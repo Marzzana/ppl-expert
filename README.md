@@ -132,39 +132,34 @@ in [`work/GUIDE.md`](work/GUIDE.md) (pages) and [`work/GUIDE-CODE.md`](work/GUID
 
 ## How this was built with Claude Code
 
-I built this with [Claude Code](https://claude.com/claude-code) across a handful of long sessions —
-**247 commits**, and roughly 7,500 authored Hebrew fields. I wrote essentially none of the code by
-hand; my job was deciding what the thing should be, and catching Claude when it was confidently wrong.
+Built with [Claude Code](https://claude.com/claude-code) over a handful of long sessions — **247
+commits** and roughly 7,500 authored Hebrew fields.
 
-What I took away from doing it:
+I didn't write this code. The honest split was: I was the product manager, Claude was the engineer.
 
-**The app was the easy half.** A React reader with progress tracking is an afternoon's work. The real
-problem is that translating 41 dense technical pages is far more work than fits in any one session —
-so the project became a *pipeline* whose whole job is making an LLM a reliable translator at scale.
+**I decided what it should be.** Hebrew, but English terms stay visible, because that's the language
+the exam is in. One ordered path instead of two separate lists. Sections short enough to finish in a
+sitting. Exercises at the end of every lecture, and a page isn't done until you've done them. A "show
+original" toggle on every section, for when you just need to see the English. No API key for the Ask
+Claude button — copying to the clipboard is good enough, and nobody has to set anything up. Then I
+read the result as a student and said what didn't work: this Hebrew is stiff, this explanation assumes
+too much, this part is just wrong.
 
-**Generated content had to be unforgeable.** The rule that saved the project: `public/content/**` is
-never hand-edited. Claude fills slots in a worksheet, `apply` merges them back with validation, and
-`verify` independently proves the English sources survived untouched. When translating, a model's
-instinct is to "improve" the code or quietly drop a bullet point — a byte-equality check on every code
-block and a lexer-coverage check on every page make that impossible rather than merely discouraged.
+**Claude decided how.** The pipeline, the worksheet loop, the hash matching that lets it re-run
+without losing finished work, the two separate verifiers — all its design, none of it mine. I asked
+the product version of the question: how do I know the translation didn't quietly drop something?
+`verify` and `audit` are the answer it built.
 
-**Idempotency bought restartability.** `parse` matches blocks by source hash, so re-running it against
-updated sources keeps every translation already written. Combined with committing every 2–4 sections,
-a session dying mid-page costs minutes instead of hours.
+Three calls I did make, which mattered more than I expected:
 
-**Consistency needed its own tool.** Across 41 pages the same English term drifts into three different
-Hebrew spellings — not an error any single session can see, because each one looks fine on its own.
-The glossary plus the `audit` sweep turns that into a failing check. Several rules in `audit.ts` exist
-only because a bug got through once and I didn't want to have to re-find it.
+- **The whole course, not a subset.** Anything less and I wouldn't have actually studied from it.
+- **Commit every couple of sections.** Sessions die, and 41 pages outlasts all of them.
+- **One thing at a time.** Running work in parallel burned the budget and died mid-task. Slower was
+  faster.
 
-**Handoffs beat memory.** Every session ended by updating a running `HANDOFF.md` with the real state,
-the traps already hit, and the exact next command to run. The next session started by reading it. That
-file — a working log, kept out of this repo — is the reason the work composed instead of restarting.
-
-**The QA sweep was worth more than more content.** One pass over the finished app found six real bugs —
-including in-page table-of-contents links that blanked the entire page under `HashRouter`, and four
-permanently broken images pointing at GitHub's retired math-rendering proxy. `pipeline:audit` is that
-sweep, made repeatable.
+And the last pass was worth more than more content. One sweep over the finished app turned up six
+real bugs — links that blanked the entire page, four images that had been broken for months. That
+sweep is now `npm run pipeline:audit`, so it never has to be found by hand again.
 
 ## Credits
 

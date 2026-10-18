@@ -1,0 +1,38 @@
+{
+  "name": "ppl-expert",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "setup": "tsx pipeline/fetch-sources.ts",
+    "pipeline:parse": "tsx pipeline/parse.ts",
+    "pipeline:verify": "tsx pipeline/verify.ts",
+    "pipeline:audit": "tsx pipeline/audit.ts",
+    "pipeline:worksheets": "tsx pipeline/worksheets.ts",
+    "pipeline:apply": "tsx pipeline/apply.ts",
+    "pipeline:code-worksheets": "tsx pipeline/code-worksheets.ts",
+    "pipeline:code-apply": "tsx pipeline/code-apply.ts"
+  },
+  "dependencies": {
+    "@fontsource/heebo": "^5.3.0",
+    "katex": "^0.16.11",
+    "marked": "^14.1.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "shiki": "^1.22.0"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}

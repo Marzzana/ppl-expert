@@ -1,0 +1,25 @@
+node_modules/
+dist/
+
+# ─── Course material — deliberately never committed ────────────────────────────
+# `sources/` is a clone of the course's own repositories, and everything the
+# pipeline writes under `public/` is derived from it: the lesson pages, the
+# figures, and verbatim interpreter source files. That material belongs to the
+# BGU course staff, not to this repo — it is fetched and generated locally by
+# `npm run setup && npm run pipeline:parse`. See README → "What is not in here".
+sources/
+public/content/
+public/resources/
+
+# Translation worksheets are scratch and are regenerated from the pipeline, but the
+# two authoring guides are real documentation — the README points at them, so they
+# must survive a fresh clone.
+work/*
+!work/GUIDE.md
+!work/GUIDE-CODE.md
+
+# Generated reports
+verification-report.md
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo

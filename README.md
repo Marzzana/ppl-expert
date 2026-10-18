@@ -53,13 +53,20 @@ code is never translated, and every section can be flipped back to the original.
 ![PPL Expert](docs/screenshot-home.png)
 -->
 
-### By the numbers
+### What a fresh clone actually gives you
 
-Once the pipeline has run, the generated content layer is:
+**The pipeline does not translate anything.** It builds the English scaffolding and leaves every
+Hebrew slot empty. Out of the box, after the two setup commands, you get:
 
 - **41 pages** — 5 chapters of lectures, 12 practice sessions, reading material — across **688 sections**
-- **1,250** Hebrew notes on code blocks · **214** authored exercises · a **589**-term glossary
-- **125** course source files browsable, **87** of them fully annotated (**432** line-anchored notes)
+- **125** course source files, browsable with syntax highlighting
+- every section, code block and source file ready to be annotated — and **no Hebrew at all**
+
+Filling those slots *is* the project. For scale: the copy I study from holds **7,454** Hebrew-authored
+fields — 1,250 notes on code blocks, 214 exercises, 432 line-anchored annotations across 87 source
+files, and a 589-term glossary that keeps the terminology identical across all of it. That took many
+long sessions with Claude Code, and it is derived from the course material, which is why it is not
+in this repo. See [What is *not* in here](#what-is-not-in-here).
 
 ## Setup
 

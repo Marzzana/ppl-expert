@@ -1,0 +1,1647 @@
+{
+ "id": "cm/5.1RelationalLogicProgramming",
+ "kind": "lecture",
+ "sourcePath": "class_material/5.1RelationalLogicProgramming.md",
+ "titleEn": "Relational Logic Programming",
+ "titleHe": "תכנות לוגי רלציוני",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/5.1RelationalLogicProgramming:0",
+   "depth": 1,
+   "headingEn": "Relational Logic Programming",
+   "raw": "# Relational Logic Programming\n\n",
+   "blocks": [],
+   "headingHe": "תכנות לוגי רלציוני"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:1",
+   "depth": 2,
+   "headingEn": "PPL2023",
+   "raw": "## PPL2023\n\n",
+   "blocks": [],
+   "headingHe": "‏PPL2023"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:2",
+   "depth": 3,
+   "headingEn": "Sources",
+   "raw": "### Sources\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:2:0",
+     "type": "prose",
+     "en": "[Principles of Programming Languages, Mira Balaban, 2017 (7.1)](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf)\n\n",
+     "hash": "b04feed55d8556fb",
+     "he": "[עקרונות שפות תכנות, מירה בלבן, 2017 (7.1)](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf)"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:2:1",
+     "type": "prose",
+     "en": "[Learn Prolog Now](http://lpn.swi-prolog.org/lpnpage.php?pageid=online) is an interactive textbook to learn Prolog.\n(You can run Prolog inside your browser to run the examples and the exercises - like in a notebook.)\nWe cover in our lectures the material from Chapter 1 to 4 in this textbook.\nIt is recommended to work on their exercises:\n",
+     "hash": "454ab9732d36bba2",
+     "he": "[Learn Prolog Now](http://lpn.swi-prolog.org/lpnpage.php?pageid=online) הוא ספר לימוד אינטראקטיבי ללימוד Prolog.\n(אפשר להריץ Prolog בתוך הדפדפן כדי להריץ את הדוגמאות והתרגילים — כמו במחברת.)\nאנחנו מכסים בהרצאות שלנו את החומר מפרק 1 עד 4 בספר הלימוד הזה.\nמומלץ לעבוד על התרגילים שבו:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:2:2",
+     "type": "list",
+     "en": "* [1.3 Exercises](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse3) on facts, rules.\n* [2.3 Exercises](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse7) on unification.\n* [3.3 Exercises](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse11) on recursion.\n* [4.4 Exercises](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse16) on list processing.\n\n\n",
+     "hash": "cb492788423b4700",
+     "he": "* [תרגילי 1.3](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse3) על עובדות וכללים.\n* [תרגילי 2.3](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse7) על אוניפיקציה.\n* [תרגילי 3.3](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse11) על רקורסיה.\n* [תרגילי 4.4](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse16) על עיבוד רשימות."
+    }
+   ],
+   "headingHe": "מקורות"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:3",
+   "depth": 3,
+   "headingEn": "Introduction",
+   "raw": "### Introduction\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:0",
+     "type": "prose",
+     "en": "Logic Programming (LP) is one the three major programming paradigms - in addition to procedural and functional programming.\nIt emerged in the 1970s, from the work of Kowalski and Colmerauer in automatic theorem proving.\nThe following article provides a good historical review of how Prolog was designed: [The Birth of Prolog](http://alain.colmerauer.free.fr/alcol/ArchivesPublications/PrologHistory/19november92.pdf) by Colmerauer and Roussel, 1992.\n\n",
+     "hash": "153f83e43196caf1",
+     "he": "תכנות לוגי (Logic Programming, LP) הוא אחת משלוש פרדיגמות התכנות המרכזיות — בנוסף לתכנות פרוצדורלי ופונקציונלי.\nהוא צמח בשנות ה-70, מעבודתם של Kowalski ו-Colmerauer בהוכחת משפטים אוטומטית.\nהמאמר הבא מספק סקירה היסטורית טובה של האופן שבו Prolog תוכננה: [The Birth of Prolog](http://alain.colmerauer.free.fr/alcol/ArchivesPublications/PrologHistory/19november92.pdf) מאת Colmerauer ו-Roussel, 1992."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:1",
+     "type": "prose",
+     "en": "Usually, a logical axiom `H <- B1 and B2... and Bn` can be interpreted in a logical declarative manner:\n*When B1 and ... and Bn are true, then H is also true.*\n\n",
+     "hash": "430f65c42654007d",
+     "he": "בדרך כלל, אקסיומה לוגית `H <- B1 and B2... and Bn` יכולה להתפרש באופן דקלרטיבי-לוגי:\n*כאשר B1 וגם ... וגם Bn אמיתיים, אז גם H אמיתי.*"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:2",
+     "type": "prose",
+     "en": "The first key observation at the basis of the logic programming paradigm is to read such a logical statement in a procedural manner: *In order to prove that H is true, you must prove that B1 and ... and Bn are true.*  The basic step in this procedural reading is the step of *proving that a predicate Bi is true*.  \n\n",
+     "hash": "59afd78b6b25239f",
+     "he": "התובנה המרכזית הראשונה שבבסיס פרדיגמת התכנות הלוגי היא לקרוא טענה לוגית כזו באופן **פרוצדורלי**: *כדי להוכיח ש-H אמיתי, עליך להוכיח ש-B1 וגם ... וגם Bn אמיתיים.* הצעד הבסיסי בקריאה הפרוצדורלית הזו הוא הצעד של *הוכחה שפרדיקט Bi אמיתי*."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:3",
+     "type": "prose",
+     "en": "The second key observation in LP is that quantified variables in a logical statement such as the following:\n$$\\forall x \\in R, \\exists y \\in R, p(x,y) \\Rightarrow q(y)$$ can be understood as the parameters of procedures, passing information into the procedure.\n\n",
+     "hash": "47be0d0c98f64fe2",
+     "he": "התובנה המרכזית השנייה ב-LP היא שמשתנים מכומתים בטענה לוגית כמו הבאה:\n$$\\forall x \\in R, \\exists y \\in R, p(x,y) \\Rightarrow q(y)$$ יכולים להיות מובנים כפרמטרים של פרוצדורות, שמעבירים מידע אל תוך הפרוצדורה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:4",
+     "type": "prose",
+     "en": "In this chapter, we introduce Logic Programming - first as users of the Prolog language, then as implementers of an interpreter for Prolog.  We use the same methodology we employed when implementing an interpreter for a functional language: define the abstract syntax and the operational semantics of the language.  \n\n",
+     "hash": "538eb0cbdc1172c8",
+     "he": "בפרק הזה נציג תכנות לוגי — תחילה כמשתמשים בשפת Prolog, ואחר כך כמממשים של מפרש ל-Prolog. אנחנו משתמשים באותה מתודולוגיה שנקטנו כשמימשנו מפרש לשפה פונקציונלית: הגדרת התחביר המופשט והסמנטיקה התפעולית של השפה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:3:5",
+     "type": "prose",
+     "en": "Even though the language we implement *feels* very different from those we studied earlier, we discover that the same tools appear in the description of its operational semantics as those we introduced in earlier chapters: substitution, unification and lazy evaluation.  In our implementation of a Logic Programming interpreter, we reuse much of the tools we developed when implementing a functional language interpreter and the type inference system.\n\n",
+     "hash": "137825dbb40ecdc6",
+     "he": "אף שהשפה שאנחנו מממשים *מרגישה* שונה מאוד מאלה שלמדנו קודם, אנחנו מגלים שאותם כלים מופיעים בתיאור הסמנטיקה התפעולית שלה כמו אלה שהצגנו בפרקים הקודמים: הצבה, אוניפיקציה והערכה עצלה. במימוש שלנו של מפרש לתכנות לוגי, אנחנו עושים שימוש חוזר בחלק גדול מהכלים שפיתחנו כשמימשנו מפרש לשפה פונקציונלית ואת מערכת הסקת הטיפוסים."
+    }
+   ],
+   "headingHe": "מבוא"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:4",
+   "depth": 2,
+   "headingEn": "Three Subsets of Logic Programming",
+   "raw": "## Three Subsets of Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:4:0",
+     "type": "prose",
+     "en": "We define three subsets of different complexity in the LP domain:\n",
+     "hash": "a79a14507dc18056",
+     "he": "אנחנו מגדירים שלוש תת-קבוצות בעלות מורכבות שונה בתחום ה-LP:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:4:1",
+     "type": "list",
+     "en": "* Relational LP (also called Datalog)\n* Pure Prolog - including recursive data structures (called functors in Prolog).\n* Full Prolog - including types, arithmetic, introspection primitives, backtracking control with the cut operator and self-modifying code.\n\n",
+     "hash": "380da63c51fd35ad",
+     "he": "* ‏LP רלציוני (נקרא גם Datalog)\n* ‏Pure Prolog — כולל מבני נתונים רקורסיביים (הנקראים functors ב-Prolog).\n* ‏Full Prolog — כולל טיפוסים, אריתמטיקה, פרימיטיבים של אינטרוספקציה, שליטה ב-backtracking באמצעות אופרטור ה-cut, וקוד ששולח יד בעצמו."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:4:2",
+     "type": "prose",
+     "en": "We will review in the course the first two subsets of Prolog.\n\n",
+     "hash": "cd3c77b8d3ad7bd3",
+     "he": "נסקור בקורס את שתי תת-הקבוצות הראשונות של Prolog."
+    }
+   ],
+   "headingHe": "שלוש תת-קבוצות של תכנות לוגי"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:5",
+   "depth": 2,
+   "headingEn": "Logic Programming as a Programming Language",
+   "raw": "## Logic Programming as a Programming Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:5:0",
+     "type": "prose",
+     "en": "The way we have described programming languages since the beginning of the course is to identify:\n",
+     "hash": "6e5ff41c253850f6",
+     "he": "הדרך שבה תיארנו שפות תכנות מתחילת הקורס היא לזהות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:5:1",
+     "type": "list",
+     "en": "* The syntax (concrete and abstract) of the language\n* The operational semantics of the language which consists of the specification of the values computed by the language and the specification of the mapping from expressions to values as a structural inductive process.\n* A set of primitive operations and primitive data types - which can be combined through the syntax of the language into compound operations (procedures) and compound data types.\n\n",
+     "hash": "f3f6baffcd9fec00",
+     "he": "* את התחביר (הקונקרטי והמופשט) של השפה\n* את הסמנטיקה התפעולית של השפה, שמורכבת מהמפרט של הערכים שהשפה מחשבת ומהמפרט של ההעתקה מביטויים לערכים כתהליך אינדוקטיבי-מבני.\n* קבוצה של פעולות פרימיטיביות וטיפוסי נתונים פרימיטיביים — שניתן לשלב אותם דרך התחביר של השפה לפעולות מורכבות (פרוצדורות) ולטיפוסי נתונים מורכבים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:5:2",
+     "type": "prose",
+     "en": "In the case of Logic Programming, the following key decisions specify the programming language:\n",
+     "hash": "c1cff631104abedd",
+     "he": "במקרה של תכנות לוגי, ההחלטות המרכזיות הבאות מגדירות את שפת התכנות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:5:3",
+     "type": "list",
+     "en": "* **Syntax**: a restricted subset of predicate calculus: A logic program is a set of formulas\n(classified into rules and facts), with a single head and only conjunction on the right-hand-side, \ndefining known relationships in the problem domain.\n* **Semantics**: the computed values are sets of answers to queries:\n  * A program is triggered by invoking a goal (query) logic statement. \n  * The goal might include variables.\n  * The computed values are sets of answers to goal queries. \n    * If a goal includes variables, the answers are substitutions (instantiations) for the variables in the query.\n    * Else the answers are true/false values.\n* **Operational semantics**: Program execution is an attempt to prove a goal statement.\n  * The proof tries to instantiate the variables (provide values for the variables), such that the goal becomes true.\n  * A computation of a logic program consists of exploring the consequences of the program, in order to reach the given goal.\n  * The operational semantics is a proof algorithm: It is based on two essential mechanisms:\n    * **Unification**: The mechanism for parameter passing. \n    * **Backtracking**: The mechanism for searching for a proof within the set of all consequences of the program.\n* **Primitives**: \n  * In relational LP and pure LP, primitive expressions include *predicates* (which are characterized by a symbol) and *symbols* which can be compared through unification (meaning an equality operator between symbols is defined).  Two predefined values - `true` and `false` - are also defined.  They are returned when a goal with no variables is executed.  \n  * In Pure Prolog, the set of expressions is extended with *functors*, which can be nested recursively.  Variables can be bound to either symbols or functors. A computed value is either the true/false primitive value, or a set of substitutions mapping variables to symbols or functors.\n  * In Full Prolog, primitive types are extended with numbers and strings and corresponding primitive operations to manipulate them (arithmetic, string operations).  In addition, primitive procedures are introduced to explicitly manipulate programs at runtime.\n\n",
+     "hash": "487f1269233a5c2e",
+     "he": "* **תחביר**: תת-קבוצה מוגבלת של תחשיב הפרדיקטים: תוכנית לוגית היא קבוצה של נוסחאות\n(המסווגות לכללים ולעובדות), עם ראש יחיד ועם צירוף (conjunction) בלבד באגף ימין,\nשמגדירות יחסים ידועים בתחום הבעיה.\n* **סמנטיקה**: הערכים המחושבים הם קבוצות של תשובות לשאילתות:\n  * תוכנית מופעלת על ידי הפעלת טענה לוגית של מטרה (שאילתה).\n  * המטרה עשויה לכלול משתנים.\n  * הערכים המחושבים הם קבוצות של תשובות לשאילתות המטרה.\n    * אם מטרה כוללת משתנים, התשובות הן הצבות (אינסטנציאציות) עבור המשתנים בשאילתה.\n    * אחרת התשובות הן ערכי אמת/שקר.\n* **סמנטיקה תפעולית**: ביצוע תוכנית הוא ניסיון להוכיח טענת מטרה.\n  * ההוכחה מנסה לאתחל את המשתנים (לספק ערכים למשתנים), כך שהמטרה תהפוך לאמיתית.\n  * חישוב של תוכנית לוגית מורכב מחקירת ההשלכות של התוכנית, כדי להגיע למטרה הנתונה.\n  * הסמנטיקה התפעולית היא אלגוריתם הוכחה: היא מבוססת על שני מנגנונים חיוניים:\n    * **אוניפיקציה**: המנגנון להעברת פרמטרים.\n    * **חזרה לאחור (Backtracking)**: המנגנון לחיפוש הוכחה בתוך קבוצת כל ההשלכות של התוכנית.\n* **פרימיטיבים**:\n  * ב-LP רלציוני וב-LP טהור, ביטויים פרימיטיביים כוללים *פרדיקטים* (המאופיינים על ידי סמל) ו*סמלים* שניתן להשוות ביניהם באמצעות אוניפיקציה (כלומר, מוגדר אופרטור שוויון בין סמלים). מוגדרים גם שני ערכים מוגדרים מראש — `true` ו-`false`. הם מוחזרים כשמבוצעת מטרה ללא משתנים.\n  * ב-Pure Prolog, קבוצת הביטויים מורחבת ב-*functors*, שיכולים להיות מקוננים רקורסיבית. משתנים יכולים להיקשר לסמלים או ל-functors. ערך מחושב הוא או הערך הפרימיטיבי אמת/שקר, או קבוצה של הצבות שממפות משתנים לסמלים או ל-functors.\n  * ב-Full Prolog, הטיפוסים הפרימיטיביים מורחבים במספרים ובמחרוזות ובפעולות פרימיטיביות מתאימות לטיפול בהם (אריתמטיקה, פעולות על מחרוזות). בנוסף, מוצגות פרוצדורות פרימיטיביות שמאפשרות לטפל בתוכניות באופן מפורש בזמן ריצה."
+    }
+   ],
+   "headingHe": "תכנות לוגי כשפת תכנות"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:6",
+   "depth": 2,
+   "headingEn": "Relational Logic Programming",
+   "raw": "## Relational Logic Programming\n\n",
+   "blocks": [],
+   "headingHe": "תכנות לוגי רלציוני"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:7",
+   "depth": 3,
+   "headingEn": "Syntax",
+   "raw": "### Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:0",
+     "type": "prose",
+     "en": "The expressions in RLP include:\n",
+     "hash": "5378d7715a9dfae5",
+     "he": "הביטויים ב-RLP כוללים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:1",
+     "type": "list",
+     "en": "* Atomic expressions: \n  * Terms\n    * Symbols - correspond to constants - start with lowercase\n    * Variables - symbol starting with Uppercase or with _\n  * Predicates - correspond to names of procedures - start with lowercase\n* Compound expressions:\n  * Atomic Formula - expression of the form $$predicate(term_1, ..., term_n)$$\n  * Facts - rule containing a single atomic formula.\n  * Rules - rule containing: a left-hand-side with a single atomic-formula and a right-hand-side which is a list of atomic formula, interpreted as a conjunction.\n  * Queries - a list of atomic formula.\n  * Program - a collection of facts and rules.\n\n",
+     "hash": "86a1231ffe1110b8",
+     "he": "* ביטויים אטומיים:\n  * ‏Terms (איברים)\n    * סמלים (Symbols) — מתאימים לקבועים — מתחילים באות קטנה\n    * משתנים (Variables) — סמל שמתחיל באות גדולה או ב-_\n  * פרדיקטים (Predicates) — מתאימים לשמות של פרוצדורות — מתחילים באות קטנה\n* ביטויים מורכבים:\n  * נוסחה אטומית (Atomic Formula) — ביטוי מהצורה $$predicate(term_1, ..., term_n)$$\n  * עובדות (Facts) — כלל שמכיל נוסחה אטומית יחידה.\n  * כללים (Rules) — כלל שמכיל: אגף שמאל עם נוסחה אטומית יחידה, ואגף ימין שהוא רשימה של נוסחאות אטומיות, המתפרשת כצירוף (conjunction).\n  * שאילתות (Queries) — רשימה של נוסחאות אטומיות.\n  * תוכנית (Program) — אוסף של עובדות וכללים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:2",
+     "type": "prose",
+     "en": "Here is an example of a program written according to the Prolog concrete syntax:\n",
+     "hash": "aec5cf4ab2743739",
+     "he": "הנה דוגמה לתוכנית שנכתבה לפי התחביר הקונקרטי של Prolog:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:3",
+     "type": "code",
+     "en": "```prolog\nparent(abraham, isaac).\nparent(isaac, jacob).\nparent(sarah, isaac).\nparent(jacob, joseph).\nmale(abraham).\nmale(isaac).\nmale(joseph).\nfemale(sarah).\n```\n\n",
+     "hash": "460df28b9495c21d",
+     "lang": "prolog",
+     "noteHe": "תוכנית Prolog ראשונה, וכדאי לעצור על כמה פרטי תחביר שיחזרו לאורך כל הפרק. **כל שורה מסתיימת בנקודה** — הנקודה היא חלק מהתחביר, לא סימן פיסוק. כל השמות מתחילים באות **קטנה**, ולכן ‏`abraham`, ‏`isaac` וכו' הם **סמלים** (קבועים) ולא משתנים; משתנה חייב להתחיל באות גדולה. שימו לב שאין כאן שום \"פקודה\" ושום סדר ביצוע — התוכנית היא פשוט **אוסף של עובדות** שמצהירות מה נכון בעולם. ‏`parent(abraham, isaac)` אומרת \"אברהם הוא הורה של יצחק\", ובכל הפרק סדר הארגומנטים הוא (הורה, ילד). **וזו נקודת המפתח שכדאי לשנן**: התוכנית אינה מתארת *איך* לחשב אלא *מה* מתקיים; החישוב יגיע מהשאילתה. שימו לב שאין כאן שום הגדרה של ‏`parent` — פרדיקט \"מוגדר\" פשוט על ידי העובדות והכללים שמזכירים אותו."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:4",
+     "type": "prose",
+     "en": "In this program, the symbol `parent` is a **predicate**.  It is part of the predicate definition that it expects two parameters - hence we will refer to it as `parent/2`. Similarly, `male/1` and `female/1` are also predicates.\n\n",
+     "hash": "516d7321c99aee9b",
+     "he": "בתוכנית הזו, הסמל `parent` הוא **פרדיקט**. זה חלק מהגדרת הפרדיקט שהוא מצפה לשני פרמטרים — ולכן נתייחס אליו כ-`parent/2`. באופן דומה, `male/1` ו-`female/1` הם גם פרדיקטים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:5",
+     "type": "prose",
+     "en": "The symbols `abraham, isaac, jacob, sarah, joseph` are all symbol terms.\n\n",
+     "hash": "e7304f0982cb5146",
+     "he": "הסמלים `abraham, isaac, jacob, sarah, joseph` הם כולם terms מסוג סמל."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:6",
+     "type": "prose",
+     "en": "The expression `parent(abraham, isaac)` is an atomic formula.\n\n",
+     "hash": "143bb1467f0dff16",
+     "he": "הביטוי `parent(abraham, isaac)` הוא נוסחה אטומית."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:7",
+     "type": "prose",
+     "en": "The expression `parent(abraham, isaac).` (with a dot at the end) is a fact.  It is an assertion that an atomic formula is true.\n\n",
+     "hash": "592abe27715d30f6",
+     "he": "הביטוי `parent(abraham, isaac).` (עם נקודה בסוף) הוא עובדה. זו טענה שנוסחה אטומית היא אמיתית."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:8",
+     "type": "prose",
+     "en": "We run a query on this program in the following manner:\n\n",
+     "hash": "9ff471786094ad91",
+     "he": "אנחנו מריצים שאילתה על התוכנית הזו באופן הבא:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:9",
+     "type": "code",
+     "en": "```prolog\n?- parent(abraham, X)\n```\n\n",
+     "hash": "4c9d7ad94251dda0",
+     "lang": "prolog",
+     "noteHe": "השאילתה הראשונה. הסימון ‏`?-` הוא ההנחיה (prompt) של Prolog ומסמן \"שאל אותי\". ‏`X` מתחיל באות **גדולה** ולכן הוא **משתנה**, בעוד ש-`abraham` באות קטנה ולכן הוא סמל — וההבחנה הזו היא כל ההבדל בין \"מי הילד של אברהם?\" לבין \"האם אברהם הוא הורה של X הספציפי?\". שימו לב שאין כאן הצהרה על טיפוס, אין קריאה לפונקציה ואין ערך מוחזר במובן הרגיל: אנחנו מציגים **תבנית** ומבקשים מהמנוע למצוא ערכים שיהפכו אותה לאמיתית. **וכאן הרעיון שכדאי לשנן**: אותו פרדיקט ‏`parent/2` יכול לשמש בכל הכיוונים — ‏`parent(abraham, X)` שואל \"מי הילדים\", ‏`parent(X, isaac)` שואל \"מי ההורים\", ו-`parent(X, Y)` מבקש את כל הזוגות. בשפה פונקציונלית היינו צריכים שלוש פונקציות שונות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:10",
+     "type": "prose",
+     "en": "The query is understood as a question: is there a value for the variable `X` which makes the atomic formula `parent(abraham, X)` true? \n\n",
+     "hash": "0f1944c3ad6f88c3",
+     "he": "השאילתה מובנת כשאלה: האם קיים ערך למשתנה `X` שהופך את הנוסחה האטומית `parent(abraham, X)` לאמיתית?"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:11",
+     "type": "prose",
+     "en": "This triggers an execution of the program for this goal query - where the intepreter tries to prove the goal.\n\n",
+     "hash": "1ae4c51bc55004ad",
+     "he": "זה מפעיל ביצוע של התוכנית עבור שאילתת המטרה הזו — שבו המפרש מנסה להוכיח את המטרה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:12",
+     "type": "prose",
+     "en": "In this case, the answer set is a set with a single substitution:\n\n",
+     "hash": "d3ce2ce918320b13",
+     "he": "במקרה הזה, קבוצת התשובות היא קבוצה עם הצבה יחידה:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:7:13",
+     "type": "code",
+     "en": "```\nX = isaac;\n```\n\n\n\n",
+     "hash": "c93e55cc0cc2b7c0",
+     "noteHe": "התשובה. שימו לב שהיא אינה \"אמת\" אלא **הצבה** — ‏`X = isaac` — כלומר הערך המחושב הוא מיפוי ממשתנה לסמל, בדיוק כמו ההצבות שראינו ב-2.6 ובמערכת הסקת הטיפוסים ב-3.2. ‏`isaac` הוא הילד היחיד של אברהם בתוכנית, ולכן קבוצת התשובות היא בגודל 1. שימו לב לנקודה-פסיק בסוף: ב-Prolog אינטראקטיבי היא הבקשה **\"תן לי תשובה נוספת\"**, ולחיצה עליה תגרום למנוע לחזור אחורה ולחפש פתרון אחר. אם אין עוד — תוחזר ‏`false`. כדאי לשנן: תשובה ב-LP אינה ערך יחיד אלא **זרם של הצבות**, וזו הסיבה שהעצלות והחזרה לאחור מ-4.3 ו-4.2 חוזרות כאן."
+    }
+   ],
+   "headingHe": "תחביר"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:8",
+   "depth": 3,
+   "headingEn": "Procedures in RLP",
+   "raw": "### Procedures in RLP\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:0",
+     "type": "prose",
+     "en": "A procedure in RLP is defined by providing in the program a collection of facts and rules for a given predicate.\nFor example, the following code defines the `mother` procedure:\n\n",
+     "hash": "361854468ece4729",
+     "he": "פרוצדורה ב-RLP מוגדרת על ידי אספקת אוסף של עובדות וכללים עבור פרדיקט נתון בתוכנית.\nלדוגמה, הקוד הבא מגדיר את הפרוצדורה `mother`:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:1",
+     "type": "code",
+     "en": "```\nmother(X, Y) :- parent(X, Y), female(X).\n```\n",
+     "hash": "fe7c0d7991e1ddf8",
+     "noteHe": "הכלל הראשון, ועכשיו נכנס הסימן ‏`:-` — קראו אותו כ\"אם\", או ליתר דיוק כחץ הפוך ‏←. שימו לב לכיוון: מה שנמצא **משמאל** ל-`:-` הוא המסקנה, ומה שמימין הם התנאים. הפסיק בין ‏`parent(X, Y)` ל-`female(X)` הוא **וגם** (צירוף — conjunction). כלומר: \"‏X היא אמו של Y אם X היא הורה של Y וגם X היא נקבה\". שימו לב ש-`X` ו-`Y` מופיעים **פעמיים כל אחד** — וזה מה שקושר את שלוש הנוסחאות זו לזו; אילו היינו כותבים ‏`female(Z)` הכלל היה אומר משהו אחר לגמרי. **כדאי לשנן את הקריאה הכפולה** מהמבוא: דקלרטיבית זו טענה על העולם, ופרוצדורלית זו הוראה — \"כדי להוכיח ‏`mother(X,Y)`, הוכח קודם ‏`parent(X,Y)` ואז ‏`female(X)`\". שתי הקריאות נכונות, והשנייה היא זו שמסבירה איך הריצה תתנהג."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:2",
+     "type": "prose",
+     "en": "This procedure is read as follows:\n",
+     "hash": "e594e6d1ae8c21e8",
+     "he": "הפרוצדורה הזו נקראת כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:3",
+     "type": "list",
+     "en": "* For any individuals X and Y, in order to prove that the relation `mother(X,Y)` holds, we must prove that `parent(X,Y)` holds and that `female(X)` holds.  \n* We call the left-hand side of the rule the **Head**, and the right-hand side is the **Body** of the procedure.\n* We observe that the variables are universally quantified in this procedure.\n\n",
+     "hash": "5c455b209ef00ff9",
+     "he": "* עבור כל פרטים X ו-Y, כדי להוכיח שהיחס `mother(X,Y)` מתקיים, עלינו להוכיח ש-`parent(X,Y)` מתקיים ושגם `female(X)` מתקיים.\n* אנחנו קוראים לאגף שמאל של הכלל **ראש** (Head), ואגף ימין הוא **הגוף** (Body) של הפרוצדורה.\n* אנחנו מבחינים שהמשתנים בפרוצדורה הזו מכומתים אוניברסלית."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:4",
+     "type": "prose",
+     "en": "In the previously shown program, the four following facts define the `parent` procedure:\n",
+     "hash": "dc2711a6a736f57f",
+     "he": "בתוכנית שהוצגה קודם, ארבע העובדות הבאות מגדירות את הפרוצדורה `parent`:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:5",
+     "type": "code",
+     "en": "```\nparent(abraham, isaac).\nparent(isaac, jacob).\nparent(sarah, isaac).\nparent(jacob, joseph).\n```\n",
+     "hash": "8e1e2b57a48e4fe8",
+     "noteHe": "אותן ארבע עובדות מלמעלה, הפעם בתפקיד אחר: הן **הגדרת הפרוצדורה** ‏`parent/2`. **וזו נקודה שכדאי לשנן**: ב-LP אין הבחנה בין \"נתונים\" ל\"קוד\" — אוסף העובדות *הוא* מימוש הפרוצדורה, בדיוק כמו שכלל עם ‏`:-` הוא מימוש. אפשר לחשוב על עובדה ככלל שגופו ריק, כלומר כלל שתמיד מתקיים. שימו לב שסדר העובדות **כן** משנה: המנוע ינסה אותן מלמעלה למטה, וזה יקבע את סדר התשובות — נקודה שתחזור בסעיף על סדר החיפוש."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:6",
+     "type": "prose",
+     "en": "The simplest possible procedure is this:\n\n",
+     "hash": "306bc2d656fc5099",
+     "he": "הפרוצדורה הפשוטה ביותר האפשרית היא זו:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:7",
+     "type": "code",
+     "en": "```\ntrue.\n```\n",
+     "hash": "eaf52d632cb6a39e",
+     "noteHe": "הפרוצדורה הקטנה ביותר שאפשר לכתוב: עובדה יחידה, בלי ארגומנטים ובלי גוף. ‏`true/0` — אפס פרמטרים — ולכן היא מצליחה תמיד ומיד. שימו לב שגם היא נכתבת עם נקודה בסוף, כמו כל עובדה. היא שימושית כברירת מחדל ובתור \"אין מה להוכיח\", והיא גם מדגימה שהמושג \"פרדיקט\" אינו דורש ארגומנטים כלל."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:8",
+     "type": "prose",
+     "en": "This procedure is defined by a single fact, for the predicate `true/0` of no parameters - and which immediately succeeds when it is invoked.\n\n",
+     "hash": "05b969466ca93657",
+     "he": "הפרוצדורה הזו מוגדרת על ידי עובדה יחידה, עבור הפרדיקט `true/0` שאין לו פרמטרים — והיא מצליחה מיד כשהיא מופעלת."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:9",
+     "type": "prose",
+     "en": "Procedures can be defined recursively, as in the following case:\n",
+     "hash": "9e4895254933dfeb",
+     "he": "פרוצדורות יכולות להיות מוגדרות רקורסיבית, כמו במקרה הבא:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:10",
+     "type": "code",
+     "en": "```\n% Signature: ancestor(Ancestor, Descendant)/2\n% Purpose: Ancestor is an ancestor of Descendant.\nancestor(A,D) :- parent(A,D).                  %1\nancestor(A,D) :- parent(A,P), ancestor(P,D).   %2\n```\n\n",
+     "hash": "eb3e586ee950cebe",
+     "noteHe": "פרוצדורה רקורסיבית ראשונה — הסגירה הטרנזיטיבית של ‏`parent`. **שימו לב שיש כאן שני כללים לאותו פרדיקט**, וזה הדבר החדש: כשלפרדיקט יש כמה כללים, הם מתפרשים כ**או** (דיסיונקציה), בעוד שהפסיקים בתוך גוף יחיד הם **וגם**. כלומר: ‏A הוא אב-קדמון של D אם הוא הורה ישיר שלו (כלל 1), **או** אם הוא הורה של מישהו שהוא אב-קדמון של D (כלל 2). כלל 1 הוא מקרה הבסיס וכלל 2 הוא הצעד הרקורסיבי — בדיוק המבנה של רקורסיה על רשימות, רק שכאן ההסתעפות נעשית על ידי **ריבוי כללים** ולא על ידי ‏`if`. שימו לב למשתנה ‏`P` שמופיע רק בגוף כלל 2 ולא בראש: משתנה כזה מכומת קיומית — \"אם **קיים** P כך ש...\". ‏`%` פותח הערה ב-Prolog, ושורות ה-`% Signature` הן מוסכמת התיעוד של הקורס, בדיוק כמו ב-Scheme. הסימונים ‏`%1` ו-`%2` הם רק תוויות שיאפשרו להתייחס לכללים בהמשך."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:11",
+     "type": "prose",
+     "en": "This procedure computes the transitive closure of the `parent/2` relation.  It is read as follows:\n",
+     "hash": "bbfcf0a757c4b54f",
+     "he": "הפרוצדורה הזו מחשבת את הסגירה הטרנזיטיבית של היחס `parent/2`. היא נקראת כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:12",
+     "type": "list",
+     "en": "* For any individuals A and D, in order to prove that the relation `ancestor(A,D)` holds, we must prove that:\n  * Either `parent(A,D)` holds\n  * Or there exists an individual P such that we can prove `parent(A,P)` holds and `ancestor(P,D)` holds.\n  \n",
+     "hash": "f862ecd3e1be152b",
+     "he": "* עבור כל פרטים A ו-D, כדי להוכיח שהיחס `ancestor(A,D)` מתקיים, עלינו להוכיח ש:\n  * או ש-`parent(A,D)` מתקיים\n  * או שקיים פרט P כך שאנחנו יכולים להוכיח ש-`parent(A,P)` מתקיים ו-`ancestor(P,D)` מתקיים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:13",
+     "type": "prose",
+     "en": "Observe the following distinctions:\n",
+     "hash": "56e39215bd0c788e",
+     "he": "שימו לב להבחנות הבאות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:14",
+     "type": "list",
+     "en": "* When a variable occurs *only* in the Body of a procedure, it is understood to be existentially quantified ($$\\exists X, q(X)$$)\n\n* When the body of procedure contains multiple atomic formula, we understand the formula are in conjunction. (Must prove p **and** prove q).\n* When a procedure contains multiple rules (for example, rule %1 and rule %2 in the procedure `ancestor`), we understand that the rules form a disjunction. (In order to prove `ancestor(A,D)` prove %1 **or** prove %2.)\n\n",
+     "hash": "b0f5659e473c1988",
+     "he": "* כאשר משתנה מופיע *רק* בגוף של פרוצדורה, הוא מובן ככזה שמכומת קיומית ($$\\exists X, q(X)$$)\n\n* כאשר גוף הפרוצדורה מכיל כמה נוסחאות אטומיות, אנחנו מבינים שהנוסחאות נמצאות בצירוף (conjunction). (יש להוכיח את p **וגם** להוכיח את q).\n* כאשר פרוצדורה מכילה כמה כללים (לדוגמה, כלל %1 וכלל %2 בפרוצדורה `ancestor`), אנחנו מבינים שהכללים יוצרים דיסיונקציה. (כדי להוכיח את `ancestor(A,D)` הוכיחו את %1 **או** הוכיחו את %2.)"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:15",
+     "type": "prose",
+     "en": "In terms of programming languages, the **scope** of a variable is a single rule.\nVariables in different rules are unrelated: Variables are bound only within a rule. \nTherefore, variables in a rule can be consistently renamed (compare with the Renaming principle in functional languages for a procedure).\n\n",
+     "hash": "2d816fc869566250",
+     "he": "במונחים של שפות תכנות, **תחום ההכרה** (scope) של משתנה הוא כלל יחיד.\nמשתנים בכללים שונים אינם קשורים זה לזה: משתנים קשורים רק בתוך כלל.\nלכן, ניתן לשנות שם של משתנים בכלל באופן עקבי (השוו לעיקרון שינוי השם בשפות פונקציונליות עבור פרוצדורה)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:16",
+     "type": "prose",
+     "en": "When we invoke the procedure ancestor/2, we obtain multiple answers:\n",
+     "hash": "db715ee5797995a0",
+     "he": "כשאנחנו מפעילים את הפרוצדורה ancestor/2, אנחנו מקבלים כמה תשובות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:17",
+     "type": "code",
+     "en": "```\n?- ancestor(abraham, D)\nD = isaac;\nD = jacob;\nD = joseph;\nfalse;\n```\n\n",
+     "hash": "f9a016a75a9eb2d6",
+     "noteHe": "כאן רואים לראשונה **כמה** תשובות לשאילתה אחת. עקבו מול העובדות: אברהם הוא הורה של יצחק (כלל 1), יצחק של יעקב ויעקב של יוסף — ולכן הסגירה הטרנזיטיבית נותנת ‏`isaac`, ‏`jacob`, ‏`joseph`. שימו לב לסדר: קודם מוצה כלל 1 (הורה ישיר), ורק אחר כך כלל 2 מייצר את הצאצאים הרחוקים — זה נובע ישירות מכך שהכללים נבדקים לפי סדר כתיבתם. ה-`false` בסוף אינו שגיאה: הוא הסימן שהמנוע חיפש תשובה **רביעית**, לא מצא, ומיצה את מרחב הפתרונות. **וזו נקודה שכדאי לשנן**: שאילתה ב-LP אינה מחזירה ערך אחד אלא **את כל** הפתרונות, אחד-אחד לפי בקשה — התנהגות זהה לגנרטור מ-4.3, וזו הסיבה שהעצלות מ-4.3 והחזרה לאחור מ-4.2 חוזרות כאן שתיהן."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:18",
+     "type": "prose",
+     "en": "#### Facts are Simple Rules\n\n",
+     "hash": "72009bdf6ada85d5",
+     "he": "#### עובדות הן כללים פשוטים"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:19",
+     "type": "prose",
+     "en": "Facts can be considered as simple rules, where the body is the true formula. In other words:\n",
+     "hash": "87d3340aa71a8cef",
+     "he": "ניתן לראות עובדות ככללים פשוטים, שבהם הגוף הוא הנוסחה true. במילים אחרות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:20",
+     "type": "code",
+     "en": "```\nmale(abraham).\n```\n",
+     "hash": "852d5016b9d1cce3",
+     "noteHe": "עובדה רגילה, שתשמש כאן כאגף שמאל של שקילות — השוו אותה לבלוק שמיד אחרי."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:21",
+     "type": "prose",
+     "en": "is equivalent to:\n",
+     "hash": "93a2e127e45f94e9",
+     "he": "שקולה ל:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:22",
+     "type": "code",
+     "en": "```\nmale(abraham) :- true.\n```\n\n",
+     "hash": "66ec510fa28bc9a6",
+     "noteHe": "אותה עובדה, כתובה במפורש ככלל שגופו ‏`true`. **וזו האחדה מושגית שכדאי לשנן**: עובדה אינה סוג ישות נפרד — היא כלל שהגוף שלו מתקיים תמיד. לכן במימוש המפרש בהמשך הפרק נצטרך לטפל רק ב**סוג אחד** של פסוקית (clause), ולא בשניים. השוו לרעיון של ערך בסיס ברקורסיה: מקרה הבסיס אינו מנגנון אחר, הוא פשוט המקרה שבו אין מה להוכיח."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:23",
+     "type": "prose",
+     "en": "In terms of operational semantics, a procedure is an **ordered** list of rules (or facts).  \nWhen trying to prove the head of a procedure, the different rules are tried in order, and within each rule, each atomic formula in the body is proved in order from left to right. (These two strategies are the default strategy in Prolog - we will discuss ordering strategies later.)\n\n",
+     "hash": "8223e5f6d323d776",
+     "he": "במונחים של סמנטיקה תפעולית, פרוצדורה היא רשימה **סדורה** של כללים (או עובדות).\nכשמנסים להוכיח את הראש של פרוצדורה, הכללים השונים מנוסים לפי הסדר, ובתוך כל כלל, כל נוסחה אטומית בגוף מוכחת לפי הסדר משמאל לימין. (שתי האסטרטגיות האלה הן אסטרטגיית ברירת המחדל ב-Prolog — נדון באסטרטגיות סדר בהמשך.)"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:24",
+     "type": "prose",
+     "en": "#### Left and Right Recursion\n\n",
+     "hash": "d7a25c32074e6039",
+     "he": "#### רקורסיה שמאלית וימנית"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:25",
+     "type": "prose",
+     "en": "Care must be taken when defining recursive procedures. Consider the following variant of the `ancestor/2` procedure where we swapped the two atomic formula in the body of the second rule.  This rule is now left-recursive (as opposed to the right-recursive case above).\n\n",
+     "hash": "6d5fafe95e854e06",
+     "he": "יש לנקוט זהירות בהגדרת פרוצדורות רקורסיביות. נתבונן בווריאנט הבא של הפרוצדורה `ancestor/2`, שבו החלפנו את הסדר של שתי הנוסחאות האטומיות בגוף הכלל השני. הכלל הזה הוא כעת רקורסיבי-שמאלי (בניגוד למקרה הרקורסיבי-ימני שלמעלה)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:26",
+     "type": "prose",
+     "en": "This inversion leads to infinite loops in the proof algorithm:\n",
+     "hash": "a84264d300dd3899",
+     "he": "ההיפוך הזה מוביל ללולאות אינסופיות באלגוריתם ההוכחה:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:27",
+     "type": "code",
+     "en": "```\n% ancestor2(Ancestor, Descendant)\nancestor2(A, D) :- parent(A, D).\nancestor2(A, D) :- ancestor2(P, D), parent(A, P).\n\n?- ancestor2(A,isaac)\nA = abraham ;\nA = sarah ;\nERROR: stack overflow\n```\n\n",
+     "hash": "c7c23878f1d819d9",
+     "noteHe": "**דוגמה חשובה במיוחד — שאלת מבחן קלאסית.** ההבדל בין ‏`ancestor2` ל-`ancestor` הוא **סדר שתי הנוסחאות בגוף הכלל השני בלבד**: כאן ‏`ancestor2(P, D)` בא לפני ‏`parent(A, P)`. דקלרטיבית שני הכללים אומרים בדיוק אותו דבר — הצירוף (conjunction) הוא חילופי — **אבל ההתנהגות שונה לגמרי**. הסיבה: המנוע מוכיח משמאל לימין, ולכן הוא מתחיל מ-`ancestor2(P, D)` כאשר ‏`P` **אינו קשור לכלום**. אין שום מידע שיצמצם את החיפוש, ולכן המנוע מנסה כל ערך אפשרי, ובדרך קורא שוב ל-`ancestor2` עם משתנה חופשי חדש — רקורסיה אינסופית. שימו לב שהפלט מראה ששתי התשובות הראשונות **כן** נמצאו (אברהם ושרה, דרך כלל 1), והקריסה מגיעה רק כשמנסים למצוא תשובה שלישית. **המסקנה שכדאי לשנן**: ב-LP המשמעות הדקלרטיבית והתנהגות הריצה הן שני דברים נפרדים, וסדר הכתיבה קובע את השני. **כלל אצבע לבחינה**: שימו את הנוסחאות שמקשרות משתנים לערכים קונקרטיים **לפני** הקריאה הרקורסיבית."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:8:28",
+     "type": "prose",
+     "en": "The difference between the `ancestor/2` and `ancestor2/2` procedures is that the first one is tail-recursive (the recursion occurs in tail position), whereas the second one is not.  This leads to a blind-search procedure when trying to find the value of the `P` variable and to an infinite loop.\n\n",
+     "hash": "ceadebb9aaf70fcc",
+     "he": "ההבדל בין הפרוצדורות `ancestor/2` ו-`ancestor2/2` הוא שהראשונה היא רקורסיבית-זנב (הרקורסיה מתרחשת בעמדת זנב), בעוד שהשנייה אינה. זה מוביל לפרוצדורת חיפוש עיוור כשמנסים למצוא את הערך של המשתנה `P`, וללולאה אינסופית."
+    }
+   ],
+   "headingHe": "פרוצדורות ב-RLP"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:9",
+   "depth": 3,
+   "headingEn": "Queries",
+   "raw": "### Queries\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:0",
+     "type": "prose",
+     "en": "A query is a list of atomic formula, which triggers the execution of a program - $$af_1, ..., af_n$$.\n\n",
+     "hash": "7bd136010ba73ae4",
+     "he": "שאילתה היא רשימה של נוסחאות אטומיות, שמפעילה את הביצוע של תוכנית — $$af_1, ..., af_n$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:1",
+     "type": "prose",
+     "en": "A good way to understand the execution of a query is to read it as follows:\n",
+     "hash": "c8dc1f217c95a399",
+     "he": "דרך טובה להבין את הביצוע של שאילתה היא לקרוא אותה כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:2",
+     "type": "list",
+     "en": "* Given all the facts and rules asserted in a program\n* Can we prove each of the atomic formula in the query $$af_i$$\n\n",
+     "hash": "bbcbf8a7d2911502",
+     "he": "* בהינתן כל העובדות והכללים שנטענו בתוכנית\n* האם אנחנו יכולים להוכיח כל אחת מהנוסחאות האטומיות בשאילתה $$af_i$$"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:3",
+     "type": "prose",
+     "en": "When variables occur in a query, their scope is shared -- they are all defined for the whole execution of the program on this query.\n\n",
+     "hash": "5cbc71888327eb09",
+     "he": "כאשר משתנים מופיעים בשאילתה, תחום ההכרה שלהם משותף — כולם מוגדרים לאורך כל הביצוע של התוכנית על השאילתה הזו."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:4",
+     "type": "prose",
+     "en": "Variables are understood as existentially quantified when they appear in a query - that is a query $$?- pred(X)$$ is understood as:\n",
+     "hash": "fdfdef1263a8b83d",
+     "he": "משתנים מובנים ככאלה שמכומתים קיומית כשהם מופיעים בשאילתה — כלומר שאילתה $$?- pred(X)$$ מובנת כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:5",
+     "type": "list",
+     "en": "* Does a constant value `v` exist such that `pred(X) o {X = v}` can be proven true. (Where `E o s` is the `apply substitution` operator over atomic formula.)\n\n",
+     "hash": "f655376e3bd84268",
+     "he": "* האם קיים ערך קבוע `v` כך שניתן להוכיח ש-`pred(X) o {X = v}` אמיתי. (כאשר `E o s` הוא אופרטור `הפעלת ההצבה` על נוסחאות אטומיות.)"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:6",
+     "type": "prose",
+     "en": "A query with multiple variables looks for all substitutions in which the variables hold in the described relation.\nFor example, given the program above - the query `parent(X,Y)` returns a list of substitutions for the pair (X,Y):\n",
+     "hash": "468bb23378a80229",
+     "he": "שאילתה עם כמה משתנים מחפשת את כל ההצבות שבהן המשתנים מקיימים את היחס המתואר.\nלדוגמה, בהינתן התוכנית שלמעלה — השאילתה `parent(X,Y)` מחזירה רשימה של הצבות עבור הזוג (X,Y):"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:7",
+     "type": "code",
+     "en": "```\n?- parent(X,Y)\nX = abraham,\nY = isaac;\n\nX = isaac,\nY = jacob;\n\nX = sarah,\nY = isaac;\n\nX = jacob,\nY = joseph\n```\n\n",
+     "hash": "db4e13341a9c5f82",
+     "noteHe": "שאילתה עם **שני** משתנים חופשיים, ולכן כל תשובה היא זוג. שימו לב שהתוצאה היא בדיוק ארבע העובדות מהתוכנית, לפי סדר כתיבתן — כלומר השאילתה ‏`parent(X,Y)` פשוט \"מדפדפת\" בכל היחס. **וזה הרעיון שכדאי לשנן**: פרדיקט ב-LP אינו פונקציה אלא **יחס** (relation), כלומר טבלה של שורות; שאילתה עם משתנים היא בקשה לשלוף שורות ממנה, בדיוק כמו ‏`SELECT` ב-SQL. הדמיון אינו מקרי — Datalog, שהוא בדיוק תת-הקבוצה הרלציונית שאנחנו לומדים, נולד מתוך מסדי נתונים. שימו לב שהפעם אין ‏`false` בסוף — המקור פשוט השמיט אותו."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:8",
+     "type": "prose",
+     "en": "A query with multiple atomic formula with shared formula defines a complex relation.  For example, in the following example, the variable Y is shared between the two atomic formula.  \n",
+     "hash": "d90df7c0e407e4d2",
+     "he": "שאילתה עם כמה נוסחאות אטומיות בעלות נוסחה משותפת מגדירה יחס מורכב. לדוגמה, בדוגמה הבאה, המשתנה Y משותף לשתי הנוסחאות האטומיות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:9",
+     "type": "code",
+     "en": "```\n?- parent(X,Y), parent(Y,Z)\nX = abraham,\nY = isaac,\nZ = jacob;\n\nX = isaac,\nY = jacob,\nZ = joseph;\n\nX = sarah,\nY = isaac,\nZ = jacob\n```\n\n",
+     "hash": "2e1084fec6425d30",
+     "noteHe": "כאן ‏`Y` מופיע **בשתי** הנוסחאות, וזה מה שיוצר את הקשר: הוא חייב להיות גם הילד של ‏`X` וגם ההורה של ‏`Z`. במונחי מסדי נתונים זהו בדיוק **join** על העמודה המשותפת. עקבו על העובדות: ‏(abraham, isaac) מתחבר ל-(isaac, jacob), ‏(isaac, jacob) ל-(jacob, joseph), ו-(sarah, isaac) ל-(isaac, jacob) — שלוש שלשות בדיוק. שימו לב ש-(jacob, joseph) אינו מופיע כזוג ראשון בשום תשובה, כי ליוסף אין ילדים בתוכנית. **הנקודה שכדאי לשנן**: משתנה משותף הוא כל מנגנון \"העברת המידע\" ב-LP — אין השמה ואין החזרת ערך, רק אילוץ ששני מופעים של אותו שם חייבים לקבל את אותו ערך. זו בדיוק אוניפיקציה, שהיא הנושא של הסעיף הבא."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:9:10",
+     "type": "prose",
+     "en": "The query is read as: \"find triplets (X,Y,Z) where X is the grand-parent, Y the parent, Z the child.\"\n\n",
+     "hash": "f6d1276c4ae0b9e9",
+     "he": "השאילתה נקראת כך: \"מצא שלשות (X,Y,Z) שבהן X הוא הסב, Y ההורה, ו-Z הילד.\""
+    }
+   ],
+   "headingHe": "שאילתות"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:10",
+   "depth": 3,
+   "headingEn": "Summary",
+   "raw": "### Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:10:0",
+     "type": "list",
+     "en": "* A rule is a conditional formula of the form $$H :- B_1, ...., B_n.$$. $$H$$ is called the head\nand $$B_1, ..., B_n$$ the body of the rule. $$H, B_1, ..., B_n$$ are atomic formulas.\n* The symbol `:-` stands for \"if\" and the symbol \",\" stands for \"and\".\n* The primitive predicate symbols true, = cannot be defined by rules (cannot appear in rule heads). true is a primitive proposition, and = is the binary unification predicate.\n* A rule is a lexical scope: The variables in a rule are bound procedure variables.\n  * They are universally quantified ($$\\forall$$) over the entire rule.\n  * Variables that appear only in the rule body are existentially quantified ($$\\exists$$) over the rule body.\n  * Variables in different rules reside in different lexical scopes.\n* Rules cannot be nested.\n\n\n",
+     "hash": "a71ed4ab318b941c",
+     "he": "* כלל הוא נוסחה מותנית מהצורה $$H :- B_1, ...., B_n.$$. ‏$$H$$ נקרא הראש\nו-$$B_1, ..., B_n$$ הגוף של הכלל. ‏$$H, B_1, ..., B_n$$ הן נוסחאות אטומיות.\n* הסמל `:-` מייצג \"אם\" והסמל \",\" מייצג \"וגם\".\n* סמלי הפרדיקטים הפרימיטיביים true, = אינם ניתנים להגדרה על ידי כללים (אינם יכולים להופיע בראשי כללים). ‏true הוא פסוק פרימיטיבי, ו-= הוא פרדיקט האוניפיקציה הבינארי.\n* כלל הוא תחום הכרה לקסיקלי: המשתנים בכלל הם משתני פרוצדורה קשורים.\n  * הם מכומתים אוניברסלית ($$\\forall$$) על פני הכלל כולו.\n  * משתנים שמופיעים רק בגוף הכלל מכומתים קיומית ($$\\exists$$) על פני גוף הכלל.\n  * משתנים בכללים שונים שוכנים בתחומי הכרה לקסיקליים שונים.\n* כללים אינם יכולים להיות מקוננים."
+    }
+   ],
+   "headingHe": "סיכום"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:11",
+   "depth": 2,
+   "headingEn": "Prolog Syntax",
+   "raw": "## Prolog Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:0",
+     "type": "prose",
+     "en": "We review the syntax of RLP described above in an informal manner by introducing its BNF format and the corresponding abstract syntax. This syntax corresponds to a subset of the Prolog programming language.\n\n",
+     "hash": "0751859500b9a11f",
+     "he": "נסקור את התחביר של RLP שתואר למעלה באופן לא-פורמלי, על ידי הצגת פורמט ה-BNF שלו והתחביר המופשט המתאים. התחביר הזה מתאים לתת-קבוצה של שפת התכנות Prolog."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:1",
+     "type": "prose",
+     "en": "The concrete syntax of RLP defines a program as a non empty set of procedures, each consisting of an ordered set of rules and facts, having the same predicate and arity.\n\n",
+     "hash": "ed2d4e699e65eb5e",
+     "he": "התחביר הקונקרטי של RLP מגדיר תוכנית כקבוצה לא-ריקה של פרוצדורות, שכל אחת מהן מורכבת מקבוצה סדורה של כללים ועובדות, בעלי אותו פרדיקט ואותה מקומיות (arity)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:2",
+     "type": "code",
+     "en": "```\n<program> -> <procedure>+\n<procedure -> (<rule> | <fact>)+ with identical predicate and arity\n<rule> -> <head> ’:-’ <body> ’.’\n<fact> -> <head> ’.’\n<head> -> <atomic-formula>\n<body> -> (<atomic-formula> ’,’)* <atomic-formula>\n<atomic-formula> -> <constant> | <predicate>’(’(<term>’,’)* <term>’)’\n<predicate> -> <constant>\n<term> -> <constant> | <variable>\n<constant> -> A string starting with a lower case letter.\n<variable> -> A string starting with an upper case letter.\n<query> -> ’?-’ (<atomic-formula>’,’)* <atomic-formula> ’.’\n```\n\n",
+     "hash": "e481ee853d66583e",
+     "noteHe": "ה-BNF של RLP — קראו אותו מלמעלה למטה כדי לראות איך כל המושגים מהסעיפים הקודמים מתחברים. שימו לב לשלוש נקודות. ראשית, ‏`<procedure>` אינו רק \"אוסף כללים\" אלא כללים **בעלי אותו פרדיקט ואותה מקומיות** — וזו הסיבה לסימון ‏`parent/2`: ‏`parent` עם שני ארגומנטים ו-`parent` עם שלושה הם שתי פרוצדורות **שונות** לגמרי. שנית, ‏`<fact>` ו-`<rule>` נבדלים רק בקיום ‏`:- <body>`, מה שמאשר את מה שראינו קודם — עובדה היא כלל בלי גוף. שלישית, ההבחנה בין ‏`<constant>` ל-`<variable>` היא **לקסיקלית בלבד**: אות ראשונה קטנה או גדולה. זו בחירת תכנון יוצאת דופן — ברוב השפות ההבדל בין קבוע למשתנה מוצהר, וכאן הוא נקבע בשלב הניתוח הלקסיקלי. השוו ל-BNF של L1–L5 מ-2.3. שימו לב שהמקור משתמש בגרשים טיפוגרפיים ‏`’` במקום בגרש רגיל."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:3",
+     "type": "prose",
+     "en": "The corresponding abstract syntax specifies the following AST types:\n",
+     "hash": "837edb2651e20ba5",
+     "he": "התחביר המופשט המתאים מגדיר את טיפוסי ה-AST הבאים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:4",
+     "type": "code",
+     "en": "```\nProgram: {procedures: Procedure[];}\nProcedure: {rules: (Rule | Fact)[]; }  // at least one rule or fact.\nFact: {head: AtomicFormula;}\nRule: {head: AtomicFormula; body: AtomicFormula[];}\nAtomicFormula: {predicate: Constant; terms: Term[];}\nTerm: Constant | Variable\nConstant: {val: string | number;} // string must start with lowercase letter\nVariable: {variable: string;}     // string must start with uppercase letter\n```\n\n",
+     "hash": "f97d67e62aa46a98",
+     "noteHe": "התחביר המופשט — ה-AST שהמפרש בפרק 5.3 יעבוד עליו. שימו לב עד כמה הוא קטן: שמונה טיפוסים בלבד, לעומת עשרות ב-L5. ההיררכיה פשוטה — תוכנית מכילה פרוצדורות, פרוצדורה מכילה כללים/עובדות, וכלל מכיל נוסחאות אטומיות שמכילות terms. ‏`Term` הוא איחוד של ‏`Constant` ו-`Variable`, וזהו כל עומק הקינון ב-RLP; ב-Pure Prolog יתווסף כאן ‏`Functor` והטיפוס יהפוך לרקורסיבי — וזה בדיוק ההבדל בין שתי תת-הקבוצות. **מה שכדאי לשים לב אליו**: ההערות בקוד אומרות ש-`Constant` חייב להתחיל באות קטנה ו-`Variable` באות גדולה, אבל זו **מוסכמה שאינה נאכפת על ידי הטיפוסים** — שניהם מוגדרים כ-`string`. ההבחנה נעשית בזמן הניתוח התחבירי, לא בזמן בדיקת הטיפוסים. שימו לב גם ש-`Constant` מרשה ‏`number` בנוסף למחרוזת, אף שה-BNF שמעל מגדיר קבוע כמחרוזת בלבד — אי-התאמה קטנה בין שני התיאורים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:11:5",
+     "type": "prose",
+     "en": "In the spirit of Scheme, Prolog adopts a minimalistic syntax.\n\n",
+     "hash": "66ec15e7eddb5e3a",
+     "he": "ברוח Scheme, גם Prolog מאמצת תחביר מינימליסטי."
+    }
+   ],
+   "headingHe": "תחביר Prolog"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:12",
+   "depth": 2,
+   "headingEn": "RLP Operational Semantics",
+   "raw": "## RLP Operational Semantics\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:12:0",
+     "type": "prose",
+     "en": "The operational semantics of logic programming is based on two mechanisms: \n",
+     "hash": "884d834032e409f5",
+     "he": "הסמנטיקה התפעולית של תכנות לוגי מבוססת על שני מנגנונים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:12:1",
+     "type": "list",
+     "en": "* Unification\n* Search and backtracking\n\n",
+     "hash": "06c3f767935012df",
+     "he": "* אוניפיקציה\n* חיפוש וחזרה לאחור"
+    }
+   ],
+   "headingHe": "סמנטיקה תפעולית של RLP"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:13",
+   "depth": 3,
+   "headingEn": "Unification for Logic Programming",
+   "raw": "### Unification for Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:0",
+     "type": "prose",
+     "en": "Unification in Logic Programming is exactly the same operation as that we discussed in [Chapter 3](https://www.cs.bgu.ac.il/~ppl192/wiki.files/class/notebook/3.2TypeInference.html#Definition:-Unification-of-Type-Expressions)\nbut applied to atomic formulas and logic variables instead of type expressions and type variables.  It relies on the exact same definition of the mathematical object of **substitution**.\n\n",
+     "hash": "eb9bca718e7e4fbd",
+     "he": "אוניפיקציה בתכנות לוגי היא בדיוק אותה פעולה שדנו בה ב-[פרק 3](https://www.cs.bgu.ac.il/~ppl192/wiki.files/class/notebook/3.2TypeInference.html#Definition:-Unification-of-Type-Expressions),\nאבל מיושמת על נוסחאות אטומיות ועל משתנים לוגיים במקום על ביטויי טיפוס ועל משתני טיפוס. היא נשענת על אותה הגדרה בדיוק של האובייקט המתמטי **הצבה**."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:1",
+     "type": "prose",
+     "en": "Unification is the operation of making atomic formulas identical by substituting expressions for variables.\nFor example, the atomic formulas `p(3, X)` and `p(Y, 4)` can be unified by the substitution `{X = 4, Y = 3}`.\nSimilarly, `p(X, 3, X)` and `p(Y, Z, 4)` can be unified by the substitution: `{X = 4, Z = 3, Y = 4}`.\n\n",
+     "hash": "430dd75c9253eab2",
+     "he": "אוניפיקציה היא הפעולה של הפיכת נוסחאות אטומיות לזהות על ידי הצבת ביטויים במקום משתנים.\nלדוגמה, את הנוסחאות האטומיות `p(3, X)` ו-`p(Y, 4)` ניתן לאחד באמצעות ההצבה `{X = 4, Y = 3}`.\nבאופן דומה, את `p(X, 3, X)` ו-`p(Y, Z, 4)` ניתן לאחד באמצעות ההצבה: `{X = 4, Z = 3, Y = 4}`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:2",
+     "type": "prose",
+     "en": "#### Formal Definition of Unification\n\n",
+     "hash": "38d0d052b46f9564",
+     "he": "#### הגדרה פורמלית של אוניפיקציה"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:3",
+     "type": "prose",
+     "en": "**Definition**: A substitution $$s$$ in logic programming involves *logic variables* as variables and *logic terms* as values, such that $$s(X) \\neq X$$. A substitution is applied to *atomic formula* (and later we will extend it to rules, facts, procedures and programs).\n\n",
+     "hash": "e09ad80eadd89a45",
+     "he": "**הגדרה**: הצבה $$s$$ בתכנות לוגי מערבת *משתנים לוגיים* כמשתנים ו*terms לוגיים* כערכים, כך ש-$$s(X) \\neq X$$. הצבה מופעלת על *נוסחאות אטומיות* (ובהמשך נרחיב אותה לכללים, לעובדות, לפרוצדורות ולתוכניות)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:4",
+     "type": "prose",
+     "en": "A pair `⟨X, s(X)⟩` is called a binding, and written $$X = s(X)$$.\n\n",
+     "hash": "71eff5009ccb5e7e",
+     "he": "זוג `⟨X, s(X)⟩` נקרא קשירה (binding), ונכתב $$X = s(X)$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:5",
+     "type": "prose",
+     "en": "**Example:**\n\n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:6",
+     "type": "list",
+     "en": "* `{X = 4, Z = 3, U = X}` and `{X = 4, Z = 3, U = V}` are substitutions\n* `{X = 4, Z = 3, Y = Y }` and `{X = 4, Z = 3, X = Y }` are **not** substitutions.\n\n",
+     "hash": "7f09c87d395680b7",
+     "he": "* `{X = 4, Z = 3, U = X}` ו-`{X = 4, Z = 3, U = V}` הן הצבות\n* `{X = 4, Z = 3, Y = Y }` ו-`{X = 4, Z = 3, X = Y }` **אינן** הצבות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:7",
+     "type": "prose",
+     "en": "**Definition**: The application of a substitution $$s$$ to an atomic formula $$A$$, denoted $$A ○ s$$ \nreplaces the terms for their variables in $$A$$. The replacement is simultaneous.\n\n",
+     "hash": "2c1d73dc8ffe3b4c",
+     "he": "**הגדרה**: הפעלת הצבה $$s$$ על נוסחה אטומית $$A$$, המסומנת $$A ○ s$$,\nמחליפה את ה-terms במקום המשתנים שלהם ב-$$A$$. ההחלפה היא בו-זמנית."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:8",
+     "type": "prose",
+     "en": "For example,\n",
+     "hash": "74d2d951a827ab7f",
+     "he": "לדוגמה,"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:9",
+     "type": "list",
+     "en": "* `p(X, 3, X,W) ○ {X = 4, Y = 4} = p(4, 3, 4,W)`\n* `p(X, 3, X,W) ○ {X = 4,W = 5} = p(4, 3, 4, 5)`\n* `p(X, 3, X,W) ○ {X = W,W = X} = p(W, 3,W, X)`\n\n",
+     "hash": "f8072366915fded2",
+     "he": "* `p(X, 3, X,W) ○ {X = 4, Y = 4} = p(4, 3, 4,W)`\n* `p(X, 3, X,W) ○ {X = 4,W = 5} = p(4, 3, 4, 5)`\n* `p(X, 3, X,W) ○ {X = W,W = X} = p(W, 3,W, X)`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:10",
+     "type": "prose",
+     "en": "**Definition**: An atomic formula $$A'$$ is *an instance of* an atomic formula $$A$$, if there exists a substitution $$s$$ such that \n$$A ○ s = A$$.\n\n",
+     "hash": "9dca52b5c8eccce7",
+     "he": "**הגדרה**: נוסחה אטומית $$A'$$ היא *מופע של* נוסחה אטומית $$A$$, אם קיימת הצבה $$s$$ כך ש-\n$$A ○ s = A$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:11",
+     "type": "prose",
+     "en": "$$A$$ is *more general than* $$A'$$, if $$A'$$ is an instance of $$A$$.\n\n",
+     "hash": "ef25ac5781fed280",
+     "he": "$$A$$ הוא *כללי יותר מ-*$$A'$$, אם $$A'$$ הוא מופע של $$A$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:12",
+     "type": "prose",
+     "en": "**Example:**\n\n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:13",
+     "type": "list",
+     "en": "* `p(X, 3, X, W)` is more general than `p(4, 3, 4, W)`, which is more general than `p(4, 3, 4, 5)`\n* `p(X, 3, X, W)` is more general than `p(W, 3, W, W)`, which is more general than `p(5, 3, 5, 5)`\n* `p(X, 3, X, W)` is more general than `p(W, 3, W, X)`, which is more general than `p(X, 3, X, W)`\n\n",
+     "hash": "0a5d43b5ea4645d8",
+     "he": "* `p(X, 3, X, W)` כללי יותר מ-`p(4, 3, 4, W)`, שכללי יותר מ-`p(4, 3, 4, 5)`\n* `p(X, 3, X, W)` כללי יותר מ-`p(W, 3, W, W)`, שכללי יותר מ-`p(5, 3, 5, 5)`\n* `p(X, 3, X, W)` כללי יותר מ-`p(W, 3, W, X)`, שכללי יותר מ-`p(X, 3, X, W)`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:14",
+     "type": "prose",
+     "en": "**Definition**: A *unifier of atomic formulas $$A$$ and $$B$$* is a substitution $$s$$, such that $$A ○ s = B ○ s$$.\n\n",
+     "hash": "003149b71844ff7b",
+     "he": "**הגדרה**: *מאחד של נוסחאות אטומיות $$A$$ ו-$$B$$* הוא הצבה $$s$$, כך ש-$$A ○ s = B ○ s$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:15",
+     "type": "prose",
+     "en": "**Example:** \nThe following substitutions are unifiers of `p(X, 3, X, W)` and `p(Y, Z, 4, W)`:\n",
+     "hash": "c826016799ac4866",
+     "he": "**דוגמה:**\nההצבות הבאות הן מאחדים של `p(X, 3, X, W)` ו-`p(Y, Z, 4, W)`:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:16",
+     "type": "list",
+     "en": "* `{X = 4, Z = 3, Y = 4}`\n* `{X = 4, Z = 3, Y = 4,W = 5}`\n* `{X = 4, Z = 3, Y = 4,W = 0}`\n\n",
+     "hash": "8116dfcda9b0e146",
+     "he": "* `{X = 4, Z = 3, Y = 4}`\n* `{X = 4, Z = 3, Y = 4,W = 5}`\n* `{X = 4, Z = 3, Y = 4,W = 0}`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:17",
+     "type": "prose",
+     "en": "**Definition:** A *most general unifier (mgu)* of atomic formulas $$A$$ and $$B$$ is a unifier $$s$$ of $$A$$ and $$B$$, \nsuch that $$A ○ s = B ○ s$$ is more general than all other instances of $$A$$ and $$B$$ that are obtained by applying a unifier of $$A$$ and $$B$$. \n\n",
+     "hash": "ba41e890f0bfe49c",
+     "he": "**הגדרה:** *המאחד הכללי ביותר (mgu)* של נוסחאות אטומיות $$A$$ ו-$$B$$ הוא מאחד $$s$$ של $$A$$ ו-$$B$$,\nכך ש-$$A ○ s = B ○ s$$ כללי יותר מכל המופעים האחרים של $$A$$ ו-$$B$$ שמתקבלים על ידי הפעלת מאחד של $$A$$ ו-$$B$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:18",
+     "type": "prose",
+     "en": "That is, for every unifier $$s′$$ of $$A$$ and $$B$$, there exists a substitution $$s''$$ such that $$A ○ s ○ s'' = A ○ s'$$.\n\n",
+     "hash": "f1de0087186721a0",
+     "he": "כלומר, עבור כל מאחד $$s′$$ של $$A$$ ו-$$B$$, קיימת הצבה $$s''$$ כך ש-$$A ○ s ○ s'' = A ○ s'$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:19",
+     "type": "prose",
+     "en": "If $$A$$ and $$B$$ are unifiable, they have an mgu (unique up to renaming).\n\n",
+     "hash": "1d92dc8f3c5c98b3",
+     "he": "אם $$A$$ ו-$$B$$ ניתנים לאיחוד, קיים להם mgu (יחיד עד כדי שינוי שם)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:20",
+     "type": "prose",
+     "en": "**Example:** \n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:21",
+     "type": "list",
+     "en": "* `{X = 4, Z = 3, Y = 4}` is an mgu of `p(X, 3, X, W)` and `p(Y, Z, 4, W)`.\n\n",
+     "hash": "d18bd67e2e089220",
+     "he": "* `{X = 4, Z = 3, Y = 4}` הוא mgu של `p(X, 3, X, W)` ו-`p(Y, Z, 4, W)`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:22",
+     "type": "prose",
+     "en": "**Definition: Combination of substitutions** \nThe combination of substitutions $$s$$ and $$s'$$ denoted $$s ○ s'$$, is defined by:\n",
+     "hash": "f58b3702d39f3198",
+     "he": "**הגדרה: הרכבה של הצבות**\nההרכבה של הצבות $$s$$ ו-$$s'$$, המסומנת $$s ○ s'$$, מוגדרת כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:23",
+     "type": "list",
+     "en": "1. $$s'$$ is applied to the terms of $$s$$, *i.e.,* for every variable $$X$$ for which $$s(X)$$ is defined, occurrences of variables $$X'$$ in $$s(X)$$ are replaced by $$s'(X')$$.\n2. A variable $$X$$ for which $$s(X)$$ is defined, is removed from the domain of $$s'$$, *i.e.,* $$s'(X)$$ is not defined on it any more.\n3. The modified $$s'$$ is added to $$s$$.\n4. Identity bindings, *i.e.*, $$s(X) = X$$, are removed.\n\n",
+     "hash": "67fec8c14ef36898",
+     "he": "1. $$s'$$ מופעלת על ה-terms של $$s$$, *כלומר*, עבור כל משתנה $$X$$ שעבורו $$s(X)$$ מוגדרת, מופעים של משתנים $$X'$$ בתוך $$s(X)$$ מוחלפים ב-$$s'(X')$$.\n2. משתנה $$X$$ שעבורו $$s(X)$$ מוגדרת, מוסר מתחום ההגדרה של $$s'$$, *כלומר*, $$s'(X)$$ אינה מוגדרת עליו יותר.\n3. ה-$$s'$$ המעודכנת מתווספת ל-$$s$$.\n4. קשירות זהות, *כלומר* $$s(X) = X$$, מוסרות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:24",
+     "type": "prose",
+     "en": "**Example:**\n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:25",
+     "type": "list",
+     "en": "* `{X = Y, Z = 3, U = V } ○ {Y = 4,W = 5, V = U, Z = X} = {X = 4, Z = 3, Y = 4,W = 5, V = U}`\n\n",
+     "hash": "4b29d8bbffb6609b",
+     "he": "* `{X = Y, Z = 3, U = V } ○ {Y = 4,W = 5, V = U, Z = X} = {X = 4, Z = 3, Y = 4,W = 5, V = U}`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:26",
+     "type": "prose",
+     "en": "#### Unification Algorithm\n\n",
+     "hash": "d10d33c17df96f94",
+     "he": "#### אלגוריתם האוניפיקציה"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:27",
+     "type": "prose",
+     "en": "The method introduced in Chapter 3 for solving type equations is a unification algorithm for any kind of expressions, that computes an mgu. We repeat this algorithm here, replacing the types of the objects manipulated to the context of the AST of logic programming:\n\n",
+     "hash": "5fb16cabec1997e2",
+     "he": "השיטה שהוצגה בפרק 3 לפתרון משוואות טיפוסים היא אלגוריתם אוניפיקציה עבור כל סוג של ביטויים, שמחשב mgu. אנחנו חוזרים כאן על האלגוריתם הזה, ומחליפים את הטיפוסים של האובייקטים שבהם מטפלים להקשר של ה-AST של תכנות לוגי:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:28",
+     "type": "prose",
+     "en": "Given atomic formulas `A`, `B` they can be unified following these steps:\n",
+     "hash": "93d35b860642237e",
+     "he": "בהינתן נוסחאות אטומיות `A`, `B`, ניתן לאחד אותן לפי הצעדים הבאים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:13:29",
+     "type": "code",
+     "en": "```\nunify(A,B): Substitution | Fail \nInitialization: sub: Substitution = {} // Empty substitution\n                equations: Equation[] = (A = B)\n1. While (equations is not empty):\n2.   Let equation_1 = pop(equations)\n3.   Let eq'_1 = equation_1 ○ sub\n4.   If one side in eq'_1 is a variable X:\n4.1    If the other side is not the same variable: i.e., eq'_1 = {X = term}\n4.2     then sub = sub o {X = term}\n4.3     else if the other side is the same variable: i.e., eq'_1 = {X = X}\n4.4       continue\n5.   else if both sides in eq'_1 are atomic, then:\n6.     if both sides are the same constant symbol then continue, else return FAIL.\n7.   else if the predicate symbols and the number of arguments are the same: eq'_1 = (p(t_1,...,t_n) = p(s_1, ..., s_n)):\n8.     split eq'_1 into equations: equations = equation U (t_i = s_i) for i=1..n, continue. \n9.   else return FAIL.\n```\n\n",
+     "hash": "31e779318e65ca99",
+     "noteHe": "**אלגוריתם האוניפיקציה — כדאי לשנן אותו, זו שאלת מבחן ודאית.** זהו בדיוק אותו אלגוריתם שפתר משוואות טיפוסים ב-3.2, רק שהמילים החליפו תפקיד: \"משתנה טיפוס\" הפך ל\"משתנה לוגי\" ו\"ביטוי טיפוס\" ל\"term\". המבנה: מחזיקים **תור משוואות** ו**הצבה מצטברת** ‏`sub`, ומעבדים משוואה אחת בכל סיבוב. שימו לב לצעד 3, שקל לפספס ובלעדיו האלגוריתם שגוי: לפני שמטפלים במשוואה, **מפעילים עליה את ההצבה שנצברה עד כה** — אחרת נאבד קשירות קודמות. אחריו יש ארבעה מקרים. (1) צד אחד הוא משתנה ‏`X`: מרכיבים ‏`sub = sub ○ {X = term}`; אם שני הצדדים אותו משתנה, ממשיכים בלי לעשות דבר (הימנעות מ-`X = X`, שאינה הצבה חוקית לפי ההגדרה למעלה). (2) שני הצדדים אטומיים: אם זה אותו קבוע ממשיכים, אחרת ‏`FAIL` — כאן נופלת ההשוואה ‏`abraham = isaac`. (3) שני הצדדים נוסחאות אטומיות עם **אותו פרדיקט ואותה מקומיות**: מפרקים למשוואות איבר-איבר ומוסיפים לתור. (4) כל השאר — ‏`FAIL`. **שימו לב מה חסר כאן לעומת 3.2**: אין בדיקת היקרות (occurs check), כי ב-RLP terms אינם מקוננים ולכן ‏`X = f(X)` אינו יכול להיווצר; ב-Pure Prolog, שבו יש functors, זה כן יהפוך לבעיה. **טעות נפוצה במבחן**: לשכוח את צעד 3 ולהחיל את ההצבה רק בסוף, או לבנות את ההצבה באיחוד פשוט במקום בהרכבה ‏`○`."
+    }
+   ],
+   "headingHe": "אוניפיקציה לתכנות לוגי"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:14",
+   "depth": 3,
+   "headingEn": "answer-query: An abstract interpreter for Logic Programming",
+   "raw": "### answer-query: An abstract interpreter for Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:0",
+     "type": "prose",
+     "en": "The computation of a Prolog program is triggered by a query.  It builds a proof-tree to establish whether the query holds given the program.  If such a proof-tree can be constructed, then answers can be read off the tree, in the form of substitutions.\n\n",
+     "hash": "7ae2d34d99b66e60",
+     "he": "החישוב של תוכנית Prolog מופעל על ידי שאילתה. הוא בונה עץ הוכחה כדי לקבוע האם השאילתה מתקיימת בהינתן התוכנית. אם ניתן לבנות עץ הוכחה כזה, אפשר לקרוא מהעץ תשובות, בצורת הצבות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:1",
+     "type": "prose",
+     "en": "A query has the following form:\n`Q = ?- G1, ..., Gn`\n\n",
+     "hash": "8c18e23c564c7765",
+     "he": "לשאילתה יש הצורה הבאה:\n`Q = ?- G1, ..., Gn`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:2",
+     "type": "prose",
+     "en": "The query components are called **goals**. \nThe interpreter tries all possible proofs for the query, and computes a set of answers, i.e., substitutions to the variables in the query.  Each answer corresponds to a proof of the query. If the query cannot be proved, then the set is the empty set.\n\n",
+     "hash": "148a3ebf6bbfd1d7",
+     "he": "רכיבי השאילתה נקראים **מטרות** (goals).\nהמפרש מנסה את כל ההוכחות האפשריות לשאילתה, ומחשב קבוצה של תשובות, כלומר הצבות למשתנים שבשאילתה. כל תשובה מתאימה להוכחה אחת של השאילתה. אם לא ניתן להוכיח את השאילתה, הקבוצה היא הקבוצה הריקה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:3",
+     "type": "prose",
+     "en": "#### Facts as Rules\n",
+     "hash": "5fbf79eb79c78714",
+     "he": "#### עובדות ככללים"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:4",
+     "type": "prose",
+     "en": "To simplify the description of the algorithm, we note that Facts can be treated as Rules, whose body is the single atomic formula true.  For example, the fact\n`r(baz, bar).`\nis equivalent to the rule:\n`r(baz,bar) :- true.`\n\n",
+     "hash": "5a0e597ccdc4a84f",
+     "he": "כדי לפשט את תיאור האלגוריתם, נציין שניתן לטפל בעובדות ככללים, שגופם הוא הנוסחה האטומית היחידה true. לדוגמה, העובדה\n`r(baz, bar).`\nשקולה לכלל:\n`r(baz,bar) :- true.`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:5",
+     "type": "prose",
+     "en": "#### Goal and Rule Selection\n\n",
+     "hash": "4624efe897019d19",
+     "he": "#### בחירת מטרה וכלל"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:6",
+     "type": "prose",
+     "en": "Each proof is a repeated effort to prove:\n",
+     "hash": "66068a1e1af7f7e4",
+     "he": "כל הוכחה היא מאמץ חוזר להוכיח:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:7",
+     "type": "list",
+     "en": "* A selected goal\n* Using a selected rule\n\n",
+     "hash": "51b92c086bb610ba",
+     "he": "* מטרה נבחרת\n* באמצעות כלל נבחר"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:8",
+     "type": "prose",
+     "en": "If the selected rule does not lead to a proof, the next selected rule is tried. This is the backtracking mechanism of the interpreter. If no rule leads to a proof, the computation fails. \n\n",
+     "hash": "af8b177ac4e9b701",
+     "he": "אם הכלל הנבחר אינו מוביל להוכחה, מנוסה הכלל הנבחר הבא. זהו מנגנון החזרה לאחור של המפרש. אם אף כלל אינו מוביל להוכחה, החישוב נכשל."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:9",
+     "type": "prose",
+     "en": "Rule selection is performed by unification between the selected goal and the head of the selected rule. \nTherefore, the algorithm has two points of **non deterministic choice**: goal and the rule selections.\nWe will refer below to the selections of goals and rules with two procedures `Gsel` for goal selection `Rsel` for rule selection.\n\n",
+     "hash": "7b9711739bdac423",
+     "he": "בחירת הכלל מתבצעת באמצעות אוניפיקציה בין המטרה הנבחרת לבין הראש של הכלל הנבחר.\nלכן, לאלגוריתם יש שתי נקודות של **בחירה לא-דטרמיניסטית**: בחירת המטרה ובחירת הכלל.\nנתייחס להלן לבחירות של מטרות ושל כללים באמצעות שתי פרוצדורות, `Gsel` לבחירת מטרה ו-`Rsel` לבחירת כלל."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:10",
+     "type": "prose",
+     "en": "**Goal selection**: Gsel is a selection function defined on tuples of goals. That is, $$Gsel(G_1, ... , G_n) = G_i, n ≥ 1, 1 ≤ i ≤ n$$, such that $$Gi \\neq true$$.\n\n",
+     "hash": "e8123fb7bd0c9290",
+     "he": "**בחירת מטרה**: ‏Gsel היא פונקציית בחירה המוגדרת על שלשות של מטרות. כלומר, $$Gsel(G_1, ... , G_n) = G_i, n ≥ 1, 1 ≤ i ≤ n$$, כך ש-$$Gi \\neq true$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:11",
+     "type": "prose",
+     "en": "**Rule selection**: Rsel is a function which for a given goal $$G$$ and a program $$P$$ (a sequence of rules) creates a sequence of all rule-substitution pairs such that:\n",
+     "hash": "f47bb5bd1143c1a9",
+     "he": "**בחירת כלל**: ‏Rsel היא פונקציה שעבור מטרה נתונה $$G$$ ותוכנית $$P$$ (סדרה של כללים) יוצרת סדרה של כל זוגות הכלל-הצבה כך ש:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:12",
+     "type": "list",
+     "en": "* $$Rsel(G, P) = (⟨R, σ⟩)_{R∈P, G ○ σ = head(R) ○ σ}$$. \n\n",
+     "hash": "c3eb102c45ff492d",
+     "he": "* $$Rsel(G, P) = (⟨R, σ⟩)_{R∈P, G ○ σ = head(R) ○ σ}$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:13",
+     "type": "prose",
+     "en": "That is, for every rule $$R ∈ P$$, if $$R = A:- B1, . . . , Bn., n ≥ 1$$, and $$unify(A, G) = σ$$ succeeds with the unifying substitution (mgu) $$σ$$, then $$⟨R, σ⟩ ∈ Rsel(G, P)$$.\n\n",
+     "hash": "378486da5368a9e7",
+     "he": "כלומר, עבור כל כלל $$R ∈ P$$, אם $$R = A:- B1, . . . , Bn., n ≥ 1$$, והאוניפיקציה $$unify(A, G) = σ$$ מצליחה ומחזירה את ההצבה המאחדת (mgu) ‏$$σ$$, אז $$⟨R, σ⟩ ∈ Rsel(G, P)$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:14",
+     "type": "prose",
+     "en": "In Prolog, GSel and RSel are defined as follows:\n",
+     "hash": "3d384fe71175611a",
+     "he": "ב-Prolog, ‏GSel ו-RSel מוגדרות כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:15",
+     "type": "list",
+     "en": "* Goal selection as the left most goal which is different from true. That is: \n  $$Gsel_{Prolog}(G_1, ... , G_n) = G_1$$, provided that $$G_1 \\neq true$$.\n* Rule selection according to the procedure rule ordering: if the rules in $$P$$ are ordered as $$R_1, ... , R_n$$, then \n  $$Rsel_{Prolog}(G, P) = (⟨R_{i_1}, σ_{i_1}⟩, ... ,⟨R_{i_m}, σ_{i_m}⟩)$$, such that $$i_j < i_{j+1}$$, for $$1 ≤ j ≤ m$$.\n\n\n",
+     "hash": "7b7703f372487771",
+     "he": "* בחירת מטרה כמטרה השמאלית ביותר ששונה מ-true. כלומר:\n  $$Gsel_{Prolog}(G_1, ... , G_n) = G_1$$, בתנאי ש-$$G_1 \\neq true$$.\n* בחירת כלל לפי סדר הכללים בפרוצדורה: אם הכללים ב-$$P$$ מסודרים כ-$$R_1, ... , R_n$$, אז\n  $$Rsel_{Prolog}(G, P) = (⟨R_{i_1}, σ_{i_1}⟩, ... ,⟨R_{i_m}, σ_{i_m}⟩)$$, כך ש-$$i_j < i_{j+1}$$, עבור $$1 ≤ j ≤ m$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:16",
+     "type": "prose",
+     "en": "#### The answer-query algorithm \n\n",
+     "hash": "2c81db91ab8b1d62",
+     "he": "#### אלגוריתם answer-query"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:17",
+     "type": "prose",
+     "en": "The answer-query algorithm builds a proof tree and then collects the answers from its leaves. \nThe proof tree is a tree with labeled nodes and edges. It is defined as follows:\n",
+     "hash": "e06fd01c9608465a",
+     "he": "האלגוריתם answer-query בונה עץ הוכחה ואז אוסף את התשובות מהעלים שלו.\nעץ ההוכחה הוא עץ שהצמתים והקשתות שלו מתויגים. הוא מוגדר כך:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:18",
+     "type": "list",
+     "en": "1. The nodes are labeled by queries, with a marked goal in the query (the selected goal).\n2. The edges are labeled by substitutions and rule numbers.\n3. The root node is labeled by the input query and its selected goal.\n4. The child nodes of a node labeled $$Q$$ with a marked goal $$G$$ represent all possible successive queries, obtained by applying all possible rules to $$G$$. The child nodes are ordered by Rsel, where the leftmost child corresponds to the first selected rule.\n\n",
+     "hash": "44d3f2588571cc55",
+     "he": "1. הצמתים מתויגים בשאילתות, כאשר בכל שאילתה מסומנת מטרה אחת (המטרה הנבחרת).\n2. הקשתות מתויגות בהצבות ובמספרי כללים.\n3. צומת השורש מתויג בשאילתת הקלט ובמטרה הנבחרת שלה.\n4. צמתי הבנים של צומת המתויג ב-$$Q$$ עם מטרה מסומנת $$G$$ מייצגים את כל השאילתות העוקבות האפשריות, המתקבלות מהפעלת כל הכללים האפשריים על $$G$$. צמתי הבנים מסודרים לפי Rsel, כאשר הבן השמאלי ביותר מתאים לכלל שנבחר ראשון."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:19",
+     "type": "prose",
+     "en": "The Tree operations used in the proof-tree algorithm are:\n",
+     "hash": "8d7be157be55d8d4",
+     "he": "פעולות העץ שבהן משתמש אלגוריתם עץ ההוכחה הן:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:20",
+     "type": "list",
+     "en": "1. Constructors:\n",
+     "hash": "9d37bdc7433b0cd3",
+     "he": "1. בנאים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:21",
+     "type": "list",
+     "en": "  * `make_node(label)`: Creates a node labeled label (labels in our case are collections of Atomic Formulas).\n  * `add_branch(tree, edge_label, branch)`: Adds branch as a right branch to the root node of tree, with an edge labeled by `edge_label`.\n",
+     "hash": "6bc7c92a1e82ca6e",
+     "he": "* `make_node(label)`: יוצר צומת המתויג ב-label (התיוגים במקרה שלנו הם אוספים של נוסחאות אטומיות).\n  * `add_branch(tree, edge_label, branch)`: מוסיף את branch כענף ימני לצומת השורש של tree, עם קשת המתויגת ב-`edge_label`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:22",
+     "type": "list",
+     "en": "2. Accessors: \n",
+     "hash": "1f4c38112a57bfe3",
+     "he": "2. פונקציות גישה:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:23",
+     "type": "list",
+     "en": "  * `label(node)` selects the label of node.\n  \n",
+     "hash": "b53ff4e94d905784",
+     "he": "* `label(node)` בוחר את התיוג של הצומת."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:24",
+     "type": "prose",
+     "en": "#### Proof Tree Example\n\n",
+     "hash": "c41ff29ef453daf7",
+     "he": "#### דוגמה לעץ הוכחה"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:25",
+     "type": "prose",
+     "en": "The following diagram illustrates the structure of a proof tree:\n\n",
+     "hash": "7ec05badba34a092",
+     "he": "הדיאגרמה הבאה ממחישה את המבנה של עץ הוכחה:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:26",
+     "type": "image",
+     "en": "![proof-tree](./resources/proof-tree1.png)\n\n",
+     "hash": "e01f960decf4b2c6"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:27",
+     "type": "list",
+     "en": "* Each node contains a query\n* Each edge is labeled by a reference to a rule (or fact) and a substitution.\n* Leaves are nodes that cannot be expanded anymore (in general, they correspond to the atomic formula `true` or `false`).\n* Answers are read off this tree by collecting the substitutions from the leaves marked as `true` and up to the root.\n\n\n",
+     "hash": "49c839a21803e93c",
+     "he": "* כל צומת מכיל שאילתה.\n* כל קשת מתויגת בהפניה לכלל (או לעובדה) ובהצבה.\n* עלים הם צמתים שלא ניתן להרחיב עוד (בדרך כלל הם מתאימים לנוסחה האטומית `true` או `false`).\n* התשובות נקראות מהעץ הזה על ידי איסוף ההצבות מהעלים המסומנים כ-`true` ועד לשורש."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:28",
+     "type": "prose",
+     "en": "**The answer-query algorithm: `answer-query(Q, P, Gsel, Rsel)`**\n\n",
+     "hash": "2733ac6cfb9f1bd0",
+     "he": "**האלגוריתם answer-query: ‏`answer-query(Q, P, Gsel, Rsel)`**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:29",
+     "type": "prose",
+     "en": "**Input:**\n",
+     "hash": "2a4755558d1c9b57",
+     "he": "**קלט:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:30",
+     "type": "list",
+     "en": "  * `Q: Query = ?- G1, . . . , Gn`, where Gi, i = 1..n are atomic formula\n  * `P: Program`, with numbered rules (denoted by number(R))\n  * A goal selection rule `Gsel`\n  * A rule selection rule `Rsel`\n  \n",
+     "hash": "aeff0ab1857d02eb",
+     "he": "* `Q: Query = ?- G1, . . . , Gn`, כאשר Gi, ‏i = 1..n הן נוסחאות אטומיות\n  * `P: Program`, עם כללים ממוספרים (המסומנים ב-number(R))\n  * כלל בחירת מטרה `Gsel`\n  * כלל בחירת כלל `Rsel`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:31",
+     "type": "prose",
+     "en": "**Output:** A set of substitutions for variables of Q (not necessarily for all variables).\n\n",
+     "hash": "229ff90aeef2531d",
+     "he": "**פלט:** קבוצה של הצבות למשתנים של Q (לא בהכרח לכל המשתנים)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:32",
+     "type": "prose",
+     "en": "**Method:**\n",
+     "hash": "716fae9ce7127894",
+     "he": "**שיטה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:33",
+     "type": "list",
+     "en": "1. `answers = {}`\n2. `PT = proof-tree(make_node(Q))`. \n3. Return `{s ∣ s ∈ answers/Q(PT)}` where `answers/Q` computes the restriction of the substitutions read out in the proof tree leaves to the variables of `Q`.\n\n",
+     "hash": "e905953b67e962f5",
+     "he": "1. `answers = {}`\n2. `PT = proof-tree(make_node(Q))`. \n3. החזירו `{s ∣ s ∈ answers/Q(PT)}`, כאשר `answers/Q` מחשב את הצמצום של ההצבות שנקראו מעלי עץ ההוכחה למשתנים של `Q`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:34",
+     "type": "prose",
+     "en": "`answer-query` can return the following types of results:\n",
+     "hash": "2aae06382b5fb1eb",
+     "he": "‏`answer-query` יכולה להחזיר את סוגי התוצאות הבאים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:35",
+     "type": "list",
+     "en": "1. An empty set answer (no substitutions) marks a failure of the interpreter to find a proof.\n2. An answer with empty substitutions marks success proofs with no variables to substitute (*e.g.,* when the query is ground).\n3. An answer with non-empty substitutions marks success proofs that require substitutions to the query variables.\n\n",
+     "hash": "b77451ed660282b5",
+     "he": "1. תשובה שהיא קבוצה ריקה (אין הצבות) מסמנת כישלון של המפרש למצוא הוכחה.\n2. תשובה עם הצבות ריקות מסמנת הוכחות שהצליחו ואין בהן משתנים להציב (*למשל,* כאשר השאילתה היא ground).\n3. תשובה עם הצבות לא-ריקות מסמנת הוכחות שהצליחו ודורשות הצבות למשתני השאילתה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:36",
+     "type": "prose",
+     "en": "**Procedure proof-tree**: `proof-tree(node)`. node is a tree node with label query, which is an ordered list of atomic formulas, called goals.\n\n",
+     "hash": "82bf0e55e69452ab",
+     "he": "**הפרוצדורה proof-tree**: ‏`proof-tree(node)`. ‏node הוא צומת עץ שהתיוג שלו הוא שאילתה, כלומר רשימה סדורה של נוסחאות אטומיות הנקראות מטרות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:37",
+     "type": "prose",
+     "en": "**Input:** A tree node node\n\n",
+     "hash": "4bd20002f9b977c7",
+     "he": "**קלט:** צומת עץ node"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:38",
+     "type": "prose",
+     "en": "**Output:** A proof tree rooted in node. \n\n",
+     "hash": "cc5c53edfa77cdd1",
+     "he": "**פלט:** עץ הוכחה שהשורש שלו הוא node."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:39",
+     "type": "prose",
+     "en": "**Method:**\n",
+     "hash": "716fae9ce7127894",
+     "he": "**שיטה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:40",
+     "type": "code",
+     "en": "```\nif label(node) is ?- true, ... , true then \n  1. Mark node as a Success node (leaf). A success backtracking point.\n  2. answers = answers ∪ {s1 ○ s2 ○ ... ○ sn}, where s1, ... , sn are the substitution labels\n     of the path from the tree-root to node. Mark node with this substitution.\nelse\n  1. Goal selection: G = Gsel(label(node)). G ≠ true since Gsel does not select a true goal.\n  2. Variables renaming: Rename variables in every rule and fact of P\n  3. Rule selection: rules = Rsel(G, P) = (⟨R, σ⟩) s.t. R ∈ P, G ○ σ = head(R) ○ σ\n  4. apply-rules(node, G, rules)\n```  \n  \n",
+     "hash": "14eac13a7c96a40f",
+     "noteHe": "זהו הלב של המפרש — **כדאי לשנן את ארבעת הצעדים של ענף ה-else, זו שאלת מבחן קלאסית.** הפרוצדורה מקבלת צומת אחד ומרחיבה אותו לעץ הוכחה שלם, ברקורסיה הדדית עם `apply-rules` שמופיעה מיד אחריה. **תנאי העצירה** (ענף ה-then): אם התיוג של הצומת הוא `?- true, ... , true`, כלומר כל המטרות בשאילתה כבר הוכחו, הצומת מסומן כ-Success והוא עלה. אז אוספים את **כל תוויות ההצבה לאורך המסלול מהשורש עד הצומת** ומרכיבים אותן בסדר `s1 ○ s2 ○ ... ○ sn` — שימו לב שזו הרכבה (composition) ולא איחוד, ושהסדר הוא משורש לעלה; היפוך הסדר נותן תשובה שגויה. את ההצבה המורכבת מוסיפים ל-`answers`, שהיא משתנה גלובלי שאותחל ב-`answers = {}` בצעד 1 של ‏`answer-query`; זהו אלגוריתם עם תופעת לוואי, לא פונקציה טהורה. ההערה \"A success backtracking point\" מציינת שזו בדיוק הנקודה שבה Prolog מדפיס תשובה ועוצר, וכשמקישים `;` הוא חוזר לכאן וממשיך לחפש. **ענף ה-else** — צומת שעוד יש בו מה להוכיח — עושה ארבעה דברים: (1) ‏`Gsel` בוחרת מטרה `G` שאינה `true` (ב-Prolog: השמאלית ביותר); (2) **שינוי שם של המשתנים** בכל כלל ועובדה בתוכנית `P`; (3) ‏`Rsel` מחזירה את סדרת זוגות הכלל-הצבה שראשיהם מתאחדים עם `G`; (4) קריאה ל-`apply-rules` שתיצור ילד לכל זוג כזה. **צעד 2 הוא זה שסטודנטים מפילים**: בלעדיו, ‏`X` שבכלל ו-`X` שבשאילתה נחשבים לאותו משתנה, האוניפיקציה נכשלת או קושרת בטעות, והרקורסיה מתפוצצת כבר בקריאה השנייה לאותו כלל. המשתנים בכללים הם משתנים קשורים (bound), בדיוק כמו פרמטרים של פרוצדורה, ולכן מותר לשנות את שמם חופשית — השוו לשינוי השם של משתנים קשורים במודל ההצבה ב-2.6, שנועד בדיוק לאותה מטרה: למנוע לכידת משתנים (variable capture). שימו לב שנקודת הכישלון אינה מופיעה כאן אלא ב-`apply-rules`: אם `Rsel` מחזירה סדרה ריקה, הצומת יישאר בלי ילדים ויהפוך לעלה כישלון."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:41",
+     "type": "prose",
+     "en": "**Procedure apply-rules:** `apply-rules(node, G, rules)`\n\n",
+     "hash": "8f40afb40d119930",
+     "he": "**הפרוצדורה apply-rules:** ‏`apply-rules(node, G, rules)`"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:42",
+     "type": "prose",
+     "en": "**Input:** \n",
+     "hash": "2a4755558d1c9b57",
+     "he": "**קלט:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:43",
+     "type": "list",
+     "en": "  * `node` is the root-node of a proof-tree, with label query, which is a tuple of atomic formulas; \n  * `G` is an atomic formula (≠ true) included in a query;\n  * `rules` is a sequence of rule-substitution pairs $$(⟨R, σ⟩)_{R ∈ P, G ○ σ = head(R) ○ σ}$$.\n\n",
+     "hash": "923243d1359da43e",
+     "he": "* `node` הוא צומת השורש של עץ הוכחה, שהתיוג שלו הוא שאילתה, כלומר שלשה של נוסחאות אטומיות;\n  * `G` היא נוסחה אטומית (≠ true) הכלולה בשאילתה;\n  * `rules` היא סדרה של זוגות כלל-הצבה $$(⟨R, σ⟩)_{R ∈ P, G ○ σ = head(R) ○ σ}$$."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:44",
+     "type": "prose",
+     "en": "**Output:** The proof tree rooted in node, extended with proof-trees created by the application of the rules in rules to the selected goal G.\n\n",
+     "hash": "3d27868281af5b18",
+     "he": "**פלט:** עץ ההוכחה שהשורש שלו הוא node, מורחב בעצי ההוכחה שנוצרו מהפעלת הכללים שב-rules על המטרה הנבחרת G."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:45",
+     "type": "prose",
+     "en": "**Method:** \n\n",
+     "hash": "716fae9ce7127894",
+     "he": "**שיטה:**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:46",
+     "type": "code",
+     "en": "```\nif empty?(rules) then \n  output = node, // the tree rooted at node. This is a failure backtracking point.\nelse let ⟨R, σ⟩ = first(rules):\n  1. new_query = (replace(label(node), G, body(R))) ○ σ\n     That is, if label(node) = G1, ..., Gn, n ≥ 1, G = Gi, and \n                 body(R) = B1, ... , Bm, m ≥ 1, then \n                 new_query = (G1, ... , Gi−1, B1, ... , Bm, Gi+1, ... , Gn) ○ σ.\n  2. New query expansion:\n     add_branch(node, ⟨σ, number(R)⟩, proof-tree(make_node(new_query)), )\n  3. Application of other selected rules: apply-rules(node, G, tail(rules))\nend\n```\n\n",
+     "hash": "83e292f20adc26b5",
+     "noteHe": "זו החצי השני של הרקורסיה ההדדית: ‏`proof-tree` מחליטה *מה* להרחיב, ו-`apply-rules` יוצרת *ילד לכל כלל מתאים*. **תנאי העצירה**: אם `rules` ריקה — כלומר `Rsel` לא מצאה אף כלל שראשו מתאחד עם `G` — הצומת מוחזר כמו שהוא, בלי ילדים, וזו **נקודת כישלון** (failure backtracking point); זהו העלה שמסומן `false` בעץ ההוכחה. אחרת לוקחים את הזוג הראשון ‏`⟨R, σ⟩` ובונים את השאילתה הבאה בשני שלבים: ראשית **מחליפים את `G` בגוף הכלל** בתוך רשימת המטרות, כלומר `(G1, ... , Gi−1, B1, ... , Bm, Gi+1, ... , Gn)`, ורק אחר כך **מפעילים את ההצבה `σ` על כל השאילתה החדשה**. ‏**כדאי לשנן את הסדר הזה, ובעיקר את המילה \"כל\"**: ‏`σ` מוחלת גם על המטרות האחיות `G1..Gi−1` ו-`Gi+1..Gn` שלא נגעו בהן, וזה בדיוק המנגנון שמעביר את הקשירה שהתקבלה ממטרה אחת לשאר השאילתה — **טעות נפוצה במבחן** היא להחיל את `σ` רק על הגוף שהוכנס. שימו לב ש-`m ≥ 1`: לעובדה יש גוף `true`, ולכן גוף אף פעם אינו ריק, וההחלפה תמיד מכניסה משהו. צעד 2 מוסיף ענף שהקשת שלו מתויגת ב-`⟨σ, number(R)⟩` — ההצבה *ומספר הכלל* — ובקצה שלו קריאה רקורסיבית ל-`proof-tree`, שמפתחת את כל תת-העץ הזה **עד הסוף** לפני שחוזרים. צעד 3 קורא ל-`apply-rules` על `tail(rules)`, וכך נוצרים הענפים האחים משמאל לימין לפי סדר `Rsel`. **הצירוף של שני הצעדים האלה הוא בדיוק חיפוש לעומק (DFS)** — וזה ההסבר לכל התנהגות ה-Prolog שראינו: אם הענף השמאלי אינסופי, הענף האח שמימינו לעולם לא ייבדק, גם אם התשובה נמצאת שם. השוו ל-`ancestor2` בסעיף הקודם. **שגיאת מקור**: לקריאה ל-`add_branch` יש כאן פסיק עודף וארגומנט רביעי ריק, בעוד שהמפרט למעלה מגדיר אותה עם שלושה ארגומנטים בלבד."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:47",
+     "type": "prose",
+     "en": "**NOTES**\n\n",
+     "hash": "f19b137bcfb0d190",
+     "he": "**הערות**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:14:48",
+     "type": "list",
+     "en": "* In the rename step, the variables in the rules are renamed by new names. This way the program variables in every binding step are different from previous steps. Since variables in rules are bound procedure variables they can be freely renamed. By convention, in every recursive call, increase some auxiliary counter, such that variables `X, Y,...` are renamed as `X1, Y1,...` at the first level, `X2, Y2,...` at the second level, etc.\n* When computing substitutions in RSel: prefer to produce substitutions of the form {$$Var_{goal} = Var_{head}$$} instead of the opposite.  This way the query variables are kept in the substitutions produced in a proof branch. \n\n",
+     "hash": "209aeeeb1949d903",
+     "he": "* בצעד שינוי השם, המשתנים שבכללים מקבלים שמות חדשים. כך משתני התוכנית בכל צעד קשירה שונים מאלה של הצעדים הקודמים. מכיוון שמשתנים בכללים הם משתני פרוצדורה קשורים, מותר לשנות את שמם חופשית. לפי המוסכמה, בכל קריאה רקורסיבית מגדילים מונה עזר כלשהו, כך שהמשתנים `X, Y,...` משנים את שמם ל-`X1, Y1,...` ברמה הראשונה, ל-`X2, Y2,...` ברמה השנייה, וכן הלאה.\n* כאשר מחשבים הצבות ב-RSel: עדיף לייצר הצבות מהצורה {$$Var_{goal} = Var_{head}$$} ולא להפך. כך משתני השאילתה נשמרים בהצבות שנוצרות לאורך ענף ההוכחה."
+    }
+   ],
+   "headingHe": "‏answer-query: מפרש מופשט לתכנות לוגי"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:15",
+   "depth": 3,
+   "headingEn": "Types of Proof Trees",
+   "raw": "### Types of Proof Trees\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:0",
+     "type": "list",
+     "en": "* A path from the root in the proof tree corresponds to a computation of answer-query.\n* A finite root-to-leaf path with a leaf marked `Success` is a successful computation path. \n* A tree with a successful computation path is a **success tree**. \n* A successful computation path corresponds to a successful computation of answer-query. \n\n",
+     "hash": "65a20474e852f825",
+     "he": "* מסלול מהשורש בעץ ההוכחה מתאים לחישוב אחד של answer-query.\n* מסלול סופי משורש לעלה שהעלה שבסופו מסומן `Success` הוא מסלול חישוב מוצלח.\n* עץ שיש בו מסלול חישוב מוצלח הוא **עץ הצלחה** (success tree).\n* מסלול חישוב מוצלח מתאים לחישוב מוצלח של answer-query."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:1",
+     "type": "prose",
+     "en": "**Definition: [Provable query]**\nA query $$Q$$ is provable from a program $$P$$, denoted $$P ⊢ Q$$, iff for some goal and rule selection rules Gsel and Rsel, the proof tree algorithm for `answer-query(Q, P, Gsel, Rsel)` computes a success tree.\n\n",
+     "hash": "5420093c0cda1547",
+     "he": "**הגדרה: [שאילתה ניתנת להוכחה]**\nשאילתה $$Q$$ ניתנת להוכחה מתוך תוכנית $$P$$, מסומן $$P ⊢ Q$$, אם ורק אם עבור *איזשהם* כללי בחירת מטרה וכלל Gsel ו-Rsel, אלגוריתם עץ ההוכחה עבור `answer-query(Q, P, Gsel, Rsel)` מחשב עץ הצלחה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:2",
+     "type": "prose",
+     "en": "A finite root-to-leaf path with a non Success marked leaf is a **finite-failure computation path**.\n\n",
+     "hash": "230cec9575ef5da3",
+     "he": "מסלול סופי משורש לעלה שהעלה שבסופו אינו מסומן Success הוא **מסלול חישוב שנכשל סופית** (finite-failure computation path)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:3",
+     "type": "prose",
+     "en": "A proof tree where all the paths are failed computation paths is a **(finite) failure tree**.\n\n",
+     "hash": "2ad2f15771f5c2a7",
+     "he": "עץ הוכחה שכל המסלולים בו הם מסלולי חישוב שנכשלו הוא **עץ כישלון (סופי)** ((finite) failure tree)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:4",
+     "type": "prose",
+     "en": "An infinite computation path is an **infinite path**. Infinite computations can be created by recursive rules (direct or indirect recursion).\n\n",
+     "hash": "9e4f8d53bd7ecde2",
+     "he": "מסלול חישוב אינסופי הוא **מסלול אינסופי**. חישובים אינסופיים יכולים להיווצר על ידי כללים רקורסיביים (רקורסיה ישירה או עקיפה)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:5",
+     "type": "prose",
+     "en": "Significant kinds of proof trees:\n",
+     "hash": "28d42ed8a8ea8e72",
+     "he": "סוגי עצי ההוכחה המשמעותיים:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:6",
+     "type": "list",
+     "en": "1. **Finite success proof tree**: A finite tree with a successful path.\n2. **(Finite) failure proof tree**: A finite tree with no successful path.\n3. **Infinite success proof tree**: An infinite tree with a successful path. In this case it is important not to explore an infinite path. In Prolog: Tail recursion is safe, while left recursion is dangerous.\n4. **Infinite failure proof tree**: An infinite tree with no successful path. Dangerous to explore.\n\n",
+     "hash": "e99a41a2a8dc95c5",
+     "he": "1. **עץ הוכחה סופי מוצלח**: עץ סופי שיש בו מסלול מוצלח.\n2. **עץ הוכחה של כישלון (סופי)**: עץ סופי שאין בו מסלול מוצלח.\n3. **עץ הוכחה אינסופי מוצלח**: עץ אינסופי שיש בו מסלול מוצלח. במקרה כזה חשוב לא לחקור מסלול אינסופי. ב-Prolog: רקורסיית זנב היא בטוחה, ואילו רקורסיה שמאלית מסוכנת.\n4. **עץ הוכחה אינסופי של כישלון**: עץ אינסופי שאין בו מסלול מוצלח. מסוכן לחקור אותו."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:7",
+     "type": "prose",
+     "en": "The proof tree above is a finite success tree. \nWe read the answer off this tree for each successful computation path: \n\n",
+     "hash": "481198ea5c97948d",
+     "he": "עץ ההוכחה שלמעלה הוא עץ הצלחה סופי.\nאנחנו קוראים את התשובה מהעץ הזה עבור כל מסלול חישוב מוצלח:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:8",
+     "type": "prose",
+     "en": "*Left path:*: `{S=X1, Y1=jacob} ○ {X1=joseph}`, which is the substitution `{X1=joseph, Y1=jacob, S=joseph}`. \nThe restriction to the query variables yields the single substitution: `{S=joseph}`.\n\n",
+     "hash": "ddaffdd7b16acfd2",
+     "he": "*המסלול השמאלי:*: `{S=X1, Y1=jacob} ○ {X1=joseph}`, שהיא ההצבה `{X1=joseph, Y1=jacob, S=joseph}`.\nהצמצום למשתני השאילתה נותן הצבה יחידה: `{S=joseph}`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:9",
+     "type": "prose",
+     "en": "*Middle path:* `{S=X1, Y1=jacob} ○ {X1=dan}`, which is the substitution `{X1=dan, Y1=jacob, S=dan}`. \nThe restriction to the query variables yields the single substitution: `{S=dan}`.\n\n",
+     "hash": "a0e91d0535dc3099",
+     "he": "*המסלול האמצעי:* `{S=X1, Y1=jacob} ○ {X1=dan}`, שהיא ההצבה `{X1=dan, Y1=jacob, S=dan}`.\nהצמצום למשתני השאילתה נותן הצבה יחידה: `{S=dan}`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:10",
+     "type": "prose",
+     "en": "*Right path:* is a failure path, hence no answer is found.\n\n",
+     "hash": "80c7c88d70dbcc97",
+     "he": "*המסלול הימני:* הוא מסלול כישלון, ולכן לא נמצאת בו תשובה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:15:11",
+     "type": "prose",
+     "en": "The resulting answer set of the computation is: `{ {S=joseph}, {S=dan} }`.\n\n",
+     "hash": "3b13f0d5e5b2fce5",
+     "he": "קבוצת התשובות המתקבלת מהחישוב היא: `{ {S=joseph}, {S=dan} }`."
+    }
+   ],
+   "headingHe": "סוגים של עצי הוכחה"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:16",
+   "depth": 3,
+   "headingEn": "Properties of the answer-query Algorithm",
+   "raw": "### Properties of the answer-query Algorithm\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:16:0",
+     "type": "list",
+     "en": "1. **Proof tree uniqueness**: The proof tree for a given query and a given program is unique, for all goal and rule selection procedures (up to sibling ordering).  As a consequence: the set of answers is independent of the concrete selection procedures for goals and rules (GSel and RSel).\n2. **Performance**: Goal and rule selection decisions have impact on performance. \n",
+     "hash": "352b6078d7daac0e",
+     "he": "1. **יחידות עץ ההוכחה**: עץ ההוכחה עבור שאילתה נתונה ותוכנית נתונה הוא יחיד, עבור כל פרוצדורות בחירת המטרה והכלל (עד כדי סדר האחים). כתוצאה מכך: קבוצת התשובות אינה תלויה בפרוצדורות הבחירה הקונקרטיות של מטרות ושל כללים (GSel ו-RSel).\n2. **ביצועים**: להחלטות בחירת המטרה והכלל יש השפעה על הביצועים."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:16:1",
+     "type": "list",
+     "en": "  * The rules of a procedure should be ordered according to the rule selection procedure. Otherwise, the computation might get stuck in an infinite path, or try multiple failed computation paths.\n  * The atomic formulas in a rule body should be ordered according to the goal selection procedure.\n  * As an example, consider the case of `ancestor/2` and `ancestor2/2` discussed above.  They only differ in terms of goal selection.  \n",
+     "hash": "967ad4722dfdbf32",
+     "he": "* יש לסדר את הכללים של פרוצדורה בהתאם לפרוצדורת בחירת הכלל. אחרת, החישוב עלול להיתקע במסלול אינסופי, או לנסות מסלולי חישוב כושלים רבים.\n  * יש לסדר את הנוסחאות האטומיות בגוף של כלל בהתאם לפרוצדורת בחירת המטרה.\n  * כדוגמה, שקלו את המקרה של `ancestor/2` ושל `ancestor2/2` שנדונו למעלה. הם נבדלים זה מזה רק במונחי בחירת המטרה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:16:2",
+     "type": "list",
+     "en": "3. Soundness and completeness:\n",
+     "hash": "69f2d9d02f9ef9fb",
+     "he": "3. נאותות ושלמות:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:16:3",
+     "type": "list",
+     "en": "  * Definition: [logical implication] A query $$Q$$ is logically implied from a program $$P$$, denoted $$P ⊧ Q$$, if $$Q$$ is true whenever the program $$P$$ is true.\n  * Completeness: $$P ⊧ Q$$ implies $$P ⊢ Q$$. That is, if a query is logically implied from a program, then it is also provable by answer-query.\n  * Soundness: $$P ⊢ Q$$ implies $$P ⊧ Q$$. That is, if a query is provable by answer-query, then it is logically implied from the program.\n\n",
+     "hash": "995702bcc78da5f3",
+     "he": "* הגדרה: [גרירה לוגית] שאילתה $$Q$$ נגררת לוגית מתוכנית $$P$$, מסומן $$P ⊧ Q$$, אם $$Q$$ אמיתית בכל פעם שהתוכנית $$P$$ אמיתית.\n  * שלמות (Completeness): ‏$$P ⊧ Q$$ גורר $$P ⊢ Q$$. כלומר, אם שאילתה נגררת לוגית מתוכנית, אז היא גם ניתנת להוכחה על ידי answer-query.\n  * נאותות (Soundness): ‏$$P ⊢ Q$$ גורר $$P ⊧ Q$$. כלומר, אם שאילתה ניתנת להוכחה על ידי answer-query, אז היא נגררת לוגית מהתוכנית."
+    }
+   ],
+   "headingHe": "תכונות של האלגוריתם answer-query"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:17",
+   "depth": 3,
+   "headingEn": "Properties of Relational Logic Programming",
+   "raw": "### Properties of Relational Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:17:0",
+     "type": "prose",
+     "en": "**Decidability:**\nGiven a program $$P$$ and a query $$Q$$, the problem \"*Is Q provable from P*\", denoted $$P ⊢ Q$$, is decidable.\n\n",
+     "hash": "660f89543967b5da",
+     "he": "**כריעות (Decidability):**\nבהינתן תוכנית $$P$$ ושאילתה $$Q$$, הבעיה \"*האם Q ניתנת להוכחה מ-P*\", המסומנת $$P ⊢ Q$$, היא כריעה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:17:1",
+     "type": "prose",
+     "en": "**Proof**. The proof tree consists of nodes that are labeled by queries, *i.e.*, sequences of atomic formulas. The atomic formulas consist of predicate and individual constant symbols that occur in the program and the query, and from variables. Therefore, (1) the number of atomic formulas is finite, up to variable renaming, and (2) the number of different selected goals in queries on a path is finite (up to variable renaming). Consequently, every path in the proof tree can be decided to be a success, a failure or an infinite computation path. \n\n",
+     "hash": "33b0f7fb668565c0",
+     "he": "**הוכחה**. עץ ההוכחה מורכב מצמתים המתויגים בשאילתות, *כלומר*, בסדרות של נוסחאות אטומיות. הנוסחאות האטומיות מורכבות מסמלי פרדיקטים ומסמלים של קבועים פרטניים המופיעים בתוכנית ובשאילתה, ומשתנים. לכן, (1) מספר הנוסחאות האטומיות סופי, עד כדי שינוי שם של משתנים, ו-(2) מספר המטרות הנבחרות השונות בשאילתות לאורך מסלול הוא סופי (עד כדי שינוי שם של משתנים). כתוצאה מכך, עבור כל מסלול בעץ ההוכחה אפשר להכריע אם הוא מסלול חישוב מוצלח, כושל או אינסופי."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:17:2",
+     "type": "prose",
+     "en": "Note that all general purpose programming languages are only partially decidable (the halting problem). Therefore, relational logic programming is less expressive than a general purpose programming language.\n\n",
+     "hash": "9a58f85eaefa4357",
+     "he": "שימו לב שכל שפות התכנות למטרות כלליות הן כריעות חלקית בלבד (בעיית העצירה). לכן, תכנות לוגי רלציוני הוא פחות אקספרסיבי משפת תכנות למטרות כלליות."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:17:3",
+     "type": "prose",
+     "en": "**Question**: If relational logic programming is decidable, does it mean that all relational logic programming proof trees are finite?\n\n",
+     "hash": "c51f9fdfccb63813",
+     "he": "**שאלה**: אם תכנות לוגי רלציוני הוא כריע, האם זה אומר שכל עצי ההוכחה בתכנות לוגי רלציוני הם סופיים?"
+    }
+   ],
+   "headingHe": "תכונות של תכנות לוגי רלציוני"
+  },
+  {
+   "id": "cm/5.1RelationalLogicProgramming:18",
+   "depth": 3,
+   "headingEn": "Relational Logic Programming and SQL Operations",
+   "raw": "### Relational Logic Programming and SQL Operations\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:0",
+     "type": "prose",
+     "en": "How useful is the relational logic programming we just defined?\n\n",
+     "hash": "f49332ab7ca873d3",
+     "he": "עד כמה שימושי התכנות הלוגי הרלציוני שהגדרנו זה עתה?"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:1",
+     "type": "prose",
+     "en": "We just saw that its semantics is decidable - meaning it is strictly less expressive than the $$L2$$ functional language we defined in Chapter 2.  Can it still express *interesting* programs?\n\n",
+     "hash": "d31bf646c383fbf3",
+     "he": "זה עתה ראינו שהסמנטיקה שלו כריעה — כלומר שהוא אקספרסיבי ממש פחות מהשפה הפונקציונלית $$L2$$ שהגדרנו בפרק 2. האם הוא עדיין יכול לבטא תוכניות *מעניינות*?"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:2",
+     "type": "prose",
+     "en": "Relational logic programming is the basis for the DataLog language, which is a logic based language for database processing. DataLog is relational logic programming + arithmetic + negation + some database related restrictions. The operational semantics of DataLog is defined in a different way (bottom up semantics).\n\n",
+     "hash": "9d5da026208fc9be",
+     "he": "תכנות לוגי רלציוני הוא הבסיס לשפת DataLog, שהיא שפה מבוססת-לוגיקה לעיבוד מסדי נתונים. ‏DataLog היא תכנות לוגי רלציוני + אריתמטיקה + שלילה + כמה הגבלות הקשורות למסדי נתונים. הסמנטיקה התפעולית של DataLog מוגדרת בדרך אחרת (סמנטיקה מלמטה למעלה)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:3",
+     "type": "prose",
+     "en": "DataLog is more expressive than SQL. The relational algebra operations include: Union, Cartesian product, diff, projection, selection, and join.  These can all be implemented in relational logic programming. In addition, recursive rules (like computing the transitive closure of a relation) cannot be expressed in SQL (at least not in the traditional SQL) but **can be computed** in RLP.\n\n",
+     "hash": "c5f1fb5a0ab6276a",
+     "he": "‏DataLog אקספרסיבית יותר מ-SQL. פעולות האלגברה הרלציונית כוללות: איחוד, מכפלה קרטזית, הפרש, הטלה, בְּרֵרָה וצירוף. את כולן אפשר לממש בתכנות לוגי רלציוני. בנוסף, כללים רקורסיביים (כמו חישוב הסגירה הטרנזיטיבית של יחס) אינם ניתנים לביטוי ב-SQL (לפחות לא ב-SQL המסורתית) אבל **כן ניתנים לחישוב** ב-RLP."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:4",
+     "type": "prose",
+     "en": "The following schema illustrates how relational algebra operations are modeled in RLP:\n\n",
+     "hash": "fe773422042a7b14",
+     "he": "הסכמה הבאה ממחישה כיצד פעולות האלגברה הרלציונית ממודלות ב-RLP:"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:5",
+     "type": "prose",
+     "en": "**Union**\n",
+     "hash": "f8e72862657d30fd",
+     "he": "**איחוד (Union)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:6",
+     "type": "code",
+     "en": "```\nr_union_s(X1, ..., Xn) :- r(X1, ..., Xn).\nr_union_s(X1, ..., Xn) :- s(X1, ..., Xn).\n```\n\n",
+     "hash": "fdfa7574f685f919",
+     "noteHe": "איחוד של שתי רלציות מיוצג על ידי **שני כללים לאותו פרדיקט**. כאן `r_union_s` מוגדר פעמיים: פעם אחת עם גוף `r(X1, ..., Xn)` ופעם אחת עם גוף `s(X1, ..., Xn)`. שלשה תתקבל כתשובה אם *לפחות אחד* משני הכללים מצליח, וזו בדיוק הגדרת האיחוד. **כדאי לשנן את הכלל הכללי**: ב-RLP, ‏**\"או\" מיוצג בכללים נפרדים ו\"וגם\" מיוצג בפסיקים בתוך גוף אחד** — אין אופרטור `or` בשפה. שימו לב שכל `n` המשתנים מופיעים גם בראש וגם בגוף, ולכן כל השדות מועברים כמו שהם; זה מחייב ש-`r` ו-`s` יהיו מאותה מקומיות, בדיוק כמו הדרישה של האלגברה הרלציונית ששתי הטבלאות יהיו בעלות אותה סכמה. שימו לב גם ש-RLP מחזיר **קבוצה** של תשובות, כך שכפילויות נעלמות מאליהן — זהו `UNION` ולא `UNION ALL`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:7",
+     "type": "prose",
+     "en": "**Cartesian product**\n",
+     "hash": "41a09e6ba1b94f07",
+     "he": "**מכפלה קרטזית (Cartesian product)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:8",
+     "type": "code",
+     "en": "```\nr_X_s(X1, ..., Xn, Y1, ..., Ym) :- r(X1, ..., Xn ), s(Y1, ..., Ym).\n```\n\n",
+     "hash": "ae60f5b5db47a97b",
+     "noteHe": "מכפלה קרטזית היא כלל **אחד** ששני פרדיקטים בגופו, והנקודה כולה היא ש**אין ולו משתנה משותף אחד** בין `r(X1, ..., Xn)` לבין `s(Y1, ..., Ym)`. בלי משתנה משותף אין שום אילוץ שקושר בין השניים, ולכן כל שלשה של `r` מצטרפת לכל שלשה של `s` — ‏$$|r| \\times |s|$$ תשובות. הראש מונה את כל `n+m` המשתנים ולכן השלשה המתקבלת היא השרשור של השתיים. **השוו לצירוף (join) שבהמשך**: המבנה שם זהה לחלוטין, וההבדל היחיד הוא ש-`X` מופיע בשני הפרדיקטים. **זה כל הרעיון שכדאי לשנן**: ב-RLP ההבדל בין מכפלה קרטזית לצירוף אינו אופרטור אלא **שיתוף שמות המשתנים** — משתנה משותף = תנאי צירוף."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:9",
+     "type": "prose",
+     "en": "**Projection**\n",
+     "hash": "01b27f6d1e6f13c7",
+     "he": "**הטלה (Projection)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:10",
+     "type": "code",
+     "en": "```\nr1(X1, X3) :- r(X1, X2, X3).\n```\n\n",
+     "hash": "bdfbcb6ce120dfb4",
+     "noteHe": "הטלה היא בחירת עמודות, וב-RLP היא נעשית פשוט על ידי **השמטת משתנים מהראש**: הגוף מזכיר את שלושת השדות `X1, X2, X3`, אבל הראש מונה רק את `X1` ואת `X3`, ולכן `X2` \"נשכח\". זהו המקבילה של `SELECT X1, X3 FROM r`. שימו לב ש-`X2` עדיין חייב להופיע בגוף — הוא ממלא את המקום השני של `r`, ובלעדיו המקומיות של `r` הייתה משתנה. משתנה כזה, המופיע בגוף ולא בראש, נקרא **משתנה אנונימי** מבחינת התוצאה, ובכתיב Prolog נהוג לכתוב במקומו `_`. **נקודה שכדאי לשנן**: מכיוון שקבוצת התשובות היא קבוצה, שתי שלשות של `r` שנבדלות רק ב-`X2` יקרסו לתשובה אחת — הטלה ב-RLP מסלקת כפילויות אוטומטית, בעוד ש-`SELECT` ב-SQL דורש `DISTINCT` מפורש."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:11",
+     "type": "prose",
+     "en": "**Selection**\n",
+     "hash": "cf2a1bea4e00ab67",
+     "he": "**בְּרֵרָה (Selection)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:12",
+     "type": "code",
+     "en": "```\nr1(X1, X2, X3) :- r(X1, X2, X3), X2 \\= X3.\n```\n\n",
+     "hash": "68b4756c720b3841",
+     "noteHe": "בְּרֵרָה היא סינון שורות, וב-RLP היא נעשית על ידי **הוספת מטרה נוספת לגוף** שמבטאת את התנאי: כאן `X2 \\= X3`, כלומר \"שני השדות אינם מתאחדים\". הראש מעביר את כל השדות כמו שהם — בניגוד להטלה, כאן לא מושמט דבר — ולכן התוצאה היא בדיוק תת-קבוצת השורות של `r` שמקיימות את התנאי, כמו `SELECT * FROM r WHERE X2 <> X3`. **שימו לב לסדר בגוף, וזו טעות נפוצה**: המטרה `X2 \\= X3` חייבת לבוא **אחרי** `r(X1, X2, X3)`. ב-Prolog הבחירה היא משמאל לימין, ואם התנאי היה נבדק ראשון, ‏`X2` ו-`X3` היו עדיין משתנים חופשיים — ושני משתנים חופשיים שונים **כן** מתאחדים זה עם זה, כך ש-`\\=` היה נכשל מיד והכלל לא היה מחזיר דבר. **שימו לב גם לשפה שבה השתמשנו כאן**: ‏`\\=` אינו חלק מ-RLP כפי שהוגדר בסעיפים הקודמים — שם הפרדיקטים הפרימיטיביים היחידים הם `true` ו-`=`. אי-שוויון מחייב שלילה, וזו בדיוק אחת התוספות ש-DataLog מוסיפה מעל RLP לפי הפסקה למעלה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:13",
+     "type": "prose",
+     "en": "**Natural Join**\n",
+     "hash": "b7716b69513e8fb6",
+     "he": "**צירוף טבעי (Natural Join)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:14",
+     "type": "code",
+     "en": "```\nr_join_s(X1, ..., Xn, X, Y1, ..., Ym) :-\nr(X1, ..., Xn, X ), s(X, Y1, ..., Ym).\n```\n\n",
+     "hash": "711839dca4640a43",
+     "noteHe": "זהו בדיוק אותו מבנה של המכפלה הקרטזית, בשינוי אחד: המשתנה `X` מופיע **גם** במקום האחרון של `r` **וגם** במקום הראשון של `s`. שני המופעים חייבים לקבל את אותו ערך, ולכן רק זוגות שלשות שמסכימות על העמודה המשותפת שורדות — זהו תנאי הצירוף, וזה בדיוק `SELECT * FROM r JOIN s ON r.last = s.first`. **מנגנון ההעברה כאן הוא אוניפיקציה, לא השוואה**: כשהמפרש פותר את `r(X1, ..., Xn, X)` הוא קושר את `X` לערך שבשלשה, וכשהוא ממשיך למטרה `s(X, Y1, ..., Ym)` ההצבה כבר הוחלה עליה (זה בדיוק צעד 1 של `apply-rules` — ‏`σ` מוחלת על **כל** השאילתה החדשה), כך ש-`s` נקרא כבר עם הערך הקונקרטי. הראש מונה את `n+1+m` המשתנים, כלומר העמודה המשותפת מופיעה בתוצאה **פעם אחת בלבד** — וזה מה שהופך את זה ל-natural join ולא ל-join רגיל. השוו לשאילתה `?- parent(X,Y), parent(Y,Z)` שראינו קודם בעמוד: אותו רעיון בדיוק, שם המשתנה המשותף היה `Y`."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:15",
+     "type": "prose",
+     "en": "**Intersection**\n",
+     "hash": "1f97c8f70a24bc2e",
+     "he": "**חיתוך (Intersection)**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:16",
+     "type": "code",
+     "en": "```\nr_meets_s(X1, ..., Xn) :- r(X1, ..., Xn ), s(X1, ..., Xn).\n```\n\n",
+     "hash": "c0a9fbdd5cd2bca5",
+     "noteHe": "חיתוך הוא כלל אחד ששני הפרדיקטים בגופו מקבלים **בדיוק את אותם משתנים**, ולכן שלשה נכנסת לתוצאה רק אם היא מופיעה גם ב-`r` וגם ב-`s`. **השוו לשלוש הדוגמאות הקודמות והבחינו כמה מעט הפרטים משתנים**: איחוד = שני כללים; חיתוך = כלל אחד עם אותם משתנים בשני הפרדיקטים; מכפלה קרטזית = כלל אחד עם משתנים זרים לגמרי; צירוף = כלל אחד עם חפיפה חלקית. כל האלגברה הרלציונית מקודדת כאן בשאלה **אילו שמות משתנים חוזרים ואיפה**, וזו שאלת מבחן קלאסית: נותנים כלל ומבקשים לזהות איזו פעולת אלגברה רלציונית הוא מבטא. **שימו לב מה חסר כאן**: הפסקה למעלה מונה גם הפרש (diff) וטוענת שכל הפעולות ניתנות למימוש ב-RLP, אבל לא מובאת לו שום דוגמה — ובצדק, שכן `r - s` דורש לבטא \"שלשה שנמצאת ב-`r` ו**אינה** ב-`s`\", כלומר שלילה, שאינה חלק מ-RLP כפי שהוגדר בעמוד הזה. זו בדיוק התוספת ש-DataLog מוסיפה."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:17",
+     "type": "prose",
+     "en": "**Transitive closure of a binary relation `r`**\n",
+     "hash": "6d9d21cd79166125",
+     "he": "**סגירה טרנזיטיבית של יחס בינארי `r`**"
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:18",
+     "type": "code",
+     "en": "```\ntr_r(X, Y) :- r(X, Y).\ntr_r(X, Y) :- r(X, Z), tr_r(Z, Y).\n```\n\n",
+     "hash": "89c384cfea30030d",
+     "noteHe": "זו השורה התחתונה של כל הסעיף: **הדבר היחיד שאי אפשר לעשות ב-SQL המסורתית**. הכלל הראשון הוא מקרה הבסיס — כל זוג ב-`r` נמצא גם בסגירה. הכלל השני הוא הצעד הרקורסיבי: אם יש קשת מ-`X` ל-`Z` ומסלול מ-`Z` ל-`Y`, אז יש מסלול מ-`X` ל-`Y`. שני הכללים יחד הם \"או\", בדיוק כמו באיחוד למעלה, ולכן `tr_r` היא איחוד של `r` עם ההרכבה של `r` עם `tr_r` — כלומר כל המסלולים באורך 1 ומעלה. **שימו לב לסדר בגוף של הכלל השני, וזו הנקודה החשובה ביותר כאן**: הקריאה הרקורסיבית `tr_r(Z, Y)` מופיעה **אחרונה**, אחרי ש-`r(X, Z)` כבר קשר את `Z` לערך קונקרטי. זו רקורסיית זנב, והיא בטוחה. אם היינו הופכים את הסדר וכותבים `tr_r(X, Y) :- tr_r(X, Z), r(Z, Y).` היינו מקבלים **רקורסיה שמאלית**: המטרה השמאלית ביותר היא הקריאה הרקורסיבית עצמה, עם אותה שאילתה בדיוק, והמפרש היה יורד לאינסוף מבלי לגעת בעובדה אחת. זהו אותו הבדל בדיוק שראינו בין `ancestor` ל-`ancestor2` — **אותה משמעות דקלרטיבית, התנהגות תפעולית הפוכה**, וזו שאלת מבחן קלאסית. הפסקה הבאה נותנת את המקרה הפרטי המוכר: אם `r` הוא יחס ההורות, ‏`tr_r` הוא יחס האבהות הקדומה (ancestor)."
+    },
+    {
+     "id": "cm/5.1RelationalLogicProgramming:18:19",
+     "type": "prose",
+     "en": "For example, if `r` is the parent relation, then `tr-parent` is the ancestor relation.\n\n",
+     "hash": "7bfb1969aa3bf2d7",
+     "he": "לדוגמה, אם `r` הוא יחס ההורות (parent), אז `tr-parent` הוא יחס האב הקדמון (ancestor)."
+    }
+   ],
+   "headingHe": "תכנות לוגי רלציוני ופעולות SQL"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "נתונות שתי הפרוצדורות הבאות:\n\n```prolog\nancestor(A,D) :- parent(A,D).\nancestor(A,D) :- parent(A,P), ancestor(P,D).\n\nancestor2(A,D) :- parent(A,D).\nancestor2(A,D) :- ancestor2(P,D), parent(A,P).\n```\n\nאיזה מהמשפטים הבאים נכון?",
+   "options": [
+    "לשתי הפרוצדורות אותה משמעות דקלרטיבית, אך ‏`ancestor2` נכנסת ללולאה אינסופית על השאילתה `?- ancestor2(A, isaac)` לאחר שהיא מוצאת מספר תשובות",
+    "לשתי הפרוצדורות משמעות דקלרטיבית שונה, ולכן קבוצות התשובות שלהן שונות",
+    "‏`ancestor2` שקולה לחלוטין ל-`ancestor` גם דקלרטיבית וגם תפעולית — סדר הנוסחאות בגוף כלל אינו משפיע",
+    "‏`ancestor2` נכנסת ללולאה אינסופית מיד, בלי להחזיר אף תשובה, כי הכלל השני רקורסיבי"
+   ],
+   "correct": 0,
+   "explanationHe": "**התשובה הנכונה היא הראשונה.** דקלרטיבית, גוף של כלל הוא **צירוף (conjunction)**, ולצירוף אין סדר: \"‏`parent(A,P)` וגם `ancestor(P,D)`\" זהה ל-\"‏`ancestor2(P,D)` וגם `parent(A,P)`\". תפעולית, לעומת זאת, Gsel של Prolog בוחרת תמיד את המטרה **השמאלית ביותר**. ב-`ancestor` הקריאה הרקורסיבית באה אחרי ש-`parent(A,P)` כבר קשרה את `P` לערך קונקרטי; ב-`ancestor2` המטרה השמאלית היא הקריאה הרקורסיבית עצמה, עם `P` עדיין לא קשור, כך שהמפרש נכנס לחיפוש עיוור ויורד לאינסוף. **מדוע האפשרות השנייה שגויה**: המשמעות הדקלרטיבית זהה — זו בדיוק הנקודה של הדוגמה, ההבדל הוא תפעולי בלבד. **מדוע השלישית שגויה**: היא מתעלמת מכך שהסמנטיקה התפעולית של Prolog קובעת סדר בחירה קבוע, ולכן הסדר בגוף משפיע דרמטית על הביצועים ועל העצירה. **מדוע הרביעית שגויה**: העץ מפותח לעומק ושתי תשובות **כן** נמצאות לפני שהענף האינסופי נתקע — ההסתעפות לכלל הראשון (מקרה הבסיס) קורית לפני הצלילה האינסופית. זהו ההבדל המדויק בין עץ הצלחה אינסופי לעץ כישלון אינסופי."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "הפעילו את אלגוריתם האוניפיקציה על שתי הנוסחאות האטומיות הבאות, וכתבו את ה-mgu שמתקבל (או FAIL אם אינן ניתנות לאיחוד):\n\n```prolog\nt(X, b, Z)\nt(a, Y, X)\n```\n\nהראו את תור המשוואות ואת ההצבה המצטברת בכל צעד.",
+   "answerHe": "‏`mgu = {X=a, Y=b, Z=a}`\n\n**המהלך:**\n\n| צעד | תור המשוואות | ‏`sub` המצטברת |\n|---|---|---|\n| 0 | `{ t(X,b,Z) = t(a,Y,X) }` | `{}` |\n| 1 | אותו פרדיקט `t` ואותה מקומיות 3 → פירוק: `{ X=a, b=Y, Z=X }` | `{}` |\n| 2 | `{ b=Y, Z=X }` — טופלה `X=a`, צד שמאל משתנה | `{X=a}` |\n| 3 | `{ Z=X }` — טופלה `b=Y`, צד ימין משתנה | `{X=a, Y=b}` |\n| 4 | `{}` — הפעלת `sub` על `Z=X` נותנת `Z=a` | `{X=a, Y=b, Z=a}` |\n\nהצעד הקריטי הוא צעד 4: לפני שמטפלים במשוואה `Z=X` **מפעילים עליה את ההצבה שנצברה**, ולכן `X` הופך ל-`a` ומתקבל `Z=a` ישירות.",
+   "explanationHe": "‏**מה נבדק כאן**: (1) שני הצדדים הם נוסחאות אטומיות עם אותו פרדיקט ואותה מקומיות, ולכן מפרקים למשוואות איבר-איבר — אילו הפרדיקטים או המקומיות היו שונים, התשובה הייתה FAIL מיד. (2) משוואה שבה אחד הצדדים משתנה מרחיבה את ההצבה בהרכבה `○`, לא באיחוד. (3) **הצעד שסטודנטים מפילים**: הפעלת ההצבה המצטברת על המשוואה **לפני** הטיפול בה. מי שידלג עליו ייצא עם `{X=a, Y=b, Z=X}` — הצבה לא-אידמפוטנטית שעדיין מכילה את `X` בצד ימין, ולכן אינה mgu תקין. שימו לב ש-`b=Y` נכתב עם המשתנה בצד ימין; זה תקין לגמרי, האלגוריתם בודק אם **אחד** משני הצדדים הוא משתנה."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "בפרוצדורה `proof-tree`, צעד 2 בענף ה-else הוא \"שינוי שם של המשתנים בכל כלל ובכל עובדה של `P`\". הסבירו מדוע הצעד הזה הכרחי, ותנו דוגמה קונקרטית לתוצאה השגויה שמתקבלת בלעדיו.",
+   "answerHe": "**המשתנים בכללים הם משתנים קשורים** — הם משחקים בדיוק את התפקיד של פרמטרים פורמליים של פרוצדורה, והיקפם הוא הכלל היחיד שבו הם מופיעים. ה-`A` שבכלל `ancestor(A,D) :- parent(A,D).` אינו קשור בשום צורה ל-`A` שבשאילתה `?- ancestor(A, isaac)`, ואינו קשור ל-`A` שיופיע בשימוש הבא באותו כלל. מכיוון שכך, מותר לשנות את שמם חופשית — וחייבים.\n\n**מה קורה בלעדיו:** נניח את התוכנית והשאילתה\n\n```prolog\nancestor(A,D) :- parent(A,P), ancestor(P,D).\n?- ancestor(abraham, D)\n```\n\nהצעד הראשון מאחד את ראש הכלל עם המטרה ומקבל `{A=abraham, D=D}`; השאילתה החדשה היא `?- parent(abraham, P), ancestor(P, D)`. עכשיו המפרש נדרש להשתמש **באותו כלל שוב** כדי לפתור את `ancestor(P, D)`. בלי שינוי שם, ה-`A` שבראש הכלל כבר קשור ל-`abraham` מהשימוש הקודם, ו-`P` שבגוף כבר קשור לילד של אברהם — האוניפיקציה תיכשל, או, גרוע מכך, תקשור בטעות משתנה מרמה אחת של הרקורסיה לערך מרמה אחרת. התוצאה: תשובות חסרות או תשובות שגויות.\n\n**עם שינוי שם** מקבלים ברמה הראשונה `A1, D1, P1`, ברמה השנייה `A2, D2, P2` וכן הלאה, וכל רמה של הרקורסיה עובדת על עותק טרי של המשתנים.\n\nזהו בדיוק אותו שיקול שהוביל לשינוי שם של משתנים קשורים במודל ההצבה (2.6): מניעת **לכידת משתנים** (variable capture).",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הקביעה שמשתנים בכללים הם **קשורים**, כמו פרמטרים של פרוצדורה, ולכן שינוי שמם אינו משנה את משמעות הכלל; (2) ההסבר שכל **קריאה רקורסיבית** משתמשת מחדש באותו כלל וזקוקה לעותק טרי של המשתנים; (3) דוגמה קונקרטית שבה בלי שינוי שם נוצרת התנגשות בין רמות הרקורסיה; (4) הזכרת המוסכמה `X1, Y1` ברמה הראשונה, `X2, Y2` בשנייה; (5) בונוס: הקבלה ללכידת משתנים במודל ההצבה מ-2.6. תשובה שאומרת רק \"כדי שהמשתנים לא יתנגשו\" בלי להסביר *מדוע* הם עלולים להתנגש (שימוש חוזר באותו כלל) אינה מלאה."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "בפרוצדורה `apply-rules`, בהינתן צומת שהתיוג שלו הוא `?- G1, G2, G3`, מטרה נבחרת `G = G2`, וזוג כלל-הצבה `⟨R, σ⟩` שגופו `body(R) = B1, B2` — מהי השאילתה החדשה?",
+   "options": [
+    "‏`?- G1, (B1, B2) ○ σ, G3` — ההצבה מוחלת רק על גוף הכלל שהוכנס",
+    "‏`?- (G1, B1, B2, G3) ○ σ` — ההצבה מוחלת על כל השאילתה החדשה, כולל המטרות האחיות",
+    "‏`?- (B1, B2) ○ σ` — המטרות האחיות נמחקות, כי רק המטרה הנבחרת מורחבת",
+    "‏`?- (G1, G2, G3) ○ σ` — ‏`G2` נשארת בשאילתה עד שתוכח"
+   ],
+   "correct": 1,
+   "explanationHe": "**התשובה הנכונה היא השנייה**, וזו נקודה שנופלים עליה במבחן. ‏`apply-rules` עושה שני דברים בסדר הזה: קודם **מחליפה** את `G` בגוף הכלל בתוך רשימת המטרות — `(G1, B1, B2, G3)` — ורק אחר כך **מפעילה את `σ` על התוצאה כולה**. **מדוע האפשרות הראשונה שגויה, וזו הטעות הנפוצה**: אם `σ` מוחלת רק על `B1, B2`, הקשירות שהתקבלו מהאוניפיקציה עם ראש הכלל לעולם לא יגיעו אל `G1` ואל `G3`. אבל זהו כל מנגנון העברת המידע ב-LP — משתנה משותף בין מטרות אחיות מקבל את ערכו בדיוק כך. בלי זה, שאילתה כמו `?- parent(X,Y), parent(Y,Z)` לא הייתה יכולה לעבוד. **מדוע השלישית שגויה**: המטרות האחיות עדיין צריכות הוכחה; מחיקתן תיתן תשובות שגויות. **מדוע הרביעית שגויה**: ‏`G2` דווקא **מוחלפת** בגוף הכלל — זהו צעד ההרחבה. ההוכחה מסתיימת כשכל המטרות הפכו ל-`true`."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "נתונים שלושה כללים ב-RLP. איזו שורה מתאימה נכון בין כל כלל לפעולת האלגברה הרלציונית שהוא מבטא?\n\n```prolog\n% (1)\np(X, Y) :- r(X, Y), s(X, Y).\n% (2)\np(X, Y, Z, W) :- r(X, Y), s(Z, W).\n% (3)\np(X, Y, W) :- r(X, Y), s(Y, W).\n```",
+   "options": [
+    "‏(1) חיתוך, (2) מכפלה קרטזית, (3) צירוף",
+    "‏(1) איחוד, (2) צירוף, (3) מכפלה קרטזית",
+    "‏(1) צירוף, (2) חיתוך, (3) איחוד",
+    "‏(1) חיתוך, (2) צירוף, (3) מכפלה קרטזית"
+   ],
+   "correct": 0,
+   "explanationHe": "**התשובה הנכונה היא הראשונה.** כל ההבדל בין שלוש הפעולות הוא **אילו שמות משתנים חוזרים בין שני הפרדיקטים בגוף**. ‏(1) שני הפרדיקטים מקבלים **בדיוק את אותם** משתנים → שלשה נכנסת לתוצאה רק אם היא ב-`r` **וגם** ב-`s` → חיתוך. ‏(2) אין ולו משתנה משותף אחד → כל שלשה של `r` מצטרפת לכל שלשה של `s` → מכפלה קרטזית, בגודל $$|r| \\times |s|$$. ‏(3) חפיפה **חלקית** — רק `Y` משותף → רק זוגות שמסכימים על העמודה המשותפת שורדים, והראש מונה אותה פעם אחת → צירוף טבעי. **מדוע אף אפשרות אינה מזכירה איחוד**: איחוד אינו כלל אחד עם שני פרדיקטים בגוף אלא **שני כללים נפרדים** לאותו פרדיקט — בגוף פסיק הוא \"וגם\", וכלל נוסף הוא \"או\". כל אפשרות שמסמנת אחד משלושת הכללים האלה כאיחוד שגויה מיסודה."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "בעמוד נטען שהבעיה \"האם $$Q$$ ניתנת להוכחה מ-$$P$$\" היא **כריעה** ב-RLP. מצד שני, ראינו ש-`ancestor2` מייצרת מסלול חישוב אינסופי. האם יש כאן סתירה? הסבירו, והסבירו גם מדוע RLP הוא אקספרסיבי פחות משפת תכנות למטרות כלליות.",
+   "answerHe": "**אין סתירה.** צריך להפריד בין שלושה דברים:\n\n1. **עץ ההוכחה עצמו** יכול בהחלט להיות אינסופי. ‏`ancestor2` היא בדיוק דוגמה כזו — עץ הצלחה אינסופי.\n2. **הכריעות** אינה טענה על גודל העץ אלא על כך שאפשר **להכריע** לגבי כל מסלול אם הוא הצלחה, כישלון או מסלול אינסופי. ההוכחה בעמוד: כל התיוגים בעץ בנויים מסמלי הפרדיקטים ומהקבועים המופיעים ב-`P` וב-`Q` וממשתנים, וב-RLP **אין functors ולכן terms אינם מקוננים**. לכן מספר הנוסחאות האטומיות השונות סופי עד כדי שינוי שם של משתנים, וכל מסלול אינסופי **חייב לחזור על תיוג שכבר ראינו** — מצב שניתן לזהות. אלגוריתם שמזהה חזרה כזו ועוצר יכריע את השאלה בזמן סופי.\n3. **החיפוש בפועל של Prolog** אינו עושה זאת: הוא צולל לעומק בלי לזכור אילו מטרות כבר ראה, ולכן הוא נתקע. כלומר הבעיה כריעה, אבל **המפרש הקונקרטי אינו אלגוריתם הכרעה**.\n\n**מדוע RLP אקספרסיבי פחות**: כל שפת תכנות למטרות כלליות (טיורינג-שלמה) היא כריעה **חלקית** בלבד — בעיית העצירה מוכיחה שלא קיים אלגוריתם שמכריע עליה. אילו RLP היה שקול לשפה כזו, היינו מקבלים אלגוריתם הכרעה לבעיית העצירה, וזו סתירה. מכאן ש-RLP הוא **ממש** חלש יותר — ואכן, את `L2` מפרק 2 אי אפשר לדמות בו. מה שחסר הוא בדיוק היכולת לבנות מבני נתונים חדשים תוך כדי החישוב: מכיוון שאין functors, מרחב הערכים סגור ונשאר בגודל הקבועים שבתוכנית. ‏5.2 מוסיפה functors, וברגע שהם קיימים השפה הופכת לטיורינג-שלמה — ומאבדת את הכריעות.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ההבחנה בין \"העץ אינסופי\" ל\"הבעיה כריעה\" — אלה שתי טענות שונות; (2) הנימוק שמספר הנוסחאות האטומיות סופי עד כדי שינוי שם, **ובגלל שאין functors ב-RLP**; (3) המסקנה שמסלול אינסופי חייב לחזור על עצמו ולכן ניתן לזיהוי; (4) ההבחנה בין כריעות תיאורטית לבין מה ש-Prolog בפועל עושה; (5) טיעון בעיית העצירה להוכחת חוסר-השקילות לשפה כללית; (6) בונוס: הקישור ל-5.2 — הוספת functors קונה אקספרסיביות במחיר הכריעות. תשובה שרק אומרת \"אין סתירה כי העץ אינסופי אבל אפשר לזהות את זה\" בלי הנימוק על סופיות הנוסחאות האטומיות אינה מלאה."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "העמוד קובע שני דברים שנראים במבט ראשון סותרים: (א) עץ ההוכחה לשאילתה נתונה ותוכנית נתונה הוא **יחיד** עבור כל Gsel ו-Rsel, ולכן קבוצת התשובות אינה תלויה בהם; (ב) יש לסדר את הכללים ואת הנוסחאות בגוף \"בהתאם לפרוצדורות הבחירה\", אחרת החישוב עלול להיתקע בלולאה אינסופית. יישבו בין השניים.",
+   "answerHe": "שתי הקביעות עוסקות ב**שתי רמות שונות**, וזהו בדיוק ההבדל בין הסמנטיקה הדקלרטיבית לתפעולית.\n\n**קביעה (א) היא על העץ כאובייקט מתמטי.** קבוצת הצמתים והקשתות נקבעת לחלוטין על ידי `P` ו-`Q`: לכל צומת יש ילד לכל כלל שראשו מתאחד עם המטרה הנבחרת. ‏`Rsel` קובעת רק את **סדר האחים** משמאל לימין, ו-`Gsel` קובעת איזו מטרה מסומנת בכל צומת — אבל שום בחירה לא מוסיפה ולא מוחקת עלה מוצלח. לכן קבוצת התשובות, שהיא איסוף על **כל** עלי ה-`Success`, זהה לכל בחירה. זו המשמעות הדקלרטיבית.\n\n**קביעה (ב) היא על החיפוש בעץ.** ‏`proof-tree` ו-`apply-rules` הן חיפוש לעומק: צעד 2 ב-`apply-rules` מפתח את תת-העץ של הכלל הראשון **עד הסוף** לפני שצעד 3 פונה לכלל הבא. אם תת-העץ השמאלי אינסופי, האחים שמימינו לעולם לא ייבדקו — גם אם התשובה נמצאת שם. העץ עדיין מכיל אותה; פשוט לא מגיעים אליה.\n\n**המסקנה**: ‏`Gsel` ו-`Rsel` אינן משנות **מה** התשובות, אלא **אילו מהן החישוב בפועל יספיק להגיע אליהן, ובאיזה סדר**. במקרה הסופי זה עניין של ביצועים בלבד; במקרה האינסופי זה ההבדל בין תוכנית שעונה לתוכנית שנתקעת — בדיוק `ancestor` מול `ancestor2`.\n\n**הניסוח המדויק**: הטענה על אי-תלות בבחירות נכונה עבור עץ שנחקר **במלואו**. חיפוש לעומק על עץ אינסופי אינו חוקר אותו במלואו, ולכן שלמות המימוש (ולא שלמות הסמנטיקה) היא זו שנשברת.",
+   "explanationHe": "תשובה מלאה חייבת: (1) לזהות שמדובר בשתי רמות — העץ מול הסדר שבו חוצים אותו; (2) לומר ש-Rsel קובעת סדר אחים ו-Gsel קובעת את המטרה המסומנת, ואף אחת מהן אינה מוסיפה או מוחקת עלי הצלחה; (3) להסביר ש-`apply-rules` היא DFS ולכן ענף אינסופי חוסם את האחים שמימינו; (4) לנסח את ההבחנה \"מה התשובות\" מול \"לאילו מהן מגיעים\"; (5) לחבר ל-`ancestor`/`ancestor2`. בונוס: לציין שהטענה על אי-תלות תקפה לעץ שנחקר במלואו, ושמה שנשבר הוא שלמות המימוש ולא הסמנטיקה."
+  },
+  {
+   "id": "ex8",
+   "type": "mcq",
+   "questionHe": "‏`answer-query` הוא גם נאות (sound) וגם שלם (complete) עבור RLP. מה בדיוק אומרת **השלמות** (completeness)?",
+   "options": [
+    "‏$$P ⊢ Q$$ גורר $$P ⊧ Q$$ — כל מה שהאלגוריתם מוכיח אכן נגרר לוגית מהתוכנית",
+    "‏$$P ⊧ Q$$ גורר $$P ⊢ Q$$ — כל מה שנגרר לוגית מהתוכנית ניתן להוכחה על ידי האלגוריתם",
+    "האלגוריתם עוצר על כל קלט",
+    "לכל שאילתה קיימת לפחות הצבה אחת בקבוצת התשובות"
+   ],
+   "correct": 1,
+   "explanationHe": "**התשובה הנכונה היא השנייה.** שלמות היא הכיוון \"כל מה שנכון — ניתן להוכחה\": ‏$$P ⊧ Q ⟹ P ⊢ Q$$. **מדוע הראשונה שגויה**: זו בדיוק ההגדרה של **נאותות** (soundness) — \"כל מה שמוכיחים — נכון\". ‏**דרך זכירה**: נאותות מגינה עלינו מתשובות שגויות, שלמות מגינה עלינו מתשובות חסרות. **מדוע השלישית שגויה**: עצירה היא כריעות, לא שלמות — וראינו ש-`ancestor2` אינה עוצרת אף שהאלגוריתם שלם. שימו לב שהשלמות היא תכונה של `answer-query` כהגדרתו על העץ המלא, לא של חיפוש לעומק קונקרטי. **מדוע הרביעית שגויה**: קבוצת תשובות ריקה היא תוצאה לגיטימית לחלוטין — היא מסמנת שהמפרש לא מצא הוכחה. אין שום הבטחה שלכל שאילתה יש תשובה."
+  }
+ ]
+}

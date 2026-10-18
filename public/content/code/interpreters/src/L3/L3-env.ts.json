@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/L3/L3-env.ts",
+ "repo": "interpreters",
+ "path": "src/L3/L3-env.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L3/L3-env.ts",
+ "code": "// ========================================================\n// Environment data type for L3\nimport { Value } from './L3-value';\nimport { Result, makeFailure, makeOk } from '../shared/result';\n\nexport type Env = EmptyEnv | NonEmptyEnv;\nexport type EmptyEnv = {tag: \"EmptyEnv\" }\nexport type NonEmptyEnv = {\n    tag: \"Env\";\n    var: string;\n    val: Value;\n    nextEnv: Env;\n}\nexport const makeEmptyEnv = (): EmptyEnv => ({tag: \"EmptyEnv\"});\nexport const makeEnv = (v: string, val: Value, env: Env): NonEmptyEnv =>\n    ({tag: \"Env\", var: v, val: val, nextEnv: env});\nexport const isEmptyEnv = (x: any): x is EmptyEnv => x.tag === \"EmptyEnv\";\nexport const isNonEmptyEnv = (x: any): x is NonEmptyEnv => x.tag === \"Env\";\nexport const isEnv = (x: any): x is Env => isEmptyEnv(x) || isNonEmptyEnv(x);\n\nexport const applyEnv = (env: Env, v: string): Result<Value> =>\n    isEmptyEnv(env) ? makeFailure(`var not found: ${v}`) :\n    env.var === v ? makeOk(env.val) :\n    applyEnv(env.nextEnv, v);\n\n",
+ "titleHe": "סביבת L3 — זהה לזו של L1, ובכוונה",
+ "descriptionHe": "עשרים ושש שורות שהן **העתק כמעט מדויק של סעיף 2 ב-`L1-eval.ts`**: רשימה מקושרת של קשירות, בנאים, פרדיקטים, ו-`applyEnv` שמחפשת מהחדש לישן.\n\nשייך ל-**2.5–2.6**. השינוי היחיד לעומת `L1` הוא שהטיפוס `Value` מיובא מ-`L3-value.ts` וכולל עכשיו גם סְגורים; מבנה הסביבה עצמו **לא השתנה בכלל**.\n\n⚠️ **וזו בדיוק הנקודה המפתיעה שכדאי לשים לב אליה**: אף שהשיעור הזה מוסיף `lambda` — הכלי שמייצר תחומי הכלה חדשים — **הסביבה לא נדרשה לגדול**. הסיבה היא ש-`L3` אינו משתמש בסביבה כדי לקשור פרמטרים כלל: הוא עובד ב**מודל ההצבה** (ראו `substitute.ts`), והסביבה משמשת **רק להגדרות `define` ברמה העליונה**. הסביבה תיאלץ להשתנות באמת רק ב-`L4`, כשהסְגור יתחיל לשמור סביבה משלו וכש-`letrec` ידרוש מבנה מעגלי.",
+ "annotations": [
+  {
+   "line": 6,
+   "noteHe": "מבנה הסביבה, **ללא שינוי מ-`L1`**: רשימה מקושרת שבה כל חוליה מחזיקה שם אחד, ערך אחד ומצביע לקודמתה. אותה הצללה שיוצאת בחינם מהחיפוש הלינארי, ואותה אי-שינויות (immutability).\n\nההבדל היחיד מ-`L1-eval.ts` הוא שהשדה `val` הוא עכשיו `Value` של `L3` — כלומר יכול להיות גם **סְגור**. שינוי בטיפוס, לא במבנה.\n\nוההוצאה לקובץ נפרד היא בעצמה איתות: ב-`L1` הסביבה ישבה בתוך המעריך, וכאן היא כבר רכיב עצמאי שגם `L3-normal.ts` וגם `lexicalAddress.ts` משתמשים בו. **כשרכיב מקבל שני לקוחות, הוא מקבל קובץ.**"
+  },
+  {
+   "line": 21,
+   "noteHe": "‏`applyEnv` — שלוש שורות, זהות ל-`L1`: ריק → שגיאה, התאמה → הערך, אחרת → המשך.\n\n**ושווה לשאול את השאלה המרכזית: אם `L3` הוסיפה `lambda`, למה הסביבה לא נדרשה לטפל בפרמטרים?**\n\nהתשובה היא שב-`L3` **פרמטרים אינם נקשרים בסביבה בכלל**. ‏`applyClosure` (ב-`L3-eval.ts`) **מציב** את הארגומנטים ישירות לתוך גוף הפונקציה, כך שכשמגיעים להעריך את הגוף כבר אין בו הפניות לפרמטרים — הן הוחלפו בערכים ממש. הסביבה נשארת אפוא **טבלת ההגדרות הגלובליות בלבד**, ו-`applyEnv` מחפשת בה רק שמות שהוגדרו ב-`define`.\n\n**כדאי לשנן את ההשלכה**: מכיוון שכל חיפוש הוא בסביבה הגלובלית, שרשרת הסביבות ב-`L3` **אף פעם אינה מסתעפת** — היא רשימה אחת שרק גדלה. ב-`L4`, כשמודל ההצבה יוחלף במודל הסביבה, כל הפעלת פונקציה תיצור ענף חדש, וזה יהיה השינוי המהותי של השיעור ההוא."
+  }
+ ]
+}

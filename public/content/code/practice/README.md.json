@@ -1,0 +1,8 @@
+{
+ "id": "practice/README.md",
+ "repo": "practice",
+ "path": "README.md",
+ "lang": "markdown",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/README.md",
+ "code": "# Principles of Programming Languages - Practice Sessions\n\nThis repository contains the code for all practice sessions.\n\nYou can find the practice sessions [here](https://bguppl.github.io/interpreters/practice_sessions.html).\n"
+}

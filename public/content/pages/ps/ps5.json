@@ -1,0 +1,1266 @@
+{
+ "id": "ps/ps5",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps5.md",
+ "titleEn": "Operational Semantics",
+ "titleHe": "סמנטיקה תפעולית",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps5:0",
+   "depth": 1,
+   "headingEn": "Operational Semantics",
+   "raw": "<h1><b>Operational Semantics</b></h1>\n\n",
+   "blocks": [],
+   "headingHe": "סמנטיקה תפעולית"
+  },
+  {
+   "id": "ps/ps5:1",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #5",
+   "raw": "<h2><b>Practical Session - Week #5</b></h2>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:1:0",
+     "type": "prose",
+     "en": "The operational semantics of a programming language is specified by a set of formal evaluation rules that operate on the AST of an expression. \nThe evaluation process can be specified as an algorithm ***eval(exp) : [AST -> Value]***.\n\n",
+     "hash": "56d827b94cb3bda8",
+     "he": "הסמנטיקה התפעולית של שפת תכנות מוגדרת על ידי אוסף של כללי הערכה פורמליים שפועלים על ה-AST של ביטוי.\nאפשר לתאר את תהליך ההערכה כאלגוריתם ***eval(exp) : [AST -> Value]***."
+    },
+    {
+     "id": "ps/ps5:1:1",
+     "type": "prose",
+     "en": "In this session, we review:\n\n",
+     "hash": "2423ea961b15ef5e",
+     "he": "בתרגול הזה נסקור:"
+    },
+    {
+     "id": "ps/ps5:1:2",
+     "type": "list",
+     "en": "* **What is an Environment**\n\n* **Handling Primitives in the Operational Semantics**\n\n* **Renaming and Substitute**\n\n* **applicative-eval *vs* normal-eval**\n\n* **letrec**\n\n\n\n",
+     "hash": "d18da07a2c1a20da",
+     "he": "* **מהי סביבה (Environment)**\n\n* **טיפול בפרימיטיבים בסמנטיקה התפעולית**\n\n* **שינוי שם (Renaming) והצבה (Substitute)**\n\n* **applicative-eval *מול* normal-eval**\n\n* **letrec**"
+    }
+   ],
+   "headingHe": "תרגול — שבוע #5"
+  },
+  {
+   "id": "ps/ps5:2",
+   "depth": 3,
+   "headingEn": "What is an Environment?",
+   "raw": "<h3><b>What is an Environment?</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:2:0",
+     "type": "prose",
+     "en": "An environment represents a partial function (as opposed to a total function) from symbols (variable names) to values.\nIt supports the operation ***apply-env(env, var)*** which either returns the value of ***var*** in the environment ***env***, or else throws an error.\n\n",
+     "hash": "c31c02e513c63b1c",
+     "he": "סביבה מייצגת פונקציה חלקית (partial function — בניגוד לפונקציה מלאה) מסמלים (שמות של משתנים) לערכים.\nהיא תומכת בפעולה ***apply-env(env, var)*** שמחזירה את הערך של ***var*** בסביבה ***env***, או לחלופין זורקת שגיאה."
+    },
+    {
+     "id": "ps/ps5:2:1",
+     "type": "prose",
+     "en": "We define the environment data type inductively by the following definition:\n",
+     "hash": "d07c57d4786c499d",
+     "he": "אנחנו מגדירים את טיפוס הנתונים של הסביבה באופן אינדוקטיבי, לפי ההגדרה הבאה:"
+    },
+    {
+     "id": "ps/ps5:2:2",
+     "type": "code",
+     "en": "```typescript\ntype Env = EmptyEnv | NonEmptyEnv;\ntype EmptyEnv = {tag: \"EmptyEnv\"}\ntype NonEmptyEnv = {tag: \"Env\"; var: string; val: Value; nextEnv: Env;}\n```\n\n",
+     "hash": "41b24453dda3f073",
+     "lang": "typescript",
+     "noteHe": "ההגדרה האינדוקטיבית של טיפוס הסביבה, בשלוש שורות. `Env` הוא איחוד מפורק של שני מקרים: `EmptyEnv` — מקרה הבסיס, רשומה שמכילה רק tag ואין בה שום קשירה; ו-`NonEmptyEnv` — רשומה שמכילה קשירה **אחת** (`var` ו-`val`) ומצביע `nextEnv` לסביבה שמעליה. שימו לב שהמבנה הוא בעצם רשימה מקושרת של זוגות שם-ערך, ושכל צומת מוסיף קשירה יחידה. זה בדיוק המבנה שמאפשר הסתרה (shadowing): אם אותו שם מופיע בשני צמתים, החיפוש יעצור בראשון שייתקל בו. שימו לב גם שההגדרה רקורסיבית — `nextEnv: Env` — ולכן גם הפונקציות שפועלות עליה יהיו רקורסיביות."
+    },
+    {
+     "id": "ps/ps5:2:3",
+     "type": "prose",
+     "en": "The ***apply-env*** operation is defined recursively according to the structure of the data type:\n",
+     "hash": "b2ba1ca63d9182ae",
+     "he": "הפעולה ***apply-env*** מוגדרת רקורסיבית לפי המבנה של טיפוס הנתונים:"
+    },
+    {
+     "id": "ps/ps5:2:4",
+     "type": "code",
+     "en": "```typescript\nexport const applyEnv = (env: Env, v: string): Result<Value> =>\n    isEmptyEnv(env) ? makeFailure(\"var not found \" + v) :\n    env.var === v ? makeOk(env.val) :\n    applyEnv(env.nextEnv, v);\n```\n\n",
+     "hash": "f3f0794a4d5a3dc1",
+     "lang": "typescript",
+     "noteHe": "המימוש של חיפוש בסביבה, ושלוש השורות שלו מקבילות בדיוק לשלושת המקרים של טיפוס הנתונים. אם הסביבה ריקה — הגענו לסוף השרשרת בלי למצוא את המשתנה, ומחזירים `Failure` עם הודעה מתאימה. אם השם בצומת הנוכחי מתאים — מחזירים את הערך שלו עטוף ב-`makeOk`. אחרת — ממשיכים רקורסיבית ל-`env.nextEnv`. שימו לב שהחיפוש עוצר ב**התאמה הראשונה**, ולכן קשירה חיצונית יותר בשרשרת מסתירה קשירה פנימית עם אותו שם. **קשר חשוב לשיעור 2.6:** השוו את המבנה הזה לפונקציה `subVarRef` שבתוך `substitute` — שתיהן עושות בדיוק את אותו דבר, חיפוש שם בטבלת התאמות; זו ההקבלה בין מודל ההצבה למודל הסביבות."
+    },
+    {
+     "id": "ps/ps5:2:5",
+     "type": "prose",
+     "en": "Example of an environment and a corresponding look-up operation - using the environment implementation\nused in class:\n\n",
+     "hash": "e5f47ce409a939b9",
+     "he": "דוגמה לסביבה ולפעולת חיפוש מתאימה — בעזרת מימוש הסביבה שראינו בכיתה:"
+    },
+    {
+     "id": "ps/ps5:2:6",
+     "type": "code",
+     "en": "```typescript\napplyEnv(makeEnv('x', 3,\n           makeEnv('y', 2,\n              makeEnv('x', 1, makeEmptyEnv())), 'x')\n=> { tag: 'Ok', value: 3 }\n```\n\n",
+     "hash": "49348897db016922",
+     "lang": "typescript",
+     "noteHe": "בניית סביבה בת שלוש קשירות וחיפוש בה. קוראים את המבנה מבחוץ פנימה: הצומת החיצוני הוא `x → 3`, אחריו `y → 2`, ואחריו `x → 1`, וכל השרשרת נגמרת ב-`makeEmptyEnv()`. החיפוש של `'x'` נעצר כבר בצומת הראשון ומחזיר `3`. שימו לב שהתוצאה עטופה — `{ tag: 'Ok', value: 3 }` — כי `applyEnv` מחזירה `Result<Value>` ולא ערך גולמי."
+    },
+    {
+     "id": "ps/ps5:2:7",
+     "type": "prose",
+     "en": "Note how the external binding for ***x*** to 3 hides the internal binding of ***x*** to 1.\n\n",
+     "hash": "cbd62c8529086f22",
+     "he": "שימו לב כיצד הקשירה החיצונית של ***x*** ל-3 מסתירה את הקשירה הפנימית של ***x*** ל-1."
+    },
+    {
+     "id": "ps/ps5:2:8",
+     "type": "code",
+     "en": "```typescript\napplyEnv(makeEnv('x', 3,\n           makeEnv('y', 2,\n             makeEnv('x', 1, makeEmptyEnv())), 'y')\n=> { tag: 'Ok', value: 2 }\n```\n\n",
+     "hash": "6612314146fe0da2",
+     "lang": "typescript",
+     "noteHe": "אותה סביבה בדיוק, הפעם חיפוש של `'y'`. הפעם הצומת הראשון אינו מתאים (`'x' !== 'y'`), ולכן הרקורסיה ממשיכה לצומת השני שבו נמצאת ההתאמה, והתוצאה היא `2`. זו הדגמה של הצעד הרקורסיבי בשורה השלישית של `applyEnv`."
+    },
+    {
+     "id": "ps/ps5:2:9",
+     "type": "code",
+     "en": "```typescript\napplyEnv(makeEnv('x', 3,\n           makeEnv('y', 2,\n             makeEnv('x', 1, makeEmptyEnv())), 'z')\n=> { tag: 'Failure', message: 'var not found z' }\n```\n\n\n",
+     "hash": "b7afb0b607a4f167",
+     "lang": "typescript",
+     "noteHe": "המקרה השלישי: חיפוש של `'z'` שאינו קיים בסביבה. הרקורסיה עוברת על כל שלושת הצמתים, מגיעה ל-`EmptyEnv` ומחזירה `{ tag: 'Failure', message: 'var not found z' }`. זו בדיוק המשמעות של \"פונקציה **חלקית**\" שהוזכרה בתחילת הסעיף — סביבה אינה מוגדרת עבור כל שם אפשרי, ולכן טיפוס ההחזרה חייב להיות `Result<Value>` ולא `Value`. במפרש, השגיאה הזאת היא מה שמתקבל כשמפנים למשתנה שלא הוגדר."
+    }
+   ],
+   "headingHe": "מהי סביבה?"
+  },
+  {
+   "id": "ps/ps5:3",
+   "depth": 3,
+   "headingEn": "Handling Primitives in L1",
+   "raw": "<h3><b>Handling Primitives in L1</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:3:0",
+     "type": "prose",
+     "en": "Let us recall the syntax of L1 using the BNF + Abstract Syntax specification we have developed in the previous lectures:\n\n",
+     "hash": "f8ba955526e926c0",
+     "he": "נזכיר לעצמנו את התחביר של L1 בעזרת מפרט ה-BNF + התחביר המופשט שפיתחנו בהרצאות הקודמות:"
+    },
+    {
+     "id": "ps/ps5:3:1",
+     "type": "code",
+     "en": "```scheme\n<program> ::= (L1 <exp>+) // program(exps:List(exp))\n<exp> ::= <define-exp> | <cexp>\n<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n<cexp> ::= <num-exp> // num-exp(val:number)\n       | <bool-exp>  // bool-exp(val:boolean)\n       | <prim-op>   // prim-op(op:string)\n       | <var-ref>   // var-ref(var:string)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n<prim-op> ::= + | - | * | / | < | > | = | not\n<num-exp> ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref> ::= an identifier token\n<var-decl> ::= an identifier token\n```\n\n",
+     "hash": "2cd0f5869d96131d",
+     "lang": "scheme",
+     "noteHe": "הדקדוק של L1 — השפה המינימלית שממנה התחלנו. שימו לב למה ש**אין** כאן: אין `if` ואין `lambda` (אלה נוספו רק ב-L2), ולכן היישום `(<cexp> <cexp>*)` יכול להפעיל רק אופרטורים פרימיטיביים. `<prim-op>` הוא סוג ביטוי בפני עצמו — כלומר `+` לבדו הוא ביטוי חוקי ב-L1 — וזו בדיוק הנקודה שהסעיף הזה בא לבחון. שימו לב גם להבחנה בין `<var-decl>` (הכרזה, מופיעה רק ב-`define`) לבין `<var-ref>` (הפניה): שניהם נראים אותו דבר בקוד אבל הם צמתים שונים ב-AST."
+    },
+    {
+     "id": "ps/ps5:3:2",
+     "type": "prose",
+     "en": "The values that can be returned in L1 are:\n\n",
+     "hash": "345d56de6906ec32",
+     "he": "הערכים שאפשר להחזיר ב-L1 הם:"
+    },
+    {
+     "id": "ps/ps5:3:3",
+     "type": "prose",
+     "en": "Value = number \\| boolean \\| PrimOp\n\n",
+     "hash": "b85eed9e9e7dc1b0",
+     "he": "Value = number \\| boolean \\| PrimOp"
+    },
+    {
+     "id": "ps/ps5:3:4",
+     "type": "prose",
+     "en": " **Note:**  In L1, the only side-effect that we can get is from a ***define*** expression.\n\n",
+     "hash": "7959f1dd81048078",
+     "he": "**שימו לב:** ב-L1, תופעת הלוואי היחידה שאפשר לקבל היא מביטוי ***define***."
+    },
+    {
+     "id": "ps/ps5:3:5",
+     "type": "prose",
+     "en": "<h4><b> Representing Primitive Operators </b></h4>\n\n",
+     "hash": "d37ed45354296fe8",
+     "he": "<h4><b> ייצוג של אופרטורים פרימיטיביים </b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:6",
+     "type": "prose",
+     "en": "In Scheme, when we compute this expression, we get:\n",
+     "hash": "f66ee4d5c16feeb8",
+     "he": "ב-Scheme, כשאנחנו מחשבים את הביטוי הזה, אנחנו מקבלים:"
+    },
+    {
+     "id": "ps/ps5:3:7",
+     "type": "code",
+     "en": "```scheme\n> +\n#<procedure:+>\n```\n",
+     "hash": "d0fe3957df51a9a2",
+     "lang": "scheme",
+     "noteHe": "הרצה ב-REPL של Scheme: מקלידים `+` לבדו ומקבלים `#<procedure:+>`. כלומר `+` הוא ביטוי חוקי בפני עצמו, וערכו הוא **פרוצדורה** — אובייקט ממדרגה ראשונה שאפשר להעביר כארגומנט, לשמור במשתנה ולהחזיר מפונקציה. זו נקודת המוצא של הדיון: ב-Scheme אין הבדל עקרוני בין `+` לבין פונקציה שהמשתמש הגדיר."
+    },
+    {
+     "id": "ps/ps5:3:8",
+     "type": "prose",
+     "en": "That is, the value of the + expression (which is an expression of type Symbol) is a procedure in Scheme. \n\n",
+     "hash": "24016df6e7efe996",
+     "he": "כלומר, הערך של הביטוי + (שהוא ביטוי מטיפוס Symbol) הוא פרוצדורה ב-Scheme."
+    },
+    {
+     "id": "ps/ps5:3:9",
+     "type": "prose",
+     "en": "On the other hand, in JavaScript, when we evaluate the expression \"+\" we get:\n",
+     "hash": "6f612f25d53110ef",
+     "he": "לעומת זאת, ב-JavaScript, כשאנחנו מעריכים את הביטוי \"+\" אנחנו מקבלים:"
+    },
+    {
+     "id": "ps/ps5:3:10",
+     "type": "code",
+     "en": "```javascript\n+;\n ^\nSyntax Error: Unexpected token ; ...\n```\n\n",
+     "hash": "76e19b1116e9b4ec",
+     "lang": "javascript",
+     "noteHe": "אותו ניסוי ב-JavaScript נכשל: `+;` מייצר שגיאת תחביר. הסיבה היא ש-`+` ב-JavaScript אינו ביטוי אלא **אופרטור** — סימן תחבירי שקיים רק כחלק מביטוי גדול יותר (`a + b` או `+x`). זהו הבדל תחבירי מהותי בין שתי השפות: ב-JavaScript אי אפשר להעביר את `+` כארגומנט לפונקציה, ולכן נאלצים לכתוב `(a, b) => a + b`."
+    },
+    {
+     "id": "ps/ps5:3:11",
+     "type": "prose",
+     "en": "(In Node - the reader keeps waiting for the continuation of the expression starting with + or -).\n\n",
+     "hash": "69fa699278e2781f",
+     "he": "(ב-Node — הקורא ממשיך להמתין להמשך הביטוי שמתחיל ב-+ או ב--)."
+    },
+    {
+     "id": "ps/ps5:3:12",
+     "type": "prose",
+     "en": "That is, in the syntax of JavaScript - primitive operators alone are not expressions - they are only defined as part of larger expressions that contain them.\n\n",
+     "hash": "7f44bef0ae6df36f",
+     "he": "כלומר, בתחביר של JavaScript — אופרטורים פרימיטיביים לבדם אינם ביטויים; הם מוגדרים רק כחלק מביטויים גדולים יותר שמכילים אותם."
+    },
+    {
+     "id": "ps/ps5:3:13",
+     "type": "prose",
+     "en": "In the code reviewed in class, we implemented primitive operators as syntactic expressions of type prim-op.\nWe represented primitive operators as a specific expression type in the AST <br/>***PrimOp(op: string)***. \nThe value of a prim-op expression is itself. \nWhen we apply a primitive operator to arguments, we explicitly dispatch to each known primitive operator in the language and apply the corresponding primitive operation in the meta-language.\nThis happens in the procedure <br/>***apply-primitive***.\n\n",
+     "hash": "c20da55443819229",
+     "he": "בקוד שסקרנו בכיתה, מימשנו אופרטורים פרימיטיביים כביטויים תחביריים מטיפוס prim-op.\nייצגנו אופרטורים פרימיטיביים כסוג ביטוי ייעודי ב-AST <br/>***PrimOp(op: string)***.\nהערך של ביטוי prim-op הוא הוא עצמו.\nכשאנחנו מיישמים אופרטור פרימיטיבי על ארגומנטים, אנחנו מפצלים במפורש לכל אופרטור פרימיטיבי מוכר בשפה ומפעילים את הפעולה הפרימיטיבית המתאימה בשפת המטא.\nזה קורה בפרוצדורה <br/>***apply-primitive***."
+    },
+    {
+     "id": "ps/ps5:3:14",
+     "type": "prose",
+     "en": "Let us implement a different strategy which is the same as in Scheme: primitives are variable references which refer to primitive procedures which \nare pre-defined in the global environment.\n\n",
+     "hash": "0c9d9944a324c6a7",
+     "he": "בואו נממש אסטרטגיה אחרת, זהה לזו של Scheme: פרימיטיבים הם הפניות למשתנים שמתייחסות לפרוצדורות פרימיטיביות\nשמוגדרות מראש בסביבה הגלובלית."
+    },
+    {
+     "id": "ps/ps5:3:15",
+     "type": "prose",
+     "en": "The steps of the change are:\n\n",
+     "hash": "290c11ccf2a1789d",
+     "he": "שלבי השינוי הם:"
+    },
+    {
+     "id": "ps/ps5:3:16",
+     "type": "list",
+     "en": "* Change the syntax to represent primitive operators as VarRef expressions \n* Change the type returned when we evaluate a primitive operator\n* Change the evaluation rules to support the evaluation of primitive operators as VarRef expressions that refer to primitive procedures\n\n",
+     "hash": "541b2ea2d8269044",
+     "he": "* לשנות את התחביר כך שאופרטורים פרימיטיביים ייוצגו כביטויי VarRef\n* לשנות את הטיפוס שמוחזר כשאנחנו מעריכים אופרטור פרימיטיבי\n* לשנות את כללי ההערכה כך שיתמכו בהערכה של אופרטורים פרימיטיביים כביטויי VarRef שמתייחסים לפרוצדורות פרימיטיביות"
+    },
+    {
+     "id": "ps/ps5:3:17",
+     "type": "prose",
+     "en": "The result of all the changes discussed in this section appears in accompanying zip file.\n\n",
+     "hash": "7bd7a05e87d409a1",
+     "he": "התוצאה של כל השינויים שנדונים בסעיף הזה מופיעה בקובץ ה-zip המצורף."
+    },
+    {
+     "id": "ps/ps5:3:18",
+     "type": "prose",
+     "en": "<h4><b> Change of AST for Primitives</b></h4>\n\n",
+     "hash": "206d43bf692a3b78",
+     "he": "<h4><b> שינוי ה-AST עבור פרימיטיבים</b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:19",
+     "type": "code",
+     "en": "```scheme\n;; The main change is that we remove the expression type prim-op\n<cexp> ::= <num-exp> // num-exp(val:number)\n       | <bool-exp>  // bool-exp(val:boolean)\n       | <var-ref>   // var-ref(var:string)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n```\n",
+     "hash": "d8fa1d352f492920",
+     "lang": "scheme",
+     "noteHe": "הדקדוק המעודכן של `<cexp>`, וההערה בשורה הראשונה מסכמת את כל השינוי: **מוחקים** את סוג הביטוי `prim-op`. שימו לב שגם הכלל `<prim-op> ::= + | - | * | ...` נעלם. מעכשיו `+` הוא פשוט `<var-ref>` — מזהה ככל מזהה אחר — ואין שום דבר בתחביר שמבדיל בינו לבין `square` שהמשתמש הגדיר. זה מפשט את הדקדוק, ומעביר את כל האחריות על הפרימיטיבים לסביבה הגלובלית."
+    },
+    {
+     "id": "ps/ps5:3:20",
+     "type": "prose",
+     "en": "Now, when we parse an expression such as <code>(L1 (* 3 2))</code> we obtain an AST:\n\n",
+     "hash": "8719627cc963a688",
+     "he": "עכשיו, כשאנחנו מפרקים ביטוי כמו <code>(L1 (* 3 2))</code>, אנחנו מקבלים AST:"
+    },
+    {
+     "id": "ps/ps5:3:21",
+     "type": "code",
+     "en": "```json\n{\n    \"tag\": \"Program\",\n    \"exps\": [\n        {\n            \"tag\": \"AppExp\",\n            \"rator\": {\n                \"tag\": \"VarRef\",\n                \"var\": \"*\"\n            },\n            \"rands\": [\n                {\n                    \"tag\": \"NumExp\",\n                    \"val\": 3\n                },\n                {\n                    \"tag\": \"NumExp\",\n                    \"val\": 2\n                }\n            ]\n        }\n    ]\n}\n```\n",
+     "hash": "ce05107a6519318c",
+     "lang": "json",
+     "noteHe": "ה-AST החדש של `(* 3 2)`, כפי שהוא נראה בייצוג JSON. הצומת החיצוני הוא `Program` שמכיל רשימת ביטויים; הביטוי היחיד הוא `AppExp` עם `rator` ו-`rands`. הנקודה היחידה שחשוב לשים לב אליה: ה-`rator` הוא `{\"tag\": \"VarRef\", \"var\": \"*\"}` — כלומר הכוכבית היא הפניה למשתנה בשם `\"*\"`. השוו לבלוק הבא כדי לראות את ההבדל."
+    },
+    {
+     "id": "ps/ps5:3:22",
+     "type": "prose",
+     "en": "instead of:\n\n",
+     "hash": "be50094190119548",
+     "he": "במקום:"
+    },
+    {
+     "id": "ps/ps5:3:23",
+     "type": "code",
+     "en": "```json\n{\n    \"tag\": \"Program\",\n    \"exps\": [\n        {\n            \"tag\": \"AppExp\",\n            \"rator\": {\n                \"tag\": \"PrimOp\",\n                \"op\": \"*\"\n            },\n            \"rands\": [\n                {\n                    \"tag\": \"NumExp\",\n                    \"val\": 3\n                },\n                {\n                    \"tag\": \"NumExp\",\n                    \"val\": 2\n                }\n            ]\n        }\n    ]\n}\n```\n",
+     "hash": "fc995220c91ed201",
+     "lang": "json",
+     "noteHe": "ה-AST **הישן** של אותו ביטוי בדיוק. ההבדל היחיד: `\"tag\": \"PrimOp\", \"op\": \"*\"` במקום `\"tag\": \"VarRef\", \"var\": \"*\"`. כל השאר זהה. שווה לשים לב שההבדל הזה — צומת אחד ב-AST — גורר שרשרת שינויים לאורך כל המפרש: בטיפוס הערכים, ב-`applyPrimitive`, ובאתחול הסביבה הגלובלית."
+    },
+    {
+     "id": "ps/ps5:3:24",
+     "type": "prose",
+     "en": "<h4><b>Change the Structure of the Returned Values</b></h4>\n\n",
+     "hash": "9e06e1bdc0c8b3f9",
+     "he": "<h4><b>שינוי המבנה של הערכים המוחזרים</b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:25",
+     "type": "prose",
+     "en": "The second change is now how to evaluate the sub-expression ```{ \"tag\": \"VarRef\", \"var\": \"*\" }```: in this case, we expect to obtain a value of a different type - which is a primitive procedure mapped to the variable <b>*</b> in the global environment.\n\n",
+     "hash": "791755b96530f56b",
+     "he": "השינוי השני הוא איך להעריך עכשיו את תת-הביטוי ```{ \"tag\": \"VarRef\", \"var\": \"*\" }```: במקרה הזה, אנחנו מצפים לקבל ערך מטיפוס אחר — פרוצדורה פרימיטיבית שממופה למשתנה <b>*</b> בסביבה הגלובלית."
+    },
+    {
+     "id": "ps/ps5:3:26",
+     "type": "prose",
+     "en": "This has an impact on the structure of the values the interpreter can return:\n\n\n",
+     "hash": "9815f887e6bc1336",
+     "he": "לזה יש השפעה על המבנה של הערכים שהמפרש יכול להחזיר:"
+    },
+    {
+     "id": "ps/ps5:3:27",
+     "type": "list",
+     "en": "* In the class implementation, for L1, Value = number \\| boolean \\| PrimOp\n* In the new implementation, we have: Value = number \\| boolean \\| <b>PrimProc</b>\n\n\n",
+     "hash": "f10f2bff8f4c3f41",
+     "he": "* במימוש של הכיתה, עבור L1: Value = number \\| boolean \\| PrimOp\n* במימוש החדש יש לנו: Value = number \\| boolean \\| <b>PrimProc</b>"
+    },
+    {
+     "id": "ps/ps5:3:28",
+     "type": "prose",
+     "en": "where ***PrimProc*** is the type of the values returned in the meta-language (TypeScript in our case) when we compute the expressions <b>+, *, -, /, not, <, >, =</b>.\n\n",
+     "hash": "866844ddb724bee9",
+     "he": "כאשר ***PrimProc*** הוא הטיפוס של הערכים שמוחזרים בשפת המטא (TypeScript במקרה שלנו) כשאנחנו מחשבים את הביטויים <b>+, *, -, /, not, <, >, =</b>."
+    },
+    {
+     "id": "ps/ps5:3:29",
+     "type": "prose",
+     "en": "In more details, we define:\n\n",
+     "hash": "c882b4464056c2fb",
+     "he": "ביתר פירוט, אנחנו מגדירים:"
+    },
+    {
+     "id": "ps/ps5:3:30",
+     "type": "code",
+     "en": "```typescript\nexport type Value = number | boolean | PrimProc;\ntype PrimitiveProcedure = (args: Value[]) => Value;\ntype PrimProc = {\n    tag: \"PrimProc\";\n    op: PrimitiveProcedure;\n};\n```\n\n\n",
+     "hash": "aea53872af87c8b6",
+     "lang": "typescript",
+     "noteHe": "הגדרת טיפוס הערכים החדש. `PrimitiveProcedure` הוא פשוט טיפוס של **פונקציית TypeScript** שמקבלת מערך של ערכים ומחזירה ערך — כלומר, המימוש האמיתי של הפעולה. `PrimProc` היא רשומה שעוטפת פונקציה כזאת ומצמידה לה tag. שימו לב מדוע העטיפה נחוצה: בלעדיה, ערך פרימיטיבי היה פונקציית JavaScript \"ערומה\", ולא היינו יכולים להבחין בינו לבין דברים אחרים בבדיקות טיפוס בזמן ריצה. השוו ל-`PrimOp` הישן, שהחזיק **מחרוזת** (`op: string`) ודרש פיצול ידני לפי השם — כאן `op` הוא כבר הפונקציה עצמה."
+    },
+    {
+     "id": "ps/ps5:3:31",
+     "type": "prose",
+     "en": "<h4><b> Change the applyPrimitive procedure </b></h4>\n\n",
+     "hash": "4ae0823d52828bf4",
+     "he": "<h4><b> שינוי הפרוצדורה applyPrimitive </b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:32",
+     "type": "prose",
+     "en": "The original version of <code>applyPrimitive</code> is:\n\n",
+     "hash": "292cbd49ebd0c612",
+     "he": "הגרסה המקורית של <code>applyPrimitive</code> היא:"
+    },
+    {
+     "id": "ps/ps5:3:33",
+     "type": "code",
+     "en": "```typescript\nconst applyPrimitive = (proc: PrimOp, args: Value[]): Result<Value> =>\n    proc.op === \"+\" ? makeOk(reduce((x, y) => x + y, 0, args)) :\n    proc.op === \"-\" ? makeOk(reduce((x, y) => x - y, 0, args)) :\n    proc.op === \"*\" ? makeOk(reduce((x, y) => x * y, 1, args)) :\n    proc.op === \"/\" ? makeOk(reduce((x, y) => x / y, 1, args)) :\n    proc.op === \">\" ? makeOk(args[0] > args[1]) :\n    proc.op === \"<\" ? makeOk(args[0] < args[1]) :\n    proc.op === \"=\" ? makeOk(args[0] === args[1]) :\n    proc.op === \"not\" ? makeOk(!args[0]) :\n    makeFailure(\"Bad primitive op \" + proc.op);\n```\n",
+     "hash": "3365be6373677f34",
+     "lang": "typescript",
+     "noteHe": "הגרסה הישנה: שרשרת ארוכה של השוואות מחרוזת, אחת לכל אופרטור. עבור `+`, `-`, `*`, `/` משתמשים ב-`reduce` כדי לתמוך במספר משתנה של ארגומנטים, עם איבר נייטרלי מתאים (`0` לחיבור, `1` לכפל). האופרטורים היחסיים לוקחים בדיוק שני ארגומנטים דרך `args[0]` ו-`args[1]`, ו-`not` לוקח אחד. השורה האחרונה מחזירה `Failure` על אופרטור לא מוכר. שימו לב לשתי חולשות בקוד הזה שכדאי לשים לב אליהן: `-` עם `reduce` ואיבר התחלה `0` נותן תוצאה שגויה — `(- 5)` יחזיר `-5` וזה בסדר, אבל `(- 10 3)` יחזיר `-13` ולא `7`; ובאותו אופן `/` עם התחלה `1` יחזיר עבור `(/ 10 2)` את `0.05` במקום `5`. אלה באגים אמיתיים בקוד המקורי, והם מדגימים כמה עדין לתרגם אופרטורים לא-אסוציאטיביים ל-`reduce`. **הבעיה העיקרית שהסעיף מצביע עליה** היא אחרת: כל הוספה של פרימיטיב חדש דורשת עריכה של הפונקציה הזאת."
+    },
+    {
+     "id": "ps/ps5:3:34",
+     "type": "prose",
+     "en": "In the new version - we replace it with the following:\n\n",
+     "hash": "5bed7c888ed336e5",
+     "he": "בגרסה החדשה — אנחנו מחליפים אותה בזו:"
+    },
+    {
+     "id": "ps/ps5:3:35",
+     "type": "code",
+     "en": "```typescript\nconst applyPrimitive = (proc: PrimProc, args: Value[]): Result<Value> =>\n    makeOk(proc.op(args));\n```\n\n",
+     "hash": "6de02ec071a0b2ca",
+     "lang": "typescript",
+     "noteHe": "הגרסה החדשה — שורה אחת. `proc.op` הוא כבר פונקציית TypeScript, ולכן מספיק להפעיל אותה על `args` ולעטוף ב-`makeOk`. כל הפיצול לפי שם האופרטור נעלם, כי המידע \"איזו פעולה לבצע\" עבר מהמפרש אל **הסביבה הגלובלית**. שימו לב שהמקרה של אופרטור לא מוכר גם הוא נעלם — הוא נתפס עכשיו מוקדם יותר, כשחיפוש ה-VarRef בסביבה מחזיר `var not found`."
+    },
+    {
+     "id": "ps/ps5:3:36",
+     "type": "prose",
+     "en": "This is a shorter version of the function - but one that exploits the fact that we have pre-defined the primitive functions\nand bound them to functions in the meta-language that all expect arguments in the same form (an array of Values).\n\n",
+     "hash": "51ed0708eb805cf0",
+     "he": "זו גרסה קצרה יותר של הפונקציה — כזו שמנצלת את העובדה שהגדרנו מראש את הפונקציות הפרימיטיביות\nוקשרנו אותן לפונקציות בשפת המטא שכולן מצפות לארגומנטים באותה צורה (מערך של Values)."
+    },
+    {
+     "id": "ps/ps5:3:37",
+     "type": "prose",
+     "en": "<h4><b> Initializing the Global Environment with Primitive Values</b></h4>\n\n",
+     "hash": "9a07872d137da246",
+     "he": "<h4><b> אתחול הסביבה הגלובלית בערכים פרימיטיביים</b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:38",
+     "type": "prose",
+     "en": "This last step is where we map variable references to actual TypeScript functions.\nWe initialize the global environment with the bindings of the primitives defined in L1 to the corresponding procedures in the meta-language.\n\n",
+     "hash": "823097c9d26bf781",
+     "he": "השלב האחרון הזה הוא המקום שבו אנחנו ממפים הפניות למשתנים לפונקציות TypeScript ממשיות.\nאנחנו מאתחלים את הסביבה הגלובלית עם הקשירות של הפרימיטיבים שמוגדרים ב-L1 לפרוצדורות המתאימות בשפת המטא."
+    },
+    {
+     "id": "ps/ps5:3:39",
+     "type": "code",
+     "en": "```typescript\nconst makeGlobalEnv = (): Env => \n  makeEnv('+', plus,\n    makeEnv('-', minus,\n      makeEmptyEnv()))\n\n// where:\nconst plus : (args: number[]) => number =\n    reduce((x, y) => x + y, 0, args)\nconst minus : (args: number[]) => number =\n    reduce((x, y) => x - y, 0, args)\n```\n",
+     "hash": "20f95184cef9eb23",
+     "lang": "typescript",
+     "noteHe": "בניית הסביבה הגלובלית — גרסה מפושטת עם שני פרימיטיבים בלבד. `makeGlobalEnv` מחזירה שרשרת סביבות שבה `'+'` קשור לפונקציה `plus` ו-`'-'` לפונקציה `minus`. שימו לב שהקוד שמתחת ל-`// where:` הוא סקיצה לא-תקינה מבחינת תחביר: הוא כותב `const plus : (args: number[]) => number = reduce(...)` — כלומר מצהיר על טיפוס של פונקציה אבל משים ערך של קריאה, ומשתמש ב-`args` שאינו בתחום. הכוונה היא כמובן `const plus = (args: number[]) => reduce((x, y) => x + y, 0, args)`, והגרסה הנכונה מופיעה בהמשך הסעיף. הרעיון עצמו ברור: כל פרימיטיב הוא בסך הכול קשירה של שם לפונקציה, בדיוק כמו כל משתנה אחר בסביבה."
+    },
+    {
+     "id": "ps/ps5:3:40",
+     "type": "prose",
+     "en": "And in the procedure ```evalL1program```, we initialize the global environment differently:\n\n",
+     "hash": "a13fc0a809408e5a",
+     "he": "ובפרוצדורה ```evalL1program```, אנחנו מאתחלים את הסביבה הגלובלית באופן שונה:"
+    },
+    {
+     "id": "ps/ps5:3:41",
+     "type": "code",
+     "en": "```typescript\nconst evalL1program = (program: Program): Value =>\n    evalExps(program.exps, makeGlobalEnv());  // instead of makeEmptyEnv()\n```\n\n\n",
+     "hash": "8e67e70e1d3317c8",
+     "lang": "typescript",
+     "noteHe": "נקודת הכניסה של המפרש, וכל השינוי הוא במילה אחת: מעבירים `makeGlobalEnv()` במקום `makeEmptyEnv()`. כלומר, התוכנית מתחילה לרוץ בסביבה שכבר מכילה את כל הפרימיטיבים. **זו התשובה המדויקת לשאלה \"מהי פונקציה פרימיטיבית\":** פונקציה שנמצאת בסביבה עוד לפני שהתוכנית התחילה."
+    },
+    {
+     "id": "ps/ps5:3:42",
+     "type": "prose",
+     "en": "This implementation explains properly what is meant by \"primitive functions\": they are the functions which are pre-defined in the global environment when the interpreter starts running - without the need for the programmer to define them.\n\n",
+     "hash": "664a2fc4b4e719af",
+     "he": "המימוש הזה מסביר כראוי מה הכוונה ב\"פונקציות פרימיטיביות\": אלה הפונקציות שמוגדרות מראש בסביבה הגלובלית כשהמפרש מתחיל לרוץ — בלי שהמתכנת צריך להגדיר אותן."
+    },
+    {
+     "id": "ps/ps5:3:43",
+     "type": "prose",
+     "en": "<h4><b> Adding a Primitive to the Interpreter</b></h4>\n\n",
+     "hash": "040617623cd02779",
+     "he": "<h4><b> הוספת פרימיטיב למפרש</b></h4>"
+    },
+    {
+     "id": "ps/ps5:3:44",
+     "type": "prose",
+     "en": "With this implementation, it is easy to add a primitive to the interpreter - we need only:\n",
+     "hash": "0282e15c859687b9",
+     "he": "עם המימוש הזה קל להוסיף פרימיטיב למפרש — כל מה שצריך הוא:"
+    },
+    {
+     "id": "ps/ps5:3:45",
+     "type": "list",
+     "en": "* Add the proper binding in the initialization of the global environment\n\n\n",
+     "hash": "03b0bc842a65cfb1",
+     "he": "* להוסיף את הקשירה המתאימה באתחול של הסביבה הגלובלית"
+    },
+    {
+     "id": "ps/ps5:3:46",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "ps/ps5:3:47",
+     "type": "code",
+     "en": "```typescript\n// Primitive operators are encoded as varRef bound out of the box to\n// functions in the meta-language with an appropriate interface.\n// The PrimProc wrapper is used to tag such primitive operator values in\n// an unambiguous manner.\nconst makeGlobalEnv = (): Env =>\n    makeEnv('+', makePrimProc((args: number[]) => reduce((x, y) => x + y, 0, args)),\n    makeEnv('-', makePrimProc((args: number[]) => reduce((x, y) => x - y, 0, args)),\n    makeEnv('*', makePrimProc((args: number[]) => reduce((x, y) => x * y, 1, args)),\n    makeEnv('/', makePrimProc((args: number[]) => reduce((x, y) => x / y, 1, args)),\n    makeEnv('display', makePrimProc((args: Value[]) => console.log(args)),\n    makeEnv('newline', makePrimProc((args: Value[]) => console.log(\"\")),\n    makeEmptyEnv()))));\n```\n\n",
+     "hash": "7ac821e87f7cb5d6",
+     "lang": "typescript",
+     "noteHe": "הגרסה המלאה של `makeGlobalEnv`, וזו הגרסה שכדאי לזכור. כל שורה קושרת שם לפונקציית TypeScript עטופה ב-`makePrimProc`. ההערות שבראש הקוד מסבירות בדיוק את הרעיון: אופרטורים פרימיטיביים מקודדים כ-VarRef שקשור \"מחוץ לקופסה\" לפונקציה בשפת המטא, והעטיפה `PrimProc` משמשת לתיוג חד-משמעי של ערכים כאלה. שימו לב לשתי השורות האחרונות — `display` ו-`newline` — שמדגימות בדיוק את הנקודה של הסעיף: הוספת פרימיטיב חדש היא **שורה אחת** בסביבה הגלובלית, בלי לגעת בשום מקום אחר במפרש. השוו זאת לגישה הישנה, שבה היה צריך להוסיף ענף ל-`applyPrimitive` וגם לעדכן את כלל הדקדוק `<prim-op> ::= ...`. שימו לב גם שמספר הסוגריים הסוגרים בסוף (`))))`) אינו תואם את מספר הקריאות ל-`makeEnv` — טעות הקלדה קלה בחומר המקורי."
+    },
+    {
+     "id": "ps/ps5:3:48",
+     "type": "prose",
+     "en": "and we have two new primitives in our language (display and newline).\n\n\n",
+     "hash": "b4fbbf7fe8a5bcf2",
+     "he": "וכך יש לנו שני פרימיטיבים חדשים בשפה (display ו-newline)."
+    }
+   ],
+   "headingHe": "טיפול בפרימיטיבים ב-L1"
+  },
+  {
+   "id": "ps/ps5:4",
+   "depth": 3,
+   "headingEn": "Order of Evaluation of Parameters in a Procedure Application",
+   "raw": "<h3><b>Order of Evaluation of Parameters in a Procedure Application</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:4:0",
+     "type": "prose",
+     "en": "evalL1program(program) receives a program, which includes an ordered sequence of expressions. \nIt iterates over the expressions and depending on the type of each expression, it either evaluates a ***DefineExp*** and obtains a new environment, which is then used to evaluate the next steps of the program; or it evaluates the expression.\n\n",
+     "hash": "435d4424913ce9c4",
+     "he": "evalL1program(program) מקבלת תוכנית, שכוללת רצף מסודר של ביטויים.\nהיא עוברת על הביטויים, ובהתאם לסוג של כל ביטוי היא או מעריכה ***DefineExp*** ומקבלת סביבה חדשה שמשמשת אחר כך להערכת השלבים הבאים של התוכנית, או מעריכה את הביטוי."
+    },
+    {
+     "id": "ps/ps5:4:1",
+     "type": "prose",
+     "en": "In expressions such as `(+ (+ 1 2) (+ 3 4) (+ 5 6))` the operational semantics does <b>not</b> specify the order of execution among the arguments - we could compute (+ 5  6) first and (+ 1 2) next, or in reverse, or even together (in parallel).\n\n",
+     "hash": "574cd1d8a4b8aeee",
+     "he": "בביטויים כמו `(+ (+ 1 2) (+ 3 4) (+ 5 6))` הסמנטיקה התפעולית <b>אינה</b> קובעת את סדר הביצוע בין הארגומנטים — אפשר לחשב קודם את (+ 5  6) ואחר כך את (+ 1 2), או בסדר ההפוך, או אפילו יחד (במקביל)."
+    },
+    {
+     "id": "ps/ps5:4:2",
+     "type": "prose",
+     "en": "This is the case in the formal semantics of Scheme - the standard explicitly indicates that the order of evaluation of operands in an application is NOT specified.\n\n",
+     "hash": "c42b739339f9811a",
+     "he": "כך הוא המצב בסמנטיקה הפורמלית של Scheme — התקן מציין במפורש שסדר ההערכה של האופרנדים ביישום אינו מוגדר."
+    },
+    {
+     "id": "ps/ps5:4:3",
+     "type": "prose",
+     "en": "This means that we can obtain different outputs if we insert side-effects as part of the operands depending on the implementation in Scheme:\n\n",
+     "hash": "b5378b580b90fb83",
+     "he": "המשמעות היא שאנחנו עלולים לקבל פלטים שונים אם נכניס תופעות לוואי כחלק מהאופרנדים, תלוי במימוש הספציפי של Scheme:"
+    },
+    {
+     "id": "ps/ps5:4:4",
+     "type": "code",
+     "en": "```scheme\n(define side-effect\n  (lambda (x) (display x) x))\n\n(+ (* (side-effect 2) (side-effect 3))\n   (* (side-effect 4) (side-effect 5)))\n\n=> can display \n2345 26\n\nor\n4235 26\n\n(or any other variant of the order of parameters)\n```\n\n\n",
+     "hash": "e243752b079108df",
+     "lang": "scheme",
+     "noteHe": "דוגמה שחושפת את חוסר הקביעות בסדר ההערכה. `side-effect` מדפיסה את הארגומנט שלה ומחזירה אותו — כך אפשר \"לרגל\" אחרי סדר ההערכה בלי לשנות את התוצאה. הביטוי מחשב `(2*3) + (4*5)` = `26`, וזה קבוע; מה שאינו קבוע הוא **סדר ההדפסות**. מימוש אחד של Scheme עשוי להדפיס `2345` (משמאל לימין) ואחר `4235` (למשל, אם הוא מעריך את האופרנד השני של `+` קודם). שימו לב שסדר ההערכה **בתוך** כל כפל וסדר ההערכה **בין** שני הכפלים שניהם לא מוגדרים, ולכן מספר הפלטים האפשריים גדול. **המסקנה המעשית:** קוד שהתוצאה שלו תלויה בסדר הערכת אופרנדים אינו נייד ואינו נכון. שימו לב שהמפרש שלנו כן קובע סדר (משמאל לימין, כי הוא משתמש ב-`map`) — אבל זהו פרט מימוש ולא חלק מהסמנטיקה של השפה."
+    }
+   ],
+   "headingHe": "סדר ההערכה של הפרמטרים ביישום פרוצדורה"
+  },
+  {
+   "id": "ps/ps5:5",
+   "depth": 3,
+   "headingEn": "L2 Evaluation",
+   "raw": "<h3><b>L2 Evaluation</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:5:0",
+     "type": "prose",
+     "en": "NOTE: In the rest of the notes, we return to the syntactic treatment of primitives as discussed in the lectures\n(as opposed to the semantic treatment discussed above).\n\n\n",
+     "hash": "2d1b0daf737a0f5c",
+     "he": "שימו לב: בהמשך הסיכום אנחנו חוזרים לטיפול התחבירי בפרימיטיבים כפי שנדון בהרצאות\n(בניגוד לטיפול הסמנטי שנדון למעלה)."
+    },
+    {
+     "id": "ps/ps5:5:1",
+     "type": "prose",
+     "en": "The syntax of  L2  extends that of  L1  with two new expression types:\n***IfExp*** and ***ProcExp***\n\n",
+     "hash": "ebab25bdeb860b8d",
+     "he": "התחביר של  L2  מרחיב את זה של  L1  בשני סוגי ביטויים חדשים:\n***IfExp*** ו-***ProcExp***"
+    },
+    {
+     "id": "ps/ps5:5:2",
+     "type": "code",
+     "en": "```scheme\n<program> ::= (L2 <exp>+) // program(exps:List(exp))\n<exp> ::= <define-exp> | <cexp>\n<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n<cexp> ::= <num-exp> // num-exp(val:number)\n       | <bool-exp>  // bool-exp(val:boolean)\n       | <prim-op>   // prim-op(op:string)\n       | <var-ref>   // var-ref(var:string)\n       | (if <exp> <exp> <exp>) // if-exp(test,then,alt)                                    ##### L2\n       | (lambda (<var-decl>*) <cexp>+) // proc-exp(params:List(var-decl), body:List(cexp)) ##### L2\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n<prim-op> ::= + | - | * | / | < | > | = | not\n<num-exp> ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref> ::= an identifier token\n<var-decl> ::= an identifier token\n````\n\n",
+     "hash": "bccc5f752505064e",
+     "lang": "scheme",
+     "noteHe": "הדקדוק המלא של L2, זהה לזה שראינו בשיעור 2.6. שתי השורות המסומנות `##### L2` הן כל התוספת על L1: `if-exp` עם שלושה רכיבים (שימו לב שכאן השדה השלישי נקרא `alt` ולא `else` — זה השם שבו משתמש הקוד ב-TypeScript), ו-`proc-exp` עם רשימת פרמטרים (`*` — אפס או יותר) וגוף (`+` — לפחות אחד). מומלץ לחזור על הדקדוק הזה עד שאפשר לשחזר אותו מהזיכרון; שאלות מבחן רבות מתחילות ב\"האם הביטוי הבא חוקי ב-L2\"."
+    },
+    {
+     "id": "ps/ps5:5:3",
+     "type": "prose",
+     "en": "The Value types includes closure values in addition to the previous types:\n\n",
+     "hash": "9e34ccf56fc82280",
+     "he": "טיפוסי ה-Value כוללים ערכי closure בנוסף לטיפוסים הקודמים:"
+    },
+    {
+     "id": "ps/ps5:5:4",
+     "type": "prose",
+     "en": "Value = Number \\| Boolean \\| Prim-op \\| <b>Closure</b>\n\n\n",
+     "hash": "1df0c451c4429c3e",
+     "he": "Value = Number \\| Boolean \\| Prim-op \\| <b>Closure</b>"
+    },
+    {
+     "id": "ps/ps5:5:5",
+     "type": "list",
+     "en": "* ***We define the closure data type as a record with two fields:***\n\n* ***Params: a list of VarDecl values***\n\n* ***Body: a list of cexp values***\n\n",
+     "hash": "55f1139082c1c0fd",
+     "he": "* ***אנחנו מגדירים את טיפוס הנתונים closure כרשומה עם שני שדות:***\n\n* ***Params: רשימה של ערכי VarDecl***\n\n* ***Body: רשימה של ערכי cexp***"
+    },
+    {
+     "id": "ps/ps5:5:6",
+     "type": "prose",
+     "en": "<b>\n`Closure ::= (Closure (<var-decl>*) <cexp>+) // closure(params:List(var-decl), body:List(cexp))`\n</b>\n\n",
+     "hash": "700039b5dc9e9779",
+     "he": "<b>\n`Closure ::= (Closure (<var-decl>*) <cexp>+) // closure(params:List(var-decl), body:List(cexp))`\n</b>"
+    },
+    {
+     "id": "ps/ps5:5:7",
+     "type": "prose",
+     "en": "<b>Note</b> that a proc-exp ```(lambda (x) (* x x))``` is an <b>expression</b> while a closure is a <b>value</b>.\nThey are of 2 different types - closures are the result of a computation.\n\n",
+     "hash": "fcec447c2db14564",
+     "he": "<b>שימו לב</b> ש-proc-exp כמו ```(lambda (x) (* x x))``` הוא <b>ביטוי</b> בעוד ש-closure הוא <b>ערך</b>.\nמדובר בשני טיפוסים שונים — closures הם התוצאה של חישוב."
+    },
+    {
+     "id": "ps/ps5:5:8",
+     "type": "prose",
+     "en": "The key change in L2 vs L1 is the support of closures when applying procedure values to arguments:\n\n",
+     "hash": "b8ab855139e6a8b5",
+     "he": "השינוי המרכזי ב-L2 לעומת L1 הוא התמיכה ב-closures כשמיישמים ערכי פרוצדורה על ארגומנטים:"
+    },
+    {
+     "id": "ps/ps5:5:9",
+     "type": "code",
+     "en": "```typescript\nconst L3applyProcedure = (proc: Value, args: Value[], env: Env): Result<Value> =>\n    isPrimOp(proc) ? applyPrimitive(proc, args) :\n    isClosure(proc) ? applyClosure(proc, args, env) :\n    makeFailure(\"Bad procedure \" + JSON.stringify(proc));\n\nconst applyClosure = (proc: Closure, args: Value[], env: Env): Result<Value> => {\n    let vars = map((v: VarDecl) => v.var, proc.params);\n    let body = renameExps(proc.body);\n    let litArgs = map(valueToLitExp, args);\n    return evalSequence(substitute(body, vars, litArgs), env);\n}\n```\n",
+     "hash": "26147fc87165476b",
+     "lang": "typescript",
+     "noteHe": "זהו בדיוק אותו קוד שראינו בשיעור 2.6, ושווה לוודא שהוא יושב היטב. `L3applyProcedure` מפצלת לפי סוג הערך של הפרוצדורה: פרימיטיב, closure, או שגיאה. `applyClosure` מבצעת ארבעה צעדים בסדר קבוע: שולפת את שמות הפרמטרים מתוך ה-`VarDecl`ים; משנה את שמות המשתנים הקשורים בגוף (`renameExps`) כדי למנוע לכידה; ממירה את הארגומנטים מערכים לביטויים (`valueToLitExp`); ולבסוף מציבה ומעריכה את הגוף המוצב עם `evalSequence`. **סדר הפעולות קריטי:** renaming תמיד לפני substitution."
+    },
+    {
+     "id": "ps/ps5:5:10",
+     "type": "prose",
+     "en": "The body is evaluated with ***evalExps*** - but we only return the last value that is computed:\nFor example:\n",
+     "hash": "110422502375f404",
+     "he": "הגוף מוערך בעזרת ***evalExps*** — אבל אנחנו מחזירים רק את הערך האחרון שחושב:\nלדוגמה:"
+    },
+    {
+     "id": "ps/ps5:5:11",
+     "type": "code",
+     "en": "```scheme\n(lambda (x)\n    (+ 1 x)\n    (+ 2 x)) \n```\n\n",
+     "hash": "f97e6d3d4260d7a4",
+     "lang": "scheme",
+     "noteHe": "lambda שהגוף שלה מכיל **שני** ביטויים — זה מותר לפי הכלל `<cexp>+` בדקדוק. שני הביטויים מוערכים בסדר, אבל רק הערך של האחרון מוחזר; כלומר `((lambda (x) (+ 1 x) (+ 2 x)) 5)` מחזיר `7` ולא `6`. הערך של `(+ 1 x)` פשוט נזרק. **מתי בכל זאת כותבים גוף מרובה ביטויים?** רק כשלביטויים המוקדמים יש תופעת לוואי — למשל `(display x)` — אחרת הם מבוזבזים לחלוטין."
+    },
+    {
+     "id": "ps/ps5:5:12",
+     "type": "prose",
+     "en": "First we evaluate`(+ 1 x)` only then we evaluate `(+ 2 x)`. The return value is the return value of the last expression. \n\n",
+     "hash": "8ce0b42e5551d908",
+     "he": "קודם אנחנו מעריכים את `(+ 1 x)` ורק אחר כך את `(+ 2 x)`. הערך המוחזר הוא הערך המוחזר של הביטוי האחרון."
+    },
+    {
+     "id": "ps/ps5:5:13",
+     "type": "prose",
+     "en": "The substitution procedure addresses 3 issues:\n",
+     "hash": "f6bb1120da531446",
+     "he": "פרוצדורת ההצבה מטפלת ב-3 סוגיות:"
+    },
+    {
+     "id": "ps/ps5:5:14",
+     "type": "list",
+     "en": "* <b>we make sure the body is renamed so that we avoid capturing free variables</b>\n\n* <b>we map the evaluated arguments to expressions to ensure that the result of the substitution is a well-typed AST which can be evaluated (this is done with the procedure ***valueToLitExp***)</b>.\n\n* <b>we do not replace bound variables inside the body - only free variables</b>\n\n\n",
+     "hash": "87f8c26c46188278",
+     "he": "* <b>אנחנו מוודאים שהגוף עבר שינוי שם כדי להימנע מלכידה של משתנים חופשיים</b>\n\n* <b>אנחנו ממפים את הארגומנטים המוערכים לביטויים, כדי להבטיח שתוצאת ההצבה היא AST תקין מבחינת טיפוסים שאפשר להעריך (זה נעשה בעזרת הפרוצדורה ***valueToLitExp***)</b>.\n\n* <b>אנחנו לא מחליפים משתנים קשורים בתוך הגוף — רק משתנים חופשיים</b>"
+    }
+   ],
+   "headingHe": "הערכה ב-L2"
+  },
+  {
+   "id": "ps/ps5:6",
+   "depth": 3,
+   "headingEn": "Renaming and Substitution",
+   "raw": "<h3><b>Renaming and Substitution</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:6:0",
+     "type": "prose",
+     "en": "<h4><b>Renaming</b></h4>\n\n",
+     "hash": "43f4a42b38fc9f5e",
+     "he": "<h4><b>שינוי שם (Renaming)</b></h4>"
+    },
+    {
+     "id": "ps/ps5:6:1",
+     "type": "prose",
+     "en": "Bound variables in expressions can be consistently renamed by new variables (that do not occur in the expression) without changing the intended meaning of the expression.\nThat is, expressions that differ only by consistent renaming of bound variables are semantically equivalent.\n\n",
+     "hash": "fd664b1648473463",
+     "he": "אפשר לשנות באופן עקבי את שמותיהם של משתנים קשורים בביטויים ולהחליפם במשתנים חדשים (שאינם מופיעים בביטוי) בלי לשנות את המשמעות המכוונת של הביטוי.\nכלומר, ביטויים שנבדלים זה מזה רק בשינוי שם עקבי של משתנים קשורים הם שקולים סמנטית."
+    },
+    {
+     "id": "ps/ps5:6:2",
+     "type": "prose",
+     "en": "For example, the following are equivalent pairs:\n\n",
+     "hash": "56dc3970624142cf",
+     "he": "לדוגמה, אלה זוגות שקולים:"
+    },
+    {
+     "id": "ps/ps5:6:3",
+     "type": "code",
+     "en": "```scheme\n(lambda (x) x) <==> (lambda (x1) x1)\n(lambda (x) (+ x y)) <==> (lambda (x1) (+ x1 y))  // y is not renamed because it occurs free\n```\n      \n",
+     "hash": "ec8f5bd91e331c23",
+     "lang": "scheme",
+     "noteHe": "שתי דוגמאות לשינוי שם תקין. בראשונה, `x` הוא היחיד בביטוי ושינוי שלו ל-`x1` חייב להתבצע גם בהכרזה וגם בהפניה. השנייה חשובה יותר, וההערה בקוד מסבירה בדיוק למה: `y` **אינו** משנה שם מפני שהוא מופיע חופשי — הוא מתייחס למשהו מחוץ ל-lambda, ושינוי שמו היה מנתק את הקשר הזה. **הכלל שיש לזכור: משנים שמות רק של משתנים קשורים.**"
+    },
+    {
+     "id": "ps/ps5:6:4",
+     "type": "prose",
+     "en": "Why renaming?\n      \n",
+     "hash": "0a414d549bc8f891",
+     "he": "למה בכלל צריך שינוי שם?"
+    },
+    {
+     "id": "ps/ps5:6:5",
+     "type": "code",
+     "en": "```scheme\n(define z not)\n\n(((lambda (x)\n     (lambda (z)\n        (x z)))\n  (lambda (w)\n     (z w)))\n  ;; Note: z occurs free in the parent exp.\n #f)\n```\n\n",
+     "hash": "5d3d2f5cf4f51282",
+     "lang": "scheme",
+     "noteHe": "זו וריאציה על דוגמת הלכידה מ-2.6, הפעם עם `not` במקום פונקציית ריבוע ועם הקלט `#f`. `z` מוגדר גלובלית כאופרטור `not`. הפונקציה החיצונית מקבלת `x` ומחזירה `(lambda (z) (x z))` — שימו לב לפרמטר בשם `z`, אותו שם כמו הגלובלי. היא מיושמת על `(lambda (w) (z w))`, וההערה בקוד מדגישה במפורש: `z` מופיע **חופשי** בביטוי הזה, ולכן הוא מתייחס ל-`not` הגלובלי. אחרי שינוי שם תקין, `((lambda (w) (not w)) #f)` מחזיר `#t`. בלי שינוי שם ה-`z` היה נלכד על ידי הפרמטר, והביטוי היה מנסה להפעיל את `#f` כפונקציה — שגיאה. **כדאי לתרגל את הגזירה המלאה של הדוגמה הזאת** — היא מופיעה בווריאציות רבות במבחנים."
+    },
+    {
+     "id": "ps/ps5:6:6",
+     "type": "prose",
+     "en": "For renaming we use the ***renameExps*** procedure:\n",
+     "hash": "0f44828deafff814",
+     "he": "לשינוי שם אנחנו משתמשים בפרוצדורה ***renameExps***:"
+    },
+    {
+     "id": "ps/ps5:6:7",
+     "type": "code",
+     "en": "```typescript\nconst makeVarGen = (): (v: string) => string => {\n    let count: number = 0;\n    return (v: string) => {\n        count++;\n        return `${v}__${count}`;\n    }\n}\n\n/*\nPurpose: Consistently rename bound variables in 'exps' to fresh names.\n         Start numbering at 1 for all new var names.\n*/\nconst renameExps = (exps: CExp[]): CExp[] => {\n    const varGen = makeVarGen();\n    const replace = (e: CExp): CExp =>\n        isIfExp(e) ? makeIfExp(replace(e.test), replace(e.then), replace(e.alt)) :\n        isAppExp(e) ? makeAppExp(replace(e.rator), map(replace, e.rands)) :\n        isProcExp(e) ? replaceProc(e) :\n        e;\n    // Rename the params and substitute old params with renamed ones.\n    // First recursively rename all ProcExps inside the body.\n    const replaceProc = (e: ProcExp): ProcExp => {\n        const oldArgs = map((arg: VarDecl): string => arg.var, e.args);\n        const newArgs = map(varGen, oldArgs);\n        const newBody = map(replace, e.body);\n        return makeProcExp(map(makeVarDecl, newArgs),\n                           substitute(newBody, oldArgs, map(makeVarRef, newArgs)));\n    }\n    return map(replace, exps);\n}\n```\n\n",
+     "hash": "3aaab44c3310d8b5",
+     "lang": "typescript",
+     "noteHe": "אותו קוד שראינו ב-2.6. `makeVarGen` מייצרת מחולל שמות עם מונה פנימי — closure עם תופעת לוואי על המשתנה הסגור `count`, כך שכל קריאה מחזירה שם חדש (`v__1`, `v__2`, …). `renameExps` יוצרת מחולל חדש בכל קריאה, ולכן המספור מתחיל מ-1 בכל יישום. `replace` סורקת את ה-AST רקורסיבית: `IfExp` ו-`AppExp` נבנים מחדש מהחלקים, כל שאר סוגי הביטויים מוחזרים כמות שהם, ורק `ProcExp` מקבל טיפול ב-`replaceProc`. שם: אוספים את שמות הפרמטרים הישנים, מייצרים שמות חדשים, **קודם** משנים רקורסיבית שמות בתוך הגוף, ואז בונים ProcExp חדש שבו ההפניות הישנות הוחלפו בחדשות בעזרת `substitute`. שימו לב לרעיון המרכזי: שינוי שם הוא בעצם הצבה של משתנה במשתנה — `substitute(newBody, oldArgs, map(makeVarRef, newArgs))`."
+    },
+    {
+     "id": "ps/ps5:6:8",
+     "type": "prose",
+     "en": "Notes on rename-exps:\n\n",
+     "hash": "ab5bea31303aa2f1",
+     "he": "הערות על rename-exps:"
+    },
+    {
+     "id": "ps/ps5:6:9",
+     "type": "list",
+     "en": "* The structure of renameExps is the same as that of rewrite-ASTs we saw in the previous lectures - a traversal of the AST top down with recursion on the components.\n\n* The only transformation renameExps does is on expressions of type ProcExp - all other expression types are copied as is.\n\n* It is a <b>pre-condition</b> of <code>substitute</code> that the expressions in which the substitution is performed are renamed. This pre-condition is enforced in the code of ***renameExps***, before we call substitute, we make sure the body is renamed .\n\n\n\n",
+     "hash": "db6ba9fce8ed6df2",
+     "he": "* המבנה של renameExps זהה לזה של rewrite-ASTs שראינו בהרצאות הקודמות — סריקה של ה-AST מלמעלה למטה עם רקורסיה על הרכיבים.\n\n* הטרנספורמציה היחידה ש-renameExps מבצעת היא על ביטויים מטיפוס ProcExp — כל שאר סוגי הביטויים מועתקים כמות שהם.\n\n* זהו <b>תנאי מקדים</b> של <code>substitute</code> שהביטויים שבתוכם מתבצעת ההצבה עברו שינוי שם. התנאי המקדים הזה נאכף בקוד של ***renameExps***: לפני שאנחנו קוראים ל-substitute, אנחנו מוודאים שהגוף עבר שינוי שם."
+    },
+    {
+     "id": "ps/ps5:6:10",
+     "type": "prose",
+     "en": "<b> Substitution </b>\n\n",
+     "hash": "3108f063f52e05c2",
+     "he": "<b> הצבה (Substitution) </b>"
+    },
+    {
+     "id": "ps/ps5:6:11",
+     "type": "prose",
+     "en": "Substitute is an operation which replaces free occurrences of variable references in an expression by other expressions.\n<b>Definition:</b> A substitution s is a mapping from a finite set of variables to a finite set of expressions.\n\n",
+     "hash": "5727f53fead02219",
+     "he": "הצבה היא פעולה שמחליפה מופעים חופשיים של הפניות למשתנים בביטוי, בביטויים אחרים.\n<b>הגדרה:</b> הצבה s היא מיפוי מקבוצה סופית של משתנים לקבוצה סופית של ביטויים."
+    },
+    {
+     "id": "ps/ps5:6:12",
+     "type": "prose",
+     "en": "Substitutions are denoted using set notation. For example:\n\n",
+     "hash": "e0f0ce5adb011dea",
+     "he": "הצבות מסומנות בעזרת סימון של קבוצות. לדוגמה:"
+    },
+    {
+     "id": "ps/ps5:6:13",
+     "type": "code",
+     "en": "```\n6 o {x=5} = 6\n\n(+ x y) o {z = 5} = (+ x y)\n \n(+ x y) o {x=5, y=6, z=7} = (+ 5 6)\n\n(lambda (x) (+ x 6)) o {x=5} = \n    renaming: E turns into (lambda (x1) (+ x1 6)\n    substitute: E turns into (lambda (x1) (+ x1 6))\n\n( + (x z) ((lambda (x) x) y))  o {x = (lambda (x) x) , y = 7 , z =8}\n    renaming: E turns into ( + (x z) ((lambda (x1) x1) y)) \n    renaming: s turns into {x = (lambda (x2) x2) , y = 7, z = 8}\n    substitute: E turns into  ( + ((lambda (x2) x2) 8) ((lambda (x1) x1) 7))\n```\n\n",
+     "hash": "91d90d74daf54097",
+     "noteHe": "חמש דוגמאות בסדר עולה של קושי — כדאי לעבור עליהן אחת-אחת. (1) `6 o {x=5} = 6`: אין משתנים בביטוי, אין מה להחליף. (2) `(+ x y) o {z = 5}`: ההצבה מדברת על `z` שאינו מופיע בביטוי, ולכן שום דבר לא משתנה. (3) `(+ x y) o {x=5, y=6, z=7} = (+ 5 6)`: מחליפים את מה שכן מופיע ומתעלמים מ-`z`. (4) `(lambda (x) (+ x 6)) o {x=5}`: כאן ה-`x` בביטוי הוא **קשור** ל-lambda, ולכן — למרות ששינוי השם מתבצע — ההצבה אינה נוגעת בו כלל, והתוצאה שקולה לביטוי המקורי. **זו נקודה קריטית: הצבה מחליפה רק מופעים חופשיים.** (5) הדוגמה האחרונה משלבת הכול: קודם משנים שמות **גם בביטוי וגם בהצבה** (שימו לב לשתי שורות ה-renaming הנפרדות — `x1` בביטוי ו-`x2` בערך שבהצבה), ורק אז מציבים בו-זמנית. שימו לב שה-`x` שבתוך `(lambda (x) x)` בביטוי המקורי לא הוחלף (הוא קשור), בעוד ש-`x` שבתפקיד האופרטור וכן `y` ו-`z` כן הוחלפו. שימו לב גם לסוגר חסר בשורת ה-renaming של דוגמה 4 — טעות הקלדה במקור."
+    },
+    {
+     "id": "ps/ps5:6:14",
+     "type": "prose",
+     "en": "Composition (combination) of Substitutions s  and  s′ , denoted  s∘s′ , is a substitution  s″  that extends  s  with a binding <x; s' (x)> for every variable  x  for which  s(x) is not defined.\n\n",
+     "hash": "dd4a5a0124555577",
+     "he": "הרכבה (שילוב) של ההצבות s  ו- s′ , המסומנת  s∘s′ , היא הצבה  s″  שמרחיבה את  s  בקשירה <x; s' (x)> עבור כל משתנה  x  ש- s(x) אינו מוגדר עבורו."
+    },
+    {
+     "id": "ps/ps5:6:15",
+     "type": "prose",
+     "en": "For example: \n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "ps/ps5:6:16",
+     "type": "code",
+     "en": "```\n#1: {} o {x = 3} = {x = 3}\n\n#2: {x = 3} o {y = #t} = {x = 3, y = #t}\n\n#3: {x = y} o {y = 3} = {x = 3, y = 3}            // Note that the binding of x changed to 3\n\n#4: {x = y} o {y = x} = {x = x, y = x} = {y = x}  // What happens when we apply this substitution?\n```\n",
+     "hash": "09e9f90eb040e17e",
+     "noteHe": "ארבע דוגמאות להרכבת הצבות, ושתי האחרונות הן הלב של הסעיף. #1 מדגימה שההצבה הריקה היא איבר הזהות. #2 מדגימה את המקרה הפשוט של משתנים זרים — פשוט מאחדים. #3 היא המעניינת: `{x = y} o {y = 3}` אינו `{x = y, y = 3}` אלא `{x = 3, y = 3}` — כפי שההערה בקוד מציינת, **הקשירה של `x` השתנתה ל-3**. הסיבה מוסברת בפסקאות הבאות: הרכבה חייבת להתנהג כמו הפעלה סדרתית, ולכן צריך \"לדחוף\" את ההצבה הימנית גם לתוך הערכים של השמאלית. #4 מגיעה למקרה קצה: `{x = y} o {y = x}` נותן `{x = x, y = x}`, וקשירה של משתנה לעצמו היא בזבוז ואפשר להשמיט אותה, ולכן התוצאה היא `{y = x}`. הסימן `//` בסוף השורה מזמין את הקורא לחשוב מה קורה כשמפעילים הצבה כזאת — ההצבה הזאת \"מחליפה\" את `y` ב-`x` ומשאירה את `x` בשקט, ולכן אינה הפיכה."
+    },
+    {
+     "id": "ps/ps5:6:17",
+     "type": "prose",
+     "en": "Let us explain #3 and #4:\n\n",
+     "hash": "a7eb51b49bcb53b0",
+     "he": "בואו נסביר את #3 ואת #4:"
+    },
+    {
+     "id": "ps/ps5:6:18",
+     "type": "prose",
+     "en": "Applying `{x = y} o {y = 3}] (s o s')` to any expression E, we want to obtain the same result as performing first s' then s - that is:\n\n",
+     "hash": "adcfd0d4de27155d",
+     "he": "כשמפעילים את `{x = y} o {y = 3}] (s o s')` על ביטוי E כלשהו, אנחנו רוצים לקבל את אותה תוצאה שהיינו מקבלים אילו הפעלנו קודם את s' ואחר כך את s — כלומר:"
+    },
+    {
+     "id": "ps/ps5:6:19",
+     "type": "prose",
+     "en": "`\nFor any E, E o [{x = y} o {y = 3}] = [E o {x = y}] o {y = 3}\n`\n\n",
+     "hash": "e1cdba6f6c9d84bc",
+     "he": "`\nFor any E, E o [{x = y} o {y = 3}] = [E o {x = y}] o {y = 3}\n`"
+    },
+    {
+     "id": "ps/ps5:6:20",
+     "type": "prose",
+     "en": "Let us take an example for E that contains x and y:\n\n",
+     "hash": "4fec5772a6a502c8",
+     "he": "ניקח דוגמה ל-E שמכיל גם x וגם y:"
+    },
+    {
+     "id": "ps/ps5:6:21",
+     "type": "prose",
+     "en": "`\nE = (x y)\nE o [{x = y} o {y = 3}] \n= [E o {x = y}] o {y = 3}\n= (y y) o {y = 3}\n= (3 3)\n`\nAfter applying {x = y} there are no more instances of x, only instances of y in the result.\nTherefore, when we replace <b>simultaneously</b> x and y in the composed substitution, we must make sure x is replaced to 3 and not to y.\n\n",
+     "hash": "8f778af54cd246ab",
+     "he": "`\nE = (x y)\nE o [{x = y} o {y = 3}] \n= [E o {x = y}] o {y = 3}\n= (y y) o {y = 3}\n= (3 3)\n`\nאחרי הפעלת {x = y} לא נשארו יותר מופעים של x, אלא רק מופעים של y בתוצאה.\nלכן, כשאנחנו מחליפים <b>בו-זמנית</b> את x ואת y בהצבה המורכבת, עלינו לוודא ש-x מוחלף ב-3 ולא ב-y."
+    },
+    {
+     "id": "ps/ps5:6:22",
+     "type": "prose",
+     "en": "Let us look at #4: we apply the same logic as in #3, and obtain that:\n\n",
+     "hash": "fbcbe7b90279aae5",
+     "he": "נסתכל על #4: אנחנו מיישמים את אותו היגיון כמו ב-#3, ומקבלים ש:"
+    },
+    {
+     "id": "ps/ps5:6:23",
+     "type": "prose",
+     "en": "`\n[{x = y} o {y = x}] = [{x = x, y = x}]\n`\n\n",
+     "hash": "4a5921ae841dc2e5",
+     "he": "`\n[{x = y} o {y = x}] = [{x = x, y = x}]\n`"
+    },
+    {
+     "id": "ps/ps5:6:24",
+     "type": "prose",
+     "en": "The substitution of x into x is not introducing any modification, therefore, we can drop it - and we obtain:\n\n",
+     "hash": "14b9dd82ba64c397",
+     "he": "ההצבה של x ל-x אינה מכניסה שום שינוי, ולכן אפשר להשמיט אותה — ומתקבל:"
+    },
+    {
+     "id": "ps/ps5:6:25",
+     "type": "prose",
+     "en": "`\n[{x = y} o {y = x}] = [{x = x, y = x}] = {y = x}\n`\n\n",
+     "hash": "15aab428aa588b12",
+     "he": "`\n[{x = y} o {y = x}] = [{x = x, y = x}] = {y = x}\n`"
+    },
+    {
+     "id": "ps/ps5:6:26",
+     "type": "prose",
+     "en": "Substitution involves renaming as a first step:\n\n",
+     "hash": "48628f9eddabab20",
+     "he": "הצבה כוללת שינוי שם כשלב ראשון:"
+    },
+    {
+     "id": "ps/ps5:6:27",
+     "type": "code",
+     "en": "```\n((+ x ((lambda (x) (* x 2)) 3))) o {x = 5} =\n    Renaming: ((+ x ((lambda (x1) (* x1 2)) 3)))\n    Substitute: ((+ 5 ((lambda (x1) (* x1 2)) 3)))\n```\n\n",
+     "hash": "41faf1e636bfb28d",
+     "noteHe": "דוגמה מסכמת בשני שלבים מפורשים. בביטוי המקורי יש שני מופעים של `x`: הראשון חופשי, והשני קשור ל-lambda הפנימית. שלב ה-Renaming משנה **רק** את הקשור ל-`x1`, כולל את ההפניה בגוף ה-lambda. שלב ה-Substitute מחליף את מה שנשאר `x` — כלומר רק את המופע החופשי — ב-`5`. התוצאה `((+ 5 ((lambda (x1) (* x1 2)) 3)))` מוערכת ל-`5 + 6 = 11`. **זו התבנית המדויקת שכדאי לכתוב בפתרון מבחן:** שתי שורות, Renaming ואז Substitute."
+    }
+   ],
+   "headingHe": "שינוי שם והצבה"
+  },
+  {
+   "id": "ps/ps5:7",
+   "depth": 3,
+   "headingEn": "Question: Why do we need renaming?",
+   "raw": "<h3><b>Question: Why do we need renaming?</b></h3> \n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:7:0",
+     "type": "prose",
+     "en": "Let us look at this program:\n\n",
+     "hash": "9b4c50320f695cf9",
+     "he": "נסתכל על התוכנית הזאת:"
+    },
+    {
+     "id": "ps/ps5:7:1",
+     "type": "prose",
+     "en": "***(lambda (x) (lambda (y) (y x)))***\n\n",
+     "hash": "7c58bc3272ba8cfa",
+     "he": "***(lambda (x) (lambda (y) (y x)))***"
+    },
+    {
+     "id": "ps/ps5:7:2",
+     "type": "prose",
+     "en": "rename ***x*** -> ***a***, ***y*** -> ***b***  - all ok:\n\n",
+     "hash": "d47947c92d22283b",
+     "he": "נשנה ***x*** -> ***a***, ***y*** -> ***b***  — הכול תקין:"
+    },
+    {
+     "id": "ps/ps5:7:3",
+     "type": "prose",
+     "en": "***(lambda (a) (lambda (b) (b a)))***\n\n",
+     "hash": "4ca153defd492bbc",
+     "he": "***(lambda (a) (lambda (b) (b a)))***"
+    },
+    {
+     "id": "ps/ps5:7:4",
+     "type": "prose",
+     "en": "From this, you might conclude that any substitution is allowed - i.e. any variable in any lambda term can be replaced by any other. This is not so. Consider the inner lambda in the first expression above:\n\n",
+     "hash": "37d916fce725e06a",
+     "he": "מכאן אולי תסיקו שכל הצבה מותרת — כלומר, שאפשר להחליף כל משתנה בכל איבר lambda בכל משתנה אחר. זה אינו כך. נבחן את ה-lambda הפנימית שבביטוי הראשון למעלה:"
+    },
+    {
+     "id": "ps/ps5:7:5",
+     "type": "prose",
+     "en": "***(lambda (y) (y x))***\n\n",
+     "hash": "9e8ab528dbc39a10",
+     "he": "***(lambda (y) (y x))***"
+    },
+    {
+     "id": "ps/ps5:7:6",
+     "type": "prose",
+     "en": "In this expression, ***x*** is free - it is not bound by a lambda abstraction. If we were to replace ***y*** with ***x***, the expression would become:\n\n",
+     "hash": "204e6c517298293b",
+     "he": "בביטוי הזה, ***x*** הוא חופשי — הוא אינו נקשר על ידי הפשטת lambda. אילו היינו מחליפים את ***y*** ב-***x***, הביטוי היה הופך ל:"
+    },
+    {
+     "id": "ps/ps5:7:7",
+     "type": "prose",
+     "en": "***(lambda (x) (x x))***\n\n",
+     "hash": "42204dfc9cb0f2f6",
+     "he": "***(lambda (x) (x x))***"
+    },
+    {
+     "id": "ps/ps5:7:8",
+     "type": "prose",
+     "en": "But we already specified that when we apply a substitution, we do not replace bound variables - so that:\n\n",
+     "hash": "e3361c7b0c42b689",
+     "he": "אבל כבר קבענו שכשאנחנו מפעילים הצבה, אנחנו לא מחליפים משתנים קשורים — ולכן:"
+    },
+    {
+     "id": "ps/ps5:7:9",
+     "type": "prose",
+     "en": "***(lambda (y) (y x))*** o {y = x}\n\n",
+     "hash": "1eef2e5ab4a4ce05",
+     "he": "***(lambda (y) (y x))*** o {y = x}"
+    },
+    {
+     "id": "ps/ps5:7:10",
+     "type": "prose",
+     "en": "is not causing any harm - we return the same value unchanged, because y is bound.\n\n",
+     "hash": "4add8ce2396a46ff",
+     "he": "אינה גורמת שום נזק — אנחנו מחזירים את אותו ערך ללא שינוי, מפני ש-y קשור."
+    },
+    {
+     "id": "ps/ps5:7:11",
+     "type": "prose",
+     "en": "But now consider what happens if we introduce a value into the expression that contains a binding with a name to a variable that occurred free in the original expression.\nThe replacement will lead to a capture of the free variable by the new binding. \n\n",
+     "hash": "32cc0d3207add852",
+     "he": "אבל עכשיו נבחן מה קורה אם אנחנו מכניסים לביטוי ערך שמכיל קשירה בשם שהופיע כחופשי בביטוי המקורי.\nההחלפה תוביל ללכידה של המשתנה החופשי על ידי הקשירה החדשה."
+    },
+    {
+     "id": "ps/ps5:7:12",
+     "type": "code",
+     "en": "```scheme\n(define z not)\n\n(((lambda (x)\n     (lambda (z)\n        (x z)))\n  (lambda (w)\n     (z w)))\n  ;; Note: z occurs free in the parent exp.\n #f)\n```\n",
+     "hash": "5d3d2f5cf4f51282",
+     "lang": "scheme",
+     "noteHe": "אותה תוכנית שראינו בסעיף הקודם, מובאת שוב כתרגיל. `z` הגלובלי הוא `not`; ה-lambda הפנימית מכריזה על פרמטר בשם `z`; והארגומנט `(lambda (w) (z w))` מכיל `z` **חופשי** שמתייחס לגלובלי. הבלוק הבא מבקש מכם לעקוב אחרי הלכידה צעד-צעד לפני שרואים את הפתרון. **נסו לעשות זאת בעצמכם:** הציבו בלי שינוי שם, וראו לאן הגעתם."
+    },
+    {
+     "id": "ps/ps5:7:13",
+     "type": "prose",
+     "en": "Work out the capture - step by step...\n\n",
+     "hash": "dda6e94d0c3fed8e",
+     "he": "עקבו אחרי הלכידה — צעד אחר צעד…"
+    },
+    {
+     "id": "ps/ps5:7:14",
+     "type": "prose",
+     "en": "How it works with renaming:\n\n",
+     "hash": "9571fb885d37801d",
+     "he": "איך זה עובד עם שינוי שם:"
+    },
+    {
+     "id": "ps/ps5:7:15",
+     "type": "code",
+     "en": "```scheme\n;; rename z in (lambda (z) (x z)) ==> (lambda (z1) (x z1))\n;; rename w in (lambda(w)(z w)) ==> (lambda(w1)(z w1))\n;; substitute (lambda(z1)(x z1)) ∘ {x = (lambda(w1)(z w1))} ==> \n(lambda (z1)\n   ((lambda (w1)\n       (z w1)) ;z remains free!\n    z1))\n\n;; substitute ((lambda (w1) (z w1)) z1)∘ {z1 = #f}==>\n((lambda(w1)\n    (z w1))\n #f)\n\n;;substitute (z w1) ∘ {w1 = #f}==>\n(z #f)\n\n;;substitute (z #f) ∘ {z = not}==>\n(not #f) \n#t\n```\n\n",
+     "hash": "d45b38f008f2f794",
+     "lang": "scheme",
+     "noteHe": "הפתרון המלא, ארבעה שלבי הצבה. שתי השורות הראשונות מבצעות את שינוי השם: הפרמטר `z` של ה-lambda הפנימית הופך ל-`z1`, והפרמטר `w` שבארגומנט הופך ל-`w1`. עכשיו ההצבה `{x = (lambda(w1)(z w1))}` בטוחה, וההערה בקוד מדגישה את הנקודה: `z remains free!` — ה-`z` שבתוך ה-lambda המוצבת נשאר חופשי ולא נלכד, כי הפרמטר של ה-lambda העוטפת נקרא עכשיו `z1`. משם החישוב זורם: מציבים `#f` במקום `z1`, מקבלים `((lambda(w1)(z w1)) #f)`; מציבים `#f` במקום `w1` ומקבלים `(z #f)`; ולבסוף `z` נפתר מהסביבה הגלובלית ל-`not`, ומתקבל `(not #f)` = `#t`. **השוו:** בלי שינוי שם, ה-`z` היה מוחלף ב-`#f` בשלב השלישי, והביטוי היה `(#f #f)` — ניסיון להפעיל בוליאני כפונקציה, כלומר שגיאה. זהו התרגיל שממחיש למה `renameExps` נקראת לפני `substitute` בכל יישום closure."
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "שאלה: מדוע אנחנו צריכים שינוי שם?"
+  },
+  {
+   "id": "ps/ps5:8",
+   "depth": 3,
+   "headingEn": "Applicative Eval",
+   "raw": "<h3><b>Applicative Eval</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:8:0",
+     "type": "prose",
+     "en": "Look at the next code:\n",
+     "hash": "6455363d3e48ac73",
+     "he": "הסתכלו על הקוד הבא:"
+    },
+    {
+     "id": "ps/ps5:8:1",
+     "type": "code",
+     "en": "```scheme\n((lambda (x z) \n    (* (+ x z) z))\n 1\n (+ 1 2))\n```\n",
+     "hash": "714881aead59d0bb",
+     "lang": "scheme",
+     "noteHe": "lambda עם **שני** פרמטרים (`x` ו-`z`) שמיושמת על שני ארגומנטים: `1` והביטוי `(+ 1 2)`. שימו לב ש-`z` מופיע פעמיים בגוף — פעם בתוך `(+ x z)` ופעם כאופרנד של `*`. זה יהיה רלוונטי כשנשווה בין הערכה יישומית לנורמלית. נסו לחשב את התוצאה לפני שאתם מסתכלים בפתרון."
+    },
+    {
+     "id": "ps/ps5:8:2",
+     "type": "prose",
+     "en": "<b>Q: </b> Evaluate the following expression according to the applicative-eval algorithm\n\n",
+     "hash": "ee47b6b4bf62c4d7",
+     "he": "<b>ש: </b> הערִיכו את הביטוי הבא לפי אלגוריתם ה-applicative-eval"
+    },
+    {
+     "id": "ps/ps5:8:3",
+     "type": "prose",
+     "en": "<b> A:</b>\n",
+     "hash": "e0628983340bf688",
+     "he": "<b> ת:</b>"
+    },
+    {
+     "id": "ps/ps5:8:4",
+     "type": "code",
+     "en": "```\napplicative-eval     [((lambda (x z) (* (+ x z) z)) 1 (+ 1 2))]\n    applicative-eval [(lambda (x z) (* (+ x z) z))] ==> <Closure (x z) (* (+ x z) z)>\n    applicative-eval [1] ==> 1\n    applicative-eval [(+ 1 2)]\n        applicative-eval [+] ==> #<primitive-procedure +>\n        applicative-eval [1] ==> 1\n        applicative-eval [2] ==> 2\n   3\nreduce:\n    applicative-eval [(* (+ 1 3) 3)]\n        applicative-eval [*] ==> #<primitive-procedure *>\n        applicative-eval [(+ 1 3)]\n            applicative-eval [+] ==> #<primitive-procedure +>\n            applicative-eval [1] ==> 1\n            applicative-eval [3] ==> 3\n        ==> 4\n        applicative-eval [3]==> 3\n    12\n```\n\n\n",
+     "hash": "bf54af5cb2e5b5d4",
+     "noteHe": "הגזירה המלאה, והתוצאה היא `12`. עקבו אחרי הסדר: קודם מוערך האופרטור ומתקבל closure עם **שני** פרמטרים; אחר כך מוערך האופרנד הראשון (`1`); ואז האופרנד השני `(+ 1 2)` שמוערך ל-`3` — שימו לב שזה קורה **לפני** היישום, וזו כל המהות של הסדר היישומי. בשלב ה-`reduce:` מוצבים שני הערכים בו-זמנית — `x=1` ו-`z=3` — ומתקבל הגוף `(* (+ 1 3) 3)`. שימו לב שההצבה של `z` נעשית בשני המקומות שבהם הוא מופיע, ובשניהם מוצב הערך `3` שכבר חושב פעם אחת. הערכת הגוף נותנת `(* 4 3)` = `12`. **טעות נפוצה:** להציב את הביטוי `(+ 1 2)` במקום הערך `3` — זו הערכה נורמלית, לא יישומית."
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "הערכה יישומית (Applicative Eval)"
+  },
+  {
+   "id": "ps/ps5:9",
+   "depth": 3,
+   "headingEn": "Normal Eval",
+   "raw": "<h3><b>Normal Eval</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:9:0",
+     "type": "prose",
+     "en": "<b> Q:</b>  Evaluate the following expression according to the normal evaluation algorithm:\n",
+     "hash": "d06022c4eb641c31",
+     "he": "<b> ש:</b>  הערִיכו את הביטוי הבא לפי אלגוריתם ההערכה הנורמלית:"
+    },
+    {
+     "id": "ps/ps5:9:1",
+     "type": "code",
+     "en": "```scheme\n(((lambda (x)\n     (lambda (y) \n        (* x y))) \n  (+ 1 2)) \n  2)  \n```\n\n",
+     "hash": "9e1bdcc6f93f71cb",
+     "lang": "scheme",
+     "noteHe": "פונקציה מקוננת (curried): הפונקציה החיצונית מקבלת `x` ומחזירה פונקציה שמקבלת `y` ומכפילה אותם. היא מיושמת קודם על `(+ 1 2)` ואחר כך התוצאה מיושמת על `2`. התשובה היא `6` בשני מודלי ההערכה; ההבדל יהיה במתי `(+ 1 2)` מחושב."
+    },
+    {
+     "id": "ps/ps5:9:2",
+     "type": "prose",
+     "en": "<b>A:</b>\n\n",
+     "hash": "6bf431e8d9fc4b35",
+     "he": "<b>ת:</b>"
+    },
+    {
+     "id": "ps/ps5:9:3",
+     "type": "code",
+     "en": "```\nnormal-eval[ (( (lambda (x)(lambda (y)(* x y)))(+ 1 2))2) ]\n  normal-eval [( (lambda (x)(lambda (y)(* x y)))(+ 1 2)) ]\n    normal-eval[(lambda (x)(lambda (y)(* x y)))] ==><closure (x) (lambda(y) (* x y))>\n    substitute:\n    (lambda(y) (* x y) ) ᵒ {x = (+ 1 2) } ==> (lambda(y) (* (+ 1 2) y) )\n    reduce:\n    normal-eval[lambda(y) (* (+ 1 2) y) ] ==><closure (y) (* (+ 1 2) y)>\n    substitute:\n    (* (+ 1 2) y) ᵒ { y = 2} ==> (* (+ 1 2) 2)\n    Reduce:\n    Normal-eval[ * (+ 1 2) 2 ] ==>\n      Normal-eval[ * ] ==> <primitive-procedure: *>\n      Normal-eval[ ( + 1 2) ] ==>\n        Normal-eval[+] ==> <primitive-procedure: +>\n        Normal-eval[1] ==> 1\n        Normal-eval[2] ==> 2\n      ==> 3\n      Normal-eval[2] ==> 2\n   ==> 6\n```\n\n",
+     "hash": "1617aa15debf820b",
+     "noteHe": "הגזירה הנורמלית, והתוצאה `6`. שימו לב לתבנית שחוזרת פעמיים: הערכת האופרטור → **substitute** → **reduce**, בלי שום הערכה של האופרנד באמצע. בשלב הראשון מוצב הביטוי `(+ 1 2)` — לא הערך `3` — במקום `x`, ומתקבל `(lambda(y) (* (+ 1 2) y))`. הערכת ה-lambda הזאת מחזירה closure שבתוכו הביטוי `(+ 1 2)` עדיין ממתין ולא חושב. בשלב השני מוצב `2` במקום `y`, ורק אז, כשצריך להפעיל את הפרימיטיב `*`, מוערך `(+ 1 2)` ל-`3` ומתקבל `(* 3 2)` = `6`. שימו לב ש-`x` מופיע פעם אחת בלבד בגוף, ולכן כאן אין חישוב כפול — בניגוד לדוגמאות שראינו ב-2.6. הפורמט של הפתרון — שורות `substitute:` ו-`reduce:` מפורשות — הוא בדיוק מה שמצפים לראות בפתרון מבחן. (בקוד המקורי יש חוסר עקביות באותיות רישיות, `Normal-eval` מול `normal-eval`; זה חסר משמעות.)"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "הערכה נורמלית (Normal Eval)"
+  },
+  {
+   "id": "ps/ps5:10",
+   "depth": 3,
+   "headingEn": "applicative-eval VS normal-eval",
+   "raw": "<h3><b>applicative-eval VS normal-eval</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:10:0",
+     "type": "prose",
+     "en": "<b>Q:</b>Does the evaluation Strategy matter? \n\n",
+     "hash": "689a42c346534d52",
+     "he": "<b>ש:</b>האם אסטרטגיית ההערכה משנה?"
+    },
+    {
+     "id": "ps/ps5:10:1",
+     "type": "prose",
+     "en": "Let us look at the next program:\n\n",
+     "hash": "4ebaa7032fa1db47",
+     "he": "נסתכל על התוכנית הבאה:"
+    },
+    {
+     "id": "ps/ps5:10:2",
+     "type": "code",
+     "en": "```scheme\n(define test\n  (lambda (x y)\n    (if (= x 0)\n        0\n        y)))\n\n(define zero-div\n  (lambda (n)\n    (/ n 0))) ; division by zero!\n\n(test 0 (zero-div 5))\n```\n\n",
+     "hash": "dacc187b775c5901",
+     "lang": "scheme",
+     "noteHe": "תוכנית שנועדה להפריד בין שני מודלי ההערכה. `test` מקבלת שני ארגומנטים ומחזירה `0` אם `x` הוא אפס, אחרת `y` — כלומר במקרה `(test 0 ...)` הארגומנט השני אף פעם לא נחוץ. `zero-div` מחלקת באפס, וההערה בקוד מסמנת זאת במפורש. השאלה היא אם הקריאה `(test 0 (zero-div 5))` תיכשל, והתשובה תלויה כולה בסדר ההערכה. שימו לב שהמבנה כאן זהה לדוגמת `try` מהשיעור, רק עם שמות אחרים."
+    },
+    {
+     "id": "ps/ps5:10:3",
+     "type": "prose",
+     "en": "<b> Normal Eval </b>\n\n",
+     "hash": "4401b4cb4edec36c",
+     "he": "<b> הערכה נורמלית </b>"
+    },
+    {
+     "id": "ps/ps5:10:4",
+     "type": "code",
+     "en": "```\nnormal-eval[(test 0 (zero-div 5))]\n    normal-eval[test] ==> <closure (lambda (x y) (if (= x 0) 0 y))>\n\n(if (= x 0) 0 y))ᵒ{x = 0} ==> (if (= 0 0) 0 y))\n\n(if (= 0 0) 0 y))ᵒ{y = (zero-div 5)} ==> (if (= 0 0) 0 (zero-div 5) ))\n\nreduce:\n\nnormal-eval[(if (= 0 0) 0 (zero-div 5)))]\n    normal-eval[(= 0 0)]\n        normal-eval[ = ] ==>#<primitive-procedure =>\n    normal-eval[ 0 ] ==>0\n    normal-eval[ 0 ] ==>0\n    ==> #t\n    normal-eval[0] ==> 0\n==>0\n```\n\n",
+     "hash": "cf7b97e487993c03",
+     "noteHe": "הגזירה הנורמלית, שמסתיימת בהצלחה עם `0`. שימו לב לשלב ההצבה: `{y = (zero-div 5)}` — מוצב ה**ביטוי** ולא ערכו. הגוף המוצב הוא `(if (= 0 0) 0 (zero-div 5))`, ומכיוון ש-`if` היא צורה מיוחדת שמעריכה רק ענף אחד, התנאי `(= 0 0)` מתקיים, מוחזר `0`, והביטוי `(zero-div 5)` **לעולם לא מוערך**. זהו הצירוף של שני מנגנוני עצלות: הסדר הנורמלי דחה את הערכת הארגומנט, וה-`if` הבטיח שהוא לא ייגע בענף שלא נבחר."
+    },
+    {
+     "id": "ps/ps5:10:5",
+     "type": "prose",
+     "en": "Notice that we didn't evaluate ***(div-zero 5)***!\n\n",
+     "hash": "de81542ee1fa542c",
+     "he": "שימו לב שלא הערכנו את ***(div-zero 5)***!"
+    },
+    {
+     "id": "ps/ps5:10:6",
+     "type": "prose",
+     "en": "<b> Applicative Eval </b>\n\n",
+     "hash": "2776eecfa097e8eb",
+     "he": "<b> הערכה יישומית </b>"
+    },
+    {
+     "id": "ps/ps5:10:7",
+     "type": "code",
+     "en": "```\napplicative-eval[(test 0 (zero-div 5))]\n    applicative-eval[test] ==> <closure (lambda (x y) (if (= x 0) 0 y))>\n    applicative-eval[0] ==> 0\n    applicative-eval[(zero-div 5)]\n        applicative-eval[zero-div]==><closure (lambda (n) (/ n 0))>\n        applicative-eval[5]==> 5\n```\n\n",
+     "hash": "dad89bc121edcd7f",
+     "noteHe": "הגזירה היישומית של אותה תוכנית — והיא **נעצרת באמצע**, וזה בכוונה. אחרי הערכת `test` ואחרי הערכת האופרנד הראשון `0`, המפרש חייב להעריך גם את האופרנד השני `(zero-div 5)`. הוא מעריך את `zero-div` ל-closure ואת `5` למספר, ומיד אחר כך יגיע לגוף `(/ 5 0)` — כלומר לשגיאה. הגזירה מסתיימת כאן כי אין טעם להמשיך: התוכנית נכשלה עוד לפני שנגענו ב-`if`. **הנקודה:** הבעיה אינה ב-`if` ואינה ב-`test`, אלא בכלל היישום שמכריח להעריך את כל האופרנדים."
+    },
+    {
+     "id": "ps/ps5:10:8",
+     "type": "prose",
+     "en": "We get a <b>\"division by zero\"</b> error !!!\n\n\n",
+     "hash": "3491e616e4664879",
+     "he": "אנחנו מקבלים שגיאת <b>\"חלוקה באפס\"</b>!!!"
+    },
+    {
+     "id": "ps/ps5:10:9",
+     "type": "prose",
+     "en": "Another example:\n\n",
+     "hash": "023fee116f0ff0ee",
+     "he": "דוגמה נוספת:"
+    },
+    {
+     "id": "ps/ps5:10:10",
+     "type": "code",
+     "en": "```scheme\n(define loop (lambda (x) (loop x)))\n\n(define g (lambda (x y) y))\n\n(g (loop 0) 7)\n```\n\n",
+     "hash": "7e62828f7c46b8e7",
+     "lang": "scheme",
+     "noteHe": "אותה הפרדה, הפעם עם לולאה אינסופית במקום שגיאה. `loop` קוראת לעצמה ללא תנאי עצירה. `g` מקבלת שני ארגומנטים ומחזירה תמיד את השני, כלומר `x` אינו בשימוש. בהערכה נורמלית הביטוי `(loop 0)` מוצב במקום `x` בגוף `y` — ומאחר ש-`x` אינו מופיע בגוף, הביטוי פשוט נעלם ומוחזר `7`. בהערכה יישומית, `(loop 0)` מוערך לפני היישום והתוכנית נתקעת לנצח. שימו לב להבדל בין המקרים: בשגיאה המפרש עוצר ומדווח, בלולאה אינסופית הוא פשוט לא מסיים לעולם — שני מקרים שבהם `normal-eval` \"חזק\" יותר."
+    },
+    {
+     "id": "ps/ps5:10:11",
+     "type": "prose",
+     "en": "normal-eval will return 7 while applicative-eval will get into infinite loop.\nwhy is that?\n\n\n",
+     "hash": "1512c021e309226a",
+     "he": "normal-eval יחזיר 7 בעוד ש-applicative-eval ייכנס ללולאה אינסופית.\nמדוע?"
+    },
+    {
+     "id": "ps/ps5:10:12",
+     "type": "prose",
+     "en": "We saw two examples where different manner of evaluation get different result.\n\n",
+     "hash": "7e35c088fac2684e",
+     "he": "ראינו שתי דוגמאות שבהן אופני הערכה שונים נותנים תוצאה שונה."
+    },
+    {
+     "id": "ps/ps5:10:13",
+     "type": "prose",
+     "en": "<b>Notice:</b> If both evaluations don't get into an infinte loop and/or an error - they both return the same value!\n\n",
+     "hash": "00981ab6cad81e84",
+     "he": "<b>שימו לב:</b> אם שתי ההערכות אינן נכנסות ללולאה אינסופית ו/או לשגיאה — שתיהן מחזירות את אותו ערך!"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "applicative-eval מול normal-eval"
+  },
+  {
+   "id": "ps/ps5:11",
+   "depth": 3,
+   "headingEn": "Distinguish between different evaluation strategies",
+   "raw": "<h3><b> Distinguish between different evaluation strategies</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps5:11:0",
+     "type": "prose",
+     "en": "<b>Q: </b> How can we distinguish what evaluation strategy the interpreter is using?\n\n",
+     "hash": "d7c052149e85cfd3",
+     "he": "<b>ש: </b> כיצד נוכל לזהות באיזו אסטרטגיית הערכה משתמש המפרש?"
+    },
+    {
+     "id": "ps/ps5:11:1",
+     "type": "prose",
+     "en": "<b>A:</b>\nAs we saw in the previous questions -\n \n",
+     "hash": "99cbab96a3e4d64b",
+     "he": "<b>ת:</b>\nכפי שראינו בשאלות הקודמות —"
+    },
+    {
+     "id": "ps/ps5:11:2",
+     "type": "prose",
+     "en": "if we understand the differences between the evaluations methods we can write a program that each method will act different on.\n\n",
+     "hash": "bfbab0bdc0bbd304",
+     "he": "אם אנחנו מבינים את ההבדלים בין שיטות ההערכה, אנחנו יכולים לכתוב תוכנית שכל שיטה תתנהג עליה אחרת."
+    },
+    {
+     "id": "ps/ps5:11:3",
+     "type": "prose",
+     "en": "for example:\n",
+     "hash": "7d26ce44545b480f",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "ps/ps5:11:4",
+     "type": "code",
+     "en": "```scheme\n(define applic\n  (lambda ()\n    (display 'applic)\n    0))\n\n(define test (lambda (x) 1))\n\n(test (applic))\n```\n\n",
+     "hash": "2536876e27e2b8b6",
+     "lang": "scheme",
+     "noteHe": "\"מבחן הגלאי\" — תוכנית קצרה שמזהה את סדר ההערכה של המפרש. `applic` היא פונקציה חסרת פרמטרים שמדפיסה את הסמל `'applic` ומחזירה `0`; שימו לב לגרש — זהו סמל מצוטט ולא הפניה למשתנה. `test` מקבלת ארגומנט ומתעלמת ממנו לחלוטין ומחזירה `1`. הקריאה `(test (applic))` תחזיר `1` בכל מקרה, אבל: אם משהו הודפס — המפרש יישומי; אם המסך נשאר ריק — המפרש נורמלי. **זו התשובה שמצפים לה במבחן בשאלה \"כיצד תבחינו בין שני מודלי ההערכה\"**: תוכנית עם תופעת לוואי בארגומנט שאינו בשימוש. שימו לב שהמבחן חייב להשתמש בארגומנט שלא נוגעים בו — אילו `test` הייתה מחזירה את `x`, שתי השיטות היו מדפיסות."
+    },
+    {
+     "id": "ps/ps5:11:5",
+     "type": "prose",
+     "en": "Normal eval will not have any side-effects while applicative eval will display \"applic\" to the screen.\nThey both will return the value 1.\n\n",
+     "hash": "78589b79b76fd127",
+     "he": "הערכה נורמלית לא תייצר שום תופעת לוואי, בעוד שהערכה יישומית תדפיס \"applic\" למסך.\nשתיהן יחזירו את הערך 1."
+    },
+    {
+     "id": "ps/ps5:11:6",
+     "type": "prose",
+     "en": "<!---\n\n<h3><b> letrec </b></h3>\n\nLet us recall the exp procedure:\n```scheme\n; Signature: exp(b e)\n; Purpose: to compute the function b^e\n; Type: [Number * Number -> Number]\n; Pre-conditions: b >= 0, e is natural\n; Tests:\n; (exp 2 3) => 8\n; (exp 2 4) => 16\n; (exp 3 4) => 81\n\n(define exp\n  (lambda (b e)\n    (exp-iter b e 1)))\n\n(define exp-iter\n  (lambda (b e acc)\n    (cond ((= e 0) acc)\n           (else (exp-iter b (- e 1) (* b acc))))))\n```\n\nIn this program both \"exp\" and \"exp-iter\" are public functions.\nbut the user will only use \"exp\" so we want \"exp-iter\" to be non-public procedure.\n\nhow can we do that?\n\n<b>First attempt:</b>\nwe will use let\n\n```scheme\n(define exp\n  (lambda (b e)\n    (let ((exp-iter (lambda (b e acc)\n                      (cond ((= e 0) acc)\n                      (else (exp-iter b (- e 1) (* b acc)))))))\n    (exp-iter b e 1))))\n```\n\n<b>Q:</b> What is the problem with that program?\n\n<b>A:</b> We use ***exp-iter*** in its definition (why is that a problem?)\n\n<b>Second attempt:</b>\n\n```scheme\n(define exp\n  (lambda (b e)\n    (letrec ((exp-iter (lambda (b e acc)\n                         (cond ((= e 0) acc)\n                         (else (exp-iter b (- e 1) (* b acc)))))))\n    (exp-iter b e 1))))\n```\n\nHere we use letrec instead let so a defintion of a procedure can be recusive.\n\nCan we do it better? Yes! By noticing that ***b*** stays constant throughout ***exp-iter***, we can just use the existing ***b*** instead of passing it around as an argument.\n\n<b> Third attempt:</b>\n\n```scheme\n(define exp\n  (lambda (b e)\n    (letrec ((exp-iter (lambda (e acc)\n                         (cond ((= e 0) acc)\n                         (else (exp-iter (- e 1) (* b acc)))))))\n    (exp-iter e 1))))\n```\n\n-->\n",
+     "hash": "976e38a5d44039c1",
+     "he": "<!---\n\n<h3><b> letrec </b></h3>\n\nנזכיר לעצמנו את הפרוצדורה exp:\n```scheme\n; Signature: exp(b e)\n; Purpose: to compute the function b^e\n; Type: [Number * Number -> Number]\n; Pre-conditions: b >= 0, e is natural\n; Tests:\n; (exp 2 3) => 8\n; (exp 2 4) => 16\n; (exp 3 4) => 81\n\n(define exp\n  (lambda (b e)\n    (exp-iter b e 1)))\n\n(define exp-iter\n  (lambda (b e acc)\n    (cond ((= e 0) acc)\n           (else (exp-iter b (- e 1) (* b acc))))))\n```\n\nבתוכנית הזאת גם \"exp\" וגם \"exp-iter\" הן פונקציות ציבוריות.\nאבל המשתמש ישתמש רק ב-\"exp\", ולכן היינו רוצים ש-\"exp-iter\" תהיה פרוצדורה לא-ציבורית.\n\nאיך אפשר לעשות זאת?\n\n<b>ניסיון ראשון:</b>\nנשתמש ב-let\n\n```scheme\n(define exp\n  (lambda (b e)\n    (let ((exp-iter (lambda (b e acc)\n                      (cond ((= e 0) acc)\n                      (else (exp-iter b (- e 1) (* b acc)))))))\n    (exp-iter b e 1))))\n```\n\n<b>ש:</b> מה הבעיה בתוכנית הזאת?\n\n<b>ת:</b> אנחנו משתמשים ב-***exp-iter*** בתוך ההגדרה של עצמה (מדוע זו בעיה?)\n\n<b>ניסיון שני:</b>\n\n```scheme\n(define exp\n  (lambda (b e)\n    (letrec ((exp-iter (lambda (b e acc)\n                         (cond ((= e 0) acc)\n                         (else (exp-iter b (- e 1) (* b acc)))))))\n    (exp-iter b e 1))))\n```\n\nכאן אנחנו משתמשים ב-letrec במקום ב-let, כך שהגדרה של פרוצדורה יכולה להיות רקורסיבית.\n\nאפשר לעשות זאת טוב יותר? כן! אם נבחין ש-***b*** נשאר קבוע לאורך כל ***exp-iter***, נוכל פשוט להשתמש ב-***b*** הקיים במקום להעביר אותו כארגומנט.\n\n<b> ניסיון שלישי:</b>\n\n```scheme\n(define exp\n  (lambda (b e)\n    (letrec ((exp-iter (lambda (e acc)\n                         (cond ((= e 0) acc)\n                         (else (exp-iter (- e 1) (* b acc)))))))\n    (exp-iter e 1))))\n```\n\n-->"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "הבחנה בין אסטרטגיות הערכה שונות"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "בסעיף \"מדוע אנחנו צריכים שינוי שם?\" מתבקשים לעקוב אחרי הלכידה צעד-צעד. בצעו את הגזירה של התוכנית **בלי** שינוי שם, והראו היכן בדיוק נלכד המשתנה `z` ומה השגיאה שמתקבלת.\n\n```scheme\n(define z not)\n\n(((lambda (x)\n     (lambda (z)\n        (x z)))\n  (lambda (w)\n     (z w)))\n #f)\n```",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n```\napplicative-eval[ ((lambda (x) (lambda (z) (x z))) (lambda (w) (z w))) ]\n    applicative-eval[ (lambda (x) (lambda (z) (x z))) ] ==> <Closure (x) (lambda (z) (x z))>\n    applicative-eval[ (lambda (w) (z w)) ]              ==> <Closure (w) (z w)>\n\nsubstitute (ללא שינוי שם):\n    (lambda (z) (x z)) o {x = (lambda (w) (z w))}\n    ==> (lambda (z) ((lambda (w) (z w)) z))     ; <-- כאן קרתה הלכידה\n```\n\nב-`(lambda (w) (z w))` המקורי, `z` היה **חופשי** והתייחס ל-`define z not` הגלובלי. אחרי שהביטוי הוצב בתוך `(lambda (z) ...)`, אותו `z` הפך ל**קשור** לפרמטר של ה-lambda העוטפת. ממשיכים:\n\n```\nreduce: applicative-eval[ (lambda (z) ((lambda (w) (z w)) z)) ] ==> <Closure (z) ((lambda (w) (z w)) z)>\n\nיישום על #f:\n    ((lambda (w) (z w)) z) o {z = #f}\n    ==> ((lambda (w) (#f w)) #f)\n    ==> (#f #f)\n```\n\nהתוצאה היא ניסיון להפעיל את הערך הבוליאני `#f` כפרוצדורה — כלומר שגיאה מסוג `Bad procedure #f`, במקום התשובה הנכונה `#t` (שהיא `(not #f)`).\n\nלשם השוואה, עם שינוי שם הפרמטר הופך ל-`z1`, ה-`z` שבתוך ה-lambda המוצבת נשאר חופשי, וההצבה האחרונה מפנה אותו לסביבה הגלובלית ומחזירה `(not #f)` = `#t`.",
+   "explanationHe": "נקודות שחייבות להופיע בתשובה: (1) לפני ההצבה `z` שבתוך `(lambda (w) (z w))` הוא חופשי ומתייחס לגלובלי; (2) ההצבה מכניסה אותו לתוך `(lambda (z) ...)` ובכך משנה את מעמדו לקשור — זו הלכידה; (3) התוצאה הסופית היא הפעלה של `#f` כפונקציה, כלומר שגיאה; (4) עם שינוי שם התוצאה הנכונה היא `#t`. שימו לב שהשגיאה אינה מתגלה בשלב ההצבה אלא רק שני צעדים אחר כך — זה מה שהופך את הבאג הזה לערמומי."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "בסעיף ההשוואה נשאלת השאלה \"מדוע?\" לגבי התוכנית הבאה: `normal-eval` מחזיר 7 ואילו `applicative-eval` נכנס ללולאה אינסופית. הסבירו במדויק.\n\n```scheme\n(define loop (lambda (x) (loop x)))\n(define g (lambda (x y) y))\n(g (loop 0) 7)\n```",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** ההבדל נובע כולו מכלל ההערכה של ביטוי יישום (AppExp).\n\nב-**applicative-eval** הכלל הוא: מעריכים את האופרטור, ואז מעריכים את **כל** האופרנדים, ורק אז מיישמים. לכן לפני שנוגעים בגוף של `g` המפרש מעריך את `(loop 0)`. הערכה זו נכנסת ל-`(loop x)` שמציב `0` וקוראת שוב ל-`(loop 0)`, וכן הלאה ללא תנאי עצירה — לולאה אינסופית. שימו לב שהעובדה ש-`g` בכלל לא משתמשת ב-`x` אינה עוזרת: כלל ההערכה אינו \"מסתכל\" על גוף הפרוצדורה לפני שהוא מעריך את הארגומנטים.\n\nב-**normal-eval** הכלל מוותר על שלב הערכת האופרנדים. מעריכים רק את `g` ומקבלים `<Closure (x y) y>`, ואז מציבים את ה**ביטויים** הלא-מוערכים: `y o {x = (loop 0), y = 7}` ==> `7`. מכיוון שגוף ה-closure הוא `y` בלבד ואינו מכיל שום מופע של `x`, הביטוי `(loop 0)` פשוט נזרק בשלב ההצבה ולא מוערך לעולם. הרדוקציה של `7` מחזירה `7`.\n\nזו הדגמה של טענה 4 בהשוואה שבשיעור: קיימים ביטויים שההערכה הנורמלית עוצרת עבורם וההערכה היישומית לא. הכיוון ההפוך אינו קיים — אם היישומית עוצרת, גם הנורמלית תעצור ותחזיר את אותו ערך.",
+   "explanationHe": "נקודות מפתח: (1) הסבר מפורש של כלל ה-AppExp בכל אחד משני המודלים; (2) ההדגשה ש-`x` אינו מופיע בגוף של `g`, ולכן בהצבה הביטוי נעלם; (3) ההבנה שבסדר יישומי הארגומנט מוערך ללא קשר לשאלה אם ישתמשו בו; (4) קישור לטענה הכללית — normal-eval עוצר בכל מקרה שבו applicative-eval עוצר, אבל לא להפך."
+  }
+ ]
+}

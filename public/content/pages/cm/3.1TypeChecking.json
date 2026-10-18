@@ -1,0 +1,1664 @@
+{
+ "id": "cm/3.1TypeChecking",
+ "kind": "lecture",
+ "sourcePath": "class_material/3.1TypeChecking.md",
+ "titleEn": "Type Checking",
+ "titleHe": "בדיקת טיפוסים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/3.1TypeChecking:0",
+   "depth": 1,
+   "headingEn": "Type Checking",
+   "raw": "# Type Checking\n",
+   "blocks": [],
+   "headingHe": "בדיקת טיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:1:0",
+     "type": "prose",
+     "en": "We return in this Chapter to the issue of type safety that was presented informally in\n[Chapter 1](https://bguppl.github.io/interpreters/class_material/1.1TypescriptDatatypes.html) when we introduced the type system of TypeScript.  \nWe investigate how we can analyze programs to verify that they are type safe.\n\n",
+     "hash": "7a927bc3cde2c329",
+     "he": "בפרק הזה אנחנו חוזרים לסוגיית בטיחות הטיפוסים שהוצגה באופן לא־פורמלי ב־\n[פרק 1](https://bguppl.github.io/interpreters/class_material/1.1TypescriptDatatypes.html), כשהצגנו את מערכת הטיפוסים של TypeScript.  \nנחקור כיצד אפשר לנתח תוכניות כדי לוודא שהן בטוחות מבחינת טיפוסים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:1:1",
+     "type": "prose",
+     "en": "An attempt to apply a procedure to inappropriate data is a *type error*.  \nWe develop techniques to analyze programs so that we can ensure they are *type safe* - that is, if we compute them, on any\npossible input values, we do not reach type errors.\n\n",
+     "hash": "e1324d7e00a0dfcf",
+     "he": "ניסיון ליישם פרוצדורה על נתונים שאינם מתאימים הוא *שגיאת טיפוס*.  \nאנחנו מפתחים טכניקות לניתוח תוכניות, כדי שנוכל להבטיח שהן *בטוחות מבחינת טיפוסים* — כלומר, שאם נחשב אותן על כל ערכי הקלט\nהאפשריים, לא נגיע לשגיאות טיפוס."
+    },
+    {
+     "id": "cm/3.1TypeChecking:1:2",
+     "type": "prose",
+     "en": "In order to support type checking, we will extend our language with type annotations - in the same way as TypeScript extends JavaScript.\nGiven a program with annotations, a type checker can systematically identify unsafe code, as demonstrated below:\n\n",
+     "hash": "f53ad9fd3cfc45a2",
+     "he": "כדי לתמוך בבדיקת טיפוסים, נרחיב את השפה שלנו בהערות טיפוס — בדיוק כמו ש-TypeScript מרחיבה את JavaScript.\nבהינתן תוכנית עם הערות, בודק טיפוסים יכול לזהות באופן שיטתי קוד לא בטוח, כפי שמודגם להלן:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:1:3",
+     "type": "code",
+     "en": "```scheme\n(define f \n  (lambda ([n : number]) : number\n    (+ n 3)))\n    \n(f 'x) --> Type error: 'x is not a number\n```\n\n",
+     "hash": "0d50d05aab1aef4b",
+     "lang": "scheme",
+     "noteHe": "ההצצה הראשונה לתחביר של $$L5$$ — השפה עם הערות הטיפוס שנפתח בפרק הזה. שימו לב לשתי הערות טיפוס בשורה אחת: `[n : number]` מציין את הטיפוס של הפרמטר, והנקודתיים שאחרי רשימת הפרמטרים, `: number`, מציינות את **טיפוס הערך המוחזר**. הסוגריים המרובעים סביב הפרמטר הם חלק מהתחביר החדש. הקריאה `(f 'x)` מעבירה סמל במקום מספר, ולכן בודק הטיפוסים דוחה אותה — **בלי להריץ את התוכנית**. זו בדיוק הנקודה: השגיאה מתגלה מניתוח סטטי של הקוד, ולא מכך שהחישוב נכשל בזמן ריצה. השוו לתחביר של TypeScript, `(n: number): number => n + 3` — הרעיון זהה, רק הסוגריים שונים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:1:4",
+     "type": "prose",
+     "en": "We proceed in two stages: \n",
+     "hash": "ec341da727c66d9f",
+     "he": "נתקדם בשני שלבים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:1:5",
+     "type": "list",
+     "en": "* We first analyze programs that include full type annotations and verify that they satisfy their type declarations.\n* We then analyze programs that include **partial** type annotations (and possibly no annotations at all) and **infer** the types of all variable declarations and functions, and check that the program is type safe.\n\n",
+     "hash": "25fd16db94b3f70f",
+     "he": "* תחילה ננתח תוכניות שכוללות הערות טיפוס מלאות, ונוודא שהן מקיימות את הצהרות הטיפוס שלהן.\n* אחר כך ננתח תוכניות שכוללות הערות טיפוס **חלקיות** (ואולי ללא הערות כלל), **נסיק** את הטיפוסים של כל הכרזות המשתנים והפונקציות, ונבדוק שהתוכנית בטוחה מבחינת טיפוסים."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/3.1TypeChecking:2",
+   "depth": 2,
+   "headingEn": "Type Safety and Program Correctness",
+   "raw": "## Type Safety and Program Correctness\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:2:0",
+     "type": "prose",
+     "en": "**Contracts** of programs provide specification for their most important properties: \n",
+     "hash": "2a10162669e64812",
+     "he": "**חוזים (Contracts)** של תוכניות מספקים מפרט לתכונות החשובות ביותר שלהן:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:1",
+     "type": "list",
+     "en": "* Signature\n* Type preconditions and postconditions. \n\n",
+     "hash": "3082e0c5daff6060",
+     "he": "* חתימה (Signature)\n* תנאים מקדימים ותנאים מאוחרים של טיפוסים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:2",
+     "type": "prose",
+     "en": "Contracts say nothing about the specifics of the implementation (such as performance, concrete data structures used in the implementation).\n\n",
+     "hash": "291f71137b3cce24",
+     "he": "חוזים אינם אומרים דבר על פרטי המימוש (כמו ביצועים, או מבני הנתונים הקונקרטיים שבהם משתמשים במימוש)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:3",
+     "type": "prose",
+     "en": "Proving program correctness consists in proving that a program implementation satisfies its contract.\nType safety is one of the conditions we must check to prove correctness:\n",
+     "hash": "fb2d101ea41e59a5",
+     "he": "הוכחת נכונות של תוכנית מורכבת מהוכחה שמימוש התוכנית מקיים את החוזה שלה.\nבטיחות טיפוסים היא אחד מהתנאים שעלינו לבדוק כדי להוכיח נכונות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:4",
+     "type": "list",
+     "en": "1. **Type correctness**: Check well-typing of all expressions, and possibly infer missing types.\n2. **Program verification**: Show that if preconditions hold, then the program terminates, and the postconditions hold.\n\n",
+     "hash": "77c9233b874c5a49",
+     "he": "1. **נכונות טיפוסים**: בדיקה שכל הביטויים מטופסים היטב, ואולי גם הסקה של טיפוסים חסרים.\n2. **אימות תוכנית**: הראו שאם התנאים המקדימים מתקיימים, אז התוכנית עוצרת והתנאים המאוחרים מתקיימים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:5",
+     "type": "prose",
+     "en": "Program correctness can be checked either **statically** or **dynamically**. \n\n",
+     "hash": "1a8250807a49480b",
+     "he": "אפשר לבדוק נכונות של תוכנית **סטטית** או **דינמית**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:6",
+     "type": "prose",
+     "en": "In static program correctness the program text is analyzed without running it. \nStatic program analysis reveals problems that characterize the program independently of specific data. \n\n",
+     "hash": "3c28ca6e432794a0",
+     "he": "בבדיקת נכונות סטטית, טקסט התוכנית מנותח בלי להריץ אותה.\nניתוח סטטי של תוכנית חושף בעיות שמאפיינות את התוכנית ללא תלות בנתונים ספציפיים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:2:7",
+     "type": "prose",
+     "en": "Static type checking verifies that the program will not encounter run time errors due to type mismatch problems.\nIn dynamic program analysis, problems are detected by running the program on specific data. \nStatic correctness methods are **strong** because they analyze the program as a whole, and evaluate properties that hold for all possible applications on all possible data values. \nDynamic correctness methods, like **unit testing**, are complementary to static methods. \nIn particular, dynamic correctness can specify preconditions which are more complex than those implied by the type system of a language.\nFor example, in Java, it is not possible to define a type that denotes even integers.  A function that has as a precondition that its parameter is an even number \ncannot be verified using the Java type system using the static Java type checker.  It could be verified as an assertion at runtime or using unit tests.\n\n",
+     "hash": "2cf4515f859d5870",
+     "he": "בדיקת טיפוסים סטטית מוודאת שהתוכנית לא תיתקל בשגיאות זמן ריצה שנובעות מבעיות של אי־התאמת טיפוסים.\nבניתוח דינמי של תוכנית, בעיות מתגלות על ידי הרצת התוכנית על נתונים ספציפיים.\nשיטות סטטיות לבדיקת נכונות הן **חזקות**, מפני שהן מנתחות את התוכנית כמכלול, ובוחנות תכונות שמתקיימות עבור כל היישומים האפשריים ועל כל ערכי הנתונים האפשריים.\nשיטות דינמיות לבדיקת נכונות, כמו **בדיקות יחידה (unit testing)**, משלימות את השיטות הסטטיות.\nבפרט, בדיקת נכונות דינמית יכולה לציין תנאים מקדימים מורכבים יותר מאלה שמערכת הטיפוסים של השפה מאפשרת.\nלדוגמה, ב-Java אי אפשר להגדיר טיפוס שמציין מספרים שלמים זוגיים. פונקציה שהתנאי המקדים שלה הוא שהפרמטר שלה הוא מספר זוגי\nאינה ניתנת לאימות באמצעות מערכת הטיפוסים של Java ובודק הטיפוסים הסטטי שלה. אפשר לאמת אותה באמצעות טענת assertion בזמן ריצה או באמצעות בדיקות יחידה."
+    }
+   ],
+   "headingHe": "בטיחות טיפוסים ונכונות תוכניות"
+  },
+  {
+   "id": "cm/3.1TypeChecking:3",
+   "depth": 2,
+   "headingEn": "Types",
+   "raw": "## Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:3:0",
+     "type": "prose",
+     "en": "Let us recall the meaning of types we adopt:\n\n",
+     "hash": "497c553510100b2a",
+     "he": "נזכיר לעצמנו את המשמעות של טיפוסים שאנחנו מאמצים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:3:1",
+     "type": "prose",
+     "en": "The semantics of a programming language defines types as subsets of the domain of computed values \nThat is, values are split into subsets, termed types, that collect together values of a similar kind and which can be passed to similar functions.\n\n",
+     "hash": "fc66a6f2c9adb9df",
+     "he": "הסמנטיקה של שפת תכנות מגדירה טיפוסים כתת-קבוצות של תחום הערכים המחושבים.\nכלומר, הערכים מחולקים לתת-קבוצות, שנקראות טיפוסים, שמאגדות יחד ערכים מסוג דומה שאפשר להעביר לפונקציות דומות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:3:2",
+     "type": "prose",
+     "en": "In the Scheme subset that we have defined up to $$L4$$ - computed values are the union of the disjoint types Numbers, Booleans,  S-expressions, Closures, Primitive operators and Void. \n\n",
+     "hash": "263ef24ceb0adfd3",
+     "he": "בתת-הקבוצה של Scheme שהגדרנו עד $$L4$$ — הערכים המחושבים הם האיחוד של הטיפוסים הזרים Numbers, ‏Booleans, ‏S-expressions, ‏Closures, אופרטורים פרימיטיביים ו-Void."
+    },
+    {
+     "id": "cm/3.1TypeChecking:3:3",
+     "type": "code",
+     "en": "```typescript\nValue = Number | Boolean | Prim-op | Closure | Void | SExp\nSExp = Symbol | Number | Boolean | SExp[]\n```\n\n",
+     "hash": "f6e1b4e5d12c7b3e",
+     "lang": "typescript",
+     "noteHe": "טיפוס הערכים של $$L4$$, מובא כתזכורת לפני שנתחיל לדבר על מערכת טיפוסים. שימו לב שההגדרה הזאת היא בדיוק החלוקה לתת-קבוצות שהפסקה הקודמת דיברה עליה: כל ערך שהתוכנית יכולה לחשב שייך לאחד ובדיוק לאחד מהטיפוסים ברשימה. השורה השנייה מגדירה `SExp` רקורסיבית. **שימו לב לנקודה עדינה:** `Number` ו-`Boolean` מופיעים גם ברשימה העליונה וגם בתוך `SExp`, ולכן ההגדרה כאן אינה באמת \"זרה\" לגמרי — פירוט מדויק יותר הופיע ב-2.6. לענייננו כאן, מה שחשוב הוא הרעיון: יש לנו קבוצה סופית ומוגדרת היטב של טיפוסים, ואפשר לנסח כללים שמנבאים לאיזה מהם ישתייך הערך של כל ביטוי."
+    },
+    {
+     "id": "cm/3.1TypeChecking:3:4",
+     "type": "prose",
+     "en": "The set of closures is defined inductively as mappings from tuples to values - where tuples are cartesian products\nof values - starting from the empty tuple, tuples of a single value, two values etc.\n\n",
+     "hash": "8faafca7318ed972",
+     "he": "קבוצת ה-closures מוגדרת אינדוקטיבית כמיפויים מ-tuples לערכים — כאשר tuples הם מכפלות קרטזיות\nשל ערכים — החל מה-tuple הריק, tuples של ערך בודד, של שני ערכים וכן הלאה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:3:5",
+     "type": "prose",
+     "en": "Most programming languages admit **fully typed semantics**, *i.e.*, every computed value belongs to a known type.\n\n\n",
+     "hash": "76fdfe758861e28e",
+     "he": "רוב שפות התכנות מאפשרות **סמנטיקה מטופסת במלואה (fully typed semantics)**, *כלומר*, כל ערך מחושב שייך לטיפוס ידוע."
+    }
+   ],
+   "headingHe": "טיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:4",
+   "depth": 3,
+   "headingEn": "Type Systems",
+   "raw": "### Type Systems\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:4:0",
+     "type": "prose",
+     "en": "Refer to [PAPL 2020 Types](https://papl.cs.brown.edu/2020/types.html) (Chapters 28 to 31) for more depth on this material.\n\n",
+     "hash": "e161bffaa02fbab3",
+     "he": "עיינו ב-[PAPL 2020 Types](https://papl.cs.brown.edu/2020/types.html) (פרקים 28 עד 31) להעמקה בחומר הזה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:4:1",
+     "type": "prose",
+     "en": "The semantics of a programming language defines a **type system**: it determines which types exist across the domain of computed values, how new types can be defined (through the usage of type constructors - such as List or Procedures or Union) and the possible relations among types (one type may be included in another, two types may be disjoint or overlap).\n\n",
+     "hash": "cec51a2d9bbfea64",
+     "he": "הסמנטיקה של שפת תכנות מגדירה **מערכת טיפוסים**: היא קובעת אילו טיפוסים קיימים בכל תחום הערכים המחושבים, כיצד אפשר להגדיר טיפוסים חדשים (באמצעות שימוש בבנאי טיפוסים — כמו List או Procedures או Union), ומהם היחסים האפשריים בין טיפוסים (טיפוס אחד עשוי להיות מוכל באחר, שני טיפוסים עשויים להיות זרים או חופפים)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:4:2",
+     "type": "prose",
+     "en": "The basis of type systems is the **principle of substitutability**: two types A and B “match” when values of one can be used in place of values of the other. Therefore, the design of a type system determines when substitutions are safe.\n\n",
+     "hash": "21062cd3774d9007",
+     "he": "הבסיס של מערכות טיפוסים הוא **עקרון ההחלפיות (principle of substitutability)**: שני טיפוסים A ו-B \"מתאימים\" זה לזה כאשר אפשר להשתמש בערכים של האחד במקום בערכים של האחר. לכן, העיצוב של מערכת טיפוסים קובע מתי החלפות הן בטוחות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:4:3",
+     "type": "prose",
+     "en": "The simplest form of substitutability is **identity**: a type can only be substituted with itself, and nothing else. \nFor instance, if the declared type of a function’s parameter is Number, then you can only call it with Number-typed values, nothing else. This is known as **invariance**: the set of values that can be passed into a function cannot vary from the set expected by that type. \n\n",
+     "hash": "1c1194ace32f882f",
+     "he": "הצורה הפשוטה ביותר של החלפיות היא **זהות**: אפשר להחליף טיפוס רק בעצמו, ובשום דבר אחר.\nלדוגמה, אם הטיפוס המוצהר של פרמטר של פונקציה הוא Number, אז אפשר לקרוא לה רק עם ערכים מטיפוס Number, ולא עם שום דבר אחר. זה ידוע בשם **אי-שונות (invariance)**: קבוצת הערכים שאפשר להעביר לפונקציה אינה יכולה לסטות מהקבוצה שאותו טיפוס מצפה לה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:4:4",
+     "type": "prose",
+     "en": "This is so obvious that it might seem to hardly warrant a name - however, it is useful to name this because it sets up a contrast with more complex type systems when richer, non-trivial notions of substitutability exist (think of Subtyping in Object Oriented systems and the usage of Interfaces).\n\n\n",
+     "hash": "e41c4b2c9cae642f",
+     "he": "זה כל כך מובן מאליו שאולי בקושי מגיע לזה שם — אבל כדאי לתת לזה שם, מפני שזה יוצר ניגוד למערכות טיפוסים מורכבות יותר, שבהן קיימות תפיסות עשירות ולא־טריוויאליות של החלפיות (חשבו על תת-טיפוסים במערכות מונחות־עצמים ועל השימוש בממשקים)."
+    }
+   ],
+   "headingHe": "מערכות טיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:5",
+   "depth": 3,
+   "headingEn": "Soundness",
+   "raw": "### Soundness\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:5:0",
+     "type": "prose",
+     "en": "The key property of a type system is a set of rules which determine whether a given expression in the language is type safe - that is, whether the evaluation of this expression will *never* lead to type errors.\n\n",
+     "hash": "1c58711c04bea026",
+     "he": "התכונה המרכזית של מערכת טיפוסים היא אוסף של כללים שקובעים אם ביטוי נתון בשפה הוא בטוח מבחינת טיפוסים — כלומר, האם ההערכה של הביטוי הזה *לעולם* לא תוביל לשגיאות טיפוס."
+    },
+    {
+     "id": "cm/3.1TypeChecking:5:1",
+     "type": "prose",
+     "en": "Type safety is achieved by defining an analysis method called **type checking**. The goal of type checking is to verify that if an expression $$E$$ is assigned type $$T$$, then, whenever $$E$$ is computed, its value will be of type $$T$$.  If the type system has this property, we say that it is **sound**.\n\n",
+     "hash": "15a59466aa3d47d7",
+     "he": "בטיחות טיפוסים מושגת על ידי הגדרת שיטת ניתוח שנקראת **בדיקת טיפוסים (type checking)**. המטרה של בדיקת טיפוסים היא לוודא שאם לביטוי $$E$$ הוקצה טיפוס $$T$$, אז בכל פעם ש-$$E$$ מחושב, ערכו יהיה מטיפוס $$T$$. אם למערכת הטיפוסים יש את התכונה הזאת, אנחנו אומרים שהיא **נאותה (sound)**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:5:2",
+     "type": "prose",
+     "en": "Note that type checking does not guarantee that the program will always terminate (that would be a strong guarantee equivalent to solving the *Halting Problem*) nor that it will not throw any exceptions, such as divide by 0.  It only guarantees that the program when it is evaluated to a proper value will not throw type errors and will return a value in the predicted type.\n\n",
+     "hash": "d3d70f2b2374b4ad",
+     "he": "שימו לב שבדיקת טיפוסים אינה מבטיחה שהתוכנית תמיד תעצור (זו הייתה הבטחה חזקה ששקולה לפתרון *בעיית העצירה*), ואף לא שהיא לא תזרוק חריגות כלשהן, כמו חלוקה ב-0. היא מבטיחה רק שהתוכנית, כאשר היא מוערכת לערך תקין, לא תזרוק שגיאות טיפוס ותחזיר ערך מהטיפוס החזוי."
+    }
+   ],
+   "headingHe": "נאותות (Soundness)"
+  },
+  {
+   "id": "cm/3.1TypeChecking:6",
+   "depth": 3,
+   "headingEn": "Type Errors",
+   "raw": "### Type Errors\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:6:0",
+     "type": "prose",
+     "en": "The type checker inspects every application nodes in the AST of a program $$E$$.  Each operand in an application is an expression of some type (which is verified inductively).  Therefore, we know that the value of the operand will be of that type.\nIf the operands are not of the type expected by the operator of the application, we say that this operator invocation (*i.e.*, this application expression node in the AST) is a **potential type error**.\n\n",
+     "hash": "d97f686c76a49fd0",
+     "he": "בודק הטיפוסים בוחן כל צומת יישום ב-AST של תוכנית $$E$$. כל אופרנד ביישום הוא ביטוי מטיפוס כלשהו (שמאומת אינדוקטיבית). לכן אנחנו יודעים שהערך של האופרנד יהיה מהטיפוס הזה.\nאם האופרנדים אינם מהטיפוס שהאופרטור של היישום מצפה לו, אנחנו אומרים שההפעלה הזאת של האופרטור (*כלומר*, צומת ביטוי היישום הזה ב-AST) היא **שגיאת טיפוס פוטנציאלית**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:6:1",
+     "type": "prose",
+     "en": "If type errors are detected, the type checker can take some actions, which is also part of the language design.  It can refuse to execute or compile the program, or it can take corrective measures (like type casting).\n\n",
+     "hash": "69d3213d7a5e6eed",
+     "he": "אם מתגלות שגיאות טיפוס, בודק הטיפוסים יכול לנקוט פעולות מסוימות, וגם זה חלק מעיצוב השפה. הוא יכול לסרב להריץ או להדר את התוכנית, או שהוא יכול לנקוט צעדים מתקנים (כמו המרת טיפוסים — type casting)."
+    }
+   ],
+   "headingHe": "שגיאות טיפוס"
+  },
+  {
+   "id": "cm/3.1TypeChecking:7",
+   "depth": 2,
+   "headingEn": "Associating Expressions with Types",
+   "raw": "## Associating Expressions with Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:7:0",
+     "type": "prose",
+     "en": "Type checking and type inference require associating program expressions with types. \n\n",
+     "hash": "b7c4e219ca57204c",
+     "he": "בדיקת טיפוסים והסקת טיפוסים מחייבות שיוך של ביטויי התוכנית לטיפוסים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:7:1",
+     "type": "prose",
+     "en": "In order to achieve this, we need to define two syntactic extensions to our language:\n\n",
+     "hash": "142a9d1458c19261",
+     "he": "כדי להשיג זאת, עלינו להגדיר שתי הרחבות תחביריות לשפה שלנו:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:7:2",
+     "type": "list",
+     "en": "* Define a type language to specify type expressions.\n* Define a way in the language to associate variables and procedures to type expressions.\n\n",
+     "hash": "5f824744f5d45d54",
+     "he": "* להגדיר שפת טיפוסים שתשמש לציון ביטויי טיפוס.\n* להגדיר דרך בשפה לשייך משתנים ופרוצדורות לביטויי טיפוס."
+    },
+    {
+     "id": "cm/3.1TypeChecking:7:3",
+     "type": "prose",
+     "en": "The extension of a language with type expressions is exactly what we observed in the transition from JavaScript to TypeScript.\nTypeScript defines a way to specify type expressions (primitive types like Number, Boolean, String and compound types such as maps, arrays and functions, or type unions).  \n\n",
+     "hash": "bfad24756c8132e1",
+     "he": "ההרחבה של שפה בביטויי טיפוס היא בדיוק מה שראינו במעבר מ-JavaScript ל-TypeScript.\n‏TypeScript מגדירה דרך לציין ביטויי טיפוס (טיפוסים פרימיטיביים כמו Number, ‏Boolean, ‏String, וטיפוסים מורכבים כמו מפות, מערכים ופונקציות, או איחודי טיפוסים)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:7:4",
+     "type": "prose",
+     "en": "Similarly, we will define a new language, $$L5$$ which extends $$L4$$ by allowing the specification of type annotations.\n\n",
+     "hash": "dcfe85cccea94989",
+     "he": "בדומה לכך, נגדיר שפה חדשה, $$L5$$, שמרחיבה את $$L4$$ בכך שהיא מאפשרת לציין הערות טיפוס."
+    }
+   ],
+   "headingHe": "שיוך ביטויים לטיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:8",
+   "depth": 2,
+   "headingEn": "Type Language",
+   "raw": "## Type Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:8:0",
+     "type": "prose",
+     "en": "We start with a definition of the type language.  \nWe actually already used this type language when we introduced Scheme in [Section 2.2](https://bguppl.github.io/interpreters/class_material/2.2Higher-Order-Functions-Let.html).\nIn the code we wrote in Scheme, we added type annotations as part of the contract section of functions, under the type annotation.  Because we did not want to extend the language, we kept these annotations as comments in Scheme, as in the following example:\n\n",
+     "hash": "d82621ce2359134f",
+     "he": "נתחיל בהגדרה של שפת הטיפוסים.\nלמעשה כבר השתמשנו בשפת הטיפוסים הזאת כשהצגנו את Scheme ב-[סעיף 2.2](https://bguppl.github.io/interpreters/class_material/2.2Higher-Order-Functions-Let.html).\nבקוד שכתבנו ב-Scheme הוספנו הערות טיפוס כחלק מקטע החוזה של הפונקציות, תחת הערת הטיפוס. מכיוון שלא רצינו להרחיב את השפה, שמרנו את ההערות האלה כהערות (comments) ב-Scheme, כמו בדוגמה הבאה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:1",
+     "type": "code",
+     "en": "```scheme\n;; Purpose: Identity\n;; Signature: id(x)\n;; Type: [T -> T]\n(define id\n  (lambda (x) x))\n```\n\n",
+     "hash": "5c144f08a1783ccc",
+     "lang": "scheme",
+     "noteHe": "פונקציית הזהות עם החוזה המלא שלה, בסגנון שליווה אותנו לאורך כל פרק 2. שימו לב לשורת `;; Type: [T -> T]` — זהו ביטוי טיפוס, אבל הוא כתוב כ**הערה** ולכן שקוף לחלוטין למפרש; אף אחד אינו בודק אותו. הסימון `T` הוא משתנה טיפוס שמציין שהפונקציה פולימורפית: היא מקבלת ערך מטיפוס כלשהו ומחזירה ערך מאותו טיפוס. **הנקודה של הסעיף:** את השפה הזאת בדיוק אנחנו הולכים להפוך מהערה לחלק אמיתי מהתחביר, כך שאפשר יהיה לבדוק אותה אוטומטית."
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:2",
+     "type": "prose",
+     "en": "Since we now know how to define our own language, we will add type annotations as part of the language $$L5$$.\n\n",
+     "hash": "f54a64f8256c50b3",
+     "he": "מכיוון שאנחנו כבר יודעים כיצד להגדיר שפה משלנו, נוסיף את הערות הטיפוס כחלק מהשפה $$L5$$."
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:3",
+     "type": "prose",
+     "en": "The possible type expressions we will consider are defined by the following syntax:\n\n",
+     "hash": "4c02fd40b2a9149e",
+     "he": "ביטויי הטיפוס האפשריים שנשקול מוגדרים על ידי התחביר הבא:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:4",
+     "type": "code",
+     "en": "```typescript\n<texp>         ::= <atomic-te> | <composite-te> | <tvar> \n<atomic-te>    ::= <num-te> | <bool-te> | <void-te>\n<num-te>       ::= number   // num-te()\n<bool-te>      ::= boolean  // bool-te()\n<str-te>       ::= string   // str-te()\n<void-te>      ::= void     // void-te()\n<composite-te> ::= <proc-te> | <tuple-te>\n<non-tuple-te> ::= <atomic-te> | <proc-te> | <tvar>\n<proc-te>      ::= [ <tuple-te> -> <non-tuple-te> ] // proc-te(param-tes: list(te), return-te: te)\n<tuple-te>     ::= <non-empty-tuple-te> | <empty-te>\n<non-empty-tuple-te> ::= ( <non-tuple-te> *)* <non-tuple-te> // tuple-te(tes: list(te))\n<empty-te>     ::= Empty\n<tvar>         ::= a symbol starting with T // tvar(id: Symbol)\n```\n\n",
+     "hash": "8d949fec659bca52",
+     "lang": "typescript",
+     "noteHe": "הדקדוק המלא של **שפת הטיפוסים** — שימו לב שזו שפה נפרדת לגמרי משפת הביטויים, עם AST משלה. שלוש קטגוריות עליונות: `<atomic-te>` (טיפוסים אטומיים), `<composite-te>` (טיפוסים מורכבים) ו-`<tvar>` (משתנה טיפוס). הטיפוסים האטומיים הם `number`, `boolean`, `void` — וגם `string`, שמוגדר בשורה נפרדת אך **אינו** מופיע ברשימת `<atomic-te>`; זו טעות קלה במקור. הכלל המרכזי הוא `<proc-te> ::= [ <tuple-te> -> <non-tuple-te> ]`: טיפוס של פרוצדורה הוא חץ מ-tuple של טיפוסי הפרמטרים לטיפוס ההחזרה. שימו לב לאסימטריה — אגף שמאל יכול להיות tuple (כמה פרמטרים), אגף ימין חייב להיות `<non-tuple-te>` (ערך מוחזר אחד בלבד). `<tuple-te>` מפורק לרשימה מופרדת ב-`*` או ל-`Empty` עבור פונקציה חסרת פרמטרים. לבסוף `<tvar>` הוא סמל שמתחיל ב-T — כמו `T1`, `T` — והוא מה שיאפשר לתאר פונקציות פולימורפיות. **כדאי לשנן את הצורה `(number * number -> boolean)`** — היא תופיע בכל שאלה בפרק הזה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:5",
+     "type": "prose",
+     "en": "The following are all examples of legal type expressions according to this syntax:\n",
+     "hash": "2c3600a8f6ecce66",
+     "he": "כל אלה הם דוגמאות לביטויי טיפוס חוקיים לפי התחביר הזה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:8:6",
+     "type": "code",
+     "en": "```scheme\nnumber\nboolean\nvoid\n(number -> boolean)\n(number * number -> boolean)\n(number -> (number -> boolean))\n(Empty -> number)\n(Empty -> void)\n(T1 -> T1)\n```\n\n",
+     "hash": "44d82ac5d57408e6",
+     "lang": "scheme",
+     "noteHe": "תשע דוגמאות שכדאי לעבור עליהן אחת-אחת. שלוש הראשונות הן טיפוסים אטומיים. `(number -> boolean)` היא פונקציה מפרמטר אחד. `(number * number -> boolean)` — שימו לב שהכוכבית מפרידה בין פרמטרים ואינה מציינת כפל. `(number -> (number -> boolean))` היא פונקציה שמחזירה **פונקציה** — הצורה של currying, ושימו לב שהסוגריים הפנימיים חיוניים. `(Empty -> number)` היא פונקציה חסרת פרמטרים שמחזירה מספר; `(Empty -> void)` היא פונקציה חסרת פרמטרים שאינה מחזירה דבר שימושי — הטיפוס של `(lambda () (display \"hi\"))`. `(T1 -> T1)` היא פונקציית הזהות הפולימורפית. **טעות נפוצה:** לכתוב `( -> number)` במקום `(Empty -> number)`; רשימת פרמטרים ריקה חייבת להיכתב במפורש כ-`Empty`."
+    }
+   ],
+   "headingHe": "שפת הטיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:9",
+   "depth": 2,
+   "headingEn": "Type Annotations",
+   "raw": "## Type Annotations\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:9:0",
+     "type": "prose",
+     "en": "We then define a way to add type annotations to expressions. \n\n",
+     "hash": "986234b20478c4ca",
+     "he": "כעת נגדיר דרך להוסיף הערות טיפוס לביטויים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:1",
+     "type": "prose",
+     "en": "**Where** are type annotations needed within programs?\n\n",
+     "hash": "92c607c7782b9fe7",
+     "he": "**היכן** נחוצות הערות טיפוס בתוך תוכניות?"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:2",
+     "type": "prose",
+     "en": "They can occur in only two specific places:\n",
+     "hash": "f06bbd2dc9683e42",
+     "he": "הן יכולות להופיע בשני מקומות ספציפיים בלבד:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:3",
+     "type": "list",
+     "en": "* As part of a variable declaration\n* As part of a procedure expression to specify the expected return type\n\n",
+     "hash": "1581143868a1326f",
+     "he": "* כחלק מהכרזת משתנה\n* כחלק מביטוי פרוצדורה, כדי לציין את טיפוס הערך המוחזר הצפוי"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:4",
+     "type": "prose",
+     "en": "Accordingly, we extend the syntax of $$L4$$ with type annotations in exactly those two expression types - these two changes are marked with `#### L5` below;\nThe only changes in the syntax of L5 are optional type annotations in `var-decl` and `proc-exp`:\n\n",
+     "hash": "67144ec4e03c560d",
+     "he": "בהתאם לכך, אנחנו מרחיבים את התחביר של $$L4$$ בהערות טיפוס בדיוק בשני סוגי הביטויים האלה — שני השינויים האלה מסומנים ב-`#### L5` להלן;\nהשינויים היחידים בתחביר של L5 הם הערות טיפוס אופציונליות ב-`var-decl` וב-`proc-exp`:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:5",
+     "type": "code",
+     "en": "```typescript\n<program> ::= (L5 <exp>+) // program(exps:List(exp))\n<exp> ::= <define-exp> | <cexp>\n<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n<cexp> ::= <num-exp> // num-exp(val:Number)\n       | <bool-exp>  // bool-exp(val:Boolean)\n       | <prim-op>   // prim-op(op:Symbol)\n       | <var-ref>   // var-ref(var:Symbol)\n       | (if <exp> <exp> <exp>) // if-exp(test,then,else)\n       | (quote <sexp>) // lit-exp(val:Sexp)\n       | (let (<binding>*) <cexp>+) // let-exp(bindings:List(binding), body:List(cexp)) \n       | (letrec (<binding>*) <cexp>+) // letrec-exp(bindings:List(binding), body:List(cexp)) \n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n\n       | (lambda (<var-decl>*) [: <texp>]? <cexp>+) \n               // proc-exp(params:List(var-decl), body:List(cexp), return-te: Texp) ##### L5\n<var-decl>   ::= <symbol> | [<symbol> : <texp>] // var-decl(var:Symbol, type:Texp)  ##### L5\n\n;; Unchanged\n<prim-op> ::= + | - | * | / | < | > | = | not |  eq?\n       | cons | car | cdr | pair? | list? | number? | boolean? | symbol? | display | newline\n<num-exp> ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref> ::= an identifier token\n<sexp> ::= a symbol token | ( <sexp>* )\n<binding> ::= ( <var-decl> <cexp> ) // Binding(var:var-decl, val:cexp)\n```\n\n",
+     "hash": "2a7b36c91bd50748",
+     "lang": "typescript",
+     "noteHe": "הדקדוק המלא של $$L5$$, וכל מה שמתחת לשורת `;; Unchanged` זהה ל-$$L4$$. שתי השורות המסומנות `##### L5` הן כל התוספת. ב-`proc-exp` נוסף `[: <texp>]?` — הסוגריים המרובעים עם סימן השאלה מציינים שהחלק הזה **אופציונלי**, וזהו טיפוס הערך המוחזר. ב-`var-decl` נוספה החלופה `[<symbol> : <texp>]`, לצד האפשרות הישנה של סמל חשוף — כלומר גם כאן ההערה אופציונלית. שימו לב לתוצאה החשובה: מכיוון שהערות טיפוס מוצמדות ל-`var-decl`, הן מתווספות **אוטומטית** בכל מקום שבו `var-decl` מופיע — בפרמטרים של lambda, ב-`define`, ובקשירות של `let` ו-`letrec` — בלי צורך בשינוי נוסף בדקדוק. שימו לב גם לתופעת לוואי מעניינת: כל תוכנית $$L4$$ תקינה היא גם תוכנית $$L5$$ תקינה (בלי הערות כלל), כלומר ההרחבה תואמת לאחור. **קשר ל-TypeScript:** בדיוק אותו עיקרון — קוד JavaScript תקין הוא קוד TypeScript תקין."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:6",
+     "type": "prose",
+     "en": "With this new syntax (heavily inspired by the TypeScript syntax), the following programs are fully annotated $$L5$$ programs:\n\n",
+     "hash": "873ddddf08d531b6",
+     "he": "עם התחביר החדש הזה (שנשען במידה רבה על התחביר של TypeScript), התוכניות הבאות הן תוכניות $$L5$$ מוערות במלואן:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:7",
+     "type": "code",
+     "en": "```scheme\n(define (x : number) 5)\n(define (f : (number -> number)) (lambda ((x : number)) : number (* x x))\n\n(define (f : (number * number -> number)) \n  (lambda ((x : number) (y : number)) : number (* x x))\n  \n(let (((a : number) 1)\n      ((b : boolean) #t))\n  (if b a (+ a 1)))\n  \n(letrec (((a : (number -> number)) (lambda ((x : number)) : number (* x x))))\n  (a 3))\n  \n(define (id : (T1 -> T1)) (lambda ((x : T1)) : T1 x))\n```\n\n",
+     "hash": "a066c8a60a7ae406",
+     "lang": "scheme",
+     "noteHe": "שש דוגמאות לתוכניות מוערות במלואן — כדאי לקרוא כל אחת ולזהות היכן בדיוק יושבת כל הערת טיפוס. בשורה הראשונה, `(define (x : number) 5)` — ה-`var-decl` הוא `(x : number)`. בשורה השנייה יש **שתי** הערות ב-lambda: על הפרמטר `(x : number)` ועל הערך המוחזר `: number` שאחרי רשימת הפרמטרים, ובנוסף הערה על השם `f` עצמו — `(number -> number)`. שימו לב לזוג הסוגריים הכפול ברשימת הפרמטרים: `((x : number))` — החיצוני הוא רשימת הפרמטרים והפנימי הוא ההכרזה. הדוגמה הרביעית מראה הערות בקשירות של `let`, והחמישית ב-`letrec`. האחרונה היא פונקציית הזהות הפולימורפית עם משתנה הטיפוס `T1` בשלושה מקומות. **שימו לב לכמה טעויות במקור:** בדוגמה השנייה והשלישית חסרים סוגריים סוגרים בסוף; ובדוגמה השלישית הפונקציה מוצהרת כמקבלת שני פרמטרים אך הגוף הוא `(* x x)` ומתעלם מ-`y` — מבחינת טיפוסים זה תקין לחלוטין, אבל ההצהרה `(number * number -> number)` והגוף אינם מסתדרים עם הכוונה המשוערת."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:8",
+     "type": "prose",
+     "en": "We defined type annotations as **optional** - so that the following programs are also legal expressions in $$L5$$: \nno type annotation on f and on return value of lambda\n\n",
+     "hash": "5aa72d3018bf1cfc",
+     "he": "הגדרנו את הערות הטיפוס כ**אופציונליות** — כך שגם התוכניות הבאות הן ביטויים חוקיים ב-$$L5$$:\nאין הערת טיפוס על f ועל ערך ההחזרה של ה-lambda"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:9",
+     "type": "code",
+     "en": "```scheme\n(define f (lambda ((x : number)) (* x x))) \n\n(let ((a 1)) (+ a a))\n```\n\n",
+     "hash": "ddb0e38eb15b10bf",
+     "lang": "scheme",
+     "noteHe": "שתי תוכניות עם הערות **חלקיות**. בראשונה יש הערה על הפרמטר `x` אבל אין הערה על `f` ואין על ערך ההחזרה; בשנייה אין הערות כלל. שתיהן חוקיות תחבירית ב-$$L5$$ — וזה בדיוק מה שהופך את השפה לשימושית. **הערה חשובה על חלוקת הפרק:** בשיעור הזה (3.1) נעסוק רק בתוכניות מוערות **במלואן**, ובודק הטיפוסים ידרוש שכל ההערות יהיו נוכחות. בשיעור 3.2, הסקת טיפוסים, נלמד למלא את החסר בעצמנו — ואז דווקא התוכניות האלה יהיו במרכז העניין. הרעיון של הערות אופציונליות נקרא **טיפוס הדרגתי (gradual typing)**, וזה בדיוק המודל של TypeScript."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:10",
+     "type": "prose",
+     "en": "The implementation of this syntax definition is available in:\n",
+     "hash": "af2c2aaec161460e",
+     "he": "המימוש של הגדרת התחביר הזאת זמין ב:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:11",
+     "type": "list",
+     "en": "* [TExp.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts).\n* [L5-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-ast.ts).\n\n",
+     "hash": "355b108e1bb71d30",
+     "he": "* [TExp.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts).\n* [L5-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-ast.ts)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:12",
+     "type": "prose",
+     "en": "It includes the following functions:\n",
+     "hash": "b40248217777c596",
+     "he": "הוא כולל את הפונקציות הבאות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:13",
+     "type": "list",
+     "en": "* parseTE(concrete-type-expression-string) -> texp AST\n* unparseTExp(texp) -> concrete-type-expression\n* parse(concrete-L5) -> L5 AST\n* unparseL5(L5ast) -> concrete L5 program\n\n",
+     "hash": "539640e156c18391",
+     "he": "* parseTE(concrete-type-expression-string) -> texp AST\n* unparseTExp(texp) -> concrete-type-expression\n* parse(concrete-L5) -> L5 AST\n* unparseL5(L5ast) -> concrete L5 program"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:14",
+     "type": "prose",
+     "en": "Type expression ASTs look as shown in these examples:\n\n",
+     "hash": "03a7cfc9515b5bef",
+     "he": "עצי ה-AST של ביטויי טיפוס נראים כמו בדוגמאות האלה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:15",
+     "type": "code",
+     "en": "```typescript\nexpect(parseTE(\"number\")).to.deep.equal(makeOk(makeNumTExp()));\nexpect(parseTE(\"boolean\")).to.deep.equal(makeOk(makeBoolTExp()));\nexpect(parseTE(\"T1\")).to.deep.equal(makeOk(makeTVar(\"T1\")));\nexpect(parseTE(\"(T * T -> boolean)\")).to.deep.equal(makeOk(makeProcTExp([makeTVar(\"T\"), makeTVar(\"T\")], makeBoolTExp())));\nexpect(parseTE(\"(number -> (number -> number))\")).\n    to.deep.equal(makeOk(makeProcTExp([makeNumTExp()], makeProcTExp([makeNumTExp()], makeNumTExp()))));\nexpect(parseTE(\"void\")).to.deep.equal(makeOk(makeVoidTExp()));\nexpect(parseTE(\"(Empty -> void)\")).to.deep.equal(makeOk(makeProcTExp([], makeVoidTExp())));\n```\n\n",
+     "hash": "3586a18878518c3d",
+     "lang": "typescript",
+     "noteHe": "בדיקות מקובץ הטסטים, שמראות כיצד נראה ה-AST של כל ביטוי טיפוס. הטיפוסים האטומיים הם קונסטרוקטורים חסרי ארגומנטים: `makeNumTExp()`, `makeBoolTExp()`, `makeVoidTExp()`. משתנה טיפוס נבנה עם `makeTVar(\"T1\")`. הקונסטרוקטור המעניין הוא `makeProcTExp(paramTEs, returnTE)` — שימו לב שהארגומנט הראשון הוא **מערך** של טיפוסי פרמטרים והשני הוא טיפוס יחיד, בדיוק כפי שהדקדוק חייב. שלוש שורות ראויות לתשומת לב מיוחדת: `\"(T * T -> boolean)\"` נבנה משני משתני טיפוס **זהים** — כלומר שני הפרמטרים חייבים להיות מאותו טיפוס; `\"(number -> (number -> number))\"` מדגים קינון של `makeProcTExp` בתוך עצמו, וזהו ה-AST של currying; `\"(Empty -> void)\"` נבנה עם מערך **ריק** של פרמטרים — כלומר `Empty` אינו טיפוס אלא סימון תחבירי לרשימה ריקה. שימו לב שכל התוצאות עטופות ב-`makeOk`, כי `parseTE` מחזירה `Result` ועשויה להיכשל על ביטוי טיפוס פגום."
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:16",
+     "type": "prose",
+     "en": "The following two points about the syntax of type expressions hold for now:\n\n",
+     "hash": "4879fd2bae5bae6e",
+     "he": "שתי הנקודות הבאות לגבי התחביר של ביטויי טיפוס תקפות בשלב הזה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:9:17",
+     "type": "list",
+     "en": "* At this point, we only support atomic type expressions (number, boolean, void) or procedure type expressions (number -> number) - and not composite types such as List(number).\n* Type variables are used to represent the case of polymorphic functions such as [T -> T] for the identity function.\n\n\n",
+     "hash": "aa570ca19c205f23",
+     "he": "* בשלב הזה אנחנו תומכים רק בביטויי טיפוס אטומיים (number, ‏boolean, ‏void) או בביטויי טיפוס של פרוצדורות (number -> number) — ולא בטיפוסים מורכבים כמו List(number).\n* משתני טיפוס משמשים לייצוג המקרה של פונקציות פולימורפיות, כמו [T -> T] עבור פונקציית הזהות."
+    }
+   ],
+   "headingHe": "הערות טיפוס"
+  },
+  {
+   "id": "cm/3.1TypeChecking:10",
+   "depth": 3,
+   "headingEn": "Annotated ASTs",
+   "raw": "### Annotated ASTs\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:10:0",
+     "type": "prose",
+     "en": "ASTs with type annotations look as in the following examples:\n\n",
+     "hash": "e92352f25c109459",
+     "he": "עצי AST עם הערות טיפוס נראים כמו בדוגמאות הבאות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:10:1",
+     "type": "code",
+     "en": "```typescript\nexpect(L5typeof(\"(lambda((a : number) (b : number)) : (Pair number number) (cons a b))\")).\n    toEqual(makeOk(\"(number * number -> (Pair number number))\"));\n```\n\n",
+     "hash": "fac899d57d21b501",
+     "lang": "typescript",
+     "noteHe": "בדיקה שמדגימה את מה שבודק הטיפוסים עושה בפועל: `L5typeof` מקבלת תוכנית $$L5$$ כמחרוזת ומחזירה את **טיפוס** הביטוי. כאן ה-lambda מקבלת שני מספרים ומחזירה זוג, ולכן הטיפוס המוחזר הוא `(number * number -> (Pair number number))` — שימו לב שהטיפוס נבנה מהערות הפרמטרים ומהערת ההחזרה, בדיוק לפי הכלל שנראה בהמשך. שימו לב ש-`(Pair number number)` הוא טיפוס מורכב מסוג שהסעיף הקודם אמר שעדיין אינו נתמך; הדוגמה הזאת מקדימה את המאוחר, ואכן המפרש המלא כן תומך בו. **הפונקציה `L5typeof` היא הכלי המרכזי של כל השיעור** — כדאי לזכור את שמה ואת מה שהיא מחזירה: ביטוי טיפוס, לא ערך."
+    }
+   ],
+   "headingHe": "עצי AST מוערים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:11",
+   "depth": 2,
+   "headingEn": "Type Analysis Algorithm",
+   "raw": "## Type Analysis Algorithm\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:11:0",
+     "type": "prose",
+     "en": "We develop an algorithm which operates over an annotated AST expression of $$L5$$ (the AST of the language with full type annotations for all var-decl nodes and all procedures), and verifies that the expression is type safe and will return its verified type.  This algorithm is a **type checker**.\n\n",
+     "hash": "86006993825f503d",
+     "he": "אנחנו מפתחים אלגוריתם שפועל על ביטוי AST מוער של $$L5$$ (ה-AST של השפה עם הערות טיפוס מלאות לכל צמתי var-decl ולכל הפרוצדורות), מוודא שהביטוי בטוח מבחינת טיפוסים, ומחזיר את הטיפוס המאומת שלו. האלגוריתם הזה הוא **בודק טיפוסים (type checker)**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:1",
+     "type": "prose",
+     "en": "The specific errors we will detect are the following:\n\n",
+     "hash": "89dc286d30b47395",
+     "he": "השגיאות הספציפיות שנזהה הן אלה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:2",
+     "type": "list",
+     "en": "* An attempt to apply a value which is neither a primitive nor a closure in an application expression.\n* An attempt to apply a procedure or a primitive operator to the wrong number of arguments.\n* An attempt to apply primitives to wrong type of arguments (for example, + to a non-number value)\n* An attempt to use a non-boolean expression as the test in an if-expression.\n\n",
+     "hash": "6b27eb7c09fbc933",
+     "he": "* ניסיון ליישם ערך שאינו פרימיטיב ואינו closure בתוך ביטוי יישום.\n* ניסיון ליישם פרוצדורה או אופרטור פרימיטיבי על מספר שגוי של ארגומנטים.\n* ניסיון ליישם פרימיטיבים על ארגומנטים מטיפוס שגוי (לדוגמה, + על ערך שאינו מספר)\n* ניסיון להשתמש בביטוי שאינו בוליאני כתנאי בביטוי if."
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:3",
+     "type": "prose",
+     "en": "We do not try to check for other types of errors - such as divide by zero or, if we had lists or arrays, reference to an index of bounds in the list or the array.\n\n",
+     "hash": "3a0f179ecd6961ea",
+     "he": "איננו מנסים לבדוק סוגי שגיאות אחרים — כמו חלוקה באפס, או, אילו היו לנו רשימות או מערכים, פנייה לאינדקס מחוץ לתחום ברשימה או במערך."
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:4",
+     "type": "prose",
+     "en": "We design this algorithm as a function `typeofExp` which given an expression will traverse the expression (the AST) and verify all the nodes in the AST for type correctness, and return the type the expression is expected to return.  That is, we first expect the function `typeofExp` to have the following type:\n\n",
+     "hash": "6a75ec81423214f1",
+     "he": "אנחנו מעצבים את האלגוריתם הזה כפונקציה `typeofExp`, שבהינתן ביטוי תסרוק אותו (את ה-AST), תאמת את כל הצמתים ב-AST מבחינת נכונות טיפוסים, ותחזיר את הטיפוס שהביטוי צפוי להחזיר. כלומר, בשלב ראשון אנחנו מצפים שלפונקציה `typeofExp` יהיה הטיפוס הבא:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:5",
+     "type": "code",
+     "en": "```typescript\ntypeofExp: Expr -> TExp\n```\n\n",
+     "hash": "e9fed69535817d73",
+     "lang": "typescript",
+     "noteHe": "הניסיון הראשון לחתימה של בודק הטיפוסים: פונקציה מביטוי לביטוי טיפוס. שימו לב לסימטריה המושגית מול המפרש — `eval` מקבלת ביטוי ומחזירה **ערך**, ואילו `typeofExp` מקבלת ביטוי ומחזירה **טיפוס**. שתי החתימות האלה ייקבעו במקביל לאורך כל השיעור, ושתיהן ישופרו באותם שני שלבים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:6",
+     "type": "prose",
+     "en": "Since we want to be able to process expressions that may include type errors, we adjust the signature to allow for Failure cases:\n\n",
+     "hash": "db43dcdcefc7d4f3",
+     "he": "מכיוון שאנחנו רוצים להיות מסוגלים לעבד ביטויים שעשויים לכלול שגיאות טיפוס, אנחנו מתאימים את החתימה כך שתאפשר מקרי Failure:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:11:7",
+     "type": "code",
+     "en": "```typescript\ntypeofExp: Expr -> Result<TExp>\n```\n\n\n\n",
+     "hash": "1778b0fe967370c1",
+     "lang": "typescript",
+     "noteHe": "החתימה המעודכנת, עם מונאדת `Result` שמלווה אותנו מ-1.5. הרעיון זהה לחלוטין למה שעשינו במפרש: שגיאת טיפוס אינה חריגה שנזרקת אלא ערך `Failure` שמוחזר, ו-`bind` דואג לכך ששגיאה בתת-ביטוי תבלע את כל החישוב. **שימו לב לפער מושגי חשוב:** `Failure` כאן פירושה \"התוכנית אינה מטופסת היטב\", ולא \"החישוב נכשל\" — בודק הטיפוסים לעולם אינו מריץ את התוכנית."
+    }
+   ],
+   "headingHe": "אלגוריתם ניתוח הטיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:12",
+   "depth": 3,
+   "headingEn": "Type of Atomic Expressions",
+   "raw": "### Type of Atomic Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:12:0",
+     "type": "prose",
+     "en": "It is easy to think of how this function will work for simple expression types:\n\n",
+     "hash": "3ccad0993f28c37c",
+     "he": "קל לחשוב כיצד הפונקציה הזאת תעבוד עבור סוגי ביטויים פשוטים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:12:1",
+     "type": "code",
+     "en": "```typescript\ntypeofExp( <NumExp val> ) => NumTexp\n```\n\n",
+     "hash": "bb2e29061835340e",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס הראשון והפשוט ביותר: הטיפוס של צומת `NumExp` הוא תמיד `NumTexp`, בלי קשר לערך המספרי שבתוכו ובלי צורך בשום מידע נוסף. שימו לב שהערך `val` אינו משתתף בכלל כלל — זה מבטא את המהות של ניתוח סטטי: מספיק לדעת שמדובר בצומת מספר, ולא צריך לדעת **איזה** מספר."
+    },
+    {
+     "id": "cm/3.1TypeChecking:12:2",
+     "type": "prose",
+     "en": "That is, the type of an AST node of the form `<NumExp val>` is Number.\nSimilarly for booleans and strings.\n\n",
+     "hash": "10883e6a7d766655",
+     "he": "כלומר, הטיפוס של צומת AST מהצורה `<NumExp val>` הוא Number.\nבדומה לכך עבור בוליאנים ומחרוזות."
+    }
+   ],
+   "headingHe": "הטיפוס של ביטויים אטומיים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:13",
+   "depth": 3,
+   "headingEn": "Type Environment",
+   "raw": "### Type Environment\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:13:0",
+     "type": "prose",
+     "en": "We then must decide what should be the type of an expression which only consists of a VarRef - that is a reference to a variable.  \n\n",
+     "hash": "d9ef496a70065803",
+     "he": "כעת עלינו להחליט מה יהיה הטיפוס של ביטוי שמורכב מ-VarRef בלבד — כלומר, הפניה למשתנה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:1",
+     "type": "prose",
+     "en": "Obviously, this depends on the context of the variable - since the same variable name in different contexts will yield different answers.  We must, therefore, extend the signature of the `typeofExp` operation to accept as an additional parameter the assumptions we make about the type of variables in our program.  \n\n",
+     "hash": "7213345f19d7d558",
+     "he": "ברור שזה תלוי בהקשר של המשתנה — מכיוון שאותו שם משתנה בהקשרים שונים ייתן תשובות שונות. לכן עלינו להרחיב את החתימה של הפעולה `typeofExp` כך שתקבל כפרמטר נוסף את ההנחות שאנחנו עושים לגבי הטיפוס של המשתנים בתוכנית שלנו."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:2",
+     "type": "prose",
+     "en": "We had exactly the same issue when we defined the operational semantics in Chapter 2.  In order to compute the value of variables (even in the simplest model $$L1$$), we introduced an **environment** which keeps track of *what we know about variables*.\n\n",
+     "hash": "1940072bc81e5353",
+     "he": "נתקלנו בדיוק באותה סוגיה כשהגדרנו את הסמנטיקה התפעולית בפרק 2. כדי לחשב את הערך של משתנים (אפילו במודל הפשוט ביותר $$L1$$), הצגנו **סביבה** ששומרת מעקב אחרי *מה שאנחנו יודעים על משתנים*."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:3",
+     "type": "prose",
+     "en": "In a similar manner, we define **type environments** as a way to keep track of what we know about the **type of variables** in the program.  As usual, we define the type environment in an inductive manner:\n\n\n",
+     "hash": "1de8064d357be88e",
+     "he": "באופן דומה, אנחנו מגדירים **סביבות טיפוסים (type environments)** כדרך לשמור מעקב אחרי מה שאנחנו יודעים על **הטיפוס של המשתנים** בתוכנית. כרגיל, אנחנו מגדירים את סביבת הטיפוסים באופן אינדוקטיבי:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:4",
+     "type": "prose",
+     "en": "#### Definition: Type Environment\n\n",
+     "hash": "a9161106e20fb976",
+     "he": "#### הגדרה: סביבת טיפוסים"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:5",
+     "type": "list",
+     "en": "1. A type environment is a substitution of **language variables** to **type expressions**, *i.e.*, a mapping of a finite set of variables to type expressions.  It is denoted as a set of variable type assumptions. For example:\n\n",
+     "hash": "1e14c2e782b224d2",
+     "he": "1. סביבת טיפוסים היא הצבה של **משתני שפה** ל**ביטויי טיפוס**, *כלומר*, מיפוי של קבוצה סופית של משתנים לביטויי טיפוס. היא מסומנת כקבוצה של הנחות טיפוס על משתנים. לדוגמה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:6",
+     "type": "code",
+     "en": "```typescript\n{x : number, y : (number -> T)}\n```\n\n",
+     "hash": "9ef4599d4775187a",
+     "lang": "typescript",
+     "noteHe": "דוגמה לסביבת טיפוסים בסימון של קבוצות. **שימו לב לניגוד המרכזי:** סביבה רגילה (מפרק 2) ממפה משתנים ל**ערכים** — `{x = 5}`; סביבת טיפוסים ממפה משתנים ל**ביטויי טיפוס** — `{x : number}`. שימו לב גם לנקודתיים במקום סימן השוויון, וזו מוסכמת סימון שכדאי לשמור עליה. הדוגמה מראה שגם טיפוס פרוצדורה יכול להופיע באגף ימין, כולל כזה שמכיל משתנה טיפוס `T`."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:7",
+     "type": "prose",
+     "en": "In this type environment, the variable x is mapped to the Number type, and the variable y is mapped to the polymorphic procedure type `(number –> T)`.\n\n",
+     "hash": "2cbb36f44652b17e",
+     "he": "בסביבת הטיפוסים הזאת, המשתנה x ממופה לטיפוס Number, והמשתנה y ממופה לטיפוס הפרוצדורה הפולימורפי `(number –> T)`."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:8",
+     "type": "prose",
+     "en": "The type of a variable v with respect to a type environment TEnv is denoted Tenv(v) (or `applyTEnv(Tenv, v)`).\n\n",
+     "hash": "5eea393e08fcf947",
+     "he": "הטיפוס של משתנה v ביחס לסביבת טיפוסים TEnv מסומן Tenv(v) (או `applyTEnv(Tenv, v)`)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:9",
+     "type": "list",
+     "en": "2. The empty type environment, denoted {}, indicates that we make no assumptions about the types of variables.\n\n3. Extending a type environment: we construct new type environments by combining new assumptions about variable-type mappings with another existing type environment.  Formally, this is achieved by composing substitutions.\n\n",
+     "hash": "53f9a30a993f89c1",
+     "he": "2. סביבת הטיפוסים הריקה, המסומנת {}, מציינת שאיננו עושים שום הנחות לגבי הטיפוסים של המשתנים.\n\n3. הרחבת סביבת טיפוסים: אנחנו בונים סביבות טיפוסים חדשות על ידי שילוב של הנחות חדשות לגבי מיפויי משתנה-טיפוס עם סביבת טיפוסים קיימת אחרת. באופן פורמלי, זה מושג על ידי הרכבת הצבות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:10",
+     "type": "prose",
+     "en": "For example, if we combine the type assumption about the type of variable z: {z:Boolean} with the substitution above, we obtain:\n\n",
+     "hash": "c4b77cf392b7fa65",
+     "he": "לדוגמה, אם נשלב את הנחת הטיפוס לגבי הטיפוס של המשתנה z: ‏{z:Boolean} עם ההצבה שלמעלה, נקבל:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:11",
+     "type": "code",
+     "en": "```typescript\n{x:Number, y:(Number –> T)]} o {z:Boolean} = {x:Number, y:(Number –> T), z:Boolean}\n```\n\n",
+     "hash": "4ac1b8f1d03684ae",
+     "lang": "typescript",
+     "noteHe": "הרכבה של שתי סביבות טיפוסים. מכיוון ש-`z` אינו מופיע בסביבה השמאלית, ההרכבה פשוט מוסיפה אותו — בדיוק לפי הגדרת הרכבת ההצבות מ-2.6. שימו לב שאילו `z` **כן** היה מופיע בשמאלית, ההנחה השמאלית הייתה גוברת. שימו לב לטעות הקלדה במקור: סוגר מסולסל מיותר אחרי `T)` באגף שמאל. שימו לב גם לכתיב לא־עקבי — `Number` באות רישית כאן מול `number` בשאר הדוגמאות; בדקדוק הרשמי שמות הטיפוסים האטומיים באות קטנה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:12",
+     "type": "prose",
+     "en": "The empty substitution is the neutral element of the substitution-composition operation: \n",
+     "hash": "803d79d9c8102947",
+     "he": "ההצבה הריקה היא איבר הזהות של פעולת הרכבת ההצבות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:13",
+     "type": "code",
+     "en": "```typescript\n{} o {x1:T1, ..., xn:Tn} = {x1:T1, ..., xn:Tn}.\n```\n\n",
+     "hash": "0b9e5e185af4febc",
+     "lang": "typescript",
+     "noteHe": "תכונת איבר הזהות, בסימון כללי: הרכבה עם ההצבה הריקה מחזירה את ההצבה כמות שהיא. זו אותה תכונה בדיוק שראינו בהצבות של מודל ההצבה — מה שמדגיש שסביבות טיפוסים אינן מנגנון חדש אלא שימוש חוזר במנגנון מוכר, על טיפוסים במקום על ערכים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:14",
+     "type": "prose",
+     "en": "The typeofExpr operation has thus the following signature and type definition:\n\n",
+     "hash": "6c244206bc947ce7",
+     "he": "לפעולה typeofExpr יש אפוא את החתימה והגדרת הטיפוס הבאות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:15",
+     "type": "code",
+     "en": "```typescript\ntypeofExp: Exp * TEnv -> Result<TExp>\n```\n\n",
+     "hash": "2209cdbfd1dea854",
+     "lang": "typescript",
+     "noteHe": "החתימה הסופית של בודק הטיפוסים: ביטוי **וסביבת טיפוסים** אל `Result<TExp>`. השוו לחתימת המפרש `env-eval: Exp * Env -> Result<Value>` — המבנה זהה לחלוטין, רק שהערכים הוחלפו בטיפוסים והסביבה בסביבת טיפוסים. **כדאי לשנן את שתי החתימות זו לצד זו** — ההקבלה ביניהן היא המפתח להבנת כל הפרק."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:16",
+     "type": "prose",
+     "en": "We make efforts in this section to reuse the same mechanisms we used when describing the operational semantics of the language - environments and substitutions.  \n\n\n",
+     "hash": "bdcc66d416bb0ed2",
+     "he": "אנחנו משתדלים בסעיף הזה לעשות שימוש חוזר באותם מנגנונים שבהם השתמשנו בתיאור הסמנטיקה התפעולית של השפה — סביבות והצבות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:17",
+     "type": "prose",
+     "en": "#### Type of Variables \n\n",
+     "hash": "2786f035360efbe7",
+     "he": "#### הטיפוס של משתנים"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:18",
+     "type": "prose",
+     "en": "Equipped with type environments, we can define the type of variable expressions:\n\n",
+     "hash": "8230274429ac0437",
+     "he": "מצוידים בסביבות טיפוסים, אנחנו יכולים להגדיר את הטיפוס של ביטויי משתנה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:19",
+     "type": "code",
+     "en": "```typescript\ntypeofExp( <varref var>, tenv ) => tenv(var)\n```\n\n",
+     "hash": "0982fd7de9e3c2ac",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של הפניה למשתנה: פשוט מחפשים אותו בסביבת הטיפוסים ומחזירים את מה שנמצא. **השוו לכלל ההערכה של VarRef במפרש** — `eval(varref, env) => applyEnv(env, var)` — אותו מבנה בדיוק. זהו הכלל הראשון שבו הסביבה משתתפת בפועל, וזו הסיבה שהיינו חייבים להוסיף אותה לחתימה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:20",
+     "type": "prose",
+     "en": "What type should we return for a var in case we made no assumptions about its type in `Tenv`?\n\n",
+     "hash": "51f3e615f36b9287",
+     "he": "איזה טיפוס עלינו להחזיר עבור משתנה במקרה שלא עשינו שום הנחות לגבי הטיפוס שלו ב-`Tenv`?"
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:21",
+     "type": "prose",
+     "en": "At present, we will trigger this as an error - as we only consider the case of fully typed programs, *i.e.*, we require the programmer to declare the type of all the variables in the program.  Variables cannot be referenced if they are not declared beforehand.\n\n",
+     "hash": "dac0970cf60b413b",
+     "he": "בשלב הזה נגדיר זאת כשגיאה — מכיוון שאנחנו מתייחסים רק למקרה של תוכניות מטופסות במלואן, *כלומר*, אנחנו דורשים מהמתכנת להצהיר על הטיפוס של כל המשתנים בתוכנית. אי אפשר להפנות למשתנים אם לא הוכרזו קודם לכן."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:22",
+     "type": "prose",
+     "en": "We will revisit this decision later when we consider the task of **type inference** as opposed to **type checking**.\n\n",
+     "hash": "821eeeb2f71ee54b",
+     "he": "נחזור להחלטה הזאת בהמשך, כשנעסוק במשימה של **הסקת טיפוסים** בניגוד ל**בדיקת טיפוסים**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:13:23",
+     "type": "prose",
+     "en": "The decision we have taken will work as long as the type checker traverses the AST in a way that it will meet varDecl nodes before it meets varRef nodes corresponding to them.\nThat is, the order in which we perform the traversal of the AST is important.  Again, we will relax this requirement when we expand the algorithm to deal with type inference.\n\n",
+     "hash": "54732d2bfd010165",
+     "he": "ההחלטה שקיבלנו תעבוד כל עוד בודק הטיפוסים סורק את ה-AST באופן שבו הוא ייתקל בצמתי varDecl לפני שייתקל בצמתי varRef שמתאימים להם.\nכלומר, הסדר שבו אנחנו מבצעים את הסריקה של ה-AST חשוב. שוב, נרפה מהדרישה הזאת כשנרחיב את האלגוריתם כדי שיטפל בהסקת טיפוסים."
+    }
+   ],
+   "headingHe": "סביבת טיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:14",
+   "depth": 2,
+   "headingEn": "Typing Rules",
+   "raw": "## Typing Rules\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:14:0",
+     "type": "prose",
+     "en": "Before we can describe how the type checker processes compound expressions, we define a tool which will help us describe precisely the behavior of the type checker.\n\n",
+     "hash": "81ae4a90b582eb73",
+     "he": "לפני שנוכל לתאר כיצד בודק הטיפוסים מעבד ביטויים מורכבים, נגדיר כלי שיעזור לנו לתאר במדויק את ההתנהגות של בודק הטיפוסים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:14:1",
+     "type": "prose",
+     "en": "In the same way as we defined *evaluation rules* for each type of expression, we define *type analysis rules*.  Type analysis rules will take the form of quantified \nlogical expressions which we call *type statements*.\n\n",
+     "hash": "d69aea08b8d399be",
+     "he": "באותו אופן שבו הגדרנו *כללי הערכה* לכל סוג ביטוי, אנחנו מגדירים *כללי ניתוח טיפוסים*. כללי ניתוח הטיפוסים ילבשו צורה של\nביטויים לוגיים עם כמתים, שאנחנו קוראים להם *טענות טיפוס*."
+    }
+   ],
+   "headingHe": "כללי טיפוס"
+  },
+  {
+   "id": "cm/3.1TypeChecking:15",
+   "depth": 3,
+   "headingEn": "Type Statements",
+   "raw": "### Type Statements\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:15:0",
+     "type": "prose",
+     "en": "To describe the typing rules, we first define a useful device we call a **typing statement**:\n\n",
+     "hash": "c6c6f57b5ed60067",
+     "he": "כדי לתאר את כללי הטיפוס, נגדיר תחילה כלי שימושי שאנחנו קוראים לו **טענת טיפוס (typing statement)**:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:1",
+     "type": "prose",
+     "en": "#### Definition: Typing Statement\n\n",
+     "hash": "5e37fbfef44f2dde",
+     "he": "#### הגדרה: טענת טיפוס"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:2",
+     "type": "prose",
+     "en": "A typing statement is a true/false formula that states a judgment about the **type of an expression, given a type environment**.\n\n",
+     "hash": "7eb7cce76349e000",
+     "he": "טענת טיפוס היא נוסחה בעלת ערך אמת/שקר, שמנסחת פסק דין לגבי **הטיפוס של ביטוי, בהינתן סביבת טיפוסים**."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:3",
+     "type": "prose",
+     "en": "Notation: `Tenv |- e:t`\n\n",
+     "hash": "28a08f379ab27137",
+     "he": "סימון: `Tenv |- e:t`"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:4",
+     "type": "prose",
+     "en": "This statement means that if the type of variables in a language expression e is as specified in Tenv,\nthen the type of e is t.\n\n",
+     "hash": "738e65d1fd09d4d0",
+     "he": "הטענה הזאת אומרת שאם הטיפוס של המשתנים בביטוי השפה e הוא כפי שמצוין ב-Tenv,\nאז הטיפוס של e הוא t."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:5",
+     "type": "prose",
+     "en": "For example, the typing statement:\n\n",
+     "hash": "2dc4a8206c40f77f",
+     "he": "לדוגמה, טענת הטיפוס:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:6",
+     "type": "code",
+     "en": "```typescript\n{x:Number} |- (+ x 5):Number\n```\n\n",
+     "hash": "27e7312f33ded3ec",
+     "lang": "typescript",
+     "noteHe": "טענת הטיפוס הראשונה, וכדאי ללמוד לקרוא את הסימון. משמאל ל-`|-` (הנקרא turnstile, \"שער\") נמצאות ההנחות — סביבת הטיפוסים; מימין נמצא הפסק — ביטוי, נקודתיים, וטיפוס. הקריאה בקול: \"בהנחה ש-x הוא number, מתקיים ש-`(+ x 5)` הוא number\". **שימו לב שזו טענה ולא חישוב** — היא נכונה או שגויה, ותפקידם של כללי הטיפוס יהיה להוכיח טענות כאלה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:7",
+     "type": "prose",
+     "en": "states that under the assumption that the type of x is Number, the type of (+ x 5) is Number. \n\n",
+     "hash": "abe507444b15d675",
+     "he": "אומרת שתחת ההנחה שהטיפוס של x הוא Number, הטיפוס של (+ x 5) הוא Number."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:8",
+     "type": "prose",
+     "en": "The typing statement:\n\n",
+     "hash": "9f89cdbd39f59dac",
+     "he": "טענת הטיפוס:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:9",
+     "type": "code",
+     "en": "```typescript\n{f:[T1 -> T2], g:T1} |- (f g):T2\n```\n\n",
+     "hash": "6aca182be90ba6b3",
+     "lang": "typescript",
+     "noteHe": "טענת טיפוס עם משתני טיפוס. הקריאה: אם `f` היא פונקציה מ-`T1` ל-`T2`, ו-`g` הוא מטיפוס `T1`, אז היישום `(f g)` הוא מטיפוס `T2`. **שימו לב לכוח שבמשתני הטיפוס:** הטענה הזאת נכונה עבור **כל** בחירה עקבית של `T1` ו-`T2` — למשל `T1=number, T2=boolean` או `T1=boolean, T2=(number -> number)`. זהו בדיוק המנגנון שמאפשר לתאר פולימורפיזם. שימו לב גם שזוהי בעצם התמצית של כלל הטיפוס של יישום, שיוצג בהמשך."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:10",
+     "type": "prose",
+     "en": "states that for every consistent replacement of `T1`, `T2`, under the assumption that the type\nof `f` is `[T1 –> T2]`, and the type of `g` is `T1`, the type of `(f g)` is `T2`.\n\n\n",
+     "hash": "22a27eb15610f337",
+     "he": "אומרת שעבור כל החלפה עקבית של `T1`, `T2`, תחת ההנחה שהטיפוס\nשל `f` הוא `[T1 –> T2]` והטיפוס של `g` הוא `T1`, הטיפוס של `(f g)` הוא `T2`."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:11",
+     "type": "prose",
+     "en": "The following typing statements are false:\n\n",
+     "hash": "6a26cdd8f88ac5b6",
+     "he": "טענות הטיפוס הבאות הן שקריות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:12",
+     "type": "code",
+     "en": "```typescript\n{f:[T1 -> T2]} |- (f g):T2\n```\n\n",
+     "hash": "2c6ee0a4deb6496a",
+     "lang": "typescript",
+     "noteHe": "טענה **שקרית**, וההבדל מהקודמת הוא מינימלי: הנחת הטיפוס על `g` נעלמה מסביבת הטיפוסים. בלי לדעת מה הטיפוס של `g`, אי אפשר להבטיח שהוא מתאים לפרמטר של `f`, ולכן אי אפשר להסיק דבר על היישום. **הלקח:** סביבת הטיפוסים חייבת לכסות את **כל** המשתנים החופשיים בביטוי; טענה עם הנחות חסרות היא שקרית, גם אם היא נראית סבירה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:13",
+     "type": "prose",
+     "en": "This is false because having no type assumption on `g`, `(f g)` might not satisfy the well-typing rules of Scheme, and create a runtime error. \n\n",
+     "hash": "1f8d17782cb9cf38",
+     "he": "זה שקרי מפני שבהיעדר הנחת טיפוס על `g`, ייתכן ש-`(f g)` לא יקיים את כללי הטיפוס התקין של Scheme וייצור שגיאת זמן ריצה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:14",
+     "type": "prose",
+     "en": "The typing statement:\n\n",
+     "hash": "9f89cdbd39f59dac",
+     "he": "טענת הטיפוס:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:15",
+     "type": "code",
+     "en": "```typescript\n{f:[Empty -> T2], g:T2} |- (f g):T2\n```\n\n",
+     "hash": "7ebfba389670f3cc",
+     "lang": "typescript",
+     "noteHe": "טענה שקרית מסיבה אחרת: כאן דווקא **יש** הנחות על שני המשתנים, אבל הן אינן מסתדרות. `f` מוצהרת כפונקציה **חסרת פרמטרים** (`Empty ->`), ולמרות זאת הביטוי `(f g)` מיישם אותה על ארגומנט. זו שגיאה במספר הארגומנטים — אחת מארבע השגיאות שברשימה בתחילת האלגוריתם. **שימו לב:** בדיקת מספר הארגומנטים היא חלק אינטגרלי מבדיקת הטיפוסים, ולא בדיקה נפרדת."
+    },
+    {
+     "id": "cm/3.1TypeChecking:15:16",
+     "type": "prose",
+     "en": "is false because based on the operational semantics of Scheme, if `f` is a parameter-less procedure, the expression `(f g)` does not satisfy the well-typing rules of Scheme.\n\n",
+     "hash": "435f7620faebf219",
+     "he": "היא שקרית מפני שעל פי הסמנטיקה התפעולית של Scheme, אם `f` היא פרוצדורה חסרת פרמטרים, הביטוי `(f g)` אינו מקיים את כללי הטיפוס התקין של Scheme."
+    }
+   ],
+   "headingHe": "טענות טיפוס"
+  },
+  {
+   "id": "cm/3.1TypeChecking:16",
+   "depth": 3,
+   "headingEn": "Typing Rules",
+   "raw": "### Typing Rules\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:16:0",
+     "type": "prose",
+     "en": "Let us enumerate typing rules for each type of expression in the language, starting with simple expression types.\nThese typing rules define the type system of our programming language.\n\n",
+     "hash": "fb9cfb0c0adb9178",
+     "he": "נמנה כללי טיפוס לכל סוג ביטוי בשפה, ונתחיל בסוגי הביטויים הפשוטים.\nכללי הטיפוס האלה מגדירים את מערכת הטיפוסים של שפת התכנות שלנו."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:1",
+     "type": "code",
+     "en": "```typescript\nTyping rule Number:\n\nFor every type environment _Tenv and number _n:\n_Tenv |- (num_exp _n) : Number\n\nTyping rule Boolean :\n\nFor every type environment _Tenv and boolean _b:\n_Tenv |- (bool_exp _b) : Boolean\n\nTyping rule Variable :\n\nFor every type environment _Tenv and variable _v:\n_Tenv |- (varref _v) : Tenv(_v)\n```\n\n",
+     "hash": "2e898e28eb4e05b1",
+     "lang": "typescript",
+     "noteHe": "שלושת כללי הטיפוס הבסיסיים, בפורמט שילווה אותנו לאורך כל הפרק. כל כלל נפתח ב-\"For every…\" שמכמת על כל מה שהכלל תקף עבורו, ואז מנסח טענת טיפוס. שימו לב לקו התחתון בשמות כמו `_Tenv`, `_n`, `_b`, `_v` — אלה **מטא-משתנים**, כלומר מקומות שממלאים בביטוי אמיתי כשמפעילים את הכלל (הסבר מלא מופיע בסוף הסעיף הבא). שני הכללים הראשונים הם המקרים ה\"קלים\": הטיפוס נקבע מסוג הצומת בלבד, ו-`_Tenv` אינו משתתף כלל. הכלל השלישי הוא היחיד שמשתמש בסביבה: `Tenv(_v)` הוא חיפוש. **הבחינו בין שני סוגי כללים:** כללים ללא תנאי מקדים (כמו שלושת אלה) נקראים אקסיומות, וכללים עם \"If … Then\" — שנראה בהמשך — נקראים כללי היסק."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:2",
+     "type": "prose",
+     "en": "For primitive operators, we use the type definition of each primitive operator.\n\n",
+     "hash": "362eb4d8ebde76b7",
+     "he": "עבור אופרטורים פרימיטיביים, אנחנו משתמשים בהגדרת הטיפוס של כל אופרטור פרימיטיבי."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:3",
+     "type": "prose",
+     "en": "We know for example that `+` is a procedure with type `(Number * ... * Number -> Number)`.  We express this in a single typing rule for each primitive procedure:\n\n",
+     "hash": "a09723832119b276",
+     "he": "אנחנו יודעים לדוגמה ש-`+` היא פרוצדורה מטיפוס `(Number * ... * Number -> Number)`. אנחנו מבטאים זאת בכלל טיפוס יחיד עבור כל פרוצדורה פרימיטיבית:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:4",
+     "type": "code",
+     "en": "```typescript\nFor every type environment _Tenv:\n_Tenv |- + : (Number * ... * Number -> Number)\n```\n\n",
+     "hash": "289c8db516343c7d",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של `+`. שימו לב שהוא אינו תלוי בסביבה כלל — הטיפוסים של הפרימיטיבים ידועים מראש ומובנים בשפה. שלוש הנקודות `...` מציינות מספר משתנה של פרמטרים, מה שנקרא פונקציה **וריאדית** (variadic); זו חריגה מהדקדוק הרגיל של ביטויי טיפוס, שדורש רשימה סופית וידועה. הפסקה הבאה מסבירה איך המימוש עוקף את הקושי הזה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:5",
+     "type": "prose",
+     "en": "In the implementation of the type checker, to simplify the code, we ignore variadic primitives - and consider `+, -, * and /` to be binary operators only. \n\n",
+     "hash": "78dd91ae1a14d86f",
+     "he": "במימוש של בודק הטיפוסים, כדי לפשט את הקוד, אנחנו מתעלמים מפרימיטיבים וריאדיים — ומתייחסים ל-`+, -, * ו-/` כאל אופרטורים בינאריים בלבד."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:6",
+     "type": "prose",
+     "en": "Similarly, for other primitives:\n\n",
+     "hash": "c05bd7f0af5ee5fc",
+     "he": "בדומה לכך, עבור פרימיטיבים אחרים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:7",
+     "type": "code",
+     "en": "```typescript\nFor every type environment _Tenv:\n_Tenv |- not : [_S -> Boolean]\n```\n\n",
+     "hash": "aae9ad69acf39e96",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של `not`, והוא מעניין: הפרמטר הוא **משתנה טיפוס** `_S`, כלומר `not` מקבלת ערך מכל טיפוס שהוא ומחזירה בוליאני. זה תואם את הסמנטיקה של L2 שראינו ב-2.6 — `isTrueValue` מקבלת כל ערך ובודקת רק אם הוא `#f`. שימו לב שזה אינו \"פולימורפיזם\" במובן הרגיל שבו הטיפוס המוחזר תלוי בקלט; כאן הטיפוס המוחזר קבוע, ורק הקלט חופשי. הפסקה שאחרי הבלוק הבא שואלת בדיוק על ההבחנה הזאת."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:8",
+     "type": "prose",
+     "en": "`_S` is a type variable. That is, `not` is a polymorphic primitive procedure - it applies to any type and returns a boolean value.\n\n",
+     "hash": "831226917e2c647d",
+     "he": "`_S` הוא משתנה טיפוס. כלומר, `not` היא פרוצדורה פרימיטיבית פולימורפית — היא חלה על כל טיפוס ומחזירה ערך בוליאני."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:9",
+     "type": "prose",
+     "en": "The display procedure has the typing rule:\n\n",
+     "hash": "107f94a59a6be859",
+     "he": "לפרוצדורה display יש את כלל הטיפוס:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:10",
+     "type": "code",
+     "en": "```typescript\nFor every type environment _Tenv:\n_Tenv |- display:(_S -> void)\n```\n\n",
+     "hash": "d1f8d2dc928b2979",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של `display`: מקבלת ערך מכל טיפוס `_S` ומחזירה `void`. הטיפוס `void` הוא הדרך של מערכת הטיפוסים לומר \"אין כאן ערך שימושי\" — הפונקציה קיימת רק בשביל תופעת הלוואי. שימו לב שהסימון כאן משתמש בסוגריים עגולים `(_S -> void)` ואילו הכלל של `not` השתמש במרובעים `[_S -> Boolean]`; שתי הצורות מופיעות בחומר לסירוגין ומשמעותן זהה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:11",
+     "type": "prose",
+     "en": "`display` is also a polymorphic primitive procedure.\n\n",
+     "hash": "c9a42a82d991a6cf",
+     "he": "גם `display` היא פרוצדורה פרימיטיבית פולימורפית."
+    },
+    {
+     "id": "cm/3.1TypeChecking:16:12",
+     "type": "prose",
+     "en": "**QUESTION**: How different is it to state that `not` is a polymorphic procedure and to state that it is a procedure which receives a parameter of type *any*?\n\n",
+     "hash": "d5fcae0b531809e4",
+     "he": "**שאלה**: עד כמה שונה לומר ש-`not` היא פרוצדורה פולימורפית, מלומר שהיא פרוצדורה שמקבלת פרמטר מטיפוס *any*?"
+    }
+   ],
+   "headingHe": "כללי טיפוס"
+  },
+  {
+   "id": "cm/3.1TypeChecking:17",
+   "depth": 2,
+   "headingEn": "Typing Rule for Procedures",
+   "raw": "## Typing Rule for Procedures\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:17:0",
+     "type": "prose",
+     "en": "The expressions which include variable declarations are more complex and they involve multiple type environments.\nLet us review the rule for typing procedure expressions.\n\n",
+     "hash": "abd15520dfdcbf55",
+     "he": "הביטויים שכוללים הכרזות משתנים מורכבים יותר, והם מערבים כמה סביבות טיפוסים.\nנסקור את הכלל לטיפוס של ביטויי פרוצדורה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:1",
+     "type": "prose",
+     "en": "A procedure has the structure `(lambda (x1 ... xn) body)`.\nWith type annotations, we have: `(lambda (x1:t1 ... xn:tn) : t body)`.\n\n",
+     "hash": "f427e40bea24cbcc",
+     "he": "לפרוצדורה יש את המבנה `(lambda (x1 ... xn) body)`.\nעם הערות טיפוס, מקבלים: `(lambda (x1:t1 ... xn:tn) : t body)`."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:2",
+     "type": "prose",
+     "en": "What should be the type of this expression?\n\n",
+     "hash": "415e5c0c62a85360",
+     "he": "מה צריך להיות הטיפוס של הביטוי הזה?"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:3",
+     "type": "prose",
+     "en": "If we trust the annotations, the answer is simple:\n\n",
+     "hash": "e1f7a3bbc82080ae",
+     "he": "אם אנחנו סומכים על ההערות, התשובה פשוטה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:4",
+     "type": "code",
+     "en": "```typescript\ntypeofExp(lambda (x1:t1 ... xn:tn) : t body) = [t1 * ... * tn -> t]\n```\n\n",
+     "hash": "242b77da6f68f27e",
+     "lang": "typescript",
+     "noteHe": "הרכבת הטיפוס של lambda מתוך ההערות: טיפוסי הפרמטרים באגף שמאל של החץ, טיפוס ההחזרה באגף ימין. שימו לב שזו פעולה **תחבירית טהורה** — פשוט מעתיקים את ההערות ומרכיבים מהן ביטוי טיפוס, בלי להסתכל בגוף כלל. הפסקה הבאה מצביעה על הבעיה: מי מבטיח שהגוף באמת מחזיר ערך מטיפוס `t`?"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:5",
+     "type": "prose",
+     "en": "But can we trust the annotations in a specific expression?  This is exactly what we want to check, by traversing\nthe body and type checking it under specific typing assumptions.\n\n",
+     "hash": "93f1fb6f445c31a6",
+     "he": "אבל האם אנחנו יכולים לסמוך על ההערות בביטוי ספציפי? זה בדיוק מה שאנחנו רוצים לבדוק, על ידי סריקה של\nהגוף ובדיקת הטיפוסים שלו תחת הנחות טיפוס מסוימות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:6",
+     "type": "prose",
+     "en": "The rule for our language reads as follows:\n\n",
+     "hash": "fc438c66d7e89e3e",
+     "he": "הכלל עבור השפה שלנו נקרא כך:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:7",
+     "type": "code",
+     "en": "```typescript\nTyping rule Procedure :\nFor every: type environment _Tenv,\n           variables _x1, ..., _xn, n >= 0\n           expressions _e1, ..., _em, m >= 1, and\n           type expressions _S1, ...,_Sn, _U1, ...,_Um :\n\nProcedure with parameters (n > 0):\n    If   _Tenv o {_x1:_S1, ..., _xn:_Sn } |- _ei:_Ui for all i = 1..m ,\n    Then _Tenv |- (lambda (_x1 ... _xn ) _e1 ... _em) : [_S1 * ... * _Sn -> _Um]\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _ei:_Ui for all i=1..m,\n    Then _Tenv |- (lambda () _e1 ... _em) : [Empty -> _Um]\n```\n\n",
+     "hash": "75763f9d675c2d5e",
+     "lang": "typescript",
+     "noteHe": "**כלל הטיפוס המרכזי של השיעור** — הראשון שהוא כלל היסק ולא אקסיומה, כלומר יש בו \"If … Then\". קראו אותו כך: **אם** תחת סביבת הטיפוסים המורחבת `_Tenv o {_x1:_S1, ..., _xn:_Sn}` — כלומר הסביבה הנוכחית בתוספת ההנחות על הפרמטרים — כל ביטוי `_ei` בגוף מקבל טיפוס `_Ui`, **אז** ה-lambda כולה מקבלת את הטיפוס `[_S1 * ... * _Sn -> _Um]`. שימו לב לשלוש נקודות מכריעות. ראשית, הרחבת הסביבה: זה בדיוק המקום שבו ההערות על הפרמטרים \"נכנסות לתוקף\", והוא מקביל ל-`extend-env` בכלל היישום של המפרש. שנית, האינדקס `_Um` בטיפוס המוחזר — **m הוא האחרון**, כלומר טיפוס ה-lambda נקבע מהביטוי האחרון בגוף בלבד, בהתאמה לכך שערך הגוף הוא ערך הביטוי האחרון. שלישית, למרות זאת התנאי דורש שכל הביטויים `i = 1..m` יטופסו בהצלחה — כלומר גם ביטויים שערכם נזרק חייבים להיות תקינים. המקרה השני, של פרוצדורה חסרת פרמטרים, זהה פרט לכך שאין הרחבה של הסביבה והטיפוס הוא `[Empty -> _Um]`. **כדאי לתרגל הפעלה ידנית של הכלל הזה** — זו שאלת מבחן שכיחה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:8",
+     "type": "prose",
+     "en": "The type of the body is the type of the last expression in the body\n(the body is a list of expressions meant to be evaluated in sequence - the value of the body is the value of the last expression,\nhence the type of the body is the type of the last expression).  \n\n",
+     "hash": "7ff68a0b06c454fa",
+     "he": "הטיפוס של הגוף הוא הטיפוס של הביטוי האחרון בגוף\n(הגוף הוא רשימה של ביטויים שנועדו להיות מוערכים ברצף — הערך של הגוף הוא הערך של הביטוי האחרון,\nולכן הטיפוס של הגוף הוא הטיפוס של הביטוי האחרון)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:9",
+     "type": "prose",
+     "en": "Still, we apply the rule to all the expressions in the body, to actually type check them.\n\n",
+     "hash": "eee9ee837d246466",
+     "he": "עם זאת, אנחנו מפעילים את הכלל על כל הביטויים בגוף, כדי לבדוק את הטיפוסים שלהם בפועל."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:10",
+     "type": "prose",
+     "en": "The rule indicates that we type check the body in a Tenv where we assume that the parameters have the declared types.  \n\n\n",
+     "hash": "255899452e70ce63",
+     "he": "הכלל מציין שאנחנו בודקים את הטיפוסים של הגוף ב-Tenv שבו אנחנו מניחים שלפרמטרים יש את הטיפוסים המוצהרים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:11",
+     "type": "prose",
+     "en": "#### Meta-variables\n\n",
+     "hash": "20485a396d101843",
+     "he": "#### מטא-משתנים"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:12",
+     "type": "prose",
+     "en": "The typing rules include meta-variables for language expressions, type expressions and type environments.\nWhen rules are instantiated, the meta-variables are replaced by real expressions of the same kind.\nThe meta-variables should not be confused with language or type variables. \nTherefore, they deliberately are preceded with an underscore to distinguish them from non-meta-variables.\n\n",
+     "hash": "dbb1b43ca3a5ec6f",
+     "he": "כללי הטיפוס כוללים מטא-משתנים עבור ביטויי שפה, ביטויי טיפוס וסביבות טיפוסים.\nכשמופעל מופע של כלל, המטא-משתנים מוחלפים בביטויים אמיתיים מאותו סוג.\nאין לבלבל בין המטא-משתנים לבין משתני שפה או משתני טיפוס.\nלכן, במכוון, קודם להם קו תחתון כדי להבחין ביניהם לבין משתנים שאינם מטא-משתנים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:13",
+     "type": "prose",
+     "en": "Each typing rule specifies an independent (standalone), universally quantified typing statement. \nThe meta-variables used in different rules are not related, and can be consistently renamed.\n\n",
+     "hash": "acb4dc8ed5a7bf18",
+     "he": "כל כלל טיפוס מנסח טענת טיפוס עצמאית (עומדת בפני עצמה), עם כימות אוניברסלי.\nהמטא-משתנים שמשמשים בכללים שונים אינם קשורים זה לזה, ואפשר לשנות את שמותיהם באופן עקבי."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:14",
+     "type": "prose",
+     "en": "####  Exhaustive sub-expression typing\n\n",
+     "hash": "d7bca91ccee31201",
+     "he": "####  טיפוס ממצה של תת-ביטויים"
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:15",
+     "type": "prose",
+     "en": "Every typing rule requires typing statements for all sub-expressions of the expression for which a typing statement is derived.\nThis property guarantees type safety – the typing algorithm assigns a type to every sub-expression which is evaluated at run-time.\n\n",
+     "hash": "f0d4334b2e6f6de2",
+     "he": "כל כלל טיפוס דורש טענות טיפוס עבור כל תת-הביטויים של הביטוי שעבורו נגזרת טענת הטיפוס.\nהתכונה הזאת מבטיחה בטיחות טיפוסים — אלגוריתם הטיפוס מקצה טיפוס לכל תת-ביטוי שמוערך בזמן ריצה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:17:16",
+     "type": "prose",
+     "en": "We will need to specify rules for if-exp, application expressions, let and letrec expressions as we go to complete the specification of the type system of the language.\n\n",
+     "hash": "0807a50c5b547511",
+     "he": "נצטרך לציין כללים עבור if-exp, ביטויי יישום, וביטויי let ו-letrec ככל שנתקדם, כדי להשלים את המפרט של מערכת הטיפוסים של השפה."
+    }
+   ],
+   "headingHe": "כלל הטיפוס לפרוצדורות"
+  },
+  {
+   "id": "cm/3.1TypeChecking:18",
+   "depth": 2,
+   "headingEn": "Type Checking Algorithm",
+   "raw": "## Type Checking Algorithm\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:18:0",
+     "type": "prose",
+     "en": "We now have the tools to specify the type checking algorithm: \n\n",
+     "hash": "7d7a64b11fa26698",
+     "he": "עכשיו יש לנו את הכלים לנסח את אלגוריתם בדיקת הטיפוסים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:1",
+     "type": "prose",
+     "en": "We assume here that **all** variable declarations and procedures in the object program we will analyze are fully type annotated.\n\n",
+     "hash": "0fd163e03be7e3a3",
+     "he": "אנחנו מניחים כאן ש**כל** הכרזות המשתנים והפרוצדורות בתוכנית שננתח מוערות בהערות טיפוס מלאות."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:2",
+     "type": "prose",
+     "en": "The algorithm traverses the AST of the expression, as we have learned to do when writing interpreters:\n\n",
+     "hash": "2baa9deafd034e44",
+     "he": "האלגוריתם סורק את ה-AST של הביטוי, כפי שלמדנו לעשות בכתיבת מפרשים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:3",
+     "type": "code",
+     "en": "```typescript\n// Purpose: Compute the type of an expression\n// Traverse the AST and check the type according to the exp type.\n// We assume that all variables and procedures have been explicitly typed in the program.\nexport const typeofExp = (exp: Parsed, tenv: TEnv): Result<TExp> =>\n    isNumExp(exp) ? makeOk(typeofNum(exp)) :\n    isBoolExp(exp) ? makeOk(typeofBool(exp)) :\n    isStrExp(exp) ? makeOk(typeofStr(exp)) :\n    isPrimOp(exp) ? typeofPrim(exp) :\n    isVarRef(exp) ? applyTEnv(tenv, exp.var) :\n    isIfExp(exp) ? typeofIf(exp, tenv) :\n    isProcExp(exp) ? typeofProc(exp, tenv) :\n    isAppExp(exp) ? typeofApp(exp, tenv) :\n    isLetExp(exp) ? typeofLet(exp, tenv) :\n    isLetrecExp(exp) ? typeofLetrec(exp, tenv) :\n    isDefineExp(exp) ? typeofDefine(exp, tenv) :\n    isProgram(exp) ? typeofProgram(exp, tenv) :\n    // Skip isSetExp(exp) isLitExp(exp)\n    makeFailure(\"Unknown type\");\n```\n\n",
+     "hash": "8648955e09874974",
+     "lang": "typescript",
+     "noteHe": "הפונקציה הראשית של בודק הטיפוסים, ושימו לב כמה היא דומה במבנה ל-`applicativeEval` של המפרש: שרשרת תנאים שמפצלת לפי סוג הצומת ב-AST, וכל ענף מפנה לפונקציה ייעודית. שלושת הענפים הראשונים מטפלים בקבועים ומחזירים טיפוס קבוע עטוף ב-`makeOk`. `isVarRef` קורא ל-`applyTEnv` — חיפוש בסביבת הטיפוסים. כל השאר מפנים לפונקציות `typeofXxx` שנראה בהמשך. שימו לב לשורת ההערה `// Skip isSetExp(exp) isLitExp(exp)` — שני סוגי ביטויים אינם נתמכים כאן: `set!` מפני ששינוי מצב מסבך את מערכת הטיפוסים, ו-`LitExp` מפני שטיפוס של רשימות דורש טיפוסים מורכבים שעדיין לא הצגנו. **שימו לב להקבלה המבנית:** לכל כלל טיפוס מתאימה פונקציה אחת, בדיוק כפי שלכל כלל הערכה התאימה פונקציה אחת במפרש."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:4",
+     "type": "prose",
+     "en": "Each rule is implemented in a dedicated procedure which traverses inductively its parameter.\n\n",
+     "hash": "ccb979a2f039f030",
+     "he": "כל כלל ממומש בפרוצדורה ייעודית שסורקת אינדוקטיבית את הפרמטר שלה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:5",
+     "type": "prose",
+     "en": "The first few types of simple expressions are simple procedures:\n\n",
+     "hash": "adbd8e4188ed503a",
+     "he": "סוגי הביטויים הפשוטים הראשונים הם פרוצדורות פשוטות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:6",
+     "type": "code",
+     "en": "```typescript\n// a number literal has type num-te\nexport const typeofNum = (n: NumExp): NumTExp => makeNumTExp();\n\n// a boolean literal has type bool-te\nexport const typeofBool = (b: BoolExp): BoolTExp => makeBoolTExp();\n\n// a string literal has type str-te\nconst typeofStr = (s: StrExp): StrTExp => makeStrTExp();\n```\n\n",
+     "hash": "f6e85b5191e98ab8",
+     "lang": "typescript",
+     "noteHe": "שלוש פונקציות של שורה אחת שמממשות את שלוש האקסיומות הבסיסיות. שימו לב שהפרמטר (`n`, `b`, `s`) **אינו בשימוש** בגוף — הפונקציה מתעלמת מהערך ומחזירה טיפוס קבוע. זו בדיוק המשמעות של \"הטיפוס נקבע מסוג הצומת בלבד\". שימו לב גם לטיפוסי ההחזרה: `NumTExp` ולא `Result<NumTExp>` — הפונקציות האלה אינן יכולות להיכשל, ולכן העטיפה ב-`makeOk` נעשית במקום הקריאה ולא כאן."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:7",
+     "type": "prose",
+     "en": "These procedures do not take Tenv as a parameter because they are true regardless of the TEnv state.\n\n",
+     "hash": "9ea82dc7f1da506e",
+     "he": "הפרוצדורות האלה אינן מקבלות את Tenv כפרמטר, מפני שהן נכונות בלי קשר למצב של ה-TEnv."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:8",
+     "type": "prose",
+     "en": "For primitive operators, we map the operator to its type expression:\n\n",
+     "hash": "6a71d239440e9e02",
+     "he": "עבור אופרטורים פרימיטיביים, אנחנו ממפים את האופרטור לביטוי הטיפוס שלו:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:9",
+     "type": "code",
+     "en": "```typescript\n// primitive ops have known proc-te types\nconst numOpTExp = parseTE('(number * number -> number)');\nconst numCompTExp = parseTE('(number * number -> boolean)');\nconst boolOpTExp = parseTE('(boolean * boolean -> boolean)');\nconst typePredTExp = parseTE('(T -> boolean)');\n\n// Todo: cons, car, cdr\nconst typeofPrim = (p: PrimOp): TExp | Error =>\n    ['+', '-', '*', '/'].includes(p.op) ? numOpTExp :\n    ['and', 'or'].includes(p.op) ? boolOpTExp :\n    ['>', '<', '='].includes(p.op) ? numCompTExp :\n    ['number?', 'boolean?', 'string?', 'symbol?', 'list?'].includes(p.op) ? typePredTExp :\n    (p.op === 'not') ? parseTE('(boolean -> boolean)') :\n    (p.op === 'eq?') ? parseTE('(T1 * T2 -> boolean)') :\n    (p.op === 'string=?') ? parseTE('(T1 * T2 -> boolean)') :\n    (p.op === 'display') ? parseTE('(T -> void)') :\n    (p.op === 'newline') ? parseTE('(Empty -> void)') :\n    Error(`Unknown primitive ${p.op}`);\n```\n\n",
+     "hash": "f3912d6fa7272c9c",
+     "lang": "typescript",
+     "noteHe": "טבלת הטיפוסים של הפרימיטיבים. ארבע השורות הראשונות מגדירות קיצורים לטיפוסים חוזרים, ונוצרות פעם אחת בטעינת המודול. `typeofPrim` היא שרשרת תנאים שממפה כל אופרטור לטיפוס שלו: אופרטורים אריתמטיים ל-`(number * number -> number)`; `and`/`or` לגרסה הבוליאנית; אופרטורי השוואה ל-`(number * number -> boolean)`; פרדיקטי טיפוס ל-`(T -> boolean)`. שימו לב לשלושה פרטים. ראשית, `eq?` ו-`string=?` מקבלות **שני משתני טיפוס שונים** `T1` ו-`T2` — כלומר מותר להשוות ערכים מטיפוסים שונים (התוצאה תהיה `#f`). שנית, `newline` היא `(Empty -> void)` — הפונקציה היחידה ברשימה בלי פרמטרים. שלישית, `not` מוגדרת כאן כ-`(boolean -> boolean)` ולא כפולימורפית, בסתירה לכלל שהוצג קודם; ההערה שאחרי הבלוק מסבירה למה. שימו לב גם ל-`// Todo: cons, car, cdr` — הפרימיטיבים של רשימות עדיין חסרים, כי הם דורשים טיפוסים מורכבים, ולטיפוס ההחזרה `TExp | Error` שאינו עקבי עם `Result` שבשאר הקוד."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:10",
+     "type": "prose",
+     "en": "**Note**: In this implementation, we describe the `not` primitive as a procedure of type `[Boolean -> Boolean]` whereas we specified `not` as a polymorphic operator above in the not-typing rule.  The reason is that at this point we have not introduced the tools that will allow us to deal with polymorphic types - we will revisit this in the next lecture.\n\n",
+     "hash": "45f1d3d548a49b1a",
+     "he": "**שימו לב**: במימוש הזה אנחנו מתארים את הפרימיטיב `not` כפרוצדורה מטיפוס `[Boolean -> Boolean]`, בעוד שלמעלה, בכלל הטיפוס של not, ציינו אותו כאופרטור פולימורפי. הסיבה היא שבשלב הזה עדיין לא הצגנו את הכלים שיאפשרו לנו להתמודד עם טיפוסים פולימורפיים — נחזור לזה בהרצאה הבאה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:11",
+     "type": "prose",
+     "en": "**Note**: At this step, we have decided to consider primitives in $$L5$$ as:\n",
+     "hash": "9436318a5d6fd383",
+     "he": "**שימו לב**: בשלב הזה החלטנו להתייחס לפרימיטיבים ב-$$L5$$ כאל:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:18:12",
+     "type": "list",
+     "en": "* non-variadic (they take exactly two parameters - not like the variadic primitives in Scheme)\n* strictly types (they expect parameters to be of a specific type - not like the flexible primitives in JavaScript)\n\n\n",
+     "hash": "98edf46dc7fcc348",
+     "he": "* לא־וריאדיים (הם מקבלים בדיוק שני פרמטרים — בניגוד לפרימיטיבים הוריאדיים ב-Scheme)\n* קפדניים לגבי טיפוסים (הם מצפים שהפרמטרים יהיו מטיפוס מסוים — בניגוד לפרימיטיבים הגמישים ב-JavaScript)"
+    }
+   ],
+   "headingHe": "אלגוריתם בדיקת הטיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:19",
+   "depth": 3,
+   "headingEn": "Type Checking Compound Expressions",
+   "raw": "### Type Checking Compound Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:19:0",
+     "type": "prose",
+     "en": "Let us now consider a case of a compound expression without variable declarations: what should be the type of an if expression?\n\n",
+     "hash": "65d06d8459f83182",
+     "he": "נבחן כעת מקרה של ביטוי מורכב ללא הכרזות משתנים: מה צריך להיות הטיפוס של ביטוי if?"
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:1",
+     "type": "code",
+     "en": "```typescript\n// Purpose: compute the type of an if-exp\n// Typing rule:\n//   if type<test>(tenv) = boolean\n//      type<then>(tenv) = t1\n//      type<else>(tenv) = t1\n// then type<(if test then else)>(tenv) = t1\nexport const typeofIf = (ifExp: IfExp, tenv: TEnv): Result<TExp> => {\n    const testTE = typeofExp(ifExp.test, tenv);\n    const thenTE = typeofExp(ifExp.then, tenv);\n    const altTE = typeofExp(ifExp.alt, tenv);\n    const constraint1 = bind(testTE, testTE => checkEqualType(testTE, makeBoolTExp(), ifExp));\n    const constraint2 = bind(thenTE, (thenTE: TExp) =>\n                            bind(altTE, (altTE: TExp) =>\n                                checkEqualType(thenTE, altTE, ifExp)));\n    return bind(constraint1, (_c1: true) =>\n                bind(constraint2, (_c2: true) =>\n                    thenTE));\n};\n```\n\n",
+     "hash": "fbf0517a9bf53971",
+     "lang": "typescript",
+     "noteHe": "המימוש של כלל הטיפוס של `if`, וההערה בראש הקוד מנסחת אותו במדויק. שלוש השורות הראשונות מחשבות רקורסיבית את הטיפוסים של שלושת הרכיבים. אחר כך נבנות **שתי אילוצים (constraints)**: `constraint1` דורש שהטיפוס של התנאי יהיה בוליאני, ו-`constraint2` דורש ששני הענפים יהיו מאותו טיפוס. שתי הדרישות נאכפות באמצעות `checkEqualType`. השורה האחרונה מחזירה את `thenTE` — הטיפוס של ענף ה-then — אבל רק אחרי ששני האילוצים עברו בהצלחה; ה-`bind`ים המקוננים דואגים לכך שכישלון באחד מהם יבלע את התוצאה. **שימו לב לנקודה מעניינת:** אפשר היה להחזיר את `altTE` באותה מידה, מפני שהאילוץ השני כבר הבטיח שהם זהים. שימו לב גם שכאן, בניגוד למפרש, **שני** הענפים מנותחים — בדיקת טיפוסים אינה מדלגת על ענפים, כי היא חייבת להבטיח בטיחות לכל מסלול ריצה אפשרי. זהו הבדל מהותי מהערכה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:2",
+     "type": "prose",
+     "en": "We check that the components of the expression are well typed, by invoking recursively typeofExp of each of the three components of the if-exp.  We then compare the type computed by typeofExp with our expectations:\n\n",
+     "hash": "4545626a49ee78e4",
+     "he": "אנחנו בודקים שרכיבי הביטוי מטופסים היטב, על ידי הפעלה רקורסיבית של typeofExp על כל אחד משלושת הרכיבים של ה-if-exp. אחר כך אנחנו משווים את הטיפוס שחישב typeofExp לציפיות שלנו:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:3",
+     "type": "list",
+     "en": "* The test component must be a boolean \n* The then and else components must be of the same type\n* The type of the whole if-exp is that of the then component (same as the else component)\n\n",
+     "hash": "9a80a77ddcb460fa",
+     "he": "* רכיב התנאי חייב להיות בוליאני\n* רכיבי ה-then וה-else חייבים להיות מאותו טיפוס\n* הטיפוס של ה-if-exp כולו הוא זה של רכיב ה-then (הזהה לרכיב ה-else)"
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:4",
+     "type": "prose",
+     "en": "The If-exp typing rule is thus specified as follows:\n\n",
+     "hash": "afa30a5ddf6726ef",
+     "he": "כלל הטיפוס של If-exp מנוסח אפוא כך:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:5",
+     "type": "code",
+     "en": "```typescript\nFor every type environment _Tenv,\n          expressions _test, _then, _else\n          type expression _S:\nIf   _Tenv |- _test : Boolean\n     _Tenv |- _then : _S\n     _Tenv |- _else : _S\nThen _Tenv |- (if _test _then _else) : _S\n```\n\n",
+     "hash": "8a128d6a3e04baa9",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של `if` בניסוח הפורמלי. **שימו לב לטריק היפה בסימון:** האילוץ ששני הענפים חייבים להיות מאותו טיפוס אינו נכתב כתנאי מפורש — הוא מקודד בכך ש**אותו מטא-משתנה `_S` מופיע בשתי השורות**. זהו מנגנון סימון חסכוני שכדאי להכיר: חזרה על מטא-משתנה = דרישת שוויון. באותו אופן, העובדה שהתנאי חייב להיות בוליאני מקודדת בכך שכתוב `Boolean` ולא מטא-משתנה. השורה האחרונה מציינת שהטיפוס של הביטוי כולו הוא `_S`. השוו לכלל הטיפוס של הפרוצדורה מהסעיף הקודם — שם היו מטא-משתנים שונים לכל ביטוי בגוף (`_U1`…`_Um`), כי לא נדרשה שום התאמה ביניהם."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:6",
+     "type": "prose",
+     "en": "In this rule, the constraint that the type of the `then` component and `else` component are compatible is captured by the fact \nthat the same meta-variable appears (_S).\n\n",
+     "hash": "d341b9b98d70f2d9",
+     "he": "בכלל הזה, האילוץ שהטיפוס של רכיב ה-`then` ורכיב ה-`else` תואמים נלכד בעובדה\nשאותו מטא-משתנה מופיע בשניהם (_S)."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:7",
+     "type": "prose",
+     "en": "In the type checking algorithm, we enforce this by invoking the function `checkEqualType`.\n\n",
+     "hash": "0acb78adbf297678",
+     "he": "באלגוריתם בדיקת הטיפוסים אנחנו אוכפים זאת על ידי הפעלת הפונקציה `checkEqualType`."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:8",
+     "type": "prose",
+     "en": "At this stage, this constraint checking is implemented as a simple equality test:\n\n",
+     "hash": "4304a0d1646b1d79",
+     "he": "בשלב הזה, בדיקת האילוצים ממומשת כמבחן שוויון פשוט:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:9",
+     "type": "code",
+     "en": "```typescript\n// Purpose: Check that type expressions are equivalent\n// as part of a fully-annotated type check process of exp.\n// Return an error if the types are different - true otherwise.\n// Exp is only passed for documentation purposes.\nconst checkEqualType = (te1: TExp, te2: TExp, exp: Exp): Result<true> =>\n  equals(te1, te2) ? makeOk(true) :\n  bind(unparseTExp(te1), (te1: string) =>\n    bind(unparseTExp(te2), (te2: string) =>\n      bind(unparse(exp), (exp: string) => \n        makeFailure<true>(`Incompatible types: ${te1} and ${te2} in ${exp}`))));\n```\n\n",
+     "hash": "b34efc6a915a7181",
+     "lang": "typescript",
+     "noteHe": "`checkEqualType` היא פונקציה קטנה אבל מרכזית. השורה הראשונה היא כל ההיגיון: `equals(te1, te2)` — השוואה מבנית פשוטה בין שני עצי הטיפוס. אם הם זהים מוחזר `makeOk(true)`, ואחרת נבנית הודעת שגיאה מפורטת. שימו לב לשלושת ה-`bind`ים שמטרתם היחידה היא להמיר את שני הטיפוסים ואת הביטוי חזרה למחרוזות קריאות (`unparseTExp`, `unparse`) לצורך ההודעה — הפרמטר `exp` מועבר, כפי שההערה מציינת, **רק לצורכי תיעוד**. שימו לב לטיפוס ההחזרה `Result<true>`: הערך המוצלח היחיד האפשרי הוא `true`, כלומר הפונקציה קיימת בשביל האילוץ ולא בשביל הערך. **הנקודה המושגית:** מכיוון שהבדיקה היא שוויון מבני מדויק, מערכת הטיפוסים היא **אי-שונה (invariant)** — אין תת-טיפוסים ואין המרות. זה יהיה נקודת המוצא לשינוי הגדול ב-3.2."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:10",
+     "type": "prose",
+     "en": "This type equality test is appropriate in the case of type checking, we will change this to a more complex mechanism when we turn to the type inference algorithm.\n\n",
+     "hash": "ab1bb83ac912372f",
+     "he": "מבחן שוויון הטיפוסים הזה מתאים במקרה של בדיקת טיפוסים; נשנה אותו למנגנון מורכב יותר כשנעבור לאלגוריתם הסקת הטיפוסים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:11",
+     "type": "prose",
+     "en": "This procedure implements the **invariant** type system we discussed above - types are compatible if and only if they are identical.\n\n",
+     "hash": "87dc7ff47e453d43",
+     "he": "הפרוצדורה הזאת מממשת את מערכת הטיפוסים ה**אי-שונה (invariant)** שדנו בה למעלה — טיפוסים תואמים אם ורק אם הם זהים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:19:12",
+     "type": "prose",
+     "en": "Recall that in TypeScript we have a richer type system with subtyping (for example between map types and disjoint union types),\nand to type check such relations a more complex version of `checkEqualType` would be necessary.\n\n",
+     "hash": "b26b75affb90603b",
+     "he": "נזכיר שב-TypeScript יש לנו מערכת טיפוסים עשירה יותר עם תת-טיפוסים (למשל בין טיפוסי מפה לבין טיפוסי איחוד זר),\nוכדי לבדוק טיפוסים ביחסים כאלה הייתה נדרשת גרסה מורכבת יותר של `checkEqualType`."
+    }
+   ],
+   "headingHe": "בדיקת טיפוסים של ביטויים מורכבים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:20",
+   "depth": 2,
+   "headingEn": "Typing Expressions with Variable Declarations",
+   "raw": "## Typing Expressions with Variable Declarations\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:20:0",
+     "type": "prose",
+     "en": "Let us analyze how the type checker implements the typing rule for procedure expressions:\nWe specified this rule as follows:\n\n",
+     "hash": "dbf5d17c236ed488",
+     "he": "ננתח כיצד בודק הטיפוסים מממש את כלל הטיפוס לביטויי פרוצדורה:\nניסחנו את הכלל הזה כך:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:1",
+     "type": "code",
+     "en": "```typescript\nTyping rule Procedure :\nFor every: type environment _Tenv,\n           variables _x1, ..., _xn, n >= 0\n           expressions _e1, ..., _em, m >= 1, and\n           type expressions _S1, ...,_Sn, _U1, ...,_Um :\n\nProcedure with parameters (n > 0):\n    If   _Tenv o {_x1:_S1, ..., _xn:_Sn } |- _ei:_Ui for all i = 1..m ,\n    Then _Tenv |- (lambda (_x1 ... _xn ) _e1 ... _em) : [_S1 * ... * _Sn -> _Um]\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _ei:_Ui for all i=1..m,\n    Then _Tenv |- (lambda () _e1 ... _em) : [Empty -> _Um]\n```\n\n",
+     "hash": "75763f9d675c2d5e",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של הפרוצדורה, מובא שוב לצורך ההשוואה עם המימוש שיוצג מיד. חזרו על שלוש הנקודות המרכזיות: הרחבת הסביבה בהנחות על הפרמטרים, הטיפוס נקבע מהביטוי האחרון בגוף, וכל הביטויים בגוף חייבים לעבור בדיקה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:2",
+     "type": "prose",
+     "en": "The corresponding code in the type checker includes the recursive traversal of the sub-components in the body of the procedure:\n\n",
+     "hash": "72374212e5fdac4e",
+     "he": "הקוד המתאים בבודק הטיפוסים כולל את הסריקה הרקורסיבית של תת-הרכיבים בגוף הפרוצדורה:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:3",
+     "type": "code",
+     "en": "```typescript\n// Purpose: compute the type of a proc-exp\n// Typing rule:\n// If   type<body>(extend-tenv(x1=t1,...,xn=tn; tenv)) = t\n// then type<lambda (x1:t1,...,xn:tn) : t exp)>(tenv) = (t1 * ... * tn -> t)\nexport const typeofProc = (proc: ProcExp, tenv: TEnv): Result<TExp> => {\n    const argsTEs = map((vd) => vd.texp, proc.args);\n    const extTEnv = makeExtendTEnv(map((vd) => vd.var, proc.args), argsTEs, tenv);\n    const constraint1 = bind(typeofExps(proc.body, extTEnv),\n                             (body: TExp) => checkEqualType(body, proc.returnTE, proc));\n    return bind(constraint1, _ => makeOk(makeProcTExp(argsTEs, proc.returnTE)));\n};\n```\n\n",
+     "hash": "9039b04c814d9b09",
+     "lang": "typescript",
+     "noteHe": "המימוש של כלל הפרוצדורה, בארבע שורות. `argsTEs` אוסף את הערות הטיפוס מכל ההכרזות (`vd.texp`). `makeExtendTEnv` בונה את סביבת הטיפוסים המורחבת — **זהו התרגום הישיר של `_Tenv o {_x1:_S1, ...}` מהכלל**, והוא מקביל ל-`extend-env` במפרש. `constraint1` מחשב את הטיפוס של הגוף בסביבה המורחבת (`typeofExps` מחזירה את הטיפוס של הביטוי **האחרון**, אחרי שבדקה את כולם) ומשווה אותו להערת ההחזרה `proc.returnTE`. השורה האחרונה מחזירה `makeProcTExp(argsTEs, proc.returnTE)` — ורק אם האילוץ עבר. **שימו לב לנקודה עדינה:** הטיפוס המוחזר נבנה מ**ההערות** ולא מהטיפוס שחושב מהגוף, למרות ששניהם הוכחו זהים; זו בחירה טבעית, כי ההערה היא ה\"הצהרה\" הרשמית של המתכנת."
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:4",
+     "type": "prose",
+     "en": "Finally, let us consider the typing rule for application expression:\n\n",
+     "hash": "19c57436c2ae6fe6",
+     "he": "לבסוף, נבחן את כלל הטיפוס לביטוי יישום:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:5",
+     "type": "code",
+     "en": "```typescript\nTyping rule Application :\nFor every: type environment _Tenv,\n           expressions _f, _e1, ..., _en, n >= 0 , and\n           type expressions _S1, ..., _Sn, _S:\n\nProcedure with parameters (n > 0):\n    If   _Tenv |- _f : [_S1*...*_Sn -> _S],\n         _Tenv |- _e1 : _S1, ..., _Tenv |- _en : _Sn\n    Then _Tenv |- (_f _e1 ... _en) : _S\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _f : [Empty -> _S]\n    Then _Tenv |- (_f) : _S\n```\n\n",
+     "hash": "b18fd3d6cf3158b3",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של יישום — הכלל האחרון והחשוב ביותר, וכדאי לשנן אותו. הקריאה: **אם** האופרטור `_f` הוא מטיפוס פרוצדורה `[_S1*...*_Sn -> _S]`, **וכל** אופרנד `_ei` הוא בדיוק מהטיפוס `_Si` שהפרוצדורה מצפה לו, **אז** היישום כולו הוא מטיפוס `_S`. שימו לב שוב לטריק הסימון: העובדה שאותם מטא-משתנים `_S1...\\_Sn` מופיעים גם בטיפוס האופרטור וגם בטיפוסי האופרנדים היא מה שמקודד את דרישת ההתאמה. שימו לב גם שמספר האופרנדים חייב להיות בדיוק `n` — התאמה במספר הארגומנטים נאכפת אף היא דרך הסימון. **השוו לכלל הפרוצדורה:** שם **בנינו** טיפוס פרוצדורה מהחלקים, וכאן אנחנו **מפרקים** אותו — שני הכללים הפוכים זה לזה, בדיוק כפי ש-lambda ויישום הפוכים זה לזה בסמנטיקה."
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:6",
+     "type": "prose",
+     "en": "The implementation in the type checker of this rule is:\n\n",
+     "hash": "ea2d3a94605e37d6",
+     "he": "המימוש של הכלל הזה בבודק הטיפוסים הוא:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:7",
+     "type": "code",
+     "en": "```typescript\n// Purpose: compute the type of an app-exp\n// Typing rule:\n// If   type<rator>(tenv) = (t1*..*tn -> t)\n//      type<rand1>(tenv) = t1\n//      ...\n//      type<randn>(tenv) = tn\n// then type<(rator rand1...randn)>(tenv) = t\n// We also check the correct number of arguments is passed.\nexport const typeofApp = (app: AppExp, tenv: TEnv): Result<TExp> =>\n    bind(typeofExp(app.rator, tenv), (ratorTE: TExp) => {\n        if (! isProcTExp(ratorTE)) {\n            return bind(unparseTExp(ratorTE), (rator: string) =>\n                        bind(unparse(app), (exp: string) =>\n                            makeFailure<TExp>(`Application of non-procedure: ${rator} in ${exp}`)));\n        }\n        if (app.rands.length !== ratorTE.paramTEs.length) {\n            return bind(unparse(app), (exp: string) => makeFailure<TExp>(`Wrong parameter numbers passed to proc: ${exp}`));\n        }\n        const constraints = zipWithResult((rand, trand) => bind(typeofExp(rand, tenv), (typeOfRand: TExp) => \n                                                                checkEqualType(typeOfRand, trand, app)),\n                                          app.rands, \n                                          ratorTE.paramTEs);\n        return bind(constraints, _ => makeOk(ratorTE.returnTE));\n    });\n```\n\n",
+     "hash": "5e5d55d2f11dfe18",
+     "lang": "typescript",
+     "noteHe": "המימוש של כלל היישום, והוא הארוך ביותר מפני שהוא בודק **שלושה** דברים ולא אחד. תחילה מחשבים את הטיפוס של האופרטור. הבדיקה הראשונה: `! isProcTExp(ratorTE)` — האם הטיפוס שהתקבל הוא בכלל טיפוס פרוצדורה? אם לא, מוחזרת השגיאה `Application of non-procedure` — זו השגיאה הראשונה מהרשימה שבתחילת האלגוריתם, ודוגמה לה היא `(5 3)`. הבדיקה השנייה משווה את מספר האופרנדים למספר הפרמטרים בטיפוס, ומייצרת `Wrong parameter numbers` — השגיאה השנייה מהרשימה. לבסוף, `zipWithResult` מריצה במקביל על רשימת האופרנדים ורשימת טיפוסי הפרמטרים, ולכל זוג בודקת שהטיפוס המחושב של האופרנד שווה לטיפוס הצפוי — זו השגיאה השלישית. רק אם כל האילוצים עברו מוחזר `ratorTE.returnTE`, כלומר טיפוס ההחזרה של הפרוצדורה. **שימו לב:** `zipWithResult` היא הגרסה של `mapResult` לשתי רשימות — היא נכשלת אם אחד הזוגות נכשל. שימו לב גם לסגנון המעורב כאן: `if` עם `return` מוקדם במקום שרשרת תנאים, מה שנוח יותר כשיש כמה בדיקות שונות זו מזו."
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:8",
+     "type": "prose",
+     "en": "Observe how the implementation verifies additional semantic errors:\n",
+     "hash": "ed5aa34138e48b11",
+     "he": "שימו לב כיצד המימוש מאמת שגיאות סמנטיות נוספות:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:20:9",
+     "type": "list",
+     "en": "* Invocation of a non-procedure type\n* Invocation of a procedure with the wrong number of parameters\n\n\n",
+     "hash": "224f58574569674e",
+     "he": "* הפעלה של טיפוס שאינו פרוצדורה\n* הפעלה של פרוצדורה עם מספר שגוי של פרמטרים"
+    }
+   ],
+   "headingHe": "טיפוס של ביטויים עם הכרזות משתנים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:21",
+   "depth": 2,
+   "headingEn": "Type Checking Examples",
+   "raw": "## Type Checking Examples\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:21:0",
+     "type": "prose",
+     "en": "Consider the following examples of application of the type checker:\n\n",
+     "hash": "b8ce50df9e491e62",
+     "he": "נבחן את הדוגמאות הבאות להפעלה של בודק הטיפוסים:"
+    },
+    {
+     "id": "cm/3.1TypeChecking:21:1",
+     "type": "code",
+     "en": "```scheme\n(if (> 1 2) 1 2)) => 'number\n(if (= 1 2) #t #f)) => 'boolean\n\n(lambda ((x : number)) : number x)) => '(number -> number)\n(lambda ((x : number)) : boolean (> x 1))) => '(number -> boolean)\n\n(lambda ((x : number)) : (number -> number) (lambda ((y : number)) : number (* y x))))\n     =>\n(number -> (number -> number))\n\n(lambda ((f : (number -> number))) : number (f 2)))\n     =>\n((number -> number) -> number)\n\n(let (((x : number) 1)) (* x 2))) => 'number\n\n(let (((x : number) 1)\n      ((y : number) 2))\n  (lambda ((a : number)) : number (+ (* x a) y))))\n=>\n(number -> number)\n\n(lambda ((x : number)) : number\n  (let (((y : number) x)) (+ x y))))\n=>\n(number -> number)\n```\n\n",
+     "hash": "7ef2bce840c50af8",
+     "lang": "scheme",
+     "noteHe": "תשע דוגמאות שכדאי לעבור עליהן אחת-אחת ולוודא שאתם יודעים לגזור כל אחת בעצמכם. שתי הראשונות מדגימות את כלל ה-`if`: הטיפוס נקבע מהענפים, לא מהתנאי. שתי הבאות מדגימות את כלל ה-lambda הפשוט. הדוגמה החמישית היא lambda שמחזירה lambda, והטיפוס `(number -> (number -> number))` — שימו לב שהערת ההחזרה בקוד היא בעצמה טיפוס פרוצדורה. הדוגמה השישית מעניינת במיוחד: הפרמטר `f` הוא **פונקציה**, ולכן הטיפוס הכולל הוא `((number -> number) -> number)` — פונקציה מסדר גבוה. **טעות נפוצה:** לבלבל בין `(number -> (number -> number))` לבין `((number -> number) -> number)`; מיקום הסוגריים קובע אם הפונקציה **מחזירה** פונקציה או **מקבלת** אחת. שלוש האחרונות מדגימות את כלל ה-`let`, כולל המקרה שבו הערך שמוחזר מה-let הוא lambda, והמקרה של `let` בתוך גוף lambda. שימו לב שבכל השורות יש סוגר סוגר עודף — טעות הקלדה עקבית במקור."
+    }
+   ],
+   "headingHe": "דוגמאות לבדיקת טיפוסים"
+  },
+  {
+   "id": "cm/3.1TypeChecking:22",
+   "depth": 2,
+   "headingEn": "Static vs. Dynamic Analysis",
+   "raw": "## Static vs. Dynamic Analysis\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:22:0",
+     "type": "prose",
+     "en": "Let us observe the structure of the type checker: it is a typical syntax-driven traversal of the expression AST.\n",
+     "hash": "d4ddf5219190ca9d",
+     "he": "נבחן את המבנה של בודק הטיפוסים: זוהי סריקה טיפוסית מונחית־תחביר של ה-AST של הביטוי."
+    },
+    {
+     "id": "cm/3.1TypeChecking:22:1",
+     "type": "list",
+     "en": "* All the nodes in the AST are exhaustively traversed.\n* On each node, we apply a typing rule and compute a type value.\n* When we traverse expressions which traverse a scope contour (bind variable declarations to values - such as application expressions, let or letrec expressions) or a new scope (such as procedure expressions), we maintain an environment to reflect the structure of the accessible variables.\n\n",
+     "hash": "efbab639d7c80132",
+     "he": "* כל הצמתים ב-AST נסרקים באופן ממצה.\n* בכל צומת אנחנו מפעילים כלל טיפוס ומחשבים ערך טיפוס.\n* כשאנחנו סורקים ביטויים שחוצים גבול של תחום הכרה (קושרים הכרזות משתנים לערכים — כמו ביטויי יישום, ביטויי let או letrec) או פותחים תחום הכרה חדש (כמו ביטויי פרוצדורה), אנחנו מתחזקים סביבה שמשקפת את מבנה המשתנים הנגישים."
+    },
+    {
+     "id": "cm/3.1TypeChecking:22:2",
+     "type": "prose",
+     "en": "This structure is parallel to the structure of the interpreters we analyzed in Chapter 2.\n\n",
+     "hash": "44e7118e802c8485",
+     "he": "המבנה הזה מקביל למבנה של המפרשים שניתחנו בפרק 2."
+    },
+    {
+     "id": "cm/3.1TypeChecking:22:3",
+     "type": "prose",
+     "en": "There are, however, important differences between the type checker and the interpreter:\nSee [PAPL 2019 Chapter 28](https://papl.cs.brown.edu/2019/safety-soundness.html)\n\n",
+     "hash": "957fdba3574ba3f0",
+     "he": "עם זאת, יש הבדלים חשובים בין בודק הטיפוסים לבין המפרש:\nראו [PAPL 2019 פרק 28](https://papl.cs.brown.edu/2019/safety-soundness.html)"
+    },
+    {
+     "id": "cm/3.1TypeChecking:22:4",
+     "type": "list",
+     "en": "* The type checker sees only program text, whereas the interpreter runs over actual data.\n* The type environment binds identifiers to types, whereas the interpreter’s environment binds identifiers to values or locations (boxes).\n* The type checker compresses (even infinite) sets of values into types, whereas the interpreter treats the elements of these sets distinctly.\n* The type checker always terminates, whereas the interpreter might not.\n* The type checker passes over the body of each expression only once, whereas the interpreter might pass over each body anywhere from zero to infinite times.\n\n",
+     "hash": "5981ca7d33098c04",
+     "he": "* בודק הטיפוסים רואה רק את טקסט התוכנית, בעוד שהמפרש רץ על נתונים ממשיים.\n* סביבת הטיפוסים קושרת מזהים לטיפוסים, בעוד שהסביבה של המפרש קושרת מזהים לערכים או למיקומים (קופסאות).\n* בודק הטיפוסים דוחס קבוצות ערכים (אפילו אינסופיות) לכדי טיפוסים, בעוד שהמפרש מתייחס לאיברים של הקבוצות האלה בנפרד.\n* בודק הטיפוסים תמיד עוצר, בעוד שהמפרש עלול לא לעצור.\n* בודק הטיפוסים עובר על הגוף של כל ביטוי פעם אחת בלבד, בעוד שהמפרש עלול לעבור על כל גוף מאפס פעמים ועד אינסוף פעמים."
+    }
+   ],
+   "headingHe": "ניתוח סטטי מול ניתוח דינמי"
+  },
+  {
+   "id": "cm/3.1TypeChecking:23",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.1TypeChecking:23:0",
+     "type": "list",
+     "en": "* Type safety is one of the conditions we must check to prove correctness:\n* Type checking consists of verifying the type of all sub-expressions , and possibly infer missing types.\n\n* Program correctness can be checked either statically or dynamically. In static program correctness the program text is analyzed without running it.\n\n* We design a **type language** to specify the expected type of variables and expressions in the language.\n* We extend the syntax of the programming language to allow association of **type annotations** (in the type language) with variable declarations and procedures.\n\n* The semantics of the programming language specifies **typing rules** which determine the type of each expression types under the assumption that the variables are associated to specific types.\n* The assumptions we make about the typing of variables are specified in a **type environment**.\n\n* The type checking algorithm determines how to traverse the AST of an expression to check that all the nodes in the expression are correctly typed and compatible with the type annotations.\n",
+     "hash": "dce76e62c8a87c47",
+     "he": "* בטיחות טיפוסים היא אחד מהתנאים שעלינו לבדוק כדי להוכיח נכונות:\n* בדיקת טיפוסים מורכבת מאימות הטיפוס של כל תת-הביטויים, ואולי גם הסקה של טיפוסים חסרים.\n\n* אפשר לבדוק נכונות של תוכנית סטטית או דינמית. בבדיקת נכונות סטטית, טקסט התוכנית מנותח בלי להריץ אותה.\n\n* אנחנו מעצבים **שפת טיפוסים** כדי לציין את הטיפוס הצפוי של משתנים וביטויים בשפה.\n* אנחנו מרחיבים את התחביר של שפת התכנות כדי לאפשר שיוך של **הערות טיפוס** (בשפת הטיפוסים) להכרזות משתנים ולפרוצדורות.\n\n* הסמנטיקה של שפת התכנות מציינת **כללי טיפוס** שקובעים את הטיפוס של כל סוגי הביטויים, תחת ההנחה שהמשתנים משויכים לטיפוסים מסוימים.\n* ההנחות שאנחנו עושים לגבי הטיפוס של משתנים מצוינות ב**סביבת טיפוסים**.\n\n* אלגוריתם בדיקת הטיפוסים קובע כיצד לסרוק את ה-AST של ביטוי, כדי לבדוק שכל הצמתים בביטוי מטופסים נכון ותואמים להערות הטיפוס."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "code-reading",
+   "questionHe": "מהו הטיפוס של כל אחד מהביטויים הבאים? ענו בסימון שפת הטיפוסים של $$L5$$.\n\n```scheme\n;; (א)\n(lambda ((x : number) (y : boolean)) : number (if y x 0))\n\n;; (ב)\n(lambda ((f : (number -> boolean))) : (number -> boolean) f)\n\n;; (ג)\n(lambda () : void (display 5))\n\n;; (ד)\n(lambda ((g : (number * number -> number))) : number (g 1 2))\n```",
+   "answerHe": "(א) `(number * boolean -> number)`\n(ב) `((number -> boolean) -> (number -> boolean))`\n(ג) `(Empty -> void)`\n(ד) `((number * number -> number) -> number)`",
+   "explanationHe": "בכל המקרים הטיפוס נבנה לפי כלל הפרוצדורה: טיפוסי הפרמטרים מופרדים ב-`*` באגף שמאל של החץ, וטיפוס ההחזרה באגף ימין. (א) שני פרמטרים, ולכן `*` ביניהם; שימו לב שגם צריך לוודא שהגוף תקין — `y` בוליאני כנדרש בתנאי, ושני הענפים `x` ו-`0` שניהם number. (ב) הפרמטר הוא **פונקציה**, ולכן טיפוסו נכתב בסוגריים בתוך אגף שמאל. (ג) פונקציה חסרת פרמטרים נכתבת עם `Empty` ולא עם רשימה ריקה. (ד) שוב פרמטר שהוא פונקציה, הפעם דו-מקומית. **טעות נפוצה:** לכתוב `(number -> (number -> boolean))` בסעיף (ב) — זו פונקציה שמחזירה פונקציה, לא כזו שמקבלת אחת."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "מה **אין** בודק טיפוסים נאות (sound) מבטיח לגבי תוכנית שעברה בדיקה בהצלחה?",
+   "options": [
+    "שהערך שהתוכנית תחזיר יהיה מהטיפוס שחושב עבורה",
+    "שלא תתרחש שגיאת טיפוס בזמן ריצה",
+    "שהתוכנית תעצור ולא תיכנס ללולאה אינסופית",
+    "שכל תת-ביטוי בתוכנית קיבל טיפוס"
+   ],
+   "correct": 2,
+   "explanationHe": "בדיקת טיפוסים **אינה** מבטיחה עצירה — הבטחה כזאת הייתה שקולה לפתרון בעיית העצירה, שהוכח שאינה כריעה. היא גם אינה מבטיחה שלא ייזרקו חריגות אחרות, כמו חלוקה באפס. מה שהיא כן מבטיחה מנוסח בזהירות: **אם** התוכנית מסיימת ומחזירה ערך, אז הערך יהיה מהטיפוס החזוי ולא תתרחש שגיאת טיפוס בדרך. תשובה 4 נכונה ונובעת מתכונת ה\"טיפוס הממצה של תת-ביטויים\" — כל כלל טיפוס דורש טענות טיפוס לכל תת-הביטויים, וזה בדיוק מה שמבטיח את הבטיחות."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "הסבירו את המשמעות של הסימון `{f : (number -> boolean), x : number} |- (f x) : boolean`, וציינו איזה כלל טיפוס מצדיק אותו.",
+   "answerHe": "**קריאת הסימון:** משמאל לסימן `|-` נמצאת **סביבת הטיפוסים** — ההנחות שאנחנו עושים על הטיפוסים של המשתנים החופשיים. מימין נמצא ה**פסק**: ביטוי, נקודתיים, וטיפוס. הקריאה המילולית: \"תחת ההנחה ש-`f` היא פונקציה מ-number ל-boolean ו-`x` הוא number, מתקיים שהטיפוס של הביטוי `(f x)` הוא boolean\".\n\n**הכלל שמצדיק:** כלל הטיפוס של יישום (Application). הוא קובע שאם `_Tenv |- _f : [_S1 -> _S]` ו-`_Tenv |- _e1 : _S1`, אז `_Tenv |- (_f _e1) : _S`. כאן ההצבה היא `_S1 = number` ו-`_S = boolean`, ואכן:\n- הטיפוס של `f` בסביבה הוא `(number -> boolean)` — מתאים לתבנית `[_S1 -> _S]`;\n- הטיפוס של `x` הוא `number` — מתאים ל-`_S1`, כלומר האופרנד תואם לפרמטר;\n- לכן טיפוס היישום הוא `_S = boolean`.\n\n**שימו לב:** הטענה היא בעלת ערך אמת/שקר, ולא חישוב. אילו הסביבה הייתה `{f : (boolean -> boolean), x : number}`, אותה טענה הייתה **שקרית**, כי האופרנד אינו תואם לפרמטר.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) פירוש שני צדי ה-`|-` — הנחות מול פסק; (2) זיהוי כלל היישום כמצדיק; (3) ההתאמה המפורשת בין תבנית הכלל למקרה — מי משחק את `_S1` ומי את `_S`; (4) בונוס: ההבנה שזו טענה שיכולה להיות שקרית, ודוגמה נגדית. שימו לב שהמטא-משתנים בכלל (עם קו תחתון) הם מקומות למילוי, ואינם משתני טיפוס של השפה."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "לכל אחת מהתוכניות הבאות, קבעו אם בודק הטיפוסים יקבל אותה או ידחה אותה, ואם ידחה — ציינו איזו מארבע השגיאות מהרשימה זוהתה.\n\n```scheme\n;; (א)\n(lambda ((x : number)) : number (if x 1 2))\n\n;; (ב)\n(lambda ((x : number)) : number (if (> x 0) 1 #t))\n\n;; (ג)\n(lambda ((x : number)) : boolean (> x 1 2))\n\n;; (ד)\n(lambda ((x : number)) : number (x 5))\n```",
+   "answerHe": "(א) **נדחית** — התנאי `x` הוא number ולא boolean.\n(ב) **נדחית** — שני ענפי ה-if מטיפוסים שונים (number ו-boolean).\n(ג) **נדחית** — `>` מקבלת שני ארגומנטים והועברו שלושה.\n(ד) **נדחית** — `x` הוא number, ולכן זהו יישום של מה שאינו פרוצדורה.",
+   "explanationHe": "כל הארבע נדחות, כל אחת מסיבה אחרת — הן מכסות שלוש מארבע השגיאות ברשימה שבתחילת האלגוריתם. (א) ו-(ב) שתיהן נופלות בכלל ה-`if`, אבל באילוצים שונים: (א) באילוץ שהתנאי בוליאני, (ב) באילוץ ששני הענפים זהים. שימו לב ש-(א) הייתה **תקינה** ב-L2, שם כל ערך שאינו `#f` נחשב אמת; מערכת הטיפוסים מחמירה יותר מהסמנטיקה. (ג) נתפסת בבדיקת `app.rands.length !== ratorTE.paramTEs.length`, ושימו לב שזה בגלל ההחלטה להתייחס לפרימיטיבים כלא־וריאדיים. (ד) נתפסת בבדיקת `! isProcTExp(ratorTE)` ומייצרת `Application of non-procedure`."
+  },
+  {
+   "id": "ex5",
+   "type": "open",
+   "questionHe": "השוו בין בודק הטיפוסים למפרש: מהם ארבעה הבדלים מהותיים ביניהם, למרות שהמבנה שלהם כמעט זהה?",
+   "answerHe": "המבנה אכן כמעט זהה — שניהם סריקה מונחית־תחביר של ה-AST, שניהם מקבלים סביבה כפרמטר, ושניהם משתמשים במונאדת `Result`. ההבדלים:\n\n1. **על מה הם פועלים:** בודק הטיפוסים רואה רק את **טקסט התוכנית** ואינו נוגע בנתונים; המפרש רץ על ערכים ממשיים.\n2. **מה הסביבה קושרת:** סביבת טיפוסים קושרת מזהים ל**טיפוסים** (`{x : number}`); סביבת המפרש קושרת מזהים ל**ערכים** או לקופסאות (`{x = 5}`).\n3. **רזולוציה:** בודק הטיפוסים **דוחס** קבוצות ערכים שלמות — אולי אינסופיות — לטיפוס יחיד; המפרש מבחין בין כל ערך וערך. זה בדיוק מה שמאפשר לבודק לסיים בזמן סופי.\n4. **עצירה ומספר מעברים:** בודק הטיפוסים **תמיד עוצר** ועובר על גוף כל ביטוי **בדיוק פעם אחת**; המפרש עלול לא לעצור, ועלול לעבור על גוף מאפס פעמים עד אינסוף.\n\n**הבדל נוסף שכדאי לציין:** בודק הטיפוסים מנתח את **שני** ענפי ה-`if`, בעוד שהמפרש מעריך רק אחד — הבטיחות חייבת להתקיים לכל מסלול ריצה אפשרי, ולא רק למסלול שנבחר בפועל.",
+   "explanationHe": "נקודות שחייבות להופיע: ארבעת ההבדלים מהרשימה שבסעיף (טקסט מול נתונים, טיפוסים מול ערכים בסביבה, דחיסת קבוצות, עצירה ומספר מעברים). קישור בין הדחיסה לבין העצירה הוא בונוס משמעותי — הסיבה שהבודק תמיד עוצר היא שהוא לא מתחקה אחרי ערכים אלא אחרי טיפוסים, שמספרם סופי. ההבחנה על שני ענפי ה-if היא בונוס נוסף."
+  },
+  {
+   "id": "ex6",
+   "type": "mcq",
+   "questionHe": "מדוע במימוש `checkEqualType` מספיקה השוואת שוויון מבנית פשוטה (`equals`), בעוד שב-TypeScript נדרש מנגנון מורכב יותר?",
+   "options": [
+    "מפני שב-$$L5$$ יש פחות טיפוסים אטומיים מאשר ב-TypeScript",
+    "מפני שמערכת הטיפוסים של $$L5$$ היא אי-שונה (invariant) — טיפוסים תואמים אם ורק אם הם זהים",
+    "מפני שב-$$L5$$ כל ההערות חובה, ולכן אין מה להשוות",
+    "מפני ש-TypeScript בודקת טיפוסים בזמן ריצה ו-$$L5$$ בזמן הידור"
+   ],
+   "correct": 1,
+   "explanationHe": "עקרון ההחלפיות ב-$$L5$$ הוא **זהות**: אפשר להחליף טיפוס רק בעצמו. זו הצורה הפשוטה ביותר של החלפיות, והיא נקראת אי-שונות (invariance). לכן שוויון מבני הוא בדיוק הבדיקה הנכונה. ב-TypeScript, לעומת זאת, יש תת-טיפוסים מבניים (structural subtyping) — אובייקט עם שדות נוספים מתאים למקום שמצפה לפחות שדות, וטיפוס מסוים מתאים למקום שמצפה לאיחוד שמכיל אותו — ולכן דרושה בדיקת **תאימות** ולא שוויון. תשובה 1 שגויה: מספר הטיפוסים אינו העניין אלא **היחסים** ביניהם. תשובה 3 שגויה — גם עם הערות מלאות עדיין צריך להשוות בין טיפוס מחושב לטיפוס מוצהר. תשובה 4 שגויה: שתיהן בודקות סטטית."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "בסעיף כללי הטיפוס נשאלת השאלה: \"עד כמה שונה לומר ש-`not` היא פרוצדורה פולימורפית `[_S -> Boolean]`, מלומר שהיא פרוצדורה שמקבלת פרמטר מטיפוס *any*?\" ענו במלואה.",
+   "answerHe": "**ההבדל מהותי, למרות שבמקרה של `not` לבדו שתי הגרסאות מתנהגות זהה.**\n\n`[_S -> Boolean]` עם משתנה טיפוס פירושו: \"לכל טיפוס `_S`, יש כאן פונקציה מ-`_S` ל-Boolean\". זהו **כימות** — הפונקציה עובדת עבור כל טיפוס, אבל בכל שימוש קונקרטי `_S` מקבל ערך מסוים, והמידע הזה **נשמר**. לעומת זאת `any` הוא טיפוס יחיד שמשמעותו \"אין לי מידע\", והמידע על הטיפוס האמיתי **אובד**.\n\nההבדל מתגלה כשמשתנה הטיפוס מופיע **יותר מפעם אחת**. השוו את פונקציית הזהות:\n- `(T1 -> T1)` — מבטיח שהערך המוחזר הוא **מאותו טיפוס** כמו הקלט. אם נעביר number, הבודק יודע שקיבלנו number.\n- `(any -> any)` — לא מבטיח שום קשר בין הקלט לפלט. הבודק יאשר גם `(+ 1 (id #t))`, כלומר תיפגע הבטיחות.\n\nב-`not` הטיפוס המוחזר קבוע (Boolean) ואינו תלוי ב-`_S`, ולכן במקרה הזה שתי הגרסאות שקולות למעשה. אבל מנגנון משתני הטיפוס חזק בהרבה, והוא הכרחי לפונקציות שהטיפוס המוחזר שלהן תלוי בקלט.\n\n**נקודה מעשית:** `any` ב-TypeScript שובר את הנאותות של המערכת בדיוק מהסיבה הזאת — הוא \"פתח מילוט\" שמכבה את הבדיקה.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) משתנה טיפוס = כימות אוניברסלי ששומר על המידע, `any` = ויתור על המידע; (2) ההבדל מתגלה כשהמשתנה חוזר יותר מפעם אחת — יש לתת דוגמה, למשל `(T1 -> T1)` מול `(any -> any)`; (3) ההודאה שעבור `not` ספציפית ההבדל אינו נראה, כי הטיפוס המוחזר קבוע. תשובה שאומרת רק \"שניהם מקבלים כל טיפוס\" מפספסת את כל העניין."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "בצעו בדיקת טיפוסים ידנית מלאה של הביטוי הבא, וכתבו את טענות הטיפוס בכל שלב.\n\n```scheme\n(lambda ((x : number) (b : boolean)) : number\n  (if b (+ x 1) x))\n```",
+   "answerHe": "נסמן את סביבת הטיפוסים ההתחלתית כ-`{}` (ריקה — אין משתנים חופשיים).\n\n**שלב 1 — הרחבת הסביבה** לפי כלל הפרוצדורה:\n```\nTenv1 = {} o {x : number, b : boolean} = {x : number, b : boolean}\n```\n\n**שלב 2 — בדיקת הגוף `(if b (+ x 1) x)` תחת Tenv1**, לפי כלל ה-if:\n\n(א) התנאי:\n```\nTenv1 |- b : boolean          ✓ (כלל המשתנה: Tenv1(b) = boolean)\n```\nהאילוץ \"התנאי בוליאני\" מתקיים.\n\n(ב) ענף ה-then, `(+ x 1)`, לפי כלל היישום:\n```\nTenv1 |- +   : (number * number -> number)   (כלל הפרימיטיב)\nTenv1 |- x   : number                        (כלל המשתנה)\nTenv1 |- 1   : number                        (כלל המספר)\nשני האופרנדים תואמים לשני הפרמטרים ⇒\nTenv1 |- (+ x 1) : number\n```\n\n(ג) ענף ה-else:\n```\nTenv1 |- x : number                          (כלל המשתנה)\n```\n\n(ד) האילוץ ששני הענפים זהים: `number = number` ✓, ולכן\n```\nTenv1 |- (if b (+ x 1) x) : number\n```\n\n**שלב 3 — השוואה להערת ההחזרה:** הטיפוס שחושב לגוף הוא `number`, וההערה היא `number` ✓.\n\n**מסקנה:**\n```\n{} |- (lambda ((x : number) (b : boolean)) : number (if b (+ x 1) x)) : (number * boolean -> number)\n```",
+   "explanationHe": "נקודות שחייבות להופיע: (1) הרחבת סביבת הטיפוסים כשלב ראשון ומפורש; (2) בדיקת שלושת רכיבי ה-if בנפרד, כולל ציון הכלל שהצדיק כל שלב; (3) שני האילוצים של ה-if — תנאי בוליאני, ענפים זהים; (4) ההשוואה בין טיפוס הגוף המחושב לבין הערת ההחזרה; (5) הרכבת הטיפוס הסופי מטיפוסי הפרמטרים ומטיפוס ההחזרה. זהו הפורמט המדויק שמצפים לו במבחן — כתיבת טענות טיפוס עם `|-` ולא רק תשובה סופית."
+  }
+ ]
+}

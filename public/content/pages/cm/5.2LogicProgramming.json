@@ -1,0 +1,936 @@
+{
+ "id": "cm/5.2LogicProgramming",
+ "kind": "lecture",
+ "sourcePath": "class_material/5.2LogicProgramming.md",
+ "titleEn": "Logic Programming",
+ "titleHe": "תכנות לוגי",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/5.2LogicProgramming:0",
+   "depth": 1,
+   "headingEn": "Logic Programming",
+   "raw": "# Logic Programming\n\n",
+   "blocks": [],
+   "headingHe": "תכנות לוגי"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:1",
+   "depth": 2,
+   "headingEn": "PPL2023",
+   "raw": "## PPL2023\n\n",
+   "blocks": [],
+   "headingHe": "PPL2023"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:2",
+   "depth": 3,
+   "headingEn": "Sources",
+   "raw": "### Sources\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:2:0",
+     "type": "list",
+     "en": "* [Principles of Programming Languages, Mira Balaban, 2017 (7.2)](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf)\n* [Learn Prolog Now Chapter 4](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlch4) List processing\n* [Learn Prolog Now Chapter 6](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlch6) Append, Reverse\n\n",
+     "hash": "38a7ae0cb528f140",
+     "he": "* [עקרונות שפות תכנות, מירה בלבן, 2017 (7.2)](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf)\n* [Learn Prolog Now פרק 4](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlch4) עיבוד רשימות\n* [Learn Prolog Now פרק 6](http://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlch6) ‏Append, ‏Reverse"
+    }
+   ],
+   "headingHe": "מקורות"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:3",
+   "depth": 3,
+   "headingEn": "Introduction",
+   "raw": "### Introduction\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:3:0",
+     "type": "prose",
+     "en": "We introduced a restricted form of Logic Programming called *Relational Logic Programming* in the previous Section.\nWe noted that RLP is decidable (and hence not Turing-complete).  RLP is still expressive enough to describe full relational algebra operations extended with recursive operations (such as transitive closure).\n\n",
+     "hash": "2e4e311266cb600d",
+     "he": "בסעיף הקודם הצגנו צורה מוגבלת של תכנות לוגי שנקראת *תכנות לוגי רלציוני*.\nציינו ש-RLP הוא כריע (ולכן אינו טיורינג-שלם). ‏RLP עדיין אקספרסיבי מספיק כדי לתאר את כל פעולות האלגברה הרלציונית, מורחבות בפעולות רקורסיביות (כמו סגירה טרנזיטיבית)."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:3:1",
+     "type": "prose",
+     "en": "We now move on to full Logic Programming - and present a programming language which is Turing-complete.\nThe increment from RLP to LP is remarkably small in terms of language design: we simply introduce **recursive terms**, using a new compound syntactic construct we call a **functor**.  Functors enable LP to describe recursive data structures.\n\n",
+     "hash": "a4b0d50f9425a244",
+     "he": "כעת נעבור לתכנות לוגי מלא — ונציג שפת תכנות שהיא טיורינג-שלמה.\nהתוספת מ-RLP ל-LP קטנה להפליא במונחים של עיצוב שפה: אנחנו פשוט מציגים **terms רקורסיביים**, באמצעות מבנה תחבירי מורכב חדש שנקרא **פונקטור** (functor). פונקטורים מאפשרים ל-LP לתאר מבני נתונים רקורסיביים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:3:2",
+     "type": "prose",
+     "en": "As a consequence of introducing recursive terms:\n",
+     "hash": "e16611e06f47c659",
+     "he": "כתוצאה מהצגת terms רקורסיביים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:3:3",
+     "type": "list",
+     "en": "1. A more complex unification operation must be defined - we must introduce the *occur-check* restriction to avoid loops.\n2. The language becomes only partially decidable. That is, while the answer to a query in relational logic programming can always be decided to be a success or a failure, logic programming is partially decidable, like all other general purpose programming languages.\n\n",
+     "hash": "a6e8c7e3fb77f05a",
+     "he": "1. יש להגדיר פעולת אוניפיקציה מורכבת יותר — אנחנו נאלצים להציג את הגבלת *בדיקת ההיקרות* (occur-check) כדי להימנע מלולאות.\n2. השפה הופכת לכריעה חלקית בלבד. כלומר, בעוד שעל התשובה לשאילתה בתכנות לוגי רלציוני תמיד אפשר להכריע אם היא הצלחה או כישלון, תכנות לוגי הוא כריע חלקית, כמו כל שאר שפות התכנות למטרות כלליות."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:3:4",
+     "type": "prose",
+     "en": "We present the updated syntax (concrete and abstract) to support recursive terms and the adjustments required in the operational semantics to extend RLP into LP.  We then describe how to model abstract data structures in Logic Programming, and specifically how to manage lists.\n\n",
+     "hash": "b74bfd0b84825d07",
+     "he": "נציג את התחביר המעודכן (הקונקרטי והמופשט) שתומך ב-terms רקורסיביים, ואת ההתאמות הנדרשות בסמנטיקה התפעולית כדי להרחיב את RLP ל-LP. לאחר מכן נתאר כיצד למדל מבני נתונים מופשטים בתכנות לוגי, ובפרט כיצד לנהל רשימות."
+    }
+   ],
+   "headingHe": "מבוא"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:4",
+   "depth": 2,
+   "headingEn": "Syntax of Complex Terms with Functors",
+   "raw": "## Syntax of Complex Terms with Functors\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:4:0",
+     "type": "prose",
+     "en": "The only difference between the syntax of Logic Programming and the syntax of Relational Logic Programming is the addition of a new kind of a constant symbol: Functor (function symbol). It enriches the set of terms so that they can describe structured data.\n\n",
+     "hash": "efa089f8bd62a350",
+     "he": "ההבדל היחיד בין התחביר של תכנות לוגי לבין התחביר של תכנות לוגי רלציוני הוא הוספה של סוג חדש של סמל קבוע: פונקטור (סמל פונקציה). הוא מעשיר את קבוצת ה-terms כך שיוכלו לתאר נתונים מבניים."
+    }
+   ],
+   "headingHe": "תחביר של terms מורכבים עם פונקטורים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:5",
+   "depth": 3,
+   "headingEn": "Definition: Terms in Logic Programming",
+   "raw": "### Definition: Terms in Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:5:0",
+     "type": "prose",
+     "en": "The syntax of terms is now inductive:\n",
+     "hash": "71f70e4d96c22857",
+     "he": "התחביר של terms הוא כעת אינדוקטיבי:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:5:1",
+     "type": "list",
+     "en": "1. *Base case*: Individual constant symbols and variables are terms (these are the only cases that exist in RLP).\n2. *Inductive step*: For terms $$t_1, ..., t_n$$, and a functor $$f$$, $$f(t_1, ..., t_n)$$ is a term.\n\n",
+     "hash": "9664f47e9e54cffe",
+     "he": "1. *מקרה בסיס*: סמלי קבועים פרטניים ומשתנים הם terms (אלה המקרים היחידים שקיימים ב-RLP).\n2. *צעד אינדוקטיבי*: עבור terms ‏$$t_1, ..., t_n$$ ופונקטור $$f$$, ‏$$f(t_1, ..., t_n)$$ הוא term."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:5:2",
+     "type": "prose",
+     "en": "**Examples of Composite Terms**\n\n",
+     "hash": "819c22c752278c7b",
+     "he": "**דוגמאות ל-terms מורכבים**"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:5:3",
+     "type": "list",
+     "en": "* `cons(a, [])` – describes the list `[a]`. `[]` is an individual constant, standing for the empty list. The `cons` functor has a syntactic sugar notation as an infix operator `|`: `cons(a,[])` is written: `[a | []]`.\n* `cons(b,cons(a,[ ]))` the list `[b, a]`, or `[b | [a | []]]`. The syntax `[b, a]` uses the printed form of lists in Prolog.\n* `cons(cons(a, []), cons(b, cons(a, [])))` – the list `[[a], [b, a]]`, or `[[a | []] | [b | [a, | []]]]`.\n* `time(monday, 12, 14)`\n* `street(alon, 32)`\n* `tree(Element, Left, Right)` – a binary tree, with `Element` as the root, `Left` and `Right` as its sub-trees.\n* `tree(5, tree(8, void, void), tree(9, void, tree(3, void, void)))`\n\n",
+     "hash": "084b96ca27031b98",
+     "he": "* `cons(a, [])` – מתאר את הרשימה `[a]`. ‏`[]` הוא קבוע פרטני, שמייצג את הרשימה הריקה. לפונקטור `cons` יש סימון של סוכר תחבירי כאופרטור אינפיקסי `|`: ‏`cons(a,[])` נכתב: ‏`[a | []]`.\n* `cons(b,cons(a,[ ]))` הרשימה `[b, a]`, או `[b | [a | []]]`. התחביר `[b, a]` משתמש בצורת ההדפסה של רשימות ב-Prolog.\n* `cons(cons(a, []), cons(b, cons(a, [])))` – הרשימה `[[a], [b, a]]`, או `[[a | []] | [b | [a, | []]]]`.\n* `time(monday, 12, 14)`\n* `street(alon, 32)`\n* `tree(Element, Left, Right)` – עץ בינארי, שבו `Element` הוא השורש ו-`Left` ו-`Right` הם תת-העצים שלו.\n* `tree(5, tree(8, void, void), tree(9, void, tree(3, void, void)))`"
+    }
+   ],
+   "headingHe": "הגדרה: ‏terms בתכנות לוגי"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:6",
+   "depth": 3,
+   "headingEn": "Atomic Formulas with Composite Terms",
+   "raw": "### Atomic Formulas with Composite Terms\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:6:0",
+     "type": "prose",
+     "en": "The arguments in atomic formulas can now be composite terms. For example:\n",
+     "hash": "9f6d0f328a4a870d",
+     "he": "הארגומנטים בנוסחאות אטומיות יכולים כעת להיות terms מורכבים. לדוגמה:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:6:1",
+     "type": "list",
+     "en": "* `father(abraham,isaac)`\n* `p(f(f(f(g(a, g(b, c))))))`\n* `ancestor(mary, sister_of(friend_of(john)))`\n* `append(cons(a, cons(b, [])), cons(c, cons(d, [])))`\n* `cons(a, cons(b, cons(c, cons(d, []))))`\n* `append([a, b], [c, d], [a, b, c, d])`\n\n",
+     "hash": "2dc1ec64666d3062",
+     "he": "* `father(abraham,isaac)`\n* `p(f(f(f(g(a, g(b, c))))))`\n* `ancestor(mary, sister_of(friend_of(john)))`\n* `append(cons(a, cons(b, [])), cons(c, cons(d, [])))`\n* `cons(a, cons(b, cons(c, cons(d, []))))`\n* `append([a, b], [c, d], [a, b, c, d])`"
+    }
+   ],
+   "headingHe": "נוסחאות אטומיות עם terms מורכבים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:7",
+   "depth": 3,
+   "headingEn": "Functor Arity",
+   "raw": "### Functor Arity\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:7:0",
+     "type": "prose",
+     "en": "Every functor has an arity, that is, it specifies the number of arguments the functor expects. \nIn the examples above:\n",
+     "hash": "e763aa87aa9ca694",
+     "he": "לכל פונקטור יש מקומיות (arity), כלומר, היא מציינת את מספר הארגומנטים שהפונקטור מצפה לקבל.\nבדוגמאות שלמעלה:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:7:1",
+     "type": "list",
+     "en": "* The arity of cons is 2.\n* The arity of sister_of is 1.\n* The arity of time is 3.\n* The arity of street is 2.\n\n",
+     "hash": "021d877f0fef6e06",
+     "he": "* המקומיות של cons היא 2.\n* המקומיות של sister_of היא 1.\n* המקומיות של time היא 3.\n* המקומיות של street היא 2."
+    }
+   ],
+   "headingHe": "מקומיות של פונקטור"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:8",
+   "depth": 3,
+   "headingEn": "Nested Functors vs. Predicates",
+   "raw": "### Nested Functors vs. Predicates\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:8:0",
+     "type": "prose",
+     "en": "Functors can be nested: Terms might have unbound depth: `f(f(f(g(a, g(b, c)))))`.\nThe number of different atomic formulas that can be constructed from a given finite set of predicate, functor and individual constant symbols is unbounded - in contrast to Relational Logic Programming. (Observe that the BNF of RLP presented in the previous Section is **not** recursive).\n\n",
+     "hash": "3e48c663d6a94a39",
+     "he": "פונקטורים יכולים להיות מקוננים: ‏terms עשויים להיות בעלי עומק בלתי חסום: ‏`f(f(f(g(a, g(b, c)))))`.\nמספר הנוסחאות האטומיות השונות שניתן לבנות מקבוצה סופית נתונה של סמלי פרדיקטים, פונקטורים וקבועים פרטניים הוא בלתי חסום — בניגוד לתכנות לוגי רלציוני. (שימו לב שה-BNF של RLP שהוצג בסעיף הקודם **אינו** רקורסיבי)."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:8:1",
+     "type": "prose",
+     "en": "In contract to terms, predicate symbols cannot be nested:\n",
+     "hash": "3cb508f7f1e5a5c7",
+     "he": "בניגוד ל-terms, סמלי פרדיקטים אינם יכולים להיות מקוננים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:8:2",
+     "type": "list",
+     "en": "* `p(f(f(f(g(a, g(b, c))))))` – `p` is a predicate symbol, while `f`, `g`, are functors.\n* `ancestor(mary, sister_of(friend_of(john)))` – `ancestor` is a predicate symbol, and `sister_of`, `friend_of` are functors.\n* `course(ppl, time(monday, 12, 14), location(building34, 201))` – `course` is a predicate symbol, and `time`, `location` are  functors.\n* `address(street(alon, 32), shikun_M, tel_aviv, israel)` – `address` is a predicate symbol, and `street`, `shikun_M` are functors.\n\n",
+     "hash": "e881eb39588d1faa",
+     "he": "* `p(f(f(f(g(a, g(b, c))))))` – ‏`p` הוא סמל פרדיקט, ואילו `f` ו-`g` הם פונקטורים.\n* `ancestor(mary, sister_of(friend_of(john)))` – ‏`ancestor` הוא סמל פרדיקט, ו-`sister_of` ו-`friend_of` הם פונקטורים.\n* `course(ppl, time(monday, 12, 14), location(building34, 201))` – ‏`course` הוא סמל פרדיקט, ו-`time` ו-`location` הם פונקטורים.\n* `address(street(alon, 32), shikun_M, tel_aviv, israel)` – ‏`address` הוא סמל פרדיקט, ו-`street` ו-`shikun_M` הם פונקטורים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:8:3",
+     "type": "prose",
+     "en": "The syntax of terms and of atomic formulas is identical. They differ in the position (context) in statements:\n",
+     "hash": "0694033bebe8fc09",
+     "he": "התחביר של terms ושל נוסחאות אטומיות זהה. הם נבדלים זה מזה במיקום (בהקשר) שבו הם מופיעים בפסוקים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:8:4",
+     "type": "list",
+     "en": "* Terms are arguments to either terms and to predicates.\n* Atomic formulas appear inside rules and facts.\n\n",
+     "hash": "37b05b70a5b2b33b",
+     "he": "* ‏terms הם ארגומנטים ל-terms אחרים או לפרדיקטים.\n* נוסחאות אטומיות מופיעות בתוך כללים ועובדות."
+    }
+   ],
+   "headingHe": "פונקטורים מקוננים לעומת פרדיקטים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:9",
+   "depth": 2,
+   "headingEn": "Formal Syntax for Composite Terms",
+   "raw": "## Formal Syntax for Composite Terms\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:9:0",
+     "type": "prose",
+     "en": "To support composite terms, we add the following concrete syntax rules:\n",
+     "hash": "94b02522e2119b14",
+     "he": "כדי לתמוך ב-terms מורכבים, אנחנו מוסיפים את כללי התחביר הקונקרטי הבאים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:9:1",
+     "type": "code",
+     "en": "```\n<term> -> <constant> | <variable> | <composite-term>\n<composite-term> -> <functor> ’(’ (<term>’,’)* <term>’)’\n<functor> -> <constant>\n```\n\n",
+     "hash": "d0f81a61757e550e",
+     "noteHe": "שלוש שורות BNF שהן כל ההבדל בין RLP ל-LP — **כדאי לשנן את זה בדיוק בצורה הזו**. ב-RLP הכלל היה `<term> -> <constant> | <variable>` בלבד, ולכן ה-BNF **לא היה רקורסיבי** ומספר ה-terms האפשריים היה סופי. כאן נוספה החלופה השלישית `<composite-term>`, והיא מוגדרת דרך `<term>` — כלומר **הדקדוק הפך לרקורסיבי**, ומכאן שעומק ה-terms אינו חסום. מכאן נובע כל השאר בעמוד הזה: אובדן הכריעות, הצורך ב-occurs check, והיכולת לייצג רשימות ועצים. שימו לב לשורה השנייה: הצורה היא `<functor>` ואחריו סוגריים ובתוכם רצף של terms מופרדים בפסיקים — ‏`(<term>',')* <term>` מבטיח **לפחות ארגומנט אחד**, כלומר אין פונקטור עם אפס ארגומנטים; מבנה בלי ארגומנטים הוא פשוט קבוע. שימו לב גם לשורה השלישית: ‏`<functor> -> <constant>` — פונקטור ייראה בדיוק כמו קבוע, ומה שמבדיל ביניהם הוא **הסוגריים שאחריו בלבד**. לכן `void` בדוגמת העץ למעלה הוא קבוע ואילו `tree` הוא פונקטור, אף ששניהם סמלים באותיות קטנות. **שגיאת מקור**: הבלוק משתמש בגרשיים טיפוגרפיים `’` במקום ב-`'` הרגילים, כמו ב-BNF של 5.1."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:9:2",
+     "type": "prose",
+     "en": "The corresponding abstract syntax for terms is adapted is:\n",
+     "hash": "89fd0a31f49c15f7",
+     "he": "התחביר המופשט המתאים ל-terms מותאם כך:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:9:3",
+     "type": "code",
+     "en": "```\n<term>: <constant> | <variable> | <composite-term>\n<composite-term>: {functor: <constant>, args: <term>[]};\n```\n\n",
+     "hash": "5837c595948216e0",
+     "noteHe": "זהו ה-AST, בדיוק בסגנון שבו כתבנו תחביר מופשט לאורך כל הקורס (השוו ל-2.3): ‏`<term>` הוא **טיפוס איחוד מפורק** (disjoint union) בין קבוע, משתנה ו-term מורכב, ו-term מורכב הוא רשומה עם שני שדות — `functor` (הסמל) ו-`args` (מערך של terms). **הרקורסיה נמצאת בשדה `args`**: הוא מוגדר כ-`<term>[]`, כלומר מערך של אותו טיפוס שאנחנו בעיצומה של הגדרתו. זו בדיוק ההגדרה האינדוקטיבית מלמעלה, כתובה כטיפוס. שימו לב ש-`args` הוא מערך ולא זוג — ‏`args.length` הוא **המקומיות** של הפונקטור, כך שהמקומיות אינה מוצהרת בנפרד אלא נגזרת מהמופע. ‏`functor: <constant>` מבטא את מה שהערנו על השורה השלישית של ה-BNF: פונקטור אינו טיפוס נפרד אלא קבוע שמופיע בתפקיד של פונקטור. **טעות נפוצה**: לחשוב שגם נוסחה אטומית היא `<term>`. היא נראית זהה, אבל היא ישות נפרדת ב-AST — ‏`p(a)` בתפקיד מטרה הוא נוסחה אטומית, ואילו `p(a)` בתוך `q(p(a))` הוא term מורכב. **ההקשר, לא הצורה, הוא שקובע.**"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:9:4",
+     "type": "prose",
+     "en": "This last rule is the first recursive data type in the AST of Logic Programming we have met.\n\n\n",
+     "hash": "276ebabaf634da58",
+     "he": "הכלל האחרון הזה הוא טיפוס הנתונים הרקורסיבי הראשון שפגשנו ב-AST של תכנות לוגי."
+    }
+   ],
+   "headingHe": "תחביר פורמלי ל-terms מורכבים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:10",
+   "depth": 2,
+   "headingEn": "Operational Semantics",
+   "raw": "## Operational Semantics\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:10:0",
+     "type": "prose",
+     "en": "The `answer-query` abstract interpreter, presented in the previous section on Relational Logic Programming, applies\nto Logic Programming as well. The only difference is that the unification algorithm has to be extended to handle composite terms.\n\n",
+     "hash": "93e7be97d4771dbb",
+     "he": "המפרש המופשט `answer-query`, שהוצג בסעיף הקודם על תכנות לוגי רלציוני, תקף גם לתכנות לוגי. ההבדל היחיד הוא שיש להרחיב את אלגוריתם האוניפיקציה כך שיטפל ב-terms מורכבים."
+    }
+   ],
+   "headingHe": "סמנטיקה תפעולית"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:11",
+   "depth": 3,
+   "headingEn": "Unification of Composite Terms",
+   "raw": "### Unification of Composite Terms\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:11:0",
+     "type": "prose",
+     "en": "The presence of function symbols complicates the unification step in the abstract interpreter.\nRecall that the rule selection procedure tries to unify a query goal (an atomic formula) with the head of the selected rule (an atomic formula). The unification operation, if successful, produces a substitution (most general unifier) for the variables in the atomic formulas.\n\n",
+     "hash": "b4979f47f17f2204",
+     "he": "נוכחותם של סמלי פונקציה מסבכת את צעד האוניפיקציה במפרש המופשט.\nנזכיר שפרוצדורת בחירת הכלל מנסה לאחד מטרה של שאילתה (נוסחה אטומית) עם הראש של הכלל הנבחר (נוסחה אטומית). פעולת האוניפיקציה, אם היא מצליחה, מייצרת הצבה (המאחד הכללי ביותר) עבור המשתנים שבנוסחאות האטומיות."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:1",
+     "type": "prose",
+     "en": "The notion of substitution is modified to support composite terms by adding the **occur-check** condition:\n\n",
+     "hash": "621eba98b9caadae",
+     "he": "מושג ההצבה משתנה כדי לתמוך ב-terms מורכבים, על ידי הוספת תנאי **בדיקת ההיקרות** (occur-check):"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:2",
+     "type": "prose",
+     "en": "**Definition: Substitution with Composite Terms**: A substitution `s` is a finite mapping from `variables` to `terms`, such that `s(X)` does not include `X`.  All the rest of the substitution and unification terminology stays unchanged.\n\n",
+     "hash": "4553d6cc2fec5a5b",
+     "he": "**הגדרה: הצבה עם terms מורכבים**: הצבה `s` היא מיפוי סופי מ-`variables` ל-`terms`, כך ש-`s(X)` אינו מכיל את `X`. כל שאר הטרמינולוגיה של הצבה ואוניפיקציה נשארת ללא שינוי."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:3",
+     "type": "prose",
+     "en": "Observe the difference with the definition we had for RLP:\n\n",
+     "hash": "be25c51be357f5a9",
+     "he": "שימו לב להבדל מההגדרה שהייתה לנו ב-RLP:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:4",
+     "type": "prose",
+     "en": "**Definition: Substitution with Atomic Terms**: A substitution $$s$$ in logic programming involves *logic variables* as variables and *logic terms* as values, such that $$s(X) \\neq X$$.\n\n",
+     "hash": "a45490cc140298df",
+     "he": "**הגדרה: הצבה עם terms אטומיים**: הצבה $$s$$ בתכנות לוגי מערבת *משתנים לוגיים* כמשתנים ו-*terms לוגיים* כערכים, כך ש-$$s(X) \\neq X$$."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:5",
+     "type": "list",
+     "en": "* For atomic terms, the condition is the simple $$s(X) \\neq X$$.\n* For composite terms, the condition is: $$X \\notin s(X)$$.\n\n",
+     "hash": "c57cc2a1ddd58130",
+     "he": "* עבור terms אטומיים, התנאי הוא הפשוט $$s(X) \\neq X$$.\n* עבור terms מורכבים, התנאי הוא: $$X \\notin s(X)$$."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:11:6",
+     "type": "prose",
+     "en": "Testing the condition $$X \\notins(X)$$ is an expensive computational operation (it is an unbounded operation because composite terms can have unbounded depth).  Occur-check makes unification expensive.\n\n",
+     "hash": "0bc7da2dbd18ae96",
+     "he": "בדיקת התנאי $$X \\notin s(X)$$ היא פעולה חישובית יקרה (זו פעולה בלתי חסומה, מפני של-terms מורכבים יכול להיות עומק בלתי חסום). בדיקת ההיקרות הופכת את האוניפיקציה ליקרה. *(במקור נכתב `\\notins` ללא רווח, ולכן הנוסחה אינה מתרנדרת שם; התיקון הוא `\\notin s`.)*"
+    }
+   ],
+   "headingHe": "אוניפיקציה של terms מורכבים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:12",
+   "depth": 3,
+   "headingEn": "Examples of Unification with Composite Terms",
+   "raw": "### Examples of Unification with Composite Terms\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:12:0",
+     "type": "code",
+     "en": "```prolog\nunify(member(X, tree(X, Left, Right)), \n      member(Y, tree(9, void, tree(3, void, void))))\n-->\n{Y=9, X=9, Left=void, Right=tree(3, void, void)}\n```\n\n",
+     "hash": "2ee7196e879d9f5f",
+     "lang": "prolog",
+     "noteHe": "הדוגמה הראשונה, ובה כל התוספת של LP לאוניפיקציה: המקרה שבו **שני הצדדים הם terms מורכבים עם אותו פונקטור ואותה מקומיות** מפורק למשוואות איבר-איבר, בדיוק כמו שהמקרה של נוסחאות אטומיות פורק ב-5.1 — רק שכעת הפירוק חוזר על עצמו לעומק. עקבו: הפרדיקט `member` זהה ובעל מקומיות 2, ולכן מקבלים `X = Y` ו-`tree(X, Left, Right) = tree(9, void, tree(3, void, void))`. המשוואה השנייה היא בין שני terms מורכבים עם הפונקטור `tree` ומקומיות 3, ולכן היא מתפרקת שוב: ‏`X = 9`, ‏`Left = void`, ‏`Right = tree(3, void, void)`. **שימו לב ל-`Right`**: הוא נקשר ל-**term מורכב שלם**, לא לקבוע — זה מה שלא היה אפשרי ב-RLP. ושימו לב ש-`X` מופיע **פעמיים** בצד השמאלי: פעם כארגומנט הראשון של `member` ופעם בתוך `tree`. שני המופעים חייבים לקבל את אותו ערך, ולכן מ-`X = Y` ומ-`X = 9` נובע גם `Y = 9`. **כדאי לשנן**: משתנה חוזר בתוך term הוא אילוץ בדיוק כמו משתנה חוזר בין מטרות."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:12:1",
+     "type": "code",
+     "en": "```prolog\nunify(member(X, tree(9, void, tree(E1, L1, R1)),\n      member(Y, tree(Y, Z, tree(3, void, void))))\n-->\n{Y=9, X=9, Z=void, E1=3, L1=void, R1=void}\n```\n\n",
+     "hash": "b1e8a4fef38c310e",
+     "lang": "prolog",
+     "noteHe": "אותו רעיון, אך כעת המשתנים מפוזרים **בשני הצדדים** — וזו הנקודה: אוניפיקציה היא סימטרית, היא אינה התאמת תבנית חד-כיוונית. ‏`E1, L1, R1` נמצאים משמאל ו-`Y, Z` מימין, וכולם נקשרים באותו מעבר. עקבו: ‏`X = Y` מהארגומנט הראשון; ואז `tree(9, void, tree(E1, L1, R1)) = tree(Y, Z, tree(3, void, void))` מתפרק ל-`9 = Y` (ולכן `Y=9`, ומכיוון ש-`X=Y` גם `X=9`), ‏`void = Z` (ולכן `Z=void` — **המשתנה בצד ימין נקשר לקבוע שבצד שמאל**, ההפך מהדוגמה הקודמת), ואז `tree(E1, L1, R1) = tree(3, void, void)` שמתפרק לרמה נוספת: ‏`E1=3, L1=void, R1=void`. שימו לב שהקינון הצריך **שני** צעדי פירוק — זהו הרקורסיה של `args` ב-AST בפעולה. **שגיאת מקור**: לשורת ה-`unify` הראשונה חסר סוגר סוגר אחד — היא צריכה להיות `unify(member(X, tree(9, void, tree(E1, L1, R1))),`."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:12:2",
+     "type": "code",
+     "en": "```prolog\nunify(t(X, f(a), X), \n      t(g(U), U, W))\n-->\n{X=g(f(a)), U=f(a), W=g(f(a))}\n```\n\n",
+     "hash": "dd48e2f1e8024a06",
+     "lang": "prolog",
+     "noteHe": "הדוגמה שמראה מדוע צעד \"הפעל את ההצבה המצטברת לפני שמטפלים במשוואה\" הופך כאן להיות **קריטי**. עקבו: הפירוק של `t/3` נותן שלוש משוואות — `X = g(U)`, ‏`f(a) = U`, ‏`X = W`. (1) המשוואה הראשונה נותנת `sub = {X = g(U)}`; שימו לב שהצד הימני עדיין מכיל משתנה לא-קשור. (2) המשוואה השנייה נותנת `U = f(a)`, ובהרכבה `{X = g(U)} ○ {U = f(a)}` **ה-`U` שבתוך `g(U)` מוחלף גם הוא**, ולכן מקבלים `{X = g(f(a)), U = f(a)}`. **זו הנקודה**: ההרכבה חודרת לתוך terms מקוננים, ולא רק מחליפה משתנים ברמה העליונה. (3) המשוואה `X = W`, לאחר הפעלת ההצבה, הופכת ל-`g(f(a)) = W`, ולכן `W = g(f(a))`. **טעות נפוצה במבחן**: לעצור עם `{X = g(U), U = f(a), W = g(U)}` — הצבה נכונה כקבוצת משוואות אך **לא אידמפוטנטית**, ולכן אינה mgu תקין לפי ההגדרה. שימו לב גם ש-`X` ו-`W` קיבלו את אותו ערך למרות שהם משתנים שונים לגמרי; זה קורה כי `X` מופיע פעמיים בצד השמאלי."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:12:3",
+     "type": "code",
+     "en": "```prolog\nunify(t(X, f(X), X),\n      t(g(U), U, W))\nfails \nOccurs-check fails when extending {X = g(U)} with {f(X) = U}\n```\n\n",
+     "hash": "a19a9303ee45904c",
+     "lang": "prolog",
+     "noteHe": "**זו הדוגמה המרכזית של הסעיף — כדאי לשנן אותה, זו שאלת מבחן ודאית.** ההבדל מהדוגמה הקודמת הוא **תו אחד**: ‏`f(a)` הפך ל-`f(X)`. עקבו: (1) ‏`X = g(U)` נותן `sub = {X = g(U)}`. (2) המשוואה הבאה היא `f(X) = U`; מפעילים עליה את ההצבה ומקבלים `f(g(U)) = U`, כלומר צריך לקשור `U` ל-term ש-`U` עצמו מופיע בתוכו. **כאן נכשלת בדיקת ההיקרות (occurs check)** ✗. מדוע זה חייב להיכשל: הצבה מוגדרת כמיפוי שבו `X ∉ s(X)`, ולכן `{U = f(g(U))}` אינה הצבה חוקית מלכתחילה. אינטואיטיבית, הפעלת ההצבה על עצמה תייצר `f(g(f(g(f(g(...))))))` לנצח. **מדוע זה לא היה יכול לקרות ב-RLP**: שם terms אינם מקוננים, ולכן ‏`s(X)` הוא תמיד קבוע או משתנה בודד — ובדיקה פשוטה `s(X) ≠ X` הספיקה. **שימו לב לעלות**: הבדיקה מחייבת סריקה של כל ה-term לעומקו, וזה בדיוק מה שהפסקה הקודמת התכוונה ב\"פעולה בלתי חסומה\". **טריוויה שכדאי להכיר**: ‏Prolog האמיתי **מדלג** על ה-occurs check כברירת מחדל מטעמי ביצועים, ולכן `X = f(X)` שם יוצר term מעגלי אינסופי במקום להיכשל; הפרדיקט `unify_with_occurs_check/2` הוא הגרסה התקנית שמבצעת אותה."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:12:4",
+     "type": "code",
+     "en": "```prolog\nunify(append([1, 2, 3], [3, 4], List),\n      append([X | Xs], Ys, [X | Zs]))\n-->      \n{X=1, Xs=[2, 3], Ys=[3, 4], List=[1 | Zs]}\n```\n\n",
+     "hash": "f36cc8f608a3ba4a",
+     "lang": "prolog",
+     "noteHe": "כאן האוניפיקציה מופעלת על **רשימות**, וזו התצוגה המקדימה של כל הסעיף הבא. זכרו ש-`[X | Xs]` הוא רק סוכר תחבירי ל-`cons(X, Xs)`, כך שזהו בדיוק אותו פירוק term-מורכב-מול-term-מורכב. עקבו על שלושת הארגומנטים: (1) ‏`[1, 2, 3] = [X | Xs]` — הפונקטור `cons` תואם, ולכן `X = 1` ו-`Xs = [2, 3]`; **זהו `car`/`cdr` שמתבצע על ידי אוניפיקציה בלבד, בלי שום פונקציית גישה**. (2) ‏`[3, 4] = Ys` — משתנה מול term, ולכן `Ys = [3, 4]`. (3) ‏`List = [X | Zs]`; מפעילים את ההצבה שנצברה ומקבלים `List = [1 | Zs]`. **שימו לב לתוצאה החלקית הזו**: ‏`List` נקשר ל-term ש**עדיין מכיל משתנה לא-קשור**, ‏`Zs`. זה חוקי לחלוטין, וזה בדיוק מנגנון ה\"רשימה עם חור\" שמאפשר לתוכניות Prolog לבנות פלט בהדרגה — הקריאה הרקורסיבית הבאה תמלא את `Zs`. **זהו ההבדל העמוק בין LP לשפה פונקציונלית**: אין כאן פונקציה שמחזירה ערך; יש term חלקי שהולך ומתמלא. השוו לאיך ש-`append` נכתב בהמשך."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:12:5",
+     "type": "code",
+     "en": "```prolog\nunify(append([1, 2, 3], [3, 4], [3, 3, 4]),\n      append([X | Xs], Ys, [Xs | Zs]))\n-->\nfails\nwhen trying to extend {X = 1, Xs = [2, 3], Ys = [3, 4]} with {Xs = 3}\n```\n\n\n",
+     "hash": "35bdec43bfbdad58",
+     "lang": "prolog",
+     "noteHe": "כישלון מסוג אחר לגמרי מזה של ה-occurs check — כאן פשוט **שני מופעים של אותו משתנה נדרשים לשני ערכים שונים**. שימו לב להבדל מהדוגמה הקודמת: הארגומנט השלישי הוא `[Xs | Zs]` ולא `[X | Zs]` — ‏`X` הוחלף ב-`Xs`. עקבו: מהארגומנט הראשון `[1,2,3] = [X | Xs]` מקבלים `X = 1` ו-`Xs = [2, 3]`; מהשני `Ys = [3, 4]`; ובשלישי `[3, 3, 4] = [Xs | Zs]` דורש `Xs = 3` — אבל `Xs` כבר קשור ל-`[2, 3]`. מפעילים את ההצבה המצטברת ומקבלים את המשוואה `[2, 3] = 3`, כלומר term מורכב מול קבוע: מקרה `FAIL` מהאלגוריתם של 5.1. **שתי דרכי הכישלון של אוניפיקציה, זו לצד זו**: (א) התנגשות מבנית — פונקטורים שונים, מקומיות שונה, או קבוע מול term מורכב (הדוגמה הזו); (ב) מעגליות — ‏`X` בתוך `s(X)` (הדוגמה הקודמת). **רק (ב) היא חדשה ב-LP.** שימו לב גם שהכישלון התגלה רק בארגומנט השלישי, אחרי ששני הראשונים כבר יצרו קשירות — אלה נזרקות, והצומת בעץ ההוכחה הופך לעלה כישלון."
+    }
+   ],
+   "headingHe": "דוגמאות לאוניפיקציה עם terms מורכבים"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:13",
+   "depth": 2,
+   "headingEn": "Expressivity and Decidability of Logic Programming",
+   "raw": "## Expressivity and Decidability of Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:13:0",
+     "type": "prose",
+     "en": "Logic Programming has the expressive power of Turing machines. That is, every computable program can be written in Logic Programming. In particular, every Scheme program can be written in Prolog, and vice versa.\n\n",
+     "hash": "a7ad1b67b1373af0",
+     "he": "לתכנות לוגי יש כוח הבעה של מכונות טיורינג. כלומר, כל תוכנית ניתנת לחישוב ניתנת לכתיבה בתכנות לוגי. בפרט, כל תוכנית ב-Scheme ניתנת לכתיבה ב-Prolog, ולהפך."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:13:1",
+     "type": "prose",
+     "en": "Logic Programming is only partially decidable - unlike Relational Logic Programming. That is, the problem \"Is Q provable from P\", denoted $$P |- Q$$, is partially decidable. The finiteness argument of Relational Logic Programming does not apply here since\nin the presence of recursive terms, the number of different atomic formulas is unbounded (since terms can be nested up to unbounded depth). Therefore, terminating proofs can have an unbounded length - even with a finite vocabulary of functors, predicates and constants.\n\n",
+     "hash": "f80adf3351f5a05f",
+     "he": "תכנות לוגי הוא כריע חלקית בלבד — בניגוד לתכנות לוגי רלציוני. כלומר, הבעיה \"האם Q ניתנת להוכחה מ-P\", המסומנת $$P |- Q$$, היא כריעה חלקית. טיעון הסופיות של תכנות לוגי רלציוני אינו תקף כאן, מפני שבנוכחות terms רקורסיביים מספר הנוסחאות האטומיות השונות אינו חסום (שכן terms יכולים להיות מקוננים עד עומק בלתי חסום). לכן, להוכחות שמסתיימות יכול להיות אורך בלתי חסום — גם עם אוצר מילים סופי של פונקטורים, פרדיקטים וקבועים."
+    }
+   ],
+   "headingHe": "אקספרסיביות וכריעות של תכנות לוגי"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:14",
+   "depth": 2,
+   "headingEn": "Defining Recursive Data Structures with Logic Programming",
+   "raw": "## Defining Recursive Data Structures with Logic Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:14:0",
+     "type": "prose",
+     "en": "Composite terms allow us to define abstract data types in LP.  This requires some change of habit though - because we do not compute terms with functions that construct new complex values.  Instead, when we program in LP, we define **relations** among values.  When we check whether two values stand in relation, we instantiate some logical variables to make the predicate hold.\nWhen this happens, we end up constructing complex values.\n\n",
+     "hash": "3b0dfd13efe37454",
+     "he": "‏terms מורכבים מאפשרים לנו להגדיר טיפוסי נתונים מופשטים ב-LP. זה דורש שינוי הרגלים מסוים, מפני שאנחנו לא מחשבים terms באמצעות פונקציות שבונות ערכים מורכבים חדשים. במקום זאת, כשאנחנו מתכנתים ב-LP אנחנו מגדירים **יחסים** בין ערכים. כשאנחנו בודקים אם שני ערכים נמצאים ביחס, אנחנו מציבים ערכים במשתנים לוגיים מסוימים כדי שהפרדיקט יתקיים.\nכשזה קורה, אנחנו בסופו של דבר בונים ערכים מורכבים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:14:1",
+     "type": "prose",
+     "en": "Let us consider this strategy with a Tree data structure.\n\n",
+     "hash": "d61e79a851afa983",
+     "he": "נבחן את האסטרטגיה הזו עם מבנה הנתונים עץ."
+    }
+   ],
+   "headingHe": "הגדרת מבני נתונים רקורסיביים בתכנות לוגי"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:15",
+   "depth": 3,
+   "headingEn": "Trees in LP",
+   "raw": "### Trees in LP\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:15:0",
+     "type": "prose",
+     "en": "The predicate `binary_tree` corresponds to the membership predicate of values to the `binary_tree` datatype.\nIt holds only for values which belong to the tree datatype.  Values of this type are composite terms with the functor `tree/3`.\nThis functor has no primitive (pre-defined) semantic.  We define its semantic by using it in specific predicates.\n\n",
+     "hash": "0e99fc0a62208eda",
+     "he": "הפרדיקט `binary_tree` מקביל לפרדיקט השייכות של ערכים לטיפוס הנתונים `binary_tree`.\nהוא מתקיים רק עבור ערכים ששייכים לטיפוס הנתונים עץ. ערכים מהטיפוס הזה הם terms מורכבים עם הפונקטור `tree/3`.\nלפונקטור הזה אין שום סמנטיקה פרימיטיבית (מוגדרת מראש). אנחנו מגדירים את הסמנטיקה שלו על ידי שימוש בו בפרדיקטים ספציפיים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:1",
+     "type": "code",
+     "en": "```prolog\n% Signature: binary_tree(T)/1\n% Purpose: T is a binary tree.\nbinary_tree(void).\nbinary_tree(tree(Element, Left, Right)) :- binary_tree(Left), binary_tree(Right).\n```\n\n",
+     "hash": "7734aca3802f7e7b",
+     "lang": "prolog",
+     "noteHe": "זהו **פרדיקט הטיפוס** — המקבילה ב-LP למה שכתבנו כ-type predicate ב-TypeScript (השוו ל-1.3) או כ-`isTree?` ב-Scheme. הוא מוגדר בדיוק כמו ההגדרה האינדוקטיבית של הטיפוס: **עובדה** למקרה הבסיס — ‏`void` הוא עץ בינארי — ו**כלל** לצעד האינדוקטיבי — ‏`tree(Element, Left, Right)` הוא עץ בינארי אם `Left` ו-`Right` הם עצים בינאריים. שימו לב לשלוש נקודות. (1) ‏`Element` אינו נבדק כלל: הוא יכול להיות כל term, ולכן זהו עץ **פולימורפי**. (2) שימו לב ש-`tree/3` הוא פונקטור סתמי לחלוטין — אין ל-Prolog מושג של \"עץ\"; מה שהופך אותו לעץ הוא **אך ורק** האופן שבו הפרדיקטים בעמוד הזה משתמשים בו, בדיוק כפי שכתוב בפסקה שמעליו. (3) הפרדיקט ניתן להרצה **בשני מצבים** (modes): עם term קשור הוא **בודק** אם הוא עץ תקין, ועם משתנה חופשי הוא **מייצר** עצים — ‏`?- binary_tree(T)` יחזיר `T=void`, ואז `T=tree(_, void, void)`, וכן הלאה לנצח. **זו כבר לא שאלה של פונקציה שמחזירה ערך; זה יחס שאפשר לקרוא לשני הכיוונים** — הרעיון המרכזי של הסעיף הבא."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:2",
+     "type": "prose",
+     "en": "We define recursive procedures over such composite values as relations.  The relation `tree_member(X, T)` holds when `X` is bound to a value that occurs as one of the nodes in `T`.\n\n",
+     "hash": "a0b32d49a1ed198e",
+     "he": "אנחנו מגדירים פרוצדורות רקורסיביות מעל ערכים מורכבים כאלה בתור יחסים. היחס `tree_member(X, T)` מתקיים כאשר `X` קשור לערך שמופיע כאחד הצמתים ב-`T`."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:3",
+     "type": "code",
+     "en": "```prolog\n% Signature: tree_member(X, T)/2\n% Purpose: X is a member of T.\ntree_member(X, tree(X, _, _)).\ntree_member(X, tree(Y, Left, _)):- tree_member(X, Left).\ntree_member(X, tree(Y, _, Right)):- tree_member(X, Right).\n```\n\n",
+     "hash": "308b54b5442a6451",
+     "lang": "prolog",
+     "noteHe": "שלושה כללים = **שלוש דרכים אפשריות** לכך ש-`X` יהיה איבר בעץ, והם מהווים דיסיונקציה (או): ‏`X` הוא השורש, או שהוא נמצא בתת-העץ השמאלי, או שהוא נמצא בתת-העץ הימני. **הכלל הראשון הוא הגאוני שבהם, ושווה לעצור עליו**: ‏`tree_member(X, tree(X, _, _)).` — זו **עובדה**, בלי גוף כלל. הבדיקה \"האם `X` שווה לשורש\" אינה נעשית בגוף אלא **בראש הכלל עצמו**, על ידי כך שאותו שם משתנה `X` מופיע פעמיים: פעם כארגומנט הראשון ופעם בתוך `tree`. אם האוניפיקציה של הראש עם המטרה מצליחה, שני המופעים קיבלו את אותו ערך — כלומר `X` באמת השורש. **זהו הרעיון שכדאי לשנן: ב-LP השוואה נעשית באוניפיקציה בראש הכלל, לא ב-`if` בגוף.** ‏`_` הוא המשתנה האנונימי: \"משהו, לא אכפת לי מה\", וכל מופע שלו הוא משתנה נפרד. שימו לב שאין כאן כלל למקרה `void` — ולכן חיפוש בעץ ריק פשוט **נכשל**, וזה הנכון: אין איברים בעץ ריק. **שגיאת מקור קלה**: בכללים השני והשלישי המשתנה `Y` מופיע פעם אחת בלבד ואינו משמש לשום דבר; היה צריך לכתוב `_`. ‏Prolog אמיתי יפלוט על כך אזהרת singleton variable."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:4",
+     "type": "prose",
+     "en": "`X` might be equal to `Y` in the second and third clauses. That means that different proof paths provide repeated answers.\n\n",
+     "hash": "1b7913dd6c75eff0",
+     "he": "‏`X` עשוי להיות שווה ל-`Y` בפסוקים השני והשלישי. משמעות הדבר היא שמסלולי הוכחה שונים מספקים תשובות חוזרות."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:5",
+     "type": "prose",
+     "en": "#### Example Queries with Trees\n\n",
+     "hash": "db5650ec225cab89",
+     "he": "#### דוגמאות לשאילתות עם עצים"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:6",
+     "type": "code",
+     "en": "```prolog\n?- tree_member(g(X),\n               tree(g(a),\n                    tree(g(b), void, void),\n                    tree(f(a), void, void))).\nX = a;\nX = b;\nfalse\n\n?- tree_member(a, Tree).\nTree = tree(a, _, _);\nTree = tree(_, tree(a, _, _), _);\nTree = tree(_, tree(_, tree(a, _, _), _), _);\n...\n```\n\n",
+     "hash": "b653d180f3b67472",
+     "lang": "prolog",
+     "noteHe": "**שתי השאילתות האלה הן אותה פרוצדורה בדיוק, מופעלת בשני כיוונים הפוכים — זה הלב של העמוד.** בשאילתה הראשונה העץ קשור לגמרי והחיפוש הוא אחרי `g(X)`, כלומר \"איזה term בצורה `g(משהו)` נמצא בעץ\". התשובות `X=a` (מהשורש `g(a)`) ו-`X=b` (מהבן השמאלי `g(b)`), ולא `f(a)` שבבן הימני — כי `g(X)` ו-`f(a)` הם terms מורכבים עם **פונקטורים שונים** ולכן האוניפיקציה נכשלת. שימו לב ש-`X` נקשר כאן ל-`a` ולא ל-`g(a)`: האוניפיקציה חודרת לתוך ה-term. ה-`false` בסוף מסמן שאין תשובות נוספות. בשאילתה השנייה **הכל הפוך**: ‏`a` קבוע ו-`Tree` משתנה חופשי, ולכן הפרוצדורה **מייצרת** את כל העצים שמכילים את `a` — קודם `tree(a, _, _)` (הכלל הראשון), אחר כך `tree(_, tree(a, _, _), _)` (הכלל השני, בעומק 1), וכן הלאה **לנצח**. ה-`...` בסוף אינו קיצור עריכה אלא עובדה: זהו עץ הוכחה אינסופי מוצלח. **שימו לב ל-`_` בפלט**: הן חורים שנשארו לא-קשורים, כלומר Prolog החזיר **תבנית**, לא ערך יחיד. **הנקודה שכדאי לשנן**: אין ב-LP הפרדה בין קלט לפלט — יש רק יחס, וכל ארגומנט שמגיע לא-קשור הופך אוטומטית ל\"פלט\". שאלת מבחן קלאסית: לקבוע מה תחזיר פרוצדורה נתונה במצב הפוך מזה שלשמו נכתבה."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:7",
+     "type": "prose",
+     "en": "Observe that in the first query above, the parameter `X` contains a variable, while the parameter `Tree` is completely bound to constants (no variables).  In contrast, in the second query, `X` is bound to a constant (`a`) while `Tree` is bound to a variable.  The same procedure can be invoked in different ways - which are called **modes** - depending on which parameter is bound to constants and which is bound to variables.\n\n",
+     "hash": "8a457c249d3ac7d7",
+     "he": "שימו לב שבשאילתה הראשונה שלמעלה, הפרמטר `X` מכיל משתנה, ואילו הפרמטר `Tree` קשור לחלוטין לקבועים (ללא משתנים). לעומת זאת, בשאילתה השנייה `X` קשור לקבוע (`a`) ואילו `Tree` קשור למשתנה. אפשר להפעיל את אותה פרוצדורה בדרכים שונות — שנקראות **מצבים** (modes) — בהתאם לשאלה איזה פרמטר קשור לקבועים ואיזה קשור למשתנים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:15:8",
+     "type": "prose",
+     "en": "In this example, the procedure `tree_member`, when it is invoked in the second mode with a free variable `Tree` is used as a **generator** of values. (In this example, the procedure is the generator of all possible trees which contain `a`.)\n\n",
+     "hash": "0b5f27275e0b8516",
+     "he": "בדוגמה זו, הפרוצדורה `tree_member`, כשהיא מופעלת במצב השני עם משתנה חופשי `Tree`, משמשת כ**מחולל** (generator) של ערכים. (בדוגמה זו, הפרוצדורה היא המחולל של כל העצים האפשריים שמכילים את `a`.)"
+    }
+   ],
+   "headingHe": "עצים ב-LP"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:16",
+   "depth": 3,
+   "headingEn": "Church Numeral Encoding",
+   "raw": "### Church Numeral Encoding\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:16:0",
+     "type": "prose",
+     "en": "In LP, we did not introduce number terms - only symbols.  Prolog extends LP with arithmetic and numeric terms.\nThere is, however, a theoretical method to represent natural numbers using only symbols - called [Church Numeral Encodings](https://en.wikipedia.org/wiki/Church_encoding). \n\n",
+     "hash": "9819133e69c1643a",
+     "he": "ב-LP לא הצגנו terms של מספרים — רק סמלים. ‏Prolog מרחיבה את LP באריתמטיקה וב-terms מספריים.\nקיימת עם זאת שיטה תיאורטית לייצג מספרים טבעיים באמצעות סמלים בלבד — שנקראת [קידודי כנסייה](https://en.wikipedia.org/wiki/Church_encoding)."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:1",
+     "type": "prose",
+     "en": "In Church encoding, natural numbers are represented by terms constructed from the symbol 0 and the functor `s/1`:\n",
+     "hash": "8492c86e27e427c0",
+     "he": "בקידוד כנסייה, מספרים טבעיים מיוצגים על ידי terms הבנויים מהסמל 0 ומהפונקטור `s/1`:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:2",
+     "type": "list",
+     "en": "* `0` - denotes zero\n* `s(0)` - denotes 1\n* `s(...s(s(0))...)` n times - denotes n\n* In general, if `N` is the Church encoding of `n`, then `s(N)` is the Church encoding of `n+1`.\n\n",
+     "hash": "cbb18b316e76f547",
+     "he": "* `0` - מסמן אפס\n* `s(0)` - מסמן 1\n* `s(...s(s(0))...)` ‏n פעמים - מסמן n\n* באופן כללי, אם `N` הוא קידוד הכנסייה של n, אז `s(N)` הוא קידוד הכנסייה של n+1."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:3",
+     "type": "prose",
+     "en": "#### Membership Predicate\n\n",
+     "hash": "fba356d6b9ff1407",
+     "he": "#### פרדיקט השייכות"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:4",
+     "type": "code",
+     "en": "```prolog\n% Signature: natural_number(N)/1\n% Purpose: N is a natural number.\nnatural_number(0).\nnatural_number(s(X)) :- natural_number(X).\n```\n\n",
+     "hash": "4b8395a14c4f1f24",
+     "lang": "prolog",
+     "noteHe": "בדיוק אותה תבנית כמו `binary_tree`: עובדה למקרה הבסיס, כלל לצעד האינדוקטיבי. ‏`0` הוא מספר טבעי, ו-`s(X)` הוא מספר טבעי אם `X` הוא מספר טבעי. **שימו לב ש-`0` כאן אינו המספר אפס אלא סמל קבוע** — ל-LP הטהור אין מספרים כלל, וזו כל הנקודה של הקידוד: לייצג את הטבעיים באמצעות **עומק הקינון של ה-term**. ‏`s(s(s(0)))` הוא 3 פשוט מפני שיש בו שלוש שכבות של `s`. ‏`s` היא הפונקציה העוקב (successor), והיא **אינה מחשבת דבר** — היא רק עוטפת, בדיוק כמו ש-`cons` רק עוטף. גם כאן שני המצבים עובדים: ‏`?- natural_number(s(s(0)))` **בודק**, ואילו `?- natural_number(X)` **מייצר** את `0`, ‏`s(0)`, ‏`s(s(0))`, ... לנצח — מונה עצל של הטבעיים. **השוו ל-2.1**: זה בדיוק אותו רעיון של הגדרה אינדוקטיבית של טיפוס דרך בנאי בסיס ובנאי צעד, רק שכאן ה\"בנאי\" הוא פונקטור והפרדיקט הוא מה שמעניק לו משמעות."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:5",
+     "type": "prose",
+     "en": "#### Arithmetic Operations on Church Numerals\n\n",
+     "hash": "87cc98fe1bbfae58",
+     "he": "#### פעולות אריתמטיות על מספרי כנסייה"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:6",
+     "type": "code",
+     "en": "```prolog\n% Signature: plus(X, Y, Z)/3\n% Purpose: Z is the sum of X and Y.\nplus(X, 0, X) :- natural_number(X).\nplus(X, s(Y), s(Z)) :- plus(X, Y, Z).\n```\n\n",
+     "hash": "6d27238faa79aef5",
+     "lang": "prolog",
+     "noteHe": "**זו הפרוצדורה החשובה ביותר בעמוד — כדאי לשנן אותה ולהבין למה היא עובדת לשלושה כיוונים.** שימו לב מיד למה שאין כאן: **אין חיבור**. אין אופרטור `+`, אין חישוב. יש רק **יחס תלת-מקומי** `plus(X, Y, Z)` שמתקיים כאשר `Z` הוא הסכום. מקרה הבסיס `plus(X, 0, X) :- natural_number(X).` אומר `X + 0 = X`, והקריאה ל-`natural_number(X)` בגוף אינה מיותרת: היא מוודאת ש-`X` הוא באמת מספר טבעי, ובמצב שבו `X` חופשי היא זו ש**מייצרת** אותו. הצעד הרקורסיבי `plus(X, s(Y), s(Z)) :- plus(X, Y, Z).` הוא הזהות `X + (Y+1) = (X+Y)+1`, והנה הטריק: **ה-`s` מקולף מהארגומנט השני ומורכב על השלישי, באותו כלל, בראש**. כל צעד רקורסיבי מעביר `s` אחד מהצד השני של המשוואה, והרקורסיה נעצרת כשהארגומנט השני מגיע ל-`0`. **הנקודה העמוקה**: מכיוון שהבנייה והפירוק של ה-`s` קורים שניהם באוניפיקציה של **ראש** הכלל, ואוניפיקציה היא סימטרית, אותה פרוצדורה עצמה מבצעת חיבור, חיסור ופירוק לזוגות — תלוי רק אילו ארגומנטים הגיעו קשורים. שלוש הדוגמאות הבאות מדגימות בדיוק את שלושת המצבים האלה."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:7",
+     "type": "prose",
+     "en": "Example queries:\n",
+     "hash": "18da159a2524c8d3",
+     "he": "שאילתות לדוגמה:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:8",
+     "type": "code",
+     "en": "```prolog\n?- plus(s(0), 0, s(0)). % checks 1+0=1\ntrue.\n```\n\n",
+     "hash": "355e71b4b5f65e6f",
+     "lang": "prolog",
+     "noteHe": "המצב הפשוט ביותר: כל שלושת הארגומנטים קשורים, ולכן זו **בדיקה** בלבד — האם `1 + 0 = 1`. השאילתה היא ground (אין בה משתנים), ולכן התשובה היא `true` בלי הצבות, בדיוק המקרה השני מרשימת סוגי התוצאות של `answer-query` ב-5.1. עקבו: המטרה מתאחדת עם ראש הכלל הראשון `plus(X, 0, X)` עם `X = s(0)` — שימו לב ששני המופעים של `X` בראש מקבלים את `s(0)` ו-`s(0)`, ולכן הבדיקה עוברת. אילו השאילתה הייתה `plus(s(0), 0, s(s(0)))` היא הייתה נכשלת בדיוק כאן, כי `X` לא יכול להיות גם `s(0)` וגם `s(s(0))`."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:9",
+     "type": "prose",
+     "en": "By changing the mode of the query, we compute substration:\n",
+     "hash": "cc9817a6d528e49c",
+     "he": "על ידי שינוי המצב של השאילתה, אנחנו מחשבים חיסור:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:10",
+     "type": "code",
+     "en": "```prolog\n?- plus(X, s(0), s(s(0)). % checks X+1=2, e.g., compute 2-1\nX=s(0).\n```\n\n",
+     "hash": "7349a6bad7f46f06",
+     "lang": "prolog",
+     "noteHe": "**וכאן הקסם: אותה `plus` בדיוק, בלי שורת קוד אחת נוספת, מחשבת חיסור.** הארגומנט הראשון הוא כעת המשתנה החופשי, והשניים האחרים קשורים — כלומר השאלה היא \"מה צריך להוסיף ל-1 כדי לקבל 2\", שזה `2 - 1`. עקבו: המטרה `plus(X, s(0), s(s(0)))` מתאימה לכלל השני (הארגומנט השני הוא `s(משהו)`), ומקבלים `plus(X, 0, s(0))` — קילפנו `s` משני הצדדים. עכשיו הארגומנט השני הוא `0`, ולכן הכלל הראשון תופס עם `X = s(0)`, ו-`natural_number(s(0))` מתאמת. התשובה: ‏`X = s(0)`, כלומר 1. **הנקודה שכדאי לשנן**: בשפה פונקציונלית `plus` הייתה פונקציה חד-כיוונית וכדי לחסר היינו צריכים לכתוב `minus` נפרדת. ב-LP יחס אחד נותן את שתי הפעולות, מפני שאין \"קלט\" ו\"פלט\" אלא רק ארגומנטים שקשורים או לא. **שגיאת מקור**: לשורת השאילתה חסר סוגר סוגר אחד — היא צריכה להיות `?- plus(X, s(0), s(s(0))).` ובפסקה שמעליה נכתב \"substration\" במקום \"subtraction\"."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:11",
+     "type": "prose",
+     "en": "By using a more abstract mode, we obtain a generator of pairs of numbers:\n",
+     "hash": "13a84c60e47d6d3a",
+     "he": "על ידי שימוש במצב מופשט יותר, אנחנו מקבלים מחולל של זוגות מספרים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:12",
+     "type": "code",
+     "en": "```prolog\n% checks X+Y=2 - all pairs of natural numbers, whose sum equals 2\n?- plus(X, Y, s(s(0))). \nX=0, Y=s(s(0));\nX=s(0), Y=s(0);\nX=s(s(0)), Y=0.\n```\n\n",
+     "hash": "c35bb7441c982319",
+     "lang": "prolog",
+     "noteHe": "המצב השלישי והמופשט ביותר: **שני** הארגומנטים הראשונים חופשיים, ורק הסכום קשור. השאלה היא \"אילו זוגות מספרים טבעיים מסתכמים ל-2\", והפרוצדורה מחזירה את **כל** שלושת הזוגות. שימו לב שזה כבר לא חישוב ולא בדיקה אלא **חיפוש** — ובכל זאת אותו קוד. עקבו על מקור שלוש התשובות: כל תשובה מתאימה למספר שונה של פעמים שהכלל הרקורסיבי הופעל לפני שהכלל הראשון סגר את הענף — אפס פעמים, פעם אחת, פעמיים. כלומר **מספר האיטרציות הוא בדיוק ההסתעפות בעץ ההוכחה**, וכל עלה מוצלח הוא זוג. שימו לב גם שהחיפוש **מסתיים**: הכלל הרקורסיבי מקלף `s` מהארגומנט השלישי, ואחרי שני קילופים הוא מגיע ל-`0` ואינו מתאים עוד לתבנית `s(Z)`. **מה שכדאי לשנן**: הכריעות כאן אינה מובטחת בכלל — לו הארגומנט השלישי היה גם הוא חופשי (`?- plus(X, Y, Z)`), הפרוצדורה הייתה מחוללת זוגות לנצח. ‏**המצב קובע אם התוכנית עוצרת**, וזו שאלת מבחן קלאסית. **הערה על סדר התשובות**: ‏Prolog מנסה את הכלל הראשון קודם, ולכן הסדר בפועל הוא `X=s(s(0)), Y=0` ← `X=s(0), Y=s(0)` ← `X=0, Y=s(s(0))` — הפוך מהמודפס כאן. קבוצת התשובות זהה; רק הסדר בפלט אינו תואם את Rsel של Prolog."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:13",
+     "type": "prose",
+     "en": "Natural number binary relation - Less than or equal:\n",
+     "hash": "00a1b82c27a02a6a",
+     "he": "יחס בינארי על מספרים טבעיים — קטן או שווה:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:14",
+     "type": "code",
+     "en": "```prolog\n% Signature: le(X,Y)/2\n% Purpose: X is less or equal Y.\nle(0, X) :- natural_number(X).\nle(s(X), s(Z)) :- le(X, Z).\n```\n\n",
+     "hash": "35c23ab78bc005df",
+     "lang": "prolog",
+     "noteHe": "השוואה בלי אופרטור השוואה. הרעיון: ‏`le(X, Y)` מתקיים אם אפשר **לקלף `s` אחד משני הצדדים בו-זמנית** עד ש-`X` מגיע ל-`0`. הכלל השני `le(s(X), s(Z)) :- le(X, Z).` הוא הקילוף המשותף — שימו לב שהוא דורש ש**שני** הארגומנטים יהיו בצורת `s(...)`, כלומר ששניהם גדולים מאפס. מקרה הבסיס `le(0, X) :- natural_number(X).` אומר ש-0 קטן או שווה לכל טבעי. **מדוע זה נכון**: אם `Y < X`, אז `Y` יגיע ל-`0` **לפני** ש-`X` יגיע, והכלל השני ייכשל כי `0` אינו מתאחד עם `s(Z)` — ואין כלל שני שיציל אותו, כי הכלל הראשון דורש `0` דווקא בארגומנט **הראשון**. **הנקודה שכדאי לשנן**: אי-שוויון מבוטא כאן על ידי **מבנה ה-terms** ולא על ידי פרדיקט מובנה, בדיוק כמו החיבור. גם כאן המצבים עובדים: ‏`?- le(s(0), Y)` מייצר את כל הטבעיים שגדולים או שווים ל-1, ‏`?- le(X, s(s(0)))` מייצר את `0`, ‏`s(0)`, ‏`s(s(0))` ועוצר. **טעות נפוצה**: לחשוב שאפשר להשמיט את הקריאה ל-`natural_number(X)` בכלל הראשון. בלעדיה `le(0, X)` הייתה מתקיימת גם עבור `X` שאינו מספר כלל, למשל `le(0, foo)`."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:15",
+     "type": "prose",
+     "en": "Natural numbers multiplication:\n",
+     "hash": "6804efdd8314840f",
+     "he": "כפל מספרים טבעיים:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:16:16",
+     "type": "code",
+     "en": "```prolog\n% Signature: Times(X,Y,Z)/2\n% Purpose: Z = X*Y\ntimes(0, X, 0) :- natural_number(X).\ntimes(s(X), Y, Z) :- times(X, Y, XY), plus(XY, Y, Z).\n```\n\n",
+     "hash": "81a21b025bd7b724",
+     "lang": "prolog",
+     "noteHe": "כפל מוגדר במונחי חיבור, בדיוק כמו ההגדרה האינדוקטיבית הרגילה: ‏`0 * Y = 0`, ו-`(X+1) * Y = X*Y + Y`. שימו לב **איך** הצעד הרקורסיבי מבוטא: `times(s(X), Y, Z) :- times(X, Y, XY), plus(XY, Y, Z).` — שתי מטרות בגוף, המחוברות ב\"וגם\". המשתנה `XY` הוא **תוצאת ביניים**, והוא בדיוק המנגנון שמחליף את קינון הקריאות `plus(times(X,Y), Y)` שהיינו כותבים בשפה פונקציונלית. **זה עיקרון כללי ב-LP שכדאי לשנן: אי אפשר לקנן קריאות לפרדיקטים, ולכן כל תוצאת ביניים מקבלת משתנה משלה ומטרה משלה, והמשתנה המשותף הוא מה שמחבר ביניהן.** שימו לב גם לסדר: ‏`times(X, Y, XY)` חייב לבוא **לפני** `plus(XY, Y, Z)`, אחרת `plus` הייתה נקראת עם `XY` לא-קשור — היא עדיין הייתה עובדת (היא יחס!), אבל היא הייתה מייצרת אינסוף אפשרויות ומאטה את החיפוש דרמטית. **שגיאת מקור**: שורת החתימה כותבת `Times(X,Y,Z)/2` — באות גדולה (בעוד שהפרדיקט המוגדר הוא `times` באות קטנה, ובאות גדולה זה היה נקרא כמשתנה) ועם מקומיות 2 במקום 3."
+    }
+   ],
+   "headingHe": "קידוד מספרי כנסייה (Church Numerals)"
+  },
+  {
+   "id": "cm/5.2LogicProgramming:17",
+   "depth": 3,
+   "headingEn": "Lists",
+   "raw": "### Lists\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.2LogicProgramming:17:0",
+     "type": "prose",
+     "en": "#### Syntax for Lists\n\n",
+     "hash": "78ce6cc8c89a8c44",
+     "he": "#### תחביר לרשימות"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:1",
+     "type": "prose",
+     "en": "Lists are defined inductively - using a special infix operator (`|`) and a special notation `[a, b, c]` as syntactic sugar for nested `cons/2` terms:\n",
+     "hash": "efa4658b7f8aa766",
+     "he": "רשימות מוגדרות באופן אינדוקטיבי — באמצעות אופרטור אינפיקסי מיוחד (`|`) וסימון מיוחד `[a, b, c]` שהוא סוכר תחבירי ל-terms מקוננים של `cons/2`:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:2",
+     "type": "list",
+     "en": "* `[]` is the empty list.\n* `[Head | Tail]` is syntactic sugar for the composite term `cons(Head, Tail)`, where Tail is a list term.\n\n",
+     "hash": "8643769b0229aec4",
+     "he": "* `[]` היא הרשימה הריקה.\n* `[Head | Tail]` הוא סוכר תחבירי ל-term המורכב `cons(Head, Tail)`, כאשר Tail הוא term של רשימה."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:3",
+     "type": "prose",
+     "en": "Simple syntax for bounded length lists:\n",
+     "hash": "8814f90df7b6d991",
+     "he": "תחביר פשוט לרשימות באורך חסום:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:4",
+     "type": "list",
+     "en": "* `[a | []] = [a]`\n* `[a | [b | []]] = [a,b]`\n\n",
+     "hash": "999283beec8e1596",
+     "he": "* `[a | []] = [a]`\n* `[a | [b | []]] = [a,b]`"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:5",
+     "type": "prose",
+     "en": "#### Membership Predicate\n\n",
+     "hash": "fba356d6b9ff1407",
+     "he": "#### פרדיקט השייכות"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:6",
+     "type": "code",
+     "en": "```prolog\nlist([]).\nlist([X | Xs]) :- list(Xs).\n```\n\n",
+     "hash": "76cfe4667fd3bcc9",
+     "lang": "prolog",
+     "noteHe": "פרדיקט הטיפוס של רשימות, ושוב באותה תבנית משני הסעיפים הקודמים: עובדה למקרה הבסיס (`[]` היא רשימה) וכלל לצעד האינדוקטיבי (`[X | Xs]` היא רשימה אם `Xs` היא רשימה). **הרעיון החשוב כאן הוא שאין כאן שום דבר חדש**: ‏`[X | Xs]` הוא רק כתיב אחר ל-`cons(X, Xs)`, כלומר term מורכב רגיל לגמרי עם פונקטור `cons` ומקומיות 2. השוו לשורה `binary_tree(tree(Element, Left, Right)) :- ...` — אותו מבנה בדיוק, רק שהפונקטור הוא `cons` במקום `tree` ויש רק תת-מבנה אחד לבדוק במקום שניים. **מסקנה שכדאי לשנן: רשימות ב-Prolog אינן טיפוס מובנה של השפה** אלא קונבנציה על terms מורכבים, בדיוק כמו שרשימות ב-Scheme הן קונבנציה על זוגות (השוו ל-2.1). כל מה שהשפה נותנת הוא **סוכר תחבירי** — ‏`|` ו-`[a, b, c]` — שחוסך את הקינון. שימו לב ש-`X` בכלל השני אינו נבדק כלל, ולכן רשימות ב-LP הן הטרוגניות: ‏`[a, tree(1, void, void), s(0)]` היא רשימה תקינה לחלוטין. (גם כאן `X` הוא משתנה singleton שהיה ראוי להיכתב `_`.)"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:7",
+     "type": "prose",
+     "en": "#### List Membership\n",
+     "hash": "fda8ceee6bda9ffb",
+     "he": "#### שייכות לרשימה"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:8",
+     "type": "code",
+     "en": "```prolog\n% Signature: member(X, List)/2\n% Purpose: X is a member of List.\nmember(X, [X|Xs]).\nmember(X, [Y|Ys]) :- member(X, Ys).\n\n?- member(a, [b, c, a, d]). % checks membership\n?- member(X, [b, c, a, d]). % takes an element from a list\n?- member(b, Z). % generates a list containing b\n```\n\n",
+     "hash": "958a6760e68dd2ed",
+     "lang": "prolog",
+     "noteHe": "‏`member` היא המקבילה ל-`tree_member` עבור רשימות, ובנויה בדיוק כמוה: העובדה `member(X, [X|Xs]).` בודקת \"‏`X` הוא הראש\" **דרך שכפול שם המשתנה בראש הכלל**, והכלל השני ממשיך לזנב. שוב אין מקרה ל-`[]`, ולכן חיפוש ברשימה ריקה נכשל — כנדרש. **שלוש השאילתות בתחתית הן שלושת המצבים של אותו פרדיקט, ושווה להכיר את שלושתם**: (1) ‏`member(a, [b, c, a, d])` — שני הארגומנטים קשורים, **בדיקה**: מחזיר `true`. (2) ‏`member(X, [b, c, a, d])` — האיבר חופשי, **שליפה**: מחזיר `X=b`, ‏`X=c`, ‏`X=a`, ‏`X=d` בזה אחר זה, כלומר הפרדיקט הופך למחולל שעובר על הרשימה. (3) ‏`member(b, Z)` — הרשימה חופשית, **חילול**: מחזיר `Z=[b|_]`, ‏`Z=[_,b|_]`, ‏`Z=[_,_,b|_]`, ... לנצח. שימו לב שהפלט של (3) מכיל **חורים לא-קשורים**; זו תבנית, לא רשימה קונקרטית. **טעות נפוצה**: לחשוב ש-(2) מחזיר את הרשימה. הוא מחזיר **איבר אחד בכל פעם**, ומי שרוצה את כולם ביחד יצטרך `findall`. **כדאי לשנן**: פרדיקט אחד + שלושה מצבים = שלוש פונקציות שונות בשפה פונקציונלית (`contains?`, איטרטור, ומחולל)."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:9",
+     "type": "prose",
+     "en": "#### List Concatenation\n",
+     "hash": "f5f9596ba6c9fd93",
+     "he": "#### שרשור רשימות"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:10",
+     "type": "code",
+     "en": "```prolog\n% Signature: append(List1, List2, List3)/3\n% Purpose: List3 is the concatenation of List1 and List2.\nappend([], Xs, Xs).\nappend([X | Xs], Y, [X | Zs]) :- append(Xs, Y, Zs).\n\n?- append([a,b], [c], X).        % concatenation of two lists\n?- append(Xs, [a,d], [b,c,a,d]). % finds a difference between lists\n?- append(Xs, Ys, [a,b,c,d]).    % divides a list into two lists\n```\n\n",
+     "hash": "e21e2ba98195b32f",
+     "lang": "prolog",
+     "noteHe": "**‏`append/3` היא הפרוצדורה החשובה ביותר בכל פרק 5 — כדאי לשנן אותה מילה במילה.** שתי שורות: העובדה `append([], Xs, Xs).` אומרת ששרשור הרשימה הריקה עם `Xs` נותן `Xs` — שימו לב ש-`Xs` מופיע **פעמיים** בראש, וזו כל ה\"החזרה\" של הערך. הכלל `append([X | Xs], Y, [X | Zs]) :- append(Xs, Y, Zs).` אומר: אם הרשימה הראשונה מתחילה ב-`X`, אז גם התוצאה מתחילה ב-`X`, והזנבות נמצאים באותו יחס. **הנקודה הקריטית**: ‏`X` מופיע גם בארגומנט הראשון וגם בשלישי **באותו כלל**, כלומר ה\"בנייה\" של הפלט מתרחשת באוניפיקציה של הראש, לפני שהקריאה הרקורסיבית בכלל התחילה. הפלט נבנה **מלמעלה למטה כשלד עם חור** (`[X | Zs]` עם `Zs` לא-קשור), והרקורסיה ממלאת את החור. השוו לדוגמת האוניפיקציה `List=[1 | Zs]` שראינו למעלה — עכשיו ברור מאין היא באה. **שלוש השאילתות הן שלושה מצבים, וזו הסיבה ש-`append` היא כוכבת העמוד**: (1) שתי הרשימות הראשונות קשורות — שרשור רגיל, `X=[a,b,c]`. (2) הראשונה חופשית והשאר קשורות — **חיסור רשימות**, `Xs=[b,c]`; זהו \"מה צריך לשים לפני `[a,d]` כדי לקבל `[b,c,a,d]`\". (3) שתי הראשונות חופשיות — **כל הדרכים לחלק את `[a,b,c,d]` לשתי רשימות**: חמש תשובות, מ-`Xs=[], Ys=[a,b,c,d]` ועד `Xs=[a,b,c,d], Ys=[]`. המצב השלישי הוא זה שהופך את `append` לכלי החיפוש הכללי שהסעיף הבא בונה עליו."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:11",
+     "type": "prose",
+     "en": "#### List Selection using append\n",
+     "hash": "be0663d002ac9bad",
+     "he": "#### בחירה מרשימה באמצעות append"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:12",
+     "type": "code",
+     "en": "```prolog\n% (a) List prefix and suffix:\nprefix(Xs, Ys) :- append(Xs, Zs, Ys).\nsuffix(Xs, Ys) :- append(Zs, Xs, Ys).\n\n% (b) Redefine member:\nmember(X, Ys) :- append(Zs, [X | Xs], Ys).\n\n% (c) Adjacent list elements:\nadjacent(X, Y, Zs) :- append(Ws, [X, Y | Ys], Zs).\n\n% (d) Last element of a list:\nlast(X, Ys) :- append(Xs, [X], Ys).\n```\n\n",
+     "hash": "ad58eb7d6bb3517e",
+     "lang": "prolog",
+     "noteHe": "**זה הבלוק שמראה כמה חזק המצב ההפוך של `append` — ארבע פרוצדורות שונות, כל אחת בשורה אחת, כולן קריאה אחת ל-`append` ואף אחת מהן אינה רקורסיבית.** הרעיון המשותף: מנסחים את השאלה כ\"האם קיים פירוק של הרשימה לצורה כזו וכזו\", ומשאירים ל-`append` לחפש את הפירוק. (א) ‏`prefix(Xs, Ys) :- append(Xs, Zs, Ys).` — ‏`Xs` היא רישא של `Ys` אם קיימת **איזושהי** ‏`Zs` שמשלימה אותה; שימו לב ש-`Zs` אינו מופיע בראש כלל, כלומר הוא משתנה קיומי טהור, \"לא מעניין אותי מה הוא, רק שיהיה\". ‏`suffix` הוא בדיוק אותו דבר עם הארגומנטים מוחלפים. (ב) הגדרה מחדש של `member`: ‏`X` הוא איבר אם אפשר לחתוך את הרשימה לשני חלקים כך ש-`X` הוא **הראש של החלק השני**. השוו להגדרה הרקורסיבית למעלה — אותה משמעות, ניסוח הפוך לגמרי: במקום \"לך צעד-צעד עד שתמצא\", \"קיים פירוק שבו הוא נמצא בדיוק כאן\". (ג) ‏`adjacent(X, Y, Zs)` — ‏`X` ו-`Y` צמודים אם קיים פירוק שבו הם **שני האיברים הראשונים** של החלק השני; שימו לב ל-`[X, Y | Ys]`, שהוא סוכר ל-`cons(X, cons(Y, Ys))`, כלומר \"שני איברים ואז שאר הרשימה\". (ד) ‏`last(X, Ys)` — ‏`X` הוא האחרון אם החלק השני של הפירוק הוא **בדיוק `[X]`**, רשימה באורך 1. **הנקודה שכדאי לשנן**: זהו סגנון התכנות הדקלרטיבי במיטבו — מתארים **מה** מאפיין את התשובה, ומנוע החיפוש מוצא אותה. **הערה על ביצועים**: כל אחת מהן דורשת מ-`append` לעבור על כל הפירוקים עד שאחד מתאים, ולכן `last` כאן היא O(n) עם קבוע גדול; הגרסה הרקורסיבית הישירה יעילה יותר. **דקלרטיביות יפה אינה תמיד יעילה** — בדיוק ההבחנה מ-5.1."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:13",
+     "type": "prose",
+     "en": "#### List Reverse\n",
+     "hash": "da18173b55b40097",
+     "he": "#### היפוך רשימה"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:14",
+     "type": "code",
+     "en": "```prolog\n% (a) A recursive version:\n% Signature: reverse(List1, List2)/2\n% Purpose: List2 is the reverse of List1.\nreverse([], []).\nreverse([H | T], R) :- reverse(T, S), append(S, [H], R).\n\n?- reverse([a, b, c, d], R).\nR=[d, c, b, a]\n\n% But, what about the other mode of this predicate:\n?- reverse(R, [a, b, c, d]).\n```\n\n",
+     "hash": "ccdd00afd60c5bdc",
+     "lang": "prolog",
+     "noteHe": "‏`reverse` הרקורסיבי הקלאסי: הרשימה הריקה היא ההיפוך של עצמה, ולהיפוך של `[H | T]` הופכים את `T` ומוסיפים את `H` **בסוף** באמצעות `append(S, [H], R)`. במצב הרגיל (הרשימה הראשונה קשורה) זה עובד ומחזיר `R=[d, c, b, a]`. שימו לב לעלות: כל צעד רקורסיבי קורא ל-`append` שעוברת על כל הרשימה שנבנתה עד כה, ולכן זהו היפוך ריבועי — בדיוק אותה בעיה של `reverse` הנאיבי ב-Scheme, שנפתרת שם עם צובר (accumulator). **אבל השורה האחרונה היא הנקודה של כל הבלוק, והיא מובילה ישירות לפסקה הבאה**: מה קורה במצב ההפוך, ‏`?- reverse(R, [a, b, c, d])`? הפעם הארגומנט **הראשון** חופשי. הכלל הרקורסיבי מנסה לפרק את `R` ל-`[H | T]` — אבל `R` אינו קשור, ולכן `H` ו-`T` נשארים חופשיים לגמרי, והקריאה הרקורסיבית `reverse(T, S)` מתבצעת שוב עם שני ארגומנטים חופשיים. **המטרה השמאלית ביותר היא הקריאה הרקורסיבית עצמה, ואין שום דבר שיצמצם אותה** — זו בדיוק המחלה של `ancestor2` מ-5.1, בתחפושת. הפרוצדורה תרד לאינסוף במקום לענות. **המסקנה שכדאי לשנן: מודוס דו-כיווני אינו מובטח.** ‏`append` עובדת בכל המצבים, אבל `reverse` שנכתבה מעליה — לא, כי סדר המטרות בגוף מתאים רק לכיוון אחד."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:15",
+     "type": "prose",
+     "en": "Starting to build the proof tree, we see that the second query is\n",
+     "hash": "5b8852e81bd3eff5",
+     "he": "כשמתחילים לבנות את עץ ההוכחה, אנחנו רואים שהשאילתה השנייה היא"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:16",
+     "type": "code",
+     "en": "```prolog\n?- reverse(T1, S1), append(S1, [H1], [a, b, c, d]).\n```\n",
+     "hash": "20321ea352c00143",
+     "lang": "prolog",
+     "noteHe": "זו השאילתה שמתקבלת אחרי הפעלה **אחת** של הכלל הרקורסיבי על `?- reverse(R, [a, b, c, d])`. עקבו איך היא נוצרה: הראש `reverse([H1 | T1], R1)` אוחד עם המטרה, כלומר `R = [H1 | T1]` ו-`R1 = [a, b, c, d]`; הגוף `reverse(T, S), append(S, [H], R)` הוחלף במקום המטרה, וההצבה הוחלה על כולו (זהו צעד 1 של `apply-rules` מ-5.1). ‏**התוצאה היא בדיוק המצב הבעייתי**: המטרה השמאלית `reverse(T1, S1)` היא שוב `reverse` עם **שני** ארגומנטים לא-קשורים. ‏Gsel של Prolog תבחר בה, ותפעיל עליה שוב את אותו כלל, וכן הלאה לנצח — הרקורסיה יורדת בלי שהיא נוגעת ברשימת הקלט `[a, b, c, d]` אפילו פעם אחת. **שימו לב היכן נמצא המידע שיכול היה לעצור את זה**: במטרה **השנייה**, ‏`append(S1, [H1], [a, b, c, d])`, שהארגומנט השלישי שלה קשור לחלוטין. אילו היא הייתה נבחרת ראשונה, היא הייתה מצמצמת מיד את `S1` ל-`[a, b, c]` ואת `H1` ל-`d`, והכל היה מתכנס. **וזה בדיוק מה שהפסקה הבאה עושה — היא רק מחליפה את הסדר של שתי המטרות בגוף.** השוו ל-`ancestor` מול `ancestor2` ב-5.1: אותה תופעה בדיוק, ואותו תיקון."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:17",
+     "type": "prose",
+     "en": "This query fails on the first rule, and needs the second. The second rule is applied four times, until four elements are unified with the four elements of the input list. We can try reversing the rule body:\n",
+     "hash": "6564006a11e2f035",
+     "he": "השאילתה הזו נכשלת על הכלל הראשון, וזקוקה לשני. הכלל השני מופעל ארבע פעמים, עד שארבעה איברים מאוחדים עם ארבעת האיברים של רשימת הקלט. אנחנו יכולים לנסות להפוך את סדר הגוף של הכלל:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:18",
+     "type": "code",
+     "en": "```prolog\nreverse([H | T], R) :- append(S, [H], R), reverse(T, S).\n```\n",
+     "hash": "e0985298de618f9d",
+     "lang": "prolog",
+     "noteHe": "**התיקון, והוא החלפת סדר של שתי מטרות ותו לא.** ‏`append(S, [H], R)` עברה לפני `reverse(T, S)`. במצב ההפוך (`?- reverse(R, [a,b,c,d])`) ‏`R` קשור, ולכן `append` נקראת עם הארגומנט השלישי קשור — המצב שראינו קודם כ\"חיסור רשימות\" — והיא מצמצמת מיד את `S` ל-`[a, b, c]` ואת `H` ל-`d`. רק אז `reverse(T, S)` נקראת, וכבר עם ארגומנט קשור. הרקורסיה מתכנסת. **המחיר**: בכיוון המקורי (`?- reverse([a,b,c,d], R)`), ‏`R` הוא זה שאינו קשור, ולכן עכשיו `append(S, [H], R)` היא זו שנקראת בלי מידע ומייצרת פירוקים על עיוור — הביצועים מתדרדרים. **זו הנקודה של כל הבלוק, וכדאי לשנן אותה בדיוק בניסוח הזה: אין סדר גוף שהוא הטוב ביותר לכל המצבים.** הסדר הנכון תלוי באילו ארגומנטים מגיעים קשורים, ומכיוון שפרדיקט אחד משמש למספר מצבים, כל בחירה היא פשרה. זה ההבדל היסודי מהתכנות הפונקציונלי, שבו כיוון החישוב ידוע מראש."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:19",
+     "type": "prose",
+     "en": "The new version gives a good performance on the last direction, but poor performance on the former direction.\n\n",
+     "hash": "ead15613b607d74e",
+     "he": "הגרסה החדשה נותנת ביצועים טובים בכיוון האחרון, אך ביצועים גרועים בכיוון הראשון."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:20",
+     "type": "prose",
+     "en": "Conclusion: Rule body ordering impacts the performance in various directions.\n\n",
+     "hash": "544941a07604a150",
+     "he": "מסקנה: סדר הגוף של הכלל משפיע על הביצועים בכיוונים השונים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:21",
+     "type": "prose",
+     "en": "What about reversing rule ordering? In the reversed direction - an infinite loop.\n\n",
+     "hash": "f4a4b4bd66a9f5b7",
+     "he": "ומה לגבי היפוך סדר הכללים? בכיוון ההפוך — לולאה אינסופית."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:22",
+     "type": "prose",
+     "en": "Typical error: Wrong \"assembly\" of resulting lists:\n",
+     "hash": "24afb2cf5f14afc8",
+     "he": "טעות טיפוסית: \"הרכבה\" שגויה של הרשימות המתקבלות:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:23",
+     "type": "code",
+     "en": "```\nwrong_reverse([H | T], R):- wrong_reverse(T, S), append(S, H, R).\n```\n\n",
+     "hash": "c38e6f3efa93144f",
+     "noteHe": "**הטעות היא תו אחד: ‏`append(S, H, R)` במקום `append(S, [H], R)`.** ‏`H` הוא **איבר**, לא רשימה — הוא הראש שקילפנו מהרשימה בראש הכלל. הארגומנט השני של `append` חייב להיות רשימה, ולכן צריך לעטוף אותו: `[H]`, כלומר רשימה בת איבר אחד. עקבו על מה שקורה בפועל עם `wrong_reverse([a], R)`: הרקורסיה נותנת `wrong_reverse([], S)` עם `S = []`, ואז המטרה היא `append([], a, R)`. העובדה `append([], Xs, Xs)` מתאחדת איתה עם `Xs = a`, ולכן `R = a` — **קבוע, לא רשימה**. אין שגיאה, אין הודעה: השאילתה פשוט מצליחה ומחזירה זבל. עבור רשימה ארוכה יותר `append([b], a, R)` ייתן `R = [b | a]`, שהוא term מורכב תקין תחבירית אבל **אינו רשימה** — הזנב שלו אינו `[]` ולא `cons`. **זו הנקודה שכדאי לשנן**: ל-Prolog אין מערכת טיפוסים שתתפוס את זה. אין כאן `type error`; יש terms חוקיים שאינם מייצגים את מה שהתכוונו. השוו ל-3.1: בדיוק סוג השגיאה שבודק טיפוסים היה תופס לפני ההרצה, וכאן היא מתגלה רק כשמסתכלים בפלט. **בדיקה מהירה שכדאי לעשות תמיד**: כל ארגומנט של `append` חייב להיות רשימה — אם משהו שם הוא איבר, עוטפים אותו בסוגריים מרובעים."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:24",
+     "type": "prose",
+     "en": "(b) An iterative version:\n",
+     "hash": "71132bf4579bb0c0",
+     "he": "(ב) גרסה איטרטיבית:"
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:25",
+     "type": "code",
+     "en": "```prolog\n% Signature: reverse(List1, List2)/2\n% Purpose: List2 is the reverse of List1. This version uses an additional\n% reverse helper procedure, that uses an accumulator.\nreverse(Xs, Ys):- reverse_help(Xs,[],Ys).\nreverse_help([X | Xs], Acc, Ys) :- reverse_help(Xs, [X | Acc], Ys). \nreverse_help([], Ys, Ys).\n\n?- reverse([a, b, c, d], R).\nR=[d, c, b, a]\n```\n\n",
+     "hash": "07a366e982b99f9f",
+     "lang": "prolog",
+     "noteHe": "**הגרסה עם צובר (accumulator) — בדיוק אותו תרגיל שעשינו ב-Scheme, בשפה אחרת.** ‏`reverse` הופכת לעטיפה שכל תפקידה לאתחל את הצובר ל-`[]`, וכל העבודה עוברת ל-`reverse_help/3`. הצעד: `reverse_help([X | Xs], Acc, Ys) :- reverse_help(Xs, [X | Acc], Ys).` — מקלפים את הראש `X` מהרשימה ו**דוחפים אותו לחזית הצובר** באמצעות `[X | Acc]`. מכיוון שכל איבר נדחף לחזית, הסדר מתהפך מעצמו. תנאי העצירה `reverse_help([], Ys, Ys).` הוא היפה שבשורות: כשהרשימה התרוקנה, **הצובר הוא התשובה** — וזה מבוטא, כמו תמיד ב-LP, על ידי כך שאותו שם משתנה `Ys` מופיע פעמיים בראש. **שימו לב לשני דברים חשובים**: (1) אין כאן שום קריאה ל-`append`, ולכן העלות היא לינארית ולא ריבועית — מעבר אחד על הרשימה, פעולת `cons` אחת לכל איבר. השוו ל-4.4, שכל עניינו היה בדיוק ההמרה הזו של רקורסיה לאיטרציה. (2) הקריאה הרקורסיבית היא המטרה **היחידה** בגוף, כלומר זו רקורסיית זנב — אין המשך שצריך לחזור אליו, ולכן זהו \"ענף בטוח\" במונחי 5.1. **הערה על סדר הכללים**: כאן מקרה הבסיס נכתב **אחרון**, ובגרסה הרקורסיבית למעלה הוא נכתב ראשון. עבור השאילתה בכיוון הרגיל זה לא משנה — שני הכללים אינם חופפים, כי `[]` ו-`[X | Xs]` לא יכולים להתאחד עם אותה רשימה. **טעות נפוצה**: לנסות להריץ את הגרסה הזו במצב ההפוך (`?- reverse(R, [a,b,c,d])`) ולהתפלא שהיא נתקעת — הבעיה מהבלוקים הקודמים לא נעלמה, היא רק עברה ל-`reverse_help`."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:26",
+     "type": "prose",
+     "en": "The length of the single success path is linear in the list length, while in the former version it is quadratic.\n\n",
+     "hash": "fe2177192f5fb9b7",
+     "he": "אורך מסלול ההצלחה היחיד הוא לינארי באורך הרשימה, בעוד שבגרסה הקודמת הוא ריבועי."
+    },
+    {
+     "id": "cm/5.2LogicProgramming:17:27",
+     "type": "prose",
+     "en": "The reverse_help procedure is a helper procedure that should not reside in the global name space. Unfortunately, Logic Programming does not support nesting of name spaces (like Scheme with `letrec`). All names reside in the global space.\n\n",
+     "hash": "3cdb5770537dc457",
+     "he": "הפרוצדורה reverse_help היא פרוצדורת עזר שלא אמורה לשכון במרחב השמות הגלובלי. לרוע המזל, תכנות לוגי אינו תומך בקינון של מרחבי שמות (כמו Scheme עם `letrec`). כל השמות שוכנים במרחב הגלובלי."
+    }
+   ],
+   "headingHe": "רשימות"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "לפניכם ארבע בעיות אוניפיקציה. באיזו מהן האוניפיקציה נכשלת **בגלל בדיקת ההיקרות (occurs check)** דווקא?",
+   "options": [
+    "‏`unify(h(X), h(k(X)))`",
+    "‏`unify(p(X, X), p(a, b))`",
+    "‏`unify(f(X), f(g(a)))`",
+    "‏`unify(q(X, Y), q(Y, X))`"
+   ],
+   "correct": 0,
+   "explanationHe": "**התשובה הנכונה היא הראשונה.** הפונקטור `h` תואם, ולכן מפרקים ומקבלים את המשוואה `X = k(X)` — ‏`X` צריך להיקשר ל-term שהוא עצמו מופיע בתוכו. לפי ההגדרה, הצבה מחייבת `X ∉ s(X)`, ולכן זה נפסל; אינטואיטיבית, הפעלה חוזרת הייתה נותנת `k(k(k(...)))` לנצח. **מדוע השנייה אינה occurs check**: היא אכן נכשלת, אבל מסיבה אחרת לגמרי — ‏`X` מופיע פעמיים בצד השמאלי, ולכן הוא נדרש להיות גם `a` וגם `b`. אחרי הפעלת ההצבה מקבלים `a = b`, שני קבועים שונים, כלומר כישלון **מבני**. סוג הכישלון הזה קיים כבר ב-RLP; רק המקרה הראשון הוא חדש ב-LP. **מדוע השלישית מצליחה**: ‏`X = g(a)` — ‏`X` **אינו** מופיע בתוך `g(a)`, ולכן זו הצבה חוקית לחלוטין. **מדוע הרביעית מצליחה**: מקבלים `X = Y` ואז `Y = X`; אחרי הפעלת ההצבה הראשונה המשוואה השנייה הופכת ל-`Y = Y`, שהאלגוריתם מדלג עליה. התוצאה `{X = Y}`, ושני המשתנים פשוט מזוהים זה עם זה. **טעות נפוצה**: לחשוב ש-`unify(q(X, Y), q(Y, X))` נכשלת בגלל המעגליות הלכאורה — אין כאן שום קינון, ולכן אין מה שייקרה בתוך מה."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "חשבו את ה-mgu של שתי הנוסחאות האטומיות הבאות, או כתבו FAIL:\n\n```prolog\np(X, f(Y), b)\np(g(Z), f(a), Z)\n```\n\nהראו את ההצבה המצטברת בכל צעד.",
+   "answerHe": "‏`mgu = {X=g(b), Y=a, Z=b}`\n\n**המהלך:**\n\n| צעד | המשוואה שמטופלת | ‏`sub` אחרי הצעד |\n|---|---|---|\n| 0 | פירוק `p/3`: `{X=g(Z), f(Y)=f(a), b=Z}` | `{}` |\n| 1 | `X = g(Z)` — צד שמאל משתנה | `{X=g(Z)}` |\n| 2 | `f(Y) = f(a)` — אותו פונקטור `f/1` → מתפרק ל-`Y=a` | `{X=g(Z), Y=a}` |\n| 3 | `b = Z` — צד ימין משתנה → `Z=b`; ההרכבה מחליפה את `Z` **גם בתוך `g(Z)`** | `{X=g(b), Y=a, Z=b}` |\n\nהתשובה הסופית: `{X=g(b), Y=a, Z=b}`.",
+   "explanationHe": "‏**מה נבדק כאן**: (1) הפירוק החוזר — קודם לפי הפרדיקט `p/3`, ואחר כך שוב לפי הפונקטור `f/1` בתוך אחת המשוואות. זה מה שהיה חסר ב-RLP. (2) **הצעד הקריטי הוא 3**: ההרכבה `{X=g(Z)} ○ {Z=b}` חייבת לחדור **לתוך** ה-term `g(Z)` ולתת `X=g(b)`. מי שיסתפק ב-`{X=g(Z), Y=a, Z=b}` יקבל הצבה שאינה אידמפוטנטית — עדיין מופיע בה `Z` בצד ימין — ולכן אינה mgu תקין. (3) שימו לב ש-`b = Z` נכתב עם המשתנה בצד **ימין**; זה תקין, האלגוריתם בודק אם אחד משני הצדדים הוא משתנה. (4) בדיקת ההיקרות **עוברת** כאן: ‏`Z` אינו מופיע בתוך `b`."
+  },
+  {
+   "id": "ex3",
+   "type": "mcq",
+   "questionHe": "בנוסחה האטומית `course(ppl, time(monday, 12, 14), location(building34, 201))`, איזה סיווג נכון?",
+   "options": [
+    "‏`course` הוא סמל פרדיקט; `time` ו-`location` הם פונקטורים; `ppl`, `monday`, `building34` הם קבועים",
+    "‏`course`, `time` ו-`location` הם כולם סמלי פרדיקטים",
+    "‏`course` הוא פונקטור; `time` ו-`location` הם סמלי פרדיקטים מקוננים",
+    "‏`course` הוא סמל פרדיקט; `time` ו-`location` הם קבועים, כי אין להם מקומיות מוגדרת"
+   ],
+   "correct": 0,
+   "explanationHe": "**התשובה הנכונה היא הראשונה.** ‏`course` נמצא **בעמדה החיצונית** — הוא זה שיכול להופיע כמטרה או כראש כלל — ולכן הוא סמל פרדיקט. ‏`time` ו-`location` נמצאים בעמדת **ארגומנט**, ולכן הם פונקטורים ומה שהם בונים הוא term מורכב. **הנקודה המרכזית**: התחביר של term מורכב ושל נוסחה אטומית **זהה לחלוטין** — ‏`f(a, b)` יכול להיות כל אחד מהם. מה שקובע הוא **ההקשר**, כלומר המיקום בפסוק. **מדוע השנייה שגויה**: פרדיקטים אינם ניתנים לקינון; רק terms כן. זו ההגבלה המרכזית של השפה, ולולא היא הייתה קיימת היינו מקבלים לוגיקה מסדר גבוה. **מדוע השלישית שגויה**: היא הופכת את הכיוון — העמדה החיצונית היא של הפרדיקט, לא של הפונקטור. **מדוע הרביעית שגויה**: המקומיות של פונקטור אינה מוצהרת בשום מקום אלא **נגזרת ממספר הארגומנטים בפועל** — ‏`time` הוא `time/3` ו-`location` הוא `location/2`. סמל בלי סוגריים כלל, כמו `ppl` או `monday`, הוא קבוע."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "בהינתן ההגדרה\n\n```prolog\nappend([], Xs, Xs).\nappend([X | Xs], Y, [X | Zs]) :- append(Xs, Y, Zs).\n```\n\nמה יחזיר Prolog על השאילתה `?- append(Xs, Ys, [a, b, c]).` — כמה תשובות, ובאיזה סדר?",
+   "answerHe": "**ארבע תשובות**, בסדר הזה:\n\n```prolog\nXs = [],        Ys = [a, b, c];\nXs = [a],       Ys = [b, c];\nXs = [a, b],    Ys = [c];\nXs = [a, b, c], Ys = [];\nfalse\n```\n\n**מדוע דווקא הסדר הזה**: הכלל הראשון (העובדה) נבחר תמיד ראשון על ידי Rsel של Prolog, והוא נותן מיד את הפירוק `Xs = []`. רק כשמבקשים תשובה נוספת נכנס הכלל השני, שמקלף איבר אחד לתוך `Xs` ומזמן את `append` על השארית — כל צלילה נוספת מעבירה איבר אחד מ-`Ys` ל-`Xs`. אחרי ארבעה פירוקים הרשימה השלישית מתרוקנת, הכלל השני אינו מתאים עוד (`[]` אינו מתאחד עם `[X | Zs]`), והחיפוש נגמר ב-`false`.\n\n**באופן כללי**: לרשימה באורך `n` יש `n+1` פירוקים לשתי רשימות, וזה בדיוק מספר התשובות.",
+   "explanationHe": "‏**מה נבדק כאן**: (1) שהמצב שבו **שני** הארגומנטים הראשונים חופשיים הופך את `append` ממשרשרת ל**מחוללת כל הפירוקים** — זה הבסיס לכל ההגדרות בסעיף \"בחירה מרשימה באמצעות append\". (2) שסדר התשובות נקבע על ידי סדר הכללים בתוכנית, ולא באופן שרירותי. (3) הספירה `n+1` ולא `n`, כי הפירוקים הריקים משני הקצוות נספרים גם הם. **טעות נפוצה**: לענות שלוש תשובות ולשכוח את `Xs = []` או את `Ys = []`. **טעות נפוצה שנייה**: להפוך את הסדר — מי שחושב שהרקורסיה קודמת לעובדה יתחיל מ-`Xs = [a, b, c]`."
+  },
+  {
+   "id": "ex5",
+   "type": "open",
+   "questionHe": "נתונה ההגדרה\n\n```prolog\nreverse([], []).\nreverse([H | T], R) :- reverse(T, S), append(S, [H], R).\n```\n\nהשאילתה `?- reverse([a,b,c,d], R)` עובדת, אבל `?- reverse(R, [a,b,c,d])` נכנסת ללולאה אינסופית. הסבירו מדוע, והסבירו מדוע החלפת סדר שתי המטרות בגוף פותרת את הבעיה — ומה המחיר.",
+   "answerHe": "**מדוע הכיוון ההפוך נתקע.** ‏Gsel של Prolog בוחרת תמיד את המטרה השמאלית ביותר, כאן `reverse(T, S)`. בשאילתה `?- reverse(R, [a,b,c,d])` הארגומנט הראשון הוא משתנה חופשי, ולכן כשראש הכלל `reverse([H | T], R)` מתאחד עם המטרה מקבלים רק `R = [H1 | T1]` — ‏`H1` ו-`T1` **שניהם נשארים חופשיים**. השאילתה הבאה היא\n\n```prolog\n?- reverse(T1, S1), append(S1, [H1], [a, b, c, d]).\n```\n\nוהמטרה השמאלית `reverse(T1, S1)` היא שוב `reverse` עם שני ארגומנטים לא-קשורים — בדיוק המצב שהתחלנו ממנו. אין שום דבר שמצמצם, והרקורסיה יורדת לנצח מבלי לגעת ברשימת הקלט אפילו פעם אחת. זהו **בדיוק** אותו כשל של `ancestor2` מ-5.1: משמעות דקלרטיבית תקינה, התנהגות תפעולית אינסופית, בגלל סדר המטרות.\n\n**מדוע החלפת הסדר עוזרת.** בגרסה\n\n```prolog\nreverse([H | T], R) :- append(S, [H], R), reverse(T, S).\n```\n\nהמטרה השמאלית היא `append(S, [H], R)`. בכיוון ההפוך `R` **כן** קשור (`R = [a,b,c,d]`), ולכן זהו המצב של \"חיסור רשימות\": ‏`append` מצמצמת מיד את `S` ל-`[a,b,c]` ואת `H` ל-`d`. רק אחר כך נקראת `reverse(T, S)`, וכבר עם ארגומנט שני קשור. הרקורסיה מתכנסת.\n\n**המחיר.** בכיוון המקורי `?- reverse([a,b,c,d], R)` דווקא `R` הוא הלא-קשור, ולכן עכשיו `append(S, [H], R)` היא זו שנקראת בלי מידע ומייצרת פירוקים על עיוור, עד שהקריאה ל-`reverse` שאחריה פוסלת אותם. התוצאה: הכיוון שעבד יפה הופך לאיטי.\n\n**המסקנה**: **אין סדר גוף שהוא הטוב ביותר לכל המצבים.** בשפה פונקציונלית כיוון החישוב ידוע מראש ולכן השאלה לא מתעוררת; ב-LP אותו פרדיקט משמש למספר מצבים, וכל סדר הוא פשרה. הפתרון הנקי הוא הגרסה עם הצובר, שהיא לינארית — אך גם היא אינה פותרת את הכיוון ההפוך.",
+   "explanationHe": "תשובה מלאה חייבת: (1) לזהות שהמטרה השמאלית היא הקריאה הרקורסיבית ושהיא מגיעה עם שני ארגומנטים לא-קשורים; (2) להראות את השאילתה שנוצרת אחרי הפעלה אחת של הכלל, ולהצביע על כך שהיא זהה במבנה למקורית; (3) לציין שהמידע שיכול היה לעצור נמצא במטרה **השנייה**, שהארגומנט השלישי שלה קשור; (4) להסביר שהחלפת הסדר מציבה את `append` במצב \"חיסור רשימות\"; (5) **לזהות את המחיר** — הכיוון המקורי מתדרדר; (6) לנסח את המסקנה הכללית שסדר הגוף הוא פשרה בין מצבים. בונוס: הקבלה מפורשת ל-`ancestor`/`ancestor2` מ-5.1. תשובה שרק אומרת \"רקורסיה אינסופית\" בלי לזהות **איזה** ארגומנט לא-קשור ולמה זה מונע צמצום אינה מלאה."
+  },
+  {
+   "id": "ex6",
+   "type": "code-reading",
+   "questionHe": "בהינתן\n\n```prolog\nnatural_number(0).\nnatural_number(s(X)) :- natural_number(X).\n\nplus(X, 0, X) :- natural_number(X).\nplus(X, s(Y), s(Z)) :- plus(X, Y, Z).\n```\n\nמה תחזיר השאילתה `?- plus(X, s(s(0)), s(s(s(0)))).` ? עקבו אחרי החישוב.",
+   "answerHe": "‏`X = s(0)`, כלומר 1. השאילתה מחשבת בפועל `3 - 2`.\n\n**המהלך:**\n\n| צעד | המטרה | הכלל | מה מתקבל |\n|---|---|---|---|\n| 1 | `plus(X, s(s(0)), s(s(s(0))))` | כלל 1 לא מתאים (הארגומנט השני אינו `0`); כלל 2 מתאים עם `Y=s(0)`, `Z=s(s(0))` | `plus(X, s(0), s(s(0)))` |\n| 2 | `plus(X, s(0), s(s(0)))` | כלל 2 שוב, `Y=0`, `Z=s(0)` | `plus(X, 0, s(0))` |\n| 3 | `plus(X, 0, s(0))` | כלל 1: הראש `plus(X', 0, X')` מאחד את הארגומנט הראשון והשלישי | `X = s(0)` |\n| 4 | `natural_number(s(0))` | כלל 2 של `natural_number`, ואז העובדה | מצליח |\n\nהתשובה: `X = s(0)`.",
+   "explanationHe": "‏**מה נבדק כאן**: (1) שהכלל הרקורסיבי `plus(X, s(Y), s(Z)) :- plus(X, Y, Z)` מקלף `s` **משני** הארגומנטים — השני והשלישי — בו-זמנית, וזה כל מנגנון החיסור. (2) שהעצירה מתרחשת כשהארגומנט השני מגיע ל-`0`, ואז הכלל הראשון מזהה את הארגומנט הראשון עם השלישי דרך שכפול שם המשתנה בראש. (3) שהקריאה ל-`natural_number` בגוף אינה קישוט — היא מאמתת שהערך תקין (וכשהארגומנט הראשון חופשי, היא זו שמייצרת אותו). **הנקודה המרכזית**: זו **אותה `plus`** ששימשה לחיבור, בלי שורה נוספת. אין ב-LP קלט ופלט אלא רק ארגומנטים שקשורים או לא, ולכן פרדיקט אחד נותן חיבור, חיסור ופירוק לזוגות. **טעות נפוצה**: לענות `X = s(s(0))` מתוך ניסיון לחשב `3 - 1` במקום `3 - 2` — ספרו את שכבות ה-`s` בארגומנט השני."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "הפרוצדורה הבאה נכתבה במקום `reverse` ואינה עובדת, אך Prolog **אינו מדווח על שום שגיאה**:\n\n```prolog\nwrong_reverse([], []).\nwrong_reverse([H | T], R) :- wrong_reverse(T, S), append(S, H, R).\n```\n\nמהי הטעות, מה בדיוק תחזיר `?- wrong_reverse([a, b], R)`, ומדוע לא מתקבלת הודעת שגיאה?",
+   "answerHe": "**הטעות**: הארגומנט השני של `append` הוא `H`, שהוא **איבר** ולא רשימה. הראש `[H | T]` קילף איבר בודד, וכדי לשרשר אותו בסוף צריך לעטוף אותו: `append(S, [H], R)`.\n\n**מה מתקבל בפועל** עבור `?- wrong_reverse([a, b], R)`:\n\n| צעד | מה קורה |\n|---|---|\n| 1 | `H=a`, `T=[b]` → קוראים ל-`wrong_reverse([b], S1)` |\n| 2 | `H=b`, `T=[]` → קוראים ל-`wrong_reverse([], S2)`, והעובדה נותנת `S2=[]` |\n| 3 | `append([], b, S1)` — העובדה `append([], Xs, Xs)` מתאחדת עם `Xs = b`, ולכן `S1 = b` |\n| 4 | `append(b, a, R)` — **כאן זה נכשל**: `b` אינו מתאחד לא עם `[]` ולא עם `[X \\| Xs]` |\n\nכלומר השאילתה מחזירה `false`. עבור `?- wrong_reverse([a], R)` היא דווקא **מצליחה** ומחזירה `R = a` — קבוע, לא רשימה. זהו המקרה המסוכן: הצלחה עם זבל.\n\n**מדוע אין שגיאה**: ל-Prolog אין מערכת טיפוסים סטטית, ואין לו מושג של \"רשימה\" כטיפוס. ‏`[a, b]` הוא רק סוכר תחבירי ל-`cons(a, cons(b, []))`, ו-`b` הוא term חוקי לחלוטין. האוניפיקציה של `append([], Xs, Xs)` עם `append([], b, S1)` פשוט קושרת `Xs = b` — אין שום כלל שאומר ש-`Xs` חייב להיות רשימה. התוצאה היא term תקין תחבירית שאינו מייצג את מה שהתכוונו. השוו ל-3.1: זו בדיוק סוג השגיאה שבודק טיפוסים היה תופס **לפני** ההרצה.",
+   "explanationHe": "תשובה מלאה חייבת: (1) לזהות שהטעות היא `H` במקום `[H]`, ולהסביר ש-`H` הוא איבר; (2) לעקוב אחרי החישוב ולהראות שהעובדה `append([], Xs, Xs)` קושרת בשמחה `Xs` לאיבר בודד; (3) להצביע על כך שהמקרה בן-האיבר-האחד **מצליח** ומחזיר קבוע — כלומר הכשל שקט; (4) להסביר שאין שגיאה כי רשימות אינן טיפוס מובנה אלא קונבנציה על terms מורכבים, ואין ל-Prolog בדיקת טיפוסים; (5) בונוס: ההקבלה ל-3.1 ולתפקיד של בודק טיפוסים. תשובה שרק אומרת \"צריך `[H]`\" בלי להסביר מדוע השגיאה שקטה אינה מלאה — זו כל הנקודה של הדוגמה."
+  }
+ ]
+}

@@ -1,0 +1,1579 @@
+{
+ "id": "cm/1.1TypescriptDatatypes",
+ "kind": "lecture",
+ "sourcePath": "class_material/1.1TypescriptDatatypes.md",
+ "titleEn": "Semantics of Programming Languages and Types",
+ "titleHe": "סמנטיקה של שפות תכנות וטיפוסים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/1.1TypescriptDatatypes:0",
+   "depth": 1,
+   "headingEn": "Semantics of Programming Languages and Types",
+   "raw": "# Semantics of Programming Languages and Types\n",
+   "blocks": [],
+   "headingHe": "סמנטיקה של שפות תכנות וטיפוסים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:1",
+   "depth": 3,
+   "headingEn": "PPL 2023",
+   "raw": "### PPL 2023 \n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:0",
+     "type": "prose",
+     "en": "This lecture introduces notion of **programming language semantics** and the role of **types** in programming languages in the context of Functional Programming.\n\n",
+     "hash": "1a795cc210b89234",
+     "he": "הרצאה זו מציגה את המושג **סמנטיקה (semantics) של שפות תכנות** ואת תפקידם של **טיפוסים (types)** בשפות תכנות, בהקשר של תכנות פונקציונלי (Functional Programming)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:1",
+     "type": "prose",
+     "en": "It leads to the definition of the following concepts:\n\n",
+     "hash": "d6e0183e48ce3954",
+     "he": "היא מובילה להגדרת המושגים הבאים:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:2",
+     "type": "list",
+     "en": "1. Operational semantics of programming languages\n",
+     "hash": "e9138b45cad5d340",
+     "he": "1. סמנטיקה אופרציונלית (operational semantics) של שפות תכנות"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:3",
+     "type": "list",
+     "en": "  * High-level definition of programming language semantics\n  * Distinguish expressions and values in programming languages\n  * Define expression types: atomic vs. compound expressions\n  * Define the evaluation algorithm to map expressions to values\n",
+     "hash": "be8898d1dc154df0",
+     "he": "* הגדרה ברמה גבוהה של סמנטיקה של שפות תכנות\n  * הבחנה בין ביטויים (expressions) לערכים (values) בשפות תכנות\n  * הגדרת סוגי ביטויים: ביטויים אטומיים (atomic) לעומת ביטויים מורכבים (compound)\n  * הגדרת אלגוריתם ההערכה (evaluation) הממפה ביטויים לערכים"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:4",
+     "type": "list",
+     "en": "2. Types in programming languages\n",
+     "hash": "491e07dfe9dbfdb4",
+     "he": "2. טיפוסים בשפות תכנות"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:5",
+     "type": "list",
+     "en": "  * Define value types: atomic vs compound values\n  * Define typing errors and type safety\n  * Distinguish untyped and typed programming languages\n  * Define static and dynamic type checking\n",
+     "hash": "2ccf0db697eb4434",
+     "he": "* הגדרת טיפוסי ערכים: ערכים אטומיים לעומת ערכים מורכבים\n  * הגדרת שגיאות טיפוס (typing errors) ובטיחות טיפוסים (type safety)\n  * הבחנה בין שפות תכנות לא מטופסות (untyped) לשפות מטופסות (typed)\n  * הגדרת בדיקת טיפוסים (type checking) סטטית ודינמית"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:6",
+     "type": "list",
+     "en": "3. Types with TypeScript \n",
+     "hash": "8dbd0b58bbde6a12",
+     "he": "3. טיפוסים עם TypeScript"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:7",
+     "type": "list",
+     "en": "  * Illustrate type checking in TypeScript\n  * Illustrate the benefits of gradual typing with TypeScript\n  * Review the type language of TypeScript:\n    * Primitive types vs. Defined types\n    * Atomic types vs. Compound types\n\n",
+     "hash": "053b5914f4e2843b",
+     "he": "* הדגמת בדיקת טיפוסים ב-TypeScript\n  * הדגמת היתרונות של טיפוס הדרגתי (gradual typing) עם TypeScript\n  * סקירת שפת הטיפוסים של TypeScript:\n    * טיפוסים פרימיטיביים לעומת טיפוסים מוגדרים (Defined types)\n    * טיפוסים אטומיים לעומת טיפוסים מורכבים"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:8",
+     "type": "prose",
+     "en": "In the next lecture, we will go deeper into complex data types in TypeScript and review:\n",
+     "hash": "4fe9ca153740ed85",
+     "he": "בהרצאה הבאה נעמיק בטיפוסי נתונים (data types) מורכבים ב-TypeScript ונסקור:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:1:9",
+     "type": "list",
+     "en": "* Compound values, literal constants and serialized values with JSON\n* Recursive types\n* Generic types\n* Function types\n\n",
+     "hash": "9679609e0bc089a7",
+     "he": "* ערכים מורכבים, קבועים ליטרליים (literal constants) וערכים מסוריאליזציה (serialized) עם JSON\n* טיפוסים רקורסיביים\n* טיפוסים גנריים\n* טיפוסי פונקציות"
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:2",
+   "depth": 2,
+   "headingEn": "Operational Semantics of Programming Languages",
+   "raw": "## Operational Semantics of Programming Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:2:0",
+     "type": "prose",
+     "en": "This section introduces very briefly the notion of *operational semantics for programming languages*.\nWe will refine this definition in Chapter 2.  This definition will help us define more precisely what\nis meant by *data types*.\n\n",
+     "hash": "33e13dde1876847f",
+     "he": "פרק זה מציג בקצרה רבה את המושג *סמנטיקה אופרציונלית של שפות תכנות*.\nנדייק הגדרה זו בפרק 2. ההגדרה תעזור לנו להגדיר במדויק יותר למה אנו מתכוונים כשאנו אומרים *טיפוסי נתונים (data types)*."
+    }
+   ],
+   "headingHe": "סמנטיקה אופרציונלית של שפות תכנות"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:3",
+   "depth": 3,
+   "headingEn": "High-level definition of programming languages semantics",
+   "raw": "### High-level definition of programming languages semantics\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:0",
+     "type": "prose",
+     "en": "Semantics is the study of the meaning of languages. The word *meaning* is complex and we must specify what is meant by *meaning of a programming language*.  We adopt here the presentation offered in Chapter 1 of:\n\n",
+     "hash": "9777cd926ab4bf3f",
+     "he": "סמנטיקה (semantics) היא חקר המשמעות של שפות. המילה *משמעות* היא מורכבת, ועלינו לפרט למה אנו מתכוונים ב*משמעות של שפת תכנות*. אנו מאמצים כאן את ההצגה המופיעה בפרק 1 של:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:1",
+     "type": "prose",
+     "en": "[**Semantics with Applications: A Formal Introduction**](http://www.cs.kun.nl/~hubbers/courses/sc_1718/materiaal/wiley.pdf)\n_Hanne Riis Nielson, Flemming Nielson_\nWiley Professional Computing, Wiley, Second Edition 1999.\n\n\n",
+     "hash": "0453398e2c1b67e1",
+     "he": "[**Semantics with Applications: A Formal Introduction**](http://www.cs.kun.nl/~hubbers/courses/sc_1718/materiaal/wiley.pdf)\n_Hanne Riis Nielson, Flemming Nielson_\nWiley Professional Computing, Wiley, מהדורה שנייה 1999."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:2",
+     "type": "prose",
+     "en": "A computer language is specified by two main components:\n",
+     "hash": "02a61ce11287ae13",
+     "he": "שפת מחשב מוגדרת על ידי שני רכיבים עיקריים:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:3",
+     "type": "list",
+     "en": "* a (formal) syntax – describing the structure of programs as they are written by programmers \n* a semantics – which describes the intended meaning of programs.\n\n",
+     "hash": "d5b52b90b3bb70e3",
+     "he": "* תחביר (syntax) פורמלי – המתאר את המבנה של תוכניות כפי שהן נכתבות על ידי מתכנתים\n* סמנטיקה (semantics) – המתארת את המשמעות המיועדת של התוכניות."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:4",
+     "type": "prose",
+     "en": "Various tools manipulate programs (compilers, interpreters, debuggers, IDEs, verification tools).\nAll of these tools must agree upon a formal specification of what is expected when we execute the program.\nThe formal semantics of a programming language provides an unambiguous definition of what the execution should achieve.\n\n",
+     "hash": "8401f2245d2876f4",
+     "he": "כלים שונים מעבדים תוכניות (מהדרים/compilers, מפרשים/interpreters, כלי דיבוג, סביבות פיתוח IDE, כלי אימות).\nכל הכלים הללו חייבים להסכים על מפרט פורמלי של מה שמצופה לקרות כאשר אנו מריצים את התוכנית.\nהסמנטיקה הפורמלית של שפת תכנות מספקת הגדרה חד-משמעית של מה שהריצה אמורה להשיג."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:5",
+     "type": "prose",
+     "en": "This formal definition has several uses - among which:\n",
+     "hash": "6c599cc7f4a3043d",
+     "he": "להגדרה פורמלית זו כמה שימושים, ביניהם:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:6",
+     "type": "list",
+     "en": "* People learning the language can understand what each of the programming language construct is expected to achieve. \n* Implementers of tools for the language (parsers, compilers, interpreters, debuggers etc) have a formal reference for their tool and a formal definition of its correctness/completeness\n* 2 different programs in the same language or in different languages can be proved formally as equivalent/non-equivalent\n\n",
+     "hash": "e36e708109a8edce",
+     "he": "* אנשים הלומדים את השפה יכולים להבין מה כל מבנה תחבירי בשפה אמור להשיג.\n* מממשי כלים עבור השפה (מנתחים תחביריים/parsers, מהדרים, מפרשים, כלי דיבוג וכו') מקבלים התייחסות (reference) פורמלית לכלי שלהם והגדרה פורמלית של נכונותו/שלמותו\n* ניתן להוכיח פורמלית ששתי תוכניות שונות באותה שפה או בשפות שונות הן שקולות/לא שקולות"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:7",
+     "type": "prose",
+     "en": "Proving that programs are equivalent is necessary for example to prove that a compiler generates assembly code which is equivalent to the source program.\nNaturally, we want to be able to prove that this equivalence holds for any possible source program. \n\n",
+     "hash": "8c9be92d50fbeffe",
+     "he": "הוכחת שקילות בין תוכניות נחוצה, למשל, כדי להוכיח שמהדר מייצר קוד אסמבלי שהוא שקול לתוכנית המקור.\nבאופן טבעי, נרצה להיות מסוגלים להוכיח שהשקילות הזו מתקיימת עבור כל תוכנית מקור אפשרית."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:8",
+     "type": "prose",
+     "en": "#### Semantic Domain\n\n",
+     "hash": "e3426f98ef229b30",
+     "he": "#### תחום סמנטי (Semantic Domain)"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:9",
+     "type": "prose",
+     "en": "Formal semantics gives rules for translation from one domain (usually the program’s syntax) to another formally defined domain.  \n\n",
+     "hash": "6ad2866f4b952763",
+     "he": "סמנטיקה פורמלית נותנת כללי תרגום מתחום אחד (בדרך כלל התחביר של התוכנית) לתחום אחר המוגדר פורמלית."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:10",
+     "type": "prose",
+     "en": "We adopt the **Operational Semantics** approach which determines that:\nthe meaning of an expression in the programming language is specified by the computation it induces when it is executed on a machine.  The operational semantics of a programming language tells us how to execute the program step by step.\nWhen we follow this specification, we record the steps and keep track of the **state** of the computation as steps are executed.\nThe specification determines what is meant by the state and which parts of the state are updated when \n\n",
+     "hash": "1d107e69f8d9c931",
+     "he": "אנו מאמצים את גישת ה**סמנטיקה האופרציונלית (Operational Semantics)**, הקובעת כי:\nהמשמעות של ביטוי בשפת התכנות מוגדרת על ידי החישוב שהוא מחולל כאשר הוא מורץ על מכונה. הסמנטיקה האופרציונלית של שפת תכנות אומרת לנו כיצד להריץ את התוכנית צעד אחר צעד.\nכשאנו עוקבים אחרי המפרט הזה, אנו רושמים את הצעדים ועוקבים אחרי **המצב (state)** של החישוב תוך כדי ביצוע הצעדים.\nהמפרט קובע מהו בדיוק המצב, ואילו חלקים של המצב מתעדכנים ומתי."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:11",
+     "type": "prose",
+     "en": "Take as example an imperative programming language with global variables and assignment to variables.\nFor this language, the semantics specifies that the state of an execution consists of the list of defined variables and their value at each step.\n\n",
+     "hash": "ca5144fdb285236b",
+     "he": "ניקח כדוגמה שפת תכנות אימפרטיבית עם משתנים גלובליים והשמה (assignment) למשתנים.\nעבור שפה זו, הסמנטיקה קובעת שמצב הריצה מורכב מרשימת המשתנים המוגדרים והערך שלהם בכל צעד."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:12",
+     "type": "prose",
+     "en": "The result of the execution of a program according to the semantic specification is a **derivation sequence** which represents the computation history.  Each step in the derivation indicates which part of the program was executed, and the state that was reached as a consequence.\n\n",
+     "hash": "6aefa81178d7b2a3",
+     "he": "התוצאה של הרצת תוכנית לפי המפרט הסמנטי היא **סדרת גזירה (derivation sequence)** המייצגת את היסטוריית החישוב. כל צעד בגזירה מציין איזה חלק של התוכנית בוצע, ואת המצב שאליו הגענו כתוצאה מכך."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:13",
+     "type": "prose",
+     "en": "In this example, a program is a sequence of assignments:\n",
+     "hash": "6170c25966e861cc",
+     "he": "בדוגמה זו, תוכנית היא סדרה של השמות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:14",
+     "type": "code",
+     "en": "```\nInitial state: [x:5, y:3, z:7]\nProgram: \"z = x; x = y; y = z;\"\n\nStep 1: execute \"z=x;\" \n    Remaining program: \"x=y; y=z;\"\n    New state: [x:5; y:3, z:5]\nStep 2: execute \"x=y;\"\n    Remaining program: \"y=z;\"\n    New state: [x:3, y:3, z:5]\nStep 3: execute \"y=z;\"\n    Remaining program: \"\"\n    New state: [x:3, y:5, z:5]\n```\n\n",
+     "hash": "0286c1d3ab3a8d13",
+     "noteHe": "זוהי דוגמה מלאה ל\"היסטוריית חישוב\" של תוכנית אימפרטיבית קטנה, שמטרתה להחליף את הערכים של `x` ו-`y` בעזרת משתנה עזר `z`. המצב ההתחלתי (`Initial state`) הוא רשימת המשתנים המוגדרים וערכיהם: `x:5, y:3, z:7`. בכל צעד מבוצעת השמה אחת (צעד פרימיטיבי), ונרשמים שני דברים: מה נותר מהתוכנית (`Remaining program`) והמצב החדש (`New state`). למשל, בצעד 1 מבוצע `z=x;` ולכן `z` מקבל את הערך 5. שימו לב שבסוף הריצה התוכנית ריקה והמצב הסופי הוא `[x:3, y:5, z:5]` — הערכים של `x` ו-`y` הוחלפו. הרעיון המרכזי: תוצאת הסמנטיקה האופרציונלית אינה רק הערך הסופי, אלא כל רצף הצעדים והמצבים — סדרת הגזירה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:15",
+     "type": "prose",
+     "en": "This result can be understood as a representation of the *history of the computation* - it traces the steps of the execution into *primitive steps*\nand the successive states of the computation. \n\n",
+     "hash": "03cf6fc103c482fc",
+     "he": "ניתן להבין את התוצאה הזו כייצוג של *היסטוריית החישוב* — היא מפרקת את מהלך הריצה ל*צעדים פרימיטיביים* ולרצף המצבים העוקבים של החישוב."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:16",
+     "type": "prose",
+     "en": "This view is an **abstraction** - it does not provide all the details of what should happen in a concrete computation on specific hardware. \nFor example, it does not mention registers, translation to machine language, encoding of data types.\nThis computation history is a formal mathematical object which is in the **semantic domain**.\n\n",
+     "hash": "461e6cc8568d1537",
+     "he": "תיאור זה הוא **הפשטה (abstraction)** — הוא אינו מספק את כל הפרטים של מה שאמור לקרות בחישוב קונקרטי על חומרה מסוימת.\nלמשל, הוא אינו מזכיר אוגרים (registers), תרגום לשפת מכונה, או קידוד של טיפוסי נתונים.\nהיסטוריית החישוב הזו היא אובייקט מתמטי פורמלי הנמצא ב**תחום הסמנטי (semantic domain)**."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:17",
+     "type": "prose",
+     "en": "The rules of the semantics of the specific programming language indicate how to select a sub-expression to evaluate at each\nstep of the computation, and what are the effects on the state of the computation each time a primitive sub-expression is \nexecuted.\n\n",
+     "hash": "eba145326b3cb6b5",
+     "he": "כללי הסמנטיקה של שפת התכנות הספציפית מציינים כיצד לבחור תת-ביטוי להערכה בכל צעד של החישוב, ומהן ההשפעות על מצב החישוב בכל פעם שתת-ביטוי פרימיטיבי מבוצע."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:3:18",
+     "type": "prose",
+     "en": "In summary, the operational semantics of the language maps a program and an initial state to a formal structure -\nin this case, we informally refer to this structure as a *computation history*.\n\n",
+     "hash": "839489d7f8f7a9b0",
+     "he": "לסיכום, הסמנטיקה האופרציונלית של השפה ממפה תוכנית ומצב התחלתי למבנה פורמלי —\nבמקרה זה, אנו מכנים מבנה זה באופן לא פורמלי *היסטוריית חישוב*."
+    }
+   ],
+   "headingHe": "הגדרה ברמה גבוהה של סמנטיקה של שפות תכנות"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:4",
+   "depth": 2,
+   "headingEn": "Statements vs. Expressions vs. Values",
+   "raw": "## Statements vs. Expressions vs. Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:0",
+     "type": "prose",
+     "en": "In **imperative programs**, programs are constructed from **statements**.  A statement is a unit of program execution.\n",
+     "hash": "a8e1fd42019f8169",
+     "he": "ב**תוכניות אימפרטיביות**, התוכניות בנויות מ**משפטים (statements)**. משפט הוא יחידת ביצוע של התוכנית."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:1",
+     "type": "list",
+     "en": "* **Atomic statements** such as variable assignment or print-statements have a single effect either on the world (screen is updated, disk is updated, information is sent in the network) or on the internal state of the program (the memory owned by the process is updated).\n* **Compound statements** are built from multiple sub-statements.  For example, an `if-then-else` construct is used to\nbuild a compound statement, or a `for-loop` construct.  \nWhen a statement is executed, the state of the program is modified.\n\n",
+     "hash": "ee71441c2b76d3d7",
+     "he": "* **משפטים אטומיים** כגון השמה למשתנה או משפטי הדפסה — יש להם השפעה יחידה, או על העולם (המסך מתעדכן, הדיסק מתעדכן, מידע נשלח ברשת) או על המצב הפנימי של התוכנית (הזיכרון שבבעלות התהליך מתעדכן).\n* **משפטים מורכבים** בנויים ממספר תת-משפטים. למשל, מבנה `if-then-else` משמש לבניית משפט מורכב, וכך גם מבנה `for-loop`.\nכאשר משפט מבוצע, מצב התוכנית משתנה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:2",
+     "type": "prose",
+     "en": "In contrast, in **Funcional Programming** (FP), programs are **expressions**.  Expressions can either be:\n",
+     "hash": "ef33e8f695546ffa",
+     "he": "לעומת זאת, ב**תכנות פונקציונלי (Functional Programming, FP)** התוכניות הן **ביטויים (expressions)**. ביטויים יכולים להיות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:3",
+     "type": "list",
+     "en": "* **Atomic expressions** - for example, the number expression `-12` or the boolean expression `true` or the variable expression `x`.\n* **Compound expressions** - which are made up of sub-expressions according to the syntax of the language. For example the expression `12 >= 7` is a compound expression made up of 3 sub-expressions. `(12 === 13) ? -1 : 2` is also a compound expression (called a conditional expression).  \n\n",
+     "hash": "c8a3c7ab536b6a1d",
+     "he": "* **ביטויים אטומיים (atomic expressions)** — למשל ביטוי המספר `-12`, הביטוי הבוליאני `true`, או ביטוי המשתנה `x`.\n* **ביטויים מורכבים (compound expressions)** — הבנויים מתת-ביטויים לפי התחביר של השפה. למשל, הביטוי `12 >= 7` הוא ביטוי מורכב הבנוי מ-3 תת-ביטויים. גם `(12 === 13) ? -1 : 2` הוא ביטוי מורכב (המכונה ביטוי תנאי — conditional expression)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:4",
+     "type": "prose",
+     "en": "In FP, we do not 'execute an expression', but instead we compute its value - a process we call **evaluation**.\nThe *evaluation function* maps expressions to **values**.  \n\n",
+     "hash": "529f323fc27f609c",
+     "he": "ב-FP איננו \"מבצעים ביטוי\", אלא מחשבים את ערכו — תהליך שאנו מכנים **הערכה (evaluation)**.\n*פונקציית ההערכה* ממפה ביטויים ל**ערכים (values)**."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:5",
+     "type": "prose",
+     "en": "The operational semantics of an FP language describes how the evaluation function operates over all possible expressions in the language.  It is defined inductively over the syntactic structure of expressions.\n\n",
+     "hash": "70c828b9d2dd28df",
+     "he": "הסמנטיקה האופרציונלית של שפת FP מתארת כיצד פונקציית ההערכה פועלת על כל הביטויים האפשריים בשפה. היא מוגדרת באופן אינדוקטיבי על פי המבנה התחבירי של הביטויים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:4:6",
+     "type": "prose",
+     "en": "In the rest of the course, we will focus on specifying the operational semantics of a functional language.\n\n",
+     "hash": "d9de15d57e89f467",
+     "he": "בהמשך הקורס נתמקד בהגדרת הסמנטיקה האופרציונלית של שפה פונקציונלית."
+    }
+   ],
+   "headingHe": "משפטים (Statements) לעומת ביטויים (Expressions) לעומת ערכים (Values)"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:5",
+   "depth": 3,
+   "headingEn": "Types of Expressions",
+   "raw": "### Types of Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:0",
+     "type": "prose",
+     "en": "The JavaScript language mixes both expressions and statements - it is a multi-paradigm language.\nThis makes it difficult to describe completely its operational semantics in a concise manner.\nWe will completely define a smaller language in Chapter 2 - here, we only provide an informal description for JavaScript.\n\n",
+     "hash": "1096eb2a6f6c8a29",
+     "he": "שפת JavaScript מערבבת ביטויים ומשפטים גם יחד — זוהי שפה מרובת פרדיגמות (multi-paradigm).\nעובדה זו מקשה לתאר במלואה את הסמנטיקה האופרציונלית שלה בצורה תמציתית.\nבפרק 2 נגדיר במלואה שפה קטנה יותר — כאן אנו מספקים רק תיאור לא פורמלי עבור JavaScript."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:1",
+     "type": "prose",
+     "en": "Intuitively, the types of expressions we consider are:\n",
+     "hash": "6e7bec41495efb28",
+     "he": "באופן אינטואיטיבי, סוגי הביטויים שנעסוק בהם הם:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:2",
+     "type": "list",
+     "en": "* **Atomic expressions**: number expressions (`1, -12`), string expressions (`\"abc\"`), boolean expressions (`true, false`).\n* **Compound expressions**: arithmetic expressions `(10 + v) * (w / 5)`, relational expressions (`x === 5`), ternary conditional expression `<condition> ? <expr1> : <expr2>`. \n* **Variable bindings**: these are expressions of the form `let <var> = <expr1>; <expr2>` which define a block in which the variable `<var>` is defined and bound to the value of `<expr1>` and then evaluate the value of `<expr2>`.\n* **Function invocation**: of the form `f(<expr1>,...,<exprn>)` \n* **Function definition**: of the form `(<var1>,...) => <expr>`.\n\n",
+     "hash": "4ea0d4a80ab310a4",
+     "he": "* **ביטויים אטומיים**: ביטויי מספרים (`1, -12`), ביטויי מחרוזות (`\"abc\"`), ביטויים בוליאניים (`true, false`).\n* **ביטויים מורכבים**: ביטויים אריתמטיים `(10 + v) * (w / 5)`, ביטויי השוואה (`x === 5`), ביטוי תנאי טרנרי `<condition> ? <expr1> : <expr2>`.\n* **קשירות משתנים (variable bindings)**: אלו ביטויים מהצורה `let <var> = <expr1>; <expr2>` המגדירים בלוק שבו המשתנה `<var>` מוגדר ונקשר לערך של `<expr1>`, ולאחר מכן מוערך הערך של `<expr2>`.\n* **קריאה לפונקציה (function invocation)**: מהצורה `f(<expr1>,...,<exprn>)`\n* **הגדרת פונקציה (function definition)**: מהצורה `(<var1>,...) => <expr>`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:3",
+     "type": "prose",
+     "en": "The list of these expression types and their structure defines the *syntax of the programming language*.\nWe intentionally did not include in this partial description the syntax of *statements* in JavaScript.\n\n",
+     "hash": "ccad3193b4c84f10",
+     "he": "רשימת סוגי הביטויים הללו והמבנה שלהם מגדירים את *התחביר של שפת התכנות*.\nבכוונה לא כללנו בתיאור החלקי הזה את התחביר של *משפטים (statements)* ב-JavaScript."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:4",
+     "type": "prose",
+     "en": "Expressions are combined recursively to form trees of compound expressions with atomic expressions at the leaves. \nFor example:\n",
+     "hash": "c3ceb0a202f22a72",
+     "he": "ביטויים משתלבים זה בזה באופן רקורסיבי ויוצרים עצים של ביטויים מורכבים, כאשר בעלים נמצאים ביטויים אטומיים.\nלמשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:5",
+     "type": "code",
+     "en": "```\nlet v = 12;\n  (v >= 7) ? (v * 3) : 9\n```\n",
+     "hash": "4ffb9a893d20a7ce",
+     "noteHe": "דוגמה לביטוי מורכב שנבנה באופן רקורסיבי. השורה הראשונה `let v = 12;` קושרת את המשתנה `v` לערך `12`, והשורה השנייה היא גוף הבלוק: ביטוי תנאי טרנרי הבודק האם `v >= 7` — אם כן, ערכו הוא `v * 3` (כלומר 36), ואם לא — `9`. הביטוי כולו הוא \"עץ\": בשורש מבנה ה-`let`, מתחתיו הקשירה `v=12` והביטוי הטרנרי, ולביטוי הטרנרי עצמו שלושה תת-ביטויים משלו. הביטויים האטומיים (`v`, `12`, `7`, `3`, `9`) הם העלים של העץ."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:5:6",
+     "type": "prose",
+     "en": "is a compound expression of type `let`, with 2 sub-expressions - a binding expression `v=12` and a body expression which\nis a conditional ternary expression; in turn, this sub-expression has 3 sub-expressions.\n\n",
+     "hash": "dc42c5b6624ed0cc",
+     "he": "זהו ביטוי מורכב מסוג `let`, עם 2 תת-ביטויים — ביטוי קשירה `v=12` וביטוי גוף שהוא ביטוי תנאי טרנרי; לתת-ביטוי זה יש בתורו 3 תת-ביטויים."
+    }
+   ],
+   "headingHe": "סוגי ביטויים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:6",
+   "depth": 3,
+   "headingEn": "Types of Values",
+   "raw": "### Types of Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:6:0",
+     "type": "prose",
+     "en": "Once an expression is evaluated by applying the *evaluation function*, it becomes a **value**.\nThe *evaluation function* maps expressions to values.\n\n",
+     "hash": "ee8028a5e371153c",
+     "he": "כאשר ביטוי מוערך על ידי הפעלת *פונקציית ההערכה*, הוא הופך ל**ערך (value)**.\n*פונקציית ההערכה* ממפה ביטויים לערכים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:6:1",
+     "type": "prose",
+     "en": "As we can distinguish types of expressions, we can also characterize the set of all possible values in an inductive manner - that is, start from **atomic values** and then build up **compound values** which are made up of smaller value parts.\n\n",
+     "hash": "8caa5ad0d12ae4fb",
+     "he": "כפי שאנו מבחינים בין סוגי ביטויים, נוכל גם לאפיין את קבוצת כל הערכים האפשריים באופן אינדוקטיבי — כלומר, להתחיל מ**ערכים אטומיים (atomic values)** ואז לבנות **ערכים מורכבים (compound values)** המורכבים מחלקי ערכים קטנים יותר."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:6:2",
+     "type": "prose",
+     "en": "This lecture focuses on the characterization of the **domain of values** in JavaScript.\n\n",
+     "hash": "0660be748ef421c1",
+     "he": "הרצאה זו מתמקדת באפיון **תחום הערכים (domain of values)** ב-JavaScript."
+    }
+   ],
+   "headingHe": "סוגי ערכים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:7",
+   "depth": 2,
+   "headingEn": "Evaluation of Expressions into Values",
+   "raw": "## Evaluation of Expressions into Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:7:0",
+     "type": "prose",
+     "en": "The operational semantics of an FP language defines the evaluation function.  It determines how a top-level expression (the program) is evaluated into a value.  This definition is inductive. For each syntactic construct, an evaluation rule indicates how the sub-expressions are evaluated - in which order.  At each step of the computation, a sub-expression is evaluated and then substituted by its value in the embedding expression.  \n\n",
+     "hash": "c62b1330990831e9",
+     "he": "הסמנטיקה האופרציונלית של שפת FP מגדירה את פונקציית ההערכה. היא קובעת כיצד ביטוי ברמה העליונה (התוכנית) מוערך לערך. הגדרה זו היא אינדוקטיבית. עבור כל מבנה תחבירי, כלל הערכה (evaluation rule) מציין כיצד מוערכים תת-הביטויים — ובאיזה סדר. בכל צעד של החישוב, תת-ביטוי מוערך ואז מוצב (substituted) ערכו במקומו בביטוי העוטף."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:7:1",
+     "type": "prose",
+     "en": "There may be a need to describe the state of the computation during this evaluation process - similar to the set of bindings `var:value` we observed above when describing the operational semantics of a very simple imperative language.  But the operations on this state will be quite different from what we observed, as in pure FP languages there is no need to perform variable assignment (because variables are immutable).  \n\n",
+     "hash": "dae74059138944fd",
+     "he": "ייתכן צורך לתאר את מצב החישוב במהלך תהליך ההערכה — בדומה לקבוצת הקשירות `var:value` שראינו למעלה כשתיארנו את הסמנטיקה האופרציונלית של שפה אימפרטיבית פשוטה מאוד. אבל הפעולות על המצב הזה יהיו שונות למדי ממה שראינו, כיוון שבשפות FP טהורות אין צורך לבצע השמה למשתנים (מפני שהמשתנים הם בלתי-ניתנים-לשינוי — immutable)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:7:2",
+     "type": "prose",
+     "en": "The output of the operational semantics is a computation history - but in this chapter we will not describe the computation history - we will only describe the values produced by the evaluation function.\n\n",
+     "hash": "ffbea30d3b74b8be",
+     "he": "הפלט של הסמנטיקה האופרציונלית הוא היסטוריית חישוב — אך בפרק זה לא נתאר את היסטוריית החישוב — נתאר רק את הערכים שפונקציית ההערכה מייצרת."
+    }
+   ],
+   "headingHe": "הערכת ביטויים לערכים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:8",
+   "depth": 3,
+   "headingEn": "Evaluation Algorithm",
+   "raw": "### Evaluation Algorithm\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:0",
+     "type": "prose",
+     "en": "Consider the complex expression we presented above:\n",
+     "hash": "394378d15db60f78",
+     "he": "נתבונן בביטוי המורכב שהצגנו למעלה:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:1",
+     "type": "code",
+     "en": "```\nlet v = 12;\n  (v >= 7) ? (v * 3) : 9\n```\n",
+     "hash": "4ffb9a893d20a7ce",
+     "noteHe": "אותו ביטוי `let` מהדוגמה הקודמת, המופיע כאן שוב כדי להדגים עליו את אלגוריתם ההערכה: קשירה של `v` ל-`12` ואחריה גוף שהוא ביטוי תנאי טרנרי. מכיוון ש-`12 >= 7` הוא `true`, ערך הביטוי כולו יהיה `v * 3`, כלומר `36`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:2",
+     "type": "prose",
+     "en": "The evaluation algorithm consists of the following steps: given an expression $$E$$\n",
+     "hash": "71cd6084a6714f0a",
+     "he": "אלגוריתם ההערכה מורכב מהצעדים הבאים: בהינתן ביטוי $$E$$"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:3",
+     "type": "list",
+     "en": "1. Identify the toplevel syntactic construct of $$E$$ - in our case a `let` construct.\n2. Identify the immediate sub-expressions of $$E$$ - in our case - the binding construct `v=12` and the body (rest of $$E$$).\n3. Perform the specific *evaluation rule* defined for the construct of $$E$$ - in this case - the *let-evaluation rule* is:\n   1. Compute the value of the `<expr>` on the right-hand-side of the binding expression - call it `v1`.\n   2. Add to the state of the computation the binding `{v:v1}`\n   3. Compute the value of the body sub-expression - call it `v2`.\n   4. Remove the binding `{v:v1}` from the state of the computation.\n   5. The value of the overall `let` construct is `v2`.\n\n",
+     "hash": "3f940784dbf11812",
+     "he": "1. זהה את המבנה התחבירי העליון של $$E$$ — במקרה שלנו מבנה `let`.\n2. זהה את תת-הביטויים המיידיים של $$E$$ — במקרה שלנו — מבנה הקשירה `v=12` והגוף (שאר $$E$$).\n3. בצע את *כלל ההערכה* הספציפי המוגדר עבור המבנה של $$E$$ — במקרה זה — *כלל ההערכה של let* הוא:\n   1. חשב את הערך של `<expr>` בצד ימין של ביטוי הקשירה — נקרא לו `v1`.\n   2. הוסף למצב החישוב את הקשירה `{v:v1}`\n   3. חשב את הערך של תת-ביטוי הגוף — נקרא לו `v2`.\n   4. הסר את הקשירה `{v:v1}` ממצב החישוב.\n   5. הערך של מבנה ה-`let` כולו הוא `v2`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:4",
+     "type": "prose",
+     "en": "This definition of the evaluation function is **recursive**: in steps 3.A and 3.C - we invoked the evaluation function recursively on sub-expressions of $$E$$.\n\n",
+     "hash": "c784018007164c5c",
+     "he": "הגדרה זו של פונקציית ההערכה היא **רקורסיבית**: בצעדים 3.A ו-3.C הפעלנו את פונקציית ההערכה באופן רקורסיבי על תת-ביטויים של $$E$$."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:5",
+     "type": "prose",
+     "en": "The evaluation function refers to a *state* which describes the set of known variables at every single step of the computation, and the values to which they are bound.\n\n",
+     "hash": "11f5b3be54a2825e",
+     "he": "פונקציית ההערכה מתייחסת ל*מצב (state)* המתאר את קבוצת המשתנים המוכרים בכל צעד וצעד של החישוב, ואת הערכים שאליהם הם קשורים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:6",
+     "type": "prose",
+     "en": "This recursive definition must have a base case to terminate. The base case of the recursion consists of evaluating \n**atomic expressions** or to invoke **atomic primitive operators or functions**.  For example:\n",
+     "hash": "ea8777cc1fe3d0ce",
+     "he": "להגדרה רקורסיבית זו חייב להיות מקרה בסיס כדי שתסתיים. מקרה הבסיס של הרקורסיה הוא הערכת **ביטויים אטומיים** או הפעלת **אופרטורים או פונקציות פרימיטיביים אטומיים**. למשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:7",
+     "type": "list",
+     "en": "* The expression `v` is an atomic expression (it has no sub-expressions); it is an expression of type *variable*.\nThe computation rule for evaluating a variable is to lookup its value in the current state of the computation.\nIn our case, the value of the expression `v` is `12`.\n* The expression `7` is an atomic expression of type `number`; The computation rule for evaluating a number is to convert the way numbers are written in the language into a number value.\n* The expression `(v >= 7)` is a compound expression of type `relational operator` with a primitive atomic operator (`>=`); The computation rule for evaluating a relational operator is to (1) evaluate the left side sub-expression (we obtain `12`); (2) evaluate the right-side sub-expression (we obtain `7`); (3) pass the 2 values to the primitive comparison operator which must return a boolean value (in this case `true`).\n\n",
+     "hash": "a1181770fbb3c392",
+     "he": "* הביטוי `v` הוא ביטוי אטומי (אין לו תת-ביטויים); זהו ביטוי מסוג *משתנה (variable)*.\nכלל החישוב להערכת משתנה הוא לחפש (lookup) את ערכו במצב הנוכחי של החישוב.\nבמקרה שלנו, הערך של הביטוי `v` הוא `12`.\n* הביטוי `7` הוא ביטוי אטומי מסוג `number`; כלל החישוב להערכת מספר הוא להמיר את צורת הכתיבה של מספרים בשפה לערך מספרי.\n* הביטוי `(v >= 7)` הוא ביטוי מורכב מסוג `relational operator` (אופרטור השוואה) עם אופרטור אטומי פרימיטיבי (`>=`); כלל החישוב להערכת אופרטור השוואה הוא: (1) להעריך את תת-הביטוי בצד שמאל (מקבלים `12`); (2) להעריך את תת-הביטוי בצד ימין (מקבלים `7`); (3) להעביר את שני הערכים לאופרטור ההשוואה הפרימיטיבי, שחייב להחזיר ערך בוליאני (במקרה זה `true`)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:8",
+     "type": "prose",
+     "en": "#### Reduction of Expressions\n\n",
+     "hash": "a443e8fb72ecc028",
+     "he": "#### רדוקציה (Reduction) של ביטויים"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:9",
+     "type": "prose",
+     "en": "A useful way to think about the evaluation of complex expressions is in terms of **reduction**.\n\n",
+     "hash": "161467ed95a321d6",
+     "he": "דרך שימושית לחשוב על הערכת ביטויים מורכבים היא במונחים של **רדוקציה (reduction)**."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:10",
+     "type": "prose",
+     "en": "Consider the following example (adopted from [PAPL Section 5.6](http://papl.cs.brown.edu/2020/basic-data-expr.html)):\n\n",
+     "hash": "531eab999cdddbb2",
+     "he": "נתבונן בדוגמה הבאה (מעובדת מתוך [PAPL Section 5.6](http://papl.cs.brown.edu/2020/basic-data-expr.html)):"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:11",
+     "type": "prose",
+     "en": "We want to evaluate the following expression, which is a formula for computing the wage of a worker given the number of hours she worked:\n\n",
+     "hash": "dd7fe68cd70ded5a",
+     "he": "אנו רוצים להעריך את הביטוי הבא, שהוא נוסחה לחישוב השכר של עובדת בהינתן מספר השעות שעבדה:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:12",
+     "type": "code",
+     "en": "```typescript\nlet hours=45;\n  (hours <= 40) ? hours * 10 :\n  (hours > 40) ? (40 * 10) + ((hours - 40) * 15) :\n  0\n```\n\n",
+     "hash": "10b56cdea871b1c8",
+     "lang": "typescript",
+     "noteHe": "נוסחת חישוב שכר הכתובה כביטוי יחיד: המשתנה `hours` נקשר ל-`45`, והגוף הוא שרשור של שני ביטויים טרנריים. הענף הראשון בודק האם `hours <= 40` — אם כן, השכר הוא 10 דולר לשעה (`hours * 10`). אם לא, הענף השני בודק האם `hours > 40` — אם כן, משלמים 400 דולר עבור 40 השעות הראשונות ועוד 15 דולר לכל שעה נוספת. הענף האחרון (`0`) הוא ברירת מחדל שלא אמורה לקרות. שימו לב שכל התוכנית היא ביטוי אחד שמוערך לערך — אין כאן משפטים (statements) — וזה בדיוק סגנון ה-FP."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:13",
+     "type": "prose",
+     "en": "This formula in a more explicit form states that:\n\n",
+     "hash": "3eea9d6a1755edc3",
+     "he": "נוסחה זו, בכתיבה מפורשת יותר, אומרת ש:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:14",
+     "type": "code",
+     "en": "```typescript\nif (hours <= 40)\n      hours * 10  // 10$ per hour for less than 40 hours a week\n   else if (hours > 40)\n      (40 * 10) + ((hours - 40) * 15) // 10$/hour up to 40hrs - 15$ above\n   else\n       0  // This should not happen.\n```\n\n\n",
+     "hash": "d24bb52651223ec8",
+     "lang": "typescript",
+     "noteHe": "אותה נוסחת שכר, אך כתובה במבנה `if-else` מפורש כדי להבהיר את הלוגיקה: עד 40 שעות שבועיות — 10 דולר לשעה; מעל 40 שעות — 400 דולר בסיס ועוד 15 דולר עבור כל שעה נוספת מעבר ל-40; והענף האחרון `0` הוא מקרה שלא אמור לקרות (ההערה `This should not happen` מציינת זאת). ההשוואה בין שתי הצורות ממחישה שהביטוי הטרנרי `? :` הוא הגרסה ה\"ביטויית\" של `if-else`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:15",
+     "type": "code",
+     "en": "```typescript\nlet hours=45;\n  (hours <= 40) ? hours * 10 :\n  (hours > 40) ? (40 * 10) + ((hours - 40) * 15) :\n  0\n```\n\n",
+     "hash": "10b56cdea871b1c8",
+     "lang": "typescript",
+     "noteHe": "חוזרים לצורה הביטויית של הנוסחה — זהו הביטוי שעליו נדגים כעת את תהליך הרדוקציה צעד-אחר-צעד: נציב את `45` במקום `hours`, נעריך את התנאים בזה אחר זה, ונצמצם בהדרגה את הביטוי כולו לערך יחיד."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:16",
+     "type": "prose",
+     "en": "Let’s now see how this expression is reduced to a value, using a step-by-step process:\n\n",
+     "hash": "e5a51ccb133e6d1e",
+     "he": "נראה כעת כיצד ביטוי זה עובר רדוקציה לערך, בתהליך צעד-אחר-צעד:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:17",
+     "type": "prose",
+     "en": "The first step is to **substitute the `hours` variable** with 45:\n\n",
+     "hash": "48363a5ed16d43f2",
+     "he": "הצעד הראשון הוא **להציב את הערך 45 במקום המשתנה `hours`**:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:18",
+     "type": "code",
+     "en": "```typescript\n  (45 <= 40) ? 45 * 10 :\n  (45 > 40) ? (40 * 10) + ((45 - 40) * 15) :\n  0\n```\n\n",
+     "hash": "56f2236adad23209",
+     "lang": "typescript",
+     "noteHe": "תוצאת צעד ההצבה (substitution): כל מופע של המשתנה `hours` הוחלף בערכו `45`, ומבנה ה-`let` נעלם. שימו לב שהביטוי עדיין לא חושב — רק הוצב בו הערך; ההערכה של התנאים תתבצע בצעדים הבאים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:19",
+     "type": "prose",
+     "en": "Next, the conditional part of the `?` expression is evaluated, which in this case is false.\n\n",
+     "hash": "937d61a2f4c0ffc4",
+     "he": "בשלב הבא מוערך חלק התנאי של ביטוי ה-`?`, שבמקרה זה הוא false."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:20",
+     "type": "code",
+     "en": "```typescript\n=>  false ? 45 * 10 :\n    (45 > 40): (40 * 10) + ((45 - 40) * 15) :\n    0\n```\n\n",
+     "hash": "00ef9a82be78991c",
+     "lang": "typescript",
+     "noteHe": "צעד רדוקציה נוסף: תת-הביטוי `(45 <= 40)` הוערך והוחלף בערכו `false`. הסימן `=>` מציין \"מצטמצם ל-\". שאר הביטוי נשאר ללא שינוי — בכל צעד מוערך תת-ביטוי אחד בלבד ומוחלף בערכו."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:21",
+     "type": "prose",
+     "en": "Since the condition is false, the next branch is tried. Note that at each step, a sub-expression is evaluated and replaced by its value:\n\n",
+     "hash": "ca10882f368c8ebe",
+     "he": "מכיוון שהתנאי הוא false, עוברים לנסות את הענף הבא. שימו לב שבכל צעד מוערך תת-ביטוי אחד ומוחלף בערכו:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:22",
+     "type": "code",
+     "en": "```typescript\n=>  false ? 45 * 10 :\n    true: (40 * 10) + ((45 - 40) * 15) :\n    0\n```\n\n",
+     "hash": "96073ef6f11b2209",
+     "lang": "typescript",
+     "noteHe": "מכיוון שהענף הראשון נכשל (התנאי `false`), מוערך כעת התנאי של הענף השני: `(45 > 40)` הוחלף בערכו `true`. כעת ברור שהביטוי כולו יצטמצם לגוף של הענף השני."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:23",
+     "type": "prose",
+     "en": "Since the condition is true, the expression reduces to the body of that branch. After that, it’s just arithmetic (but each step is done in a specific order):\n",
+     "hash": "638726f006c1ee26",
+     "he": "מכיוון שהתנאי הוא true, הביטוי מצטמצם לגוף של אותו ענף. מכאן והלאה זו רק אריתמטיקה (אבל כל צעד מתבצע בסדר מוגדר):"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:24",
+     "type": "code",
+     "en": "```typescript\n=>  (40 * 10) + ((45 - 40) * 15)\n=>  400 + ((45 - 40) * 15)\n=>  400 + (5 * 15)\n=>  400 + 75\n=>  475\n```\n\n",
+     "hash": "5058c472c3cfb053",
+     "lang": "typescript",
+     "noteHe": "סיום תהליך הרדוקציה: הביטוי הצטמצם לגוף הענף השני, וכעת בכל שורה מוערך תת-ביטוי אריתמטי אחד ומוחלף בערכו — קודם `40 * 10` הופך ל-`400`, אחר כך `45 - 40` הופך ל-`5`, ואז `5 * 15` הופך ל-`75`, ולבסוף החיבור נותן את הערך הסופי `475`. זהו בדיוק הרעיון של רדוקציה: הביטוי המורכב מצטמצם בהדרגה, צעד-אחר-צעד ובסדר מוגדר, עד שנותר ערך יחיד."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:8:25",
+     "type": "prose",
+     "en": "This style of reduction is the best way to think about the evaluation of complex expressions.\nIt is called a process of **reduction** - because the complex expression is incrementally reduced into a value.\n\n",
+     "hash": "c6bf3e96a2c6ec4a",
+     "he": "סגנון רדוקציה זה הוא הדרך הטובה ביותר לחשוב על הערכת ביטויים מורכבים.\nהתהליך נקרא **רדוקציה (reduction)** — כי הביטוי המורכב מצומצם בהדרגה לכדי ערך."
+    }
+   ],
+   "headingHe": "אלגוריתם ההערכה"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:9",
+   "depth": 2,
+   "headingEn": "Types in Programming Languages",
+   "raw": "## Types in Programming Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:0",
+     "type": "prose",
+     "en": "In the same way as **expressions** can be atomic or compound and built-up into complex recursive programs,\nthe **values** that are generated by programs can be:\n",
+     "hash": "79c313773e187401",
+     "he": "בדיוק כפי ש**ביטויים** יכולים להיות אטומיים או מורכבים ולהיבנות לתוכניות רקורסיביות מורכבות,\nכך גם **הערכים** שתוכניות מייצרות יכולים להיות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:1",
+     "type": "list",
+     "en": "* **atomic values**: values which have no \"sub-components\" - such as numbers or booleans.\n* **compound values**: values which are constructed from sub-values, such as arrays or structures.\n\n",
+     "hash": "34bdbed9f03f874d",
+     "he": "* **ערכים אטומיים (atomic values)**: ערכים שאין להם \"תת-רכיבים\" — כגון מספרים או ערכים בוליאניים.\n* **ערכים מורכבים (compound values)**: ערכים הבנויים מתת-ערכים, כגון מערכים (arrays) או מבנים (structures)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:2",
+     "type": "prose",
+     "en": "Compound values can be created in the following manner:\n",
+     "hash": "9c8a1c559cda9ed6",
+     "he": "ערכים מורכבים יכולים להיווצר בדרכים הבאות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:3",
+     "type": "list",
+     "en": "* Specified as **constant literal values** in the program; for example the expression `[1,2,3]` denotes in JavaScript an array value containing 3 number components.\n* Computed by **primitive constructor** functions - for example, the expression `[1].concat([12])` returns a new array value containing 2 number components `[1,12]`.\n* **Deserialized from strings** that represent compound values according to a value syntax (we will see in the next lecture the example of JSON).\n\n",
+     "hash": "72abff76d1cf4732",
+     "he": "* מצוינים כ**ערכים ליטרליים קבועים (constant literal values)** בתוכנית; למשל, הביטוי `[1,2,3]` מציין ב-JavaScript ערך מערך המכיל 3 רכיבי מספר.\n* מחושבים על ידי פונקציות **בנאי פרימיטיביות (primitive constructor)** — למשל, הביטוי `[1].concat([12])` מחזיר ערך מערך חדש המכיל 2 רכיבי מספר `[1,12]`.\n* **עוברים דה-סריאליזציה (deserialization) ממחרוזות** המייצגות ערכים מורכבים לפי תחביר ערכים (בהרצאה הבאה נראה את הדוגמה של JSON)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:4",
+     "type": "prose",
+     "en": "**NOTE 1**: the capability to specify compound values as literal constants is a characteristic of dynamic languages such as JavaScript, Scheme or Python.  \nIt is more difficult to *write down compound values* in languages such as Java or C++.\nWe will return to this important distinction later.\n\n",
+     "hash": "c2d3ac1165977ea5",
+     "he": "**הערה 1**: היכולת לציין ערכים מורכבים כקבועים ליטרליים היא מאפיין של שפות דינמיות כגון JavaScript, Scheme או Python.\nקשה יותר *לכתוב ערכים מורכבים במפורש* בשפות כגון Java או C++.\nנחזור להבחנה חשובה זו בהמשך."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:9:5",
+     "type": "prose",
+     "en": "**NOTE 2**: the distinction that a value is atomic depends on a language design decision: for example, strings in JavaScript are defined to be immutable atomic values.  \nThis is because there is no accessor that can take apart a string into characters and mutate one of these parts in place.  \nIn contrast, in C and C++, strings are mutable compound (non-atomic) values (arrays of characters). \nThere are functions in JavaScript that can compute a sub-string of a string, but these are string constructors - they compute a new string given another string as input, not accessors which give access to a part of an existing compound string.\n\n\n",
+     "hash": "978680428aab8967",
+     "he": "**הערה 2**: ההגדרה של ערך כאטומי תלויה בהחלטת תכנון של השפה: למשל, מחרוזות ב-JavaScript מוגדרות כערכים אטומיים בלתי-ניתנים-לשינוי (immutable).\nזאת משום שאין פונקציית גישה (accessor) שיכולה לפרק מחרוזת לתווים ולשנות אחד מהחלקים הללו במקום (in place).\nלעומת זאת, ב-C וב-C++ מחרוזות הן ערכים מורכבים (לא אטומיים) ניתנים לשינוי (מערכים של תווים).\nיש ב-JavaScript פונקציות שיכולות לחשב תת-מחרוזת של מחרוזת, אך אלו הן בנאיות מחרוזות — הן מחשבות מחרוזת חדשה בהינתן מחרוזת אחרת כקלט, ולא פונקציות גישה המעניקות גישה לחלק ממחרוזת מורכבת קיימת."
+    }
+   ],
+   "headingHe": "טיפוסים בשפות תכנות"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:10",
+   "depth": 3,
+   "headingEn": "Typed vs. Untyped Languages",
+   "raw": "### Typed vs. Untyped Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:10:0",
+     "type": "prose",
+     "en": "As you have noted, JavaScript is an **untyped language** - this means: when we declare variables (using the `let` construct)\nor functions (with the `function` or `=>` constructs), we do not specify the type of the variables or parameters.\nWe also do not need to specify the type returned by the function.\n\n",
+     "hash": "97bc6a180b525c89",
+     "he": "כפי ששמתם לב, JavaScript היא **שפה לא מטופסת (untyped)** — כלומר: כשאנו מצהירים על משתנים (באמצעות מבנה `let`) או על פונקציות (עם המבנים `function` או `=>`), איננו מציינים את הטיפוס של המשתנים או הפרמטרים.\nאיננו נדרשים גם לציין את הטיפוס שהפונקציה מחזירה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:10:1",
+     "type": "prose",
+     "en": "This is in contrast to **typed languages** such as Java and C++ - which require the programmer to specify the type\nof all variables before they can be defined or used.\n\n",
+     "hash": "71880132283d9ba9",
+     "he": "זאת בניגוד ל**שפות מטופסות (typed)** כגון Java ו-C++ — הדורשות מהמתכנת לציין את הטיפוס של כל המשתנים לפני שניתן להגדירם או להשתמש בהם."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:10:2",
+     "type": "prose",
+     "en": "Yet - even if **variables** are not declared with a type in Javascript, **values** in JavaScript **do have** a type -- they can be either `number` or `string` or `boolean` or compound values.\n\n",
+     "hash": "5bcd10993793df58",
+     "he": "ובכל זאת — גם אם **משתנים** אינם מוצהרים עם טיפוס ב-JavaScript, ל**ערכים** ב-JavaScript **כן יש** טיפוס — הם יכולים להיות `number` או `string` או `boolean` או ערכים מורכבים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:10:3",
+     "type": "prose",
+     "en": "Why would we want or not want to declare the type of variables? \n\n",
+     "hash": "ced428659bd1a24f",
+     "he": "מדוע נרצה — או לא נרצה — להצהיר על הטיפוס של משתנים?"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:10:4",
+     "type": "prose",
+     "en": "What are the benefits of each of the approaches?\n\n\n",
+     "hash": "4b7e053f130c766c",
+     "he": "מהם היתרונות של כל אחת מהגישות?"
+    }
+   ],
+   "headingHe": "שפות מטופסות (Typed) לעומת לא מטופסות (Untyped)"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:11",
+   "depth": 3,
+   "headingEn": "Typing Errors at Runtime",
+   "raw": "### Typing Errors at Runtime\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:0",
+     "type": "prose",
+     "en": "In the description of the evaluation function above, we indicated that expressions are traversed recursively, til \natomic expressions are evaluated (into numbers, booleans or strings) and primitive operators or functions are invoked\n(for example `(v >= 7)`).  \n\n",
+     "hash": "1f259360abf64f51",
+     "he": "בתיאור פונקציית ההערכה למעלה ציינו שביטויים נסרקים באופן רקורסיבי, עד שביטויים אטומיים מוערכים (למספרים, ערכים בוליאניים או מחרוזות) ואופרטורים או פונקציות פרימיטיביים מופעלים (למשל `(v >= 7)`)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:1",
+     "type": "prose",
+     "en": "When primitive operators or functions are invoked - we can obtain errors at runtime because the value which is passed to the operator does not fit the type of the primitive operator.  \nFor example, in most languages, the evaluation of `(7 >= \"a\")` or `(8 + \"b\")`would return an error at runtime because the \noperators `\">=\"` and `+` do not know how to operate on a mixture of numbers and strings.\nThis will be the case in Scheme for example as we will see in Chapter 2.\n\n",
+     "hash": "59bc9c987d7ea833",
+     "he": "כאשר אופרטורים או פונקציות פרימיטיביים מופעלים — אנו עלולים לקבל שגיאות בזמן ריצה, משום שהערך המועבר לאופרטור אינו מתאים לטיפוס של האופרטור הפרימיטיבי.\nלמשל, ברוב השפות, הערכה של `(7 >= \"a\")` או `(8 + \"b\")` תחזיר שגיאה בזמן ריצה, כי האופרטורים `\">=\"` ו-`+` אינם יודעים לפעול על תערובת של מספרים ומחרוזות.\nכך יהיה למשל ב-Scheme, כפי שנראה בפרק 2."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:2",
+     "type": "prose",
+     "en": "#### JavaScript Primitives do not Fail\n\n",
+     "hash": "cb9aaf57f95b3531",
+     "he": "#### פרימיטיבים ב-JavaScript אינם נכשלים"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:3",
+     "type": "prose",
+     "en": "In JavaScript, the language designers took a different approach: they made the primitive operators extremely flexible and robust.  So that evaluations of *strange expressions* do not trigger a runtime error - but instead do either automatic conversions or return special values indicating an *impossible value*.\n\n",
+     "hash": "e55395b2a8f6428b",
+     "he": "ב-JavaScript, מעצבי השפה נקטו גישה שונה: הם הפכו את האופרטורים הפרימיטיביים לגמישים ועמידים במיוחד. כך שהערכות של *ביטויים מוזרים* אינן מפעילות שגיאת זמן ריצה — אלא מבצעות המרות אוטומטיות או מחזירות ערכים מיוחדים המציינים *ערך בלתי אפשרי*."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:4",
+     "type": "prose",
+     "en": "For example:\n\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "למשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:5",
+     "type": "code",
+     "en": "```typescript\n\"a\" > 2\n// => false\n```\n\n",
+     "hash": "f98d31da60206cec",
+     "lang": "typescript",
+     "noteHe": "השוואה בין מחרוזת למספר: במקום להיכשל, JavaScript מנסה להמיר את `\"a\"` למספר, מקבלת `NaN`, וכל השוואה מול `NaN` מחזירה `false`. זו דוגמה לגמישות \"העמידה\" של הפרימיטיבים — אין שגיאה, אבל התוצאה עלולה להפתיע."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:6",
+     "type": "code",
+     "en": "```typescript\n2 + \"ab\"\n// =>    '2ab'\n```\n",
+     "hash": "e9efdee9a856290a",
+     "lang": "typescript",
+     "noteHe": "חיבור מספר ומחרוזת: האופרטור `+` מבצע כאן המרה אוטומטית של המספר `2` למחרוזת `'2'` ואז שרשור מחרוזות, והתוצאה היא `'2ab'`. שימו לב ש-`+` על מחרוזת פירושו שרשור ולא חיבור אריתמטי — עוד דוגמה להמרה אוטומטית שקטה במקום שגיאה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:7",
+     "type": "code",
+     "en": "```typescript\n\"a\" * 2\n// =>    NaN\n```\n",
+     "hash": "055f4d4c18a001c6",
+     "lang": "typescript",
+     "noteHe": "כפל של מחרוזת במספר: האופרטור `*` מוגדר רק על מספרים, ולכן JavaScript מנסה להמיר את `\"a\"` למספר. ההמרה נכשלת ומתקבל הערך המיוחד `NaN` (\"Not a Number\") — ערך שמסמן \"ערך בלתי אפשרי\" במקום להרים שגיאת זמן ריצה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:8",
+     "type": "prose",
+     "en": "`NaN` is a special value which means *\"Not a Number\"*.\n\n",
+     "hash": "e5b6588d4982e6b3",
+     "he": "`NaN` הוא ערך מיוחד שמשמעותו *\"Not a Number\"* (לא מספר)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:9",
+     "type": "code",
+     "en": "```typescript\n\"a\" && true\n// =>     true\n```\n\n",
+     "hash": "8bf17e80ed248006",
+     "lang": "typescript",
+     "noteHe": "שימוש במחרוזת כאופרנד בוליאני: מחרוזת לא ריקה כמו `\"a\"` נחשבת \"truthy\", ולכן `&&` ממשיך ומחזיר את האופרנד השני, `true`. זו דוגמה לכך שערכים לא בוליאניים מפורשים כבוליאניים כשהם מופיעים כארגומנטים של אופרטורים בוליאניים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:10",
+     "type": "prose",
+     "en": "Non-boolean values are interpreted as boolean when they appear as arguments to boolean operators such as `&&` and `||`.\nArithmetic operations are defined over strings and numbers.\n\n",
+     "hash": "520684bea1249538",
+     "he": "ערכים לא בוליאניים מפורשים כבוליאניים כשהם מופיעים כארגומנטים של אופרטורים בוליאניים כגון `&&` ו-`||`.\nפעולות אריתמטיות מוגדרות הן על מחרוזות והן על מספרים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:11",
+     "type": "prose",
+     "en": "So that overall - primitive operations in JavaScript do not fail easily.\n\n",
+     "hash": "c4c0288a1bcd0d8b",
+     "he": "כך שבסך הכול — פעולות פרימיטיביות ב-JavaScript אינן נכשלות בקלות."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:12",
+     "type": "prose",
+     "en": "This is a dubious decision - as such automatic handling of unexpected variations is most often a sign of poorly written code\nand produces *surprising* results.\n\n",
+     "hash": "007700eac36a039e",
+     "he": "זוהי החלטה מפוקפקת — שכן טיפול אוטומטי כזה במקרים לא צפויים הוא לרוב סימן לקוד כתוב גרוע, והוא מייצר תוצאות *מפתיעות*."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:13",
+     "type": "prose",
+     "en": "#### Accessors to Compound Values in JavaScript do not Fail\n\n",
+     "hash": "bb416069703ee3b7",
+     "he": "#### פונקציות גישה לערכים מורכבים ב-JavaScript אינן נכשלות"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:14",
+     "type": "prose",
+     "en": "Another decision of the JavaScript designers was to make access to compound values \"robust\" against runtime errors as well:\n",
+     "hash": "0a010d0d80247568",
+     "he": "החלטה נוספת של מעצבי JavaScript הייתה להפוך גם את הגישה לערכים מורכבים ל\"עמידה\" בפני שגיאות זמן ריצה:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:15",
+     "type": "list",
+     "en": "* Accessing an index out of bounds in an array returns the special value `undefined`\n* Accessing an undefined key in a map returns the special value `undefined` as well.\n\n\n",
+     "hash": "dabe860bd4203ba4",
+     "he": "* גישה לאינדקס מחוץ לתחום במערך מחזירה את הערך המיוחד `undefined`\n* גישה למפתח לא מוגדר במפה (map) מחזירה גם היא את הערך המיוחד `undefined`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:16",
+     "type": "code",
+     "en": "```typescript\nlet arr=[1];\n    arr[4]\n// =>    undefined\n```\n\n",
+     "hash": "9dc456e27ab82dba",
+     "lang": "typescript",
+     "noteHe": "גישה לאינדקס מחוץ לתחום: המערך `arr` מכיל איבר אחד בלבד (באינדקס 0), אך הגישה `arr[4]` אינה מרימה שגיאה — היא מחזירה בשקט את הערך המיוחד `undefined`. בשפות כמו Java פעולה כזו הייתה זורקת חריגה (exception)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:17",
+     "type": "code",
+     "en": "```typescript\nlet map={a:1, b:2}\n    map.c\n// =>  undefined\n```\n\n",
+     "hash": "600918d1fb3587e9",
+     "lang": "typescript",
+     "noteHe": "גישה למפתח שאינו קיים במפה: ל-`map` יש רק את המפתחות `a` ו-`b`, אך הגישה `map.c` אינה נכשלת — היא מחזירה `undefined`. שוב, JavaScript מעדיפה ערך מיוחד \"שקט\" על פני שגיאת זמן ריצה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:18",
+     "type": "prose",
+     "en": "#### Undefined Variables in JavaScript do Fail\n\n",
+     "hash": "2a6f392a075db5b6",
+     "he": "#### משתנים לא מוגדרים ב-JavaScript כן נכשלים"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:19",
+     "type": "prose",
+     "en": "Variables access, however, **can fail**: trying to access an undefined variable raises an error at runtime.\nWhen variable expressions are evaluated, it may turn out that the variable is not defined in the current state of the program at the time its value is looked up.  \n\n",
+     "hash": "f0379e7951ea06c3",
+     "he": "גישה למשתנים, לעומת זאת, **יכולה להיכשל**: ניסיון לגשת למשתנה לא מוגדר מרים שגיאה בזמן ריצה.\nכאשר ביטויי משתנה מוערכים, עשוי להתברר שהמשתנה אינו מוגדר במצב הנוכחי של התוכנית ברגע שבו מחפשים את ערכו."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:20",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "למשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:21",
+     "type": "code",
+     "en": "```typescript\nlet b=2;\n    c; // Trigger a reference error\n// => ReferenceError: c is not defined\n```\n\n",
+     "hash": "2bcef5e732fdf467",
+     "lang": "typescript",
+     "noteHe": "כאן מוגדר רק המשתנה `b`, ולאחר מכן מנסים להעריך את ביטוי המשתנה `c` — שאינו קשור לשום ערך במצב הנוכחי של התוכנית. בניגוד לגישה למפתח חסר במפה (שמחזירה `undefined`), גישה למשתנה לא מוגדר כן מרימה שגיאת זמן ריצה: `ReferenceError`. זו נקודה חשובה לבחינה — להבחין אילו פעולות ב-JavaScript נכשלות ואילו לא."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:22",
+     "type": "prose",
+     "en": "Similarly, trying to access a key from an `undefined` value triggers an error at runtime:\n\n",
+     "hash": "49ba037684700716",
+     "he": "באופן דומה, ניסיון לגשת למפתח מתוך ערך `undefined` מפעיל שגיאה בזמן ריצה:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:11:23",
+     "type": "code",
+     "en": "```typescript\ne.k \n// => ReferenceError: e is not defined\n```\n\n",
+     "hash": "e3633a25c17247a7",
+     "lang": "typescript",
+     "noteHe": "ניסיון לגשת למפתח `k` של משתנה `e` שכלל לא הוגדר: ההערכה של `e` עצמו נכשלת עוד לפני הגישה למפתח, ולכן מתקבלת `ReferenceError`. באופן דומה, גם גישה למפתח של ערך שהוא `undefined` (למשל `map.c.x`) תרים שגיאה בזמן ריצה."
+    }
+   ],
+   "headingHe": "שגיאות טיפוס בזמן ריצה"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:12",
+   "depth": 2,
+   "headingEn": "Type Safety",
+   "raw": "## Type Safety\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:0",
+     "type": "prose",
+     "en": "Now that we have seen which errors can be triggered when executing a JavaScript program - and which *surprising* results may be returned when we combine unexpected value types in primitive operators invocations - we return to our question:\n",
+     "hash": "18833c69f5831e30",
+     "he": "כעת, לאחר שראינו אילו שגיאות עלולות להתרחש בעת הרצת תוכנית JavaScript — ואילו תוצאות *מפתיעות* עשויות להתקבל כשאנו משלבים טיפוסי ערכים לא צפויים בהפעלות של אופרטורים פרימיטיביים — נחזור לשאלה שלנו:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:1",
+     "type": "list",
+     "en": "* Can we avoid such errors and surprises?\n* What are the benefits of declaring the types of variables?\n\n",
+     "hash": "f88af342b68f01ee",
+     "he": "* האם נוכל להימנע משגיאות והפתעות כאלה?\n* מהם היתרונות של הצהרה על טיפוסי המשתנים?"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:2",
+     "type": "prose",
+     "en": "**Type safety** (see [Wikipedia Type Safety](https://en.wikipedia.org/wiki/Type_safety)) is *the extent to which a programming language discourages or prevents type errors. A type error is erroneous or undesirable program behaviour caused by a discrepancy between differing data types for the program's constants, variables, and methods (functions), e.g., treating an integer (int) as a floating-point number (float).*\n\n",
+     "hash": "ca16e95c7bd629b9",
+     "he": "**בטיחות טיפוסים (Type safety)** (ראו [Wikipedia Type Safety](https://en.wikipedia.org/wiki/Type_safety)) היא *המידה שבה שפת תכנות מרתיעה מפני שגיאות טיפוס או מונעת אותן. שגיאת טיפוס (type error) היא התנהגות שגויה או לא רצויה של תוכנית, הנגרמת מאי-התאמה בין טיפוסי נתונים שונים של הקבועים, המשתנים והמתודות (פונקציות) של התוכנית — למשל, התייחסות למספר שלם (int) כאל מספר נקודה צפה (float).*"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:3",
+     "type": "prose",
+     "en": "Type enforcement can be either:\n",
+     "hash": "6e3a302ab73cc230",
+     "he": "אכיפת טיפוסים יכולה להיות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:4",
+     "type": "list",
+     "en": "* **static**, catching potential errors at compile time, \n* or **dynamic**, associating type information with values at run-time and consulting them as needed to detect imminent errors,\n* or a combination of both.\n\n",
+     "hash": "234537bac4f6d12c",
+     "he": "* **סטטית (static)** — תופסת שגיאות פוטנציאליות בזמן קומפילציה,\n* או **דינמית (dynamic)** — מצמידה מידע על טיפוסים לערכים בזמן ריצה ובודקת אותו לפי הצורך כדי לזהות שגיאות מתקרבות,\n* או שילוב של שתיהן."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:5",
+     "type": "prose",
+     "en": "In the context of static (compile-time) type systems, type safety usually involves a **guarantee that the eventual value of any expression will be a legitimate member of that expression's static type**.\n\n",
+     "hash": "98e95d1cdd57422c",
+     "he": "בהקשר של מערכות טיפוסים סטטיות (בזמן קומפילציה), בטיחות טיפוסים כוללת בדרך כלל **ערובה לכך שהערך הסופי של כל ביטוי יהיה איבר לגיטימי של הטיפוס הסטטי של אותו ביטוי**."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:12:6",
+     "type": "prose",
+     "en": "We will develop the notion of type safety incrementally, after we discuss what are types.\n\n",
+     "hash": "0d163f5134dcbfb7",
+     "he": "נפתח את מושג בטיחות הטיפוסים בהדרגה, לאחר שנדון בשאלה מהם טיפוסים."
+    }
+   ],
+   "headingHe": "בטיחות טיפוסים (Type Safety)"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:13",
+   "depth": 2,
+   "headingEn": "Types of Values",
+   "raw": "## Types of Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:0",
+     "type": "prose",
+     "en": "A data type is a classification of data which indicates what the programmer intends to do with the data. \nData types are defined along 2 aspects:\n",
+     "hash": "f0dbc23dbe0640f4",
+     "he": "טיפוס נתונים (data type) הוא סיווג של נתונים המציין מה המתכנת מתכוון לעשות עם הנתונים.\nטיפוסי נתונים מוגדרים לפי 2 היבטים:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:1",
+     "type": "list",
+     "en": "* Types correspond to **sets of values** - for example, the type `Boolean` is the set of values {`true`, `false`};\n  the type `Number` is the (possibly infinite) set of numeric values.\n* Types define the **operations that can be done on data values** in the set.  For example, values of type `Boolean` can be\n  computed using logical operators such as `and`, `or`; `Number` values can be manipulated with operators `+`, `*` and\n  compared with operators such as `<`, `>`.\n  \n",
+     "hash": "ec197f95e4152c64",
+     "he": "* טיפוסים מתאימים ל**קבוצות של ערכים** — למשל, הטיפוס `Boolean` הוא קבוצת הערכים {`true`, `false`};\n  הטיפוס `Number` הוא קבוצת הערכים המספריים (שעשויה להיות אינסופית).\n* טיפוסים מגדירים את **הפעולות שניתן לבצע על ערכי הנתונים** בקבוצה. למשל, ערכים מטיפוס `Boolean` ניתנים לחישוב באמצעות אופרטורים לוגיים כגון `and`, `or`; ערכי `Number` ניתנים לעיבוד עם האופרטורים `+`, `*` ולהשוואה עם אופרטורים כגון `<`, `>`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:2",
+     "type": "prose",
+     "en": "Types also determine how the interpreter reads and writes the values, and how it stores the values in memory. \n\n",
+     "hash": "1104169880e24420",
+     "he": "טיפוסים קובעים גם כיצד המפרש (interpreter) קורא וכותב את הערכים, וכיצד הוא מאחסן אותם בזיכרון."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:3",
+     "type": "prose",
+     "en": "When discussing types, we must distinguish the **type of a value** and the **type of a variable**:\n",
+     "hash": "e682db07ede78c86",
+     "he": "כשדנים בטיפוסים, עלינו להבחין בין **הטיפוס של ערך** ל**טיפוס של משתנה**:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:4",
+     "type": "list",
+     "en": "* **Values** always have a type - that is, they belong to a specific set of values. The number `3` belongs to the set of `number` values; the value `true` belongs to the set of `boolean` values.\n* **Variables** are parts of the programming language expressions. They are bound to values as the expressions are computed at runtime.  When a programmer declares that a *variable has a type* - the meaning is that we express the intent of the programmer that this variable can **only be bound to values of this type** during the lifecycle of the variable. It states a constraint on the variable usage.  \n\n",
+     "hash": "5e03071f138868c5",
+     "he": "* ל**ערכים** תמיד יש טיפוס — כלומר, הם שייכים לקבוצת ערכים מסוימת. המספר `3` שייך לקבוצת ערכי `number`; הערך `true` שייך לקבוצת ערכי `boolean`.\n* **משתנים** הם חלקים מהביטויים של שפת התכנות. הם נקשרים לערכים כאשר הביטויים מחושבים בזמן ריצה. כאשר מתכנת מצהיר ש*למשתנה יש טיפוס* — המשמעות היא שאנו מבטאים את כוונת המתכנת שמשתנה זה יכול **להיקשר רק לערכים מטיפוס זה** במהלך מחזור החיים של המשתנה. זוהי הצהרה על אילוץ (constraint) על השימוש במשתנה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:13:5",
+     "type": "prose",
+     "en": "In most typed languages, this constraint can be checked at compile time: this is an extremely strong result.  It means that the compiler can at compile time guarantee that all possible executions of the program, with all possible input values will satisfy the stated constraint.  This static verification (that is, a verification performed at compile-time - without knowing the value of the variables) is called **type checking**.\n\n",
+     "hash": "f59f36ba85d67131",
+     "he": "ברוב השפות המטופסות, ניתן לבדוק אילוץ זה בזמן קומפילציה: זוהי תוצאה חזקה במיוחד. משמעותה שהמהדר יכול להבטיח בזמן קומפילציה שכל הריצות האפשריות של התוכנית, עם כל ערכי הקלט האפשריים, יקיימו את האילוץ המוצהר. אימות סטטי זה (כלומר, אימות המתבצע בזמן קומפילציה — ללא ידיעת ערכי המשתנים) נקרא **בדיקת טיפוסים (type checking)**."
+    }
+   ],
+   "headingHe": "טיפוסים של ערכים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:14",
+   "depth": 2,
+   "headingEn": "Value Types",
+   "raw": "## Value Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:14:0",
+     "type": "prose",
+     "en": "As mentioned, a value always has a type - this simply states that a value belongs to a set of values.\nFor example, the value `1` belongs to the set of values `number` - which means that the value `1` has type `number`.\n\n",
+     "hash": "a717e7ffc447b7a8",
+     "he": "כאמור, לערך תמיד יש טיפוס — פירוש הדבר פשוט שהערך שייך לקבוצת ערכים.\nלמשל, הערך `1` שייך לקבוצת הערכים `number` — כלומר לערך `1` יש טיפוס `number`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:14:1",
+     "type": "prose",
+     "en": "In most cases, a value will have more than one type: consider for example the case of *sub-types*\nsuch as `Integer` and `Number`. `Integer` as a set of values is a proper subset of `Number` as a set of values.\nThis means in particular that a value like `6` belongs both to the type `Integer` and to the type `Number`.\n\n",
+     "hash": "865734f1f9c153bb",
+     "he": "ברוב המקרים, לערך יהיה יותר מטיפוס אחד: חשבו למשל על המקרה של *תת-טיפוסים (sub-types)* כגון `Integer` ו-`Number`. הקבוצה `Integer` כקבוצת ערכים היא תת-קבוצה ממש של `Number` כקבוצת ערכים.\nפירוש הדבר, בפרט, שערך כמו `6` שייך גם לטיפוס `Integer` וגם לטיפוס `Number`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:14:2",
+     "type": "prose",
+     "en": "A good type system helps programmers not only declare the intended types of variables to obtain type safety,\nit also helps the programmer **design the range of values** the program will process and produce.\nThis is a constructive process which helps structure the set of all possible values in meaningful ways\nand also document the domain upon which programs operate.  \n\n",
+     "hash": "7af209ffd6385938",
+     "he": "מערכת טיפוסים (type system) טובה עוזרת למתכנתים לא רק להצהיר על הטיפוסים המיועדים של משתנים כדי להשיג בטיחות טיפוסים,\nאלא גם עוזרת למתכנת **לתכנן את טווח הערכים** שהתוכנית תעבד ותייצר.\nזהו תהליך בונה שעוזר לארגן את קבוצת כל הערכים האפשריים בדרכים משמעותיות,\nוגם לתעד את התחום (domain) שעליו התוכניות פועלות."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:14:3",
+     "type": "prose",
+     "en": "As we write more complex programs over more complex data structures - we will feel more strongly the benefit \nof describing precise data types - which will also guide the structure of the code we write to operate over them.\n\n\n",
+     "hash": "63d7c2afaa0cdf8c",
+     "he": "ככל שנכתוב תוכניות מורכבות יותר על מבני נתונים מורכבים יותר — נחוש ביתר שאת את התועלת שבתיאור טיפוסי נתונים מדויקים — שגם ינחו את מבנה הקוד שנכתוב כדי לפעול עליהם."
+    }
+   ],
+   "headingHe": "טיפוסי ערכים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:15",
+   "depth": 3,
+   "headingEn": "Types and Set Relations",
+   "raw": "### Types and Set Relations\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:0",
+     "type": "prose",
+     "en": "Since types denote set of values, we can define relations among types that are similar to set relations:\n",
+     "hash": "3379f57de56ba38e",
+     "he": "מכיוון שטיפוסים מציינים קבוצות של ערכים, נוכל להגדיר יחסים בין טיפוסים הדומים ליחסים בין קבוצות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:1",
+     "type": "list",
+     "en": "* Type T1 can be a subset of type T2: this means any value of type T1 is also a value of type T2.  We also say that T1 is a subtype of T2.\n* Types T1 and T2 can be disjoint - meaning there are no values that are both of type T1 and T2.  For example, \n`number` and `boolean` are disjoint. \n* One can define a universal type - which is the type of all possible values.  (This type is exists in TypeScript and is called `any`).\n* Some types denote finite sets (`boolean` has 2 values), others are infinite (`number`, `string`). \n* One can construct new types on the basis of existing types: \n  * The union of T1 and T2 contains all the values of T1 and T2 together.\n  * The intersection of T1 and T2.\n  * The cartesian product of T1 and T2 would be the type that contains pairs of values (v1, v2) such that v1 is of type T1 and v2 is of type T2.\n  \n",
+     "hash": "c9a1dfb38325d40a",
+     "he": "* טיפוס T1 יכול להיות תת-קבוצה של טיפוס T2: פירוש הדבר שכל ערך מטיפוס T1 הוא גם ערך מטיפוס T2. אנו אומרים גם ש-T1 הוא תת-טיפוס (subtype) של T2.\n* הטיפוסים T1 ו-T2 יכולים להיות זרים (disjoint) — כלומר אין ערכים שהם גם מטיפוס T1 וגם מטיפוס T2. למשל, `number` ו-`boolean` זרים.\n* ניתן להגדיר טיפוס אוניברסלי — שהוא הטיפוס של כל הערכים האפשריים. (טיפוס זה קיים ב-TypeScript ונקרא `any`).\n* חלק מהטיפוסים מציינים קבוצות סופיות (ל-`boolean` יש 2 ערכים), אחרים אינסופיים (`number`, `string`).\n* ניתן לבנות טיפוסים חדשים על בסיס טיפוסים קיימים:\n  * האיחוד (union) של T1 ו-T2 מכיל את כל הערכים של T1 ושל T2 יחד.\n  * החיתוך (intersection) של T1 ו-T2.\n  * המכפלה הקרטזית של T1 ו-T2 תהיה הטיפוס המכיל זוגות ערכים (v1, v2) כך ש-v1 מטיפוס T1 ו-v2 מטיפוס T2."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:2",
+     "type": "prose",
+     "en": "This last construction opens the door to compound data types - that is, types which contains values that have sub-components.\n\n",
+     "hash": "1f7c3ed0eb933a72",
+     "he": "הבנייה האחרונה הזו פותחת את הדלת לטיפוסי נתונים מורכבים — כלומר, טיפוסים המכילים ערכים בעלי תת-רכיבים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:3",
+     "type": "prose",
+     "en": "We will see later that most typed programming languages allow programmers to define new types (user-defined types) on the basis of primitive types (types provided by the language) by using set theory operations like Union, Intersection or Cartesian Product.\n\n",
+     "hash": "537c5e7b50baf671",
+     "he": "נראה בהמשך שרוב שפות התכנות המטופסות מאפשרות למתכנתים להגדיר טיפוסים חדשים (טיפוסים מוגדרי-משתמש) על בסיס טיפוסים פרימיטיביים (טיפוסים שהשפה מספקת) באמצעות פעולות מתורת הקבוצות כמו איחוד (Union), חיתוך (Intersection) או מכפלה קרטזית (Cartesian Product)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:4",
+     "type": "prose",
+     "en": "Different languages offer various levels of introspection (often called *reflection*) to enable the analysis of\nthe type of values *at runtime*, or *at interpretation/compile time*. \n\n",
+     "hash": "69f02c7b504b7c1e",
+     "he": "שפות שונות מציעות רמות שונות של אינטרוספקציה (המכונה לעיתים קרובות *רפלקציה — reflection*) המאפשרת לנתח את הטיפוס של ערכים *בזמן ריצה*, או *בזמן פירוש/קומפילציה*."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:5",
+     "type": "prose",
+     "en": "In JavaScript (the underlying language into which TypeScript is translated), variables are not typed, values have a type (which is encoded in the binary representation of the values in memory) and the `typeof` primitive operator can be used to inspect the type of values at runtime.  Primitives in JavaScript use this introspection mechanism to decide how to operate on each combination of value types they receive as parameters.\n\n",
+     "hash": "b6bd01f975be299d",
+     "he": "ב-JavaScript (השפה הבסיסית שאליה מתורגם TypeScript), משתנים אינם מטופסים, לערכים יש טיפוס (המקודד בייצוג הבינארי של הערכים בזיכרון), והאופרטור הפרימיטיבי `typeof` יכול לשמש לבדיקת הטיפוס של ערכים בזמן ריצה. הפרימיטיבים ב-JavaScript משתמשים במנגנון אינטרוספקציה זה כדי להחליט כיצד לפעול על כל צירוף של טיפוסי ערכים שהם מקבלים כפרמטרים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:15:6",
+     "type": "prose",
+     "en": "In contrast, in Java and C/C++, primitive values (non-object values such as integers, booleans, characters, pointers and references) cannot be inspected at runtime: values of different types (for example a char, a boolean or an integer) are encoded in binary format in RAM without any distinctive sign that could be used at runtime to determine that the value belongs to different types.\n\n",
+     "hash": "a1c3c27c75eb366f",
+     "he": "לעומת זאת, ב-Java וב-C/C++, ערכים פרימיטיביים (ערכים שאינם אובייקטים, כגון מספרים שלמים, ערכים בוליאניים, תווים, מצביעים והפניות) אינם ניתנים לבדיקה בזמן ריצה: ערכים מטיפוסים שונים (למשל char, boolean או int) מקודדים בפורמט בינארי ב-RAM ללא כל סימן מבחין שניתן להשתמש בו בזמן ריצה כדי לקבוע שהערך שייך לטיפוסים שונים."
+    }
+   ],
+   "headingHe": "טיפוסים ויחסים בין קבוצות"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:16",
+   "depth": 2,
+   "headingEn": "Types in TypeScript",
+   "raw": "## Types in TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:16:0",
+     "type": "prose",
+     "en": "We now describe the basic data types manipulated in TypeScript.\nThe online reference is available in the [TypeScript Tutorial](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html): \n\n",
+     "hash": "abe454c4c6498055",
+     "he": "כעת נתאר את טיפוסי הנתונים הבסיסיים שבהם עובדים ב-TypeScript.\nהתיעוד המקוון זמין ב-[TypeScript Tutorial](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html):"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:16:1",
+     "type": "prose",
+     "en": "TypeScript is a language built on top of JavaScript: it adds optional **type declarations** to variables (which do not exist \nin JavaScript). The TypeScript compiler (invoked by the command line tool `tsc`) translates TypeScript into JavaScript.\nDuring the translation, the TypeScript compiler performs **type checking** - which we will explain later.\n\n\n",
+     "hash": "ec3eca6eae530898",
+     "he": "TypeScript היא שפה הבנויה מעל JavaScript: היא מוסיפה **הצהרות טיפוס (type declarations)** אופציונליות למשתנים (שאינן קיימות ב-JavaScript). המהדר של TypeScript (המופעל באמצעות כלי שורת הפקודה `tsc`) מתרגם TypeScript ל-JavaScript.\nבמהלך התרגום, המהדר של TypeScript מבצע **בדיקת טיפוסים (type checking)** — אותה נסביר בהמשך."
+    }
+   ],
+   "headingHe": "טיפוסים ב-TypeScript"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:17",
+   "depth": 3,
+   "headingEn": "Atomic Primitive Value Types",
+   "raw": "### Atomic Primitive Value Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:0",
+     "type": "prose",
+     "en": "Simple values can have the following primitive data types in TypeScript:\n",
+     "hash": "8a4824097bf4d6d3",
+     "he": "לערכים פשוטים יכולים להיות טיפוסי הנתונים הפרימיטיביים הבאים ב-TypeScript:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:1",
+     "type": "list",
+     "en": "* Boolean: `true`, `false`;\n* Number: floating point numbers; `6, 6.1, -4, 0xf0a` (hexadecimal notation)\n* String: immutable sequences of characters, `\"this is a string\"`.\n\n\n",
+     "hash": "1da2866c9b16723b",
+     "he": "* Boolean: הערכים `true`, `false`;\n* Number: מספרי נקודה צפה; `6, 6.1, -4, 0xf0a` (כתיב הקסדצימלי)\n* String: סדרות בלתי-ניתנות-לשינוי (immutable) של תווים, `\"this is a string\"`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:2",
+     "type": "code",
+     "en": "```typescript\nconsole.log(typeof(6))\nconsole.log(typeof(true))\nconsole.log(typeof(\"a\"))\n// =>     number\n//        boolean\n//        string\n```\n\n",
+     "hash": "65d0c9b9a915cb34",
+     "lang": "typescript",
+     "noteHe": "הדגמה של האופרטור `typeof`, הבודק את טיפוס הערך בזמן ריצה: עבור `6` הוא מחזיר את המחרוזת `number`, עבור `true` — `boolean`, ועבור `\"a\"` — `string`. אלו שלושת הטיפוסים האטומיים הפרימיטיביים העיקריים. `console.log` פשוט מדפיס את התוצאה למסך."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:3",
+     "type": "prose",
+     "en": "There are two *special* value types that are not useful on their own - but will play an important role when we start\nbuilding more complex types:\n",
+     "hash": "42b564644dd7e0e1",
+     "he": "ישנם שני טיפוסי ערכים *מיוחדים* שאינם שימושיים בפני עצמם — אך ימלאו תפקיד חשוב כשנתחיל לבנות טיפוסים מורכבים יותר:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:4",
+     "type": "list",
+     "en": "* **null**: this is a type that contains only the special value `null`\n* **undefined**: this is a type that contains only the special value `undefined`\n\n",
+     "hash": "680da7c55b33550f",
+     "he": "* **null**: זהו טיפוס המכיל רק את הערך המיוחד `null`\n* **undefined**: זהו טיפוס המכיל רק את הערך המיוחד `undefined`"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:5",
+     "type": "prose",
+     "en": "`undefined` plays a special role in the lifecycle of variables.  We will return to this when we discuss the types of\nvariables (as opposed to the type of values which are we now reviewing).\n\n\n",
+     "hash": "60bcfca46326f623",
+     "he": "ל-`undefined` תפקיד מיוחד במחזור החיים של משתנים. נחזור לכך כשנדון בטיפוסים של משתנים (להבדיל מהטיפוסים של ערכים, שאותם אנו סוקרים כעת)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:6",
+     "type": "code",
+     "en": "```typescript\nlet null1 = null;\nlet undef = undefined;\n\nconsole.log(typeof(null1));\nconsole.log(typeof(undef));\n\n// =>     object\n//        undefined\n```\n\n",
+     "hash": "0cff6ed2ae834120",
+     "lang": "typescript",
+     "noteHe": "בדיקת `typeof` על שני הערכים המיוחדים: המשתנה `null1` קשור ל-`null` והמשתנה `undef` ל-`undefined`. שימו לב לתוצאה המפתיעה: `typeof null` מחזיר `object` ולא `null` — זהו באג היסטורי מפורסם ב-JavaScript שמעולם לא תוקן (ראו ההערה בהמשך). לעומת זאת, `typeof undefined` מחזיר כצפוי `undefined`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:17:7",
+     "type": "prose",
+     "en": "*NOTE*:\n*the value of the expression `typeof null` returns `object` - this is a well-known error in JavaScript that\nhas not yet been cleaned up - `null` should still be understood as a distinct atomic primitive value type - not as a compound type.*\n\n",
+     "hash": "e751600a2018db0f",
+     "he": "*הערה*:\n*הערך של הביטוי `typeof null` הוא `object` — זוהי שגיאה ידועה ב-JavaScript שטרם תוקנה — יש להבין את `null` כטיפוס ערך פרימיטיבי אטומי נפרד, ולא כטיפוס מורכב.*"
+    }
+   ],
+   "headingHe": "טיפוסי ערכים פרימיטיביים אטומיים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:18",
+   "depth": 2,
+   "headingEn": "Compound Value Types",
+   "raw": "## Compound Value Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:0",
+     "type": "prose",
+     "en": "In contrast to atomic values, one can also define *compound values* - which are values that are built from multiple parts.\nThere are two basic compound types in TypeScript:\n",
+     "hash": "622f4d6b03cba927",
+     "he": "בניגוד לערכים אטומיים, ניתן להגדיר גם *ערכים מורכבים* — ערכים הבנויים מכמה חלקים.\nישנם שני טיפוסים מורכבים בסיסיים ב-TypeScript:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:1",
+     "type": "list",
+     "en": "* Arrays\n* Maps\n\n",
+     "hash": "4f3ccbabf46c1ffb",
+     "he": "* מערכים (Arrays)\n* מפות (Maps)"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:2",
+     "type": "prose",
+     "en": "Values of arrays are written as literal constants of the form `[1, 2, 3]`.\n\n",
+     "hash": "ced497dfa084672e",
+     "he": "ערכי מערכים נכתבים כקבועים ליטרליים מהצורה `[1, 2, 3]`."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:3",
+     "type": "prose",
+     "en": "Maps are written as literal constants of the form: `{ a : 1, b : 2 }`\n\n",
+     "hash": "a7a71155fbf622c0",
+     "he": "מפות נכתבות כקבועים ליטרליים מהצורה: `{ a : 1, b : 2 }`"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:4",
+     "type": "prose",
+     "en": "Any value that is not an atomic value is a *compound value* - which is called in Javascript an *object* value.\n\n",
+     "hash": "2c39abfef105bbc5",
+     "he": "כל ערך שאינו ערך אטומי הוא *ערך מורכב* — המכונה ב-JavaScript ערך *object*."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:5",
+     "type": "prose",
+     "en": "*NOTE*:\nThe term of **object** is confusing in this context - it does not refer to *objects* as used in the more standard \ncontext of *object oriented programming*.  *Object* in this context means any value which is *not* an atomic value type.\n\n\n",
+     "hash": "ae608827a1049db7",
+     "he": "*הערה*:\nהמונח **object** מבלבל בהקשר זה — הוא אינו מתייחס ל*אובייקטים* במובן המקובל של *תכנות מונחה עצמים*. *Object* בהקשר זה פירושו כל ערך ש*אינו* מטיפוס ערך אטומי."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:6",
+     "type": "code",
+     "en": "```typescript\nlet arr1 = [1, 2, 3],\n    arr2 = ['a', 'b', 'c'];\n  console.log(typeof(arr1));\n  console.log(typeof(arr2));\n\n// =>     object\n//       object\n```\n\n",
+     "hash": "91fa7a742c8ba144",
+     "lang": "typescript",
+     "noteHe": "כאן מוגדרים שני מערכים — `arr1` של מספרים ו-`arr2` של מחרוזות — ועל שניהם `typeof` מחזיר את אותה תשובה: `object`. כלומר, `typeof` אינו מבחין בין מערך של מספרים למערך של מחרוזות, ואפילו לא בין מערך למפה — כל ערך מורכב הוא פשוט `object` מבחינתו."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:7",
+     "type": "code",
+     "en": "```typescript\nlet map1 = { a : 1, b : 2},\n    map2 = { 'a' : 1, 'b' : 2};\n  console.log(typeof(map1));\n  console.log(typeof(map2));\n\n// =>     object\n//       object\n```\n\n",
+     "hash": "7032d2cc65f49208",
+     "lang": "typescript",
+     "noteHe": "אותה בדיקה על מפות: `map1` ו-`map2` הן למעשה אותה מפה — מפתחות שהם מחרוזות יכולים להיכתב עם או בלי מירכאות. גם כאן `typeof` מחזיר `object` עבור שתיהן, מה שממחיש שוב את המגבלה של האופרטור: הוא אינו מסוגל להבחין בין סוגים שונים של ערכים מורכבים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:8",
+     "type": "prose",
+     "en": "*NOTE:*\nNotice that the primitive `typeof` operator is limited in its capability to distinguish the types of values, even if they are \nvery different.  We will see later that TypeScript improves on this operator tremendously.\n\n",
+     "hash": "61182e2d4778186e",
+     "he": "*הערה:*\nשימו לב שהאופרטור הפרימיטיבי `typeof` מוגבל ביכולתו להבחין בין טיפוסי ערכים, גם כשהם שונים מאוד זה מזה. נראה בהמשך ש-TypeScript משפרת אופרטור זה במידה עצומה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:9",
+     "type": "prose",
+     "en": "More specific reflection operators allow finer distinction in the types of values, for example:\n\n\n",
+     "hash": "38ad4ad98b9b6aff",
+     "he": "אופרטורים רפלקטיביים ספציפיים יותר מאפשרים הבחנה עדינה יותר בין טיפוסי ערכים, למשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:10",
+     "type": "code",
+     "en": "```typescript\nlet arrIns = [1, 2],\n    mapIns = { a:1 }\n  console.log(arrIns instanceof Array);\n  console.log(mapIns instanceof Array);\n\n// =>    true\n//       false\n```\n\n",
+     "hash": "5457de66532063b3",
+     "lang": "typescript",
+     "noteHe": "האופרטור `instanceof` מדגים רפלקציה (reflection) עדינה יותר מ-`typeof`: הביטוי `arrIns instanceof Array` מחזיר `true` כי `arrIns` הוא אכן מערך, ואילו `mapIns instanceof Array` מחזיר `false` כי מפה אינה מערך. כך ניתן להבחין בזמן ריצה בין מערך למפה — הבחנה ש-`typeof` אינו מסוגל לעשות."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:11",
+     "type": "prose",
+     "en": "Compound values can be entered as constant literals (as above) or can be constructed by invoking the appropriate constructors\nand mutators (functions which incrementally change a value).\n\n",
+     "hash": "b01113054c441426",
+     "he": "ערכים מורכבים יכולים להיכתב כליטרלים קבועים (כמו למעלה) או להיבנות על ידי הפעלת הבנאים (constructors) המתאימים ופונקציות שינוי (mutators — פונקציות המשנות ערך באופן הדרגתי)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:12",
+     "type": "prose",
+     "en": "For example:\n\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "למשל:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:13",
+     "type": "code",
+     "en": "```typescript\nlet arrConstructed = Array(1,2,3)\n  arrConstructed\n// =>     [ 1, 2, 3 ]\n```\n\n",
+     "hash": "035a6a659566c081",
+     "lang": "typescript",
+     "noteHe": "בנייה של מערך באמצעות הבנאי `Array` במקום ליטרל: הקריאה `Array(1,2,3)` מייצרת מערך זהה לחלוטין לליטרל `[1, 2, 3]`. זו הדגמה שערכים מורכבים יכולים להיווצר גם על ידי קריאה לפונקציית בנאי, לא רק בכתיב ליטרלי."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:18:14",
+     "type": "code",
+     "en": "```typescript\nlet mapConstructed = {}\n  mapConstructed.a = 1\n  mapConstructed.b = 2\n  mapConstructed\n// =>  { a: 1, b: 2 }\n```\n\n",
+     "hash": "3f67029ece64bd6a",
+     "lang": "typescript",
+     "noteHe": "בנייה הדרגתית של מפה באמצעות פונקציות שינוי (mutation): מתחילים ממפה ריקה `{}`, ואז כל השמה כמו `mapConstructed.a = 1` מוסיפה מפתח וערך למפה הקיימת — כלומר משנה את הערך במקום (in place). התוצאה הסופית זהה לליטרל `{ a: 1, b: 2 }`. שימו לב שזהו סגנון אימפרטיבי — בתכנות פונקציונלי טהור נימנע משינוי כזה של ערכים."
+    }
+   ],
+   "headingHe": "טיפוסי ערכים מורכבים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:19",
+   "depth": 3,
+   "headingEn": "Compound Value Getters",
+   "raw": "### Compound Value Getters\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:0",
+     "type": "prose",
+     "en": "Compound values can be \"taken apart\" by using getters - for arrays, using indexes which refer to the positions of the items\nwithin the array, and for maps using key values.  In addition, the `slice()` method of arrays can return a range of values from within the array:\n\n\n",
+     "hash": "61dd0100de436328",
+     "he": "ניתן \"לפרק\" ערכים מורכבים באמצעות פונקציות גישה (getters) — במערכים, באמצעות אינדקסים המתייחסים למיקומי האיברים בתוך המערך, ובמפות באמצעות ערכי מפתח. בנוסף, המתודה `slice()` של מערכים יכולה להחזיר טווח של ערכים מתוך המערך:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:1",
+     "type": "code",
+     "en": "```typescript\nlet arrInd = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n    console.log(arrInd[0])          // Array indexes start at 0\n    console.log(arrInd[1])\n    console.log(arrInd.slice(1))    // Extract from item 1 to the end.\n    console.log(arrInd.slice(1,4))  // Extract from item 1 to 4 - 4 not included.\n\n// =>     a\n//    b\n//    [ 'b', 'c', 'd', 'e' ]\n//    [ 'b', 'c', 'd' ]\n```\n\n",
+     "hash": "20fa09b8abdd2d93",
+     "lang": "typescript",
+     "noteHe": "הדגמת פונקציות גישה למערך: אינדקסים מתחילים מ-0, ולכן `arrInd[0]` מחזיר `a` ו-`arrInd[1]` מחזיר `b`. המתודה `slice(1)` מחזירה מערך חדש מהאיבר באינדקס 1 ועד הסוף, ו-`slice(1,4)` מחזירה את האיברים מאינדקס 1 עד 4 — כאשר אינדקס 4 עצמו אינו נכלל (טווח \"חצי פתוח\"). חשוב לזכור: `slice` אינה משנה את המערך המקורי אלא בונה מערך חדש."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:2",
+     "type": "prose",
+     "en": "Maps are collections of pairs (key, value).\n\n",
+     "hash": "bfa7991b62a29e4b",
+     "he": "מפות הן אוספים של זוגות (מפתח, ערך)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:3",
+     "type": "prose",
+     "en": "Map getters use the key to access the value.\n\n",
+     "hash": "4a575df415bd59b7",
+     "he": "פונקציות הגישה של מפות משתמשות במפתח כדי לגשת לערך."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:4",
+     "type": "prose",
+     "en": "Alternatively, the dot notation `m.k` can be used when the key is a string.\n\n\n",
+     "hash": "e019c0630e99e728",
+     "he": "לחלופין, ניתן להשתמש בכתיב הנקודה `m.k` כאשר המפתח הוא מחרוזת."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:5",
+     "type": "code",
+     "en": "```typescript\nlet mapInd = { a : 1, b : 2 }   // Note that keys which are strings in key position can skip the quotes - this is the same as { \"a\" : 1, \"b\" : 2}\n    console.log(mapInd['a'])\n    console.log(mapInd.a)\n    console.log(mapInd['b'])\n    console.log(mapInd.b)\n\n// =>     1\n//    1\n//    2\n//    2\n```\n\n",
+     "hash": "209c884e7197b76c",
+     "lang": "typescript",
+     "noteHe": "שתי דרכים שקולות לגשת לערך במפה: כתיב הסוגריים `mapInd['a']` וכתיב הנקודה `mapInd.a` — שניהם מחזירים `1`. ההערה בקוד מזכירה שמפתחות שהם מחרוזות יכולים להיכתב ללא מירכאות בעמדת המפתח, כך ש-`{ a : 1 }` זהה ל-`{ \"a\" : 1 }`. כתיב הנקודה נוח יותר, אך עובד רק כשהמפתח הוא מחרוזת חוקית כשם מזהה."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:6",
+     "type": "prose",
+     "en": "The method `Object.keys(x)` returns the list of the keys which are defined for any compound values.\nIt operates both on arrays (the keys are the indexes) and on maps.\n\n",
+     "hash": "3b36e3ff0ccfa2cf",
+     "he": "המתודה `Object.keys(x)` מחזירה את רשימת המפתחות המוגדרים עבור כל ערך מורכב.\nהיא פועלת הן על מערכים (המפתחות הם האינדקסים) והן על מפות."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:7",
+     "type": "code",
+     "en": "```typescript\nlet mapKey = { a : 1, b : 2},\n    arrKey = ['a', 'b', 'c'];\n  console.log(Object.keys(mapKey));\n  console.log(Object.keys(arrKey));\n\n// =>    [ 'a', 'b' ]\n//    [ '0', '1', '2' ]\n```\n",
+     "hash": "a7d91dfc7917f24a",
+     "lang": "typescript",
+     "noteHe": "הפעלת `Object.keys` על מפה מחזירה את רשימת המפתחות שלה (`[ 'a', 'b' ]`), ועל מערך — את רשימת האינדקסים שלו. שימו לב לפרט המפתיע: האינדקסים מוחזרים כמחרוזות (`'0'`, `'1'`, `'2'`) ולא כמספרים. זה ממחיש שמערך ב-JavaScript הוא בעצם סוג של מפה שהמפתחות שלה הם אינדקסים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:8",
+     "type": "prose",
+     "en": "Alternatively, one can use the generalized `for` loops over arrays and maps:\n\n\n",
+     "hash": "5e94e75215baa00e",
+     "he": "לחלופין, ניתן להשתמש בלולאות `for` המוכללות על מערכים ומפות:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:19:9",
+     "type": "code",
+     "en": "```typescript\n// The backquote notation can be used to generate \"interpolated strings\"\n// The notation ${expression} in such a string is replaced by the value of the expression converted to a string.\nfor (let k in mapKey) {\n  console.log(`${k} has value ${mapKey[k]}`);  \n}\nfor (let i in arrKey) {\n  console.log(`${i} has value ${arrKey[i]}`);\n}\n// =>\n//    a has value 1\n//    b has value 2\n//    0 has value a\n//    1 has value b\n//    2 has value c\n```\n\n",
+     "hash": "bbb98e3c1446a935",
+     "lang": "typescript",
+     "noteHe": "לולאת `for...in` עוברת על כל המפתחות של ערך מורכב: במפה `mapKey` המשתנה `k` מקבל בתורו את `a` ואת `b`, ובמערך `arrKey` המשתנה `i` מקבל את האינדקסים `0`, `1`, `2`. בתוך הלולאה ניגשים לערך באמצעות `mapKey[k]` או `arrKey[i]`. ההערות בקוד מסבירות גם את כתיב הגרש ההפוך (backquote) ליצירת \"מחרוזות משורבבות\" (interpolated strings): הביטוי `${expression}` בתוך מחרוזת כזו מוחלף בערך הביטוי מומר למחרוזת."
+    }
+   ],
+   "headingHe": "פונקציות גישה (Getters) לערכים מורכבים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:20",
+   "depth": 2,
+   "headingEn": "Variable Types in TypeScript: Gradual Typing",
+   "raw": "## Variable Types in TypeScript: Gradual Typing\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:0",
+     "type": "prose",
+     "en": "In *static languages* like C++ and Java, variables must be typed - that is, when a variable is defined, its type must be declared by the programmer. \n\n",
+     "hash": "e8a469dfae574def",
+     "he": "ב*שפות סטטיות* כמו C++ ו-Java, משתנים חייבים להיות מטופסים — כלומר, כאשר מגדירים משתנה, המתכנת חייב להצהיר על הטיפוס שלו."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:1",
+     "type": "prose",
+     "en": "In *dynamically typed languages* like JavaScript and Scheme, variables are not typed.  \nBut when a variable is bound to a value, we can inspect its type at runtime (because values are always typed).\n\n",
+     "hash": "90866a32c34581b4",
+     "he": "ב*שפות מטופסות דינמית* כמו JavaScript ו-Scheme, משתנים אינם מטופסים.\nאבל כאשר משתנה קשור לערך, נוכל לבדוק את הטיפוס שלו בזמן ריצה (כי לערכים תמיד יש טיפוס)."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:2",
+     "type": "prose",
+     "en": "TypeScript extends JavaScript and introduces *optional variable types*.\nTypeScript is compiled into JavaScript - and at compilation time, type checking is performed.\nThere is no additional type checking happening at runtime after compilation has completed.\n\n",
+     "hash": "a413a9f68de95622",
+     "he": "TypeScript מרחיבה את JavaScript ומציגה *טיפוסי משתנים אופציונליים*.\nTypeScript מהודרת ל-JavaScript — ובזמן ההידור מתבצעת בדיקת טיפוסים.\nלא מתבצעת בדיקת טיפוסים נוספת בזמן ריצה לאחר שההידור הסתיים."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:3",
+     "type": "prose",
+     "en": "Typing annotations can be introduced gradually as code matures.\n(See [Wikipedia Gradual Typing](https://en.wikipedia.org/wiki/Gradual_typing)).\n\n",
+     "hash": "6a639dd4a7457faa",
+     "he": "ניתן להוסיף הערות טיפוס (type annotations) בהדרגה ככל שהקוד מבשיל.\n(ראו [Wikipedia Gradual Typing](https://en.wikipedia.org/wiki/Gradual_typing))."
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:4",
+     "type": "prose",
+     "en": "Typing a variable means that the programmer declares how she intends to use the variable - which values it can be bound to.\nIn TypeScript, this is performed by adding a type annotation to variable declarations:\n\n\n",
+     "hash": "0924aaf2b5166ccb",
+     "he": "טיפוס של משתנה פירושו שהמתכנתת מצהירה כיצד בכוונתה להשתמש במשתנה — לאילו ערכים הוא יכול להיקשר.\nב-TypeScript, הדבר נעשה על ידי הוספת הערת טיפוס (type annotation) להצהרות משתנים:"
+    },
+    {
+     "id": "cm/1.1TypescriptDatatypes:20:5",
+     "type": "code",
+     "en": "```typescript\nlet typedVarNum  : number = 6,\n    typedVarStr  : string = \"blue\",\n    typedVarBool : boolean = true;\n```\n\n\n",
+     "hash": "33537c00d04b5f1b",
+     "lang": "typescript",
+     "noteHe": "כך נראות הערות טיפוס (type annotations) ב-TypeScript: אחרי שם המשתנה מוסיפים נקודתיים ואת שם הטיפוס — `typedVarNum : number` מצהיר שהמשתנה יכול להיקשר רק לערכי `number`, וכן הלאה עבור `string` ו-`boolean`. המהדר `tsc` יאכוף את האילוצים הללו בזמן קומפילציה: השמה של מחרוזת ל-`typedVarNum`, למשל, תיכשל בבדיקת הטיפוסים."
+    }
+   ],
+   "headingHe": "טיפוסי משתנים ב-TypeScript: טיפוס הדרגתי (Gradual Typing)"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:21",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [],
+   "headingHe": "סיכום"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:22",
+   "depth": 3,
+   "headingEn": "Concepts",
+   "raw": "### Concepts\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:22:0",
+     "type": "list",
+     "en": "* Programming Language *semantics* defines the requirements for tools that manipulate programs: interpreters, compilers, debuggers etc.  It helps determine whether 2 programs are equivalent.\n* The *Operational Semantics* of programming language defines the meaning of programs by mapping programs to evaluation histories. \n* *Operational semantics* provide recursive *evaluation rules* for each specific syntactic construct in a programming language.\n\n* *Expressions* in an FP language are computed into *values*. This process can be described as *reduction*.\n\n* *Runtime errors* can be triggered when parameters of the wrong type are passed to primitives (in Scheme) or when undefined variables are accessed.\n* *Type safety* guarantees at compile time that a well-typed program will not lead to type runtime errors. It requires that the compiler determines the type of variables - which means to which types of values the variable can ever be bound.\n\n* *Data types* are defined by 2 aspects: they are *sets of values* and they determine which *operations can be used on values*.\n* *Values* can be *atomic* (no sub-part) or *compound* (made up of multiple parts).\n\n* TypeScript adds the option of *gradual typing* on top of JavaScript\n* *Primitive atomic types* in TypeScript are *number*, *boolean*, *string*, *undefined* and *null*.\n* *Primitive compound types* in TypeScript are *array* and *map*.\n\n",
+     "hash": "cd27749371976248",
+     "he": "* *הסמנטיקה* של שפת תכנות מגדירה את הדרישות מכלים המעבדים תוכניות: מפרשים, מהדרים, כלי דיבוג וכו'. היא עוזרת לקבוע האם 2 תוכניות הן שקולות.\n* *הסמנטיקה האופרציונלית* של שפת תכנות מגדירה את משמעות התוכניות על ידי מיפוי תוכניות להיסטוריות הערכה.\n* *סמנטיקה אופרציונלית* מספקת *כללי הערכה* רקורסיביים לכל מבנה תחבירי ספציפי בשפת התכנות.\n\n* *ביטויים* בשפת FP מחושבים ל*ערכים*. ניתן לתאר תהליך זה כ*רדוקציה (reduction)*.\n\n* *שגיאות זמן ריצה* עלולות להתרחש כאשר פרמטרים מהטיפוס הלא נכון מועברים לפרימיטיבים (ב-Scheme) או כאשר ניגשים למשתנים לא מוגדרים.\n* *בטיחות טיפוסים (type safety)* מבטיחה בזמן קומפילציה שתוכנית מטופסת היטב (well-typed) לא תוביל לשגיאות טיפוס בזמן ריצה. היא דורשת שהמהדר יקבע את הטיפוס של משתנים — כלומר לאילו טיפוסי ערכים המשתנה יכול אי-פעם להיקשר.\n\n* *טיפוסי נתונים* מוגדרים לפי 2 היבטים: הם *קבוצות של ערכים* והם קובעים אילו *פעולות ניתן להפעיל על הערכים*.\n* *ערכים* יכולים להיות *אטומיים* (ללא תת-חלקים) או *מורכבים* (בנויים מכמה חלקים).\n\n* TypeScript מוסיפה את האפשרות של *טיפוס הדרגתי (gradual typing)* מעל JavaScript\n* *הטיפוסים האטומיים הפרימיטיביים* ב-TypeScript הם *number*, *boolean*, *string*, *undefined* ו-*null*.\n* *הטיפוסים המורכבים הפרימיטיביים* ב-TypeScript הם *array* (מערך) ו-*map* (מפה)."
+    }
+   ],
+   "headingHe": "מושגים"
+  },
+  {
+   "id": "cm/1.1TypescriptDatatypes:23",
+   "depth": 3,
+   "headingEn": "Compound Types Operations",
+   "raw": "### Compound Types Operations\n",
+   "blocks": [
+    {
+     "id": "cm/1.1TypescriptDatatypes:23:0",
+     "type": "list",
+     "en": "* Literal constants for arrays are written as `[1, 2, 3]`\n* Literal constants for maps are written as `{ k1 : 1, k2 : 2}`\n* Parts of an array are accessed using number indexes starting with 0: `arr[0], arr[1]`\n* Parts of a map are accessed using key indexes: `map[k1]` or the dot notation `map.k1`\n* The list of indexes that can be used to access parts of a compound values is returned by `Object.keys(value)`\n  or using the construct `for (let k in object) { ... }`.\n\n\n",
+     "hash": "74315ff3f88af43c",
+     "he": "* קבועים ליטרליים של מערכים נכתבים בצורה `[1, 2, 3]`\n* קבועים ליטרליים של מפות נכתבים בצורה `{ k1 : 1, k2 : 2}`\n* לחלקים של מערך ניגשים באמצעות אינדקסים מספריים המתחילים מ-0: `arr[0], arr[1]`\n* לחלקים של מפה ניגשים באמצעות אינדקסי מפתח: `map[k1]` או בכתיב הנקודה `map.k1`\n* רשימת האינדקסים שניתן להשתמש בהם כדי לגשת לחלקים של ערך מורכב מוחזרת על ידי `Object.keys(value)`\n  או באמצעות המבנה `for (let k in object) { ... }`."
+    }
+   ],
+   "headingHe": "פעולות על טיפוסים מורכבים"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהי הסמנטיקה האופרציונלית (operational semantics) של שפת תכנות?",
+   "options": [
+    "תיאור של כללי התחביר הקובעים אילו תוכניות חוקיות בשפה",
+    "הגדרת משמעות של ביטוי באמצעות החישוב שהוא מחולל כשהוא מורץ על מכונה, צעד אחר צעד, תוך מעקב אחר מצב החישוב",
+    "תרגום של התוכנית לשפת מכונה עם פירוט האוגרים והזיכרון",
+    "אוסף כללי הסגנון המומלצים לכתיבת תוכניות בשפה"
+   ],
+   "correct": 1,
+   "explanationHe": "סמנטיקה אופרציונלית קובעת שמשמעות של ביטוי היא החישוב שהוא מחולל: כללי הערכה המפרטים כיצד להריץ את התוכנית צעד-אחר-צעד, תוך רישום המצב (state) בכל צעד. מסיח 1 מתאר תחביר (syntax) ולא סמנטיקה; מסיח 3 שגוי כי הסמנטיקה היא הפשטה שאינה עוסקת בחומרה, אוגרים או קידוד בזיכרון; מסיח 4 אינו קשור כלל להגדרה פורמלית של משמעות."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "מה ההבדל המהותי בין משפט (statement) לביטוי (expression)?",
+   "options": [
+    "משפט הוא יחידת ביצוע שמשנה את מצב התוכנית או את העולם, ואילו ביטוי מוערך (evaluated) לערך",
+    "ביטוי תמיד אטומי ואילו משפט תמיד מורכב",
+    "משפטים קיימים רק בשפות פונקציונליות וביטויים רק בשפות אימפרטיביות",
+    "אין הבדל — אלו שני שמות לאותו מושג"
+   ],
+   "correct": 0,
+   "explanationHe": "בתכנות אימפרטיבי תוכניות בנויות ממשפטים — יחידות ביצוע שיש להן השפעה (על המסך, הדיסק או זיכרון התהליך). בתכנות פונקציונלי תוכניות הן ביטויים, ואיננו 'מבצעים' אותם אלא מחשבים את ערכם (הערכה). מסיח 2 שגוי — גם משפטים וגם ביטויים יכולים להיות אטומיים או מורכבים; מסיח 3 הפוך מהאמת — משפטים מאפיינים דווקא שפות אימפרטיביות."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה יודפס בכל אחת מהשורות הבאות ב-JavaScript?\n```typescript\nconsole.log(2 + \"ab\");\nconsole.log(\"a\" * 2);\nconsole.log(\"a\" > 2);\nconsole.log([1][4]);\nconsole.log(typeof null);\n```",
+   "answerHe": "יודפס: `'2ab'`, אחר כך `NaN`, אחר כך `false`, אחר כך `undefined`, ולבסוף `object`.",
+   "explanationHe": "הפרימיטיבים של JavaScript אינם נכשלים: `+` בין מספר למחרוזת מבצע המרה ושרשור (`'2ab'`); `*` מנסה להמיר את `\"a\"` למספר ונכשל — ומחזיר `NaN`; השוואה מול מחרוזת שאינה מספר מחזירה `false`; גישה לאינדקס מחוץ לתחום מחזירה `undefined` ולא שגיאה; ו-`typeof null` מחזיר `object` — באג היסטורי ידוע בשפה, אף ש-`null` הוא טיפוס אטומי נפרד."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "אילו מהפעולות הבאות כן מרימות שגיאה בזמן ריצה ב-JavaScript?",
+   "options": [
+    "גישה לאינדקס מחוץ לתחום במערך, כמו `arr[100]`",
+    "גישה למפתח שאינו קיים במפה, כמו `map.c`",
+    "גישה למשתנה שלא הוגדר, כמו הערכת `c` כאשר `c` אינו מוגדר",
+    "חיבור מספר ומחרוזת, כמו `2 + \"ab\"`"
+   ],
+   "correct": 2,
+   "explanationHe": "גישה למשתנה לא מוגדר מרימה `ReferenceError` בזמן ריצה — זהו המקרה שבו JavaScript כן נכשלת. לעומת זאת, גישה לאינדקס מחוץ לתחום או למפתח חסר מחזירה בשקט `undefined`, וחיבור מספר ומחרוזת מבצע המרה אוטומטית ושרשור. הבחנה זו — מה נכשל ומה מחזיר ערך מיוחד — היא נקודה קלאסית לבחינה."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "הראו את תהליך הרדוקציה (reduction) המלא, צעד אחר צעד, של הביטוי הבא:\n```typescript\nlet x = 10;\n  (x > 5) ? (x - 5) * 2 : x + 1\n```",
+   "answerHe": "1. הצבת `10` במקום `x`: `(10 > 5) ? (10 - 5) * 2 : 10 + 1`\n2. הערכת התנאי: `true ? (10 - 5) * 2 : 10 + 1`\n3. התנאי אמת — הביטוי מצטמצם לגוף הענף: `(10 - 5) * 2`\n4. `=> 5 * 2`\n5. `=> 10`",
+   "explanationHe": "נקודות מפתח: תחילה מצבים (substitution) את ערך המשתנה בכל מופעיו; אחר כך מעריכים את התנאי של הביטוי הטרנרי ומחליפים אותו בערכו הבוליאני; מכיוון שהתנאי `true`, כל הביטוי מצטמצם לענף ה-then בלבד (הענף השני כלל לא מוערך); ולבסוף מבצעים את האריתמטיקה תת-ביטוי אחרי תת-ביטוי, בסדר מוגדר, עד קבלת ערך יחיד."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הסבירו את ההבדל בין הטיפוס של ערך (value) לטיפוס של משתנה (variable). מדוע ניתן לומר ש-JavaScript היא שפה לא מטופסת (untyped) למרות שלכל ערך בה יש טיפוס?",
+   "answerHe": "לערך תמיד יש טיפוס — הוא שייך לקבוצת ערכים מסוימת (למשל `3` שייך לקבוצת ערכי `number`), וזה נכון בכל שפה. טיפוס של משתנה, לעומת זאת, הוא הצהרת כוונה של המתכנת: אילוץ שקובע שהמשתנה יכול להיקשר רק לערכים מהטיפוס המוצהר לאורך כל מחזור חייו. JavaScript נקראת לא מטופסת כי בהצהרת משתנים (`let`) ופונקציות אין מציינים טיפוס למשתנים, לפרמטרים או לערך המוחזר — אך הערכים עצמם כן נושאים טיפוס בזמן ריצה, וניתן לבדוק אותו עם `typeof`. בשפות מטופסות כמו Java ו-C++ המהדר בודק את האילוץ בזמן קומפילציה (type checking) ומבטיח שכל הריצות האפשריות יקיימו אותו.",
+   "explanationHe": "נקודות שחייבות להופיע: ערכים תמיד בעלי טיפוס (שייכות לקבוצת ערכים); טיפוס משתנה הוא אילוץ/הצהרת כוונה על הקשירות האפשריות; 'לא מטופסת' מתייחס להיעדר הצהרות טיפוס על משתנים, לא להיעדר טיפוסים לערכים; והקשר לבדיקת טיפוסים סטטית בזמן קומפילציה בשפות מטופסות."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "מהו טיפוס הדרגתי (gradual typing) ב-TypeScript?",
+   "options": [
+    "מנגנון שמוסיף בדיקות טיפוסים בזמן ריצה מעבר לבדיקות של JavaScript",
+    "האפשרות להוסיף הערות טיפוס (type annotations) אופציונליות בהדרגה ככל שהקוד מבשיל, כשבדיקת הטיפוסים מתבצעת בזמן ההידור בלבד",
+    "דרישה שכל המשתנים יקבלו טיפוס לפני שהקוד מתקמפל",
+    "המרה אוטומטית של טיפוסים בזמן ריצה, כמו המרת מספר למחרוזת"
+   ],
+   "correct": 1,
+   "explanationHe": "TypeScript מוסיפה טיפוסי משתנים אופציונליים מעל JavaScript: אפשר לטפס רק חלק מהקוד ולהוסיף הערות טיפוס בהדרגה. בדיקת הטיפוסים מתבצעת על ידי המהדר `tsc` בזמן ההידור ל-JavaScript — ואין שום בדיקת טיפוסים נוספת בזמן ריצה (ולכן מסיח 1 שגוי). מסיח 3 שגוי כי הטיפוס אופציונלי ולא חובה; מסיח 4 מתאר את ההמרות האוטומטיות של JavaScript, לא את gradual typing."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "טיפוסים מציינים קבוצות של ערכים. תארו את היחסים בין טיפוסים במונחים של תורת הקבוצות: תת-טיפוס, טיפוסים זרים, טיפוס אוניברסלי, ודרכי בנייה של טיפוסים חדשים. תנו דוגמה לכל מושג.",
+   "answerHe": "טיפוס T1 הוא תת-טיפוס (subtype) של T2 אם קבוצת הערכים של T1 היא תת-קבוצה של זו של T2 — כל ערך של T1 הוא גם ערך של T2; למשל `Integer` הוא תת-טיפוס של `Number`, ולכן `6` שייך לשניהם. טיפוסים זרים (disjoint) הם טיפוסים ללא ערכים משותפים — למשל `number` ו-`boolean`. טיפוס אוניברסלי הוא הטיפוס של כל הערכים האפשריים — ב-TypeScript הוא קיים ונקרא `any`. טיפוסים חדשים נבנים מטיפוסים קיימים באמצעות פעולות קבוצתיות: איחוד (union) — כל ערכי T1 ו-T2 יחד; חיתוך (intersection); ומכפלה קרטזית — טיפוס הזוגות (v1, v2) שבהם v1 מטיפוס T1 ו-v2 מטיפוס T2, שהיא הבסיס לטיפוסים מורכבים. כמו כן יש טיפוסים סופיים (`boolean` עם 2 ערכים) ואינסופיים (`number`, `string`).",
+   "explanationHe": "נקודות מפתח: טיפוס = קבוצת ערכים; תת-טיפוס = הכלה של קבוצות עם הדוגמה Integer/Number וערך השייך ליותר מטיפוס אחד; זרות = חיתוך ריק; `any` כטיפוס אוניברסלי ב-TypeScript; ובניית טיפוסים חדשים באיחוד, חיתוך ומכפלה קרטזית — שפותחת את הדלת לטיפוסים מורכבים."
+  }
+ ]
+}

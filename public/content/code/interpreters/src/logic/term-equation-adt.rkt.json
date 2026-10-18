@@ -1,0 +1,28 @@
+{
+ "id": "interpreters/src/logic/term-equation-adt.rkt",
+ "repo": "interpreters",
+ "path": "src/logic/term-equation-adt.rkt",
+ "lang": "scheme",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/logic/term-equation-adt.rkt",
+ "code": "#lang racket\n\n(provide (all-defined-out))\n\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;; Equation ADT\n;; An equation is implemented as a tagged list of two terms.\n\n;; Constructors:\n\n;; Signature: make-equation(term1, term2)\n;; Type: [Term * Term -> Equation]\n;; Purpose: Equation value constructor\n;; Pre-conditions: -\n;; Tests:\n;;  (make-equation '(f (var X)) '(f 2))\n;;  ==> '(equation (f (var X)) (f 2))\n(define make-equation\n  (lambda (term1 term2)\n    (list 'equation term1 term2)))\n\n;; Signature: equation?(eq)\n;; Type: [T -> Boolean]\n;; Purpose: membership predicate for Equation\n;; Pre-conditions: -\n;; Tests: -\n(define equation?\n  (lambda (x)\n    (and (list? x) (= (length x) 3) (eq? (car list) 'equation))))\n\n;; Signature: equation->left(eq)\n;; Type: [Equation -> Term]\n;; Purpose: Accessor for equation\n;; Pre-conditions: -\n;; Tests: (equation->left '(equation (f (var X)) (f 2)))\n;;         ==> '(f (var X))\n(define equation->left\n  (lambda (eq)\n    (second eq)))\n\n;; Signature: equation->right(eq)\n;; Type: [Equation -> Term]\n;; Purpose: Accessor for equation\n;; Pre-conditions: -\n;; Tests: (equation->right '(equation (f (var X)) (f 2)))\n;;         ==> '(f 2)\n(define equation->right\n  (lambda (eq)\n    (third eq)))\n",
+ "titleHe": "משוואה בין terms — ה-ADT הקטן שעליו עובד אלגוריתם האוניפיקציה",
+ "descriptionHe": "הקובץ הקטן ביותר במפרש הלוגי: הוא מגדיר טיפוס אחד, **משוואה** (equation) — זוג של שני terms שהאוניפיקציה צריכה להשוות. זה כל התוכן. אין כאן אלגוריתם, רק בנאי (constructor), פרדיקט שייכות ושני מאחזרים (accessors), בדיוק לפי תבנית ה-ADT שהקורס מלמד מ-2.2 והלאה.\n\nשייך ל-**5.3 (מפרש לתכנות לוגי)**, §8–§10, ומשמש רק את `unify.rkt`: `unify-terms` מקבל רשימת משוואות, מוציא אחת בכל צעד באמצעות `equation->left` / `equation->right`, ומייצר משוואות חדשות באמצעות `make-equation` כשהוא מפרק שני terms מורכבים. כדאי להשוות ל-`solve` של **3.2/3.3** — שם הפריט הבסיסי היה משוואה בין *טיפוסים*, כאן בין *terms*; האלגוריתם זהה והשתנו רק העצמים שבתוך המשוואה.",
+ "annotations": [
+  {
+   "line": 6,
+   "noteHe": "כל הקובץ הוא ADT אחד: **משוואה היא רשימה מתויגת בת שלושה איברים** — התג `'equation` ואחריו שני ה-terms. זו בדיוק תבנית ה-ADT שהקורס חוזר עליה מ-2.2: בנאי שמייצר רשימה מתויגת, פרדיקט שבודק את התג, ומאחזרים ששולפים את השדות. למה בכלל צריך טיפוס לזה, ולא סתם זוג? כי ב-Scheme זוג הוא גם רשימה, גם term מורכב וגם הכול — התג הוא הדבר היחיד שמאפשר לקוד להבדיל בין \"משוואה בין שני terms\" לבין \"term שבמקרה נראה כמו רשימה בת שניים\". שימו לב שאין כאן שום קשר לסדר: משוואה `t1 = t2` ו-`t2 = t1` הן שקולות סמנטית, אבל האלגוריתם ב-`unify.rkt` **כן** מסתכל על צד שמאל תחילה, ולכן הוא מוסיף צעד שמחליף צדדים כשמשתנה נמצא מימין."
+  },
+  {
+   "line": 19,
+   "noteHe": "‏`make-equation` בונה `(equation t1 t2)`. הדוגמה בתיעוד שווה קריאה: `(make-equation '(f (var X)) '(f 2))` — כלומר ה-terms עצמם מיוצגים כרשימות Scheme, ומשתנה לוגי מקודד כ-`(var X)`. זהו הקידוד שנקבע ב-`LP-ast.rkt`, ובזכותו כל ה-ADT הזה יכול להתעלם לחלוטין ממבנה ה-terms: הוא רק מחזיק אותם."
+  },
+  {
+   "line": 28,
+   "noteHe": "⚠️ **יש כאן באג אמיתי בחומר הקורס**, ולא סתם שגיאת כתיב: `(eq? (car list) 'equation)` אמור להיות `(eq? (car x) 'equation)`. ‏`list` הוא **הפרוצדורה** המובנית של Scheme, לא הפרמטר — כך שהקריאה `(car list)` תיפול עם שגיאת טיפוס בכל קלט שיגיע לכאן. הפונקציה לעולם אינה מוחזרת `#t` ולעולם אינה מוחזרת `#f`; היא פשוט קורסת. הסיבה שאיש לא הבחין: **`equation?` אינה נקראת אף פעם** — `unify.rkt` יודע מראש שמה שהוא שולף מהרשימה הוא משוואה, ולכן הפרדיקט הוא קוד מת. זו הדגמה יפה לכך שפרדיקט שייכות שאינו נבדק אינו שווה כלום, ובדיוק אותו שיעור חוזר בפרק 3: מערכת טיפוסים הייתה תופסת את זה מיד, כי `list` הוא פרוצדורה ולא רשימה. השוו לגרסאות ה-TypeScript של אותם ADTs ב-`src/L5` — שם השגיאה לא הייתה עוברת קומפילציה."
+  },
+  {
+   "line": 38,
+   "noteHe": "שני המאחזרים משתמשים ב-`second` וב-`third` של Racket, ולא ב-`cadr`/`caddr`. הם שקולים לחלוטין, אבל שימו לב שאלה **פונקציות של Racket ולא של Scheme סטנדרטי** — אותה תלות שהופיעה כבר ב-4.3 עם `sub1` ו-`sqr`. שימו לב גם למה שחסר: אף אחד מהמאחזרים אינו בודק שהארגומנט הוא באמת משוואה. אם תעבירו לכאן רשימה כלשהי בת שלושה איברים, תקבלו בשקט את האיבר השני שלה. זו החלטה מודעת של הקורס — התיעוד מתפקד כחוזה, והאכיפה מוטלת על הקורא. אותה גישה בדיוק בכל ה-ADTs של המפרש הלוגי."
+  }
+ ]
+}

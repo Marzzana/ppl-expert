@@ -1,0 +1,8 @@
+{
+ "id": "practice/week4/src/shared/list.ts",
+ "repo": "practice",
+ "path": "week4/src/shared/list.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/week4/src/shared/list.ts",
+ "code": "// List operations similar to car/cdr/cadr in Scheme\nimport { all } from 'ramda';\n\nexport const cons = <T>(x: T, xs: T[]): T[] => [x].concat(xs);\nexport const first = <T>(x: T[]): T => x[0];\nexport const second = <T>(x: T[]): T => x[1];\nexport const rest = <T>(x: T[]): T[] => x.slice(1);\nexport const isEmpty = (x: any): boolean => Array.isArray(x) && x.length === 0;\n\n// A useful type predicate for homogeneous lists\nexport const allT = <T>(isT: (x: any) => x is T, x: any[]): x is T[] => all(isT, x);\n"
+}

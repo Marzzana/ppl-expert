@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/L3/L3.ts",
+ "repo": "interpreters",
+ "path": "src/L3/L3.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L3/L3.ts",
+ "code": "import { readFileSync } from \"fs\";\nimport { map } from \"ramda\";\nimport { parseL3, unparseL3 } from \"./L3-ast\";\nimport { evalL3program } from \"./L3-eval\";\nimport { isClosure, valueToString, Value, Closure } from \"./L3-value\";\nimport { bind, either } from \"../shared/result\";\n\nconst filename = process.argv[2];\nif (!filename) {\n    console.error(\"Usage: L3 <filename>\");\n    process.exit(1);\n}\n\nlet source: string;\ntry {\n    source = readFileSync(filename, \"utf-8\");\n} catch (e) {\n    console.error(`Error reading file '${filename}': ${(e as Error).message}`);\n    process.exit(1);\n}\n\n// Display a closure with properly unparsed body using the L3 concrete syntax.\nconst displayClosure = (c: Closure): string => {\n    const params = map((p) => p.var, c.params).join(\" \");\n    const body = map(unparseL3, c.body).join(\" \");\n    return `<Closure (${params}) ${body}>`;\n};\n\nconst displayValue = (val: Value): string =>\n    isClosure(val) ? displayClosure(val) :\n    valueToString(val);\n\nconst result = bind(parseL3(source), evalL3program);\n\neither(\n    result,\n    (value) => console.log(displayValue(value)),\n    (message) => {\n        console.error(`Error: ${message}`);\n        process.exit(1);\n    }\n);\n",
+ "titleHe": "נקודת הכניסה של L3 — ואיך מדפיסים סְגור",
+ "descriptionHe": "תוכנית ההרצה של `L3`, ו**כמעט העתק מדויק של `L1.ts`**: קריאת קובץ, ניתוח, הערכה, הדפסה — עם אותה שורה מרכזית `bind(parseL3(source), evalL3program)`.\n\nשייך ל-**2.5–2.6**. ההבדל היחיד, וזה שבגללו שווה להסתכל, הוא **בהדפסה**: ‏`L3` יכולה להחזיר **סְגור** כתוצאה (כמו `test.l3`, שמסתיים ב-`(make-adder 10)`), ולסְגור אין ייצוג טקסטואלי מובן מאליו. הקובץ מוסיף לשם כך שתי פונקציות קטנות — ומעניין לראות **איפה** הוא בחר להוסיף אותן.",
+ "annotations": [
+  {
+   "line": 22,
+   "noteHe": "**שתי הפונקציות האלה הן כל ההבדל בין הקובץ הזה ל-`L1.ts`, והן מרפאות באג בקובץ אחר.**\n\n‏`displayClosure` מדפיסה סְגור בתחביר `L3` הקונקרטי: שמות הפרמטרים מופרדים ברווח, והגוף עובר דרך **`unparseL3`** — הפונקציה שהופכת AST בחזרה למחרוזת קוד. התוצאה עבור `test.l3` היא `<Closure (x) (+ x 10)>`.\n\n⚠️ **ושווה לשים לב למה זה כאן ולא ב-`L3-value.ts`.** שם יש כבר `closureToString`, אבל היא **שבורה**: היא מזריקה את `c.params` ואת `c.body` ישירות לתבנית מחרוזת, כלומר מפעילה `toString()` על מערך אובייקטים ומדפיסה `<Closure [object Object] [object Object]>`. השורה המתוקנת, זו שמפעילה `unparse`, נמצאת שם **בהערה**.\n\nכלומר: **הבאג ידוע, והתיקון נעשה אצל הקורא במקום במקור.** ‏`L3.ts` מדלגת על `valueToString` כשמדובר בסְגור ומשתמשת בגרסה שלה. כל קורא אחר של `valueToString` — למשל קובצי הבדיקות — עדיין מקבל `[object Object]`. **טעות נפוצה שכדאי לזהות בקוד אמיתי**: כשמתקנים במעלה הזרם, התיקון אינו מגיע לשאר הקוראים.\n\nופרט מושגי ששווה יותר מהבאג: **`unparseL3` היא ההפך של `parseL3`** — AST חזרה למחרוזת. הצמד הזה, `parse`/`unparse`, הוא מה שמאפשר להדפיס ערך פרוצדורלי בכלל, והוא גם מה שיאפשר את כל פרק 4: **טרנספורמציית CPS** אינה אלא ניתוח, שינוי העץ, ו-unparse בחזרה."
+  },
+  {
+   "line": 33,
+   "noteHe": "אותה שורה בדיוק כמו ב-`L1.ts` — `bind(parse, eval)` — ואותו `either` להדפסה. **שתי שפות, מפרשים שונים לחלוטין, ואותו צינור.** זו התבנית שתחזור גם ב-`L4.ts` וב-`L5.ts`, שם יתווסף באמצע שלב **בדיקת טיפוסים**: `bind(bind(parse(s), typeCheck), eval)`.\n\nשימו לב שכל הקוד שנוגע בעולם החיצון — `readFileSync`, `process.argv`, `console.log`, `process.exit` — מרוכז בקובץ הזה בלבד, כמו ב-`L1`. **ליבה פונקציונלית, מעטפת אימפרטיבית.**"
+  }
+ ]
+}

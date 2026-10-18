@@ -1,0 +1,1044 @@
+{
+ "id": "cm/2.5OperationalSemantics",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.5OperationalSemantics.md",
+ "titleEn": "Operational Semantics",
+ "titleHe": "סמנטיקה אופרציונלית (Operational Semantics)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.5OperationalSemantics:0",
+   "depth": 1,
+   "headingEn": "Operational Semantics",
+   "raw": "# Operational Semantics\n\n",
+   "blocks": [],
+   "headingHe": "סמנטיקה אופרציונלית (Operational Semantics)"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:1:0",
+     "type": "prose",
+     "en": "The operational semantics of a programming language is specified by a set of formal evaluation rules that operate on the AST of an expression. The evaluation process can be specified as an algorithm `eval(exp)` which maps an `AST` to a `Value`.\n\n",
+     "hash": "c7b4073bca0ff2de",
+     "he": "הסמנטיקה האופרציונלית של שפת תכנות מוגדרת על ידי קבוצה של כללי הערכה פורמליים שפועלים על ה-AST של ביטוי. אפשר להגדיר את תהליך ההערכה כאלגוריתם `eval(exp)` שממפה `AST` ל-`Value`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:1:1",
+     "type": "prose",
+     "en": "In this lecture, we go back to the definition of languages $$L1$$ to $$L3$$ (which are all subsets of Scheme) and present their operational semantics in a more formal manner, based on the definition of the AST of the languages and the method of structural induction.  For each language, we also specify the set of Values that can be computed by the language and review different implementation options for the domain of Values.\n\n",
+     "hash": "6693f68baf920b7d",
+     "he": "בהרצאה זו נחזור להגדרת השפות $$L1$$ עד $$L3$$ (שכולן תת-קבוצות של Scheme) ונציג את הסמנטיקה האופרציונלית שלהן באופן פורמלי יותר, המבוסס על הגדרת ה-AST של השפות ועל שיטת האינדוקציה המבנית. לכל שפה נגדיר גם את קבוצת הערכים שהשפה יכולה לחשב, ונסקור אפשרויות מימוש שונות לתחום הערכים."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:1:2",
+     "type": "prose",
+     "en": "In Sections 1 to 4, we studied the formal description of the **syntax** of programming languages.\nIn Sections 5 to 8, we study the formal description of their **semantics** - using the **operational semantics** approach.\nThe tool we use is to describe the implementation of interpreters for these languages using a functional subset of TypeScript as a metalanguage.\n\n",
+     "hash": "5cc04d1f59fbe52c",
+     "he": "בסעיפים 1 עד 4 למדנו את התיאור הפורמלי של ה**תחביר** של שפות תכנות.\nבסעיפים 5 עד 8 נלמד את התיאור הפורמלי של ה**סמנטיקה** שלהן — בגישת ה**סמנטיקה האופרציונלית**.\nהכלי שבו נשתמש הוא תיאור המימוש של מפרשים לשפות האלה, תוך שימוש בתת-קבוצה פונקציונלית של TypeScript כשפת-על."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:1:3",
+     "type": "prose",
+     "en": "The pipeline of operations we describe is:\n\n",
+     "hash": "357acbf573281b16",
+     "he": "צינור הפעולות שאנו מתארים הוא:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:1:4",
+     "type": "prose",
+     "en": "Concrete Syntax (string) ==> (Parser) ==> Abstract Syntax (AST) ==> (Interpreter) ==> Value\n\n",
+     "hash": "846af157917609d4",
+     "he": "תחביר קונקרטי (מחרוזת) ==> (מנתח תחבירי / Parser) ==> תחביר מופשט (AST) ==> (מפרש / Interpreter) ==> ערך (Value)"
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:2",
+   "depth": 2,
+   "headingEn": "$$L1$$ Operational Semantics",
+   "raw": "## $$L1$$ Operational Semantics\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:2:0",
+     "type": "prose",
+     "en": "$$L1$$ is a language in which primitive operators and primitive values can be combined recursively.\nIn addition, composite expressions can be given a name and bound to variables using the `define` special form.\n\n",
+     "hash": "35957d7121e2bffb",
+     "he": "$$L1$$ היא שפה שבה אפשר לצרף באופן רקורסיבי אופרטורים פרימיטיביים וערכים פרימיטיביים.\nבנוסף, אפשר לתת שם לביטויים מורכבים ולקשור אותם למשתנים באמצעות הצורה המיוחדת `define`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:2:1",
+     "type": "prose",
+     "en": "For example, the following is a program in $$L1$$:\n",
+     "hash": "78bcb74a032041e8",
+     "he": "למשל, זוהי תוכנית ב-$$L1$$:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:2:2",
+     "type": "code",
+     "en": "```scheme\n(L1\n  (define x (+ (* 2 3) (* 4 5)))\n  (+ x (* 2 2)))\n```\n\n",
+     "hash": "4a1f58f316b65082",
+     "lang": "scheme",
+     "noteHe": "תוכנית $$L1$$ שלמה. שימו לב לעטיפה `(L1 ...)` — היא חלק מהתחביר של תוכנית בשפה (זכרו: `<program> ::= (L1 <exp>+)`). התוכנית מכילה שני ביטויים: הגדרה שקושרת את `x` לערך 26 (‏6+20), ואז ביטוי שמחושב ל-30 (‏26+4). ערך התוכנית הוא ערכו של הביטוי **האחרון**."
+    }
+   ],
+   "headingHe": "הסמנטיקה האופרציונלית של $$L1$$"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:3",
+   "depth": 3,
+   "headingEn": "$$L1$$ Syntax",
+   "raw": "### $$L1$$ Syntax \n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:3:0",
+     "type": "prose",
+     "en": "Let us summarize the syntax of $$L1$$ using the BNF + Abstract Syntax specification we have developed in the previous lectures:\n\n",
+     "hash": "da47ba50df68b7bf",
+     "he": "נסכם את התחביר של $$L1$$ באמצעות מפרט ה-BNF + התחביר המופשט שפיתחנו בהרצאות הקודמות:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:3:1",
+     "type": "code",
+     "en": "```typescript\n<program> ::= (L1 <exp>+) // program(exps:List(exp))\n<exp> ::= <define-exp> | <cexp>\n<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n<cexp> ::= <num-exp> // num-exp(val:Number)\n       | <bool-exp>  // bool-exp(val:Boolean)\n       | <prim-op>   // prim-op(op:String)\n       | <var-ref>   // var-ref(var:String)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n<prim-op> ::= + | - | * | / | < | > | = | not\n<num-exp> ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref> ::= an identifier token\n<var-decl> ::= an identifier token\n```\n\n",
+     "hash": "f21d1af113867144",
+     "lang": "typescript",
+     "noteHe": "המפרט המלא של $$L1$$ — זהה למה שראינו ב-2.4. עכשיו נשתמש בו כ**נקודת מוצא לסמנטיקה**: לכל שורה בטבלה הזו נצטרך להגדיר כלל הערכה. שימו לב כמה מעט סוגי ביטויים יש — חמישה בלבד ב-`cexp` — וזה בדיוק מה שיהפוך את המפרש לקצר."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:3:2",
+     "type": "prose",
+     "en": "The corresponding TypeScript implementation of this AST using the Disjoint-Union pattern and with the `parseL1` AST factory function is provided in [L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts) which maps a string containing the concrete syntax of a program in $$L1$$ to its AST representation.\n\n",
+     "hash": "2130095b1d87b7ba",
+     "he": "המימוש המתאים ב-TypeScript של ה-AST הזה, באמצעות תבנית האיחוד-הזר ועם פונקציית מפעל ה-AST‏ `parseL1`, מסופק ב-[L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts), הממפה מחרוזת המכילה את התחביר הקונקרטי של תוכנית ב-$$L1$$ לייצוג ה-AST שלה."
+    }
+   ],
+   "headingHe": "התחביר של $$L1$$"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:4",
+   "depth": 3,
+   "headingEn": "$$L1$$ Values",
+   "raw": "### $$L1$$ Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:4:0",
+     "type": "prose",
+     "en": "To determine which values can be computed by $$L1$$ programs, we proceed inductively on the structure of $$L1$$-ASTs.\n",
+     "hash": "a408c1ec33194d72",
+     "he": "כדי לקבוע אילו ערכים תוכניות $$L1$$ יכולות לחשב, נתקדם באינדוקציה על מבנה ה-ASTs של $$L1$$."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:4:1",
+     "type": "list",
+     "en": "* Atomic expressions can return as a value:\n  * A number (`NumExp`)\n  * A boolean (`BoolExp`)\n  * The value of a primitive operator (`PrimOp`)\n  * The value of a variable reference (`VarRef`) - which can be any value (we need to define how this works)\n* Define expressions return a void value.\n* Composite expressions return a value returned by the application of a primitive operator.\n  This can be proved by induction - the value of a compound expression will always be either the value of a literal expression\n  or the result of a primitive operator applied to values.\n  We posit that primitive operators are delegated to the corresponding TypeScript primitives, which return either:\n  * A number (`+,-,*,/`)\n  * A boolean (`<,>,=,not`)\n  Hence, composite expressions will return either a number, a boolean value or one of the literal values that atomic \n  expressions can return.\n\n",
+     "hash": "9230969528b28ee7",
+     "he": "* ביטויים אטומיים יכולים להחזיר כערך:\n  * מספר (`NumExp`)\n  * ערך בוליאני (`BoolExp`)\n  * את ערכו של אופרטור פרימיטיבי (`PrimOp`)\n  * את ערכה של הפניה למשתנה (`VarRef`) — שיכול להיות כל ערך (עלינו להגדיר איך זה עובד)\n* ביטויי define מחזירים ערך void.\n* ביטויים מורכבים מחזירים ערך שמוחזר מהפעלת אופרטור פרימיטיבי.\n  אפשר להוכיח זאת באינדוקציה — ערכו של ביטוי מורכב יהיה תמיד או ערכו של ביטוי ליטרלי או תוצאה של אופרטור פרימיטיבי שהופעל על ערכים.\n  אנו מניחים שאופרטורים פרימיטיביים מואצלים לפרימיטיבים המתאימים של TypeScript, שמחזירים או:\n  * מספר (`+,-,*,/`)\n  * ערך בוליאני (`<,>,=,not`)\n  לכן, ביטויים מורכבים יחזירו או מספר, או ערך בוליאני, או אחד מהערכים הליטרליים שביטויים אטומיים יכולים להחזיר."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:4:2",
+     "type": "prose",
+     "en": "Altogether, we conclude that the set of all possible values computed by $$L1$$ programs is:\n",
+     "hash": "1fc673ac986071bf",
+     "he": "בסך הכול, אנו מסיקים שקבוצת כל הערכים האפשריים שתוכניות $$L1$$ מחשבות היא:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:4:3",
+     "type": "code",
+     "en": "```typescript\nValue = Number | Boolean | PrimOp | Void\n```\n\n",
+     "hash": "206e5261989fb4c1",
+     "lang": "typescript",
+     "noteHe": "**התחום הסמנטי של $$L1$$** — ארבעת סוגי הערכים היחידים שהשפה יכולה לייצר. שימו לב ש-`PrimOp` מופיע כאן גם כביטוי (ב-AST) וגם כערך — האופרטור `+` מוערך לעצמו. ה-`Void` הוא הערך של `define`."
+    }
+   ],
+   "headingHe": "הערכים של $$L1$$"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:5",
+   "depth": 3,
+   "headingEn": "$$L1$$ Value Type",
+   "raw": "### $$L1$$ Value Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:5:0",
+     "type": "prose",
+     "en": "We decide to use the following type in the metalanguage (TypeScript) to represent the values that can be computed by $$L1$$ expressions:\n\n",
+     "hash": "c62339beafaded3f",
+     "he": "אנו מחליטים להשתמש בטיפוס הבא בשפת-העל (TypeScript) כדי לייצג את הערכים שביטויי $$L1$$ יכולים לחשב:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:5:1",
+     "type": "code",
+     "en": "```typescript\nValue = Number | Boolean | PrimOp\n```\n\n",
+     "hash": "4f6d0e5a5d110f7d",
+     "lang": "typescript",
+     "noteHe": "טיפוס ה-`Value` במימוש — שימו לב שהוא **ללא** `Void`, בניגוד לניתוח התיאורטי שלמעלה. הסעיף הבא מסביר בדיוק למה: הטיפול ב-`define` נעשה בנפרד ולא דרך מנגנון הערכים."
+    }
+   ],
+   "headingHe": "טיפוס הערך של $$L1$$"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:6",
+   "depth": 3,
+   "headingEn": "Representing Primitive Operators",
+   "raw": "### Representing Primitive Operators\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:6:0",
+     "type": "prose",
+     "en": "The decision to represent `Number` and `Boolean` using the corresponding value types in the meta-language (in our case, in TypeScript) is natural.\nNote, however, that there are many options to represent Numbers in different languages.  For example, the way Scheme represents integers and rational numbers is very different \nfrom the way they are represented in JavaScript or C (experiment in Racket to see the differences).  In this implementation of the interpreter, we will ignore these differences.\n\n",
+     "hash": "325cf0293dbffbc9",
+     "he": "ההחלטה לייצג `Number` ו-`Boolean` באמצעות טיפוסי הערכים המתאימים בשפת-העל (במקרה שלנו, ב-TypeScript) היא טבעית.\nשימו לב עם זאת שיש אפשרויות רבות לייצוג מספרים בשפות שונות. למשל, האופן שבו Scheme מייצגת מספרים שלמים ורציונליים שונה מאוד מהאופן שבו הם מיוצגים ב-JavaScript או ב-C (התנסו ב-Racket כדי לראות את ההבדלים). במימוש הזה של המפרש נתעלם מההבדלים האלה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:1",
+     "type": "prose",
+     "en": "We must then decide how to represent primitive operators as computed values - so that we can decide which value to return when we compute the expression `+`.\n\n",
+     "hash": "51aae60fd1a1a51c",
+     "he": "עלינו להחליט אז כיצד לייצג אופרטורים פרימיטיביים כערכים מחושבים — כדי שנוכל להחליט איזה ערך להחזיר כשאנו מחשבים את הביטוי `+`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:2",
+     "type": "prose",
+     "en": "In Scheme, when we compute this expression, we get:\n",
+     "hash": "f66ee4d5c16feeb8",
+     "he": "ב-Scheme, כשאנו מחשבים את הביטוי הזה, אנו מקבלים:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:3",
+     "type": "code",
+     "en": "```scheme\n> +\n#<procedure:+>\n```\n\n",
+     "hash": "d0fe3957df51a9a2",
+     "lang": "scheme",
+     "noteHe": "סשן REPL של Scheme: כשמקלידים `+` לבדו (בלי סוגריים!) — כלומר מעריכים את הביטוי האטומי `+` — מקבלים ערך מטיפוס **פרוצדורה**. הסימון `#<procedure:+>` הוא הדרך של Racket להדפיס ערך פרוצדורה. זה מוכיח שב-Scheme אופרטורים הם ערכים לכל דבר."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:4",
+     "type": "prose",
+     "en": "That is, the value of the `+` expression (which is an expression of type Symbol) is a procedure in Scheme.\nIf we implement primitive values as procedures, we rely on the fact that our meta-language (TypeScript) is a functional language which supports fist-class procedures: a procedure value can be bound to a variable.  \n\n",
+     "hash": "6ff71610595d92a0",
+     "he": "כלומר, ערכו של הביטוי `+` (שהוא ביטוי מטיפוס סמל) הוא פרוצדורה ב-Scheme.\nאם נממש ערכים פרימיטיביים כפרוצדורות, אנו מסתמכים על כך ששפת-העל שלנו (TypeScript) היא שפה פונקציונלית שתומכת בפרוצדורות ממדרגה ראשונה: אפשר לקשור ערך פרוצדורה למשתנה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:5",
+     "type": "prose",
+     "en": "In JavaScript (and TypeScript), primitive operators are *not* variables bound to procedures.  This can be verified by the following test:\n\n\n",
+     "hash": "25ad3895149ea6c4",
+     "he": "ב-JavaScript (וב-TypeScript), אופרטורים פרימיטיביים *אינם* משתנים שקשורים לפרוצדורות. אפשר לוודא זאת באמצעות הבדיקה הבאה:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:6",
+     "type": "code",
+     "en": "```typescript\nconst plus = (x,y) => x + y;\nplus\n// --> [Function]\n```\n\n",
+     "hash": "88929098b07b3661",
+     "lang": "typescript",
+     "noteHe": "כשמגדירים פונקציה ומקשרים אותה למשתנה `plus`, הערכת השם `plus` מחזירה ערך תקין — `[Function]`. עד כאן דומה ל-Scheme."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:7",
+     "type": "code",
+     "en": "```typescript\n+\n// --> Error\n```\n\n",
+     "hash": "f4b963ac4856a0f7",
+     "lang": "typescript",
+     "noteHe": "אבל האופרטור `+` לבדו הוא **שגיאת תחביר** ב-TypeScript — הוא אינו ביטוי חוקי כלל. זהו ההבדל המהותי מ-Scheme: ב-JavaScript האופרטורים הם חלק מהתחביר, לא ערכים. לכן לא נוכל פשוט \"להאציל\" את `+` של השפה שלנו ל-`+` של שפת-העל כערך."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:8",
+     "type": "prose",
+     "en": "We observe that if we bind a function to a variable, then its value is returned as an object of type `[Function]`.\nIn contrast, the expression `+` (where `+` can be any primitive operator) is *not* a well formed expression in TypeScript. \n\n",
+     "hash": "07d908ce99b99249",
+     "he": "אנו רואים שאם נקשור פונקציה למשתנה, ערכה מוחזר כאובייקט מטיפוס `[Function]`.\nלעומת זאת, הביטוי `+` (כאשר `+` יכול להיות כל אופרטור פרימיטיבי) *אינו* ביטוי תקין ב-TypeScript."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:9",
+     "type": "prose",
+     "en": "We decide in our language $$L1$$ to represent primitive operators as strings, and in the code of the interpreter, map each primitive operator to the underlying primitive operation in the meta-language.\nWe will adopt this solution in our first model and in our implementation.\n\n",
+     "hash": "13a3ac43337c0b9c",
+     "he": "אנו מחליטים בשפה שלנו $$L1$$ לייצג אופרטורים פרימיטיביים כמחרוזות, ובקוד המפרש למפות כל אופרטור פרימיטיבי לפעולה הפרימיטיבית המתאימה בשפת-העל.\nנאמץ את הפתרון הזה במודל הראשון שלנו ובמימוש שלנו."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:10",
+     "type": "prose",
+     "en": "We represent primitive operators as a specify expression type in the AST `PrimOp(op:PrimOpKeyword)`, \nwhere primOpKeyword is an enumerated type of all the defined primitive operators.\nThe value of a `PrimOp` expression is itself when we evaluate the expression.\nWhen we apply a primitive operator to arguments, we explicitly dispatch to each known primitive operator in the language\nand apply the corresponding primitive operation in the meta-language.  The exhaustive enumeration of operators is\nterminated by a `never` case.\n\n\n",
+     "hash": "1af776bc37aaad72",
+     "he": "אנו מייצגים אופרטורים פרימיטיביים כסוג ביטוי ספציפי ב-AST‏ `PrimOp(op:PrimOpKeyword)`, כאשר primOpKeyword הוא טיפוס מנוי (enumerated) של כל האופרטורים הפרימיטיביים המוגדרים.\nערכו של ביטוי `PrimOp` הוא הוא-עצמו כשמעריכים את הביטוי.\nכשאנו מפעילים אופרטור פרימיטיבי על ארגומנטים, אנו מפצלים במפורש לכל אופרטור פרימיטיבי מוכר בשפה ומפעילים את הפעולה הפרימיטיבית המתאימה בשפת-העל. המנייה הממצה של האופרטורים מסתיימת במקרה `never`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:11",
+     "type": "code",
+     "en": "```typescript\n// There are type errors which we will address in L3\nconst applyPrimitive = (proc: PrimOp, args: Value[]): Result<Value> =>\n    proc.op === \"+\" ? makeOk(reduce((x, y) => x + y, 0, args)) :\n    proc.op === \"-\" ? makeOk(reduce((x, y) => x - y, 0, args)) :\n    proc.op === \"*\" ? makeOk(reduce((x, y) => x * y, 1, args)) :\n    proc.op === \"/\" ? makeOk(reduce((x, y) => x / y, 1, args)) :\n    proc.op === \">\" ? makeOk(args[0] > args[1]) :\n    proc.op === \"<\" ? makeOk(args[0] < args[1]) :\n    proc.op === \"=\" ? makeOk(args[0] === args[1]) :\n    proc.op === \"not\" ? makeOk(!args[0]) :\n    proc.op;  // never\n```\n\n",
+     "hash": "35d2a81d2522212a",
+     "lang": "typescript",
+     "noteHe": "`applyPrimitive` — הפונקציה שמבצעת בפועל את הפעולות הפרימיטיביות. המבנה הוא פיצול לפי `proc.op` (המחרוזת), וכל ענף מאציל לפעולה המתאימה של TypeScript.\nשימו לב לשני דברים חשובים:\n- ארבעת האופרטורים האריתמטיים משתמשים ב-`reduce` כי הם **וריאדיים** (מקבלים מספר משתנה של ארגומנטים). ערך ההתחלה נבחר כאיבר הנייטרלי: 0 לחיבור, 1 לכפל.\n- אופרטורי ההשוואה ניגשים ישירות ל-`args[0]` ו-`args[1]` — הם בינאריים.\n- הערה בראש הקוד מודה שיש כאן שגיאות טיפוס, ובהמשך תראו שגם הטיפול ב-`-` וב-`/` שגוי (ראו הסבר בהמשך). התיקון יגיע ב-$$L3$$."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:12",
+     "type": "prose",
+     "en": "#### Variadic Primitives\n\n",
+     "hash": "dc304be53fba969b",
+     "he": "#### פרימיטיבים וריאדיים (Variadic)"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:13",
+     "type": "prose",
+     "en": "We adopt Scheme's model for the arithmetic operators: they are **variadic** - meaning that they can accept any number of arguments (from 0 and up).  \nSince the AST of application forms (`app-exp`) supports any number of arguments, \nthe syntax of $$L1$$ also supports expressions of the form: `(+ 1 2), (+ 1 2 3 4)` and even `(+ 1)` and `(+)`.\nIn the meta-language, to apply a procedure to a list of arguments, we use `reduce`.\n\n",
+     "hash": "8098af254a76122c",
+     "he": "אנו מאמצים את המודל של Scheme לאופרטורים האריתמטיים: הם **וריאדיים (variadic)** — כלומר הם יכולים לקבל כל מספר של ארגומנטים (מ-0 ומעלה).\nמכיוון שה-AST של צורות ההפעלה (`app-exp`) תומך בכל מספר של ארגומנטים, התחביר של $$L1$$ תומך גם הוא בביטויים מהצורה: `(+ 1 2), (+ 1 2 3 4)` ואפילו `(+ 1)` ו-`(+)`.\nבשפת-העל, כדי להפעיל פרוצדורה על רשימת ארגומנטים, אנו משתמשים ב-`reduce`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:14",
+     "type": "prose",
+     "en": "Think about what the value of `(+)` and `(*)` without parameters should be (compare with the general problem of finding the initial value passed to a `reduce` operation).\n\n",
+     "hash": "11717d0a4e131a53",
+     "he": "חשבו מה צריך להיות ערכם של `(+)` ושל `(*)` ללא פרמטרים (השוו לבעיה הכללית של מציאת ערך ההתחלה שמועבר לפעולת `reduce`)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:15",
+     "type": "prose",
+     "en": "It turns out the handling of '-' and '/' is more complex than '+' and `*` because they are not associative operators.\nThe code above does not reflect correctly the way `-` works in Scheme.  We will revise this problem in the interpreter for $$L3$$.\n\n",
+     "hash": "983c99d20d0168bb",
+     "he": "מסתבר שהטיפול ב-'-' וב-'/' מורכב יותר מאשר ב-'+' וב-`*`, כי הם אינם אופרטורים אסוציאטיביים.\nהקוד לעיל אינו משקף נכונה את האופן שבו `-` עובד ב-Scheme. נחזור לבעיה הזו במפרש של $$L3$$."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:16",
+     "type": "prose",
+     "en": "Check in Scheme what is the value returned by `(-)` and `(/)`.\n\n",
+     "hash": "fdcb1c76053c40c3",
+     "he": "בדקו ב-Scheme מהו הערך שמוחזר עבור `(-)` ועבור `(/)`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:17",
+     "type": "prose",
+     "en": "#### Type Strict Primitives\n\n",
+     "hash": "8231bffd578872c4",
+     "he": "#### פרימיטיבים קפדניים לגבי טיפוסים"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:18",
+     "type": "prose",
+     "en": "We have already pointed at the difference in behavior of primitives in Scheme and in JavaScript: \n",
+     "hash": "c0e8add3b53cb3b5",
+     "he": "כבר הצבענו על ההבדל בהתנהגות הפרימיטיבים ב-Scheme וב-JavaScript:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:19",
+     "type": "list",
+     "en": "* Scheme has type-strict primitives.  Invoking a primitive like `+` with non-number parameters throws an error.\n* JavaScript has type-flexible primitives.  Primitives do not fail in general when given unexpected data types as arguments.\n\n",
+     "hash": "a20dd82e77c629b5",
+     "he": "* ל-Scheme יש פרימיטיבים קפדניים לגבי טיפוסים. הפעלת פרימיטיב כמו `+` עם פרמטרים שאינם מספרים זורקת שגיאה.\n* ל-JavaScript יש פרימיטיבים גמישים לגבי טיפוסים. פרימיטיבים בדרך כלל אינם נכשלים כשמקבלים טיפוסי נתונים לא-צפויים כארגומנטים."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:20",
+     "type": "prose",
+     "en": "In the implementation of the $$L1$$ interpreter, we do not test the type of arguments at runtime.  \nWe also do not attempt to \"do the right thing\" when given unexpected arguments.  Instead we silently compute \"junk\".  \n\n",
+     "hash": "9bb127d0cbab5747",
+     "he": "במימוש המפרש של $$L1$$ איננו בודקים את טיפוסי הארגומנטים בזמן ריצה.\nגם איננו מנסים \"לעשות את הדבר הנכון\" כשמקבלים ארגומנטים לא-צפויים. במקום זאת אנו מחשבים בשקט \"זבל\"."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:6:21",
+     "type": "prose",
+     "en": "In the implementation of $$L3$$, we will properly implement type checking for primitives.\n\n\n",
+     "hash": "dbf281a83049ee1d",
+     "he": "במימוש של $$L3$$ נממש כראוי בדיקת טיפוסים לפרימיטיבים."
+    }
+   ],
+   "headingHe": "ייצוג אופרטורים פרימיטיביים"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:7",
+   "depth": 3,
+   "headingEn": "Representing the value returned by `define`",
+   "raw": "### Representing the value returned by `define`\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:7:0",
+     "type": "prose",
+     "en": "We need to decide how to handle the case of `define` expressions, because these expressions behave in a special way: \nIn Scheme, a define expression does not return any value:\n",
+     "hash": "db65824857674594",
+     "he": "עלינו להחליט כיצד לטפל במקרה של ביטויי `define`, כי הביטויים האלה מתנהגים באופן מיוחד:\nב-Scheme, ביטוי define אינו מחזיר שום ערך:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:1",
+     "type": "code",
+     "en": "```scheme\n> (define x 1)\n> \n```\n\n",
+     "hash": "0b81a2a68842d18b",
+     "lang": "scheme",
+     "noteHe": "סשן REPL: אחרי `(define x 1)` ה-REPL פשוט מציג את הסימן `>` הבא — **לא מודפס שום ערך**. השוו לביטוי `(+ 1 2)` שהיה מדפיס `3`. זה מה שמייחד את `define`: הוא מופעל בשביל תופעת הלוואי שלו (יצירת הקשירה), לא בשביל ערך."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:2",
+     "type": "prose",
+     "en": "This is unusual for a functional language - where all expressions are expected to return a value.\nThe reason `define` does not return a usable value is that it is only used for its side-effect (which is to create\na new binding for the variable with universal scope).\n\n",
+     "hash": "ebac8fae353fec78",
+     "he": "זה חריג עבור שפה פונקציונלית — שבה מצפים שכל הביטויים יחזירו ערך.\nהסיבה ש-`define` אינו מחזיר ערך שימושי היא שהוא משמש רק בשביל תופעת הלוואי שלו (שהיא יצירת קשירה חדשה למשתנה עם תחום הכרה אוניברסלי)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:3",
+     "type": "prose",
+     "en": "In non-functional languages, such expressions are called **statements** - as opposed to expressions which return a value.\n\n",
+     "hash": "3ad18814171b09e2",
+     "he": "בשפות לא-פונקציונליות, ביטויים כאלה נקראים **משפטים (statements)** — להבדיל מביטויים שמחזירים ערך."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:4",
+     "type": "prose",
+     "en": "To avoid the dichotomy expression/statement, we will adopt Scheme's model which is that expressions that have a side-effect return a special type of value - which is called **void**.  \nThe void type contains a single value (also called void).\nIn TypeScript, there are multiple *strange values* that can be used to encode the **void** value.  We choose to use the **undefined** TypeScript value for this purpose.  \n\n",
+     "hash": "befab46395c9b20f",
+     "he": "כדי להימנע מהדיכוטומיה ביטוי/משפט, נאמץ את המודל של Scheme שלפיו ביטויים בעלי תופעת לוואי מחזירים סוג ערך מיוחד — הנקרא **void**.\nטיפוס ה-void מכיל ערך יחיד (שגם הוא נקרא void).\nב-TypeScript יש כמה *ערכים מוזרים* שאפשר להשתמש בהם כדי לקודד את הערך **void**. אנו בוחרים להשתמש בערך **undefined** של TypeScript למטרה זו."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:5",
+     "type": "prose",
+     "en": "We thus adopt the convention that the value of a define expression will be the `undefined` value.\n\n",
+     "hash": "fffc59990d89d4ad",
+     "he": "אנו מאמצים אפוא את המוסכמה שערכו של ביטוי define יהיה הערך `undefined`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:7:6",
+     "type": "code",
+     "en": "```typescript\nValue = number | boolean | string | PrimOp | undefined\n```\n\n\n",
+     "hash": "1586e7575b192ffd",
+     "lang": "typescript",
+     "noteHe": "טיפוס ה-`Value` הסופי של $$L1$$, כולל `undefined` בתפקיד ה-void. (שימו לב ש-`string` מופיע כאן אף שב-$$L1$$ אין עדיין מחרוזות — הוא מוכן לשפות הבאות.)"
+    }
+   ],
+   "headingHe": "ייצוג הערך שמוחזר על ידי `define`"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:8",
+   "depth": 3,
+   "headingEn": "$$L1$$ Evaluation Rules",
+   "raw": "### $$L1$$ Evaluation Rules\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:8:0",
+     "type": "prose",
+     "en": "The operational semantics of $$L1$$ is a function which maps inductively any Expression in $$L1$$ to a Value:\n",
+     "hash": "f6f0df80cab797f4",
+     "he": "הסמנטיקה האופרציונלית של $$L1$$ היא פונקציה שממפה באופן אינדוקטיבי כל ביטוי ב-$$L1$$ לערך:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:1",
+     "type": "code",
+     "en": "```typescript\neval: Expression -> Value\n```\n",
+     "hash": "b7dfc0c968b21ce6",
+     "lang": "typescript",
+     "noteHe": "החתימה של הפונקציה המרכזית של כל הפרק: מ-`Expression` (כלומר AST) ל-`Value`. כל שאר הסעיף הוא פירוט של הפונקציה הזו לפי סוג הביטוי."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:2",
+     "type": "prose",
+     "en": "We have now established how to represent a Value. \nLet us define the `eval` algorithm in an inductive manner - by starting from the base cases - atomic expressions,\nand then moving up to composite expressions.  \n\n",
+     "hash": "03f8433df91ed3b8",
+     "he": "כעת ביססנו כיצד לייצג ערך.\nנגדיר את האלגוריתם `eval` באופן אינדוקטיבי — נתחיל ממקרי הבסיס, הביטויים האטומיים, ואז נעלה לביטויים מורכבים."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:3",
+     "type": "prose",
+     "en": "#### 1. Evaluation of Atomic Expressions\n",
+     "hash": "2510600a668a1cd1",
+     "he": "#### 1. הערכת ביטויים אטומיים"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:4",
+     "type": "code",
+     "en": "```typescript\n// Number atomic literal expressions evaluate to number values.\n1. eval(NumExp(val)) => val         \n// Boolean atomic literal expressions evaluate to boolean values true and false.\n2. eval(BoolExp(val)) => val        \n// Primitive procedures evaluate to the primitive operation \n3. eval(PrimOp(op)) => PrimOp(op)   \n// Variables are evaluated by looking up their value in the global environment - see below definition.\n4. eval(VarRef(var)) => applyEnv(env, var) \n```\n\n",
+     "hash": "fcdb641dd4ba55b8",
+     "lang": "typescript",
+     "noteHe": "**ארבעת כללי ההערכה למקרי הבסיס** — כדאי לשנן. שלושת הראשונים טריוויאליים: ביטוי מספר/בוליאני מוערך לערך שבתוכו, ואופרטור פרימיטיבי מוערך **לעצמו** (שימו לב: `PrimOp(op)` בשני צידי החץ). הכלל הרביעי הוא היחיד המעניין: הפניה למשתנה מוערכת על ידי **חיפוש בסביבה** — וזה בדיוק מה שיאלץ אותנו להגדיר מהי סביבה בסעיף הבא. שימו לב שכללים 1–3 אינם תלויים בשום הקשר, ואילו כלל 4 כן."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:5",
+     "type": "prose",
+     "en": "#### 2. Evaluation of Compound Forms\n\n",
+     "hash": "2c725692fc4a3c04",
+     "he": "#### 2. הערכת צורות מורכבות"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:6",
+     "type": "prose",
+     "en": "The evaluation of compound forms involves the recursive evaluation of parts of the compound forms, followed by a\nrule that determines how to combine the resulting values to obtain the value of the compound form.\n\n",
+     "hash": "167d91b71a5f29f1",
+     "he": "הערכת צורות מורכבות כרוכה בהערכה רקורסיבית של חלקי הצורה המורכבת, ואחריה כלל שקובע כיצד לצרף את הערכים שהתקבלו כדי לקבל את ערכה של הצורה המורכבת."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:7",
+     "type": "prose",
+     "en": "For special forms, not all the parts of the compound form are always evaluated.  \nThe order in which the parts is evaluated is determined by the computation rule of the compound form type.  \nIn $$L1$$ there is a single special form - `define`.\n\n",
+     "hash": "1a08d46568c3acfe",
+     "he": "בצורות מיוחדות, לא תמיד כל חלקי הצורה המורכבת מוערכים.\nהסדר שבו החלקים מוערכים נקבע על ידי כלל החישוב של סוג הצורה המורכבת.\nב-$$L1$$ יש צורה מיוחדת אחת בלבד — `define`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:8:8",
+     "type": "code",
+     "en": "```typescript\n1. eval(DefineExp(var, val)) => \n    // var is of type VarDecl\n    // val is of type Cexp\n    let val:Value = eval(val)\n        add the binding <(var-decl->var var), val> to the global environment\n        return undefined.\n2. eval(AppExp(rator, rands)) =>\n    // rator is of type Cexp\n    // rands is of type List(Cexp)\n    let proc = eval(rator)\n        args = [eval(r) for r in rands]\n        return applyProc(proc, args)\n```\n\n\n",
+     "hash": "8390c55ee6912112",
+     "lang": "typescript",
+     "noteHe": "**שני כללי ההערכה לצורות מורכבות** (בפסאודו-קוד):\n- **`define`** — צורה מיוחדת: מעריכים **רק** את `val` (השם `var` אינו מוערך!), מוסיפים את הקשירה לסביבה הגלובלית, ומחזירים `undefined`.\n- **`app-exp`** — הצורה הרגילה: מעריכים את האופרטור `rator`, מעריכים את **כל** האופרנדים `rands`, ואז מפעילים. שימו לב לסדר: הכול מוערך לפני ההפעלה — זהו **סדר יישומי (applicative order)**, נושא שיחזור ב-2.6."
+    }
+   ],
+   "headingHe": "כללי ההערכה של $$L1$$"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:9",
+   "depth": 3,
+   "headingEn": "Global Environment, Variable References and Define Expressions",
+   "raw": "### Global Environment, Variable References and Define Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:9:0",
+     "type": "prose",
+     "en": "In the specification of the eval algorithm above, we need to clarify two clauses:\n\n",
+     "hash": "fc64163dc6886dbe",
+     "he": "במפרט של אלגוריתם ה-eval לעיל, עלינו להבהיר שתי פסוקיות:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:1",
+     "type": "code",
+     "en": "```typescript\n// Variables are evaluated by looking up their value in the global environment.\neval(VarRef(var)) => applyEnv(env, var) \neval(DefineExp(var,val)=> ... add the binding <(var-decl->var var), val> to the global environment ...\n```\n\n",
+     "hash": "863fd7bb1a3d9d9d",
+     "lang": "typescript",
+     "noteHe": "שתי הפסוקיות שנשארו \"מעורפלות\": שתיהן מזכירות את \"הסביבה הגלובלית\" — אחת קוראת ממנה (`applyEnv`) והשנייה כותבת אליה. הסעיף הזה מגדיר בדיוק מהי הסביבה הזו ואיך היא ממומשת."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:2",
+     "type": "prose",
+     "en": "These evaluation rules help us deal with the following cases:\n",
+     "hash": "9fe4d8527db21b5f",
+     "he": "כללי ההערכה האלה עוזרים לנו להתמודד עם המקרים הבאים:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:3",
+     "type": "list",
+     "en": "* What is the value of the expression `x`? (that is, the evaluation of a `VarRef(x)` AST).\n\n",
+     "hash": "57d82d8a256a84f3",
+     "he": "* מהו ערכו של הביטוי `x`? (כלומר, ההערכה של AST מסוג `VarRef(x)`)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:4",
+     "type": "prose",
+     "en": "The answer is that it depends on the context.  If the variable `x` has been previously defined (using a `define` expression),\nthen `x` should `remember` this value and return it.  Else, the evaluation should fail.  \nIn other words, the evaluation of variable references requires us to maintain a *memory*: the memory is filled when we define a variable,\nit is accessed when we evaluate a variable reference.\n\n",
+     "hash": "bdf652fe1eb6257b",
+     "he": "התשובה היא שזה תלוי בהקשר. אם המשתנה `x` הוגדר קודם לכן (באמצעות ביטוי `define`), אז `x` צריך `לזכור` את הערך הזה ולהחזיר אותו. אחרת, ההערכה צריכה להיכשל.\nבמילים אחרות, הערכת הפניות למשתנים דורשת מאיתנו לתחזק *זיכרון*: הזיכרון מתמלא כשאנו מגדירים משתנה, וניגשים אליו כשאנו מעריכים הפניה למשתנה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:5",
+     "type": "prose",
+     "en": "We implement this memory with an object we call the **global environment**.  \nWe model an **environment** as a **partial function which maps variable references to values**.\nA function is **partial** when it is defined on a restricted domain - in our case, not all variable references will be defined in a given environment, and the function is actually a **finite function** (defined on a finite set of values).  When the function is invoked outside of its domain, it returns a failure.\n\n",
+     "hash": "4238ebe8f7001f7c",
+     "he": "אנו מממשים את הזיכרון הזה באמצעות עצם שאנו קוראים לו ה**סביבה הגלובלית (global environment)**.\nאנו ממדלים **סביבה (environment)** כ**פונקציה חלקית שממפה הפניות למשתנים לערכים**.\nפונקציה היא **חלקית (partial)** כשהיא מוגדרת על תחום מצומצם — במקרה שלנו, לא כל ההפניות למשתנים יהיו מוגדרות בסביבה נתונה, והפונקציה היא למעשה **פונקציה סופית** (מוגדרת על קבוצה סופית של ערכים). כשהפונקציה מופעלת מחוץ לתחום שלה, היא מחזירה כישלון."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:6",
+     "type": "prose",
+     "en": "We model environments as an inductive data type, to reflect the fact that environments can be extended (this is what happens when we define a new variable and bind it to a value).  We adopt the method discussed in [Chapter 1.5](./class_material/1.4TypesAndOperations.html) to model environments (which are mutable data structures) in a functional manner. \n\n",
+     "hash": "53a35deb721787ad",
+     "he": "אנו ממדלים סביבות כטיפוס נתונים אינדוקטיבי, כדי לשקף את העובדה שאפשר להרחיב סביבות (זה מה שקורה כשאנו מגדירים משתנה חדש וקושרים אותו לערך). אנו מאמצים את השיטה שנדונה ב[פרק 1.5](./class_material/1.4TypesAndOperations.html) למידול סביבות (שהן מבני נתונים ברי-שינוי) באופן פונקציונלי."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:7",
+     "type": "prose",
+     "en": "Recall that the strategy to implement mutable data structures in a functional manner consists of the following steps:\n",
+     "hash": "e5a8dc7a4b789898",
+     "he": "היזכרו שהאסטרטגיה למימוש מבני נתונים ברי-שינוי באופן פונקציונלי מורכבת מהשלבים הבאים:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:8",
+     "type": "list",
+     "en": "* Define a data type for the possible values of the data structure as a disjoint union - specifically, distinguish atomic value types and recursive value types.\n* For each mutation operation, define a distinct value constructor for the data type which receives as a parameter the mutation parameters together with the original value of the object and returns a new value which represents the result of the mutation.\n* Clients that perform mutation operations obtain a new value which represents the result of applying the mutation on the old version of the object.\n\n",
+     "hash": "e259ea7fc62a0da4",
+     "he": "* להגדיר טיפוס נתונים לערכים האפשריים של מבנה הנתונים כאיחוד זר — ובפרט, להבחין בין טיפוסי ערך אטומיים לטיפוסי ערך רקורסיביים.\n* לכל פעולת שינוי, להגדיר בנאי ערכים נפרד לטיפוס הנתונים, שמקבל כפרמטר את פרמטרי השינוי יחד עם הערך המקורי של העצם, ומחזיר ערך חדש שמייצג את תוצאת השינוי.\n* לקוחות שמבצעים פעולות שינוי מקבלים ערך חדש שמייצג את תוצאת הפעלת השינוי על הגרסה הישנה של העצם."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:9",
+     "type": "prose",
+     "en": "In the case of the environment data structure, we obtain the following inductive data type definition:\n\n",
+     "hash": "705e1b14250228d3",
+     "he": "במקרה של מבנה הנתונים של הסביבה, אנו מקבלים את הגדרת טיפוס הנתונים האינדוקטיבית הבאה:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:10",
+     "type": "code",
+     "en": "```typescript\nenv ::= empty-env | extended-env\nempty-env // empty-env()\nextended-env(var, val, env) // extended-env(var:string, val:Value, next-env:Env)\n```\n",
+     "hash": "1f7f29d0e7fe8927",
+     "lang": "typescript",
+     "noteHe": "**ההגדרה האינדוקטיבית של סביבה** — שתי שורות שכדאי לזכור: סביבה היא או **ריקה** (מקרה הבסיס) או **מורחבת** — שלישייה של שם משתנה, ערך, ו**סביבה נוספת** (המקרה הרקורסיבי). המבנה הזה הוא בעצם רשימה מקושרת של קשירות. הרעיון החשוב: \"הרחבת\" סביבה אינה משנה אותה — היא יוצרת סביבה **חדשה** שמצביעה על הישנה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:11",
+     "type": "prose",
+     "en": "That is, we define an environment as either:\n",
+     "hash": "b4e13520ef151003",
+     "he": "כלומר, אנו מגדירים סביבה כאחד משניים:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:12",
+     "type": "list",
+     "en": "* An empty environment\n* Or an extended environment which maps variables (strings) to values on top of an existing environment.\n\n",
+     "hash": "216ce41ac92527b3",
+     "he": "* סביבה ריקה\n* או סביבה מורחבת שממפה משתנים (מחרוזות) לערכים מעל סביבה קיימת."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:13",
+     "type": "prose",
+     "en": "On the basis of this inductive definition, we define a single value accessor for environment, which we call `applyEnv`\n(see full source code in [L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts#L13)):\n\n\n",
+     "hash": "0633c86f3d4c6cf9",
+     "he": "על בסיס ההגדרה האינדוקטיבית הזו, אנו מגדירים פונקציית גישה יחידה לסביבה, שאנו קוראים לה `applyEnv`\n(ראו את קוד המקור המלא ב-[L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts#L13)):"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:14",
+     "type": "code",
+     "en": "```typescript\n// ========================================================\n// Environment data type for L1\n\nexport type Env = EmptyEnv | NonEmptyEnv;\nexport type EmptyEnv = {tag: \"EmptyEnv\" };\nexport type NonEmptyEnv = {\n    tag: \"Env\";\n    var: string;\n    val: Value;\n    nextEnv: Env;\n};\nexport const makeEmptyEnv = (): EmptyEnv => ({tag: \"EmptyEnv\"});\nexport const makeEnv = (v: string, val: Value, env: Env): NonEmptyEnv =>\n    ({tag: \"Env\", var: v, val: val, nextEnv: env});\nconst isEmptyEnv = (x: any): x is EmptyEnv => x.tag === \"EmptyEnv\";\nconst isNonEmptyEnv = (x: any): x is NonEmptyEnv => x.tag === \"Env\";\nconst isEnv = (x: any): x is Env => isEmptyEnv(x) || isNonEmptyEnv(x);\n\nexport const applyEnv = (env: Env, v: string): Result<Value> =>\n    isEmptyEnv(env) ? makeFailure(\"var not found \" + v) :\n    env.var === v ? makeOk(env.val) :\n    applyEnv(env.nextEnv, v);\n```\n\n",
+     "hash": "282974b513890596",
+     "lang": "typescript",
+     "noteHe": "מימוש טיפוס הסביבה — שוב המתכון המוכר (טיפוסים, בנאים, פרדיקטים), אבל שימו לב לפונקציה האחרונה `applyEnv`, שהיא לב העניין:\n- אם הסביבה **ריקה** → כישלון \"משתנה לא נמצא\" (מקרה הבסיס).\n- אם השם בקשירה הנוכחית **תואם** → מחזירים את ערכה.\n- אחרת → ממשיכים רקורסיבית ל-`nextEnv`.\nזהו חיפוש ליניארי בשרשרת הקשירות. **תוצאה חשובה**: אם אותו שם נקשר פעמיים, הקשירה **האחרונה שנוספה** נמצאת קרוב יותר לראש השרשרת ולכן היא זו שתימצא — כך פועלת הסתרה (shadowing)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:15",
+     "type": "prose",
+     "en": "To lookup a variable `v` in an environment `env`, we apply the `env` function on the variable.\nThis is implemented recursively:\n",
+     "hash": "0024d7681f956794",
+     "he": "כדי לחפש משתנה `v` בסביבה `env`, אנו מפעילים את הפונקציה `env` על המשתנה.\nזה ממומש רקורסיבית:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:16",
+     "type": "list",
+     "en": "* No variable is defined in an empty environment - in this case, we return a Failure.\n* Else, for an environment made up of the binding `(var)->(val)` and a next environment `nextEnv`:\n    * If `var` is the same as `v` - return the correspond `val`.\n    * Else continue searching in the embedded environment `nextEnv`.\n\n",
+     "hash": "0c8318f3f9ec5795",
+     "he": "* בסביבה ריקה לא מוגדר אף משתנה — במקרה כזה אנו מחזירים Failure.\n* אחרת, עבור סביבה המורכבת מהקשירה `(var)->(val)` ומסביבה נוספת `nextEnv`:\n    * אם `var` זהה ל-`v` — החזר את ה-`val` המתאים.\n    * אחרת המשך לחפש בסביבה המוטמעת `nextEnv`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:17",
+     "type": "prose",
+     "en": "As usual - this computation is an instance of the structural induction principle (we exhaustively traverse all the cases of the `env` type definition).\n\n",
+     "hash": "697c656b5a57a29c",
+     "he": "כרגיל — החישוב הזה הוא מופע של עקרון האינדוקציה המבנית (אנו עוברים באופן ממצה על כל המקרים של הגדרת הטיפוס `env`)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:18",
+     "type": "prose",
+     "en": "Here is an example using this data structure:\n\n\n",
+     "hash": "1125f5f5209be28e",
+     "he": "הנה דוגמה לשימוש במבנה הנתונים הזה:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:19",
+     "type": "code",
+     "en": "```typescript\n// Lookup of any variable in an empty env fails\nisFailure(applyEnv(makeEmptyEnv(), \"x\"))\n// --> true\n```\n\n",
+     "hash": "a8bb6d66adaaab0a",
+     "lang": "typescript",
+     "noteHe": "מקרה הבסיס: חיפוש כל משתנה בסביבה ריקה נכשל — `applyEnv` מגיע מיד לענף `isEmptyEnv` ומחזיר `Failure`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:20",
+     "type": "code",
+     "en": "```typescript\n// Lookup of a variable defined in an extended env succeeds\napplyEnv(makeEnv(\"x\", 1, makeEmptyEnv()), \"x\")\n// --> 1\n```\n\n",
+     "hash": "5bd4fe2843dd542e",
+     "lang": "typescript",
+     "noteHe": "המקרה הפשוט ביותר של הצלחה: סביבה עם קשירה אחת, וחיפוש בדיוק אותו שם — התאמה כבר בשלב הראשון, מוחזר 1."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:21",
+     "type": "code",
+     "en": "```typescript\n// Lookup of a variable that is not defined in an extended env fails\nisFailure(applyEnv(makeEnv(\"x\", 1, makeEmptyEnv()), \"y\"))\n// --> true\n```\n\n",
+     "hash": "97ba18b6c443a4f7",
+     "lang": "typescript",
+     "noteHe": "חיפוש שם שאינו קיים: הקשירה `x` אינה תואמת ל-`y`, ולכן ממשיכים ל-`nextEnv` — שהיא ריקה — ומקבלים כישלון. שימו לב שהחיפוש עובר על **כל** השרשרת לפני שהוא נכשל."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:22",
+     "type": "code",
+     "en": "```typescript\n// Lookup of a variable that is defined in a deeper env is retrieved\n// Here we have 2 levels: (<y 2> <x 1> <empty>)\napplyEnv(makeEnv(\"y\", 2, \n         makeEnv(\"x\", 1, \n         makeEmptyEnv())), \"x\")\n// --> 1        \n```\n\n\n",
+     "hash": "8f7791d59adc9675",
+     "lang": "typescript",
+     "noteHe": "חיפוש בעומק: הסביבה היא `(<y 2> <x 1> <empty>)`. מחפשים `x` — הקשירה הראשונה היא `y` ולא תואמת, ממשיכים פנימה, ומוצאים את `x` עם ערך 1. זה מדגים את הרקורסיה על השרשרת."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:23",
+     "type": "code",
+     "en": "```typescript\n// Lookup of a variable that is defined in a deeper env is overridden by a newer binding\n// Here we have 2 levels: (<x 2> <x 1> <empty>)\napplyEnv(makeEnv(\"x\", 2, \n         makeEnv(\"x\", 1, \n         makeEmptyEnv())), \"x\")\n--> 2         \n```\n\n",
+     "hash": "1ecb0799675ea942",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה החשובה ביותר — הסתרה (shadowing).** אותו שם `x` קשור פעמיים: פעם ל-2 (חיצוני יותר בשרשרת) ופעם ל-1. החיפוש מוצא **את הראשון בשרשרת** ולכן מחזיר 2. זה מדגים איך המבנה הרקורסיבי נותן הסתרה בחינם: קשירה שנוספה מאוחר יותר נמצאת קרוב יותר לראש, ולכן היא ה\"פעילה\"."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:24",
+     "type": "prose",
+     "en": "#### Handling Variable References\n\n",
+     "hash": "b27602cbacaada87",
+     "he": "#### טיפול בהפניות למשתנים"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:25",
+     "type": "prose",
+     "en": "Given this definition of the **environment** data type, let us review how to handle variable references and define expressions.\nWe first observe that mutation to the environment are necessary when evaluating a program (that is, a sequence of expressions that can include define expressions), \nwhile the evaluation of `cexp` expressions does not require any mutation.\nYet, the evaluation of variable references (`var-ref` expressions) requires access to an environment.\n\n",
+     "hash": "a37780da2629aaf8",
+     "he": "בהינתן ההגדרה הזו של טיפוס הנתונים **סביבה**, נסקור כיצד לטפל בהפניות למשתנים ובביטויי define.\nתחילה נשים לב ששינויים בסביבה נחוצים בעת הערכת **תוכנית** (כלומר, רצף ביטויים שיכול לכלול ביטויי define), ואילו הערכת ביטויי `cexp` אינה דורשת שום שינוי.\nעם זאת, הערכת הפניות למשתנים (ביטויי `var-ref`) כן דורשת גישה לסביבה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:26",
+     "type": "prose",
+     "en": "We split the implementation of the eval algorithm in two cases:\n",
+     "hash": "5d788ccafc5e1ecb",
+     "he": "אנו מפצלים את מימוש אלגוריתם ה-eval לשני מקרים:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:27",
+     "type": "list",
+     "en": "* `L1eval(exp, env)`: evaluate a `<cexp>` AST with reference to a given environment.\n* `L1evalProgram(program)`: evaluate a program\n\n",
+     "hash": "889cec802b4884b3",
+     "he": "* `L1eval(exp, env)`: הערכת AST מסוג `<cexp>` ביחס לסביבה נתונה.\n* `L1evalProgram(program)`: הערכת תוכנית"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:28",
+     "type": "prose",
+     "en": "`L1eval` handles the case of evaluating a variable reference with respect to a given environment.\nThe evaluation rule for `VarRef` expressions is now clarified:\n\n",
+     "hash": "bf6b17fb41047ab9",
+     "he": "`L1eval` מטפל במקרה של הערכת הפניה למשתנה ביחס לסביבה נתונה.\nכלל ההערכה לביטויי `VarRef` מובהר כעת:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:29",
+     "type": "code",
+     "en": "```typescript\n// Variables are evaluated by looking up their value in the global environment.\nL1eval(VarRef(var)) => applyEnv(env, var) \n```\n\n",
+     "hash": "e4370e93509bd165",
+     "lang": "typescript",
+     "noteHe": "כלל ההערכה של `VarRef`, כעת מדויק לחלוטין: `L1eval` מקבל **גם** סביבה כפרמטר, וההערכה היא בסך הכול חיפוש בה. זה מסביר למה חתימת `eval` השתנתה מ-`Expression -> Value` ל-`(Expression, Env) -> Value`."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:9:30",
+     "type": "prose",
+     "en": "We still need to determine how the value of `env` is obtained so that it can be used in this clause.\n\n",
+     "hash": "e71354a1ac804eed",
+     "he": "עדיין עלינו לקבוע כיצד מתקבל ערכו של `env` כדי שאפשר יהיה להשתמש בו בפסוקית הזו."
+    }
+   ],
+   "headingHe": "הסביבה הגלובלית, הפניות למשתנים וביטויי define"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:10",
+   "depth": 3,
+   "headingEn": "Handling DefineExp and Evaluating Programs",
+   "raw": "### Handling DefineExp and Evaluating Programs\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:10:0",
+     "type": "prose",
+     "en": "Let us now address the issue of evaluating a program - which is a sequence of expressions, which can be either\n`define` expressions, which update the current environment (and return void), or `cexp` expressions, which return a value.\n\n",
+     "hash": "dd65411f5cd02bbd",
+     "he": "נטפל כעת בסוגיית הערכת תוכנית — שהיא רצף ביטויים, שיכולים להיות ביטויי `define`, שמעדכנים את הסביבה הנוכחית (ומחזירים void), או ביטויי `cexp`, שמחזירים ערך."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:1",
+     "type": "prose",
+     "en": "`L1evalProgram(program)` receives a program, which includes an ordered sequence of expressions.\nIt iterates over the expressions and depending on the type of each expression, it performs the following:\n",
+     "hash": "5b4943e58e039d61",
+     "he": "`L1evalProgram(program)` מקבל תוכנית, שכוללת רצף מסודר של ביטויים.\nהוא עובר על הביטויים ובהתאם לסוג כל ביטוי מבצע את הפעולות הבאות:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:2",
+     "type": "code",
+     "en": "```typescript\nDefineExp(var, val) =>\n    let value = L1eval(val, env)\n        if there are more expressions in the program:\n            let newEnv = extendEnv(var, val, env)\n                continue evaluating remaining expressions in newEnv\n        else\n            return void\n\nCexp =>\n    let value = L1eval(cexp, env)\n        if there are more expressions in the program\n            continue evaluating remaining expressions in env\n        else\n            return value\n```\n\n",
+     "hash": "bf9ec4d2f2599045",
+     "lang": "typescript",
+     "noteHe": "**אלגוריתם הערכת תוכנית** (פסאודו-קוד) — שימו לב שהוא מעביר סביבה מביטוי לביטוי:\n- ב-**`define`**: מעריכים את הערך, ואז יוצרים סביבה **חדשה** `newEnv` שמרחיבה את הקודמת בקשירה החדשה, וממשיכים להעריך את שאר הביטויים **בסביבה החדשה**. כך \"העדכון\" של הסביבה מתבצע באופן פונקציונלי לגמרי, בלי שינוי מצב.\n- ב-**`cexp`**: מעריכים, וממשיכים באותה סביבה (אין קשירה חדשה).\n- בשני המקרים: אם זה הביטוי האחרון — מחזירים את תוצאתו (או void ל-define)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:3",
+     "type": "prose",
+     "en": "This algorithm is implemented in [L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts#L90).\n\n",
+     "hash": "6cc568b0f90e6eee",
+     "he": "האלגוריתם הזה ממומש ב-[L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts#L90)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:4",
+     "type": "prose",
+     "en": "The function `L1applicativeEval` has the typical structure of a syntax-driven function, as was reviewed in [Section 2.4](./class_material/2.4SyntacticOperations.html)\nwith a conditional clause for each type of AST expression.  It returns a `Result<Value>` given a `CExp` and the current `Env`.\n\n\n",
+     "hash": "8ce2b709d9464ebe",
+     "he": "לפונקציה `L1applicativeEval` יש את המבנה הטיפוסי של פונקציה מונחית-תחביר, כפי שנסקר ב[סעיף 2.4](./class_material/2.4SyntacticOperations.html), עם פסוקית תנאי לכל סוג ביטוי ב-AST. היא מחזירה `Result<Value>` בהינתן `CExp` וה-`Env` הנוכחית."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:5",
+     "type": "code",
+     "en": "```typescript\nconst L1applicativeEval = (exp: CExp, env: Env): Result<Value> =>\n    isNumExp(exp) ? makeOk(exp.val) :\n    isBoolExp(exp) ? makeOk(exp.val) :\n    isPrimOp(exp) ? makeOk(exp) :\n    isVarRef(exp) ? applyEnv(env, exp.var) :\n    isAppExp(exp) ? bind(mapResult((rand: CExp) =>  L1applicativeEval(rand, env), exp.rands), (rands: Value[]) => \n                         L1applyProcedure(exp.rator, rands)) :\n    exp;\n```\n\n",
+     "hash": "7588b38e600be33a",
+     "lang": "typescript",
+     "noteHe": "**המפרש של $$L1$$ — שבע שורות קוד בלבד.** זהו המימוש המלא של כללי ההערכה שראינו:\n- שלושת הענפים הראשונים הם מקרי הבסיס הטריוויאליים (`makeOk(exp.val)` לליטרלים, `makeOk(exp)` לפרימיטיב).\n- `isVarRef` → `applyEnv` — חיפוש בסביבה.\n- `isAppExp` → מעריכים את **כל** האופרנדים (`mapResult` הוא map שמתמודד עם `Result`), ואז מפעילים. שימו לב שהאופרטור `exp.rator` מועבר ל-`L1applyProcedure` **בלי הערכה מוקדמת** — פישוט שאפשרי כאן כי ב-$$L1$$ האופרטור הוא תמיד פרימיטיב.\n- השם `applicativeEval` מרמז על **סדר יישומי**: כל הארגומנטים מוערכים לפני ההפעלה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:6",
+     "type": "prose",
+     "en": "The `L1evalProgram` invokes `evalExps` to evaluate the sequence of expressions that appear inside the program with an initially empty environment.  The expressions can either be of type DefineExp (which modify the current environment) or CExp (which have no side effect).  To model the updates of the current environment in a functional manner, we implement in the `evalDefineExps` the process that creates a new environment after each define, and passes the new environment to the evaluation of the next expressions.\n\n\n",
+     "hash": "71f0f2a1dc33d393",
+     "he": "`L1evalProgram` מפעיל את `evalExps` כדי להעריך את רצף הביטויים שמופיעים בתוך התוכנית, עם סביבה ריקה בהתחלה. הביטויים יכולים להיות מטיפוס DefineExp (שמשנים את הסביבה הנוכחית) או CExp (שאין להם תופעת לוואי). כדי למדל את עדכוני הסביבה הנוכחית באופן פונקציונלי, אנו מממשים ב-`evalDefineExps` את התהליך שיוצר סביבה חדשה אחרי כל define, ומעביר את הסביבה החדשה להערכת הביטויים הבאים."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:7",
+     "type": "code",
+     "en": "```typescript\n// Purpose: evaluate a program made up of a sequence of expressions.\n// When def-exp expressions are executed, thread an updated env to the continuation.\n// For other expressions (that have no side-effect), execute the expressions sequentially.\nexport const L1evalProgram = (program: Program): Result<Value> =>\n    evalSequence(program.exps, makeEmptyEnv());\n\n// Evaluate a sequence of expressions (in a program)\nexport const evalSequence = (seq: Exp[], env: Env): Result<Value> =>\n    isEmpty(seq) ? makeFailure(\"Empty sequence\") :\n    evalSequenceFirst(first(seq), rest(seq), env);\n\nconst evalSequenceFirst = (first: Exp, rest: Exp[], env: Env): Result<Value> =>\n    isDefineExp(first) ? evalDefineExps(first, rest, env) :\n    isEmpty(rest) ? L1applicativeEval(first, env) :\n    bind(L1applicativeEval(first, env), _ => evalSequence(rest, env));\n\n// Eval a sequence of expressions when the first exp is a Define.\n// Compute the rhs of the define, extend the env with the new binding\n// then compute the rest of the exps in the new env.\nconst evalDefineExps = (def: DefineExp, exps: Exp[], env: Env): Result<Value> =>\n    bind(L1applicativeEval(def.val, env),\n         (rhs: Value) => evalSequence(exps, makeEnv(def.var.var, rhs, env)));\n```\n\n",
+     "hash": "cabf8f7935725da8",
+     "lang": "typescript",
+     "noteHe": "**מימוש הערכת התוכנית — שלוש פונקציות שעובדות יחד.** עקבו אחריהן לפי הסדר:\n- `L1evalProgram` — נקודת הכניסה: מתחילה את הרצף עם **סביבה ריקה**.\n- `evalSequence` — בודקת שהרצף אינו ריק ומעבירה את הראשון והשאר הלאה.\n- `evalSequenceFirst` — שלושה מקרים: אם הראשון הוא `define` → מפנה ל-`evalDefineExps`; אם אין עוד ביטויים → מעריכה ומחזירה את התוצאה (**ערך התוכנית**); אחרת → מעריכה, **זורקת את התוצאה** (שימו לב ל-`_` בפרמטר!) וממשיכה לשאר באותה סביבה.\n- `evalDefineExps` — הלב: מעריכה את הערך, ואז קוראת ל-`evalSequence` על השאר עם **סביבה חדשה** `makeEnv(def.var.var, rhs, env)`. ה-`def.var.var` הכפול הוא בגלל ש-`def.var` הוא `VarDecl` ולכן צריך לחלץ ממנו את המחרוזת."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:10:8",
+     "type": "prose",
+     "en": "Interestingly, we implemented a form of mutation in $$L1$$ (the evaluation of `define`) **without mutation** in the interpreter.\nThis is obtained by using a functional implementation of the environment and *threading* the updated value of this environment \n(which is a new constructed value, obtained without mutation) at each step of the evaluation process.\n\n",
+     "hash": "a4e498c6ea9a5c54",
+     "he": "מעניין לציין שמימשנו צורה של שינוי מצב ב-$$L1$$ (ההערכה של `define`) **ללא שינוי מצב** במפרש עצמו.\nזה מושג באמצעות מימוש פונקציונלי של הסביבה, ו*השחלה (threading)* של הערך המעודכן של הסביבה הזו (שהוא ערך חדש שנבנה, שהתקבל ללא שינוי מצב) בכל שלב של תהליך ההערכה."
+    }
+   ],
+   "headingHe": "טיפול ב-DefineExp והערכת תוכניות"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:11",
+   "depth": 3,
+   "headingEn": "Procedure Calls",
+   "raw": "### Procedure Calls\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:11:0",
+     "type": "prose",
+     "en": "The last aspect of the operational semantics that is left to clarify is how procedure calls are handled.\nIn $$L1$$, the only procedures that can be applied are primitives, since we have not yet provided a way to define user procedures (we will do this next in $$L2$$).\n\n",
+     "hash": "705fb2a2f76717a0",
+     "he": "ההיבט האחרון של הסמנטיקה האופרציונלית שנותר להבהיר הוא כיצד מטפלים בקריאות לפרוצדורות.\nב-$$L1$$, הפרוצדורות היחידות שאפשר להפעיל הן פרימיטיבים, מכיוון שעדיין לא סיפקנו דרך להגדיר פרוצדורות משתמש (נעשה זאת בהמשך ב-$$L2$$)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:1",
+     "type": "prose",
+     "en": "Consider for example the computation of this $$L1$$-expression:\n",
+     "hash": "8697ae49c3eea42f",
+     "he": "נתבונן למשל בחישוב של ביטוי ה-$$L1$$ הזה:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:2",
+     "type": "code",
+     "en": "```scheme\n(+ (* 2 3) (- 3 2))\n```\n\n",
+     "hash": "67227b9bc9555082",
+     "lang": "scheme",
+     "noteHe": "ביטוי מקונן פשוט: חיבור של שני תת-ביטויים, שכל אחד מהם הוא בעצמו הפעלת פרימיטיב. נעקוב אחרי סדר החישוב שלו בסעיף הזה — התוצאה תהיה 6+1=7."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:3",
+     "type": "prose",
+     "en": "The way this expression is evaluated according to the computation rule for `AppExp(rator, rands)` expressions is:\n\n",
+     "hash": "fe6e829bd4e7e220",
+     "he": "האופן שבו הביטוי הזה מוערך לפי כלל החישוב לביטויי `AppExp(rator, rands)` הוא:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:4",
+     "type": "code",
+     "en": "```typescript\n    isAppExp(exp) ? bind(mapResult((rand: CExp) =>  L1applicativeEval(rand, env), exp.rands), (rands: Value[]) => \n                         L1applyProcedure(exp.rator, rands)) :\n```\n\n",
+     "hash": "dae278b785167456",
+     "lang": "typescript",
+     "noteHe": "שוב הענף של `isAppExp` מהמפרש — עכשיו נתמקד בסדר: `mapResult` מעריך את כל האופרנדים תחילה (רקורסיבית!), ורק אז `bind` מעביר את **הערכים** ל-`L1applyProcedure`. שימו לב שהאופרטור מועבר כביטוי `exp.rator` ולא כערך."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:5",
+     "type": "prose",
+     "en": "We first evaluate all the arguments, then we invoke the procedure on the computed values.\nIn the example above, it means that we compute the expression in this order:\n",
+     "hash": "bff554e60bd16aad",
+     "he": "תחילה אנו מעריכים את כל הארגומנטים, ואז מפעילים את הפרוצדורה על הערכים המחושבים.\nבדוגמה לעיל, זה אומר שאנו מחשבים את הביטוי בסדר הזה:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:6",
+     "type": "list",
+     "en": "1. Compute (* 2 3) and (- 3 2)\n2. Compute (+ 6 1)\n\n",
+     "hash": "d0d44ad33d4b389b",
+     "he": "1. מחשבים את (* 2 3) ואת (- 3 2)\n2. מחשבים את (+ 6 1)"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:7",
+     "type": "prose",
+     "en": "Recursively, if we have an expression that is nested deeper, we start by computing the inner-most sub-expression,\nand then move up towards the root of the AST.\n\n",
+     "hash": "6e027fda8636c3b8",
+     "he": "רקורסיבית, אם יש לנו ביטוי מקונן עמוק יותר, אנו מתחילים בחישוב תת-הביטוי הפנימי ביותר, ואז עולים לכיוון שורש ה-AST."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:8",
+     "type": "prose",
+     "en": "The operational semantics does **not** specify the order of execution among the arguments - we could compute\n(* 2 3) first and (- 3 2) next, or in reverse, or even together (in parallel).\n\n",
+     "hash": "ab9b855daeecd475",
+     "he": "הסמנטיקה האופרציונלית **אינה** קובעת את סדר הביצוע בין הארגומנטים — אפשר לחשב קודם את (* 2 3) ואז את (- 3 2), או להפך, או אפילו יחד (במקביל)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:11:9",
+     "type": "prose",
+     "en": "The procedure `apply-proc` does **not** need an `env` parameter because it receives only values, not expressions, and in particular, it does not receive any variable reference or any object that may contain a variable reference.\n\n",
+     "hash": "abdce16e512e90f6",
+     "he": "הפרוצדורה `apply-proc` **אינה** זקוקה לפרמטר `env`, כי היא מקבלת רק ערכים ולא ביטויים, ובפרט היא אינה מקבלת שום הפניה למשתנה או עצם שעשוי להכיל הפניה למשתנה."
+    }
+   ],
+   "headingHe": "קריאות לפרוצדורות"
+  },
+  {
+   "id": "cm/2.5OperationalSemantics:12",
+   "depth": 3,
+   "headingEn": "$$L1$$ Operational Semantics Summary",
+   "raw": "### $$L1$$ Operational Semantics Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.5OperationalSemantics:12:0",
+     "type": "prose",
+     "en": "The complete code of the $$L1$$ interpreter which implements the operational semantics described here is available in the following program:  \n[L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts)\n\n",
+     "hash": "3ba09077a3718386",
+     "he": "הקוד המלא של המפרש של $$L1$$, שמממש את הסמנטיקה האופרציונלית שתוארה כאן, זמין בתוכנית הבאה:\n[L1-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-eval.ts)"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:1",
+     "type": "prose",
+     "en": "Tests are available in [L1-eval.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L1/L1-eval.test.ts)\n\n",
+     "hash": "0a0ab692c8c927bd",
+     "he": "בדיקות זמינות ב-[L1-eval.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L1/L1-eval.test.ts)"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:2",
+     "type": "prose",
+     "en": "In general, the operational semantics is defined as a syntax-driven traversal of an input AST.\nThe algorithm of this AST traversal is specified inductively:\n\n",
+     "hash": "d014ce01916f9bc4",
+     "he": "באופן כללי, הסמנטיקה האופרציונלית מוגדרת כמעבר מונחה-תחביר על AST של קלט.\nהאלגוריתם של המעבר הזה מוגדר אינדוקטיבית:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:3",
+     "type": "list",
+     "en": "1. Evaluation of atomic expressions\n",
+     "hash": "2dede503dc72e58c",
+     "he": "1. הערכת ביטויים אטומיים"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:4",
+     "type": "code",
+     "en": "```typescript\n// Number atomic literal expressions evaluate to number values.\neval(NumExp(val), env)  => val \n// Boolean atomic literal expressions evaluate to boolean values true and false.\neval(BoolExp(val), env) => val \n// Primitive procedures evaluate to the primitive operation \neval(PrimOp(op), env)   => PrimOp(op) \n// Variables are evaluated by looking up their value in the global environment.\neval(VarRef(var), env)  => applyEnv(env, var) \n```\n",
+     "hash": "4f43169f3c903aa3",
+     "lang": "typescript",
+     "noteHe": "**סיכום ארבעת כללי ההערכה האטומיים** — עכשיו בגרסה הסופית, עם פרמטר `env` בכל קריאה. זהו הניסוח שכדאי לשנן למבחן. שימו לב ששלושת הראשונים מתעלמים מ-`env` לגמרי, ורק הרביעי משתמש בו."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:5",
+     "type": "list",
+     "en": "2. Evaluation of compound forms\n",
+     "hash": "87712b3a7842b11c",
+     "he": "2. הערכת צורות מורכבות"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:6",
+     "type": "code",
+     "en": "```typescript\neval(DefineExp(var, val)) =>\n    // var is of type var-decl\n    // val is of type cexp\n    let val:Value = eval(val)\n        add the binding [var, val] to the global environment\n        return void.\neval(AppExp(rator, rands)) =>\n    // rator is of type cexp\n    // rands is of type List(cexp)\n    let  proc = eval(rator, env)\n         args = [eval(r,env) for r in rands]\n         return applyProc(proc, args)\n```\n\n",
+     "hash": "c55ebf3cb6645143",
+     "lang": "typescript",
+     "noteHe": "**סיכום שני כללי ההערכה המורכבים.** שימו לב להבדל המהותי ביניהם: ב-`define` **לא** מעריכים את `var` (רק את `val`) והתוצאה היא תופעת לוואי + void; ב-`AppExp` מעריכים את **כל** תת-הביטויים (אופרטור ואופרנדים) ואז מפעילים. זהו ההבדל בין צורה מיוחדת לצורה רגילה."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:7",
+     "type": "prose",
+     "en": "The key decisions we made are:\n",
+     "hash": "e00f6a43a7f49206",
+     "he": "ההחלטות המרכזיות שקיבלנו הן:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:8",
+     "type": "list",
+     "en": "* Primitive operations are represented as syntactically distinct expressions (PrimOp) with a specific type for their value (PrimOp as well).\n* Primitive operations are dispatched to the meta-language (TypeScript) based on their name.\n* We represent the global environment using an inductive data-structure - `env = empty-env | ExtEnv(vars, vals)` with the\naccessor `applyEnv(env, var)`.\n* Variable references are resolved by applying the global environment to the variable name.\n* Define expressions are evaluated sequentially - they return a `void` value (`undefined`), and have a side-effect which is to update the current global environment.\n* We model the mutation of the global environment by obtaining from the evaluation of Define expressions the updated environment and passing the new value to further evaluations.\n* When evaluating an application expression (`AppExp`), we first compute the arguments (in any order), then apply the procedure to the argument values.\n\n",
+     "hash": "89ccb631c8568893",
+     "he": "* פעולות פרימיטיביות מיוצגות כביטויים נבדלים תחבירית (PrimOp) עם טיפוס ספציפי לערכן (גם הוא PrimOp).\n* פעולות פרימיטיביות מואצלות לשפת-העל (TypeScript) על סמך שמן.\n* אנו מייצגים את הסביבה הגלובלית באמצעות מבנה נתונים אינדוקטיבי — `env = empty-env | ExtEnv(vars, vals)` עם פונקציית הגישה `applyEnv(env, var)`.\n* הפניות למשתנים נפתרות על ידי הפעלת הסביבה הגלובלית על שם המשתנה.\n* ביטויי define מוערכים באופן סדרתי — הם מחזירים ערך `void` (‏`undefined`), ויש להם תופעת לוואי שהיא עדכון הסביבה הגלובלית הנוכחית.\n* אנו ממדלים את השינוי של הסביבה הגלובלית על ידי קבלת הסביבה המעודכנת מהערכת ביטויי Define, והעברת הערך החדש להערכות הבאות.\n* בהערכת ביטוי הפעלה (`AppExp`), אנו מחשבים תחילה את הארגומנטים (בכל סדר), ואז מפעילים את הפרוצדורה על ערכי הארגומנטים."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:9",
+     "type": "prose",
+     "en": "The set of computed values for $$L1$$ is:\n",
+     "hash": "6dcfdf5652cb31f9",
+     "he": "קבוצת הערכים המחושבים של $$L1$$ היא:"
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:10",
+     "type": "code",
+     "en": "```typescript\nValue = Number | Boolean | Prim-ops | Void\n```\n\n",
+     "hash": "7ab8e7b4adca823f",
+     "lang": "typescript",
+     "noteHe": "התחום הסמנטי הסופי של $$L1$$ — ארבעה סוגי ערכים. שווה להשוות זאת בהמשך לתחום של $$L2$$ (שיוסיף Closure) ושל $$L3$$ (שיוסיף Pair ו-List)."
+    },
+    {
+     "id": "cm/2.5OperationalSemantics:12:11",
+     "type": "prose",
+     "en": "Variables in $$L1$$ are bound to Values.\n",
+     "hash": "3bfec8f12bb5a27d",
+     "he": "משתנים ב-$$L1$$ קשורים לערכים."
+    }
+   ],
+   "headingHe": "סיכום הסמנטיקה האופרציונלית של $$L1$$"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו הערך של הביטוי `+` (האופרטור לבדו, ללא סוגריים) לפי הסמנטיקה של $$L1$$?",
+   "options": [
+    "שגיאה — `+` אינו ביטוי חוקי",
+    "‏0 (האיבר הנייטרלי של חיבור)",
+    "ה-`PrimOp` עצמו — אופרטור פרימיטיבי מוערך לעצמו",
+    "פונקציה של TypeScript"
+   ],
+   "correct": 2,
+   "explanationHe": "כלל ההערכה הוא `eval(PrimOp(op), env) => PrimOp(op)` — האופרטור מוערך **לעצמו**. זו ההחלטה שהתקבלה בפרק: מייצגים אופרטורים פרימיטיביים כערכים מטיפוס `PrimOp` (בעצם מחרוזות), ורק בזמן ה**הפעלה** (`applyPrimitive`) מאצילים לפעולה המתאימה של שפת-העל. אפשרות 4 שגויה — ב-TypeScript, בניגוד ל-Scheme, האופרטור `+` אינו ערך כלל."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "בהינתן המימוש של `applyEnv`, מה יחזיר הביטוי הבא ומדוע?\n```typescript\napplyEnv(makeEnv(\"x\", 5,\n         makeEnv(\"y\", 2,\n         makeEnv(\"x\", 1,\n         makeEmptyEnv()))), \"x\")\n```",
+   "answerHe": "‏5.",
+   "explanationHe": "`applyEnv` הוא חיפוש ליניארי מראש השרשרת: הקשירה הראשונה היא `x`→5 והיא תואמת מיד, ולכן מוחזר 5 והחיפוש נעצר. הקשירה `x`→1 העמוקה יותר **מוסתרת** (shadowed). זהו העיקרון שמאפשר לקשירה חדשה 'לדרוס' ישנה בלי לשנות שום מבנה נתונים קיים."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "הסבירו כיצד המפרש של $$L1$$ ממדל את ה'שינוי' של הסביבה הגלובלית בעת הערכת `define`, בלי להשתמש בשינוי מצב (mutation).",
+   "answerHe": "במקום לשנות את הסביבה במקום, `evalDefineExps` **יוצר סביבה חדשה**: `newEnv = makeEnv(var, value, env)` — סביבה מורחבת שהאיבר הראשון שלה הוא הקשירה החדשה, והזנב שלה הוא הסביבה הקודמת (שלא השתנתה). את הסביבה החדשה הוא מעביר כפרמטר להערכת שאר הביטויים בתוכנית.\nכך ה'עדכון' מיוצג כ**העברת ערך חדש הלאה** ולא כשינוי, וזוהי בדיוק השיטה שנלמדה ב-1.4 למידול מבני נתונים ברי-שינוי באופן פונקציונלי.",
+   "explanationHe": "נקודות מפתח: יצירת ערך חדש במקום שינוי, המבנה הרקורסיבי שהופך את ההרחבה לזולה (רק צומת אחד נוסף), והעברת הסביבה כפרמטר לשלב הבא. שימו לב שהסביבות הישנות נשארות תקפות — תכונה שתהיה קריטית כשנגיע לסגורים ב-2.7."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "מדוע `applyProcedure` (הפעלת הפרוצדורה) אינה מקבלת פרמטר `env`?",
+   "options": [
+    "כי הסביבה היא משתנה גלובלי",
+    "כי היא מקבלת רק **ערכים** ולא ביטויים — כל ההפניות למשתנים כבר נפתרו בשלב ההערכה",
+    "כי ב-$$L1$$ אין משתנים כלל",
+    "כי היא תמיד משתמשת בסביבה הריקה"
+   ],
+   "correct": 1,
+   "explanationHe": "זו נקודה עקרונית בהפרדה בין `eval` ל-`apply`: ‏`eval` עובד על **ביטויים** ולכן זקוק לסביבה כדי לפתור הפניות למשתנים; `apply` מקבל כבר את הערכים המחושבים, ובערכים אין הפניות למשתנים — ולכן אין לו צורך בהקשר כלשהו. ההבחנה הזו תישבר חלקית ב-$$L2$$, כשערך יוכל להיות סגור שמכיל קוד."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "עקבו אחר ההערכה של התוכנית הבאה וציינו את הערך שמוחזר:\n```scheme\n(L1\n  (define x 3)\n  (define y (* x 2))\n  (+ x y))\n```",
+   "answerHe": "‏9.",
+   "explanationHe": "שלושה צעדים, כשהסביבה גדלה בכל אחד: (1) `(define x 3)` → סביבה `<x 3>`, מוחזר void; (2) `(define y (* x 2))` → הערך `(* x 2)` מוערך **בסביבה הנוכחית** (`x` נמצא ומחזיר 3) ונותן 6, הסביבה הופכת ל-`<y 6> <x 3>`; (3) `(+ x y)` מוערך ל-3+6=9. ערך התוכנית הוא ערכו של **הביטוי האחרון**. שימו לב שסדר הביטויים קריטי: אילו `(define y ...)` היה ראשון, ההערכה הייתה נכשלת על משתנה לא-קשור."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "לפי המימוש של `applyPrimitive`, מה יהיה הערך של `(+)` ושל `(*)` (ללא ארגומנטים)? הסבירו מדוע נבחרו הערכים האלה.",
+   "answerHe": "`(+)` → **0** ו-`(*)` → **1**.\nהסיבה: המימוש משתמש ב-`reduce` עם ערך התחלה, וכשרשימת הארגומנטים ריקה מוחזר ערך ההתחלה עצמו. הערכים נבחרו כ**איבר הנייטרלי (neutral element)** של כל פעולה — 0 לחיבור (כי `x + 0 = x`) ו-1 לכפל (כי `x · 1 = x`). זו הבחירה היחידה שמשמרת את התכונה `(+ a b c) = (+ a (+ b c))` גם במקרי קצה.",
+   "explanationHe": "זו אותה שאלה שנשאלה ב-1.2 לגבי ערך ההתחלה של `reduce` — הבחירה הנכונה תמיד האיבר הנייטרלי. שימו לב שעבור `-` ו-`/` אין איבר נייטרלי דו-צדדי, ולכן הקוד שבפרק אכן שגוי עבורם (הטקסט מודה בכך ומפנה לתיקון ב-$$L3$$)."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "מהו ערכו של ביטוי `define` בסמנטיקה שנבחרה עבור $$L1$$, ולמה?",
+   "options": [
+    "הערך שנקשר למשתנה",
+    "שם המשתנה כמחרוזת",
+    "ערך `void` (ממומש כ-`undefined` ב-TypeScript), כי `define` מופעל בשביל תופעת הלוואי שלו בלבד",
+    "אין לו ערך — הוא משפט ולא ביטוי"
+   ],
+   "correct": 2,
+   "explanationHe": "כדי להימנע מהדיכוטומיה ביטוי/משפט שקיימת בשפות לא-פונקציונליות, בחרו לומר שכל ביטוי מחזיר ערך — אלא שביטויים בעלי תופעת לוואי מחזירים ערך מיוחד `void`. ב-TypeScript הוא מקודד כ-`undefined`. אפשרות 4 מתארת את הגישה של שפות אימפרטיביות, שדווקא ממנה הקורס בורח."
+  }
+ ]
+}

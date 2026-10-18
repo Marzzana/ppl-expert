@@ -1,0 +1,1329 @@
+{
+ "id": "ps/ps1",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps1.md",
+ "titleEn": "TypeScript: Complex Data Types, JSON, Map, Filter, Reduce",
+ "titleHe": "TypeScript: טיפוסי נתונים מורכבים, JSON, Map, Filter, Reduce",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps1:0",
+   "depth": 1,
+   "headingEn": "TypeScript: Complex Data Types, JSON, Map, Filter, Reduce",
+   "raw": "# TypeScript: Complex Data Types, JSON, Map, Filter, Reduce\n\n",
+   "blocks": [],
+   "headingHe": "TypeScript: טיפוסי נתונים מורכבים, JSON, Map, Filter, Reduce"
+  },
+  {
+   "id": "ps/ps1:1",
+   "depth": 2,
+   "headingEn": "PPL 2023 - [Course Website](https://bguppl.github.io/interpreters/)",
+   "raw": "## PPL 2023 - [Course Website](https://bguppl.github.io/interpreters/)\n",
+   "blocks": [],
+   "headingHe": "PPL 2023 - [אתר הקורס](https://bguppl.github.io/interpreters/)"
+  },
+  {
+   "id": "ps/ps1:2",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #1",
+   "raw": "## Practical Session - Week #1\n\n",
+   "blocks": [],
+   "headingHe": "תרגול מעשי - שבוע מספר 1"
+  },
+  {
+   "id": "ps/ps1:3",
+   "depth": 3,
+   "headingEn": "How to Install Node.js and NPM on Windows",
+   "raw": "### How to Install Node.js and NPM on Windows\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:3:0",
+     "type": "prose",
+     "en": "Node.js is a JavaScript interpreter. NPM (Node Package Manager) let's you install software (libraries, plugins, frameworks and applications) used to build Node applications. Both are installed using the installer package avaiable from the Node.js web site. The isntallation is pretty straightforward: \n\n",
+     "hash": "7fd9eb73ae149309",
+     "he": "Node.js הוא מפרש (interpreter) של JavaScript. ‏NPM (‏Node Package Manager) מאפשר להתקין תוכנות (ספריות, תוספים, frameworks ואפליקציות) המשמשות לבניית אפליקציות Node. את שניהם מתקינים באמצעות חבילת ההתקנה הזמינה באתר של Node.js. ההתקנה פשוטה למדי:"
+    },
+    {
+     "id": "ps/ps1:3:1",
+     "type": "list",
+     "en": "1. Download the LTS (version 18) Windows installer from [nodejs.org](https://nodejs.org/en/)\n2. Run the installer (the .msi file you downloaded in the previous step.)\n3. Follow the prompts in the installer (Accept the license agreement, click the NEXT button a bunch of times and accept the default installation settings).\n4. Restart your computer.\n\n",
+     "hash": "33b7fe4b7629aa54",
+     "he": "1. הורידו את מתקין ה-Windows בגרסת ה-LTS (גרסה 18) מהאתר [nodejs.org](https://nodejs.org/en/)\n2. הריצו את המתקין (קובץ ה-.msi שהורדתם בשלב הקודם).\n3. עקבו אחר ההנחיות במתקין (אשרו את הסכם הרישיון, לחצו על כפתור NEXT כמה פעמים וקבלו את הגדרות ברירת המחדל של ההתקנה).\n4. הפעילו מחדש את המחשב."
+    },
+    {
+     "id": "ps/ps1:3:2",
+     "type": "prose",
+     "en": "#### Test the installation: \n",
+     "hash": "8544e92b4847a805",
+     "he": "#### בדיקת ההתקנה:"
+    },
+    {
+     "id": "ps/ps1:3:3",
+     "type": "list",
+     "en": "* Open the Windows Command Prompt (press the Win + R keys. Then, type `cmd` and press Enter).\n* To verify node is installed, type `node -v`, then press Enter. You should see a version number (should start with 'v16.').\n* To verify NPM installation, type `npm -v` and press Enter. You should see a version number (should start with '8.').\n\n",
+     "hash": "4b448d5fbf2f345e",
+     "he": "* פתחו את שורת הפקודה של Windows (הקישו על המקשים Win + R, הקלידו `cmd` והקישו Enter).\n* כדי לוודא ש-node מותקן, הקלידו `node -v` והקישו Enter. אמור להופיע מספר גרסה (שאמור להתחיל ב-'v16.').\n* כדי לוודא את התקנת NPM, הקלידו `npm -v` והקישו Enter. אמור להופיע מספר גרסה (שאמור להתחיל ב-'8.')."
+    },
+    {
+     "id": "ps/ps1:3:4",
+     "type": "prose",
+     "en": "#### More information:\n",
+     "hash": "6eaaf21addb47aa0",
+     "he": "#### מידע נוסף:"
+    },
+    {
+     "id": "ps/ps1:3:5",
+     "type": "prose",
+     "en": "For instructions on how to install other software that will be used throughout the course, please refer to the [useful links](https://bguppl.github.io/interpreters/useful_links.html) section in the course web site.  In particular, see instructions on how to install the TypeScript compiler `tsc` and the Visual Studio Code IDE.\n\n",
+     "hash": "8553359fbe66271f",
+     "he": "להוראות התקנה של תוכנות נוספות שישמשו אתכם לאורך הקורס, פנו לחלק [useful links](https://bguppl.github.io/interpreters/useful_links.html) (קישורים שימושיים) באתר הקורס. ראו במיוחד את ההוראות להתקנת מהדר ה-TypeScript ‏`tsc` וסביבת הפיתוח Visual Studio Code."
+    }
+   ],
+   "headingHe": "כיצד מתקינים Node.js ו-NPM ב-Windows"
+  },
+  {
+   "id": "ps/ps1:4",
+   "depth": 2,
+   "headingEn": "1. Types of Values",
+   "raw": "## 1. Types of Values\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:4:0",
+     "type": "prose",
+     "en": "A **data-type** is a classification of data which indicates what the programmer intends to do with the data. Types correspond to a set of values (eg. the boolean type corresponds to {true,false}, number type corresponds to the infinite set of numeric values), and they define the operations that can be done on the data (e.g. booleans can be computed using logical operators).\n\n",
+     "hash": "1dcfdab569729c52",
+     "he": "**טיפוס נתונים (data type)** הוא סיווג של נתונים שמציין מה המתכנת מתכוון לעשות איתם. טיפוסים מתאימים לקבוצה של ערכים (למשל, הטיפוס הבוליאני מתאים לקבוצה {true,false}, וטיפוס ה-number מתאים לקבוצה האינסופית של הערכים המספריים), והם מגדירים את הפעולות שאפשר לבצע על הנתונים (למשל, ערכים בוליאניים אפשר לחשב באמצעות אופרטורים לוגיים)."
+    },
+    {
+     "id": "ps/ps1:4:1",
+     "type": "prose",
+     "en": "We pay attention to two distinguishable defintions: The **type of a value** (atomic/compound) and the **type of a variable**. The type of a variable may be declared by the programmer of inferred by the type of the value it stores. The type of a value is determined by a defined group to which it belongs. The type of a variable may be different than the type of the value it stores, but they must be compatiable.\n\n",
+     "hash": "5bd68003137d39c3",
+     "he": "נשים לב לשתי הגדרות נבדלות: **הטיפוס של ערך** (אטומי/מורכב) ו**הטיפוס של משתנה**. הטיפוס של משתנה יכול להיות מוצהר על ידי המתכנת או מוסק (inferred) מהטיפוס של הערך שהוא מאחסן. הטיפוס של ערך נקבע לפי הקבוצה המוגדרת שאליה הוא שייך. הטיפוס של משתנה עשוי להיות שונה מהטיפוס של הערך שהוא מאחסן, אך עליהם להיות תואמים (compatible)."
+    },
+    {
+     "id": "ps/ps1:4:2",
+     "type": "prose",
+     "en": "Apart from atomic types (number, string, boolean), there are **compound types**. Javascript introduces two basic compound types: Arrays and Maps. In Javascript, compound types are called *object* types (note: not to be confused with the more standard term - *object* here simply refers to any value which is not an atomic type)\n\n",
+     "hash": "bbf6fa3218a4815f",
+     "he": "מלבד הטיפוסים האטומיים (number, string, boolean), קיימים **טיפוסים מורכבים (compound types)**. ‏JavaScript מציגה שני טיפוסים מורכבים בסיסיים: מערכים (Arrays) ומפות (Maps). ב-JavaScript, טיפוסים מורכבים נקראים טיפוסי *object* (שימו לב: אין לבלבל זאת עם המונח הסטנדרטי יותר — *object* כאן פשוט מציין כל ערך שאינו מטיפוס אטומי)."
+    },
+    {
+     "id": "ps/ps1:4:3",
+     "type": "prose",
+     "en": "##### Arrays\n\n",
+     "hash": "577f32f183dd102d",
+     "he": "##### מערכים (Arrays)"
+    },
+    {
+     "id": "ps/ps1:4:4",
+     "type": "prose",
+     "en": "Arrays are the first basic compound type in Javascript. Here is an example of using arrays:\n\n\n",
+     "hash": "4785cb5013784e4a",
+     "he": "מערכים הם הטיפוס המורכב הבסיסי הראשון ב-JavaScript. הנה דוגמה לשימוש במערכים:"
+    },
+    {
+     "id": "ps/ps1:4:5",
+     "type": "code",
+     "en": "```typescript\n// This is how we declare an array containing the elements 16,8,27,13\nlet a = [16, 8, 27, 13];\n\n// Here's how we use the Array compound value getter:\nconsole.log(a[3]); // ==> 13\n\n// There is also a slice method:\nconsole.log(a.slice(1, 4)); // ==> [ 8, 27, 13 ]\n```\n\n\n",
+     "hash": "0e768598bf5cee89",
+     "lang": "typescript",
+     "noteHe": "הקטע מדגים את פעולות הבסיס על מערכים. השורה `let a = [16, 8, 27, 13]` יוצרת מערך באמצעות סוגריים מרובעים (ליטרל של מערך). הביטוי `a[3]` הוא פונקציית הגישה (getter) של מערכים — האינדקסים מתחילים מ-0, ולכן `a[3]` מחזיר את האיבר הרביעי, 13. המתודה `a.slice(1, 4)` מחזירה מערך חדש שמכיל את האיברים באינדקסים 1 עד 3 (הגבול העליון אינו נכלל) — `[ 8, 27, 13 ]` — מבלי לשנות את המערך המקורי."
+    },
+    {
+     "id": "ps/ps1:4:6",
+     "type": "prose",
+     "en": "Let's check that it is a compound type:\n\n\n",
+     "hash": "99a8733b77de974b",
+     "he": "נבדוק שזהו אכן טיפוס מורכב:"
+    },
+    {
+     "id": "ps/ps1:4:7",
+     "type": "code",
+     "en": "```typescript\nconsole.log(typeof a); // ==> 'object'\n```\n\n",
+     "hash": "8c2fb9351ea28324",
+     "lang": "typescript",
+     "noteHe": "האופרטור `typeof` מחזיר את שם הטיפוס של ערך. עבור מערך מתקבל `'object'` — ב-JavaScript כל ערך שאינו אטומי מסווג כ-object, ולכן `typeof` לבדו אינו מבחין בין מערך למפה."
+    },
+    {
+     "id": "ps/ps1:4:8",
+     "type": "prose",
+     "en": "And now the more specific reflection operator: \n\n\n",
+     "hash": "8fc8c70c53bc29eb",
+     "he": "וכעת אופרטור הרפלקציה (reflection) הספציפי יותר:"
+    },
+    {
+     "id": "ps/ps1:4:9",
+     "type": "code",
+     "en": "```typescript\nconsole.log(a instanceof Array); // ==> true\n```\n\n",
+     "hash": "4d75f451913b4d6f",
+     "lang": "typescript",
+     "noteHe": "`instanceof` הוא אופרטור רפלקציה מדויק יותר מ-`typeof`: הביטוי `a instanceof Array` מחזיר `true` ומאשר שהערך הוא ספציפית מערך, ולא סתם object כלשהו."
+    },
+    {
+     "id": "ps/ps1:4:10",
+     "type": "prose",
+     "en": "The array we defined above is **homogeneous**, meaning that it contains a single data type. \nThe **homogeneous** array `a` above contains values whose types are `number`. \nArrays in Javascript can be heterogeneous as well: \n\n\n",
+     "hash": "2bd3a1bf8d6d26ed",
+     "he": "המערך שהגדרנו לעיל הוא **הומוגני**, כלומר הוא מכיל טיפוס נתונים יחיד.\nהמערך **ההומוגני** `a` שלעיל מכיל ערכים שהטיפוס שלהם הוא `number`.\nמערכים ב-JavaScript יכולים להיות גם הטרוגניים:"
+    },
+    {
+     "id": "ps/ps1:4:11",
+     "type": "code",
+     "en": "```typescript\nlet manyArray = [1, 'a', '2', \"The Dawn\", true];\n\nconsole.log(`manyArray = ${manyArray}`); // ==> manyArray = 1,a,2,The Dawn,true\n```\n\n",
+     "hash": "cb369fbd8f055fca",
+     "lang": "typescript",
+     "noteHe": "`manyArray` הוא מערך הטרוגני שמערבב טיפוסים: מספר (`1`), מחרוזות (`'a'`, `'2'`, `\"The Dawn\"`) וערך בוליאני (`true`). שימו לב לשימוש ב-template string (גרשיים הפוכים עם `${...}`) לצורך ההדפסה — כאשר מערך מומר למחרוזת, האיברים מודפסים מופרדים בפסיקים, ללא סוגריים מרובעים."
+    },
+    {
+     "id": "ps/ps1:4:12",
+     "type": "prose",
+     "en": "##### Maps and `Object.keys`\n\n",
+     "hash": "edc118bdca9c724b",
+     "he": "##### מפות (Maps) ו-`Object.keys`"
+    },
+    {
+     "id": "ps/ps1:4:13",
+     "type": "prose",
+     "en": "Maps are the second basic compound type in Javascript:\n\n",
+     "hash": "8d044f5773d29343",
+     "he": "מפות (Maps) הן הטיפוס המורכב הבסיסי השני ב-JavaScript:"
+    },
+    {
+     "id": "ps/ps1:4:14",
+     "type": "code",
+     "en": "```typescript\n// This is how we declare them\nlet map = { a: 1, b: 2 };\n\n// This is how we use the Map compound value getter for the values:\nconsole.log(map['a']); // ==> 1\nconsole.log(map.a); // ==> 1\nconsole.log(map['b']); // ==> 2\nconsole.log(map.b); // ==> 2\n\n// And for keys (relevant for both Arrays [the keys there are the indexes] and Maps)\nconsole.log(Object.keys(a)); // ==> [ '0', '1', '2', '3', '4' ]\nconsole.log(Object.keys(map)); // ==> [ 'a', 'b' ]\n```\n\n",
+     "hash": "a6ceb2eaa72c2684",
+     "lang": "typescript",
+     "noteHe": "מפה נכתבת בסוגריים מסולסלים כאוסף של זוגות מפתח–ערך: `{ a: 1, b: 2 }`. יש שתי דרכים שקולות לגשת לערך: תחביר סוגריים `map['a']` ותחביר נקודה `map.a` — שתיהן מחזירות 1. הפונקציה `Object.keys` מחזירה מערך של כל המפתחות: עבור מפה אלו שמות המפתחות (`[ 'a', 'b' ]`), ועבור מערך המפתחות הם האינדקסים, כמחרוזות — כאן היא מופעלת על `a`, המערך ההטרוגני בן חמשת האיברים מהדוגמה הקודמת, ולכן מתקבל `[ '0', '1', '2', '3', '4' ]`."
+    },
+    {
+     "id": "ps/ps1:4:15",
+     "type": "prose",
+     "en": "##### Variable Types\n\n",
+     "hash": "cd570009933e1ecc",
+     "he": "##### טיפוסים של משתנים"
+    },
+    {
+     "id": "ps/ps1:4:16",
+     "type": "prose",
+     "en": "Javascript is a *dynamic language*, meaning that variables are not typed. But when a variable is bound to a value, we can inspect its type at runtime. \n\n",
+     "hash": "0f900d1173d7a1ba",
+     "he": "JavaScript היא *שפה דינמית*, כלומר משתנים אינם מטופסים. אבל כאשר משתנה קשור לערך, אנחנו יכולים לבדוק את הטיפוס שלו בזמן ריצה."
+    },
+    {
+     "id": "ps/ps1:4:17",
+     "type": "prose",
+     "en": "Typescript extends Javascript to introduce optional variable types - it is compiled into Javascript and at compilation time, type checking is performed. Let's recall the example from the lectures: \n\n\n",
+     "hash": "55d653fbbc008257",
+     "he": "TypeScript מרחיבה את JavaScript ומוסיפה טיפוסי משתנים אופציונליים — היא מהודרת ל-JavaScript, ובזמן ההידור מתבצעת בדיקת טיפוסים (type checking). ניזכר בדוגמה מההרצאות:"
+    },
+    {
+     "id": "ps/ps1:4:18",
+     "type": "code",
+     "en": "```typescript\nlet typedVarNum: number = 6;\nlet typedVarStr: string = \"blue\";\nlet typedVarBool: boolean = true;\n```\n\n",
+     "hash": "dbce23cb6902efa2",
+     "lang": "typescript",
+     "noteHe": "כאן מודגם התחביר של הערות טיפוס (type annotations) ב-TypeScript: אחרי שם המשתנה מופיעים נקודתיים ושם הטיפוס — `typedVarNum: number`, ‏`typedVarStr: string`, ‏`typedVarBool: boolean`. המהדר בודק בזמן ההידור שהערך המושם למשתנה אכן תואם לטיפוס שהוצהר."
+    }
+   ],
+   "headingHe": "1. טיפוסים של ערכים"
+  },
+  {
+   "id": "ps/ps1:5",
+   "depth": 2,
+   "headingEn": "2. JSON",
+   "raw": "## 2. JSON\n\n",
+   "blocks": [],
+   "headingHe": "2. JSON"
+  },
+  {
+   "id": "ps/ps1:6",
+   "depth": 3,
+   "headingEn": "2.1 JSON Review",
+   "raw": "### 2.1 JSON Review\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:6:0",
+     "type": "prose",
+     "en": "JSON stands for JavaScript Object Notation and is a standard way to serialize Javascript compound values into strings (and vice-versa). It is widely used to allow data exchange in server-client communication. It serves a role that is similar to XML.\n\n",
+     "hash": "7c093287e6bb71c5",
+     "he": "JSON הם ראשי תיבות של JavaScript Object Notation — דרך סטנדרטית לבצע סריאליזציה (serialization) של ערכים מורכבים של JavaScript למחרוזות (ולהפך). הוא נמצא בשימוש נרחב להעברת נתונים בתקשורת שרת–לקוח, וממלא תפקיד דומה לזה של XML."
+    },
+    {
+     "id": "ps/ps1:6:1",
+     "type": "prose",
+     "en": "JSON is a **notation** - that is, a way of writing Javascript values in a way that allows reading them back easily. \nMost Javascript values can be written in JSON - but not all of them.\n\n",
+     "hash": "35321a980b33ca6c",
+     "he": "JSON הוא **סימון (notation)** — כלומר, דרך לכתוב ערכי JavaScript באופן שמאפשר לקרוא אותם בחזרה בקלות.\nאת רוב ערכי ה-JavaScript אפשר לכתוב ב-JSON — אך לא את כולם."
+    },
+    {
+     "id": "ps/ps1:6:2",
+     "type": "prose",
+     "en": "Once you have a Javascript object, and once there is an agreed-upon-way of \"stringifying\" the object (in our case, the standard way is `JSON.stringify()`), then you can easily pass this string through the network, from a computer to a computer, as passing strings through the network is easy, and the receiving side can only do an agreed-upon way to parse the string into an object (in our case, the standard way is `JSON.parse()`).\n\n",
+     "hash": "9785c60f9c52738a",
+     "he": "ברגע שיש לכם object של JavaScript, וברגע שקיימת דרך מוסכמת \"להפוך אותו למחרוזת\" (במקרה שלנו, הדרך הסטנדרטית היא `JSON.stringify()`), אפשר בקלות להעביר את המחרוזת הזו ברשת, ממחשב למחשב — שהרי העברת מחרוזות ברשת היא דבר קל — והצד המקבל רק צריך להפעיל דרך מוסכמת לניתוח (parsing) של המחרוזת בחזרה ל-object (במקרה שלנו, הדרך הסטנדרטית היא `JSON.parse()`)."
+    },
+    {
+     "id": "ps/ps1:6:3",
+     "type": "prose",
+     "en": "The JSON interface defines the following two methods: \n",
+     "hash": "73cf0457fa04f12d",
+     "he": "ממשק ה-JSON מגדיר את שתי המתודות הבאות:"
+    },
+    {
+     "id": "ps/ps1:6:4",
+     "type": "list",
+     "en": "1. `JSON.stringify(o)` - maps a value to a string\n2. `JSON.parse(s)` - maps a string written according to the JSON syntax to a value\n\n",
+     "hash": "408c03fd00d567f0",
+     "he": "1. `JSON.stringify(o)` — ממפה ערך למחרוזת\n2. `JSON.parse(s)` — ממפה מחרוזת הכתובה לפי תחביר JSON לערך"
+    },
+    {
+     "id": "ps/ps1:6:5",
+     "type": "prose",
+     "en": "JSON serves a similar goal to that of `Serializable` of Java that we saw in SPL.\n\n\n",
+     "hash": "4974adefed5f07ae",
+     "he": "JSON משרת מטרה דומה לזו של `Serializable` בשפת Java, שראינו בקורס SPL."
+    },
+    {
+     "id": "ps/ps1:6:6",
+     "type": "code",
+     "en": "```typescript\nlet person1 = { name : \"Yosi\", age : 31, city : \"Beer Sheva\" };\nlet person1JSONString = JSON.stringify(person1);\n\nconsole.log(`person1 serialized in JSON = ${person1JSONString}`); // ==> person1 serialized in JSON = {\"name\":\"Yosi\",\"age\":31,\"city\":\"Beer Sheva\"}\nconsole.log(`person1JSONString is of type ${typeof person1JSONString}`); // ==> person1JSONString is of type string\n```\n\n",
+     "hash": "f466a5ef508f8e83",
+     "lang": "typescript",
+     "noteHe": "יוצרים מפה `person1` עם שלושה מפתחות, ואז `JSON.stringify(person1)` ממירה אותה למחרוזת JSON. שימו לב שבפלט המפתחות מוקפים במירכאות (`\"name\"` וכדומה) — זהו תחביר ה-JSON. הבדיקה `typeof person1JSONString` מחזירה `string`: התוצאה היא מחרוזת רגילה שאפשר לשלוח ברשת."
+    },
+    {
+     "id": "ps/ps1:6:7",
+     "type": "code",
+     "en": "```typescript\nlet person2 = JSON.parse(person1JSONString);\n\nconsole.log(person2); // ==> { name: 'Yosi', age: 31, city: 'Beer Sheva' }\nconsole.log(`person2 is of type ${typeof person2}`); // ==> person2 is of type object\n```\n\n",
+     "hash": "6946fbe752d48a50",
+     "lang": "typescript",
+     "noteHe": "הכיוון ההפוך: `JSON.parse` מקבלת את מחרוזת ה-JSON ובונה ממנה בחזרה ערך מורכב. `typeof person2` מחזיר `object` — קיבלנו שוב מפה של JavaScript, עם אותם מפתחות וערכים כמו `person1` המקורי."
+    },
+    {
+     "id": "ps/ps1:6:8",
+     "type": "prose",
+     "en": "Note that the way values are written in JSON is not exactly the same as we write them in a Javascript program - there are quotes (\"\") around keys for example.\n\n",
+     "hash": "123ecde8fabace73",
+     "he": "שימו לב שהאופן שבו ערכים נכתבים ב-JSON אינו זהה בדיוק לאופן שבו אנחנו כותבים אותם בתוכנית JavaScript — למשל, יש מירכאות (\"\") סביב המפתחות."
+    },
+    {
+     "id": "ps/ps1:6:9",
+     "type": "prose",
+     "en": "Note also that `stringify()` and `parse()` work on atomic values as well:\n\n\n",
+     "hash": "4b48f74a32656e00",
+     "he": "שימו לב גם ש-`stringify()` ו-`parse()` עובדות גם על ערכים אטומיים:"
+    },
+    {
+     "id": "ps/ps1:6:10",
+     "type": "code",
+     "en": "```typescript\n// note that the input to JSON.parse is a JSON string\nconsole.log(typeof JSON.parse('2')); // ==> number\nconsole.log(typeof JSON.parse('true')); // ==> boolean\nconsole.log(typeof JSON.parse('\"abc\"')); // ==> string\n```\n\n",
+     "hash": "dc3f2768901359a6",
+     "lang": "typescript",
+     "noteHe": "הקלט ל-`JSON.parse` הוא תמיד מחרוזת JSON. המחרוזת `'2'` מנותחת למספר, `'true'` לערך בוליאני, ו-`'\"abc\"'` (מחרוזת שמכילה בתוכה מירכאות) — למחרוזת. כלומר, גם ערכים אטומיים הם ערכי JSON תקינים, לא רק מפות ומערכים."
+    },
+    {
+     "id": "ps/ps1:6:11",
+     "type": "prose",
+     "en": "The values that can be encoded into JSON (let us call them \"JSON values\") must be one of the following types:\n",
+     "hash": "2763a031b41a1744",
+     "he": "הערכים שאפשר לקודד ל-JSON (נקרא להם \"ערכי JSON\") חייבים להיות מאחד הטיפוסים הבאים:"
+    },
+    {
+     "id": "ps/ps1:6:12",
+     "type": "list",
+     "en": "1. `string`\n2. `number`\n3. `boolean`\n4. `null`\n5. a map where all the keys are strings and all the values are JSON values (recursively) \n6. an array where all the values are JSON values\n\n",
+     "hash": "d06f37f6b7a3b0ef",
+     "he": "1. `string`\n2. `number`\n3. `boolean`\n4. `null`\n5. מפה שבה כל המפתחות הם מחרוזות וכל הערכים הם ערכי JSON (באופן רקורסיבי)\n6. מערך שבו כל הערכים הם ערכי JSON"
+    },
+    {
+     "id": "ps/ps1:6:13",
+     "type": "prose",
+     "en": "The Javascript compound data types, *arrays* and *maps*, can be combined in a recursive manner. \nThis applies to JSON as well.\n\n",
+     "hash": "d347b4c6444646f5",
+     "he": "טיפוסי הנתונים המורכבים של JavaScript, *מערכים* ו*מפות*, ניתנים לשילוב זה בזה באופן רקורסיבי.\nהדבר נכון גם לגבי JSON."
+    },
+    {
+     "id": "ps/ps1:6:14",
+     "type": "prose",
+     "en": "The Javascript values that **cannot be encoded** into JSON strings are `undefined` and functions.\n\n",
+     "hash": "0bdb101270a80b9a",
+     "he": "ערכי ה-JavaScript ש**אי אפשר לקודד** למחרוזות JSON הם `undefined` ופונקציות."
+    },
+    {
+     "id": "ps/ps1:6:15",
+     "type": "prose",
+     "en": "Let us look at an example of a complex value and how we can describe it in JSON and then how using types can help us describe its structure in a well-documented manner:\n\n\n",
+     "hash": "7ffa71e2de2af69e",
+     "he": "נתבונן בדוגמה של ערך מורכב, נראה כיצד אפשר לתאר אותו ב-JSON, ולאחר מכן כיצד שימוש בטיפוסים עוזר לנו לתאר את המבנה שלו באופן מתועד היטב:"
+    },
+    {
+     "id": "ps/ps1:6:16",
+     "type": "code",
+     "en": "```typescript\nlet studentsData = {\n    department: \"Computer Science\", \n    students: [\n        { name: \"Alice\", degree: \"PhD\" }\n        { name: \"Bob\", degree: \"MSc\" },\n    ]\n};\n\nlet studentsJSON = JSON.stringify(studentsData);\nconsole.log(studentsJSON); // ==> {\"department\":\"Computer Science\",\"students\":[{\"name\":\"Alice\",\"degree\":\"PhD\"},{\"name\":\"Bob\",\"degree\":\"MSc\"}]}\nconsole.log(`studentsJSON is of type ${typeof studentsJSON}`); // ==> studentsJSON is of type string\nlet studentsJSONParsed = JSON.parse(studentsJSON);\nconsole.log(studentsJSONParsed);\n// ==> \n// {\n//   department: 'Computer Science',\n//   students: [ { name: 'Alice', degree: 'PhD' }, { name: 'Bob', degree: 'MSc' } ]\n// }\nconsole.log(`studentsJSONParsed is of type ${typeof studentsJSONParsed}`); // ==> studentsJSONParsed is of type object\n```\n\n",
+     "hash": "e724172717e6e43a",
+     "lang": "typescript",
+     "noteHe": "`studentsData` הוא ערך מקונן: מפה שמכילה מחרוזת (`department`) ומערך של מפות (`students`). הקוד מדגים **round-trip** מלא: `JSON.stringify` מייצרת מחרוזת JSON אחת שמקודדת את כל המבנה המקונן, ו-`JSON.parse` בונה ממנה בחזרה ערך זהה למקור. הערה: בקוד כפי שהוא מודפס נפלה שגיאת דפוס קטנה — חסר פסיק בין שני איברי המערך `students` (אחרי המפה של Alice); כדי שהקוד ירוץ יש להוסיף אותו."
+    },
+    {
+     "id": "ps/ps1:6:17",
+     "type": "prose",
+     "en": "We verified that this complex structure can be written into JSON, and then parsed back into an identical value (this is a **round-trip** that preserves the value).\n\n",
+     "hash": "aab05916fdb2d7d1",
+     "he": "וידאנו שאפשר לכתוב את המבנה המורכב הזה ל-JSON, ואז לנתח (parse) אותו בחזרה לערך זהה (זהו **round-trip** שמשמר את הערך)."
+    },
+    {
+     "id": "ps/ps1:6:18",
+     "type": "prose",
+     "en": "We can look at the type of `studentData` as a **tree** of simpler values:\n",
+     "hash": "a30d29e14f17780f",
+     "he": "אפשר להסתכל על הטיפוס של `studentData` כעל **עץ** של ערכים פשוטים יותר:"
+    },
+    {
+     "id": "ps/ps1:6:19",
+     "type": "list",
+     "en": "* `studentsData` is a map which has 2 keys:\n  * `department` with a value which is a string\n  * `students` with a value which is an embedded array whose items are compound values.\n* The nested values are maps that have 2 keys:\n  * `name` whose value is a `string` \n  *  `degree` whose value is also a `string`\n  \n\n",
+     "hash": "8c7e4f9f84012001",
+     "he": "* `studentsData` היא מפה בעלת 2 מפתחות:\n  * `department` שערכו מחרוזת\n  * `students` שערכו מערך מוטבע שהאיברים שלו הם ערכים מורכבים.\n* הערכים המקוננים הם מפות בעלות 2 מפתחות:\n  * `name` שערכו `string`\n  * `degree` שערכו גם הוא `string`"
+    }
+   ],
+   "headingHe": "2.1 חזרה על JSON"
+  },
+  {
+   "id": "ps/ps1:7",
+   "depth": 3,
+   "headingEn": "2.2 Documenting Complex Values with Type Annotations",
+   "raw": "### 2.2 Documenting Complex Values with Type Annotations\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:7:0",
+     "type": "prose",
+     "en": "We can describe this structure using the following TypeScript declaration:\n\n",
+     "hash": "c60c781cce796e3d",
+     "he": "אפשר לתאר את המבנה הזה באמצעות ההצהרה הבאה ב-TypeScript:"
+    },
+    {
+     "id": "ps/ps1:7:1",
+     "type": "code",
+     "en": "```typescript\n{\n    department: string;\n    students: { name: string, degree: string }[]\n}\n```\n\n",
+     "hash": "05daefd15759dcf7",
+     "lang": "typescript",
+     "noteHe": "זוהי הערת טיפוס (type annotation) שמתארת את מבנה הערך: מפה עם מפתח `department` מטיפוס `string`, ומפתח `students` שהוא מערך — הסימון `{...}[]` פירושו \"מערך של מפות\", שבו לכל מפה יש `name` ו-`degree` מטיפוס `string`."
+    },
+    {
+     "id": "ps/ps1:7:2",
+     "type": "prose",
+     "en": "This can be made more readable if we name the types, using the **type alias** TypeScript construct to name map compound types:\n\n\n",
+     "hash": "1409754f7beb9b8d",
+     "he": "אפשר להפוך זאת לקריא יותר אם ניתן שמות לטיפוסים, באמצעות מנגנון ה-**type alias** (כינוי טיפוס) של TypeScript, המאפשר לתת שמות לטיפוסי מפה מורכבים:"
+    },
+    {
+     "id": "ps/ps1:7:3",
+     "type": "code",
+     "en": "```typescript\ntype Student = {\n    name: string;\n    degree: string;\n}\n\ntype StudentsData = {\n    department: string;\n    students: Student[];\n}\n```\n\n",
+     "hash": "06bd51639d2b2066",
+     "lang": "typescript",
+     "noteHe": "בעזרת מילת המפתח `type` מגדירים שני כינויי טיפוס: `Student` מתאר מפה של סטודנט יחיד, ו-`StudentsData` משתמש בשם `Student` כדי להגדיר את המבנה השלם — `Student[]` פירושו מערך של ערכי `Student`. פירוק כזה לשמות הופך טיפוסים מקוננים לקריאים יותר ולניתנים לשימוש חוזר."
+    },
+    {
+     "id": "ps/ps1:7:4",
+     "type": "prose",
+     "en": "This type definition is useful to document the type of the expected values that we expect to read.\n\n",
+     "hash": "faf94e04943c4bb1",
+     "he": "הגדרת טיפוס כזו שימושית לתיעוד הטיפוס של הערכים שאנחנו מצפים לקרוא."
+    }
+   ],
+   "headingHe": "2.2 תיעוד ערכים מורכבים באמצעות הערות טיפוס (Type Annotations)"
+  },
+  {
+   "id": "ps/ps1:8",
+   "depth": 3,
+   "headingEn": "2.3 Working on complex JSON values",
+   "raw": "### 2.3 Working on complex JSON values\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:8:0",
+     "type": "prose",
+     "en": "In this section, we will use the methods **map**, **filter**, **reduce** to operate over complex JSON values. \n\n",
+     "hash": "1f7070c7535d81ca",
+     "he": "בחלק זה נשתמש במתודות **map**, **filter** ו-**reduce** כדי לפעול על ערכי JSON מורכבים."
+    },
+    {
+     "id": "ps/ps1:8:1",
+     "type": "prose",
+     "en": "We will take a videos-database example ([http://reactivex.io/learnrx/](http://reactivex.io/learnrx/)) as a basis for our examples.\n\n",
+     "hash": "faec7388550af4c9",
+     "he": "ניקח דוגמה של מסד נתונים של סרטונים ([http://reactivex.io/learnrx/](http://reactivex.io/learnrx/)) כבסיס לדוגמאות שלנו."
+    },
+    {
+     "id": "ps/ps1:8:2",
+     "type": "prose",
+     "en": "Suppose you are a developer at the popular streaming-movie website Netflix, and that your system's *API* uses JSON to communicate data. The JSON values we describe are actual JSON values returned by the Netflix API.\n\n",
+     "hash": "a4a9dba053600a9d",
+     "he": "נניח שאתם מפתחים באתר סרטי הסטרימינג הפופולרי Netflix, ושה-*API* של המערכת שלכם משתמש ב-JSON כדי להעביר נתונים. ערכי ה-JSON שנתאר הם ערכי JSON אמיתיים שמוחזרים על ידי ה-API של Netflix."
+    },
+    {
+     "id": "ps/ps1:8:3",
+     "type": "prose",
+     "en": "When searching for new movie releases, you send a query to the API, and obtain a JSON reply:\n\n\n",
+     "hash": "cbfd9aa00215aa0b",
+     "he": "כאשר מחפשים סרטים חדשים שיצאו לאחרונה, שולחים שאילתה (query) ל-API ומקבלים תשובת JSON:"
+    },
+    {
+     "id": "ps/ps1:8:4",
+     "type": "code",
+     "en": "```typescript\nlet newReleases = [\n        {\n            \"id\": 70111470,\n            \"title\": \"Die Hard\",\n            \"boxart\": \"http://cdn-0.nflximg.com/images/2891/DieHard.jpg\",\n            \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n            \"rating\": 4.0,\n            \"bookmark\": []\n        },\n        {\n            \"id\": 654356453,\n            \"title\": \"Bad Boys\",\n            \"boxart\": \"http://cdn-0.nflximg.com/images/2891/BadBoys.jpg\",\n            \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n            \"rating\": 5.0,\n            \"bookmark\": [{ id: 432534, time: 65876586 }]\n        },\n        {\n            \"id\": 65432445,\n            \"title\": \"The Chamber\",\n            \"boxart\": \"http://cdn-0.nflximg.com/images/2891/TheChamber.jpg\",\n            \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n            \"rating\": 4.0,\n            \"bookmark\": []\n        },\n        {\n            \"id\": 675465,\n            \"title\": \"Fracture\",\n            \"boxart\": \"http://cdn-0.nflximg.com/images/2891/Fracture.jpg\",\n            \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n            \"rating\": 5.0,\n            \"bookmark\": [{ id: 432534, time: 65876586 }]\n        }\n    ];\n```\n\n",
+     "hash": "6429a72c6b115da4",
+     "lang": "typescript",
+     "noteHe": "`newReleases` הוא תשובת ה-API לדוגמה: מערך הומוגני של ארבע מפות, שכל אחת מתארת סרט אחד עם השדות `id` (מזהה מספרי), `title` (שם הסרט), `boxart` (כתובת תמונת העטיפה), `uri` (כתובת המשאב ב-API), `rating` (דירוג מספרי) ו-`bookmark`. שימו לב ש-`bookmark` הוא בעצמו מערך — ריק אצל חלק מהסרטים, ואצל אחרים מכיל מפה מקוננת `{ id, time }` — הדגמה לכך שטיפוסים מורכבים מקוננים זה בתוך זה באופן רקורסיבי."
+    },
+    {
+     "id": "ps/ps1:8:5",
+     "type": "prose",
+     "en": "Let us describe the **type** of this value:\n",
+     "hash": "0848c801dd333127",
+     "he": "נתאר את ה**טיפוס** של הערך הזה:"
+    },
+    {
+     "id": "ps/ps1:8:6",
+     "type": "list",
+     "en": "* We observe it is a homogeneous array of map values.\n* Each map value describes a \"movie\" with fields id, title, boxart, uri, rating and bookmark.\n\n",
+     "hash": "0c1e7ac2d00661e2",
+     "he": "* אנחנו רואים שזהו מערך הומוגני של ערכי מפה.\n* כל ערך מפה מתאר \"סרט\" עם השדות id,‏ title,‏ boxart,‏ uri,‏ rating ו-bookmark."
+    },
+    {
+     "id": "ps/ps1:8:7",
+     "type": "prose",
+     "en": "The corresponding TypeScript annotation is:\n\n",
+     "hash": "44d1d9e8d42a27d2",
+     "he": "הערת הטיפוס המתאימה ב-TypeScript היא:"
+    },
+    {
+     "id": "ps/ps1:8:8",
+     "type": "code",
+     "en": "```typescript\ntype Video = {\n    id: number;\n    title: string;\n    boxart: string;\n    uri: string;\n    rating: number;\n    bookmark: { id: number, time: number }[];\n}\n\ntype Releases = Video[];\n```\n\n",
+     "hash": "dab7ff6f101b2855",
+     "lang": "typescript",
+     "noteHe": "כינוי הטיפוס (type alias) בשם `Video` מתעד את המבנה של כל מפה במערך: `id` ו-`rating` הם `number`; ‏`title`,‏ `boxart` ו-`uri` הם `string`; ו-`bookmark` הוא מערך של מפות מהצורה `{ id: number, time: number }`. השורה `type Releases = Video[]` נותנת שם לתשובה כולה — מערך של ערכי `Video`."
+    },
+    {
+     "id": "ps/ps1:8:9",
+     "type": "prose",
+     "en": "This type annotation lets us think about the data we obtained from the API as an array `[v1, v2, v3, v4]` where each item $$v_i$$ is a map `{ id, title, boxart, uri, rating, bookmark }`.\n\n\n",
+     "hash": "135f8ce271d0c5e2",
+     "he": "הערת הטיפוס הזו מאפשרת לנו לחשוב על הנתונים שקיבלנו מה-API כעל מערך `[v1, v2, v3, v4]` שבו כל איבר $$v_i$$ הוא מפה `{ id, title, boxart, uri, rating, bookmark }`."
+    },
+    {
+     "id": "ps/ps1:8:10",
+     "type": "prose",
+     "en": "#### 2.3.1 Map over an Array of Videos\n\n",
+     "hash": "c8997264a92b9f7f",
+     "he": "#### 2.3.1 הפעלת Map על מערך של סרטונים"
+    },
+    {
+     "id": "ps/ps1:8:11",
+     "type": "prose",
+     "en": "We would like to transform this data into an array of `{ id, title }` properties. \nThis transformation is called a **projection** as we select only some of the properties in the input.\n\n",
+     "hash": "71ce0192070e39eb",
+     "he": "נרצה להמיר את הנתונים האלה למערך של מאפייני `{ id, title }`.\nטרנספורמציה כזו נקראת **הטלה (projection)**, מכיוון שאנחנו בוחרים רק חלק מהמאפיינים שבקלט."
+    },
+    {
+     "id": "ps/ps1:8:12",
+     "type": "prose",
+     "en": "In terms of types, this transformation maps from the type `Video[]` into the type `{ id: number, title: string }[]`.\n\n",
+     "hash": "ead55f2ae7f4cdfc",
+     "he": "במונחי טיפוסים, הטרנספורמציה הזו ממפה מהטיפוס `Video[]` אל הטיפוס `{ id: number, title: string }[]`."
+    },
+    {
+     "id": "ps/ps1:8:13",
+     "type": "prose",
+     "en": "A procedural way to achieve this goal would be:\n\n\n",
+     "hash": "265fcc8b466a0e01",
+     "he": "דרך פרוצדורלית להשגת המטרה הזו תיראה כך:"
+    },
+    {
+     "id": "ps/ps1:8:14",
+     "type": "code",
+     "en": "```typescript\nfunction getIDsAndTitles_1(reply) {\n    let res = [];\n    for (let i = 0; i < reply.length; i++) {\n        res.push({ id: reply[i].id, title: reply[i].title });\n    }\n    return res;\n}\n\nlet newReleasesIDAndTitle = getIDsAndTitles_1(newReleases);\nconsole.log(newReleasesIDAndTitle);\n// ==> \n// [ { id: 70111470, title: 'Die Hard' },\n//   { id: 654356453, title: 'Bad Boys' },\n//   { id: 65432445, title: 'The Chamber' },\n//   { id: 675465, title: 'Fracture' } ]\n```\n\n",
+     "hash": "2a4eac7a3ef828ab",
+     "lang": "typescript",
+     "noteHe": "הפתרון הפרוצדורלי: מאתחלים מערך ריק `res`, עוברים בלולאת `for` על כל האיברים של `reply`, ולכל סרט דוחפים (`push`) למערך התוצאה מפה חדשה עם שני שדות בלבד — `id` ו-`title`. שימו לב לסממני הסגנון הפרוצדורלי: מונה לולאה `i` שעובר שינוי (`i++`) ומשתנה צובר `res` שמשתנה בכל איטרציה. הפלט הוא ההטלה המבוקשת — ארבע מפות מוקטנות."
+    },
+    {
+     "id": "ps/ps1:8:15",
+     "type": "prose",
+     "en": "A functional way of achieving the same result uses the **map** method (seen in the reading material for week 1) to abstract away the loop and the mutations we observe in the procedural solution (`i++`, `res.push()`).\n\n",
+     "hash": "60b92154a411a26a",
+     "he": "דרך פונקציונלית להשגת אותה תוצאה משתמשת במתודה **map** (שראינו בחומר הקריאה של שבוע 1) כדי להפשיט את הלולאה ואת השינויים (mutations) שראינו בפתרון הפרוצדורלי (`i++`, ‏`res.push()`)."
+    },
+    {
+     "id": "ps/ps1:8:16",
+     "type": "code",
+     "en": "```typescript\nlet newReleasesIDAndTitle = newReleases.map(x => ({ id: x.id, title: x.title }));\nconsole.log(newReleasesIDAndTitle);\n// ==> \n// [ { id: 70111470, title: 'Die Hard' },\n//   { id: 654356453, title: 'Bad Boys' },\n//   { id: 65432445, title: 'The Chamber' },\n//   { id: 675465, title: 'Fracture' } ]\n```\n\n",
+     "hash": "40bdde3052a3d90b",
+     "lang": "typescript",
+     "noteHe": "אותה הטלה בשורה אחת: `map` מפעילה את פונקציית הטרנספורמציה על כל איבר ובונה מערך חדש מהתוצאות — בלי לולאה ובלי שינוי משתנים. שימו לב ל-\"gotcha\" תחבירי: בביטוי `x => ({ id: x.id, title: x.title })` הליטרל של המפה עטוף בסוגריים עגולים — בלעדיהם JavaScript הייתה מפרשת את הסוגריים המסולסלים כגוף הפונקציה ולא כליטרל של מפה. הפלט זהה לזה של הגרסה הפרוצדורלית."
+    },
+    {
+     "id": "ps/ps1:8:17",
+     "type": "prose",
+     "en": "Note that in this version:\n",
+     "hash": "351cb4e623f6ba3c",
+     "he": "שימו לב שבגרסה הזו:"
+    },
+    {
+     "id": "ps/ps1:8:18",
+     "type": "list",
+     "en": "* There is no loop (`map` abstracts away the loop control structure)\n* There is no variable assignment (no need to define a loop counter `i` and mutate it and to maintain a `res` accumulator variable).\n\n",
+     "hash": "e10c8bf0fd56c768",
+     "he": "* אין לולאה (`map` מפשיטה את מבנה הבקרה של הלולאה)\n* אין השמה למשתנים (אין צורך להגדיר מונה לולאה `i` ולשנות אותו, ואין צורך לתחזק משתנה צובר `res`)."
+    },
+    {
+     "id": "ps/ps1:8:19",
+     "type": "prose",
+     "en": "Let us note what is the type of the transformer function we pass as an argument to `map`:\nit gets as an argument `x` an item from `newReleases` - which is of type `Video` - and it returns a map of type `{ id: number, name: title }`.  \n\n",
+     "hash": "bc5501a5bff4882b",
+     "he": "נשים לב מהו הטיפוס של פונקציית הטרנספורמציה שאנחנו מעבירים כארגומנט ל-`map`:\nהיא מקבלת כארגומנט `x` איבר מתוך `newReleases` — שהוא מטיפוס `Video` — ומחזירה מפה מטיפוס `{ id: number, name: title }`."
+    },
+    {
+     "id": "ps/ps1:8:20",
+     "type": "prose",
+     "en": "#### 2.3.2 Filter an Array of Videos\n\n",
+     "hash": "fc77e544c55027ef",
+     "he": "#### 2.3.2 סינון (Filter) של מערך סרטונים"
+    },
+    {
+     "id": "ps/ps1:8:21",
+     "type": "prose",
+     "en": "The user is quite picky, and would like to search for new releases that have a rating of 5.0 only. \n\n",
+     "hash": "ad949ceef8253f0e",
+     "he": "המשתמש בררן למדי, ורוצה לחפש רק סרטים חדשים בעלי דירוג 5.0."
+    },
+    {
+     "id": "ps/ps1:8:22",
+     "type": "prose",
+     "en": "We can solve this problem using **filter**.\n\n",
+     "hash": "d370a8a05489f992",
+     "he": "נוכל לפתור את הבעיה הזו באמצעות **filter**."
+    },
+    {
+     "id": "ps/ps1:8:23",
+     "type": "prose",
+     "en": "In terms of types, the operation we want to define maps an array of `Video[]` to an array of `Video[]`.\nThis fits the definition of `filter` - which does not change the type of items in the array.\n\n",
+     "hash": "d6256085b7325440",
+     "he": "במונחי טיפוסים, הפעולה שאנחנו רוצים להגדיר ממפה מערך `Video[]` למערך `Video[]`.\nזה מתאים להגדרה של `filter` — שאינה משנה את הטיפוס של איברי המערך."
+    },
+    {
+     "id": "ps/ps1:8:24",
+     "type": "code",
+     "en": "```typescript\nlet newReleasesOfRating5 = newReleases.filter(x => x.rating === 5);\nconsole.log(newReleasesOfRating5);\n// ==>\n// [ { id: 654356453,\n//     title: 'Bad Boys',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/BadBoys.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 5,\n//     bookmark: [ [Object] ] },\n//   { id: 675465,\n//     title: 'Fracture',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/Fracture.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 5,\n//     bookmark: [ [Object] ] } ]\n```\n\n",
+     "hash": "de2e6c2728405f08",
+     "lang": "typescript",
+     "noteHe": "הפרדיקט `x => x.rating === 5` מופעל על כל סרט, ו-`filter` מחזירה מערך חדש שמכיל רק את הסרטים שעבורם הוא החזיר `true` — כאן Bad Boys ו-Fracture. שימו לב שהאיברים שנשארו הם ערכי `Video` שלמים על כל שדותיהם: `filter` בוחרת איברים אך אינה משנה את הטיפוס שלהם. הסימון `[ [Object] ]` בפלט הוא רק קיצור של הקונסולה בהדפסת מפות מקוננות עמוק."
+    },
+    {
+     "id": "ps/ps1:8:25",
+     "type": "prose",
+     "en": "#### 2.3.4 Reminder: Reduce and Neutral Elements as Initializers\n",
+     "hash": "bf4394cc49a78a54",
+     "he": "#### 2.3.4 תזכורת: Reduce ואיברים נייטרליים כערכי אתחול"
+    },
+    {
+     "id": "ps/ps1:8:26",
+     "type": "prose",
+     "en": "Compare the following 5 invocations of `reduce`:\n\n",
+     "hash": "fbfad40f153fbc94",
+     "he": "השוו בין חמש הקריאות הבאות ל-`reduce`:"
+    },
+    {
+     "id": "ps/ps1:8:27",
+     "type": "code",
+     "en": "```typescript\n// Compute the sum of an array of integers\n[1, 2, 3].reduce((acc, cur) => acc + cur, 0); // ==> 6\n\n// Compute the product of an array of integers\n[1, 2, 3].reduce((acc, cur) => acc * cur, 1); // ==> 6\n\n// Compute the logical and of an array of booleans\n[true, false, true].reduce((acc, cur) => acc && cur, true); // ==> false\n\n// Compute the logical or of an array of booleans\n[true, false, true].reduce((acc, cur) => acc || cur, false); // ==> true\n\n// Compute the max of an array of numbers\n[3, 1, 4].reduce((acc,cur) => Math.max(acc,cur), 0); // ==> 4\n```\n\n",
+     "hash": "b6f608b07d3c54e6",
+     "lang": "typescript",
+     "noteHe": "חמש דוגמאות לאותה תבנית — `reduce(reducer, init)` מקפלת מערך לערך יחיד: סכום עם ערך אתחול 0, מכפלה עם ערך אתחול 1, \"וגם\" לוגי (`&&`) עם `true`, \"או\" לוגי (`||`) עם `false`, ומקסימום באמצעות `Math.max` עם ערך אתחול 0. בכל המקרים פונקציית הצבירה (reducer) מקבלת את הצובר הנוכחי `acc` ואת האיבר הנוכחי `cur`, ומחזירה את ערך הצובר הבא."
+    },
+    {
+     "id": "ps/ps1:8:28",
+     "type": "prose",
+     "en": "Note that in all 5 cases, the initializer passed to `reduce(reducer, init)` is the neutral element of the reducer operator (0 for `+`, 1 for `*`, `true` for `and`, `false` for `or`).\n\n",
+     "hash": "7ee957fec87b0bdc",
+     "he": "שימו לב שבכל חמשת המקרים, ערך האתחול המועבר ל-`reduce(reducer, init)` הוא האיבר הנייטרלי (neutral element) של אופרטור הצבירה (0 עבור `+`,‏ 1 עבור `*`,‏ `true` עבור `and`,‏ `false` עבור `or`)."
+    },
+    {
+     "id": "ps/ps1:8:29",
+     "type": "prose",
+     "en": "This makes sense in general - and allows one to answer the puzzling question of **what should be the value of reduce when applied to an empty array**.  The general answer is that it should be the neutral element of the reducer.\n\n",
+     "hash": "697f154bf45b4fde",
+     "he": "זה הגיוני באופן כללי — ומאפשר לענות על השאלה המתמיהה **מה צריך להיות הערך של reduce כשהיא מופעלת על מערך ריק**. התשובה הכללית היא שזה צריך להיות האיבר הנייטרלי של ה-reducer."
+    },
+    {
+     "id": "ps/ps1:8:30",
+     "type": "prose",
+     "en": "**NOTE**: the `max` version takes as an initializer the value 0.  This is not correct when the array can contain negative numbers.  What should be the initial value in this case?\n\n",
+     "hash": "de52efa8ed90e818",
+     "he": "**הערה**: גרסת ה-`max` מקבלת כערך אתחול את הערך 0. זה אינו נכון כאשר המערך עשוי להכיל מספרים שליליים. מה צריך להיות ערך האתחול במקרה כזה?"
+    },
+    {
+     "id": "ps/ps1:8:31",
+     "type": "prose",
+     "en": "#### 2.3.5 Rectangle Selection with Reduce\n\n",
+     "hash": "dc45e23290bfaa57",
+     "he": "#### 2.3.5 בחירת מלבן באמצעות Reduce"
+    },
+    {
+     "id": "ps/ps1:8:32",
+     "type": "prose",
+     "en": "A user has chosen to view movies as boxarts (that is, the image that is shown for each movie), as it is easier to select movies according to their boxarts. The API returned the following value as a reply to our query:\n\n\n",
+     "hash": "99e102a98ecfdc67",
+     "he": "משתמש בחר להציג את הסרטים כתמונות עטיפה (boxarts — התמונה שמוצגת עבור כל סרט), כי קל יותר לבחור סרטים לפי תמונות העטיפה שלהם. ה-API החזיר את הערך הבא כתשובה לשאילתה שלנו:"
+    },
+    {
+     "id": "ps/ps1:8:33",
+     "type": "code",
+     "en": "```typescript\nlet boxarts = [\n    { width: 200, height: 200, url: \"http://cdn-0.nflximg.com/images/2891/Fracture200.jpg\" },\n    { width: 150, height: 200, url: \"http://cdn-0.nflximg.com/images/2891/Fracture150.jpg\" },\n    { width: 300, height: 200, url: \"http://cdn-0.nflximg.com/images/2891/Fracture300.jpg\" },\n    { width: 425, height: 150, url: \"http://cdn-0.nflximg.com/images/2891/Fracture425.jpg\" }\n]\n```\n\n",
+     "hash": "99aa607f62c5b188",
+     "lang": "typescript",
+     "noteHe": "`boxarts` הוא מערך הומוגני של ארבע מפות, שכל אחת מתארת גרסה של תמונת העטיפה של הסרט Fracture בגודל אחר: רוחב (`width`), גובה (`height`) וכתובת התמונה (`url`). זה הקלט שעליו נפעיל את דוגמאות ה-`reduce` הבאות."
+    },
+    {
+     "id": "ps/ps1:8:34",
+     "type": "prose",
+     "en": "Let us define the type of this returned value: it is a homogeneous array of maps. Each map describes a boxart.\n\n",
+     "hash": "53eeddafb0632f30",
+     "he": "נגדיר את הטיפוס של הערך המוחזר: זהו מערך הומוגני של מפות. כל מפה מתארת תמונת עטיפה (boxart)."
+    },
+    {
+     "id": "ps/ps1:8:35",
+     "type": "code",
+     "en": "```typescript\ntype Boxart = {\n    width: number; \n    height: number;\n    url: string;\n}\n```\n\n",
+     "hash": "3aa29eac3d13607f",
+     "lang": "typescript",
+     "noteHe": "כינוי הטיפוס `Boxart` מתעד את המבנה של כל מפה במערך: שני מספרים — `width` ו-`height` — ומחרוזת `url`."
+    },
+    {
+     "id": "ps/ps1:8:36",
+     "type": "prose",
+     "en": "We would like to find the largest box-art image size, so that we could know what is the maximal size of the image placeholder should be.  We measure rectangles by their area ($$width \\times height$$).\n\n",
+     "hash": "3887f0fc529e0a67",
+     "he": "נרצה למצוא את הגודל של תמונת העטיפה הגדולה ביותר, כדי לדעת מה צריך להיות הגודל המקסימלי של ה-placeholder של התמונה. אנחנו מודדים מלבנים לפי השטח שלהם ($$width \\times height$$)."
+    },
+    {
+     "id": "ps/ps1:8:37",
+     "type": "prose",
+     "en": "A straightforward way to do this is by going over each boxart, and keeping a temporary variable that holds the largest size out of the boxarts we have seen so far.\n\n",
+     "hash": "8aa0677976f165ee",
+     "he": "דרך ישירה לעשות זאת היא לעבור על כל תמונת עטיפה, ולהחזיק משתנה זמני שמכיל את הגודל הגדול ביותר מבין תמונות העטיפה שראינו עד כה."
+    },
+    {
+     "id": "ps/ps1:8:38",
+     "type": "prose",
+     "en": "In terms of types, the transformation maps an array `Boxart[]` into a `number`. Let us annotate this type into the function definition:\n\n\n",
+     "hash": "2de7d273f3cf77cf",
+     "he": "במונחי טיפוסים, הטרנספורמציה ממפה מערך `Boxart[]` ל-`number`. נוסיף את הערת הטיפוס הזו להגדרת הפונקציה:"
+    },
+    {
+     "id": "ps/ps1:8:39",
+     "type": "code",
+     "en": "```typescript\ntype Boxart = {\n    width: number; \n    height: number;\n    url: string;\n}\n\nfunction maxBox(boxes: Boxart[]): number {\n    let maxBox = 0;\n    for (let i = 0; i < boxes.length; i++) {\n        let curBoxSize = boxes[i].width * boxes[i].height;\n        if (curBoxSize > maxBox) {\n            maxBox = curBoxSize;\n        }\n    }\n    return maxBox;\n}\nmaxBox(boxarts); // ==> 63750\n```\n\n",
+     "hash": "be6c70bf9797c405",
+     "lang": "typescript",
+     "noteHe": "הפתרון הפרוצדורלי, הפעם עם הערות טיפוס מלאות: החתימה `maxBox(boxes: Boxart[]): number` מתעדת שהפונקציה מקבלת מערך של `Boxart` ומחזירה מספר. בגוף הפונקציה: המשתנה הזמני `maxBox` מאותחל ל-0; לולאת `for` עוברת על כל תמונות העטיפה, מחשבת את השטח של הנוכחית (`curBoxSize = boxes[i].width * boxes[i].height`) ומעדכנת את `maxBox` אם נמצא שטח גדול יותר. עבור הנתונים שלנו התוצאה היא 63750 (השטח 425 × 150). שוב יש כאן לולאה, מונה ושינוי משתנים."
+    },
+    {
+     "id": "ps/ps1:8:40",
+     "type": "prose",
+     "en": "This is a case of a loop to accumulate a value from an array of values. In terms of types, it maps an array to a single value. The **reduce** method fits perfectly for this scenario: The `reduce` method takes as parameter a reducer function and an initial value, and returns the accumulated value. \n\n",
+     "hash": "2d7cdaaff11c5b0c",
+     "he": "זהו מקרה של לולאה שצוברת ערך מתוך מערך של ערכים. במונחי טיפוסים, היא ממפה מערך לערך יחיד. המתודה **reduce** מתאימה לתרחיש הזה באופן מושלם: המתודה `reduce` מקבלת כפרמטרים פונקציית צבירה (reducer) וערך התחלתי, ומחזירה את הערך הנצבר."
+    },
+    {
+     "id": "ps/ps1:8:41",
+     "type": "prose",
+     "en": "The reducer function takes two arguments: the current accumulator, and the current item. The return value of the reducer function is the \"successive\" value of the accumulator parameter. That is, the result of some operation applied to the current accumulator, and the current item.\n\n",
+     "hash": "796fdca800df5d5b",
+     "he": "פונקציית הצבירה מקבלת שני ארגומנטים: הצובר הנוכחי והאיבר הנוכחי. ערך ההחזרה של פונקציית הצבירה הוא הערך \"העוקב\" של פרמטר הצובר — כלומר, התוצאה של פעולה כלשהי המופעלת על הצובר הנוכחי ועל האיבר הנוכחי."
+    },
+    {
+     "id": "ps/ps1:8:42",
+     "type": "prose",
+     "en": "Our current accumulator should be the current largest box-art image size, and the initial value should be 0.\n\n",
+     "hash": "52686f28b56288ed",
+     "he": "הצובר הנוכחי שלנו צריך להיות גודל תמונת העטיפה הגדול ביותר שנראה עד כה, וערך האתחול צריך להיות 0."
+    },
+    {
+     "id": "ps/ps1:8:43",
+     "type": "code",
+     "en": "```typescript\nlet largestBoxartSize = boxarts.reduce(\n    (curMax,curBox) => {\n        let curBoxSize = curBox.width * curBox.height;\n           if (curBoxSize > curMax) {\n               return curBoxSize;\n           } else {\n               return curMax;\n           }\n    }, // this is the reducer function\n    0  // this is the initial value\n    );\n    \nconsole.log(largestBoxartSize); // ==> 63750\n```\n\n",
+     "hash": "3b83986a96f73988",
+     "lang": "typescript",
+     "noteHe": "אותו חישוב עם `reduce`: פונקציית הצבירה מקבלת את המקסימום הנוכחי `curMax` ואת תמונת העטיפה הנוכחית `curBox`, מחשבת את שטחה, ומחזירה את הגדול מבין השניים — וערך ההחזרה הזה הופך לצובר של הצעד הבא. הארגומנט השני של `reduce`,‏ 0, הוא ערך האתחול של הצובר. התוצאה זהה — 63750 — אך ללא לולאה וללא שינוי משתנים."
+    },
+    {
+     "id": "ps/ps1:8:44",
+     "type": "prose",
+     "en": "Indeed, the largest boxart image size is 63750, which is the 4th boxart.\n\n",
+     "hash": "a934ab7d02caec52",
+     "he": "ואכן, הגודל של תמונת העטיפה הגדולה ביותר הוא 63750, וזו תמונת העטיפה הרביעית."
+    },
+    {
+     "id": "ps/ps1:8:45",
+     "type": "prose",
+     "en": "Note that this version has no side effect, no mutation and no loop.\n\n",
+     "hash": "3429d203d2e47b11",
+     "he": "שימו לב שלגרסה הזו אין תופעות לוואי, אין שינוי מצב (mutation) ואין לולאה."
+    },
+    {
+     "id": "ps/ps1:8:46",
+     "type": "prose",
+     "en": "We can make this version more readable by using the Math.max function - to express clearly that what we are doing in this `reduce` invocation is the identification of the max of an array.  We also annotate the expected type of the parameters in the reducer.\n\n",
+     "hash": "c2c996d104aba7f8",
+     "he": "נוכל להפוך את הגרסה הזו לקריאה יותר באמצעות הפונקציה `Math.max` — כדי לבטא בבירור שמה שאנחנו עושים בקריאה הזו ל-`reduce` הוא מציאת המקסימום של מערך. נוסיף גם הערות טיפוס לפרמטרים של פונקציית הצבירה."
+    },
+    {
+     "id": "ps/ps1:8:47",
+     "type": "code",
+     "en": "```typescript\nconst boxSize = (box: Boxart) => box.width * box.height;\nlet maxBoxSize = boxarts.reduce((curMax: number, curBox: Boxart) => Math.max(curMax, boxSize(curBox)), 0);\n\nconsole.log(maxBoxSize); // ==> 63750\n```\n\n",
+     "hash": "1636530a79041d93",
+     "lang": "typescript",
+     "noteHe": "גרסה תמציתית וקריאה יותר: הפונקציה `boxSize` מחלצת את חישוב השטח לפונקציית עזר בעלת שם, ופונקציית הצבירה מצטמצמת ל-`Math.max(curMax, boxSize(curBox))`. הערות הטיפוס `curMax: number` ו-`curBox: Boxart` מתעדות בדיוק אילו ערכים זורמים בכל צעד. התוצאה זהה — 63750."
+    }
+   ],
+   "headingHe": "2.3 עבודה עם ערכי JSON מורכבים"
+  },
+  {
+   "id": "ps/ps1:9",
+   "depth": 3,
+   "headingEn": "2.4 Tree Values",
+   "raw": "### 2.4 Tree Values\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:9:0",
+     "type": "prose",
+     "en": "Some replies will be more complex than what we have witnessed above: it is very often that we face replies that have a **tree** form, as opposed to a flat homogeneous array.\n\n",
+     "hash": "c1237ea633be7a82",
+     "he": "חלק מהתשובות מורכבות יותר ממה שראינו לעיל: לעיתים קרובות מאוד אנחנו נתקלים בתשובות בעלות צורת **עץ**, בניגוד למערך הומוגני שטוח."
+    },
+    {
+     "id": "ps/ps1:9:1",
+     "type": "prose",
+     "en": "One example of such, is the following API reply - which returns values grouped by movie genre (\"New Releases\", \"Dramas\" ...)\n\n",
+     "hash": "ffbaf6cbb62001f4",
+     "he": "דוגמה אחת לכך היא תשובת ה-API הבאה — שמחזירה ערכים מקובצים לפי ז'אנר הסרט (\"New Releases\",‏ \"Dramas\" ...)"
+    },
+    {
+     "id": "ps/ps1:9:2",
+     "type": "code",
+     "en": "```typescript\nlet movieLists = [\n        {\n            name: \"New Releases\",\n            videos: [\n                {\n                    \"id\": 70111470,\n                    \"title\": \"Die Hard\",\n                    \"boxart\": \"http://cdn-0.nflximg.com/images/2891/DieHard.jpg\",\n                    \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n                    \"rating\": 4.0,\n                    \"bookmark\": []\n                },\n                {\n                    \"id\": 654356453,\n                    \"title\": \"Bad Boys\",\n                    \"boxart\": \"http://cdn-0.nflximg.com/images/2891/BadBoys.jpg\",\n                    \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n                    \"rating\": 5.0,\n                    \"bookmark\": [{ id: 432534, time: 65876586 }]\n                }\n            ]\n        },\n        {\n            name: \"Dramas\",\n            videos: [\n                {\n                    \"id\": 65432445,\n                    \"title\": \"The Chamber\",\n                    \"boxart\": \"http://cdn-0.nflximg.com/images/2891/TheChamber.jpg\",\n                    \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n                    \"rating\": 4.0,\n                    \"bookmark\": []\n                },\n                {\n                    \"id\": 675465,\n                    \"title\": \"Fracture\",\n                    \"boxart\": \"http://cdn-0.nflximg.com/images/2891/Fracture.jpg\",\n                    \"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n                    \"rating\": 5.0,\n                    \"bookmark\": [{ id: 432534, time: 65876586 }]\n                }\n            ]\n        }\n    ]\n```\n\n",
+     "hash": "857bd79646c9643d",
+     "lang": "typescript",
+     "noteHe": "`movieLists` הוא ערך בעל מבנה של עץ: מערך של שתי קטגוריות, שלכל אחת מהן שם (`name`) ומערך פנימי `videos` של ערכי `Video` — אותם סרטים מהדוגמאות הקודמות, מחולקים הפעם בין הקטגוריות \"New Releases\" ו-\"Dramas\". כלומר, ערכי ה-`Video` כבר אינם ברמה העליונה של המערך אלא מקוננים בתוך הקטגוריות — קינון בעומק שתי רמות."
+    },
+    {
+     "id": "ps/ps1:9:3",
+     "type": "prose",
+     "en": "To document the structure of this value, let us write its type:\n",
+     "hash": "7edcb971c7cb6cb8",
+     "he": "כדי לתעד את המבנה של הערך הזה, נכתוב את הטיפוס שלו:"
+    },
+    {
+     "id": "ps/ps1:9:4",
+     "type": "list",
+     "en": "* It is an array of 2 maps of identical structure.\n* Each item represents a category of Videos. The category maps have the following keys:\n  * name: string\n  * videos: an array of Video.\n\n",
+     "hash": "2991646dfc2ba951",
+     "he": "* זהו מערך של 2 מפות בעלות מבנה זהה.\n* כל איבר מייצג קטגוריה של סרטונים (Videos). למפות הקטגוריה יש את המפתחות הבאים:\n  * ‏name: מחרוזת\n  * ‏videos: מערך של Video."
+    },
+    {
+     "id": "ps/ps1:9:5",
+     "type": "prose",
+     "en": "The TypeScript definition is thus:\n\n",
+     "hash": "49797cae8912d9ea",
+     "he": "הגדרת ה-TypeScript היא אפוא:"
+    },
+    {
+     "id": "ps/ps1:9:6",
+     "type": "code",
+     "en": "```typescript\ntype VideoCategory = {\n    name: string;\n    videos: Video[];\n}\ntype VideoCategories = VideoCategory[];\n```\n\n",
+     "hash": "b2131827e3c90ada",
+     "lang": "typescript",
+     "noteHe": "מגדירים כינוי טיפוס `VideoCategory` — מפה עם `name` מטיפוס `string` ו-`videos` שהוא מערך של ערכי `Video` (הטיפוס שהגדרנו קודם) — ואז `VideoCategories`, שהוא מערך של קטגוריות. כך בונים הגדרות טיפוס בצורה מודולרית, שכבה על גבי שכבה."
+    },
+    {
+     "id": "ps/ps1:9:7",
+     "type": "prose",
+     "en": "The structure of the value is thus a *tree*: $$[ category_1, category_2 ]$$ where $$category_i$$ is of the form:<br>\n`{ name: string, videos: [v1,...] }`.\n\n",
+     "hash": "c3b414d9188fa8d1",
+     "he": "המבנה של הערך הוא אפוא *עץ*: $$[ category_1, category_2 ]$$ כאשר $$category_i$$ הוא מהצורה:<br>\n`{ name: string, videos: [v1,...] }`."
+    },
+    {
+     "id": "ps/ps1:9:8",
+     "type": "prose",
+     "en": "These kinds of trees impose a challenge when working with them: if we apply `map` or `filter`, the transformer or the predicate will receive as argument a `VideoCategory` object.  If we want to process the embedded `Video` objects inside the categories, we must first **flatten** the tree.\n\n",
+     "hash": "c058818fc0d9bdc6",
+     "he": "עצים מהסוג הזה מציבים אתגר בעבודה איתם: אם נפעיל `map` או `filter`, פונקציית הטרנספורמציה או הפרדיקט יקבלו כארגומנט אובייקט `VideoCategory`. אם נרצה לעבד את אובייקטי ה-`Video` המוטבעים בתוך הקטגוריות, עלינו קודם **לשטח (flatten)** את העץ."
+    },
+    {
+     "id": "ps/ps1:9:9",
+     "type": "prose",
+     "en": "Suppose we would like to have a list of all movie ids in that tree. The most trivial way, as before, is to do the following (using a foreach loop):\n\n",
+     "hash": "5203e5e07d594247",
+     "he": "נניח שנרצה לקבל רשימה של כל מזהי הסרטים שבעץ הזה. הדרך הטריוויאלית ביותר, כמו קודם, היא לעשות זאת כך (באמצעות לולאת foreach):"
+    },
+    {
+     "id": "ps/ps1:9:10",
+     "type": "code",
+     "en": "```typescript\nlet movieIds = []\nmovieLists.forEach(category => category.videos.forEach(video => movieIds.push(video.id)));\nconsole.log(`movieIds=${movieIds}`); // ==> movieIds=70111470,654356453,65432445,675465\n```\n\n",
+     "hash": "063f48a4c14c7cd6",
+     "lang": "typescript",
+     "noteHe": "הפתרון האימפרטיבי: מאתחלים מערך ריק `movieIds`, ואז `forEach` חיצוני עובר על הקטגוריות, ובתוכו `forEach` פנימי עובר על הסרטונים של כל קטגוריה ודוחף (`push`) את `video.id` אל הצובר. התוצאה: כל ארבעת המזהים במערך שטוח אחד."
+    },
+    {
+     "id": "ps/ps1:9:11",
+     "type": "prose",
+     "en": "`forEach` abstracts a single loop. The embedded calls to `forEach` inside `forEach` reflects the two-level traversal of the tree.\n\n",
+     "hash": "fe47a47b9b89f70e",
+     "he": "`forEach` מפשיטה לולאה יחידה. הקריאות המוטבעות של `forEach` בתוך `forEach` משקפות את המעבר הדו-רמתי על העץ."
+    },
+    {
+     "id": "ps/ps1:9:12",
+     "type": "prose",
+     "en": "Note that `forEach` is **not a functional** style: this is precisely the type of operations we want to abstract away using map/filter/reduce. This version has an accumulator variable (`movieIds`) which we must initialize and then mutate as part of the `forEach` iteration.\n\n",
+     "hash": "597457ca1e25ddc4",
+     "he": "שימו לב ש-`forEach` היא **לא סגנון פונקציונלי**: זה בדיוק סוג הפעולות שאנחנו רוצים להפשיט באמצעות map/filter/reduce. בגרסה הזו יש משתנה צובר (`movieIds`) שעלינו לאתחל ואז לשנות במסגרת האיטרציה של `forEach`."
+    },
+    {
+     "id": "ps/ps1:9:13",
+     "type": "prose",
+     "en": "Not a functional solution...\n\n",
+     "hash": "8c25983d2a9c81b4",
+     "he": "לא פתרון פונקציונלי..."
+    },
+    {
+     "id": "ps/ps1:9:14",
+     "type": "prose",
+     "en": "The general feeling of the task we want to perform is an **accumulation** - so that `reduce` seems to be the good tool. But we cannot apply `reduce` as is, because `reduce` would work on `Category` values and we want to accumulate `Video` values.\n\n",
+     "hash": "2dfa6f02cbc589a2",
+     "he": "התחושה הכללית של המשימה שאנחנו רוצים לבצע היא **צבירה (accumulation)** — כך ש-`reduce` נראית ככלי הנכון. אבל איננו יכולים להפעיל `reduce` כמות שהיא, מפני ש-`reduce` תעבוד על ערכי `Category`, ואנחנו רוצים לצבור ערכי `Video`."
+    },
+    {
+     "id": "ps/ps1:9:15",
+     "type": "prose",
+     "en": "Alternatively, we could attempt to use **map** as we are mapping `Video` values into `number` values.  But again, we cannot map over Categories - we need to map over Videos - so that `map` cannot be used directly.\n\n",
+     "hash": "cffc3eecd7d724d2",
+     "he": "לחלופין, נוכל לנסות להשתמש ב-**map**, שהרי אנחנו ממפים ערכי `Video` לערכי `number`. אבל שוב — איננו יכולים למפות על הקטגוריות; אנחנו צריכים למפות על הסרטונים — כך שאי אפשר להשתמש ב-`map` ישירות."
+    },
+    {
+     "id": "ps/ps1:9:16",
+     "type": "prose",
+     "en": "Let's recall the `concat` method of arrays:\n\n",
+     "hash": "db1afb3dde2fa9ce",
+     "he": "ניזכר במתודה `concat` של מערכים:"
+    },
+    {
+     "id": "ps/ps1:9:17",
+     "type": "code",
+     "en": "```typescript\nlet arrayOne = [1, 2, 3, 4];\nlet arrayTwo = [5, 6, 7, 8];\narrayOne.concat(arrayTwo); // ==> [ 1, 2, 3, 4, 5, 6, 7, 8 ]\n```\n\n",
+     "hash": "5990dc78adf8d726",
+     "lang": "typescript",
+     "noteHe": "`concat` מחברת שני מערכים: `arrayOne.concat(arrayTwo)` מחזירה מערך חדש שמכיל את איברי `arrayOne` ואחריהם את איברי `arrayTwo`. חשוב: שני המערכים המקוריים אינם משתנים."
+    },
+    {
+     "id": "ps/ps1:9:18",
+     "type": "prose",
+     "en": "In contrast to `push`, `concat` does not mutate its arguments - it returns a new array and can be used safely.\n\n",
+     "hash": "95e3fc21dbaed26c",
+     "he": "בניגוד ל-`push`,‏ `concat` אינה משנה את הארגומנטים שלה — היא מחזירה מערך חדש, ולכן אפשר להשתמש בה בבטחה."
+    },
+    {
+     "id": "ps/ps1:9:19",
+     "type": "prose",
+     "en": "If we `reduce` an array of arrays and accumulate using the `concat` operator,  we will get a method that flattens one level of an array of arrays:\n\n",
+     "hash": "49a665ae09269c74",
+     "he": "אם נפעיל `reduce` על מערך של מערכים ונצבור באמצעות האופרטור `concat`, נקבל מתודה שמשטחת רמה אחת של מערך של מערכים:"
+    },
+    {
+     "id": "ps/ps1:9:20",
+     "type": "code",
+     "en": "```typescript\nlet a = [[1, 2, 3], [4, 5, 6]];\na.reduce((acc, curr) => acc.concat(curr), []); // ==> [ 1, 2, 3, 4, 5, 6 ]\n```\n\n",
+     "hash": "6c5401c584307eef",
+     "lang": "typescript",
+     "noteHe": "`a` הוא מערך של שני מערכים. פונקציית הצבירה `(acc, curr) => acc.concat(curr)` מדביקה כל תת-מערך אל הצובר, החל מערך האתחול — המערך הריק `[]`. התוצאה היא שיטוח של רמה אחת: `[ 1, 2, 3, 4, 5, 6 ]`."
+    },
+    {
+     "id": "ps/ps1:9:21",
+     "type": "prose",
+     "en": "We now need to apply a mixture of `map` and `reduce` in order to map and flatten:\n\n",
+     "hash": "bb486aa50eb782ed",
+     "he": "כעת עלינו להפעיל שילוב של `map` ו-`reduce` כדי גם למפות וגם לשטח:"
+    },
+    {
+     "id": "ps/ps1:9:22",
+     "type": "code",
+     "en": "```typescript\n// We want the following as an array of the numbers:\nlet a = [{ group: 1, numbers: [1, 2, 3] }, { group: 2, numbers: [4, 5, 6] }];\na.map(x => x.numbers).reduce((acc,curr) => acc.concat(curr), []); // ==> [ 1, 2, 3, 4, 5, 6 ]\n```\n\n",
+     "hash": "1bb253da0732007d",
+     "lang": "typescript",
+     "noteHe": "כאן כל איבר במערך `a` הוא מפה עם שדה `numbers`. תחילה `map(x => x.numbers)` מחלצת את המערכים הפנימיים ומייצרת מערך של מערכים, ואז `reduce` עם `concat` משטחת אותו למערך יחיד. זו בדיוק תבנית ה\"מיפוי-ואז-שיטוח\" שנזדקק לה עבור עץ הסרטונים."
+    }
+   ],
+   "headingHe": "2.4 ערכי עץ (Tree Values)"
+  },
+  {
+   "id": "ps/ps1:10",
+   "depth": 3,
+   "headingEn": "2.4.1 The Ramda package",
+   "raw": "### 2.4.1 The Ramda package\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:10:0",
+     "type": "prose",
+     "en": "Ramda is a library of functions designed to facilitate functional programming in JavaScript.\n\n",
+     "hash": "ee0fc80df90e670b",
+     "he": "Ramda היא ספרייה של פונקציות שנועדה להקל על תכנות פונקציונלי ב-JavaScript."
+    },
+    {
+     "id": "ps/ps1:10:1",
+     "type": "prose",
+     "en": "Ramda includes a function called `chain` (often also called `flatmap`) which can come handy in our last example: If we want to return all of the results as a single flat array instead of as an array of arrays, then we can use Ramda's `chain`:\n\n",
+     "hash": "1d4854bfa3b760c7",
+     "he": "Ramda כוללת פונקציה בשם `chain` (המכונה לעיתים קרובות גם `flatmap`), שיכולה להועיל בדוגמה האחרונה שלנו: אם נרצה להחזיר את כל התוצאות כמערך שטוח יחיד במקום כמערך של מערכים, נוכל להשתמש ב-`chain` של Ramda:"
+    },
+    {
+     "id": "ps/ps1:10:2",
+     "type": "code",
+     "en": "```typescript\nimport * as R from \"ramda\";\n\nR.chain(x => x.numbers, a); // ==> [ 1, 2, 3, 4, 5, 6 ]\n```\n\n",
+     "hash": "135b798f318cca8f",
+     "lang": "typescript",
+     "noteHe": "מייבאים את Ramda תחת השם `R`, ואז `R.chain(x => x.numbers, a)` עושה בקריאה אחת את מה שעשינו קודם בשני שלבים: ממפה כל איבר למערך ה-`numbers` שלו ומשטחת את התוצאה ברמה אחת. שימו לב שבסגנון של Ramda הפונקציה מקבלת את המערך כארגומנט האחרון, במקום להיקרא כמתודה על המערך."
+    },
+    {
+     "id": "ps/ps1:10:3",
+     "type": "prose",
+     "en": "The `chain` function goes through an array, and flattens the result of 'doing something' (which can be 'nothing' or applying a 'mapping') by one level.\n\n",
+     "hash": "45ca5ff3c0a841c8",
+     "he": "הפונקציה `chain` עוברת על מערך, ומשטחת ברמה אחת את התוצאה של \"לעשות משהו\" (שיכול להיות \"כלום\" או הפעלה של \"מיפוי\")."
+    },
+    {
+     "id": "ps/ps1:10:4",
+     "type": "prose",
+     "en": "Back to our videos example, if we `chain` the `movieLists` with a function that just returns the category videos, then the result would be an array containing the videos. As such:\n\n",
+     "hash": "8c95d2ee22c91367",
+     "he": "בחזרה לדוגמת הסרטונים שלנו: אם נפעיל `chain` על `movieLists` עם פונקציה שפשוט מחזירה את סרטוני הקטגוריה, התוצאה תהיה מערך שמכיל את הסרטונים. כך:"
+    },
+    {
+     "id": "ps/ps1:10:5",
+     "type": "code",
+     "en": "```typescript\nR.chain(category => category.videos, movieLists);\n// ==>\n// [ { id: 70111470,\n//     title: 'Die Hard',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/DieHard.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 4,\n//     bookmark: [] },\n//   { id: 654356453,\n//     title: 'Bad Boys',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/BadBoys.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 5,\n//     bookmark: [ [Object] ] },\n//   { id: 65432445,\n//     title: 'The Chamber',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/TheChamber.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 4,\n//     bookmark: [] },\n//   { id: 675465,\n//     title: 'Fracture',\n//     boxart: 'http://cdn-0.nflximg.com/images/2891/Fracture.jpg',\n//     uri: 'http://api.netflix.com/catalog/titles/movies/70111470',\n//     rating: 5,\n//     bookmark: [ [Object] ] } ]\n```\n\n",
+     "hash": "be2485511b908182",
+     "lang": "typescript",
+     "noteHe": "`R.chain(category => category.videos, movieLists)` ממפה כל קטגוריה למערך הסרטונים שלה ומשטחת את התוצאה: מתקבל מערך שטוח יחיד של ארבעת ערכי ה-`Video`, ללא רמת הקטגוריות. העץ הדו-רמתי הפך לרשימה שטוחה, שעליה כבר אפשר להפעיל `map` או `filter` רגילים."
+    },
+    {
+     "id": "ps/ps1:10:6",
+     "type": "prose",
+     "en": "The only change that is left, is that we do not want the category videos flattened, rather something extra: taking the `category.videos` and mapping each element there to its `id`.\n\n",
+     "hash": "35df30288d8cb097",
+     "he": "השינוי היחיד שנותר: איננו רוצים רק את סרטוני הקטגוריה משוטחים, אלא משהו נוסף — לקחת את `category.videos` ולמפות כל איבר שם ל-`id` שלו."
+    },
+    {
+     "id": "ps/ps1:10:7",
+     "type": "code",
+     "en": "```typescript\nR.chain(category => category.videos, movieLists).map(video => video.id); // ==> [ 70111470, 654356453, 65432445, 675465 ]\n```\n\n",
+     "hash": "2f67b343565c7706",
+     "lang": "typescript",
+     "noteHe": "משרשרים את שני השלבים: `R.chain` מייצרת את המערך השטוח של הסרטונים, ואז `.map(video => video.id)` ממפה כל סרטון למזהה שלו. התוצאה — `[ 70111470, 654356453, 65432445, 675465 ]` — בדיוק מה שהשיג הפתרון האימפרטיבי עם שתי לולאות `forEach` מקוננות, אבל ללא לולאות וללא שינוי מצב."
+    },
+    {
+     "id": "ps/ps1:10:8",
+     "type": "prose",
+     "en": "It helps to annotate the types of the arguments in such chained transformations to document and verify their correctness:\n\n",
+     "hash": "5f6c4350bbee82a2",
+     "he": "מועיל להוסיף הערות טיפוס לארגומנטים בטרנספורמציות משורשרות כאלה, כדי לתעד אותן ולוודא את נכונותן:"
+    },
+    {
+     "id": "ps/ps1:10:9",
+     "type": "code",
+     "en": "```typescript\nR.chain((category: VideoCategory) => category.videos, movieLists).map((video: Video) => video.id); // ==> [ 70111470, 654356453, 65432445, 675465 ]\n```\n\n",
+     "hash": "7627ad08c460617c",
+     "lang": "typescript",
+     "noteHe": "אותו קוד עם הערות טיפוס: הפונקציה המועברת ל-`R.chain` מקבלת `category: VideoCategory` ומחזירה `Video[]`, והפונקציה המועברת ל-`map` מקבלת `video: Video` ומחזירה `number`. ההערות מתעדות את \"מסלול הטיפוסים\" של השרשרת: מ-`VideoCategory[]` אל `Video[]` ואל `number[]`."
+    }
+   ],
+   "headingHe": "2.4.1 חבילת Ramda"
+  },
+  {
+   "id": "ps/ps1:11",
+   "depth": 2,
+   "headingEn": "3. Exercises",
+   "raw": "## 3. Exercises\n\n",
+   "blocks": [],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "3. תרגילים"
+  },
+  {
+   "id": "ps/ps1:12",
+   "depth": 3,
+   "headingEn": "3.1 Implement the `map` method using `reduce`",
+   "raw": "### 3.1 Implement the `map` method using `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:12:0",
+     "type": "prose",
+     "en": "Let's think step by step: What should be our *accumulated* value? It is natural to think that the accumulation consists in 'pushing' the current element **as a mapped value** to the currently accumulated array.\n\n",
+     "hash": "ed8a69371f4d065e",
+     "he": "נחשוב צעד אחר צעד: מה צריך להיות הערך *הנצבר* שלנו? טבעי לחשוב שהצבירה מורכבת מ\"דחיפת\" האיבר הנוכחי **כערך ממופה** אל המערך שנצבר עד כה."
+    },
+    {
+     "id": "ps/ps1:12:1",
+     "type": "prose",
+     "en": "To that end, the initial value should be the empty array. As we go, we will take the current element, and our next accumulator will be the current accumulator, only expanded by the current element after it is mapped by the transformer.\n\n",
+     "hash": "8aa4f6849bf0d34c",
+     "he": "לשם כך, ערך האתחול צריך להיות המערך הריק. תוך כדי התקדמות, ניקח את האיבר הנוכחי, והצובר הבא שלנו יהיה הצובר הנוכחי, מורחב באיבר הנוכחי לאחר שמופה על ידי פונקציית הטרנספורמציה."
+    },
+    {
+     "id": "ps/ps1:12:2",
+     "type": "prose",
+     "en": "[Solution](./ps1_sol.html#exercise-1-implementing-map-with-reduce)\n\n",
+     "hash": "3a2279aaaf925a19",
+     "he": "[פתרון](./ps1_sol.html#exercise-1-implementing-map-with-reduce)"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "3.1 מימוש המתודה `map` באמצעות `reduce`"
+  },
+  {
+   "id": "ps/ps1:13",
+   "depth": 3,
+   "headingEn": "3.2 Implement `filter` using `reduce`",
+   "raw": "### 3.2 Implement `filter` using `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:13:0",
+     "type": "prose",
+     "en": "What should be changed in the solution of the previous exercise?\n\n",
+     "hash": "4a6281053e857b6a",
+     "he": "מה צריך להשתנות בפתרון של התרגיל הקודם?"
+    },
+    {
+     "id": "ps/ps1:13:1",
+     "type": "prose",
+     "en": "We can skip adding the current element if it does not satisfy the predicate, in which case the next accumulator will not change. However, if the current element does satisfy the predicate, we will set the next accumulator to be the current one, only enlarged by the current element\n\n",
+     "hash": "21c4f08bfb01e75b",
+     "he": "נוכל לדלג על הוספת האיבר הנוכחי אם הוא אינו מקיים את הפרדיקט — ובמקרה כזה הצובר הבא לא ישתנה. לעומת זאת, אם האיבר הנוכחי כן מקיים את הפרדיקט, נקבע שהצובר הבא יהיה הצובר הנוכחי, מורחב באיבר הנוכחי."
+    },
+    {
+     "id": "ps/ps1:13:2",
+     "type": "prose",
+     "en": "[Solution](./ps1_sol.html#exercise-2-implementing-filter-with-reduce)\n\n",
+     "hash": "2b517f507bcb3cf5",
+     "he": "[פתרון](./ps1_sol.html#exercise-2-implementing-filter-with-reduce)"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "3.2 מימוש `filter` באמצעות `reduce`"
+  },
+  {
+   "id": "ps/ps1:14",
+   "depth": 3,
+   "headingEn": "3.3 Implement `some` and `every` using `map` and `reduce`",
+   "raw": "### 3.3 Implement `some` and `every` using `map` and `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:14:0",
+     "type": "prose",
+     "en": "`some(pred)` is a method that returns `true` if and only if *at least one* element in an array satisfies a given predicate.\n\n",
+     "hash": "5ff76442cc9cfd82",
+     "he": "`some(pred)` היא מתודה שמחזירה `true` אם ורק אם *לפחות איבר אחד* במערך מקיים פרדיקט נתון."
+    },
+    {
+     "id": "ps/ps1:14:1",
+     "type": "prose",
+     "en": "`every(pred)` is a method that returns true if and only if *all* the elements in an array satisfy a given predicate.\n\n",
+     "hash": "2e07bb3641aa50d6",
+     "he": "`every(pred)` היא מתודה שמחזירה `true` אם ורק אם *כל* האיברים במערך מקיימים פרדיקט נתון."
+    },
+    {
+     "id": "ps/ps1:14:2",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "ps/ps1:14:3",
+     "type": "code",
+     "en": "```typescript\nlet even = (x => x % 2 == 0);\nlet arr1 = [1,2,3,4];\nlet arr2 = [1,3,5,7];\nlet arr3 = [2,4,6,8];\nlet arr1HasEvenNumbers = arr1.some(even);\nlet arr2HasEvenNumbers = arr2.some(even);\nlet allInArr1AreEven = arr1.every(even);\nlet allInArr3AreEven = arr3.every(even);\nconsole.log(`arr1HasEvenNumbers = ${arr1HasEvenNumbers}`); // ==> arr1HasEvenNumbers = true\nconsole.log(`arr2HasEvenNumbers = ${arr2HasEvenNumbers}`); // ==> arr2HasEvenNumbers = false\nconsole.log(`allInArr1AreEven = ${allInArr1AreEven}`); // ==> allInArr1AreEven = false\nconsole.log(`allInArr3AreEven = ${allInArr3AreEven}`); // ==> allInArr3AreEven = true\n```\n\n",
+     "hash": "ef61b6cbad1629b1",
+     "lang": "typescript",
+     "noteHe": "הדגמה של המתודות המובנות: `even` הוא פרדיקט שבודק זוגיות. `arr1.some(even)` מחזירה `true` כי ב-`arr1` יש מספר זוגי, ואילו `arr2.some(even)` מחזירה `false` כי ב-`arr2` כל האיברים אי-זוגיים. `arr1.every(even)` מחזירה `false` כי לא כל איברי `arr1` זוגיים, ו-`arr3.every(even)` מחזירה `true` כי כל איברי `arr3` זוגיים. בתרגיל תממשו את ההתנהגות הזו בעצמכם באמצעות `map` ו-`reduce`."
+    },
+    {
+     "id": "ps/ps1:14:4",
+     "type": "prose",
+     "en": "Instructions: \n\n",
+     "hash": "4de0bc28403b50de",
+     "he": "הנחיות:"
+    },
+    {
+     "id": "ps/ps1:14:5",
+     "type": "prose",
+     "en": "A way to implement `some` is by mapping the array to `true/false` values of whether each element satisfies the predicate, and then doing an accumulated logical `or` between the elements using `reduce`, with the initial accumulator equal to `false`.\n\n",
+     "hash": "0d0bf34cb6a80ef7",
+     "he": "דרך לממש את `some` היא למפות את המערך לערכי `true/false` — האם כל איבר מקיים את הפרדיקט — ואז לבצע \"או\" (`or`) לוגי נצבר בין האיברים באמצעות `reduce`, עם צובר התחלתי השווה ל-`false`."
+    },
+    {
+     "id": "ps/ps1:14:6",
+     "type": "prose",
+     "en": "Similarly, we can implement `every` in the same way as above, except that we need to use a logical `and` and our initial accumulator should be `true`.\n\n",
+     "hash": "d34d30a62017bd7a",
+     "he": "באופן דומה, נוכל לממש את `every` באותו אופן, אלא שעלינו להשתמש ב\"וגם\" (`and`) לוגי, והצובר ההתחלתי שלנו צריך להיות `true`."
+    },
+    {
+     "id": "ps/ps1:14:7",
+     "type": "prose",
+     "en": "[Solution](./ps1_sol.html#exercise-3-implementing-some-and-every-with-map-and-reduce)\n\n",
+     "hash": "75bf5fd12301ed81",
+     "he": "[פתרון](./ps1_sol.html#exercise-3-implementing-some-and-every-with-map-and-reduce)"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "3.3 מימוש `some` ו-`every` באמצעות `map` ו-`reduce`"
+  },
+  {
+   "id": "ps/ps1:15",
+   "depth": 2,
+   "headingEn": "Shortcut Semantics",
+   "raw": "## Shortcut Semantics\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1:15:0",
+     "type": "prose",
+     "en": "The native `some` and `every` methods employ a concept known as 'shortcut semantics'. What this means, is that `some` stops and immediately returns `true` at the moment it finds an element that satisfies the predicate. `every` stops and immediately returns `false` at the moment it finds an element that does not satisfy the predicate.\n\n",
+     "hash": "95c877bf596c5ea3",
+     "he": "המתודות המובנות `some` ו-`every` משתמשות במושג המכונה \"סמנטיקת קיצור\" (shortcut semantics). המשמעות היא ש-`some` עוצרת ומחזירה `true` מיד ברגע שהיא מוצאת איבר שמקיים את הפרדיקט, ו-`every` עוצרת ומחזירה `false` מיד ברגע שהיא מוצאת איבר שאינו מקיים את הפרדיקט."
+    },
+    {
+     "id": "ps/ps1:15:1",
+     "type": "prose",
+     "en": "**Question**: does our implementation satisfy shortcut semantics?\n\n",
+     "hash": "ad462f08f72a213a",
+     "he": "**שאלה**: האם המימוש שלנו מקיים סמנטיקת קיצור?"
+    },
+    {
+     "id": "ps/ps1:15:2",
+     "type": "prose",
+     "en": "It is difficult to distinguish between shortcut semantics and non-shortcut semantics because both shortcut and non-shortcut versions return the same values for all parameters.  \n\n",
+     "hash": "dacf676fdfcaef0c",
+     "he": "קשה להבחין בין סמנטיקת קיצור לסמנטיקה ללא קיצור, מפני ששתי הגרסאות — עם הקיצור ובלעדיו — מחזירות את אותם ערכים עבור כל הפרמטרים."
+    },
+    {
+     "id": "ps/ps1:15:3",
+     "type": "prose",
+     "en": "Can we conclude that a shortcut and non-shortcut versions of `some` are equivalent according to the definition of function equivalence we provided in class?\n\n",
+     "hash": "94df43917fbc86ca",
+     "he": "האם נוכל להסיק שגרסה עם קיצור וגרסה ללא קיצור של `some` שקולות זו לזו לפי הגדרת שקילות הפונקציות (function equivalence) שנתנו בכיתה?"
+    },
+    {
+     "id": "ps/ps1:15:4",
+     "type": "prose",
+     "en": "Remember though the difference between mathematical function equivalence and programming functions equivalence: 2 programming functions `f` and `g` are equivalent if they have the same domain, same range and for all values in the domain:\n",
+     "hash": "c0b1ebba018a05ad",
+     "he": "זכרו עם זאת את ההבדל בין שקילות פונקציות מתמטית לשקילות של פונקציות בתכנות: שתי פונקציות תכנותיות `f` ו-`g` הן שקולות אם יש להן אותו תחום, אותו טווח, ולכל ערך בתחום:"
+    },
+    {
+     "id": "ps/ps1:15:5",
+     "type": "list",
+     "en": "* Either `f(x)` has a value and `g(x)` has the same value\n* Or `f(x)` does not terminate and `g(x)` does not terminate as well\n* Or `f(x)` throws an error and `g(x)` throws an error as well\n\n",
+     "hash": "6f8109df4220fade",
+     "he": "* או ש-`f(x)` בעלת ערך ו-`g(x)` בעלת אותו ערך\n* או ש-`f(x)` אינה עוצרת וגם `g(x)` אינה עוצרת\n* או ש-`f(x)` זורקת שגיאה וגם `g(x)` זורקת שגיאה"
+    },
+    {
+     "id": "ps/ps1:15:6",
+     "type": "prose",
+     "en": "How can we then distinguish between a shortcut semantics version of `some` and one that is not shortcut?\n\n",
+     "hash": "fd624c0aee0f8c55",
+     "he": "כיצד, אם כן, נוכל להבחין בין גרסה של `some` בעלת סמנטיקת קיצור לגרסה שאינה כזו?"
+    },
+    {
+     "id": "ps/ps1:15:7",
+     "type": "prose",
+     "en": "The solution is to choose parameters that will distinguish between the two computations using either non-termination (infinite loops) or errors.\n\n",
+     "hash": "b1d5b76921e9d4d4",
+     "he": "הפתרון הוא לבחור פרמטרים שיבחינו בין שני החישובים באמצעות אי-עצירה (לולאות אינסופיות) או באמצעות שגיאות."
+    },
+    {
+     "id": "ps/ps1:15:8",
+     "type": "prose",
+     "en": "Let us define such an example on arrays of numbers.  We can trigger an error in JavaScript by using the `throw` primitive.\n\n",
+     "hash": "c54af7136c48b0e9",
+     "he": "נגדיר דוגמה כזו על מערכים של מספרים. אפשר לגרום לזריקת שגיאה ב-JavaScript באמצעות הפרימיטיב `throw`."
+    },
+    {
+     "id": "ps/ps1:15:9",
+     "type": "prose",
+     "en": "To test whether an error was thrown, we use the same syntax as in Java - with `try/catch`.\n\n",
+     "hash": "20a334662040234d",
+     "he": "כדי לבדוק האם נזרקה שגיאה, נשתמש באותו תחביר כמו ב-Java — עם `try/catch`."
+    },
+    {
+     "id": "ps/ps1:15:10",
+     "type": "code",
+     "en": "```typescript\nconst throwOnZero = x => {\n    if (x > 0)\n        return true;\n    else\n        throw false;\n}\n\nlet a = [1, 0];\n\ntry {\n    a.some(throwOnZero);\n} catch (e) {\n    e;\n}\n```\n\n",
+     "hash": "e91051f218b9aa8a",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `throwOnZero` מחזירה `true` עבור מספר חיובי, וזורקת (`throw`) את הערך `false` עבור כל קלט אחר. המערך הוא `a = [1, 0]`. המתודה המובנית `a.some(throwOnZero)` בודקת קודם את 1 ומקבלת `true` — ובזכות סמנטיקת הקיצור היא עוצרת מיד ומחזירה `true`, בלי להגיע כלל ל-0 שהיה גורם לזריקת שגיאה. לכן בלוק ה-`catch` אינו מופעל."
+    },
+    {
+     "id": "ps/ps1:15:11",
+     "type": "prose",
+     "en": "The code above returns `true`.\n\n",
+     "hash": "d8b382fc2ee32431",
+     "he": "הקוד שלעיל מחזיר `true`."
+    },
+    {
+     "id": "ps/ps1:15:12",
+     "type": "code",
+     "en": "```typescript\nconst someExercise = (pred, arr) => arr.map(pred).reduce((acc, cur) => acc || cur, false);\n\ntry {\n    someExercise(throwOnZero, a);\n} catch (e) {\n    e;\n}\n```\n\n",
+     "hash": "89d9a63c2d4f7414",
+     "lang": "typescript",
+     "noteHe": "לעומת זאת, המימוש שלנו `someExercise` מפעיל תחילה `arr.map(pred)` — ו-`map` מפעילה את הפרדיקט על **כל** האיברים, כולל 0. לכן נזרקת שגיאה עוד לפני שמגיעים לשלב ה-`reduce`, החישוב בבלוק ה-`try` נקטע, ובלוק ה-`catch` תופס את הערך שנזרק — `false`. כך מתגלה שלמימוש שלנו אין סמנטיקת קיצור."
+    },
+    {
+     "id": "ps/ps1:15:13",
+     "type": "prose",
+     "en": "The code above will return `false`.\n\n",
+     "hash": "801aeaf4aae9a8af",
+     "he": "הקוד שלעיל יחזיר `false`."
+    },
+    {
+     "id": "ps/ps1:15:14",
+     "type": "prose",
+     "en": "By using deliberate error throwing, we are able to distinguish between shortcut and non-shortcut semantics on the definition of the `some` function.\n\n",
+     "hash": "4aa9a59c9af967c9",
+     "he": "באמצעות זריקת שגיאה מכוונת, הצלחנו להבחין בין סמנטיקת קיצור לסמנטיקה ללא קיצור בהגדרה של הפונקציה `some`."
+    },
+    {
+     "id": "ps/ps1:15:15",
+     "type": "prose",
+     "en": "The next question that arises is whether we can define a version of `some` using `reduce` that has shortcut semantics. We will revisit this question in Chapter 3 of the course, when we introduce generators.\n",
+     "hash": "b4dc0a6103a1b999",
+     "he": "השאלה הבאה שעולה היא: האם אפשר להגדיר גרסה של `some` באמצעות `reduce` שיש לה סמנטיקת קיצור? נחזור לשאלה הזו בפרק 3 של הקורס, כשנציג גנרטורים (generators)."
+    }
+   ],
+   "headingHe": "סמנטיקת קיצור (Shortcut Semantics)"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "בתזכורת על `reduce` (סעיף 2.3.4) ראינו שגרסת ה-`max` משתמשת בערך אתחול 0:\n```typescript\n[3, 1, 4].reduce((acc, cur) => Math.max(acc, cur), 0); // ==> 4\n```\nזה אינו נכון כאשר המערך עשוי להכיל מספרים שליליים. מה צריך להיות ערך האתחול במקרה כזה? הדגימו מקרה שבו ערך האתחול 0 נותן תוצאה שגויה.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** ערך האתחול צריך להיות האיבר הנייטרלי (neutral element) של אופרטור הצבירה. עבור `Math.max` האיבר הנייטרלי הוא מינוס אינסוף — `-Infinity` ב-JavaScript — שכן לכל מספר `x` מתקיים `Math.max(-Infinity, x) === x`.\n```typescript\n[-3, -1, -4].reduce((acc, cur) => Math.max(acc, cur), -Infinity); // ==> -1\n```\nלעומת זאת, עם ערך האתחול 0 אותו מערך היה מחזיר 0 — מספר שכלל אינו מופיע במערך, ולכן התוצאה שגויה. (בנוסף, על מערך ריק הגרסה עם `-Infinity` מחזירה את האיבר הנייטרלי `-Infinity`, בהתאם לעיקרון שראינו לגבי reduce על מערך ריק.)",
+   "explanationHe": "נקודות מפתח: (1) ערך האתחול של `reduce` צריך להיות האיבר הנייטרלי של האופרטור; (2) 0 אינו נייטרלי עבור `max` כשמותרים מספרים שליליים; (3) האיבר הנייטרלי של `max` הוא `-Infinity` (ובאופן סימטרי, של `min` הוא `Infinity`); (4) דוגמה מספרית שגויה, כמו `[-3, -1, -4]` שמחזיר 0 במקום -1."
+  }
+ ]
+}

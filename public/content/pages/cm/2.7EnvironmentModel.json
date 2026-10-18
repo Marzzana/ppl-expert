@@ -1,0 +1,1270 @@
+{
+ "id": "cm/2.7EnvironmentModel",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.7EnvironmentModel.md",
+ "titleEn": "Environment Model of Operational Semantics",
+ "titleHe": "מודל הסביבות של הסמנטיקה התפעולית",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.7EnvironmentModel:0",
+   "depth": 1,
+   "headingEn": "Environment Model of Operational Semantics",
+   "raw": "# Environment Model of Operational Semantics\n",
+   "blocks": [],
+   "headingHe": "מודל הסביבות של הסמנטיקה התפעולית"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:1:0",
+     "type": "prose",
+     "en": "In the substitution model we just presented [2.6 Substitution Model](./class_material/2.6SubstitutionModel.html) procedure application involves the following operations:\n",
+     "hash": "8c545476e3eef2ac",
+     "he": "במודל ההצבה שהצגנו זה עתה ב־[2.6 מודל ההצבה](./class_material/2.6SubstitutionModel.html), יישום פרוצדורה כרוך בפעולות הבאות:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:1",
+     "type": "list",
+     "en": "1. Argument evaluation\n2. Renaming\n3. Substitution\n4. Reduction\n\n",
+     "hash": "1c75b54ef6717335",
+     "he": "1. הערכת הארגומנטים\n2. שינוי שם (Renaming)\n3. הצבה (Substitution)\n4. רדוקציה (Reduction)"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:2",
+     "type": "prose",
+     "en": "The substitution operation applies the pairing of procedure parameters with the corresponding arguments. \nRenaming is an annoying by-product of substitution - and it cannot be \"compiled away\" easily in this model - we need to\nrename the body of the closure each time it is applied (convince yourself of this by finding an example that requires repeated renaming).\n\n",
+     "hash": "b20332b79fbb2b73",
+     "he": "פעולת ההצבה מבצעת את הזיווג בין הפרמטרים של הפרוצדורה לבין הארגומנטים המתאימים.\nשינוי השם הוא תוצר לוואי מטריד של ההצבה — ואי אפשר \"לקמפל אותו החוצה\" בקלות במודל הזה; אנחנו חייבים\nלשנות את שמות המשתנים בגוף ה-closure בכל פעם שהוא מיושם (שכנעו את עצמכם בכך על ידי מציאת דוגמה שדורשת שינוי שם חוזר)."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:3",
+     "type": "prose",
+     "en": "The main problem of this approach is that substitution requires repeated analysis of procedure bodies. \nIn every application, the entire procedure body is repeatedly renamed, substituted and reduced.  These operations on ASTs \nactually **copy** the structure of the whole AST - leading to extensive memory allocation / garbage collection when dealing\nwith large programs.  In fact, the substitution interpreter we reviewed is so slow that it is barely usable.\n\n",
+     "hash": "522a99d41413ff2a",
+     "he": "הבעיה המרכזית בגישה הזאת היא שההצבה דורשת ניתוח חוזר ונשנה של גופי פרוצדורות.\nבכל יישום, כל גוף הפרוצדורה עובר שוב שינוי שם, הצבה ורדוקציה. הפעולות האלה על עצי AST\nלמעשה **מעתיקות** את המבנה של כל ה-AST — מה שמוביל להקצאת זיכרון נרחבת ולאיסוף זבל (garbage collection) בתוכניות\nגדולות. למעשה, מפרש ההצבה שסקרנו כל כך איטי שהוא בקושי שמיש."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:4",
+     "type": "prose",
+     "en": "We introduce a new operational semantics model which aims at optimizing the substitution model into an efficient procedure execution algorithm: the **environment based operational semantics model** replaces substitution and renaming by a data structure – the environment – which is associated with every procedure application, is created when a closure is created and accessed when a closure is applied.  We call the procedure that maps expressions to values according to this model `env-eval`.\n\n",
+     "hash": "ff37355a361b8dc5",
+     "he": "אנחנו מציגים מודל חדש של סמנטיקה תפעולית, שמטרתו לייעל את מודל ההצבה לכדי אלגוריתם יעיל להרצת פרוצדורות: **מודל הסמנטיקה התפעולית מבוסס־הסביבות** מחליף את ההצבה ואת שינוי השם במבנה נתונים — הסביבה — שמשויך לכל יישום פרוצדורה, נוצר כשנוצר closure, וניגשים אליו כשה-closure מיושם. אנחנו קוראים לפרוצדורה שממפה ביטויים לערכים לפי המודל הזה `env-eval`."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:5",
+     "type": "prose",
+     "en": "This model is introduced to be an optimization of the applicative-eval model, but it does **not change the operational semantics** of the language:`env-eval` returns the same values on the same programs as `applicative-eval` and enters into loops on the same programs, and throws exceptions on the same programs.  It does all of this much faster than `applicative-eval`.\n\n",
+     "hash": "07dd6a21163d734d",
+     "he": "המודל הזה מוצג כאופטימיזציה של מודל ה-applicative-eval, אבל הוא **אינו משנה את הסמנטיקה התפעולית** של השפה: `env-eval` מחזיר את אותם ערכים עבור אותן תוכניות כמו `applicative-eval`, נכנס ללולאות עבור אותן תוכניות, וזורק חריגות עבור אותן תוכניות. הוא עושה את כל זה הרבה יותר מהר מ-`applicative-eval`."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:6",
+     "type": "prose",
+     "en": "The distinction between substitution and environment models is orthogonal to the distinction between applicative and normal evaluation strategies.  We can combine these 2 options independently of each other and obtain 4 distinct evaluation algorithms, which implement two distinct operational semantics (applicative vs. normal).\n\n",
+     "hash": "fe63a2f95548a169",
+     "he": "ההבחנה בין מודל ההצבה למודל הסביבות היא אורתוגונלית להבחנה בין אסטרטגיות ההערכה היישומית והנורמלית. אפשר לשלב בין שתי האפשרויות האלה באופן בלתי־תלוי ולקבל 4 אלגוריתמי הערכה שונים, שמממשים שתי סמנטיקות תפעוליות שונות (יישומית מול נורמלית)."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:7",
+     "type": "prose",
+     "en": "As we have introduced when presenting the \n[$$L1$$ substitution model](./class_material/2.5OperationalSemantics.html), an environment is a finite mapping from variables (the parameters) to values (the argument values). In the substitution model, we used only a single environment - the global environment.  \nIn the **environment-based model**, we will manipulate **multiple related environments**.\n\n",
+     "hash": "340bda1408695336",
+     "he": "כפי שהצגנו כשהוצג\n[מודל ההצבה של $$L1$$](./class_material/2.5OperationalSemantics.html), סביבה היא מיפוי סופי ממשתנים (הפרמטרים) לערכים (ערכי הארגומנטים). במודל ההצבה השתמשנו בסביבה אחת בלבד — הסביבה הגלובלית.  \nב**מודל מבוסס־הסביבות**, נטפל ב**מספר סביבות קשורות זו לזו**."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:8",
+     "type": "prose",
+     "en": "Consider what the steps performed as part of the `apply-procedure` step of the substitution applicative-order model when we apply a closure to a list of arguments:\n",
+     "hash": "5687b1dd2672dc45",
+     "he": "נבחן אילו צעדים בוצעו כחלק משלב ה-`apply-procedure` של מודל ההצבה בסדר יישומי, כשיישמנו closure על רשימת ארגומנטים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:9",
+     "type": "list",
+     "en": "* We computed the values of the arguments\n* We renamed bound variables in the body\n* We replaced all free occurrences of type `VarRef` of the parameters of the body with the computed values.\n\n",
+     "hash": "396a695e1444490a",
+     "he": "* חישבנו את הערכים של הארגומנטים\n* שינינו את שמות המשתנים הקשורים בגוף\n* החלפנו את כל המופעים החופשיים מטיפוס `VarRef` של הפרמטרים בגוף בערכים שחושבו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:10",
+     "type": "prose",
+     "en": "The objective of this manipulation was to pre-process `VarRef` expressions in the body of the procedure - so that, when we reduce the body (evaluate the body after the substitution step), we do not reach variables such as `x`, but instead find the value to which `x` was bound at the time of the closure application.\n\n",
+     "hash": "5aa94f539b4a3b02",
+     "he": "המטרה של הטיפול הזה הייתה לעבד מראש את ביטויי ה-`VarRef` שבגוף הפרוצדורה — כך שכשנבצע רדוקציה לגוף (נעריך את הגוף אחרי שלב ההצבה), לא ניתקל במשתנים כמו `x`, אלא נמצא ישירות את הערך ש-`x` נקשר אליו בזמן יישום ה-closure."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:1:11",
+     "type": "prose",
+     "en": "The environment-based model turns this process around by making the `VarRef` substitution a **lazy operation**: instead of replacing `VarRef`s before reduction, we start reduction with a substitution object on the side, and if and when we reach a `VarRef`, then we resolve it with the substitution - instead of using the global environment. It turns out that we can use exactly the same environment data structure to keep track of the required lazy substitution as we used to maintain the \nglobal environment when dealing with $$L1$$.\n\n",
+     "hash": "9371ced550d5a83e",
+     "he": "מודל הסביבות הופך את התהליך הזה על פיו, בכך שהוא הופך את ההצבה של ה-`VarRef`ים ל**פעולה עצלה**: במקום להחליף את ה-`VarRef`ים לפני הרדוקציה, אנחנו מתחילים את הרדוקציה כשאובייקט ההצבה מונח בצד, ואם וכאשר נגיע ל-`VarRef` — אז נפתור אותו בעזרת ההצבה, במקום להשתמש בסביבה הגלובלית. מסתבר שאנחנו יכולים להשתמש בדיוק באותו מבנה נתונים של סביבה כדי לעקוב אחרי ההצבה העצלה הנדרשת, כמו זה שבו השתמשנו לתחזוקת\nהסביבה הגלובלית כשעסקנו ב-$$L1$$."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:2",
+   "depth": 2,
+   "headingEn": "Elements of the Environment Model",
+   "raw": "## Elements of the Environment Model \n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:2:0",
+     "type": "prose",
+     "en": "The elements of the environment model include:\n\n",
+     "hash": "123a1c7379b12641",
+     "he": "המרכיבים של מודל הסביבות כוללים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:2:1",
+     "type": "list",
+     "en": "1. Data structures\n    * The environment data structure is organized as a linked list of **frames** - each frame maps variables to values.\n      The links in the list of frames correspond to nested invocations of closures.\n    * The **closure** data structure is modified to carry an environment.\n      The environment associated to the closure remembers the set of variables that were accessible when the closure was created.\n  \n2. Evaluation rules\n    * Expressions are evaluated with respect to an environment. \n      The environment plays the role of a context for the evaluation - \n      so that, the same expression evaluated in different contexts will yield different values.  \n      For example, `(* x x)` evaluated in the context of an environment `{x=2}` results in 4, in an environment `{x=3}`, 9.\n    * The evaluation rule for procedure application is modified, so to replace substitution (and renaming) by environment creation.\n\n",
+     "hash": "2d6056a3e95a188d",
+     "he": "1. מבני נתונים\n    * מבנה הנתונים של הסביבה מאורגן כרשימה מקושרת של **מסגרות (frames)** — כל מסגרת ממפה משתנים לערכים.\n      הקישורים ברשימת המסגרות מתאימים לקריאות מקוננות של closures.\n    * מבנה הנתונים של ה-**closure** משתנה כך שיישא איתו סביבה.\n      הסביבה שמשויכת ל-closure זוכרת את אוסף המשתנים שהיו נגישים בזמן שה-closure נוצר.\n  \n2. כללי הערכה\n    * ביטויים מוערכים ביחס לסביבה.\n      הסביבה ממלאת את תפקיד ההקשר (context) של ההערכה —\n      כך שאותו ביטוי, כשהוא מוערך בהקשרים שונים, ייתן ערכים שונים.\n      לדוגמה, `(* x x)` שמוערך בהקשר של הסביבה `{x=2}` נותן 4, ובסביבה `{x=3}` נותן 9.\n    * כלל ההערכה של יישום פרוצדורה משתנה, כך שההצבה (ושינוי השם) מוחלפים ביצירת סביבה."
+    }
+   ],
+   "headingHe": "מרכיבי מודל הסביבות"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:3",
+   "depth": 2,
+   "headingEn": "The Environment Data Structure",
+   "raw": "## The Environment Data Structure\n\n",
+   "blocks": [],
+   "headingHe": "מבנה הנתונים של הסביבה"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:4",
+   "depth": 3,
+   "headingEn": "Environment Terminology",
+   "raw": "### Environment Terminology\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:4:0",
+     "type": "list",
+     "en": "1. An environment is a finite sequence of **frames**: `<f1; f2; ... ; fn>`.\n2. A frame represents a substitution of variables by values. A variable-value pair in a frame is called a **binding**.\n3. Environments can overlap. An environment `<f1; f2; ... ; fn>` includes n embedded environments: `<f1; f2; ... ; fn>`; \n`<f2; ... ; fn>`; ... ; `<fn>`;.\n4. The empty sequence of frames is called the **empty environment**.\n5. The environment `<fi+1; fi+2; ... ; fn>` is the **enclosing environment** of the frame `fi` in `<f1; f2; ... ; fn>`, and `fi` extends the environment `<fi+1; fi+2; ... ; fn>`.\n6. Another form of environment overlapping is **tail sharing**, i.e., environments that share ancestors environment, as in \n`<k; f1; f2; ... ; fn>` and `<l; f1; f2; ... ; fn>`.\n\n",
+     "hash": "5ea0eabe741feeb2",
+     "he": "1. סביבה היא סדרה סופית של **מסגרות (frames)**: `<f1; f2; ... ; fn>`.\n2. מסגרת מייצגת הצבה של משתנים בערכים. זוג משתנה-ערך בתוך מסגרת נקרא **קשירה (binding)**.\n3. סביבות יכולות לחפוף. סביבה `<f1; f2; ... ; fn>` כוללת n סביבות מוכלות: `<f1; f2; ... ; fn>`;\n`<f2; ... ; fn>`; ... ; `<fn>`;.\n4. הסדרה הריקה של מסגרות נקראת **הסביבה הריקה (empty environment)**.\n5. הסביבה `<fi+1; fi+2; ... ; fn>` היא **הסביבה העוטפת (enclosing environment)** של המסגרת `fi` בתוך `<f1; f2; ... ; fn>`, והמסגרת `fi` **מרחיבה** את הסביבה `<fi+1; fi+2; ... ; fn>`.\n6. צורה נוספת של חפיפה בין סביבות היא **שיתוף זנב (tail sharing)** — כלומר, סביבות שחולקות סביבת אב משותפת, כמו\n`<k; f1; f2; ... ; fn>` ו-`<l; f1; f2; ... ; fn>`."
+    }
+   ],
+   "headingHe": "מינוח של סביבות"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:5",
+   "depth": 3,
+   "headingEn": "Variable Value Definitions (Apply-env Operation)",
+   "raw": "### Variable Value Definitions (Apply-env Operation)\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:5:0",
+     "type": "list",
+     "en": "1. The value of a variable `x` in a frame `f` is given by `f(x)` (an operation we call `apply-frame(f,x)`).\n2. The value of a variable `x` in an environment `E` is the value of `x` in the first frame of `E` in which it is defined. \nIf `x` is not defined in any frame of `E`, it is unbound in `E`.\n3. Calculating the value of a variable `x` in an environment E is the operation **apply-env(E, x)** - this is a recursive operation across the linked list of frames in the environment.\n\n",
+     "hash": "a3b6391d017bcc2a",
+     "he": "1. הערך של משתנה `x` במסגרת `f` ניתן על ידי `f(x)` (פעולה שאנחנו קוראים לה `apply-frame(f,x)`).\n2. הערך של משתנה `x` בסביבה `E` הוא הערך של `x` במסגרת **הראשונה** של `E` שבה הוא מוגדר.\nאם `x` אינו מוגדר באף מסגרת של `E`, הוא לא-קשור (unbound) ב-`E`.\n3. חישוב הערך של משתנה `x` בסביבה E הוא הפעולה **apply-env(E, x)** — זוהי פעולה רקורסיבית לאורך הרשימה המקושרת של המסגרות בסביבה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:5:1",
+     "type": "prose",
+     "en": "The interface of the Frame and Environment data types thus includes:\n\n",
+     "hash": "b29efeb42f3a7b3c",
+     "he": "הממשק של טיפוסי הנתונים Frame ו-Environment כולל אפוא:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:5:2",
+     "type": "list",
+     "en": "1. Value constructors\n    * Frame: `make-frame(vars,vals)` - we will denote frames as `{var=val, ...}`\n    * Environment: `make-empty-env()`, `extend-env(env, frame)`\n2. Accessors\n    * `apply-frame(frame, var)` - which we will denote `frame(var)`\n    * `apply-env(env, var)` - which we will denote `env(var)`\n    * `env->frame(env)` and `env->enclosing-env(env)`\n\n\n",
+     "hash": "00e213986984b74b",
+     "he": "1. בנאי ערכים\n    * מסגרת: `make-frame(vars,vals)` — נסמן מסגרות כ-`{var=val, ...}`\n    * סביבה: `make-empty-env()`, `extend-env(env, frame)`\n2. פונקציות גישה\n    * `apply-frame(frame, var)` — שנסמן `frame(var)`\n    * `apply-env(env, var)` — שנסמן `env(var)`\n    * `env->frame(env)` ו-`env->enclosing-env(env)`"
+    }
+   ],
+   "headingHe": "הגדרת ערכם של משתנים (הפעולה Apply-env)"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:6",
+   "depth": 2,
+   "headingEn": "Direct Evaluation of Let-expressions",
+   "raw": "## Direct Evaluation of Let-expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:6:0",
+     "type": "prose",
+     "en": "Let us consider an evaluation rule for the direct computation of a let-expression:\n\n",
+     "hash": "ba2b750195998e18",
+     "he": "נבחן כלל הערכה לחישוב ישיר של ביטוי let:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:1",
+     "type": "code",
+     "en": "```\n<let-exp> ::= (let (<binding>*) <cexp>+) // let-exp(bindings:List(Binding), body:List(Cexp))\n<binding> ::= (<var> <cexp>) // binding(var:Var-decl, val:Cexp)\n```\n\n",
+     "hash": "fbb5e86e4ed98bd8",
+     "noteHe": "כללי הדקדוק של `let`. השורה הראשונה מגדירה `let-exp` עם שני שדות: `bindings` — רשימה של קשירות (יכולה להיות ריקה, בגלל ה-`*`), ו-`body` — רשימה של ביטויים שחייבת להכיל לפחות אחד (`+`). השורה השנייה מגדירה מהי קשירה: זוג של הכרזת משתנה וביטוי. שימו לב לפרט מהותי: `<var>` בקשירה הוא `Var-decl` — **הכרזה** ולא הפניה — בדיוק כמו פרמטר של lambda. זה הרמז לכך ש-`let` מתנהג בסופו של דבר כמו יישום פרוצדורה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:2",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:3",
+     "type": "code",
+     "en": "```\n(let ((x 1) (y 2)) (+ x y))\n```\n\n",
+     "hash": "b7d1a793f1f3a695",
+     "noteHe": "ביטוי let פשוט עם שתי קשירות. `x` נקשר ל-1, `y` נקשר ל-2, והגוף `(+ x y)` מוערך בהקשר הזה ומחזיר `3`. שימו לב לצורה התחבירית: רשימה של קשירות בתוך סוגריים, וכל קשירה בעצמה בסוגריים — טעות נפוצה היא לשכוח את זוג הסוגריים החיצוני."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:4",
+     "type": "prose",
+     "en": "We saw earlier ([rewrite.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/rewrite.ts)) that let-exp can be considered syntactic sugar (or syntactic abbreviation) for procedure application - and hence a syntactic rewrite operation leads us to a form that we know how to evaluate using closure creation and closure application.\n\n",
+     "hash": "52188ba179d3338b",
+     "he": "ראינו קודם ([rewrite.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/rewrite.ts)) שאפשר להתייחס ל-let-exp כאל סוכר תחבירי (syntactic sugar, או קיצור תחבירי) ליישום פרוצדורה — ולכן פעולת שכתוב תחבירית מובילה אותנו לצורה שאנחנו כבר יודעים להעריך בעזרת יצירת closure ויישום closure."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:5",
+     "type": "prose",
+     "en": "We now introduce a direct evaluation rule for let-expressions to illustrate the use of environments.\nThe two evaluation rules are semantically equivalent - that is, they will always produce exactly the same results.\n\n",
+     "hash": "dfee5e748f3d08c7",
+     "he": "כעת אנחנו מציגים כלל הערכה ישיר לביטויי let, כדי להמחיש את השימוש בסביבות.\nשני כללי ההערכה שקולים סמנטית — כלומר, הם תמיד ייצרו בדיוק את אותן תוצאות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:6",
+     "type": "prose",
+     "en": "How do we evaluate the let-expression using environments instead of substitution?\n\n",
+     "hash": "1b7bcf585071d9bf",
+     "he": "כיצד אנחנו מעריכים את ביטוי ה-let בעזרת סביבות במקום הצבה?"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:7",
+     "type": "prose",
+     "en": "What we want to achieve, is to evaluate the body of the let-expression in a context such that when we ask to compute the VarRef x and y, we obtain the corresponding values (1 and 2).\n\n",
+     "hash": "f1c9f236169ebdcf",
+     "he": "מה שאנחנו רוצים להשיג הוא להעריך את הגוף של ביטוי ה-let בהקשר שבו, כשנבקש לחשב את ה-VarRef של x ושל y, נקבל את הערכים המתאימים (1 ו-2)."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:8",
+     "type": "prose",
+     "en": "In order to achieve this goal, we construct a new environment with a frame in which x and y are bound to 1 and 2, and then evaluate the body in this environment: compute(`(+ a b)`, env({a=1, b=2})).\n\n",
+     "hash": "fb414e93115614eb",
+     "he": "כדי להשיג את המטרה הזאת, אנחנו בונים סביבה חדשה עם מסגרת שבה x ו-y קשורים ל-1 ול-2, ואז מעריכים את הגוף בסביבה הזאת: compute(`(+ a b)`, env({a=1, b=2}))."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:9",
+     "type": "prose",
+     "en": "But this is not sufficient. Consider the following program:\n\n",
+     "hash": "0129848ae5c1ae20",
+     "he": "אבל זה אינו מספיק. נבחן את התוכנית הבאה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:10",
+     "type": "code",
+     "en": "```\n(let ((a 1))\n    (let ((b (+ a a)))\n        (+ a b)))\n```\n\n",
+     "hash": "580d7321278b784d",
+     "noteHe": "שני ביטויי let מקוננים. ה-let החיצוני קושר `a` ל-1; ה-let הפנימי קושר `b` ל-`(+ a a)` — ביטוי שמשתמש ב-`a` שנקשר בחוץ — והגוף הפנימי `(+ a b)` משתמש בשניהם. התוצאה היא `1 + 2 = 3`. הדוגמה נבחרה כדי לחשוף בעיה בכלל התמים שהוצג קודם: אם הגוף הפנימי היה מוערך בסביבה שמכילה **רק** את `{b=2}`, ההפניה ל-`a` הייתה נכשלת. כלומר, סביבה חדשה חייבת לרשת את הקשירות של הסביבה שבתוכה היא נוצרה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:11",
+     "type": "prose",
+     "en": "There are 2 let-expressions embedded in each other.  By the rule we just presented, we will evaluate the inner-let expression in an environment in which a is bound to 1 - let us denote it env({a=1}).\n\n",
+     "hash": "b3163109d06fd640",
+     "he": "יש כאן 2 ביטויי let מקוננים זה בזה. לפי הכלל שהצגנו זה עתה, נעריך את ביטוי ה-let הפנימי בסביבה שבה a קשור ל-1 — נסמן אותה env({a=1})."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:12",
+     "type": "prose",
+     "en": "We first compute the new environment for the inner-let - by computing the expression `(+ a a)` in env({a=1}) - yielding 2.\nWe then evaluate the inner-let body `(+ a b)` in a new environment env({b=2}).\n\n",
+     "hash": "b5b96407fd5ae22f",
+     "he": "תחילה נחשב את הסביבה החדשה של ה-let הפנימי — על ידי חישוב הביטוי `(+ a a)` בתוך env({a=1}), ומתקבל 2.\nאחר כך נעריך את הגוף של ה-let הפנימי `(+ a b)` בסביבה חדשה env({b=2})."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:13",
+     "type": "prose",
+     "en": "We realize that it is not sufficient to evaluate the body in an environment that binds the let variables - we also need to **inherit the bindings from the current environment**.  So that the inner-let needs to be evaluated in an environment:\n\n",
+     "hash": "1d52c8eb65d2deff",
+     "he": "אנחנו מבינים שאין די בכך שנעריך את הגוף בסביבה שקושרת את משתני ה-let — עלינו גם **לרשת את הקשירות מהסביבה הנוכחית**. כך שיש להעריך את ה-let הפנימי בסביבה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:14",
+     "type": "code",
+     "en": "```\neval-env((+ a b), <{b=2};{a=1}>)\n```\n\n",
+     "hash": "89b0fe2435ed22ea",
+     "noteHe": "כאן מוצג לראשונה הסימון המרכזי של השיעור: `<{b=2};{a=1}>` היא סביבה בת **שתי מסגרות**, שבה `{b=2}` היא המסגרת הראשונה (הפנימית) ו-`{a=1}` היא הסביבה העוטפת. שימו לב לכיוון: נקודה-פסיק מפרידה בין מסגרות, והמסגרת השמאלית ביותר היא זו שבה מתחיל החיפוש. כשמעריכים `(+ a b)` בסביבה הזאת, `b` נמצא במסגרת הראשונה ו-`a` נמצא בשנייה. **כדאי לשנן את הסימון הזה** — הוא זה שבו משתמשים בפתרונות מבחן."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:6:15",
+     "type": "prose",
+     "en": "We generalize from this observation the evaluation rule for let-expressions which crucially relies on **nested-environments**:\n\n",
+     "hash": "325bfd22b7ab069e",
+     "he": "מההבחנה הזאת אנחנו מכלילים את כלל ההערכה לביטויי let, שנשען באופן מכריע על **סביבות מקוננות**:"
+    }
+   ],
+   "headingHe": "הערכה ישירה של ביטויי let"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:7",
+   "depth": 3,
+   "headingEn": "Let Evaluation Rule",
+   "raw": "### Let Evaluation Rule\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:7:0",
+     "type": "code",
+     "en": "```\nIf exp = let-exp(bindings, body):\n  env-eval(exp, env) is computed by:\n      let vars = variables in bindings\n          vals = value expressions in bindings\n          let cvals = eval(val, env) for val in vals\n              return eval-sequence(body, \n                                   extend-env(env, make-frame(vars, cvals)))\n```\n\n",
+     "hash": "4b394d46ed248637",
+     "noteHe": "כלל ההערכה המלא של `let`, וכדאי לשנן אותו. הוא מפריד את הקשירות לשני חלקים: `vars` — השמות, ו-`vals` — ביטויי הערך. אחר כך `cvals` הם הערכים שמתקבלים מהערכת כל אחד מהביטויים **בסביבה `env` הנוכחית**, לא בסביבה החדשה — זו נקודה קריטית. לבסוף מעריכים את הגוף באמצעות `eval-sequence` בסביבה `extend-env(env, make-frame(vars, cvals))`, כלומר סביבה חדשה שמוסיפה מסגרת עם הקשירות **מעל** הסביבה הנוכחית. שימו לב לשלוש הנקודות שהכלל מקודד: (1) ערכי הקשירות מוערכים בסביבה החיצונית, ולכן `(let ((x 1) (y x)) ...)` לא ייתן ל-`y` את הערך 1 החדש; (2) הסביבה החדשה מרחיבה את הקיימת ולכן יורשת ממנה; (3) `eval-sequence` ולא `eval`, כי הגוף הוא רשימת ביטויים שערכה הוא ערך האחרון."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:7:1",
+     "type": "prose",
+     "en": "There are two key points to note in this evaluation rule:\n",
+     "hash": "8ae9728934ced27b",
+     "he": "יש שתי נקודות מפתח שכדאי לשים לב אליהן בכלל ההערכה הזה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:7:2",
+     "type": "list",
+     "en": "* The values of each var in the let declaration are evaluated in the current environment. Thus, they are outside the scope of the new variable declarations - and the variables defined in the let cannot be used in the right-hand side of the bindings.\n* The body of the let expression is evaluated in a new environment that has a new frame which represents the new variable declarations bound to their computed values.\n\n",
+     "hash": "bb1652ccc11b0016",
+     "he": "* הערכים של כל var בהכרזת ה-let מוערכים בסביבה **הנוכחית**. לכן הם נמצאים מחוץ לתחום ההכרה של ההכרזות החדשות — והמשתנים שמוגדרים ב-let אינם יכולים לשמש באגף ימין של הקשירות.\n* הגוף של ביטוי ה-let מוערך בסביבה חדשה שיש בה מסגרת חדשה המייצגת את הכרזות המשתנים החדשות הקשורות לערכים שחושבו עבורן."
+    }
+   ],
+   "headingHe": "כלל ההערכה של let"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:8",
+   "depth": 2,
+   "headingEn": "From Let to Closure",
+   "raw": "## From Let to Closure\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:8:0",
+     "type": "prose",
+     "en": "Let us recall that a let-expression is semantically equivalent to the construction of a procedure and its application:\n\n",
+     "hash": "3c7612f62fe80f0a",
+     "he": "נזכיר לעצמנו שביטוי let שקול סמנטית לבנייה של פרוצדורה וליישום שלה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:8:1",
+     "type": "code",
+     "en": "```\n(let ((a 1) (b 2)) <body>) ~ \n((lambda (a b) <body>)\n 1 2)\n```\n\n",
+     "hash": "9e5e2df85e237263",
+     "noteHe": "כלל השכתוב (rewrite) שמתרגם `let` ליישום של lambda. הסימן `~` פירושו \"שקול סמנטית\". שמות המשתנים של ה-let הופכים לפרמטרים של ה-lambda, וערכי הקשירות הופכים לאופרנדים של היישום — בדיוק באותו סדר. שימו לב שהכלל הזה מסביר מיד את שתי הנקודות מהסעיף הקודם: ערכי הקשירות מוערכים בסביבה החיצונית מפני שהם אופרנדים של יישום, והגוף מקבל מסגרת חדשה מפני שכך עובד יישום פרוצדורה. **הכיוון של השיעור הוא ההפוך:** אחרי שהבנו את `let` דרך סביבות, ננסה לגזור מכאן את כלל היישום הכללי — ונגלה שהוא לא כל כך פשוט."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:8:2",
+     "type": "prose",
+     "en": "By the same reasoning as for let-expressions, let us try to derive the evaluation rule in env-eval of a procedure application as follows:\n\n",
+     "hash": "944019ed5726dda7",
+     "he": "לפי אותו היגיון שהפעלנו על ביטויי let, ננסה לגזור את כלל ההערכה ב-env-eval של יישום פרוצדורה באופן הבא:"
+    }
+   ],
+   "headingHe": "מ-let ל-closure"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:9",
+   "depth": 3,
+   "headingEn": "Application Evaluation Rule (Attempt 1)",
+   "raw": "### Application Evaluation Rule (Attempt 1)\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:9:0",
+     "type": "code",
+     "en": "```\nIf exp=app-exp(rator, rands):\n   env-eval(exp, env) is computed by:\n       let proc = env-eval(rator, env)\n           args = eval(rand, env) fro rand in rands\n           if proc is a closure:\n             let params = closure.params(proc)\n               body = closure.body(proc)\n               return eval-sequence(body,\n                                    extend-env(env, make-frame(params, args))) ### !! See below  !!\n           else\n             return apply-primitive(proc, args)\n```\n\n",
+     "hash": "e718bc09adaf5129",
+     "noteHe": "ניסיון ראשון לנסח את כלל היישום — **והוא שגוי**, כפי שההערה `### !! See below !!` מרמזת. הכלל מעריך את האופרטור ומקבל `proc`, מעריך את כל האופרנדים ומקבל `args`, ואז מפצל: אם `proc` הוא closure — שולפים ממנו `params` ו-`body` ומעריכים את הגוף בסביבה `extend-env(env, make-frame(params, args))`; אחרת מפעילים פרימיטיב. השורה הבעייתית היא בדיוק זו שמסומנת: היא משתמשת ב-`env` — **הסביבה הנוכחית, זו שבה מתרחשת הקריאה** — כבסיס להרחבה. זה נראה טבעי, וזה בדיוק מה שעשינו ב-`let`, אבל בהמשך נראה שזה נותן תשובות שגויות. (בקוד יש שגיאת הקלדה קטנה: `fro` במקום `for`.)"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:1",
+     "type": "prose",
+     "en": "If we try to apply this rule to the following program - all seems to be ok:\n\n",
+     "hash": "4bb3f0db2c4c395b",
+     "he": "אם ננסה להפעיל את הכלל הזה על התוכנית הבאה — הכול נראה תקין:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:2",
+     "type": "code",
+     "en": "```\nenv-eval[ ((lambda (a b) (+ a b)) 1 2), <> ]\n==> env-eval[ (+ a b) , <{a=1, b=2}> ]\n==> 3\n```\n\n",
+     "hash": "fdcbfa27efe531fe",
+     "noteHe": "גזירה קצרה שבה הכלל השגוי עובד בסדר גמור. מתחילים בסביבה הריקה `<>`, מיישמים את ה-lambda על `1` ו-`2`, ומעריכים את הגוף בסביבה `<{a=1, b=2}>` — מסגרת אחת בלבד. התוצאה `3` נכונה. הסיבה שהכלל עובד כאן: לגוף `(+ a b)` אין משתנים חופשיים מלבד הפרמטרים עצמם, ולכן אין שום תלות בסביבה שנבחרה כבסיס. הדוגמה הבאה תפר בדיוק את התנאי הזה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:3",
+     "type": "prose",
+     "en": "But consider now what happens if we evaluate the following program:\n\n",
+     "hash": "988432e8e1f754ae",
+     "he": "אבל נבחן עכשיו מה קורה אם נעריך את התוכנית הבאה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:4",
+     "type": "code",
+     "en": "```\n(let ((x 1))                       ;; E1\n  (let ((p (lambda (y) (+ x y))))  ;; E2\n    (let ((x 2))                   ;; E3\n      (p x))))\n```\n\n",
+     "hash": "34eaac531eb33a50",
+     "noteHe": "**זו הדוגמה המרכזית של השיעור, וכדאי להכיר אותה בעל פה.** שלושה let-ים מקוננים, מסומנים E1, E2, E3. ב-E1 המשתנה `x` נקשר ל-`1`. ב-E2 נוצרת פונקציה `p` שגופה `(+ x y)` — שימו לב ש-`x` בגוף הזה **חופשי**, וברגע שה-lambda נוצרה הוא \"רואה\" את `x=1`. ב-E3 מוגדר `x` **חדש** בערך `2`, שמסתיר את הקודם. לבסוף `(p x)` מפעיל את `p` על `2`. השאלה: איזה `x` תראה הפונקציה `p` בגופה — זה שהיה קיים כשהיא **נוצרה** (1) או זה שקיים כשהיא **נקראת** (2)? התשובה הנכונה, לפי Scheme ולפי מודל ההצבה, היא `1` — ולכן התוצאה היא `1 + 2 = 3`. זו ההגדרה של **תחום הכרה לקסיקלי (lexical scope)**. הכלל השגוי מהניסיון הראשון ייתן `4`, כפי שנראה מיד. **המונחים לזכור:** תחום הכרה לקסיקלי (סטטי) מול תחום הכרה דינמי (dynamic scope) — ההבדל ביניהם הוא בדיוק שאלת ה-`x`."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:5",
+     "type": "prose",
+     "en": "The computation of p returns a closure `(closure (y) (+ x y))`.\nWe then enter the body of the third inner-let and compute `(p x)` in the following environment:\n\n",
+     "hash": "12dbd2719c1dbfe7",
+     "he": "החישוב של p מחזיר closure ‏`(closure (y) (+ x y))`.\nאחר כך אנחנו נכנסים לגוף של ה-let הפנימי השלישי ומחשבים את `(p x)` בסביבה הבאה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:6",
+     "type": "code",
+     "en": "```\nE1 = extend-env(empty-env, {x=1}) = <{x=1}>\nE2 = extend-env(E1, {p = (closure (y) (+ x y))}) = <{p=(closure..)};{x=1}>\nE3 = extend-env(E2, {x = 2}) = <{x=2>;<p=(closure...);{x=1}>\n```\n\n",
+     "hash": "6c4fe80ebcad1847",
+     "noteHe": "בניית שרשרת הסביבות שלושה שלבים, אחד לכל let. `E1` מרחיבה את הסביבה הריקה במסגרת `{x=1}`. `E2` מרחיבה את `E1` במסגרת שקושרת את `p` ל-closure, ולכן היא בת שתי מסגרות. `E3` מרחיבה את `E2` במסגרת `{x=2}`, ולכן היא בת שלוש מסגרות — ובה `x` מופיע **פעמיים**, כשהמסגרת הפנימית ביותר מסתירה את החיצונית. שימו לב לתבנית: `extend-env` תמיד מוסיפה מסגרת בראש השרשרת, ולכן חיפוש מתחיל תמיד מהחדשה ביותר. (בשורת `E3` יש טעויות הקלדה בסוגריים המשולשים; הכוונה היא `<{x=2};{p=(closure...)};{x=1}>`.)"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:7",
+     "type": "prose",
+     "en": "In this environment, we compute `(p x)` - which means we apply the application rule we tried to define above and obtain:\n\n",
+     "hash": "6d86cabb9b7165e2",
+     "he": "בסביבה הזאת אנחנו מחשבים את `(p x)` — כלומר מפעילים את כלל היישום שניסינו להגדיר למעלה, ומקבלים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:8",
+     "type": "code",
+     "en": "```\nlet proc = (closure (y) (+ x y))\n    args = (2)\n    let params = (y)\n        body = ((+ x y))\n        return env-eval-sequence(body, extend-env(E3, {y=2})\n```\n\n",
+     "hash": "8f2510286ac743e0",
+     "noteHe": "הפעלת הכלל השגוי צעד-צעד. `proc` הוא ה-closure של `p`; `args` הוא `(2)` — הערך של `x` **ב-E3**, כלומר 2; `params` הם `(y)` ו-`body` הוא `((+ x y))`. השורה האחרונה היא הבעיה: `extend-env(E3, {y=2})` — מרחיבים את **E3**, הסביבה שבה בוצעה הקריאה, ולא את הסביבה שבה ה-closure נוצר. מכיוון ש-E3 מכילה `{x=2}` במסגרתה הראשונה, כל הפניה ל-`x` מגוף ה-closure תיפול על הערך הלא-נכון."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:9",
+     "type": "prose",
+     "en": "Eventually, we evaluate `(+ x y)` in an environment E4 = <{y = 2} ; {x = 2} ; { p = ...} ; {x = 1}>\n\n",
+     "hash": "b1fcabb528b7e975",
+     "he": "בסופו של דבר, אנחנו מעריכים את `(+ x y)` בסביבה E4 = <{y = 2} ; {x = 2} ; { p = ...} ; {x = 1}>"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:10",
+     "type": "prose",
+     "en": "The key observation, is that the inner frame binding x to 2 hides the outer frame binding x to 1.\nThe result of this reduction is thus 4.\n\n",
+     "hash": "df40abe98e4ef842",
+     "he": "ההבחנה המרכזית היא שהמסגרת הפנימית שקושרת את x ל-2 מסתירה את המסגרת החיצונית שקושרת את x ל-1.\nהתוצאה של הרדוקציה הזאת היא אפוא 4."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:9:11",
+     "type": "prose",
+     "en": "This is **wrong**: this program yields 3 in Scheme and in the applicative-eval substitution model.\n\n",
+     "hash": "db328127108b13d4",
+     "he": "זה **שגוי**: התוכנית הזאת נותנת 3 ב-Scheme ובמודל ההצבה בסדר יישומי."
+    }
+   ],
+   "headingHe": "כלל ההערכה של יישום (ניסיון 1)"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:10",
+   "depth": 3,
+   "headingEn": "Fixing the Application Evaluation Rule: Enforcing Lexical Scoping",
+   "raw": "### Fixing the Application Evaluation Rule: Enforcing Lexical Scoping\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:10:0",
+     "type": "prose",
+     "en": "The root of the problem is that the closure that we computed in step 2 must **remember** the bindings of the variables that occur free in its body - not only the bindings of its parameters.\n\n",
+     "hash": "31fe9a8e4355f12f",
+     "he": "שורש הבעיה הוא שה-closure שחישבנו בשלב 2 חייב **לזכור** את הקשירות של המשתנים שמופיעים חופשיים בגופו — ולא רק את הקשירות של הפרמטרים שלו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:1",
+     "type": "prose",
+     "en": "If we look at the procedure p - `(lambda (y) (+ x y))` - it has one **explicit** parameter, y, but it also has an **implicit dependency on the free variable x**.  \n\n",
+     "hash": "50b69d320c72dfc9",
+     "he": "אם נסתכל על הפרוצדורה p — `(lambda (y) (+ x y))` — יש לה פרמטר **מפורש** אחד, y, אבל יש לה גם **תלות מובלעת במשתנה החופשי x**."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:2",
+     "type": "prose",
+     "en": "Scheme (and most sane programming languages) resolve these implicit dependencies by using the rules of **lexical scoping** which we reviewed in \n[Syntactic Properties of Expressions](./class_material/2.4SyntacticOperations.html) when we defined lexical addressing.\n\n",
+     "hash": "076f1963327f5eab",
+     "he": "‏Scheme (ורוב שפות התכנות השפויות) פותרות את התלויות המובלעות האלה בעזרת כללי **תחום ההכרה הלקסיקלי (lexical scoping)** שסקרנו ב־\n[תכונות תחביריות של ביטויים](./class_material/2.4SyntacticOperations.html) כשהגדרנו כתובות לקסיקליות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:3",
+     "type": "prose",
+     "en": "The rule we wrote above does not respect these rules - because it leaves the free variables in the body of the closure free until the moment of the closure application.  This leads to the wrong effect of **variable capture** that we have observed above - where x was captured by the inner let in E3.\n\n",
+     "hash": "53e33431ce97f1a5",
+     "he": "הכלל שכתבנו למעלה אינו מכבד את הכללים האלה — מפני שהוא משאיר את המשתנים החופשיים שבגוף ה-closure חופשיים עד לרגע היישום שלו. זה מוביל לתופעה השגויה של **לכידת משתנה (variable capture)** שראינו למעלה — שבה x נלכד על ידי ה-let הפנימי ב-E3."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:4",
+     "type": "prose",
+     "en": "To fix this problem, we must **add memory to the closure** data structure: in addition to the list of parameters (which will be bound when the closure is applied to its arguments), we must also remember the **binding of the free variables in the context in which the closure was created**.  In the example above, the closure must remember the binding of x in the context of E1.\n\n",
+     "hash": "ad533a9811cdd1d4",
+     "he": "כדי לתקן את הבעיה הזאת, עלינו **להוסיף זיכרון למבנה הנתונים של ה-closure**: בנוסף לרשימת הפרמטרים (שייקשרו כשה-closure ייושם על הארגומנטים שלו), עלינו לזכור גם את **הקשירות של המשתנים החופשיים בהקשר שבו ה-closure נוצר**. בדוגמה שלמעלה, ה-closure חייב לזכור את הקשירה של x בהקשר של E1."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:5",
+     "type": "prose",
+     "en": "**NOTE**: This behavior is what justifies the name of the *closure* - it *closes bindings* inside its memory.\n\n",
+     "hash": "ad3aa7e3c337fe02",
+     "he": "**שימו לב**: ההתנהגות הזאת היא מה שמצדיק את השם *closure* (סְגור) — הוא *סוגר קשירות* בתוך הזיכרון שלו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:6",
+     "type": "prose",
+     "en": "When we evaluate a closure application, we must then use the environment which the closure remembers - **instead of the current environment**.\n\n",
+     "hash": "7c6dabe14d599945",
+     "he": "כשאנחנו מעריכים יישום של closure, עלינו אפוא להשתמש בסביבה שה-closure זוכר — **במקום בסביבה הנוכחית**."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:7",
+     "type": "prose",
+     "en": "To fix the evaluation rule, we must therefore:\n\n",
+     "hash": "d89e31b9a1552554",
+     "he": "כדי לתקן את כלל ההערכה, עלינו אפוא:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:8",
+     "type": "list",
+     "en": "* Update the definition of the `closure` data structure to include: params, body *and* environment at closure creation time.\n* Change the closure application rule to use the closure env as a basis for the extend-env instead of the current env.\n\n",
+     "hash": "740fd92c1af2f7af",
+     "he": "* לעדכן את ההגדרה של מבנה הנתונים `closure` כך שיכלול: params, body *וגם* סביבה בזמן יצירת ה-closure.\n* לשנות את כלל היישום של closure כך שישתמש בסביבת ה-closure כבסיס ל-extend-env במקום בסביבה הנוכחית."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:10:9",
+     "type": "prose",
+     "en": "**NOTE**: Why didn't we see this problem when we specified the evaluation rule for let-expressions?\n\n\n",
+     "hash": "b6fbe42dd5fba293",
+     "he": "**שימו לב**: מדוע לא נתקלנו בבעיה הזאת כשניסחנו את כלל ההערכה לביטויי let?"
+    }
+   ],
+   "headingHe": "תיקון כלל ההערכה של יישום: אכיפת תחום הכרה לקסיקלי"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:11",
+   "depth": 3,
+   "headingEn": "Correct Evaluation Rule for Applications",
+   "raw": "### Correct Evaluation Rule for Applications\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:11:0",
+     "type": "prose",
+     "en": "The closure data-structure is updated to include a new `env` field:\n",
+     "hash": "d70e022ac5f7bed3",
+     "he": "מבנה הנתונים של ה-closure מתעדכן כך שיכלול שדה `env` חדש:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:1",
+     "type": "code",
+     "en": "```\n<closure> ::= closure(params:List(Var-decl), body:List(CExp), env:Env)\n```\n\n",
+     "hash": "0dd814f689871349",
+     "noteHe": "ההגדרה המעודכנת של closure — **וזהו ההבדל המרכזי בין שני מודלי ההערכה**. השדה השלישי `env:Env` הוא כל התוספת על ההגדרה מ-2.6. כדאי לשנן את שלושת השדות: פרמטרים, גוף, סביבה. בשאלות מבחן שבהן מבקשים לרשום ערך של closure במודל הסביבות, חייבים לכתוב את שלושתם — למשל `<Closure (y) (+ x y) E1>`."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:2",
+     "type": "prose",
+     "en": "The closure.env field is initialized when the closure is **created** - that is, when a proc-exp expression is evaluated:\n\n",
+     "hash": "bc0d2685c4f251c7",
+     "he": "השדה closure.env מאותחל כשה-closure **נוצר** — כלומר, כשמוערך ביטוי proc-exp:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:3",
+     "type": "code",
+     "en": "```\nIf exp=proc-exp(params, body):\n   env-eval(exp, env) is computed by:\n       return make-closure(params, body, env)\n```\n\n",
+     "hash": "346636195ab53418",
+     "noteHe": "כלל ההערכה של lambda במודל הסביבות. השוו לכלל מ-2.6: שם היה `makeClosure(params, body)` וכאן `make-closure(params, body, env)` — הפרמטר `env` נכנס לתוך ה-closure. **זה הרגע שבו \"נצרבת\" הסביבה**: היא נלכדת בזמן ההערכה של ה-lambda, ולא בזמן הקריאה. עדיין לא מתבצע שום חישוב על הגוף, בדיוק כמו קודם. כדאי לזכור את הצמד: יצירת closure שומרת את הסביבה, יישום closure משתמש בה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:4",
+     "type": "prose",
+     "en": "The closure.env field remembers the environment with the bindings for all the variables that may occur free in its body beyond its parameters.  This field is eventually used when the closure is applied:\n\n",
+     "hash": "d1f1a869b186e108",
+     "he": "השדה closure.env זוכר את הסביבה שבה נמצאות הקשירות של כל המשתנים שעשויים להופיע חופשיים בגופו, מעבר לפרמטרים שלו. בשדה הזה משתמשים בסופו של דבר כשה-closure מיושם:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:5",
+     "type": "code",
+     "en": "```\nIf exp=app-exp(rator, rands):\n   env-eval(exp, env) is computed by:\n       let proc = env-eval(rator, env)\n           args = eval(rand, env) for rand in rands\n           if proc is a closure:\n             let params = closure.params(proc)\n                 body = closure.body(proc)\n                 closure-env = closure.env(proc)\n               ;; Extend the **closure-env** and **not** the current env\n               return eval-sequence(body,\n                                    extend-env(closure-env, make-frame(params, args))) \n           else\n             return apply-primitive(proc, args)\n```\n\n",
+     "hash": "2f6de8c8e0d84d66",
+     "noteHe": "כלל היישום המתוקן — **וזה הכלל שיש לדעת למבחן**. השוו אותו לניסיון הראשון: כל השורות זהות פרט לאחת. במקום `extend-env(env, ...)` מופיע `extend-env(closure-env, ...)`, וההערה בקוד מדגישה זאת במפורש: מרחיבים את **סביבת ה-closure** ולא את הסביבה הנוכחית. שימו לב שהסביבה הנוכחית `env` עדיין משמשת — אבל רק כדי להעריך את האופרטור ואת האופרנדים, כלומר את מה שנמצא בנקודת הקריאה. ברגע שנכנסים לגוף ה-closure, הסביבה הנוכחית \"נזרקת\" והחישוב ממשיך מהסביבה השמורה. **זו התמצית של תחום הכרה לקסיקלי בשורה אחת.** פרימיטיבים, כמובן, לא נושאים סביבה ולכן ממשיכים דרך `apply-primitive` כרגיל."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:6",
+     "type": "prose",
+     "en": "When we apply this new and corrected evaluation rule to the case above, we now obtain the expected result:\n\n",
+     "hash": "c2ebdf17b2382527",
+     "he": "כשאנחנו מפעילים את כלל ההערכה החדש והמתוקן על המקרה שלמעלה, אנחנו מקבלים עכשיו את התוצאה הצפויה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:7",
+     "type": "code",
+     "en": "```\nenv-eval [ (let ((x 1))                       ;; E1\n             (let ((p (lambda (y) (+ x y))))  ;; E2\n               (let ((x 2))                   ;; E3\n                  (p x)))), \n           empty-env() ] ==>\n           \n  env-eval [ (let ((p (lambda (y) (+ x y))))  ;; E2\n               (let ((x 2))                   ;; E3\n                  (p x))), \n             ext-env({}, {x=1}) ]  ==>\n           \n    env-eval [ (let ((x 2)) ;; E3\n                  (p x)),\n               ext-env({}; {x=1}; {p = (closure (y) (+ x y) {};{x=1}) ] ==>   ;; #1: Store env\n             \n      env-eval[ (p x),\n                ext-env({};{x=1};{p=(closure(y)(+ x y) {};{x=1});{x=2} ] ==>\n                \n        env-eval[ (+ x y),                                                    ;; #2: Use stored env\n                  ext-env( {};{x=1};{y=2} ) ] ==> 3\n```\n\n",
+     "hash": "785507c351388137",
+     "noteHe": "הגזירה המלאה עם הכלל המתוקן, שמסתיימת ב-`3` — התוצאה הנכונה. עקבו אחרי שתי ההערות שבקוד. בשלב `#1: Store env` נוצר ה-closure של `p`, והסביבה שנשמרת בתוכו היא `{};{x=1}` — כלומר E1, הסביבה שהייתה קיימת ברגע היצירה, שבה `x` הוא 1. שימו לב שמאותו רגע ה-closure \"נושא איתו\" את הסביבה הזאת לכל מקום. בשלב הבא נוצרת מסגרת `{x=2}` והסביבה הנוכחית הופכת לארבע מסגרות — אבל זה לא רלוונטי ל-`p`. בשלב `#2: Use stored env` מתבצע היישום: הסביבה שבה מוערך הגוף `(+ x y)` היא `{};{x=1};{y=2}` — כלומר סביבת ה-closure השמורה, מורחבת במסגרת הפרמטרים. שימו לב מה **אין** בסביבה הזאת: המסגרת `{x=2}` נעלמה לגמרי, וגם `{p=...}` אינה שם. לכן `x` נפתר ל-1, `y` ל-2, והתוצאה היא 3. **תרגלו לשחזר את הגזירה הזאת — היא הבסיס לכל שאלת מודל סביבות במבחן.**"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:11:8",
+     "type": "prose",
+     "en": "As expected, `env-eval` returns the same value as the substitution model (and as Scheme). \n\n",
+     "hash": "13dc8dc121dccc55",
+     "he": "כצפוי, `env-eval` מחזיר את אותו ערך כמו מודל ההצבה (וכמו Scheme)."
+    }
+   ],
+   "headingHe": "כלל ההערכה הנכון ליישומים"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:12",
+   "depth": 2,
+   "headingEn": "Env-Eval Interpreter",
+   "raw": "## Env-Eval Interpreter\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:12:0",
+     "type": "prose",
+     "en": "The env-eval model is implemented in the following code [L4](https://github.com/bguppl/interpreters/tree/master/src/L4):\n",
+     "hash": "5c15bf22c10cf4ad",
+     "he": "מודל ה-env-eval ממומש בקוד הבא [L4](https://github.com/bguppl/interpreters/tree/master/src/L4):"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:12:1",
+     "type": "list",
+     "en": "* AST for L4 with let and letrec expressions: [L4-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-ast.ts)\n* Immutable environment data type - empty-env, extend-env: [L4-env.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-env.ts)\n* Values datatype for L4 with Closures that include a reference to environment: [L4-value.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-value.ts)\n* Environment-based interpreter: [L4-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-eval.ts)\n* Tests: [L4-eval.tests.ts](https://github.com/bguppl/interpreters/blob/master/test/L4/L4-eval.test.ts)\n\n",
+     "hash": "ef764e637fd4d52c",
+     "he": "* ה-AST של L4 עם ביטויי let ו-letrec: [L4-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-ast.ts)\n* טיפוס נתונים בלתי־משתנה (immutable) לסביבה — empty-env, extend-env: [L4-env.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-env.ts)\n* טיפוס הערכים של L4 עם Closures שכוללים הפניה לסביבה: [L4-value.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-value.ts)\n* המפרש מבוסס־הסביבות: [L4-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L4/L4-eval.ts)\n* בדיקות: [L4-eval.tests.ts](https://github.com/bguppl/interpreters/blob/master/test/L4/L4-eval.test.ts)"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:12:2",
+     "type": "prose",
+     "en": "The interpreter is **identical** to that of the substitution model for L3 we reviewed previously except for the following places:\n",
+     "hash": "32150c7e168b7aaa",
+     "he": "המפרש **זהה** לזה של מודל ההצבה עבור L3 שסקרנו קודם, פרט למקומות הבאים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:12:3",
+     "type": "list",
+     "en": "* Support for direct evaluation of let-exp expressions with extend-env.\n* An expanded version of the closure data structure with the env field.\n* The evaluation rule for proc-exp which stores the current env in the created closure.\n* The procedure apply-proc.\n\n",
+     "hash": "efbdf1735a539976",
+     "he": "* תמיכה בהערכה ישירה של ביטויי let-exp בעזרת extend-env.\n* גרסה מורחבת של מבנה הנתונים closure עם שדה ה-env.\n* כלל ההערכה של proc-exp ששומר את הסביבה הנוכחית ב-closure שנוצר.\n* הפרוצדורה apply-proc."
+    }
+   ],
+   "headingHe": "המפרש Env-Eval"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:13",
+   "depth": 2,
+   "headingEn": "Visual Notation for the Environment Model",
+   "raw": "## Visual Notation for the Environment Model\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:13:0",
+     "type": "prose",
+     "en": "To properly understand the process of expression evaluation using the environment model, we develop a visual notation to trace the development of environments and their relation.  As a program evaluation proceeds, multiple environments are created, with various relations between them:\n\n",
+     "hash": "aa9a35b1ac65e61b",
+     "he": "כדי להבין כראוי את תהליך הערכת הביטויים בעזרת מודל הסביבות, אנחנו מפתחים סימון ויזואלי שמאפשר לעקוב אחרי התפתחות הסביבות והיחסים ביניהן. ככל שהערכת התוכנית מתקדמת, נוצרות סביבות רבות, ובין הסביבות האלה מתקיימים יחסים שונים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:1",
+     "type": "list",
+     "en": "* When a closure is created, the closure refers to the environment in which it was created.\n* When a closure is applied, a new environment is created which extends the closure environment.\n  The new closure also refers to the current environment (in which the application is evaluated) - this reference is called \n  the **return control** relation.\n* When a let-expression is evaluated, a new environment is created which extends the current environment.\n\n",
+     "hash": "5a41bc4a8b7389ed",
+     "he": "* כשנוצר closure, ה-closure מפנה לסביבה שבה הוא נוצר.\n* כשמיושם closure, נוצרת סביבה חדשה שמרחיבה את סביבת ה-closure.\n  ה-closure החדש מפנה גם לסביבה הנוכחית (זו שבה מוערך היישום) — הפניה זו נקראת\n  יחס **בקרת החזרה (return control)**.\n* כשמוערך ביטוי let, נוצרת סביבה חדשה שמרחיבה את הסביבה הנוכחית."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:2",
+     "type": "prose",
+     "en": "A frame is represented as a box containing bindings - denoted var:val.\n\n",
+     "hash": "08d38f38d747f021",
+     "he": "מסגרת מיוצגת כתיבה שמכילה קשירות — המסומנות var:val."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:3",
+     "type": "prose",
+     "en": "An environment is represented as a frame which links to its enclosing environment as a chain of frame boxes.\n\n",
+     "hash": "0df9a98a398fb004",
+     "he": "סביבה מיוצגת כמסגרת שמקושרת לסביבה העוטפת שלה, כשרשרת של תיבות מסגרת."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:4",
+     "type": "image",
+     "en": "![env as chain of frame boxes](./resources/1_1.png)\n\n\n",
+     "hash": "ae55cd3a546e6137"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:5",
+     "type": "prose",
+     "en": "The environment diagrams display all the environments constructed over the process of an expression evaluation using env-eval.\nEach environment is identified by a unique name and a serial number in the order of environment construction.\nBy convention, we use the names E1, E2, ..., where the environment named Ei is the i-th in the construction order. \nThe global environment is named GE.\n\n",
+     "hash": "85b3f87f5612e737",
+     "he": "דיאגרמות הסביבות מציגות את כל הסביבות שנבנו במהלך תהליך הערכת ביטוי בעזרת env-eval.\nכל סביבה מזוהה על ידי שם ייחודי ומספר סידורי לפי סדר הבנייה של הסביבות.\nלפי המוסכמה, אנחנו משתמשים בשמות E1, E2, ..., כאשר הסביבה ששמה Ei היא ה-i-ית בסדר הבנייה.\nהסביבה הגלובלית נקראת GE."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:6",
+     "type": "prose",
+     "en": "Each environment is associated with a lexical block in the evaluated code, and its code.\n\n",
+     "hash": "840d9b94009731e2",
+     "he": "כל סביבה משויכת לבלוק לקסיקלי בקוד המוערך, ולקוד שלו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:13:7",
+     "type": "prose",
+     "en": "Each environment has a return control link and a return value. \nThe return control link points to the environment where computation continues, once the evaluation of the code of the environment is over. The return value is the value of the evaluation of the code of the environment.\n\n",
+     "hash": "fcbeb05f3da7a6b8",
+     "he": "לכל סביבה יש קישור בקרת חזרה (return control link) וערך מוחזר.\nקישור בקרת החזרה מצביע על הסביבה שבה החישוב ממשיך, ברגע שהערכת הקוד של הסביבה הסתיימה. הערך המוחזר הוא הערך של הערכת הקוד של הסביבה."
+    }
+   ],
+   "headingHe": "סימון ויזואלי למודל הסביבות"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:14",
+   "depth": 3,
+   "headingEn": "Scoping and Control",
+   "raw": "### Scoping and Control\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:14:0",
+     "type": "list",
+     "en": "* The tree structured lexical scopes of the program are reflected in the tree structure of frames in an environment diagram. \n* The sequential computation is reflected in the linear order of frames.\n\n",
+     "hash": "61dfec5ea13e405b",
+     "he": "* מבנה העץ של תחומי ההכרה הלקסיקליים של התוכנית משתקף במבנה העץ של המסגרות בדיאגרמת הסביבות.\n* החישוב הסדרתי משתקף בסדר הלינארי של המסגרות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:14:1",
+     "type": "prose",
+     "en": "Therefore, the environment links (from environment to enclosing environment) – create a tree structure, while the return control links create a linear order.\n\n",
+     "hash": "f65ff0d84d666f8a",
+     "he": "לכן, קישורי הסביבות (מסביבה לסביבה העוטפת שלה) יוצרים מבנה עץ, בעוד שקישורי בקרת החזרה יוצרים סדר לינארי."
+    }
+   ],
+   "headingHe": "תחום הכרה ובקרה"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:15",
+   "depth": 3,
+   "headingEn": "Visual Representation of Closures",
+   "raw": "### Visual Representation of Closures\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:15:0",
+     "type": "prose",
+     "en": "The visual notation for a closure includes is a double circle - the left circle is annotated with the params and body of the closure; the right circle is an arrow which points to the environment in which the closure was created.\n\n",
+     "hash": "2e28565dd632604b",
+     "he": "הסימון הוויזואלי ל-closure הוא עיגול כפול — העיגול השמאלי מסומן בפרמטרים ובגוף של ה-closure; העיגול הימני הוא חץ שמצביע על הסביבה שבה ה-closure נוצר."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:1",
+     "type": "image",
+     "en": "![env diagram with closure](./resources/1_2.png)\n\n",
+     "hash": "fc0fdfc1c6a2a2e8"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:2",
+     "type": "prose",
+     "en": "When the diagram refers to source code, we identify the lexical blocks in the source code with identifiers such as B1, B2.\n\n",
+     "hash": "56752fb0a6a8ed9a",
+     "he": "כשהדיאגרמה מתייחסת לקוד המקור, אנחנו מזהים את הבלוקים הלקסיקליים בקוד המקור בעזרת מזהים כמו B1, B2."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:3",
+     "type": "prose",
+     "en": "Consider the source code:\n\n",
+     "hash": "a07245bbf0540d34",
+     "he": "נבחן את קוד המקור:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:4",
+     "type": "code",
+     "en": "```\n(define sq (lambda (x) (* x x)))\n(define sum-of-square (lambda (x y) (+ (sq x) (sq y))))\n(define f (lambda (a) (sum-of-squares (+ a 1) (* a 2))))\n```\n\n",
+     "hash": "aa1b2ef531cef0c7",
+     "noteHe": "שלוש הגדרות ברמה הגלובלית, שישמשו לדוגמת הדיאגרמה. `sq` מעלה בריבוע; `sum-of-square` מחברת ריבועים של שניים; `f` קוראת לה עם `(+ a 1)` ו-`(* a 2)`. שימו לב שכל אחת מההגדרות יוצרת closure, ושלושתם נוצרים ב**סביבה הגלובלית** — ולכן שדה ה-env של שלושתם יצביע על GE. שימו לב לחוסר עקביות בשמות בקוד המקורי: השורה השנייה מגדירה `sum-of-square` (יחיד) אבל השורה השלישית קוראת ל-`sum-of-squares` (רבים); זו טעות הקלדה, והדיאגרמה בהמשך משתמשת בשם ברבים."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:5",
+     "type": "prose",
+     "en": "The corresponding environment diagram showing the 3 created closures (sq, sum-of-squares and f) is:\n\n",
+     "hash": "d9d8f5911bb47668",
+     "he": "דיאגרמת הסביבות המתאימה, שמציגה את 3 ה-closures שנוצרו (sq, sum-of-squares ו-f), היא:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:6",
+     "type": "image",
+     "en": "![env diagram sq, sum-of-squares, f](./resources/3_1.png)\n\n",
+     "hash": "0c4a26b2a6a0e238"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:7",
+     "type": "prose",
+     "en": "When we evaluate the program `(f 5)` - the resulting environment diagram is:\n\n",
+     "hash": "5b77700eeed90de5",
+     "he": "כשאנחנו מעריכים את התוכנית `(f 5)` — דיאגרמת הסביבות המתקבלת היא:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:8",
+     "type": "image",
+     "en": "![env diagram when evaluating (f 5)](./resources/3_2.png)\n\n\n",
+     "hash": "c94cd7c2285ff2ad"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:9",
+     "type": "prose",
+     "en": "**NOTES**:\n",
+     "hash": "535d8b5ea26b6cd1",
+     "he": "**הערות**:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:10",
+     "type": "list",
+     "en": "1. The environments E1, E2, E3 and E4 are created each time a closure is applied.\n2. The block of code associated to each environment is written as B3, B2, B1 (for example, E1 results from the application of the closure `f` - whose body is B3.\n3. These environments extend the environment in which the applied closure was created - in this case, all 4 environments refer to the Global Environment GE.\n4. The return control arrow indicates for each environment to which environment it returns once its body computation completes, and which value the body reduction returns.\n\n",
+     "hash": "0bf0c4249bc6a1fb",
+     "he": "1. הסביבות E1, E2, E3 ו-E4 נוצרות בכל פעם שמיושם closure.\n2. בלוק הקוד שמשויך לכל סביבה נכתב כ-B3, B2, B1 (לדוגמה, E1 נובעת מהיישום של ה-closure ‏`f` — שגופו הוא B3.\n3. הסביבות האלה מרחיבות את הסביבה שבה נוצר ה-closure שיושם — במקרה הזה, כל 4 הסביבות מפנות לסביבה הגלובלית GE.\n4. חץ בקרת החזרה מציין עבור כל סביבה לאיזו סביבה היא חוזרת ברגע שחישוב הגוף שלה מסתיים, ואיזה ערך מחזירה הרדוקציה של הגוף."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:15:11",
+     "type": "prose",
+     "en": "Learn to draw such environments from code and to retrieve code from an environment.\n\n",
+     "hash": "39ef2834e01065c3",
+     "he": "למדו לצייר סביבות כאלה מתוך קוד, ולשחזר קוד מתוך סביבה."
+    }
+   ],
+   "headingHe": "ייצוג ויזואלי של closures"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:16",
+   "depth": 3,
+   "headingEn": "Historical Note: Dynamic Scoping",
+   "raw": "### Historical Note: Dynamic Scoping\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:16:0",
+     "type": "prose",
+     "en": "The distinction we made above between using the *current environment* or the *closure environment* when applying a procedure was clarified only in the late 1970s (between 1975 and 1980).  The confusion was caused by the fact that in most programming languages there was no first class functions, and only the restricted form of let-expressions known as local variables. As we have noted above, in the case of let-expression, the closure-env and the current-env happen to be the same.\n\n",
+     "hash": "f16ccc88aa2ce4ba",
+     "he": "ההבחנה שעשינו למעלה בין שימוש ב*סביבה הנוכחית* לבין שימוש ב*סביבת ה-closure* בעת יישום פרוצדורה הובהרה רק בסוף שנות ה-70 (בין 1975 ל-1980). הבלבול נגרם מכך שברוב שפות התכנות לא היו פונקציות ממדרגה ראשונה, אלא רק הצורה המוגבלת של ביטויי let שידועה כמשתנים מקומיים. כפי שציינו למעלה, במקרה של ביטוי let, סביבת ה-closure והסביבה הנוכחית במקרה זהות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:16:1",
+     "type": "prose",
+     "en": "The first interpreters of the Lisp-family languages used a scoping policy called **dynamic scoping** which consists of using the current env instead of the closure env when applying a closure.  This is in contrast to the **lexical scoping** discipline we just described.\n\n",
+     "hash": "3162805c63d24263",
+     "he": "המפרשים הראשונים של שפות ממשפחת Lisp השתמשו במדיניות תחום הכרה שנקראת **תחום הכרה דינמי (dynamic scoping)**, שמשמעותה שימוש בסביבה הנוכחית במקום בסביבת ה-closure בעת יישום closure. זאת בניגוד לגישת **תחום ההכרה הלקסיקלי (lexical scoping)** שתיארנו זה עתה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:16:2",
+     "type": "prose",
+     "en": "In general, using dynamic scoping is not a good idea - as it creates unexpected dependencies between unrelated variables and functions which only appear at runtime.\n\n",
+     "hash": "f2a41d2390ec3375",
+     "he": "באופן כללי, שימוש בתחום הכרה דינמי אינו רעיון טוב — מפני שהוא יוצר תלויות בלתי־צפויות בין משתנים ופונקציות שאין ביניהם קשר, תלויות שמתגלות רק בזמן ריצה."
+    }
+   ],
+   "headingHe": "הערה היסטורית: תחום הכרה דינמי"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:17",
+   "depth": 2,
+   "headingEn": "Using Closures",
+   "raw": "## Using Closures\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:17:0",
+     "type": "prose",
+     "en": "The environment model refined our understanding of closures.  \nClosures capture a reference to bindings in the environment in which they are created.\n\n",
+     "hash": "15f3b4dc4b6ee400",
+     "he": "מודל הסביבות חידד את ההבנה שלנו לגבי closures.\n‏Closures לוכדים הפניה לקשירות שבסביבה שבה הם נוצרו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:17:1",
+     "type": "prose",
+     "en": "We will now explore programming techniques which exploit this property of features.\n\n",
+     "hash": "20c0f8e1134844eb",
+     "he": "כעת נחקור טכניקות תכנות שמנצלות את התכונה הזאת."
+    }
+   ],
+   "headingHe": "שימוש ב-closures"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:18",
+   "depth": 3,
+   "headingEn": "Frames Lifecycle in the presence of closures",
+   "raw": "### Frames Lifecycle in the presence of closures\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:18:0",
+     "type": "prose",
+     "en": "Consider the case in which we construct a closure in the scope of a variable, and then exit this scope.\n\n",
+     "hash": "9fa001e95da33ee2",
+     "he": "נבחן את המקרה שבו אנחנו בונים closure בתוך תחום ההכרה של משתנה, ואז יוצאים מתחום ההכרה הזה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:1",
+     "type": "code",
+     "en": "```\n(let ((a 1))            ;; E1\n  (lambda (x) (+ x a)))\n```\n\n",
+     "hash": "949be88922383570",
+     "noteHe": "ביטוי let שהערך שלו הוא lambda. הסביבה E1 מכילה `{a=1}`, וה-lambda שנוצרת בתוכה שומרת הפניה ל-E1 בשדה ה-env שלה. שימו לב שברגע שביטוי ה-let מסתיים, ה-closure \"יוצא החוצה\" ונושא איתו את E1 — למרות שתחום ההכרה של `a` כבר הסתיים מבחינת הקוד. זו נקודת הפתיחה לדיון על מחזור החיים של מסגרות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:2",
+     "type": "prose",
+     "en": "When we exit the scope of the let-expression, the environment E1 is usually discarded.\nThis is what happens in the usual stack-management of frames as was discussed in SPL: \nwhen the process enters a block which defines local variables, we allocate a frame on the stack.  \nWhen the process exits the block, the frame is discarded (popped from the stack).\n\n",
+     "hash": "03a07cb1d9390de2",
+     "he": "כשאנחנו יוצאים מתחום ההכרה של ביטוי ה-let, הסביבה E1 בדרך כלל נזרקת.\nזה מה שקורה בניהול המחסנית הרגיל של מסגרות, כפי שנדון ב-SPL:\nכשהתהליך נכנס לבלוק שמגדיר משתנים מקומיים, אנחנו מקצים מסגרת על המחסנית.\nכשהתהליך יוצא מהבלוק, המסגרת נזרקת (נשלפת מהמחסנית)."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:3",
+     "type": "prose",
+     "en": "When a closure is created within this scope though, the frame may need to be kept accessible for a longer period.\nConsider this configuration:\n\n",
+     "hash": "f82131784bcd7d93",
+     "he": "אבל כשנוצר closure בתוך תחום ההכרה הזה, ייתכן שיהיה צורך לשמור את המסגרת נגישה לתקופה ארוכה יותר.\nנבחן את התצורה הזאת:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:4",
+     "type": "code",
+     "en": "```\n(let ((f (let ((a 1))               ;; E1: <{a=1}>\n            (lambda (x) (+ x a))))) \n    (f 10))                         ;; E2: <{f=(closure (x) (+x a) E1)}>\n```\n\n",
+     "hash": "c8256fcd8e2be5c8",
+     "noteHe": "ה-let החיצוני קושר את `f` לתוצאה של ה-let הפנימי, כלומר ל-closure שנוצר ב-E1. ההערות בקוד מראות את שתי הסביבות: E1 מכילה `{a=1}`, ו-E2 מכילה `{f=(closure (x) (+ x a) E1)}` — שימו לב שהשדה השלישי של ה-closure הוא E1. כשמעריכים `(f 10)`, הגוף `(+ x a)` מוערך בסביבה `<{x=10};{a=1}>` — כלומר E1 מורחבת במסגרת הפרמטרים — והתוצאה היא `11`. **הנקודה המהותית:** המסגרת `{a=1}` שרדה למרות שהיציאה מה-let הפנימי כבר התרחשה, ורק בזכות ההפניה שה-closure מחזיק אליה."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:5",
+     "type": "prose",
+     "en": "The body of the closure f is evaluated in the environment <{x=10};{a=1}> - even though the environment E1 has already been exited and is not accessible anymore.  To wit, if we were to compute:\n\n",
+     "hash": "7ff73d124698076e",
+     "he": "הגוף של ה-closure ‏f מוערך בסביבה <{x=10};{a=1}> — למרות שכבר יצאנו מהסביבה E1 והיא אינה נגישה יותר. ליתר דיוק, אילו היינו מחשבים:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:6",
+     "type": "code",
+     "en": "```\n(let ((f (let ((a 1))               ;; E1: <{a=1}>\n            (lambda (x) (+ x a))))) \n    a)                         ;; E2: <{f=(closure (x) (+x a) E1)}>\n```\n\n",
+     "hash": "a18ebd974e5b5108",
+     "noteHe": "אותה תוכנית בדיוק, אבל הגוף של ה-let החיצוני הוא `a` במקום `(f 10)`. עכשיו הגוף מוערך בסביבה E2, שמכילה רק את `{f=...}` ואת מה שמעליה — **ולא** את `{a=1}`, כי E1 אינה חוליה בשרשרת של E2 אלא רק \"תלויה\" מתוך ה-closure. לכן ההפניה ל-`a` נכשלת. הניגוד בין שתי הדוגמאות הוא בדיוק העניין: `a` נגיש מתוך גוף ה-closure, ואינו נגיש מבחוץ."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:7",
+     "type": "prose",
+     "en": "we would obtain a variable undefined error - because a is not accessible anymore in the environment E2.\n\n",
+     "hash": "60e5e8f95834933d",
+     "he": "היינו מקבלים שגיאת \"משתנה לא מוגדר\" — מפני ש-a אינו נגיש יותר בסביבה E2."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:18:8",
+     "type": "prose",
+     "en": "Following this analysis, we conclude that the lifecycle of frames in the presence of closures must take into account the references that closures keep to frames.\n\n",
+     "hash": "74f31df9436acb48",
+     "he": "בעקבות הניתוח הזה, אנחנו מסיקים שמחזור החיים של מסגרות בנוכחות closures חייב להביא בחשבון את ההפניות ש-closures שומרים למסגרות."
+    }
+   ],
+   "headingHe": "מחזור החיים של מסגרות בנוכחות closures"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:19",
+   "depth": 3,
+   "headingEn": "Closure Factories",
+   "raw": "### Closure Factories\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:19:0",
+     "type": "prose",
+     "en": "The following program pattern exploits the environment memory in closures to create *objects* with their private environment.\n\n",
+     "hash": "c9ecfad085afda2f",
+     "he": "תבנית התוכנית הבאה מנצלת את זיכרון הסביבה שב-closures כדי ליצור *אובייקטים* עם סביבה פרטית משלהם."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:19:1",
+     "type": "prose",
+     "en": "In general - we will understand the evaluation of a lambda-expression (a procedure) as the construction of a closure.\n\n",
+     "hash": "57083c89105c5985",
+     "he": "באופן כללי — נבין את ההערכה של ביטוי lambda (פרוצדורה) כבנייה של closure."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:19:2",
+     "type": "prose",
+     "en": "We can thus write \"closure maker\" functions which, given parameters, construct a closure which remembers these parameters.\nFor example:\n\n",
+     "hash": "f6eaef16d3d2449d",
+     "he": "לכן אנחנו יכולים לכתוב פונקציות \"יצרניות closures\" שבהינתן פרמטרים, בונות closure שזוכר את הפרמטרים האלה.\nלדוגמה:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:19:3",
+     "type": "code",
+     "en": "```\n(define make-adder\n  (lambda (a)           ;; Parameters to the closure maker\n    (lambda (x)         ;; Construction of the closure\n      (+ a x))))        ;; Body of the closure - refers to the private environment of the closure\n      \n(define a3 (make-adder 3)) ;; This adder has a private state a=3\n(define a5 (make-adder 5)) ;; a5 has a private state a=5\n\n(a3 2) => 5\n(a5 2) => 7\n((make-adder 1) 2) => 3\n```\n\n",
+     "hash": "123d3db4c55a0aec",
+     "noteHe": "`make-adder` היא הדוגמה הקלאסית ל\"מפעל closures\". שימו לב למבנה הכפול: ה-lambda החיצונית מקבלת `a` ומחזירה lambda פנימית שמקבלת `x` ומחשבת `(+ a x)`. ה-`a` שבגוף הפנימי הוא **חופשי** ביחס ל-lambda הפנימית, ולכן הוא נלכד בסביבת ה-closure. כשקוראים `(make-adder 3)`, נוצרת סביבה `{a=3}`, ומוחזר closure שזוכר אותה — זה ה\"מצב הפרטי\" שההערות מדברות עליהן. `(make-adder 5)` יוצרת closure **אחר** עם סביבה `{a=5}`, ושני ה-closures אינם משפיעים זה על זה. לכן `(a3 2)` נותן 5 ו-`(a5 2)` נותן 7. השורה האחרונה `((make-adder 1) 2)` מדגימה שאפשר להשתמש ב-closure מיד בלי לקשור אותו לשם. **זו התבנית שעומדת בבסיס כל מה שיבוא בסעיפים הבאים** — ייצוג של אובייקטים עם מצב פרטי, בלי שום מנגנון מיוחד בשפה מלבד closures."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:19:4",
+     "type": "prose",
+     "en": "We constructed various instances of the general adder function - each with its own private state.\nThe returned object is a closure, which is a procedure and that we use as a regular function.\n\n",
+     "hash": "c55fb308030a428e",
+     "he": "בנינו מופעים שונים של פונקציית ה-adder הכללית — לכל אחד מצב פרטי משלו.\nהאובייקט המוחזר הוא closure, שהוא פרוצדורה, ואנחנו משתמשים בו כמו בפונקציה רגילה."
+    }
+   ],
+   "headingHe": "מפעלי closures (Closure Factories)"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:20",
+   "depth": 3,
+   "headingEn": "Using Closures to Implement Compound Data Structures",
+   "raw": "### Using Closures to Implement Compound Data Structures\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:20:0",
+     "type": "prose",
+     "en": "We can then exploit this pattern to represent compound data structures in a purely functional manner - without requiring \nprimitives to construct compound data structures such as pairs or lists or maps.\n\n",
+     "hash": "b27d2a7774bfd4ba",
+     "he": "אנחנו יכולים לנצל את התבנית הזאת כדי לייצג מבני נתונים מורכבים באופן פונקציונלי טהור — בלי לדרוש\nפרימיטיבים לבניית מבני נתונים מורכבים כמו זוגות, רשימות או מיפויים."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:1",
+     "type": "prose",
+     "en": "Here is a closure-based implementation of the pair data structure:\n\n",
+     "hash": "51abbdde789a041d",
+     "he": "לפניכם מימוש מבוסס־closures של מבנה הנתונים \"זוג\":"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:2",
+     "type": "code",
+     "en": "```\n;; Purpose: closure-based pair value constructor\n;; Signature: make-pair(a,b)\n;; Type: [T1 * T2 -> Closure-Pair(T1,T2)]\n(define make-pair\n  (lambda (a b)                        ;; Parameters of the pair constructor\n    (lambda (msg)                      ;; Interface of the pair object\n      (cond ((eq? msg 'car) a)         ;; Dispatch method for the pair object\n            ((eq? msg 'cdr) b)))))\n\n(let ((p1 (make-pair 1 2))\n      (p2 (make-pair 3 4)))\n   (+ (p1 'car) (p2 'cdr)))\n=> 5\n```\n\n",
+     "hash": "647e3d466bbcdecc",
+     "noteHe": "מימוש של זוג בלי `cons` — רק בעזרת closures. `make-pair` מקבלת `a` ו-`b` ומחזירה closure שמקבל `msg`. ה-`cond` בגוף הוא **מנגנון שיגור הודעות (message dispatch)**: אם ההודעה היא הסמל `'car` מחזירים את `a`, אם `'cdr` מחזירים את `b`. שימו לב לגרשיים — `'car` הוא סמל מצוטט, לא הפניה לפרימיטיב `car`, ו-`eq?` משווה סמלים. שימו לב גם שהתחביר של הגישה הוא `(p1 'car)` — כלומר **הפעלה של האובייקט** ולא קריאה לפונקציה חיצונית; האובייקט הוא פונקציה. הדוגמה יוצרת שני זוגות עצמאיים ומחשבת `1 + 4 = 5`. **הרעיון המרכזי:** הערכים `a` ו-`b` שמורים בסביבה הפרטית של ה-closure, ואין שום דרך לגשת אליהם מבחוץ מלבד דרך הממשק — זו בדיוק ההגדרה של אנקפסולציה (encapsulation) בתכנות מונחה־עצמים, שמושגת כאן בלי שום מנגנון שפה מיוחד. שימו לב לחולשה קטנה: אם ההודעה אינה `'car` ואינה `'cdr`, ה-`cond` אינו מכסה את המקרה ולא מוגדר מה יוחזר."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:3",
+     "type": "prose",
+     "en": "We consider a pair as the aggregation of two values a and b of types T1 and T2.\nWe construct a closures which remembers the two provided values in a private environment with bindings for variables a and b.\n\n",
+     "hash": "3a3cd4813bb42b84",
+     "he": "אנחנו מתייחסים לזוג כאל צירוף של שני ערכים a ו-b מטיפוסים T1 ו-T2.\nאנחנו בונים closure שזוכר את שני הערכים שסופקו, בסביבה פרטית שיש בה קשירות למשתנים a ו-b."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:4",
+     "type": "prose",
+     "en": "We must next think of a way to provide access to these values according to the functional interface of the Pair data type.\nWe achieve this by writing the body of the closure as a **message-dispatch** pattern: the closure receives as an argument the name of the operation we want to achieve on the pair data structure, and the message dispatch logic computes the operation in the context in which a and b are accessible.\n\n",
+     "hash": "da2446403099da70",
+     "he": "כעת עלינו לחשוב על דרך לספק גישה לערכים האלה בהתאם לממשק הפונקציונלי של טיפוס הנתונים Pair.\nאנחנו משיגים זאת על ידי כתיבת הגוף של ה-closure כתבנית **שיגור הודעות (message-dispatch)**: ה-closure מקבל כארגומנט את שם הפעולה שאנחנו רוצים לבצע על מבנה הנתונים של הזוג, ולוגיקת שיגור ההודעות מחשבת את הפעולה בהקשר שבו a ו-b נגישים."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:5",
+     "type": "prose",
+     "en": "In the case of the Pair datatype, the functional interface we want to expose is `car` to access the `a` member and `cdr` to access the `b` member.  We thus implement a message dispatch which knows to receive the `messages` `car` and `cdr` and routes them to the right branch in the cond which executes the right code (retrieve the value of `a` or `b`).\n\n",
+     "hash": "28d64e9b2d1699a2",
+     "he": "במקרה של טיפוס הנתונים Pair, הממשק הפונקציונלי שאנחנו רוצים לחשוף הוא `car` לגישה לאיבר `a` ו-`cdr` לגישה לאיבר `b`. לכן אנחנו מממשים שיגור הודעות שיודע לקבל את ה`הודעות` ‏`car` ו-`cdr` ולנתב אותן לענף הנכון ב-cond, שמריץ את הקוד הנכון (שליפת הערך של `a` או של `b`)."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:6",
+     "type": "prose",
+     "en": "Assume now we want to extend the functional interface of this compound data type with a method `sum` to compute `a+b`.\nThe direct approach consists of extending the dispatch method:\n\n",
+     "hash": "ff5ae1576e61299a",
+     "he": "נניח עכשיו שאנחנו רוצים להרחיב את הממשק הפונקציונלי של טיפוס הנתונים המורכב הזה במתודה `sum` שמחשבת `a+b`.\nהגישה הישירה היא להרחיב את מתודת השיגור:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:7",
+     "type": "code",
+     "en": "```\n;; Purpose: closure-based pair value constructor with add support\n;; Signature: make-adder-pair(a,b)\n;; Type: [Number * Number -> Adder-Pair]\n(define make-adder-pair\n  (lambda (a b)                        ;; Parameters of the pair constructor\n    (lambda (msg)                      ;; Interface of the pair object\n      (cond ((eq? msg 'car) a)         ;; Dispatch method for the adder-pair object\n            ((eq? msg 'cdr) b)\n            ((eq? msg 'add) (+ a b))\n            ))))\n\n(let ((p1 (make-adder-pair 1 2))\n      (p2 (make-adder-pair 3 4)))\n   (+ (p1 'add) (p2 'add)))\n=> 10\n```\n\n",
+     "hash": "3e68e1b95668b7b2",
+     "noteHe": "אותו מבנה בדיוק, בתוספת ענף שלישי ב-`cond`: אם ההודעה היא `'add`, מחשבים `(+ a b)`. שימו לב שהחישוב מתבצע בתוך גוף ה-closure, שם `a` ו-`b` נגישים — הלקוח החיצוני לעולם אינו רואה אותם. הדוגמה מחשבת `(1+2) + (3+4) = 10`. שימו לב לפער קטן בין הטקסט לקוד: הטקסט מדבר על מתודה בשם `sum` והקוד מממש אותה בשם `add`. הרעיון החשוב: **הוספת מתודה = הוספת ענף ל-cond**, וזו בדיוק המגבלה שהסעיף הבא מנסה לעקוף."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:8",
+     "type": "prose",
+     "en": "How would we handle the case of a method in the data structures which requires a parameter?\n\n",
+     "hash": "0bc5cf47c4733983",
+     "he": "כיצד נטפל במקרה של מתודה במבנה הנתונים שדורשת פרמטר?"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:9",
+     "type": "prose",
+     "en": "There are different ways to support this case - we present here one technique which exploits closures again:\n\n",
+     "hash": "36c60e4978272ebd",
+     "he": "יש דרכים שונות לתמוך במקרה הזה — כאן נציג טכניקה אחת שמנצלת שוב את ה-closures:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:10",
+     "type": "prose",
+     "en": "For example, let us extend the adder-pair interface with a method `scale` which takes a parameter `k` and returns a new pair `[k*a, k*b]`.\n\n",
+     "hash": "326e1e67a83bbda4",
+     "he": "לדוגמה, נרחיב את הממשק של adder-pair במתודה `scale` שמקבלת פרמטר `k` ומחזירה זוג חדש `[k*a, k*b]`."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:11",
+     "type": "code",
+     "en": "```\n;; Purpose: closure-based pair value constructor with scale\n;; Signature: make-scale-pair(a,b)\n;; Type: [Number * Number -> Scale-Pair]\n(define make-scale-pair\n  (lambda (a b)                        ;; Parameters of the pair constructor\n    (lambda (msg)                      ;; Interface of the pair object\n      (cond ((eq? msg 'car) a)         ;; Dispatch method for the adder-pair object\n            ((eq? msg 'cdr) b)\n            ((eq? msg 'scale)          ;; Method with a parameter k\n             (lambda (k) (make-scale-pair (* k a) (* k b))))\n            ))))\n\n(let ((p1 (make-scale-pair 1 2)))\n   (let ((kp1 ((p1 'scale) 3)))         ;; Observe how the parameter k is passed to the method scale\n     (kp1 'cdr))) \n=> \n6\n```\n\n",
+     "hash": "00e9a1e46eaacb21",
+     "noteHe": "הטריק לתמיכה במתודה עם פרמטר: הענף של `'scale` אינו מחזיר ערך אלא **closure נוסף** — `(lambda (k) (make-scale-pair (* k a) (* k b)))`. ה-closure הזה נוצר בתוך הסביבה שבה `a` ו-`b` נגישים, ולכן הוא זוכר אותם; הלקוח מקבל אותו ומפעיל אותו על `k`. שימו לב לתחביר שנובע מכך: `((p1 'scale) 3)` — **שני** זוגות סוגריים, קודם שולפים את המתודה ואז מפעילים אותה, בדיוק כפי שמדגישה ההערה בקוד. שימו לב גם ש-`make-scale-pair` קוראת לעצמה כדי לבנות את הזוג החדש. הדוגמה מחשבת: `p1` הוא `[1,2]`, אחרי `scale` ב-3 מתקבל `[3,6]`, ו-`'cdr` מחזיר `6`. **זו בעצם currying** — טכניקה שראינו ב-2.2, וכאן בשימוש מעשי."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:20:12",
+     "type": "prose",
+     "en": "To receive a parameter to the method, we actually construct a method closure from within the pair dispatcher.\nBecause this closure is constructed in a closure which is activated in the environment in which a and b are accessible,\nthe returned closure also has access to the private a and b state binding of the object.  The client code can then\nuse this returned closure and pass it the required parameter k.\n\n",
+     "hash": "009b365850b2f5bc",
+     "he": "כדי לקבל פרמטר למתודה, אנחנו למעשה בונים closure של המתודה מתוך המשגר של הזוג.\nמכיוון שה-closure הזה נבנה בתוך closure שמופעל בסביבה שבה a ו-b נגישים,\nגם ל-closure המוחזר יש גישה לקשירות של המצב הפרטי a ו-b של האובייקט. קוד הלקוח יכול אז\nלהשתמש ב-closure המוחזר ולהעביר לו את הפרמטר k הנדרש."
+    }
+   ],
+   "headingHe": "שימוש ב-closures למימוש מבני נתונים מורכבים"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:21",
+   "depth": 3,
+   "headingEn": "Functional Selectors for Closure-based Compound Data Structures",
+   "raw": "### Functional Selectors for Closure-based Compound Data Structures\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:21:0",
+     "type": "prose",
+     "en": "Instead of adding a new branch in the message-dispatch cond of the closure body, we can generalize the access pattern to the\nfields of a closure-based compound data structure by accepting a functional parameter.\n\n",
+     "hash": "bd20337a36842e50",
+     "he": "במקום להוסיף ענף חדש ל-cond של שיגור ההודעות בגוף ה-closure, אנחנו יכולים להכליל את תבנית הגישה\nלשדות של מבנה נתונים מורכב מבוסס־closure, בכך שנקבל פרמטר פונקציונלי."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:21:1",
+     "type": "prose",
+     "en": "Consider this alternative implementation of the closure-based pair data structure:\n\n",
+     "hash": "0beb3c46fa896df0",
+     "he": "נבחן מימוש חלופי זה של מבנה הנתונים \"זוג\" מבוסס־closure:"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:21:2",
+     "type": "code",
+     "en": "```\n;; Purpose: value constructor for pair-sel data structure\n;; Signature: make-pair-sel(a,b)\n;; Type: [T1 * T2 -> Pair-Sel(T1,T2)\n(define make-pair-sel\n  (lambda (a b)         ;; parameters to the constructor\n    (lambda (sel)       ;; closure constructor\n      (sel a b))))      ;; body of the closure - general selector application\n\n;; Purpose: access the first element in a pair-sel\n;; Signature: pair-first(pair-sel)\n;; Type: [Pair-sel(T1, T2) -> T1]\n(define pair-first\n  (lambda (pair)\n    (pair (lambda (a b) a))))   ;; Pass the a selector\n    \n;; Purpose: access the second element in a pair-sel\n;; Signature: pair-second(pair-sel)\n;; Type: [Pair-sel(T1, T2) -> T2]\n(define pair-second\n  (lambda (pair)\n    (pair (lambda (a b) b))))\n    \n(let ((p1 (make-pair-sel 1 2))\n      (p2 (make-pair-sel 3 4)))\n   (+ (pair-first p1) (pair-second p2)))\n=> 5\n\n(let ((p3 (make-pair-sel 5 6)))\n  (p3 (lambda (a b) (+ a b))))\n=> 11\n\n;; Scale pair - as above, the selector constructs a closure method\n;; which accepts the k parameter.\n(let ((p4 (make-pair-sel 7 8)))\n  (let ((p5-scale (p4 (lambda (a b) \n                        (lambda (k) \n                          (make-pair-sel (* k a) (* k b)))))))\n    (pair-first (p5-scale 2))))\n=> 14    \n```\n\n",
+     "hash": "a39982db2cb61a8e",
+     "noteHe": "מימוש אלגנטי יותר של הזוג, שכדאי להשוות לקודם. `make-pair-sel` מחזירה closure שמקבל `sel` — **פונקציה** — ופשוט מפעיל אותה על `a` ו-`b`: `(sel a b)`. אין כאן שום `cond` ואין שום רשימת הודעות מוכרות מראש. את הבחירה עושה הלקוח: `pair-first` מעבירה את הבורר `(lambda (a b) a)` שמחזיר את הראשון, ו-`pair-second` מעבירה `(lambda (a b) b)`. שימו לב לעוצמה שבכך — הדוגמה השנייה מעבירה `(lambda (a b) (+ a b))` ומקבלת `11`, כלומר קיבלנו את המתודה `add` **בלי לשנות את מבנה הנתונים בכלל**. הדוגמה השלישית מדגימה גם מתודה עם פרמטר: הבורר מחזיר `(lambda (k) ...)`, שמופעל אחר כך על `2` ומחזיר זוג חדש `[14,16]`, ומכאן `pair-first` נותן `14`. **ההבדל המהותי בין שתי הגישות:** בשיגור הודעות, המבנה קובע מראש אילו פעולות אפשריות; בבורר פונקציונלי, הלקוח יכול להריץ **כל** פעולה בהקשר הפרטי של המבנה. הטקסט מציין שזו וריאציה על תבנית העיצוב Visitor."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:21:3",
+     "type": "prose",
+     "en": "We observe that this functional accessor method generalizes the variants we have observed above.\nIt allows the client to pass to the data structure a method which will be invoked in the context of the data structure.\n\n",
+     "hash": "db955f86d63ca0be",
+     "he": "אנחנו רואים ששיטת הגישה הפונקציונלית הזאת מכלילה את הווריאנטים שראינו למעלה.\nהיא מאפשרת ללקוח להעביר למבנה הנתונים מתודה שתופעל בהקשר של מבנה הנתונים."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:21:4",
+     "type": "prose",
+     "en": "This technique is a variant of the [**visitor** design pattern](https://en.wikipedia.org/wiki/Visitor_pattern).\n\n\n",
+     "hash": "97f97c108cebae6b",
+     "he": "הטכניקה הזאת היא וריאציה על [**תבנית העיצוב visitor**](https://en.wikipedia.org/wiki/Visitor_pattern)."
+    }
+   ],
+   "headingHe": "בוררים פונקציונליים למבני נתונים מורכבים מבוססי־closures"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:22",
+   "depth": 3,
+   "headingEn": "Comparison Closure-based Techniques with Object Oriented Programming",
+   "raw": "### Comparison Closure-based Techniques with Object Oriented Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:22:0",
+     "type": "prose",
+     "en": "The closure-based functional techniques we have just reviewed as closely related to the paradigm of Object-oriented programming.\n(See this [entertaining Zen story](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg03277.html) about this comparison.)\n\n",
+     "hash": "b4e1bea6ec84d3b9",
+     "he": "הטכניקות הפונקציונליות מבוססות־ה-closures שסקרנו זה עתה קשורות קשר הדוק לפרדיגמה של תכנות מונחה־עצמים.\n(ראו את [סיפור הזן המשעשע הזה](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg03277.html) על ההשוואה הזאת.)"
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:22:1",
+     "type": "prose",
+     "en": "The key similarity is that a closure with its private environment is similar to an object with its private state.\n\n",
+     "hash": "f8fceabd130d7f5a",
+     "he": "הדמיון המרכזי הוא ש-closure עם הסביבה הפרטית שלו דומה לאובייקט עם המצב הפרטי שלו."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:22:2",
+     "type": "prose",
+     "en": "The closure exposes a limited functional interface (it can be applied), while an object can expose an interface with multiple methods.\n\n",
+     "hash": "f56d42ace61275b8",
+     "he": "ה-closure חושף ממשק פונקציונלי מוגבל (אפשר ליישם אותו), בעוד שאובייקט יכול לחשוף ממשק עם מתודות רבות."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:22:3",
+     "type": "prose",
+     "en": "We also did not discuss the aspects of inheritance, composition and interface extension in the closure-based techniques above.  These are all important aspect of OO programming.\n\n",
+     "hash": "8b30b3161655cbbc",
+     "he": "כמו כן, לא דנו בהיבטים של ירושה, הרכבה והרחבת ממשקים בטכניקות מבוססות־ה-closures שלמעלה. כל אלה הם היבטים חשובים של תכנות מונחה־עצמים."
+    },
+    {
+     "id": "cm/2.7EnvironmentModel:22:4",
+     "type": "prose",
+     "en": "Finally, we did not discuss ways in which the syntax of the programming language can make using such techniques easy and approachable.\n\n",
+     "hash": "f68ee16da86fce22",
+     "he": "לבסוף, לא דנו בדרכים שבהן התחביר של שפת התכנות יכול להפוך את השימוש בטכניקות כאלה לקל ונוח."
+    }
+   ],
+   "headingHe": "השוואה בין טכניקות מבוססות־closures לבין תכנות מונחה־עצמים"
+  },
+  {
+   "id": "cm/2.7EnvironmentModel:23",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.7EnvironmentModel:23:0",
+     "type": "list",
+     "en": "1. The environment model is an optimization of the substitution applicative model of the operational semantics.\n2. The optimization consists of avoiding the cost of substitution and renaming when applying closures to their arguments - and instead delay the decision of how to map variable references to their value; to allow this decision an environment data structure is maintained and passed to the eval procedure.\n3. The environment structure is made up of frames which are linked in a list structure.  Each frame contains bindings of variables to values.\n4. When a closure is constructed, a new field in the closure remembers the environment that was active when the closure was created.\n5. When a closure is applied to arguments, the body of the closure is evaluated in the environment which extends the closure env with the frame mapping the parameters of the closure to the values of the arguments.\n6. Dynamic scoping is a different, unattractive, method to maintain the environment structure - which leads to a **different** operational semantics for a given language.  In dynamic scoping, closures do not remember their environment, and when they are applied, they are applied in the current environment.\n\n1. Environment diagrams illustrate the structure of lexical scopes, the bindings of variables and the control order of environments creation.\n\n1. Closures can be used to remember bindings and maintain private state.\n2. Invoking a lambda expression in the context of a function consists of constructing a new closure (make-adder example).\n3. Compound data structures can be implemented using closures with a message dispatch pattern (make-pair example).\n4. Compound data structures can also be implemented using closures and a functional selector pattern (make-pair-sel example).\n",
+     "hash": "3787dd94bd6c0d7a",
+     "he": "1. מודל הסביבות הוא אופטימיזציה של מודל ההצבה בסדר יישומי של הסמנטיקה התפעולית.\n2. האופטימיזציה מורכבת מהימנעות מהעלות של הצבה ושינוי שם בעת יישום closures על הארגומנטים שלהם — ובמקום זאת דחיית ההחלטה כיצד למפות הפניות למשתנים לערכיהן; כדי לאפשר את ההחלטה הזאת, מתוחזק מבנה נתונים של סביבה שמועבר לפרוצדורת ה-eval.\n3. מבנה הסביבה עשוי ממסגרות שמקושרות במבנה של רשימה. כל מסגרת מכילה קשירות של משתנים לערכים.\n4. כשנבנה closure, שדה חדש ב-closure זוכר את הסביבה שהייתה פעילה בעת יצירתו.\n5. כש-closure מיושם על ארגומנטים, גוף ה-closure מוערך בסביבה שמרחיבה את סביבת ה-closure במסגרת שממפה את הפרמטרים של ה-closure לערכי הארגומנטים.\n6. תחום הכרה דינמי הוא שיטה שונה, ולא אטרקטיבית, לתחזוקת מבנה הסביבות — והיא מובילה לסמנטיקה תפעולית **שונה** עבור שפה נתונה. בתחום הכרה דינמי, closures אינם זוכרים את סביבתם, וכשהם מיושמים הם מיושמים בסביבה הנוכחית.\n\n1. דיאגרמות סביבות ממחישות את מבנה תחומי ההכרה הלקסיקליים, את הקשירות של המשתנים, ואת סדר הבקרה של יצירת הסביבות.\n\n1. אפשר להשתמש ב-closures כדי לזכור קשירות ולתחזק מצב פרטי.\n2. הפעלה של ביטוי lambda בהקשר של פונקציה מורכבת מבניית closure חדש (דוגמת make-adder).\n3. אפשר לממש מבני נתונים מורכבים בעזרת closures עם תבנית שיגור הודעות (דוגמת make-pair).\n4. אפשר לממש מבני נתונים מורכבים גם בעזרת closures ותבנית של בורר פונקציונלי (דוגמת make-pair-sel)."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו ההבדל היחיד בין מבנה הנתונים `closure` במודל ההצבה לבין מבנה הנתונים `closure` במודל הסביבות?",
+   "options": [
+    "במודל הסביבות ה-closure מכיל גם את הערכים המחושבים של הארגומנטים",
+    "במודל הסביבות ה-closure מכיל שדה שלישי — הסביבה שהייתה פעילה בזמן יצירתו",
+    "במודל הסביבות ה-closure אינו מכיל את גוף הפרוצדורה, רק הפניה אליו",
+    "אין הבדל — ההבדל הוא רק בכלל ההערכה של יישום"
+   ],
+   "correct": 1,
+   "explanationHe": "במודל ההצבה: `closure(params, body)`. במודל הסביבות: `closure(params, body, env)`. השדה `env` מאותחל בכלל ההערכה של `proc-exp` — `make-closure(params, body, env)` — ומשמש אחר כך בכלל היישום כבסיס ל-`extend-env`. תשובה 1 שגויה: ארגומנטים נקשרים רק בזמן היישום, במסגרת חדשה, ואינם חלק מה-closure. תשובה 3 שגויה — הגוף נשמר במלואו. תשובה 4 שגויה: אמנם גם כלל היישום משתנה, אבל השינוי במבנה הנתונים הוא ממשי והוא זה שמאפשר את התיקון."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "מה מחזירה התוכנית הבאה במודל הסביבות? ציינו במפורש את הסביבה שבה מוערך גוף ה-closure.\n```scheme\n(let ((x 10))\n  (let ((g (lambda (y) (* x y))))\n    (let ((x 100))\n      (g 2))))\n```",
+   "answerHe": "20. גוף ה-closure `(* x y)` מוערך בסביבה `<{y=2};{x=10}>`.",
+   "explanationHe": "ה-closure של `g` נוצר בסביבה E2 = `<{g=...};{x=10}>`, ולכן שדה ה-env שלו מצביע על הסביבה שבה `x` הוא 10. כשמיישמים `(g 2)`, כלל היישום הנכון מרחיב את **סביבת ה-closure** ולא את הסביבה הנוכחית: `extend-env(closure-env, {y=2})`. המסגרת `{x=100}` שנוצרה ב-let השלישי כלל אינה בשרשרת הזאת, ולכן `x` נפתר ל-10 והתוצאה היא `10 * 2 = 20`. **אילו היינו משתמשים בכלל השגוי** (הרחבת הסביבה הנוכחית) היינו מקבלים `100 * 2 = 200` — וזו בדיוק ההתנהגות של תחום הכרה דינמי."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "הסבירו מדוע כלל ההערכה של `let` **לא** נזקק לתיקון שכלל ההערכה של יישום פרוצדורה נזקק לו, למרות ש-`let` שקול תחבירית ליישום של lambda.",
+   "answerHe": "ב-`let`, ה-lambda השקולה נוצרת ומיושמת **באותה נקודה בקוד ובאותו רגע בזמן ריצה**. לכן הסביבה שבה ה-closure ה\"וירטואלי\" נוצר זהה לחלוטין לסביבה שבה הוא מיושם — `closure-env` ו-`current-env` הם אותו דבר, ולכן אין הבדל בין הכלל הנכון לכלל השגוי.\n\nהבעיה נוצרת רק כשה-closure **מטייל**: כשהוא נוצר במקום אחד, מוחזר או מועבר כערך, ומיושם במקום אחר שבו הסביבה כבר שונה. בדוגמה `(let ((x 1)) (let ((p (lambda (y) (+ x y)))) (let ((x 2)) (p x))))` ה-closure נוצר תחת `x=1` אבל מיושם תחת `x=2`, ורק אז ההבדל בין שתי הסביבות הופך למשמעותי.\n\nזו גם הסיבה ההיסטורית לכך שההבחנה התבררה רק בסוף שנות ה-70: בשפות שבהן לא היו פונקציות ממדרגה ראשונה, ה-closures מעולם לא \"טיילו\", ולכן תחום הכרה דינמי ולקסיקלי נתנו את אותן תוצאות.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) ב-let, סביבת היצירה וסביבת היישום מתלכדות; (2) הבעיה מתעוררת רק כשה-closure מוחזר מהתחום שבו נוצר או מועבר כערך; (3) בונוס — הקישור להערה ההיסטורית על שפות ללא פונקציות ממדרגה ראשונה. תשובה שמסתפקת ב\"כי let הוא סוכר תחבירי\" אינה מספיקה — צריך להסביר **מדוע** דווקא במקרה הזה שני הכללים מתלכדים."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "עבור התוכנית הבאה, מה יחזיר מפרש עם תחום הכרה **לקסיקלי**, ומה יחזיר מפרש עם תחום הכרה **דינמי**?\n```scheme\n(define a 5)\n(define show (lambda () a))\n(define wrapper (lambda (a) (show)))\n(wrapper 100)\n```",
+   "answerHe": "לקסיקלי: 5. דינמי: 100.",
+   "explanationHe": "ה-closure של `show` נוצר בסביבה הגלובלית, שבה `a` הוא 5, ולכן בתחום הכרה לקסיקלי הוא תמיד יראה את 5 — בלי קשר למי שקורא לו. בתחום הכרה דינמי, `(show)` מוערך בסביבה הנוכחית, שהיא הסביבה שנוצרה עבור היישום של `wrapper` ובה `a` הוא 100. **זו הבעיה המרכזית בתחום הכרה דינמי:** פונקציה שקוראת ל-`show` יכולה לשנות את התנהגותה רק בגלל שהיא במקרה בחרה שם פרמטר זהה — תלות בלתי־צפויה בין קטעי קוד שאין ביניהם שום קשר."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "מה מחזירה התוכנית הבאה? הסבירו מה מונע מהמסגרת `{n=3}` להיעלם.\n```scheme\n(define make-counter\n  (lambda (n)\n    (lambda () n)))\n\n(let ((c (make-counter 3)))\n  (+ (c) (c)))\n```",
+   "answerHe": "6",
+   "explanationHe": "היישום `(make-counter 3)` יוצר סביבה `E1 = <{n=3}>` ומחזיר closure ששדה ה-env שלו מצביע עליה. בדרך כלל, ביציאה מיישום פרוצדורה המסגרת נשלפת מהמחסנית ונזרקת — אבל כאן ה-closure מחזיק **הפניה** ל-E1, ולכן היא חייבת לשרוד. כל קריאה ל-`(c)` מעריכה את הגוף `n` בסביבה `extend-env(E1, {})`, כלומר עדיין רואה את 3. התוצאה היא `3 + 3 = 6`. זו הסיבה שבשפות עם closures לא ניתן לנהל מסגרות במחסנית בלבד — צריך ערימה (heap) ואיסוף זבל. **שימו לב:** למרות השם `make-counter`, אין כאן שום מונה — הערך אינו משתנה בין הקריאות, כי אין בשפה השמה. מוני אמת יגיעו רק ב-2.8 עם `set!`."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "ממשו בסגנון מבוסס־closures מבנה נתונים \"משולש\" (triple) שמחזיק שלושה ערכים, בשתי הגישות שנלמדו: (א) שיגור הודעות, (ב) בורר פונקציונלי. הראו גם כיצד הלקוח מחשב את סכום שלושת האיברים בכל אחת מהגישות.",
+   "answerHe": "**(א) שיגור הודעות:**\n```scheme\n(define make-triple\n  (lambda (a b c)\n    (lambda (msg)\n      (cond ((eq? msg 'first) a)\n            ((eq? msg 'second) b)\n            ((eq? msg 'third) c)))))\n\n(let ((t (make-triple 1 2 3)))\n  (+ (t 'first) (t 'second) (t 'third)))\n=> 6\n```\nכדי לקבל את הסכום ישירות מהמבנה, חייבים להוסיף ענף: `((eq? msg 'sum) (+ a b c))`.\n\n**(ב) בורר פונקציונלי:**\n```scheme\n(define make-triple-sel\n  (lambda (a b c)\n    (lambda (sel)\n      (sel a b c))))\n\n(let ((t (make-triple-sel 1 2 3)))\n  (t (lambda (a b c) (+ a b c))))\n=> 6\n```\nכאן הסכום התקבל **בלי לשנות דבר במבנה הנתונים** — הלקוח פשוט העביר את הפעולה הרצויה.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) בשתי הגישות הערכים נשמרים בסביבה הפרטית של ה-closure שנוצר ב-lambda החיצונית; (2) בגישת שיגור ההודעות, הממשק סגור — כל פעולה חדשה דורשת ענף חדש ב-`cond`; (3) בגישת הבורר, הממשק פתוח — הלקוח מעביר פונקציה שתופעל בהקשר הפרטי; (4) התחביר של הגישה: `(t 'first)` מול `(t (lambda (a b c) ...))`. בונוס: לציין ששיגור הודעות דומה יותר לאובייקט עם מתודות, ובורר פונקציונלי דומה לתבנית Visitor."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "מהו היחס בין `env-eval` (מודל הסביבות) לבין `applicative-eval` (מודל ההצבה) מבחינת התוצאות שהם מחזירים?",
+   "options": [
+    "env-eval מחזיר תוצאות שונות במקרים שבהם יש משתנים חופשיים בגוף closure",
+    "env-eval מחזיר בדיוק את אותן תוצאות, נכנס ללולאה על אותן תוכניות וזורק חריגות על אותן תוכניות — רק מהר יותר",
+    "env-eval עוצר על יותר תוכניות מ-applicative-eval, בדומה ליחס בין normal ל-applicative",
+    "env-eval מחזיר אותן תוצאות רק עבור תוכניות ללא פונקציות ממדרגה ראשונה"
+   ],
+   "correct": 1,
+   "explanationHe": "מודל הסביבות הוא **אופטימיזציה** ולא סמנטיקה חדשה: שני המודלים מגדירים את אותה סמנטיקה תפעולית בדיוק. ההבדל הוא בביצועים — מודל ההצבה מעתיק ומשכתב את כל ה-AST בכל יישום, ומודל הסביבות רק מוסיף מסגרת לרשימה. תשובה 1 מתארת את הכלל **השגוי** מהניסיון הראשון, שאכן נתן תוצאות שונות, ולכן הוא תוקן. תשובה 3 מבלבלת בין ההבחנה הזאת לבין ההבחנה יישומי/נורמלי — שתי הבחנות אורתוגונליות לחלוטין. תשובה 4 שגויה: השקילות מתקיימת לכל תוכנית. **כדאי לשנן:** יש 4 שילובים אפשריים (הצבה/סביבות × יישומי/נורמלי), אבל רק **שתי** סמנטיקות שונות."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "שרטטו (בטקסט) את שרשרת הסביבות שנוצרת בהערכת התוכנית הבאה, וציינו עבור כל closure לאיזו סביבה מצביע שדה ה-env שלו.\n```scheme\n(define add\n  (lambda (a)\n    (lambda (b)\n      (+ a b))))\n\n(define add5 (add 5))\n(add5 3)\n```",
+   "answerHe": "**GE** (הסביבה הגלובלית): `{add = <Closure (a) (lambda (b) (+ a b)) GE>, add5 = <Closure (b) (+ a b) E1>}`\n\n**E1** — נוצרת ביישום `(add 5)`: `{a=5}`, סביבה עוטפת: GE.\n\n**E2** — נוצרת ביישום `(add5 3)`: `{b=3}`, סביבה עוטפת: **E1** (סביבת ה-closure של `add5`, לא הסביבה הנוכחית שהיא GE).\n\nשרשרת: `E2 = <{b=3};{a=5};GE>`. הערכת הגוף `(+ a b)` מוצאת את `b=3` במסגרת הראשונה ואת `a=5` בשנייה, והתוצאה היא `8`.\n\nשדות ה-env: ה-closure של `add` נוצר בהערכת ה-`define` הראשון ולכן מצביע ל-GE. ה-closure של `add5` נוצר בהערכת ה-lambda הפנימית **בתוך** היישום `(add 5)`, כלומר בסביבה E1, ולכן מצביע אליה.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) שני closures נפרדים עם שדות env שונים; (2) E1 שורדת אחרי סיום היישום `(add 5)` בזכות ההפניה מ-`add5`; (3) E2 מרחיבה את E1 ולא את GE — זו הנקודה שבה מתבטא הכלל הנכון; (4) התוצאה 8. זוהי תבנית ה-currying/closure-factory, ושאלות מסוג \"שרטטו את דיאגרמת הסביבות\" מופיעות כמעט בכל מבחן."
+  }
+ ]
+}

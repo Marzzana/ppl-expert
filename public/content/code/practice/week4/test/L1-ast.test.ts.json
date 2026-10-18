@@ -1,0 +1,8 @@
+{
+ "id": "practice/week4/test/L1-ast.test.ts",
+ "repo": "practice",
+ "path": "week4/test/L1-ast.test.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/week4/test/L1-ast.test.ts",
+ "code": "import { expect } from \"chai\";\nimport { isAppExp, makePrimOp, parseL1CExp } from \"../src/L1/L1-ast\";\nimport { parse as parseSexp } from \"../src/shared/parser\";\nimport { bind, isOkT } from \"../src/shared/result\";\n\ndescribe(\"L1 Parsing\", () => {\n    it(\"parses AppExps correctly\", () => {\n        const result = bind(parseSexp(\"(> 1 2)\"), parseL1CExp);\n        if (isOkT(isAppExp)(result)) {\n            expect(result.value.rator).to.deep.equal(makePrimOp(\">\"));\n        } else {\n            expect.fail(\"Could not parse (> 1 2) as AppExp.\");\n        }\n    });\n});"
+}

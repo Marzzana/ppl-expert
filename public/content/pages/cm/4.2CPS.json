@@ -1,0 +1,1332 @@
+{
+ "id": "cm/4.2CPS",
+ "kind": "lecture",
+ "sourcePath": "class_material/4.2CPS.md",
+ "titleEn": "Continuation Passing Style",
+ "titleHe": "סגנון העברת המשכיות",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/4.2CPS:0",
+   "depth": 1,
+   "headingEn": "Continuation Passing Style",
+   "raw": "# Continuation Passing Style\n",
+   "blocks": [],
+   "headingHe": "סגנון העברת המשכיות"
+  },
+  {
+   "id": "cm/4.2CPS:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:1:0",
+     "type": "prose",
+     "en": "We return to Scheme and investigate functional techniques to model and understand advanced control structures in addition\nto conditionals, function invocation and iteration.\n\n",
+     "hash": "9cd82b5c9f28cb18",
+     "he": "אנחנו חוזרים ל-Scheme ובוחנים טכניקות פונקציונליות למידול ולהבנה של מבני בקרה מתקדמים, מעבר לתנאים, להפעלת פונקציה ולאיטרציה."
+    }
+   ],
+   "headingHe": "‏PPL 2023"
+  },
+  {
+   "id": "cm/4.2CPS:2",
+   "depth": 2,
+   "headingEn": "Conditionals, Sequence, Recursion and Iteration in Scheme",
+   "raw": "## Conditionals, Sequence, Recursion and Iteration in Scheme\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:2:0",
+     "type": "prose",
+     "en": "The traditional control structures in programming languages are:\n",
+     "hash": "cfd895f256e091d1",
+     "he": "מבני הבקרה המסורתיים בשפות תכנות הם:"
+    },
+    {
+     "id": "cm/4.2CPS:2:1",
+     "type": "list",
+     "en": "* **Conditionals**: are provided in Scheme with the special forms `if` and `cond` - they must be supported as part of the operational semantics of the language.\n* **Sequence**: are supported in Scheme in the body of procedures and let expressions; they are useful when we execute procedures with side effects.\n* **Recursion and Iteration**: There is no special form in Scheme for loops and iterations.  Instead, loops are implemented using a specific form of recursion and are supported by the **letrec** special form.\n\n",
+     "hash": "d484eb9bbb7e76ca",
+     "he": "* **תנאים (Conditionals)**: ב-Scheme הם ניתנים באמצעות הצורות המיוחדות (special forms) ‏`if` ו-`cond` — הם חייבים להיתמך כחלק מהסמנטיקה התפעולית (operational semantics) של השפה.\n* **רצף (Sequence)**: נתמך ב-Scheme בגוף של פרוצדורות ובגוף של ביטויי `let`; הוא שימושי כשמריצים פרוצדורות עם תופעות לוואי (side effects).\n* **רקורסיה ואיטרציה (Recursion and Iteration)**: אין ב-Scheme צורה מיוחדת ללולאות ולאיטרציות. במקום זאת, לולאות ממומשות באמצעות צורה מסוימת של רקורסיה, ונתמכות על ידי הצורה המיוחדת **letrec**."
+    },
+    {
+     "id": "cm/4.2CPS:2:2",
+     "type": "prose",
+     "en": "Consider the comparison between these two functions computing the factorial of a number n:\n\n",
+     "hash": "ce300c1c410a463a",
+     "he": "נתבונן בהשוואה בין שתי הפונקציות הבאות, שמחשבות את העצרת (factorial) של מספר n:"
+    },
+    {
+     "id": "cm/4.2CPS:2:3",
+     "type": "code",
+     "en": "```scheme\n(define fact\n  (lambda (n)\n    (if (= n 1)\n      1\n      (* n (fact (- n 1))))))\n      \n(define fact-iter\n  (lambda (n acc)\n    (if (= n 1)\n        acc\n        (fact-iter (- n 1) (* n acc)))))\n```\n\n",
+     "hash": "c95405f88f333c5a",
+     "lang": "scheme",
+     "noteHe": "שני מימושים של עצרת, וההבדל ביניהם הוא לב השיעור. ‏`fact` היא הרקורסיה ה\"טבעית\": אם ‏`n` שווה 1 מחזירים 1, אחרת מחשבים ‏`(fact (- n 1))` ואז **מכפילים** את התוצאה ב-`n`. הכפל הזה הוא עבודה שנשארת *אחרי* שהקריאה הרקורסיבית חוזרת — ולכן המחשב חייב לזכור אותה. ‏`fact-iter` מקבלת פרמטר שני, ‏`acc`, שהוא צובר (accumulator): הוא מחזיק את המכפלה שנצברה עד כה, וכשמגיעים לתנאי העצירה פשוט מחזירים אותו. שימו לב שבענף האחרון של ‏`fact-iter` הקריאה הרקורסיבית היא **הביטוי כולו** — לא עוטפים אותה בשום פעולה נוספת. זו בדיוק ההגדרה של קריאת זנב (tail call), ובה תלוי כל ההבדל בין תהליך רקורסיבי לתהליך איטרטיבי. הערה על המקור: בשני המימושים תנאי העצירה הוא ‏`(= n 1)` ולא ‏`(= n 0)`, ולכן ‏`(fact 0)` ייכנס לרקורסיה אינסופית (0 → ‎-1 → ‎-2 …) במקום להחזיר 1."
+    },
+    {
+     "id": "cm/4.2CPS:2:4",
+     "type": "prose",
+     "en": "The evaluation of fact generates a **recursive** process - the steps of the evaluation look as follows:\n\n",
+     "hash": "d97c43f2d2bcb072",
+     "he": "ההערכה של fact מייצרת תהליך **רקורסיבי** — צעדי ההערכה נראים כך:"
+    },
+    {
+     "id": "cm/4.2CPS:2:5",
+     "type": "code",
+     "en": "```scheme\n(fact 6)\n(* 6 (fact 5))\n...\n(* 6 (* 5 (...(* 2 (fact 1)...)\n(* 6 (* 5 (...(* 2 1)...)\n...\n(* 6 120)\n720\n```\n\n",
+     "hash": "0cc07a9cdf059957",
+     "lang": "scheme",
+     "noteHe": "זהו עקבות (trace) של ההערכה: כל שורה היא הביטוי שנשאר לחשב אחרי הצעד הקודם. שימו לב לצורה — הביטוי **גדל** בכל צעד: תחילה ‏`(* 6 …)`, אחר כך ‏`(* 6 (* 5 …))` וכן הלאה, עד שמגיעים לתנאי העצירה ‏`(fact 1)`. רק אז הפעולות שנצברו מתחילות להתבצע בכיוון ההפוך, מבפנים החוצה, עד ל-720. ה\"בטן\" הזו שמתנפחת ואז מתכווצת היא החתימה של תהליך רקורסיבי, והיא צורכת זיכרון בגודל שפרופורציונלי ל-n. כדאי לשנן: **רקורסיה** היא תכונה של הקוד, **תהליך רקורסיבי** היא תכונה של הריצה — ושני הדברים אינם זהים, כפי שנראה מיד."
+    },
+    {
+     "id": "cm/4.2CPS:2:6",
+     "type": "prose",
+     "en": "In contrast, the `fact-iter` function generates an **iterative** process - the steps of the evaluation look as follows:\n\n",
+     "hash": "8843809000d5db78",
+     "he": "לעומת זאת, הפונקציה `fact-iter` מייצרת תהליך **איטרטיבי** — צעדי ההערכה נראים כך:"
+    },
+    {
+     "id": "cm/4.2CPS:2:7",
+     "type": "code",
+     "en": "```scheme\n(fact-iter 6 1)\n(fact-iter 5 6)\n(fact-iter 4 30)\n(fact-iter 3 120)\n(fact-iter 2 360)\n(fact-iter 1 720)\n720\n```\n\n",
+     "hash": "2fa1dd10705ecc67",
+     "lang": "scheme",
+     "noteHe": "השוו את הצורה של העקבות הזה לקודם: כאן הביטוי **לא גדל** — בכל שורה יש בדיוק קריאה אחת ל-`fact-iter`, רק עם ארגומנטים אחרים. אין שום פעולה שממתינה לתוצאה, ולכן אין מה לזכור: המחשב יכול לדרוס את המסגרת (frame) הנוכחית ולהשתמש בה מחדש. זהו בדיוק המבנה של לולאה — שני המשתנים ‏`n` ו-`acc` הם ה\"מונה\" וה\"צובר\" שלה. שימו לב שהתוצאה מצטברת בכיוון ההפוך מהמימוש הרקורסיבי: כאן מכפילים 6·1, אחר כך 5·6, אחר כך 4·30, וכן הלאה — כלומר החישוב מתבצע *בדרך פנימה* ולא *בדרך החוצה*, ולכן כשמגיעים לתנאי העצירה התשובה כבר מוכנה ואפשר פשוט להחזיר את ‏`acc`."
+    },
+    {
+     "id": "cm/4.2CPS:2:8",
+     "type": "prose",
+     "en": "Observe that each call of `fact` in the trace is executed in a **control context** - which indicates what computation is to be done after the call completes.  We see that this context grows in each successive call - until the base case of the recursion is reached.  At this point, the accumulated context is executed, step by step, and this control context is consumed, until the result of the recursion is obtained.  This type of recursive process execution consumes memory in this case proportional to the input parameter `n`.  The memory is consumed on a stack of frames.\n\n",
+     "hash": "95aeda4c92909840",
+     "he": "שימו לב שכל קריאה ל-`fact` בעקבות מתבצעת בתוך **הקשר בקרה** (control context) — שמציין איזה חישוב צריך להתבצע אחרי שהקריאה מסתיימת. אנחנו רואים שההקשר הזה גדל בכל קריאה עוקבת — עד שמגיעים למקרה הבסיס של הרקורסיה. בנקודה הזו ההקשר שנצבר מתבצע, צעד אחר צעד, וההקשר הזה נצרך, עד שמתקבלת תוצאת הרקורסיה. סוג כזה של ביצוע תהליך רקורסיבי צורך במקרה הזה זיכרון פרופורציונלי לפרמטר הקלט `n`. הזיכרון נצרך על גבי מחסנית של מסגרות (stack of frames)."
+    },
+    {
+     "id": "cm/4.2CPS:2:9",
+     "type": "prose",
+     "en": "In contrast, in the process generated by `fact-iter` there is no control context generated: each time the call to `fact-iter` is executed, there is no *next* computation that needs to be done with the return value of `fact-iter`.  We say that `fact-iter` occurs in **tail position** in the function.  Such procedures can be executed without consuming stack frames. \n\n",
+     "hash": "e5e46c894091df64",
+     "he": "לעומת זאת, בתהליך שנוצר על ידי `fact-iter` לא נוצר שום הקשר בקרה: בכל פעם שהקריאה ל-`fact-iter` מתבצעת, אין חישוב *הבא* שצריך להתבצע עם ערך ההחזרה של `fact-iter`. אנחנו אומרים ש-`fact-iter` מופיעה ב**עמדת זנב** (tail position) בתוך הפונקציה. פרוצדורות כאלה יכולות להתבצע בלי לצרוך מסגרות מחסנית."
+    },
+    {
+     "id": "cm/4.2CPS:2:10",
+     "type": "prose",
+     "en": "The operational semantics of Scheme requires that the execution of **tail recursive** procedures do not consume control memory.\nHence, tail recursion is the construct used in Scheme to support **iteration**.\n\n",
+     "hash": "b5d06c2a6c908bc8",
+     "he": "הסמנטיקה התפעולית של Scheme דורשת שביצוע של פרוצדורות **רקורסיביות-זנב** (tail recursive) לא יצרוך זיכרון בקרה.\nלכן, רקורסיית זנב היא המבנה שמשמש ב-Scheme כדי לתמוך ב**איטרציה**."
+    },
+    {
+     "id": "cm/4.2CPS:2:11",
+     "type": "prose",
+     "en": "Observe that the iterative procedure `fact-iter` has two parameters - one represents the current number over which is to be computed, the second one is an accumulator, in which we incrementally compute the result of the computation. \n\n",
+     "hash": "870ff9e714a28341",
+     "he": "שימו לב שלפרוצדורה האיטרטיבית `fact-iter` יש שני פרמטרים — האחד מייצג את המספר הנוכחי שעליו מחשבים, והשני הוא צובר (accumulator), שבו אנחנו מחשבים בהדרגה את תוצאת החישוב."
+    }
+   ],
+   "headingHe": "תנאים, רצף, רקורסיה ואיטרציה ב-Scheme"
+  },
+  {
+   "id": "cm/4.2CPS:3",
+   "depth": 3,
+   "headingEn": "Tail Recursive Implementation",
+   "raw": "### Tail Recursive Implementation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:3:0",
+     "type": "prose",
+     "en": "While Scheme requires that tail recursion be implemented in an iterative manner, JavaScript does not impose this behavior.\nHow can we find out whether Node.js implementation is tail-recursive?\n\n",
+     "hash": "435d3c5c8b61a1f3",
+     "he": "בעוד ש-Scheme דורשת שרקורסיית זנב תמומש באופן איטרטיבי, JavaScript אינה כופה את ההתנהגות הזו.\nאיך אפשר לגלות האם המימוש של Node.js הוא רקורסיבי-זנב?"
+    },
+    {
+     "id": "cm/4.2CPS:3:1",
+     "type": "prose",
+     "en": "The easiest way is to try it: recursive calls consume memory on a stack.  This stack is usually limited in size to avoid an infinite recursive call from consuming all the RAM of the process.  If we run a tail-recursive procedure in JavaScript in Node.js, we find out it fails with an error of type \"Stack Overflow\" - which indicates the execution consumes stack memory - or in other words, Node.js does **not** implement tail recursion in an iterative manner.\n\n",
+     "hash": "f0606ce187c66e79",
+     "he": "הדרך הקלה ביותר היא פשוט לנסות: קריאות רקורסיביות צורכות זיכרון על גבי מחסנית. המחסנית הזו מוגבלת בדרך כלל בגודלה, כדי למנוע ממצב של קריאה רקורסיבית אינסופית לצרוך את כל ה-RAM של התהליך. אם נריץ פרוצדורה רקורסיבית-זנב ב-JavaScript תחת Node.js, נגלה שהיא נכשלת עם שגיאה מסוג \"Stack Overflow\" — מה שמעיד שהביצוע צורך זיכרון מחסנית, או במילים אחרות, ש-Node.js **אינו** מממש רקורסיית זנב באופן איטרטיבי."
+    },
+    {
+     "id": "cm/4.2CPS:3:2",
+     "type": "code",
+     "en": "```typescript\nconst factIter = (n: number, res: number): number =>\n    (n === 0) ? res :\n    factIter(n - 1, n * res);\n\nconsole.log(factIter(10000, 1));\n```\n\n",
+     "hash": "778857ef60bfd8cb",
+     "lang": "typescript",
+     "noteHe": "זו בדיוק אותה `fact-iter` מהסעיף הקודם, כתובה ב-TypeScript: ‏`factIter` מקבלת מונה ‏`n` וצובר ‏`res`, ובענף ה\"אחרת\" הקריאה הרקורסיבית היא הביטוי כולו — כלומר קריאת זנב לכל דבר. אילו TypeScript/Node היו מממשים אופטימיזציית קריאת זנב (tail call optimization), הקריאה ‏`factIter(10000, 1)` הייתה רצה בזיכרון קבוע. הניסוי הזה הוא הבדיקה האמפירית: מריצים עם קלט גדול מספיק (10,000 קריאות מקוננות) ורואים אם המחסנית עולה על גדותיה. שימו לב שהתוצאה המספרית עצמה חסרת משמעות — ‎10000! הוא הרבה מעבר לטווח של ‏`number` ויחזור כ-`Infinity`; מה שנבדק כאן הוא צריכת הזיכרון, לא הערך."
+    },
+    {
+     "id": "cm/4.2CPS:3:3",
+     "type": "prose",
+     "en": "When executed - we obtain an error:\n",
+     "hash": "cb5187de125a174f",
+     "he": "כשמריצים — מקבלים שגיאה:"
+    },
+    {
+     "id": "cm/4.2CPS:3:4",
+     "type": "code",
+     "en": "```typescript\nconst factIter = (n: number, res: number): number =>\n                 ^\nRangeError: Maximum call stack size exceeded\n```\n\n",
+     "hash": "900bdc5209160c1f",
+     "lang": "typescript",
+     "noteHe": "פלט השגיאה של Node. ‏`RangeError: Maximum call stack size exceeded` היא הדרך של V8 להגיד \"המחסנית התמלאה\" — כלומר כל קריאה רקורסיבית אכן פתחה מסגרת חדשה על המחסנית, ואף אחת מהן לא נמחקה. זו ההוכחה המעשית ש-Node.js אינו מבצע tail call optimization, למרות שהתקן ES2015 כן מגדיר אותה. כדאי לשנן: ההגדרה של רקורסיית זנב היא תכונה של **הקוד**; האם היא רצה בזיכרון קבוע היא תכונה של **המימוש** של השפה."
+    },
+    {
+     "id": "cm/4.2CPS:3:5",
+     "type": "prose",
+     "en": "What can we infer from this fact about the following question:\n",
+     "hash": "c2503564bc3734fd",
+     "he": "מה אפשר להסיק מהעובדה הזו לגבי השאלה הבאה:"
+    },
+    {
+     "id": "cm/4.2CPS:3:6",
+     "type": "list",
+     "en": "* Our interpreter for L5 is written in JavaScript, which does not implement tail recursion as iteration\n  (See [L5-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-eval.ts)).\n* Does our interpreter implement tail recursion as iteration?\n\n",
+     "hash": "ccb4085664f2d1f4",
+     "he": "* המפרש שלנו ל-L5 כתוב ב-JavaScript, שאינה מממשת רקורסיית זנב כאיטרציה\n  (ראו [L5-eval.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-eval.ts)).\n* האם המפרש שלנו מממש רקורסיית זנב כאיטרציה?"
+    },
+    {
+     "id": "cm/4.2CPS:3:7",
+     "type": "prose",
+     "en": "We can test empirically this question using the same method as we did for testing whether Node.js implements tail recursion as iteration: run the following L5 program in our interpreter:\n\n",
+     "hash": "6e5fda18761ea5e8",
+     "he": "אנחנו יכולים לבדוק את השאלה הזו אמפירית בעזרת אותה שיטה שבה בדקנו האם Node.js מממשת רקורסיית זנב כאיטרציה: להריץ את תוכנית ה-L5 הבאה במפרש שלנו:"
+    },
+    {
+     "id": "cm/4.2CPS:3:8",
+     "type": "code",
+     "en": "```scheme\nevalParse(`\n(L5 (define factIter\n      (lambda (n res)\n        (if (= n 0)\n            res\n            (factIter (- n 1) (* n res)))))\n    (factIter 10000 1))\n`)\n```\n\n",
+     "hash": "fb6a2b4ce693f9e6",
+     "lang": "scheme",
+     "noteHe": "אותה תוכנית עצמה, הפעם בשפת המושא (object language) שלנו: מריצים אותה דרך ‏`evalParse` — הפונקציה של המפרש שמקבלת מחרוזת L5, מנתחת אותה תחבירית ומעריכה. ‏`define` יוצר קשירה גלובלית ל-`factIter`, והביטוי האחרון ‏`(factIter 10000 1)` הוא זה שמפעיל את הרקורסיה. השאלה שנבדקת: המפרש שלנו הוא רק תוכנית JavaScript, וקריאה רקורסיבית ב-L5 מתורגמת לקריאה רקורסיבית ל-`applyProcedure`/`L5applicativeEval` ב-JavaScript — אז האם רקורסיית זנב בשפת המושא נשמרת כאיטרציה, או שהיא \"יורשת\" את התנהגות שפת-המטא? שימו לב שהבלוק מסומן כ-Scheme אבל הוא בעצם קוד TypeScript שעוטף מחרוזת L5 — זו קריאת ‏`evalParse` בתוך תבנית מחרוזת (template literal)."
+    },
+    {
+     "id": "cm/4.2CPS:3:9",
+     "type": "prose",
+     "en": "When we execute this program in our L5 interpreter, we get the same error:\n",
+     "hash": "b58ac4d3f6fdff43",
+     "he": "כשמריצים את התוכנית הזו במפרש ה-L5 שלנו, מקבלים את אותה שגיאה:"
+    },
+    {
+     "id": "cm/4.2CPS:3:10",
+     "type": "code",
+     "en": "```typescript\nRangeError: Maximum call stack size exceeded\n```\n\n",
+     "hash": "c7daca31d892d51a",
+     "lang": "typescript",
+     "noteHe": "אותה שגיאה בדיוק — והמסקנה חשובה: המפרש שלנו **יורש** את מודל הבקרה של שפת-המטא. מכיוון שלא מודלנו את מחסנית הקריאות במפורש, כל קריאה בשפת המושא נשענת על קריאת פונקציה ב-JavaScript, ולכן צורכת מסגרת מחסנית — גם כשהיא בעמדת זנב ב-L5. זו בדיוק הסיבה שנצטרך את CPS: כדי שהמפרש *יסביר* בעצמו איך בקרה עובדת, במקום להשאיל אותה משפת-המטא."
+    },
+    {
+     "id": "cm/4.2CPS:3:11",
+     "type": "prose",
+     "en": "In other words, L5 does not implement the Scheme requirement that the interpreter execute tail-recursive programs in an iterative manner.\n\n",
+     "hash": "89e34bd9bf2f0ad9",
+     "he": "במילים אחרות, L5 אינה מממשת את הדרישה של Scheme שהמפרש יבצע תוכניות רקורסיביות-זנב באופן איטרטיבי."
+    },
+    {
+     "id": "cm/4.2CPS:3:12",
+     "type": "prose",
+     "en": "In this chapter, we design a strategy that enables us to meet this requirement: implement an interpreter that executes tail-recursive programs in an iterative manner **even though** the meta-language (JavaScript in our case) does **not** provide this behavior.  We do not complete the code for this interpreter, but develop the strategy through the analysis of a general code transformation strategy called **CPS - Continuation Passing Style**.\n\n",
+     "hash": "4f9915f2d2a8b2fe",
+     "he": "בפרק הזה נתכנן אסטרטגיה שתאפשר לנו לעמוד בדרישה הזו: לממש מפרש שמבצע תוכניות רקורסיביות-זנב באופן איטרטיבי **למרות** ששפת-המטא (JavaScript במקרה שלנו) **אינה** מספקת את ההתנהגות הזו. לא נשלים את הקוד של המפרש הזה, אבל נפתח את האסטרטגיה דרך ניתוח של אסטרטגיית טרנספורמציית קוד כללית שנקראת **CPS — סגנון העברת המשכיות (Continuation Passing Style)**."
+    },
+    {
+     "id": "cm/4.2CPS:3:13",
+     "type": "prose",
+     "en": "**NOTE**: Understand which part of the L5 interpreter consumes stack memory when it executes a tail-recursive program.  Point to the exact procedure that causes this memory consumption. \n\n",
+     "hash": "b1c841eb19891275",
+     "he": "**שימו לב**: הבינו איזה חלק במפרש ה-L5 צורך זיכרון מחסנית כשהוא מבצע תוכנית רקורסיבית-זנב. הצביעו על הפרוצדורה המדויקת שגורמת לצריכת הזיכרון הזו."
+    }
+   ],
+   "headingHe": "מימוש רקורסיבי-זנב"
+  },
+  {
+   "id": "cm/4.2CPS:4",
+   "depth": 2,
+   "headingEn": "Delayed Computation in Scheme",
+   "raw": "## Delayed Computation in Scheme\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:4:0",
+     "type": "prose",
+     "en": "An important usage of procedure expressions is delaying computation: when a procedure returns a closure, the computation embedded in the returned closure is not applied; instead it is delayed until the closure is applied.\n\n",
+     "hash": "8efc7380c62444b4",
+     "he": "שימוש חשוב בביטויי פרוצדורה הוא השהיית חישוב: כאשר פרוצדורה מחזירה סגור (closure), החישוב שמוטמע בסגור המוחזר אינו מופעל; במקום זאת הוא מושהה עד שהסגור יופעל."
+    },
+    {
+     "id": "cm/4.2CPS:4:1",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/4.2CPS:4:2",
+     "type": "code",
+     "en": "```scheme\n(define make-delayed\n  (lambda (n)\n    (lambda ()\n      (fact n))))\n```\n\n",
+     "hash": "e84b49b0b5586648",
+     "lang": "scheme",
+     "noteHe": "‏`make-delayed` היא lambda שמחזירה lambda — שימו לב ל-`(lambda () …)` הפנימית, שאין לה אף פרמטר. כשקוראים ‏`(make-delayed 4)` **לא** מחושב שום דבר: נוצר רק סגור שזוכר ש-`n` הוא 4, וגוף החישוב ‏`(fact n)` יושב בתוכו ומחכה. רק כשנפעיל את הסגור הזה, בכתיב ‏`(f4)`, החישוב ירוץ בפועל. פרוצדורה חסרת פרמטרים שכל תפקידה לעטוף חישוב מושהה נקראת **thunk** — ולנו זה מוכר כבר מהעיקרון של הערכה עצלה (lazy evaluation). ה\"קסם\" כאן הוא לא בשפה אלא בסגור: הוא זה שמאפשר לשמור את הערך של ‏`n` יחד עם החישוב שטרם בוצע."
+    },
+    {
+     "id": "cm/4.2CPS:4:3",
+     "type": "prose",
+     "en": "When invoked, this function constructs a delayed computation:\n\n",
+     "hash": "a5b6c2e1ea2cf401",
+     "he": "כשמפעילים אותה, הפונקציה הזו בונה חישוב מושהה:"
+    },
+    {
+     "id": "cm/4.2CPS:4:4",
+     "type": "code",
+     "en": "```scheme\n(let ((f4 (make-delayed 4)))\n  (do-something)\n  (f4))\n```\n\n",
+     "hash": "d6b25313963ff736",
+     "lang": "scheme",
+     "noteHe": "שלושה צעדים שמדגימים את ההשהיה: ‏`(make-delayed 4)` בונה את הסגור וקושר אותו ל-`f4` — עד כאן ‏`(fact 4)` עדיין לא רץ. אחר כך מבצעים משהו אחר לגמרי, ‏`(do-something)`. ורק בשורה האחרונה, ‏`(f4)` — הסוגריים החיצוניים הם ההפעלה — החישוב המושהה מתעורר ומחזיר 24. ההפרדה הזו בין **בניית** החישוב לבין **הפעלתו** היא בדיוק מה שראינו ב-4.1 עם משימות (tasks) ולולאת האירועים, וזה יהיה הבסיס להמשכיות (continuations) בהמשך השיעור."
+    },
+    {
+     "id": "cm/4.2CPS:4:5",
+     "type": "prose",
+     "en": "`f4` is a procedure of no argument which encapsulates the computation `(fact 4)`.  When it is created, a closure is constructed - but it is not invoked.  We can then do other activities, and later, when the programmer decides, in the future, this delayed computation can be invoked in the form `(f4)`.  This closure plays a role similar to the **tasks** we reviewed in the previous lecture when discussing the Node event loop and asynchronous functions.  The difference is that, in the Scheme case, we have not yet defined the framework in which we post tasks and which decides when to invoke these tasks (the equivalent of the event loop).\n\n",
+     "hash": "ad8387c922d9743d",
+     "he": "‏`f4` היא פרוצדורה חסרת ארגומנטים שעוטפת את החישוב `(fact 4)`. כשהיא נוצרת, נבנה סגור — אבל הוא אינו מופעל. אנחנו יכולים אז לבצע פעילויות אחרות, ומאוחר יותר, כשהמתכנת מחליט, בעתיד, אפשר להפעיל את החישוב המושהה הזה בצורה `(f4)`. הסגור הזה ממלא תפקיד דומה ל**משימות** (tasks) שסקרנו בהרצאה הקודמת בדיון על לולאת האירועים של Node ועל פונקציות אסינכרוניות. ההבדל הוא שבמקרה של Scheme עדיין לא הגדרנו את המסגרת שאליה מפרסמים משימות ושמחליטה מתי להפעיל אותן (המקבילה של לולאת האירועים)."
+    },
+    {
+     "id": "cm/4.2CPS:4:6",
+     "type": "prose",
+     "en": "This simple mechanism of using closures for delayed computations allows the Scheme programmer to design advanced control structures.\n\n",
+     "hash": "7bf6c3c4f58fb091",
+     "he": "המנגנון הפשוט הזה, של שימוש בסגורים לחישובים מושהים, מאפשר למתכנת ב-Scheme לתכנן מבני בקרה מתקדמים."
+    },
+    {
+     "id": "cm/4.2CPS:4:7",
+     "type": "prose",
+     "en": "Let us consider two examples where this technique is applied:\n",
+     "hash": "cabb9ec0ea920fc0",
+     "he": "נתבונן בשתי דוגמאות שבהן הטכניקה הזו מיושמת:"
+    },
+    {
+     "id": "cm/4.2CPS:4:8",
+     "type": "list",
+     "en": "* Write procedures which compute explicitly delayed computations with one or two continuations\n* Model streams which are similar to the generator pattern reviewed in JavaScript.\n\n",
+     "hash": "b08f572742117f18",
+     "he": "* כתיבת פרוצדורות שמחשבות חישובים מושהים באופן מפורש, עם המשכית אחת או שתיים\n* מידול זרמים (streams) הדומים לתבנית הגנרטורים שסקרנו ב-JavaScript."
+    }
+   ],
+   "headingHe": "חישוב מושהה ב-Scheme"
+  },
+  {
+   "id": "cm/4.2CPS:5",
+   "depth": 2,
+   "headingEn": "Continuation Passing",
+   "raw": "## Continuation Passing\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:5:0",
+     "type": "prose",
+     "en": "Consider these two variants of the factorial procedure:\n\n",
+     "hash": "54b1df6dc9908283",
+     "he": "נתבונן בשתי הווריאציות הבאות של פרוצדורת העצרת:"
+    },
+    {
+     "id": "cm/4.2CPS:5:1",
+     "type": "code",
+     "en": "```scheme\n(define fact\n  (lambda (n)\n    (if (= n 1)\n        1\n        (* n (fact (- n 1))))))\n\n(define fact$\n  (lambda (n cont)\n    (if (= n 1)\n        (cont 1)\n        (fact$ (- n 1) \n                (lambda (res) (cont (* n res)))))))\n```\n\n",
+     "hash": "59a8a8fc58e205ce",
+     "lang": "scheme",
+     "noteHe": "זו הדוגמה המרכזית של השיעור — כדאי לשנן אותה. למעלה ‏`fact` המוכרת. למטה ‏`fact$`: אותה פונקציה, אבל עם פרמטר נוסף ‏`cont` (קיצור של continuation, המשכית). המוסכמה בקורס: שם שמסתיים ב-`$` מסמן פונקציה בסגנון CPS. הרעיון: במקום ש-`fact$` **תחזיר** ערך, היא **מעבירה** את הערך ל-`cont`. במקרה הבסיס, במקום ‏`1` כתוב ‏`(cont 1)` — \"קח את 1 ותמשיך איתו\". במקרה הרקורסיבי, במקום ‏`(* n (fact (- n 1)))`, הכפל ב-`n` נדחס לתוך המשכית **חדשה** — ‏`(lambda (res) (cont (* n res)))` — שאומרת: \"כשתגיע התוצאה של הרקורסיה, קרא לה ‏`res`, הכפל אותה ב-`n`, ואת התוצאה תעביר ל-`cont` הישן\". התוצאה: הקריאה ל-`fact$` היא כעת בעמדת זנב — שום דבר לא מחכה לה. העבודה שהייתה קודם \"אחרי הקריאה\" הועברה לתוך פרמטר. שימו לב ש-`n` נלכד בסגור של ה-lambda החדשה, ולכן כל המשכית זוכרת \"את ה-`n` שלה\". טעות נפוצה: לכתוב ‏`(cont (* n (fact$ (- n 1) cont)))` — זה מפספס את כל הפואנטה ומחזיר לנו את ההקשר על המחסנית."
+    },
+    {
+     "id": "cm/4.2CPS:5:2",
+     "type": "prose",
+     "en": "Observe the function `fact$` (we use the convention of naming procedures which follow this pattern with a dollar sign at the end).  This procedure receives a parameter which we conventionally name `cont` which represents a delayed computation - that is, a procedure which expects a single parameter, and applies a delayed computation to this value.  \nThe type of this parameter is simply a closure which receives as argument the type that the overall function returns - in the case of `fact$` it has type `[Number -> T]`.\n\n",
+     "hash": "eb63916f94d04b7b",
+     "he": "שימו לב לפונקציה `fact$` (אנחנו נוקטים במוסכמה של מתן שם עם סימן דולר בסופו לפרוצדורות שעוקבות אחרי התבנית הזו). הפרוצדורה הזו מקבלת פרמטר שאותו אנחנו נוהגים לקרוא `cont`, והוא מייצג חישוב מושהה — כלומר, פרוצדורה שמצפה לפרמטר יחיד, ומחילה עליו חישוב מושהה.\nהטיפוס של הפרמטר הזה הוא פשוט סגור שמקבל כארגומנט את הטיפוס שהפונקציה כולה מחזירה — במקרה של `fact$` יש לו הטיפוס `[Number -> T]`."
+    },
+    {
+     "id": "cm/4.2CPS:5:3",
+     "type": "prose",
+     "en": "The procedure `fact$` models the following computation:\n",
+     "hash": "c7475774167812fe",
+     "he": "הפרוצדורה `fact$` ממדלת את החישוב הבא:"
+    },
+    {
+     "id": "cm/4.2CPS:5:4",
+     "type": "list",
+     "en": "* If the base case of the recursion is reached, apply the continuation cont to the base value `(cont 1)`.\n* Else, build a new continuation `(lambda (res) (cont (* n res)))` which represents the context of \"what should be done after we compute the recursive case `(fact (- n 1))` - then recursively invoke `(fact$ (- n 1))` with this new continuation.\n\n",
+     "hash": "11921afa92d920f9",
+     "he": "* אם הגענו למקרה הבסיס של הרקורסיה, החל את ההמשכית cont על ערך הבסיס — `(cont 1)`.\n* אחרת, בנה המשכית חדשה `(lambda (res) (cont (* n res)))` שמייצגת את ההקשר של \"מה צריך לעשות אחרי שנחשב את המקרה הרקורסיבי `(fact (- n 1))`\" — ואז קרא רקורסיבית ל-`(fact$ (- n 1))` עם ההמשכית החדשה הזו."
+    },
+    {
+     "id": "cm/4.2CPS:5:5",
+     "type": "prose",
+     "en": "Let us trace this function to understand how it models the control context explicitly:\n\n",
+     "hash": "5ce09de99d9ad39c",
+     "he": "בואו נעקוב אחרי הפונקציה הזו כדי להבין איך היא ממדלת את הקשר הבקרה באופן מפורש:"
+    },
+    {
+     "id": "cm/4.2CPS:5:6",
+     "type": "code",
+     "en": "```scheme\n(fact$ 3 (lambda (x) x)) =>                ;; let us call: k3 = (lambda (x) x)\n(fact$ 2 (lambda (res) (k3 (* 3 res)))) => ;; let us call: k2 = (lambda (res) (k3 (* 3 res)))\n(fact$ 1 (lambda (res) (k2 (* 2 res)))) => ;; let us call: k1 = (lambda (res) (k2 (* 2 res)))\n(k1 1) =>\n(k2 (* 2 1)) =>\n(k3 (* 3 2)) =>\n6\n```\n\n",
+     "hash": "a4258a7778302370",
+     "lang": "scheme",
+     "noteHe": "עקבות של ‏`(fact$ 3 (lambda (x) x))` — ההמשכית ההתחלתית היא פונקציית הזהות, כי בסוף אנחנו רוצים פשוט לקבל את התוצאה. ההערות בקוד נותנות שמות להמשכיות: ‏`k3`, ‏`k2`, ‏`k1`. עקבו אחרי שלושת השורות הראשונות: ‏`n` יורד 3 → 2 → 1, ובכל צעד ההמשכית מתעבה — ‏`k2` עוטפת את ‏`k3`, ו-`k1` עוטפת את ‏`k2`. בשורה הרביעית מגיעים לתנאי העצירה ומפעילים ‏`(k1 1)`, וזה מפעיל שרשרת \"פריקה\": ‏`(k2 (* 2 1))` = ‏`(k2 2)`, אחר כך ‏`(k3 (* 3 2))` = ‏`(k3 6)`, ולבסוף 6 = ‎3!. השוו לעקבות של ‏`fact` בתחילת הדף: שם ההקשר שנצבר ישב **על המחסנית**; כאן בדיוק אותו הקשר יושב **בתוך ערך** שאנחנו מעבירים כארגומנט. זו הפואנטה של CPS."
+    },
+    {
+     "id": "cm/4.2CPS:5:7",
+     "type": "prose",
+     "en": "The execution of the function does not consume stack space - `fact$` is a tail recursive iterative function.\nBut observe that the parameter `cont` **grows** in each successive call:\n\n",
+     "hash": "c59cd73487f8e704",
+     "he": "ביצוע הפונקציה אינו צורך מקום במחסנית — `fact$` היא פונקציה איטרטיבית רקורסיבית-זנב.\nאבל שימו לב שהפרמטר `cont` **גדל** בכל קריאה עוקבת:"
+    },
+    {
+     "id": "cm/4.2CPS:5:8",
+     "type": "code",
+     "en": "```scheme\nk3 = (lambda (x) x)\nk2 = (lambda (res) (k3 (* 3 res))) = \n     (lambda (res) \n       ((lambda (x) x) \n        (* 3 res)))\nk1 = (lambda (res) (k2 (* 2 res))) = \n     (lambda (res) \n       ((lambda (res)\n          ((lambda (x) x)\n           (* 3 res)))\n        (* 2 res)))\n```\n\n",
+     "hash": "07834df737cc36db",
+     "lang": "scheme",
+     "noteHe": "כאן \"פותחים\" את ההמשכיות ורואים מה הן באמת: ‏`k3` היא הזהות; ‏`k2` היא lambda שבתוכה יושבת ‏`k3` שלמה; ‏`k1` היא lambda שבתוכה יושבת ‏`k2` שלמה, שבתוכה ‏`k3`. כלומר הקינון גדל ליניארית ב-`n` — בדיוק כמו שהמחסנית גדלה במימוש הרקורסיבי המקורי. המסקנה החשובה, ושאלת מבחן קלאסית: CPS **לא מבטל את הזיכרון** שהחישוב דורש; הוא מעביר אותו ממחסנית הבקרה (שהמפרש מנהל, ושאין לנו שליטה עליה) אל **הערמה** (heap), כמבנה נתונים מפורש שאנחנו בונים בעצמנו. הרווח הוא שליטה: עכשיו אפשר לשמור המשכית, לקרוא לה פעמיים, או לזרוק אותה — וזה מה שיאפשר בהמשך גנרטורים, קו-רוטינות וחריגות. שימו לב לטעות עדינה בבלוק המקור: בפתיחת ‏`k1` הפרמטר הפנימי נקרא גם הוא ‏`res`, מה שמסתיר (shadowing) את ה-`res` החיצוני — למעשה שתי ה-lambda-ות עוטפות משתנים שונים, וכדאי לקרוא להן בשמות שונים כדי לא להתבלבל."
+    },
+    {
+     "id": "cm/4.2CPS:5:9",
+     "type": "prose",
+     "en": "In a schematic manner, we see that this version explicitly represents the control context in the form of a closure.\nWe can think of this procedure as an iterative procedure which constructs its own control stack in its local parameter `cont`\ninstead of relying on the interpreter's control stack.\n\n",
+     "hash": "aab0d520a42cab48",
+     "he": "באופן סכמטי, אנחנו רואים שהגרסה הזו מייצגת במפורש את הקשר הבקרה בצורת סגור.\nאפשר לחשוב על הפרוצדורה הזו כעל פרוצדורה איטרטיבית שבונה לעצמה את מחסנית הבקרה שלה בתוך הפרמטר המקומי `cont`,\nבמקום להסתמך על מחסנית הבקרה של המפרש."
+    }
+   ],
+   "headingHe": "העברת המשכיות"
+  },
+  {
+   "id": "cm/4.2CPS:6",
+   "depth": 3,
+   "headingEn": "Characterizing Iteration: Head and Tail Positions",
+   "raw": "### Characterizing Iteration: Head and Tail Positions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:6:0",
+     "type": "prose",
+     "en": "How can we tell a program will yield an iterative process when it is evaluated in Scheme as opposed to a recursive one?\nIn other words, let us determine through **static analysis** of the syntactic structure of a program whether its evaluation\nwill consume unbounded control space - stack space which is proportional to the arguments and thus can grow to a non-constant size.  This analysis can be formalized and automated, so that an expression can be proven to create iterative processes. \n\n",
+     "hash": "7d5f54996c71e32e",
+     "he": "איך אפשר לדעת שתוכנית תייצר תהליך איטרטיבי כשהיא מוערכת ב-Scheme, ולא תהליך רקורסיבי?\nבמילים אחרות, נקבע באמצעות **ניתוח סטטי** (static analysis) של המבנה התחבירי של תוכנית האם ההערכה שלה\nתצרוך מקום בקרה בלתי-חסום — מקום מחסנית שפרופורציונלי לארגומנטים ולכן יכול לגדול לגודל לא-קבוע. הניתוח הזה ניתן לפורמליזציה ולאוטומציה, כך שאפשר להוכיח על ביטוי שהוא יוצר תהליכים איטרטיביים."
+    },
+    {
+     "id": "cm/4.2CPS:6:1",
+     "type": "prose",
+     "en": "This analysis is based on the distinction of two syntactic positions within the AST of the language:\n",
+     "hash": "b0015ae479d442fa",
+     "he": "הניתוח הזה מבוסס על ההבחנה בין שתי עמדות תחביריות בתוך ה-AST של השפה:"
+    },
+    {
+     "id": "cm/4.2CPS:6:2",
+     "type": "list",
+     "en": "* **Head position**: sub-expressions of an expression which must be evaluated before the value of the overall expression is computed through primitive combination.\n* **Tail position**: sub-expressions of an expression which are evaluated and whose value is not further combined with any other computation to return the value of the overall expression.\n\n",
+     "hash": "5277b5baa1d44276",
+     "he": "* **עמדת ראש (Head position)**: תת-ביטויים של ביטוי שחייבים להיות מוערכים לפני שערך הביטוי כולו מחושב באמצעות שילוב פרימיטיבי.\n* **עמדת זנב (Tail position)**: תת-ביטויים של ביטוי שמוערכים, וערכם אינו משולב עם שום חישוב נוסף כדי להחזיר את ערך הביטוי כולו."
+    },
+    {
+     "id": "cm/4.2CPS:6:3",
+     "type": "prose",
+     "en": "For example, consider the expression: `(if (> x 2) (* x 3) x)`.\nTo compute this expression, according to the computation rule of `if-exp` AST nodes in the operational semantics of the language, we must first compute the test sub-expression `(> x 2)`.  This sub-expression is in Head position.  Then, based on the value which is obtained, we compute either `(* x 3)` or `x` - without combining their resulting value with any other computation.  These sub-expressions are in Tail position of the `if-exp` expression.\n\n",
+     "hash": "e31eba140e65ce29",
+     "he": "לדוגמה, נתבונן בביטוי: `(if (> x 2) (* x 3) x)`.\nכדי לחשב את הביטוי הזה, לפי כלל החישוב של צמתי `if-exp` ב-AST בסמנטיקה התפעולית של השפה, עלינו לחשב תחילה את תת-ביטוי התנאי `(> x 2)`. תת-הביטוי הזה נמצא בעמדת ראש. אחר כך, על סמך הערך שהתקבל, אנחנו מחשבים או את `(* x 3)` או את `x` — בלי לשלב את הערך שהתקבל מהם עם שום חישוב אחר. תת-הביטויים האלה נמצאים בעמדת זנב של ביטוי ה-`if-exp`."
+    },
+    {
+     "id": "cm/4.2CPS:6:4",
+     "type": "prose",
+     "en": "Tail positions are positions whose evaluations is the last to occur.\n\n",
+     "hash": "74231456bf30a29b",
+     "he": "עמדות זנב הן עמדות שההערכה שלהן היא האחרונה שמתרחשת."
+    },
+    {
+     "id": "cm/4.2CPS:6:5",
+     "type": "prose",
+     "en": "Let us review the whole abstract syntax of our language and identify Head positions marked as H and tail positions marked as T.\nWe only need to review compound expressions, since the definition of Head and Tail positions is only relevant for positions within a compound expression:\n\n",
+     "hash": "460bc1e504a54803",
+     "he": "נסקור את התחביר המופשט (abstract syntax) כולו של השפה שלנו ונזהה עמדות ראש, המסומנות ב-H, ועמדות זנב, המסומנות ב-T.\nעלינו לסקור רק ביטויים מורכבים, מכיוון שההגדרה של עמדות ראש וזנב רלוונטית רק לעמדות בתוך ביטוי מורכב:"
+    },
+    {
+     "id": "cm/4.2CPS:6:6",
+     "type": "list",
+     "en": "1. `(define var H)`\n2. `(if H T T)`\n3. `(lambda (var1 ... varn) E ... E)`\n4. `(let ( (var1 H) ...) H ... T)`\n5. Application: `(H ... H)`\n\n",
+     "hash": "adcd747588fd94cb",
+     "he": "1. `(define var H)`\n2. `(if H T T)`\n3. `(lambda (var1 ... varn) E ... E)`\n4. `(let ( (var1 H) ...) H ... T)`\n5. הפעלה (application): `(H ... H)`"
+    },
+    {
+     "id": "cm/4.2CPS:6:7",
+     "type": "prose",
+     "en": "In a procedure expression (`lambda`), the sub-expressions are neither Head nor Tail position - since they are not computed when we compute the value of the lambda expression - and we note this with E position.  However, if we want to analyze a complete program to determine whether it has the potential to create a non-iterative process, we must also analyze the body of all the procedures as if they could be applied.  When we perform this analysis, we must also analyze the body of the procedures and attribute positions H for all the sub-expressions in the sequence except the last which is Tail - as in the body of let-exp.\n\n",
+     "hash": "489647f915802fdc",
+     "he": "בביטוי פרוצדורה (`lambda`), תת-הביטויים אינם בעמדת ראש ואינם בעמדת זנב — מכיוון שהם אינם מחושבים כשאנחנו מחשבים את ערך ביטוי ה-lambda — ואנחנו מסמנים זאת בעמדה E. עם זאת, אם ברצוננו לנתח תוכנית שלמה כדי לקבוע האם יש לה פוטנציאל ליצור תהליך לא-איטרטיבי, עלינו לנתח גם את גופן של כל הפרוצדורות כאילו הן עשויות להיות מופעלות. כשאנחנו מבצעים את הניתוח הזה, עלינו לנתח גם את גוף הפרוצדורות ולייחס עמדה H לכל תת-הביטויים ברצף פרט לאחרון, שהוא בעמדת זנב (Tail) — בדיוק כמו בגוף של let-exp."
+    },
+    {
+     "id": "cm/4.2CPS:6:8",
+     "type": "prose",
+     "en": "**Definition**: An expression is in **tail form** iff:\n",
+     "hash": "786601a6c19e7325",
+     "he": "**הגדרה**: ביטוי נמצא ב**צורת זנב** (tail form) אם ורק אם:"
+    },
+    {
+     "id": "cm/4.2CPS:6:9",
+     "type": "list",
+     "en": "1. its head positions do not include applications with non-primitive operators, \n2. and its sub-expressions are all in tail form.\n\n",
+     "hash": "158a5343b7efc363",
+     "he": "1. עמדות הראש שלו אינן כוללות הפעלות עם אופרטורים לא-פרימיטיביים,\n2. וכל תת-הביטויים שלו נמצאים אף הם בצורת זנב."
+    },
+    {
+     "id": "cm/4.2CPS:6:10",
+     "type": "prose",
+     "en": "Atomic expressions and combinations of atomic applications are in tail form.\n\n",
+     "hash": "38176c2bbf26c597",
+     "he": "ביטויים אטומיים ושילובים של הפעלות אטומיות נמצאים בצורת זנב."
+    },
+    {
+     "id": "cm/4.2CPS:6:11",
+     "type": "prose",
+     "en": "**Examples**\n\n",
+     "hash": "7177838a55ab1030",
+     "he": "**דוגמאות**"
+    },
+    {
+     "id": "cm/4.2CPS:6:12",
+     "type": "list",
+     "en": "* `(+ 1 x)` is in tail form.\n* `(* (* x x) (+ x x))` is in tail form (combination of primitive applications).\n* `(if p x (+ 1 (+ 1 x)))` is in tail form.\n* `(f (+ x y))` is in tail form.\n* `(+ 1 (f x))` is not in tail form (but `(f x)` is in tail form) because after `(f x)` is computed, the result must be passed to further computation.\n* `(if p x (f (- x 1)))` is in tail form.\n* `(if (f x) x (f (- x 1)))` is not in tail form - because the head call `(f x)` must be followed by other calls.\n* `(lambda (x) (f x))` is in tail form.\n* `(lambda (x) (+ 1 (f x)))` is not in tail form because the sub-expression `(+ 1 (f x))` is not in tail form.\n* `(lambda (x) (g (f 5)))` is not in tail form.\n\n",
+     "hash": "e62cbd69a31444b9",
+     "he": "* `(+ 1 x)` נמצא בצורת זנב.\n* `(* (* x x) (+ x x))` נמצא בצורת זנב (שילוב של הפעלות פרימיטיביות).\n* `(if p x (+ 1 (+ 1 x)))` נמצא בצורת זנב.\n* `(f (+ x y))` נמצא בצורת זנב.\n* `(+ 1 (f x))` אינו בצורת זנב (אבל `(f x)` כן נמצא בצורת זנב), מכיוון שאחרי ש-`(f x)` מחושב, יש להעביר את התוצאה לחישוב נוסף.\n* `(if p x (f (- x 1)))` נמצא בצורת זנב.\n* `(if (f x) x (f (- x 1)))` אינו בצורת זנב — מכיוון שאחרי קריאת הראש `(f x)` חייבות לבוא קריאות נוספות.\n* `(lambda (x) (f x))` נמצא בצורת זנב.\n* `(lambda (x) (+ 1 (f x)))` אינו בצורת זנב, מכיוון שתת-הביטוי `(+ 1 (f x))` אינו בצורת זנב.\n* `(lambda (x) (g (f 5)))` אינו בצורת זנב."
+    },
+    {
+     "id": "cm/4.2CPS:6:13",
+     "type": "prose",
+     "en": "Expressions in tail form create iterative processes when they are evaluated.  \nWe will present an argument supporting this conclusion later.  \n\n",
+     "hash": "bc59c2533bc169a6",
+     "he": "ביטויים בצורת זנב יוצרים תהליכים איטרטיביים כשהם מוערכים.\nנציג טיעון שתומך במסקנה הזו בהמשך."
+    },
+    {
+     "id": "cm/4.2CPS:6:14",
+     "type": "prose",
+     "en": "First, let us present a systematic transformation which generates a tail-form expression for any given expression which is equivalent to the original expression in a specific sense.\n\n",
+     "hash": "8a126de3a8d634e3",
+     "he": "תחילה, נציג טרנספורמציה שיטתית שמייצרת ביטוי בצורת זנב עבור כל ביטוי נתון, כך שהוא שקול לביטוי המקורי במובן מסוים."
+    }
+   ],
+   "headingHe": "אפיון איטרציה: עמדות ראש וזנב"
+  },
+  {
+   "id": "cm/4.2CPS:7",
+   "depth": 2,
+   "headingEn": "Continuation Passing Style (CPS)",
+   "raw": "## Continuation Passing Style (CPS)\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:7:0",
+     "type": "prose",
+     "en": "Continuation Passing Style (CPS) is a programming technique which assumes that every user defined procedure `f$` has a specific argument called its continuation, which is used to carry the control context of the computation.\n\n",
+     "hash": "49b4b6a478908042",
+     "he": "סגנון העברת המשכיות (Continuation Passing Style, CPS) הוא טכניקת תכנות שמניחה שלכל פרוצדורה שהמשתמש מגדיר, `f$`, יש ארגומנט מיוחד שנקרא ההמשכית שלה, ומשמש לשאת את הקשר הבקרה של החישוב."
+    },
+    {
+     "id": "cm/4.2CPS:7:1",
+     "type": "prose",
+     "en": "Consider a regular function `f` - used in a specific context:\n\n",
+     "hash": "4afa7ff4ec072357",
+     "he": "נתבונן בפונקציה רגילה `f` — בשימוש בהקשר מסוים:"
+    },
+    {
+     "id": "cm/4.2CPS:7:2",
+     "type": "code",
+     "en": "```scheme\n(+ (f a) (* a a))\n```\n\n",
+     "hash": "2bd11098869fa0dd",
+     "lang": "scheme",
+     "noteHe": "ביטוי קטן שממחיש מהו \"הקשר\": מחשבים ‏`(f a)`, ואז מחברים את התוצאה עם ‏`(* a a)`. הקריאה ל-`f` נמצאת בעמדת ראש — יש עבודה שממתינה לה. זו נקודת המוצא לתרגום ל-CPS בשורות הבאות."
+    },
+    {
+     "id": "cm/4.2CPS:7:3",
+     "type": "prose",
+     "en": "The context in which `(f a)` is invoked is:\n\n",
+     "hash": "b9b28af4a65f656f",
+     "he": "ההקשר שבו `(f a)` מופעלת הוא:"
+    },
+    {
+     "id": "cm/4.2CPS:7:4",
+     "type": "code",
+     "en": "```scheme\n(+ <r> (* a a))\n```\n\n",
+     "hash": "f7c90cee4acb0873",
+     "lang": "scheme",
+     "noteHe": "הביטוי המקורי עם \"חור\" במקום שבו הייתה הקריאה: ‏`<r>` הוא סימון לחור, למקום שאליו תיכנס התוצאה. ביטוי עם חור כזה נקרא לפעמים הקשר הערכה (evaluation context), והוא בדיוק מה שהמחסנית זוכרת עבורנו. הטריק של CPS הוא להפוך את הביטוי-עם-חור הזה ל-lambda שהחור שלה הוא הפרמטר."
+    },
+    {
+     "id": "cm/4.2CPS:7:5",
+     "type": "prose",
+     "en": "where `<r>` represents the result of computing `(f a)`. \n\n",
+     "hash": "6f9cae2482019be7",
+     "he": "כאשר `<r>` מייצג את התוצאה של חישוב `(f a)`."
+    },
+    {
+     "id": "cm/4.2CPS:7:6",
+     "type": "prose",
+     "en": "In CPS, we encapsulate this context into a **continuation** procedure - which receives the result of computing `(f a)` and pass it to the CPS function `f$`:\n\n",
+     "hash": "645dc63e8a80f820",
+     "he": "ב-CPS, אנחנו עוטפים את ההקשר הזה בתוך פרוצדורת **המשכית** — שמקבלת את התוצאה של חישוב `(f a)` — ומעבירים אותה לפונקציית ה-CPS ‏`f$`:"
+    },
+    {
+     "id": "cm/4.2CPS:7:7",
+     "type": "code",
+     "en": "```scheme\n(f$ a (lambda (res) (+ res (* a a))))\n```\n\n",
+     "hash": "22e3aadad3262a5d",
+     "lang": "scheme",
+     "noteHe": "זו הצורה ה-CPS של ‏`(+ (f a) (* a a))`. הקריאה עברה מ-`f` ל-`f$`, וההקשר ‏`(+ <r> (* a a))` הפך ל-`(lambda (res) (+ res (* a a)))` — החור ‏`<r>` הפך לפרמטר ‏`res`. שימו לב שהביטוי החדש כולו הוא **קריאה אחת** בעמדת זנב: אין יותר \"אחרי\". וגם: ‏`a` נלכד בסגור של ההמשכית, כך שהיא זוכרת את הסביבה שבה נוצרה. זו התבנית שתחזור בכל טרנספורמציית CPS — זהו את החור, הפכו אותו ל-lambda."
+    },
+    {
+     "id": "cm/4.2CPS:7:8",
+     "type": "prose",
+     "en": "In general, the continuation parameter passed to CPS functions represents the future computation that needs to be applied once the computation of `f$` ends.\n\n",
+     "hash": "1576d8bc5ad899d3",
+     "he": "באופן כללי, פרמטר ההמשכית שמועבר לפונקציות CPS מייצג את החישוב העתידי שיש להחיל ברגע שחישוב `f$` מסתיים."
+    }
+   ],
+   "headingHe": "סגנון העברת המשכיות (CPS)"
+  },
+  {
+   "id": "cm/4.2CPS:8",
+   "depth": 3,
+   "headingEn": "CPS Equivalence",
+   "raw": "### CPS Equivalence\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:8:0",
+     "type": "prose",
+     "en": "We say that a procedure `(f$ x1 ... xn cont)` is CPS-equivalent to a function `(f x1 ... xn)` if - for every parameters `(x1 ... xn)`, and every continuation procedure `(k res)` - `(f$ x1 ... xn k) = (k (f x1 ... xn))`.\n\n",
+     "hash": "5e33933a412eba8e",
+     "he": "אנחנו אומרים שפרוצדורה `(f$ x1 ... xn cont)` היא **שקולת-CPS** לפונקציה `(f x1 ... xn)` אם — עבור כל הפרמטרים `(x1 ... xn)`, ועבור כל פרוצדורת המשכית `(k res)` — מתקיים `(f$ x1 ... xn k) = (k (f x1 ... xn))`."
+    },
+    {
+     "id": "cm/4.2CPS:8:1",
+     "type": "prose",
+     "en": "Note the type relations between a procedure `f` and its CPS-equivalent procedure `f$`:\n\n",
+     "hash": "477741dd8de0bbbd",
+     "he": "שימו לב ליחסי הטיפוסים בין פרוצדורה `f` לבין הפרוצדורה שקולת-ה-CPS שלה `f$`:"
+    },
+    {
+     "id": "cm/4.2CPS:8:2",
+     "type": "code",
+     "en": "```scheme\nf: [T1 * ... * Tn -> T]\nf$: [T1 * ... * Tn * [T -> K] -> K]\n```\n\n",
+     "hash": "1fcd438863601847",
+     "lang": "scheme",
+     "noteHe": "כלל הטיפוסים של CPS — כדאי לשנן, זו שאלת מבחן קלאסית. הפונקציה המקורית ‏`f` לוקחת ‏`T1 … Tn` ומחזירה ‏`T`. הגרסה ה-CPS ‏`f$` לוקחת את אותם פרמטרים **ועוד** המשכית מטיפוס ‏`[T -> K]` — כלומר משהו שמקבל את מה ש-`f` הייתה מחזירה — ומחזירה ‏`K`, בדיוק מה שההמשכית מחזירה. שימו לב ש-`K` הוא טיפוס פולימורפי (משתנה טיפוס): ‏`f$` לא באמת \"יודעת\" מה יוצא בסוף, היא רק מעבירה הלאה. אם נבחר את הזהות כהמשכית, ‏`K` הוא ‏`T` וחוזרים לפונקציה המקורית — מה שמנוסח בפסקה הבאה."
+    },
+    {
+     "id": "cm/4.2CPS:8:3",
+     "type": "prose",
+     "en": "In particular, using the identity procedure `Id = (lambda (x) x)`, the equivalent `(f$ x1 ... xn id) = (f x1 ... xn)` holds when `f` and `f$` are CPS-equivalent for all possible arguments `(x1 ... xn)`.\n\n",
+     "hash": "aa9a7589dbf96202",
+     "he": "בפרט, בשימוש בפרוצדורת הזהות `Id = (lambda (x) x)`, השוויון `(f$ x1 ... xn id) = (f x1 ... xn)` מתקיים כאשר `f` ו-`f$` הן שקולות-CPS עבור כל הארגומנטים האפשריים `(x1 ... xn)`."
+    }
+   ],
+   "headingHe": "שקילות CPS"
+  },
+  {
+   "id": "cm/4.2CPS:9",
+   "depth": 2,
+   "headingEn": "CPS Transformation",
+   "raw": "## CPS Transformation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:9:0",
+     "type": "prose",
+     "en": "It is surprisingly possible to transform systematically any expression of our language $$L5$$ to a CPS-equivalent expression which is in tail-form.  The method consists of identifying any head position in the expression which is not a primitive combination, to extract it as the first call of the CPS version, and to encapsulate the resulting context as the continuation of the CPS version.  The process is repeated until all head positions in the expression are left as primitive compositions and all the user-procedure calls are encapsulated into nested continuations.\n\n",
+     "hash": "6a5ffe0c2973dd70",
+     "he": "באופן מפתיע, ניתן להמיר שיטתית כל ביטוי בשפה שלנו $$L5$$ לביטוי שקול-CPS שנמצא בצורת זנב. השיטה מורכבת מזיהוי של כל עמדת ראש בביטוי שאינה שילוב פרימיטיבי, חילוץ שלה כקריאה הראשונה של גרסת ה-CPS, ועטיפת ההקשר שנוצר כהמשכית של גרסת ה-CPS. התהליך חוזר על עצמו עד שכל עמדות הראש בביטוי נותרות כהרכבות פרימיטיביות, וכל הקריאות לפרוצדורות המשתמש עטופות בתוך המשכיות מקוננות."
+    },
+    {
+     "id": "cm/4.2CPS:9:1",
+     "type": "prose",
+     "en": "Let us review examples of this transformation:\n\n",
+     "hash": "984968e425063651",
+     "he": "נסקור דוגמאות של הטרנספורמציה הזו:"
+    }
+   ],
+   "headingHe": "טרנספורמציית CPS"
+  },
+  {
+   "id": "cm/4.2CPS:10",
+   "depth": 3,
+   "headingEn": "CPS of tail form expressions",
+   "raw": "### CPS of tail form expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:10:0",
+     "type": "prose",
+     "en": "In the following cases, the original procedures are already in tail-form, the CPS transformation consists of simply adding a continuation parameter:\n\n",
+     "hash": "55265ffe9b2f49d1",
+     "he": "במקרים הבאים הפרוצדורות המקוריות כבר נמצאות בצורת זנב, וטרנספורמציית ה-CPS מסתכמת בהוספת פרמטר המשכית בלבד:"
+    },
+    {
+     "id": "cm/4.2CPS:10:1",
+     "type": "code",
+     "en": "```scheme\n(define square (lambda (x) (* x x)))\n(define add1 (lambda (x) (+ x 1)))\n\n(define square$\n  (lambda (x cont) (cont (* x x)))\n\n(define add1$\n  (lambda (x cont) (cont (+ x 1))))\n```\n\n",
+     "hash": "3d5f1f8c8164d5ab",
+     "lang": "scheme",
+     "noteHe": "המקרה הפשוט ביותר של הטרנספורמציה. ‏`square` ו-`add1` בנויות כולן מפעולות פרימיטיביות (`*`, ‏`+`) — אין בהן שום קריאה לפרוצדורת משתמש, ולכן הן כבר בצורת זנב. הכלל: מוסיפים פרמטר ‏`cont`, ובמקום להחזיר את התוצאה — עוטפים אותה בקריאה ‏`(cont …)`. שימו לב שהחישוב הפרימיטיבי עצמו, ‏`(* x x)`, נשאר בפנים כמו שהוא: פרימיטיבים לעולם לא עוברים CPS, כי הם מסתיימים מיד ואינם יוצרים הקשר בקרה. הערה על המקור: להגדרת ‏`square$` חסר סוגר מסיים אחד — היא נסגרת ב-`(cont (* x x)))` בעוד שצריכים שם ארבעה סוגרים; שימו לב לזה אם אתם מעתיקים את הקוד ל-Racket."
+    },
+    {
+     "id": "cm/4.2CPS:10:2",
+     "type": "prose",
+     "en": "Let us consider the next increment of complexity, with an expression which is still in tail-form - but with a user-defined procedure.  In this case, we transform the user procedure with its CPS-equivalent and simply pass the continuation argument to the CPS version:\n\n",
+     "hash": "9ccd756f285087f9",
+     "he": "נתבונן בשלב הבא של המורכבות, עם ביטוי שעדיין נמצא בצורת זנב — אך מכיל פרוצדורה מוגדרת-משתמש. במקרה הזה, אנחנו מחליפים את פרוצדורת המשתמש בשקולת-ה-CPS שלה ופשוט מעבירים את ארגומנט ההמשכית לגרסת ה-CPS:"
+    },
+    {
+     "id": "cm/4.2CPS:10:3",
+     "type": "code",
+     "en": "```scheme\n(define h\n  (lambda (x) (add1 (+ x 1))))\n\n(define h$\n  (lambda (x cont) (add1$ (+ x 1) cont)))\n```\n\n",
+     "hash": "9035080e3665e156",
+     "lang": "scheme",
+     "noteHe": "כאן יש כבר קריאה לפרוצדורת משתמש, ‏`add1`, אבל היא בעמדת זנב: היא הביטוי האחרון בגוף של ‏`h`, ואין עליה עטיפה. לכן הטרנספורמציה קלה — קוראים ל-`add1$` ומעבירים לה את **אותה** ‏`cont` שקיבלנו, בלי לבנות המשכית חדשה. כדאי לשנן את הכלל: קריאה בעמדת זנב מקבלת את ‏`cont` כמו שהיא; רק קריאה בעמדת ראש מחייבת בניית ‏`(lambda (res) …)` חדשה. הארגומנט ‏`(+ x 1)` הוא פרימיטיבי ולכן מחושב במקום, בלי המשכית."
+    }
+   ],
+   "headingHe": "‏CPS של ביטויים בצורת זנב"
+  },
+  {
+   "id": "cm/4.2CPS:11",
+   "depth": 3,
+   "headingEn": "CPS of Nested Applications",
+   "raw": "### CPS of Nested Applications\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:11:0",
+     "type": "prose",
+     "en": "The next case is a nested user procedure call: the function is not in tail-form.\n\n",
+     "hash": "a6d5813571b748ff",
+     "he": "המקרה הבא הוא קריאה מקוננת לפרוצדורת משתמש: הפונקציה אינה בצורת זנב."
+    },
+    {
+     "id": "cm/4.2CPS:11:1",
+     "type": "code",
+     "en": "```scheme\n(define h1\n  (lambda (x) (square (add1 (+ x 1)))))\n  \n(define h1$\n  (lambda (x cont)\n    (add1$ (+ x 1) (lambda (add1-res) (square$ add1-res cont)))\n```\n\n",
+     "hash": "ae675d1743ad9cc2",
+     "lang": "scheme",
+     "noteHe": "כאן שתי קריאות לפרוצדורות משתמש מקוננות זו בזו: ‏`(square (add1 (+ x 1)))`. ‏`add1` היא בעמדת ראש — התוצאה שלה חייבת להיכנס ל-`square` — ולכן היא זו שמתחלפת ראשונה. שימו לב לסדר בגרסת ה-CPS: מה שהיה **פנימי** בקוד המקורי הופך ל**חיצוני** בקוד ה-CPS. הקריאה הראשונה היא ‏`add1$`, וההמשכית שלה, ‏`(lambda (add1-res) (square$ add1-res cont))`, אומרת: \"כשתגיע התוצאה של add1, קרא לה ‏`add1-res`, ואז הפעל את ‏`square$` עליה עם ההמשכית המקורית\". שימו לב ש-`square$` כן מקבלת את ‏`cont` המקורית — כי היא בעמדת זנב. כדאי לשנן את היפוך הסדר הזה: CPS הופך קינון פנימי-חיצוני לשרשרת קריאות משמאל לימין. הערה על המקור: להגדרת ‏`h1$` חסרים שני סוגריים מסיימים."
+    },
+    {
+     "id": "cm/4.2CPS:11:2",
+     "type": "prose",
+     "en": "In this case, we identify the first head position in the body of the procedure: this is the call `(add1 (+ x 1))`.\nThis sub-expression is the first expression which is evaluated when the body of the procedure is evaluated.\nIt is evaluated in a non-tail position -- because the result of this evaluation must be passed to the context:\n`(square <res>)`.  The CPS transformation abstracts away this context into the continuation and moves the inner-most\nuser-function application as the body of the procedure.  The context is:\n\n",
+     "hash": "6a2f2355bacdada3",
+     "he": "במקרה הזה, אנחנו מזהים את עמדת הראש הראשונה בגוף הפרוצדורה: זו הקריאה `(add1 (+ x 1))`.\nתת-הביטוי הזה הוא הביטוי הראשון שמוערך כשגוף הפרוצדורה מוערך.\nהוא מוערך בעמדה שאינה עמדת זנב — מכיוון שתוצאת ההערכה הזו חייבת לעבור להקשר:\n`(square <res>)`. טרנספורמציית ה-CPS מפשיטה את ההקשר הזה אל תוך ההמשכית, ומעבירה את ההפעלה הפנימית ביותר של פונקציית המשתמש להיות גוף הפרוצדורה. ההקשר הוא:"
+    },
+    {
+     "id": "cm/4.2CPS:11:3",
+     "type": "code",
+     "en": "```scheme\ncont1 = (lambda (add1-res) (square add1-res))\n```\n\n",
+     "hash": "2f72a6c1642344e0",
+     "lang": "scheme",
+     "noteHe": "זה השלב האמצעי של הגזירה: ההקשר ‏`(square <res>)` נכתב כ-lambda ששמה ‏`cont1`, כשהחור מקבל את השם ‏`add1-res`. שימו לב שכאן עדיין כתוב ‏`square` ולא ‏`square$` — זו עדיין הצורה הרגילה; ההמרה של ההקשר עצמו ל-CPS היא השלב הבא, ואז מקבלים ‏`(square$ add1-res cont)` כפי שמופיע בקוד למעלה. מועיל לחשוב על זה כשני צעדים נפרדים: קודם מחלצים את ההקשר ל-lambda, ואחר כך ממירים גם אותו ל-CPS."
+    },
+    {
+     "id": "cm/4.2CPS:11:4",
+     "type": "prose",
+     "en": "We read the resulting CPS h1$ functions as:\n",
+     "hash": "0177f8c6a68d7247",
+     "he": "אנחנו קוראים את פונקציית ה-CPS h1$ שהתקבלה כך:"
+    },
+    {
+     "id": "cm/4.2CPS:11:5",
+     "type": "list",
+     "en": "* First compute the user procedure `(add1$ (+ x 1) ...)`\n* And pass the result of this procedure to the continuation `(lambda (add1-res) ...)`.  Note that by convention we name the parameter of the continuation with the name `<name-of-user-procedure>-res` - in this case `add1-res` - to indicate that this parameter will be bound to the result of the add1 application when the continuation will be invoked.\n* Transform the context procedure into a CPS form - `(square add1-res)` becomes `(square$ add1-res cont)` - as was discussed in the previous example.\n\n",
+     "hash": "4897a695f67da3a5",
+     "he": "* תחילה חשב את פרוצדורת המשתמש `(add1$ (+ x 1) ...)`\n* והעבר את התוצאה של הפרוצדורה הזו להמשכית `(lambda (add1-res) ...)`. שימו לב שעל פי המוסכמה אנחנו נותנים לפרמטר של ההמשכית את השם `<name-of-user-procedure>-res` — במקרה הזה `add1-res` — כדי לציין שהפרמטר הזה ייקשר לתוצאה של הפעלת add1 כשההמשכית תופעל.\n* המר את פרוצדורת ההקשר לצורת CPS — `(square add1-res)` הופך ל-`(square$ add1-res cont)` — כפי שנדון בדוגמה הקודמת."
+    }
+   ],
+   "headingHe": "‏CPS של הפעלות מקוננות"
+  },
+  {
+   "id": "cm/4.2CPS:12",
+   "depth": 3,
+   "headingEn": "CPS Determines the Order of Evaluation of Arguments",
+   "raw": "### CPS Determines the Order of Evaluation of Arguments\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:12:0",
+     "type": "prose",
+     "en": "When we specified the operational semantics of application expressions in applicative order, we indicated that the Scheme semantics specificaly indicates that the order of evaluation of arguments within an application `(rator rand1 ... randn)` is not specified and can be determined by the implementation.  That is, the interpreter is free to evaluate `rand2` before `rand1` or vice-versa.\n\n",
+     "hash": "a4584d1f11f6e330",
+     "he": "כשהגדרנו את הסמנטיקה התפעולית של ביטויי הפעלה בסדר אפליקטיבי (applicative order), ציינו שהסמנטיקה של Scheme קובעת במפורש שסדר ההערכה של הארגומנטים בתוך הפעלה `(rator rand1 ... randn)` אינו מוגדר, וניתן לקביעה על ידי המימוש. כלומר, המפרש חופשי להעריך את `rand2` לפני `rand1` או להפך."
+    },
+    {
+     "id": "cm/4.2CPS:12:1",
+     "type": "prose",
+     "en": "When we transform an expression of this type to CPS, we *must* select a sub-expression (an operand) that will become the first head to be evaluated.  Consider the following example:\n\n",
+     "hash": "6eb844dc06af77f7",
+     "he": "כשאנחנו ממירים ביטוי מהסוג הזה ל-CPS, אנחנו *חייבים* לבחור תת-ביטוי (אופרנד) שיהפוך לראש הראשון שיוערך. נתבונן בדוגמה הבאה:"
+    },
+    {
+     "id": "cm/4.2CPS:12:2",
+     "type": "code",
+     "en": "```scheme\n(define mult\n  (lambda (x y) (* x y)))\n\n(define h2\n  (lambda (x y) (mult (square x) (add1 y))))\n\n;; In CPS:\n(define mult$\n  (lambda (x y cont) (cont (* x y))))\n\n(define h2-1$\n  (lambda (x y cont)\n    (square$ x\n      (lambda (square-res)\n        (add1$ y\n               (lambda (add1-res) \n                 (mult$ square-res add1-res cont)))))))\n```\n\n",
+     "hash": "8423b0798eaa0a18",
+     "lang": "scheme",
+     "noteHe": "כאן שתי קריאות לפרוצדורות משתמש יושבות כשני ארגומנטים של קריאה שלישית: ‏`(mult (square x) (add1 y))`. ב-Scheme רגילה סדר ההערכה של שני הארגומנטים אינו מוגדר, אבל ב-CPS אין ברירה — חייבים לבחור מי ראשון, כי השרשרת היא רצף. ‏`h2-1$` בוחרת ב-`square$` ראשונה: מפעילים אותה, ההמשכית קולטת ‏`square-res` ומפעילה ‏`add1$`, ההמשכית של זו קולטת ‏`add1-res`, ורק אז מפעילים ‏`(mult$ square-res add1-res cont)`. שימו לב לקינון ההולך ומעמיק — כל ארגומנט מוסיף רמה. שימו לב גם ש-`square-res` נשמר בסגור לאורך כל הדרך עד לשימוש בו בסוף. **שאלת מבחן קלאסית**: \"המירו לבנות CPS\" — ובודקים בדיוק את שני הדברים האלה, את הסדר ואת מי מקבל את ‏`cont` המקורית (רק הקריאה האחרונה, שהיא בעמדת זנב)."
+    },
+    {
+     "id": "cm/4.2CPS:12:3",
+     "type": "prose",
+     "en": "In this transformation, we identified two user-procedure applications - square and add1 - in non-tail position (within the context of `(mult s a)`.  We decide to move the first operand `(square x)` to the first evaluated expression in CPS - and \nmove the rest of the calls to the continuation.  The order of evaluations in the `h2-1$` version is:\n",
+     "hash": "cc975e0ef2ce080f",
+     "he": "בטרנספורמציה הזו זיהינו שתי הפעלות של פרוצדורות משתמש — square ו-add1 — בעמדה שאינה עמדת זנב (בתוך ההקשר של `(mult s a)`). אנחנו מחליטים להעביר את האופרנד הראשון `(square x)` להיות הביטוי הראשון שמוערך ב-CPS — ולהעביר את שאר הקריאות להמשכית. סדר ההערכות בגרסת `h2-1$` הוא:"
+    },
+    {
+     "id": "cm/4.2CPS:12:4",
+     "type": "list",
+     "en": "1. First compute `(square x)`\n2. Then pass the result `square-res` to the continuation which computes `(add1 y)`\n3. Then pass the result `add1-res` to the continuation which computes `(mult s a)`\n\n",
+     "hash": "ad2963e0609b3ca2",
+     "he": "1. תחילה חשב את `(square x)`\n2. אחר כך העבר את התוצאה `square-res` להמשכית שמחשבת את `(add1 y)`\n3. אחר כך העבר את התוצאה `add1-res` להמשכית שמחשבת את `(mult s a)`"
+    },
+    {
+     "id": "cm/4.2CPS:12:5",
+     "type": "prose",
+     "en": "We can also generate the alternative version where `(add1 y)` is first computed, and `(square x)` second:\n\n",
+     "hash": "b1ddca4daa94714d",
+     "he": "אנחנו יכולים גם לייצר את הגרסה החלופית, שבה `(add1 y)` מחושב ראשון ו-`(square x)` שני:"
+    },
+    {
+     "id": "cm/4.2CPS:12:6",
+     "type": "code",
+     "en": "```scheme\n(define h2-2$\n  (lambda (x y cont)\n    (add1$ y\n      (lambda (add1-res)\n        (square$ x\n          (lambda (square-res) \n            (mult$ square-res add1-res cont)))))))\n```\n\n",
+     "hash": "c871786555957c24",
+     "lang": "scheme",
+     "noteHe": "אותה פונקציה בדיוק, אבל עם סדר הפוך: ‏`add1$` ראשונה ו-`square$` שנייה. שימו לב שהקריאה הסופית ‏`(mult$ square-res add1-res cont)` נשארת זהה — הארגומנטים מועברים ל-`mult$` באותו סדר, כי סדר ה**ארגומנטים** אינו סדר ה**הערכה**. הנקודה החשובה: שתי הגרסאות שקולות-CPS לאותה ‏`h2`, אבל אינן זהות בהתנהגות אם ל-`square` או ל-`add1` יש תופעות לוואי (side effects) — למשל הדפסה. כאן CPS **מקבע** את מה שהיה לא-מוגדר ב-Scheme, וזו אחת הסיבות שהוא כלי כל כך שימושי בכתיבת מפרשים."
+    },
+    {
+     "id": "cm/4.2CPS:12:7",
+     "type": "prose",
+     "en": "By convention, in the CPS transformation we will select arguments in left-to-right order - even if this is not the only possible transformation.\n\n",
+     "hash": "cd2253bde4fa7198",
+     "he": "על פי מוסכמה, בטרנספורמציית ה-CPS נבחר את הארגומנטים בסדר משמאל לימין — גם אם זו אינה הטרנספורמציה האפשרית היחידה."
+    }
+   ],
+   "headingHe": "‏CPS קובע את סדר ההערכה של הארגומנטים"
+  },
+  {
+   "id": "cm/4.2CPS:13",
+   "depth": 3,
+   "headingEn": "CPS of Tree Recursion Procedures",
+   "raw": "### CPS of Tree Recursion Procedures\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:13:0",
+     "type": "prose",
+     "en": "Let us consider the following example of a recursion which generates a tree-recursive process when evaluated, and transform it to a CPS-equivalent version:\n\n",
+     "hash": "46c64c8e0f5c5c74",
+     "he": "נתבונן בדוגמה הבאה של רקורסיה שמייצרת תהליך רקורסיבי-עץ (tree-recursive) כשהיא מוערכת, ונמיר אותה לגרסה שקולת-CPS:"
+    },
+    {
+     "id": "cm/4.2CPS:13:1",
+     "type": "code",
+     "en": "```scheme\n(define sum-odd-squares\n  (lambda (tree)\n    (cond ((empty? tree) 0)\n          ((not (list? tree))\n           (if (odd? tree) (square tree) 0))\n          (else (+ (sum-odd-squares (car tree))\n                   (sum-odd-squares (cdr tree)))))))\n```\n\n",
+     "hash": "214a8d9c3d485284",
+     "lang": "scheme",
+     "noteHe": "‏`sum-odd-squares` מקבלת \"עץ\" — רשימה מקוננת של מספרים — ומחזירה את סכום הריבועים של המספרים האי-זוגיים שבה. שלושת ענפי ה-`cond`: אם העץ ריק, 0; אם הוא **אינו** רשימה, כלומר עלה (מספר בודד), מחזירים את ריבועו אם הוא אי-זוגי ואחרת 0; אחרת מפצלים ל-`(car tree)` ול-`(cdr tree)` וסוכמים את שתי התוצאות. שימו לב שיש כאן **שתי** קריאות רקורסיביות, ושתיהן בעמדת ראש — שתיהן ארגומנטים ל-`+`. זה מה שהופך את התהליך לרקורסיית עץ ולא לרקורסיה ליניארית: הרקורסיה מסתעפת. השוו ל-2.1 ולתבנית של פעולות על רשימות; ההבדל הוא שכאן ‏`(car tree)` יכול להיות בעצמו רשימה, ולכן צריך לרדת רקורסיבית גם לתוכו ולא רק להתקדם לאורך ה-`cdr`."
+    },
+    {
+     "id": "cm/4.2CPS:13:2",
+     "type": "prose",
+     "en": "We consider the branches of the `cond` expression one by one.  \nIn branches 1 and 2, both tests are primitive combinations, and the consequents are in tail-form.\nThe else branch has no user-procedure call in head position. Hence the CPS-transformation does not change the structure of the cond expression.  The first stage of the transformation is thus:\n\n",
+     "hash": "87aba84cce5bc219",
+     "he": "נתבונן בענפי ביטוי ה-`cond` אחד אחד.\nבענפים 1 ו-2, שני התנאים הם שילובים פרימיטיביים, והתוצאות (consequents) נמצאות בצורת זנב.\nבענף ה-else אין קריאה לפרוצדורת משתמש בעמדת ראש. לכן טרנספורמציית ה-CPS אינה משנה את המבנה של ביטוי ה-cond. השלב הראשון של הטרנספורמציה הוא אם כן:"
+    },
+    {
+     "id": "cm/4.2CPS:13:3",
+     "type": "code",
+     "en": "```scheme\n(define sum-odd-squares$\n  (lambda (tree cont)\n    (cond ((empty? tree) (cont 0))\n          ((not (list? tree))\n           (if (odd? tree) (square$ tree cont) (cont 0)))\n          (else <<CPS-transform (+ (sum-odd-squares (car tree))\n                                   (sum-odd-squares (cdr tree)))>> ))))\n```\n\n",
+     "hash": "0806d2b2135437b5",
+     "lang": "scheme",
+     "noteHe": "שלב ביניים בגזירה — שימו לב לסימון ‏`<<CPS-transform …>>` שאינו קוד Scheme חוקי, אלא \"חור\" שמסמן חלק שעדיין לא הומר. מה כן נעשה כאן: כל **ערך** שהוחזר עוטף עכשיו ב-`cont` — ‏`0` הפך ל-`(cont 0)` — והקריאה ל-`square` הפכה ל-`(square$ tree cont)` כי היא בעמדת זנב. שני התנאים של ה-`cond`, ‏`(empty? tree)` ו-`(not (list? tree))`, נשארו כמו שהם כי הם פרימיטיביים; אם התנאי היה קריאה לפרוצדורת משתמש היינו נדרשים לשנות את מבנה ה-`cond` — וזה בדיוק המקרה שנראה בסעיף על ‏`filter`. הטכניקה של גזירה בשלבים, עם חור שמצטמק, היא הדרך הנכונה לפתור שאלות CPS במבחן — לא לנסות לכתוב את התוצאה הסופית בבת אחת."
+    },
+    {
+     "id": "cm/4.2CPS:13:4",
+     "type": "prose",
+     "en": "Let us now consider the consequent of the last branch.  There are two user-procedure calls which are in non-tail position.\nWe pick the first one, and turn it as the first call of the CPS.\n\n",
+     "hash": "1920fb5c19876392",
+     "he": "נתבונן כעת בתוצאה (consequent) של הענף האחרון. יש בה שתי קריאות לפרוצדורות משתמש שנמצאות בעמדה שאינה עמדת זנב.\nאנחנו בוחרים את הראשונה, והופכים אותה לקריאה הראשונה של ה-CPS."
+    },
+    {
+     "id": "cm/4.2CPS:13:5",
+     "type": "code",
+     "en": "```scheme\n(define sum-odd-squares$\n  (lambda (tree cont)\n    (cond ((empty? tree) (cont 0))\n          ((not (list? tree))\n           (if (odd? tree) (square$ tree cont) (cont 0)))\n          (else (sum-odd-squares$ (car tree)\n                  (lambda (sum-odd-squares-car-res)\n                    <<CPS-transform (+ sum-odd-squares-car-res (sum-odd-squares (cdr tree)))>> ))))))\n```\n\n",
+     "hash": "9ab63e1e49a23095",
+     "lang": "scheme",
+     "noteHe": "השלב הבא: הקריאה הרקורסיבית על ‏`(car tree)` יוצאת ראשונה, וכל מה שנשאר אחריה נדחס לתוך ההמשכית ‏`(lambda (sum-odd-squares-car-res) …)`. שימו לב לשם הפרמטר — הוא נבנה לפי המוסכמה מהסעיף הקודם: שם הפרוצדורה שהופעלה, ועל מה, בתוספת ‏`-res`. החור שנשאר קטן יותר מקודם: כבר לא ‏`(+ (sum-odd-squares (car tree)) (sum-odd-squares (cdr tree)))` אלא ‏`(+ sum-odd-squares-car-res (sum-odd-squares (cdr tree)))` — קריאה אחת פחות. עוד סבב אחד ונגיע לקוד המלא."
+    },
+    {
+     "id": "cm/4.2CPS:13:6",
+     "type": "prose",
+     "en": "We have pushed the CPS transformation inside - let us complete it:\n\n",
+     "hash": "4532e2183f1c67aa",
+     "he": "דחפנו את טרנספורמציית ה-CPS פנימה — נשלים אותה:"
+    },
+    {
+     "id": "cm/4.2CPS:13:7",
+     "type": "code",
+     "en": "```scheme\n(define sum-odd-squares$\n  (lambda (tree cont)\n    (cond ((empty? tree) (cont 0))\n          ((not (list? tree))\n           (if (odd? tree) (square$ tree cont) (cont 0)))\n          (else (sum-odd-squares$ (car tree)\n                  (lambda (sum-odd-squares-car-res)\n                    (sum-odd-squares$ (cdr tree)\n                      (lambda (sum-odd-square-cdr-res)\n                        (cont (+ sum-odd-square-car-res sum-odd-square-cdr-res))))))))))\n```\n\n\n",
+     "hash": "a4a2271ba18d0a09",
+     "lang": "scheme",
+     "noteHe": "הגרסה המלאה. עקבו אחרי השרשרת בענף ה-else: קוראים ל-`sum-odd-squares$` על ‏`(car tree)`; ההמשכית שלה קוראת ל-`sum-odd-squares$` על ‏`(cdr tree)`; ורק ההמשכית הפנימית ביותר מבצעת את החיבור ומעבירה אותו ל-`cont` המקורית. שימו לב שכל שלוש הקריאות בקוד הסופי הן בעמדת זנב — הרקורסיה המסועפת \"יושרה\" לשרשרת. וזה מוביל לתובנה החשובה: הזיכרון לא נעלם, הוא רק עבר לשרשרת ההמשכיות, שעומקה כעומק העץ. הערה על המקור: יש כאן באג אמיתי בשמות — הפרמטרים שנקשרים הם ‏`sum-odd-squares-car-res` (ברבים) ו-`sum-odd-square-cdr-res` (ביחיד), אבל שורת החיבור משתמשת ב-`sum-odd-square-car-res` ו-`sum-odd-square-cdr-res`. השם הראשון אינו קיים, ולכן הקוד ייפול על משתנה לא-מוגדר; צריך לאחד את הכתיב."
+    }
+   ],
+   "headingHe": "‏CPS של פרוצדורות רקורסיית-עץ"
+  },
+  {
+   "id": "cm/4.2CPS:14",
+   "depth": 3,
+   "headingEn": "CPS Transformation of Higher-Order Procedures",
+   "raw": "### CPS Transformation of Higher-Order Procedures\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:14:0",
+     "type": "prose",
+     "en": "Let us consider the transformation of function which receives a function as a parameter - for example the `map` operator:\n\n",
+     "hash": "21415001993362bf",
+     "he": "נתבונן בטרנספורמציה של פונקציה שמקבלת פונקציה כפרמטר — למשל האופרטור `map`:"
+    },
+    {
+     "id": "cm/4.2CPS:14:1",
+     "type": "code",
+     "en": "```scheme\n(define map\n  (lambda (f list)\n    (if (empty? list)\n        list\n        (cons (f (car list))\n              (map f (cdr list))))))\n```\n\n",
+     "hash": "c95c6e367c8eea7d",
+     "lang": "scheme",
+     "noteHe": "המימוש המוכר של ‏`map`: אם הרשימה ריקה מחזירים אותה, אחרת בונים ‏`cons` שראשו ‏`(f (car list))` וזנבו ‏`(map f (cdr list))`. שימו לב לשתי הקריאות לפרוצדורות משתמש — ‏`f` והקריאה הרקורסיבית ל-`map` — ושתיהן ארגומנטים ל-`cons`, כלומר בעמדת ראש. ‏`f` היא פרמטר, ולכן זו פרוצדורה מסדר גבוה (higher-order procedure): לא ידוע לנו מראש מה היא עושה, וזה בדיוק מה שיסבך את הטרנספורמציה. הערה על סגנון: המקור קורא לפרמטר ‏`list`, שהוא גם שם של פרוצדורה מובנית ב-Scheme — הצללה (shadowing) שכדאי להימנע ממנה בקוד אמיתי."
+    },
+    {
+     "id": "cm/4.2CPS:14:2",
+     "type": "prose",
+     "en": "This procedure includes two user-procedure calls, nested within a cons application - hence not in tail position. \nTherefore, the process is not iterative. The two nested user procedure calls appear in the arguments of the cons application. \n\n",
+     "hash": "bce9f21fd50a9d35",
+     "he": "הפרוצדורה הזו כוללת שתי קריאות לפרוצדורות משתמש, מקוננות בתוך הפעלת cons — ולכן לא בעמדת זנב.\nלפיכך, התהליך אינו איטרטיבי. שתי הקריאות המקוננות לפרוצדורות המשתמש מופיעות בארגומנטים של הפעלת cons."
+    },
+    {
+     "id": "cm/4.2CPS:14:3",
+     "type": "prose",
+     "en": "Note that the test of the if-exp and the then-part are all primitive combinations, hence, no CPS transformation is required besides wrapping the tail value in the cont call.\n\n",
+     "hash": "885e354f72ebde90",
+     "he": "שימו לב שהתנאי של ה-if-exp וחלק ה-then הם כולם שילובים פרימיטיביים, ולכן לא נדרשת שום טרנספורמציית CPS מלבד עטיפת ערך הזנב בקריאה ל-cont."
+    },
+    {
+     "id": "cm/4.2CPS:14:4",
+     "type": "prose",
+     "en": "We select the first argument of cons as the first nested call and move it as the first step of the CPS-transformed version:\n\n",
+     "hash": "d69eeaa6c08e25d6",
+     "he": "אנחנו בוחרים את הארגומנט הראשון של cons כקריאה המקוננת הראשונה, ומעבירים אותו להיות הצעד הראשון של הגרסה המומרת ל-CPS:"
+    },
+    {
+     "id": "cm/4.2CPS:14:5",
+     "type": "code",
+     "en": "```scheme\n(define map$\n  (lambda (f$ list cont)\n    (if (empty? list)\n        (cont list)\n        (f$ (car list)\n            (lambda (f-res)\n              <<CPS-transform (cons f-res (map f (cdr list)))>> )))))\n```\n\n",
+     "hash": "6841a71174d56253",
+     "lang": "scheme",
+     "noteHe": "שלב ביניים, ושימו לב לשינוי החשוב בחתימה: הפרמטר כבר אינו ‏`f` אלא ‏`f$` — הפונקציה שמקבלים חייבת בעצמה להיות בסגנון CPS, כלומר לקבל המשכית. לכן הקריאה היא ‏`(f$ (car list) (lambda (f-res) …))` ולא ‏`(f (car list))`. ענף ה-then הפך מ-`list` ל-`(cont list)` — עטיפת ערך בהמשכית, כרגיל. החור ‏`<<CPS-transform (cons f-res (map f (cdr list)))>>` הוא מה שנשאר להמיר."
+    },
+    {
+     "id": "cm/4.2CPS:14:6",
+     "type": "prose",
+     "en": "Note that in this transformation, we consider that the f parameter we receive is a user procedure in CPS format as well.\nThis is necessary, because CPS as a discipline is an all-or-nothing proposition: all user-defined procedures must be transformed in CPS to be able to obtain a coherent CPS program.\n\n",
+     "hash": "ec10b87fea2d4153",
+     "he": "שימו לב שבטרנספורמציה הזו אנחנו מניחים שהפרמטר f שאנחנו מקבלים הוא בעצמו פרוצדורת משתמש בפורמט CPS.\nזה הכרחי, מכיוון ש-CPS כדיסציפלינה הוא עניין של הכול-או-כלום: כל הפרוצדורות המוגדרות על ידי המשתמש חייבות לעבור המרה ל-CPS כדי שנוכל לקבל תוכנית CPS קוהרנטית."
+    },
+    {
+     "id": "cm/4.2CPS:14:7",
+     "type": "prose",
+     "en": "We next observe the remaining segment to be transformed in CPS: `(cons f-res (map f (cdr list)))`.\nThe first sub-expression to be evaluated in this context is `(map f (cdr list))` which we push outside as the first step of the CPS transformation - and we eventually obtain:\n\n",
+     "hash": "fedba26e6ed2cbb4",
+     "he": "כעת נתבונן בקטע שנותר להמרה ל-CPS: `(cons f-res (map f (cdr list)))`.\nתת-הביטוי הראשון שמוערך בהקשר הזה הוא `(map f (cdr list))`, שאותו אנחנו דוחפים החוצה כצעד הראשון של טרנספורמציית ה-CPS — ובסופו של דבר מקבלים:"
+    },
+    {
+     "id": "cm/4.2CPS:14:8",
+     "type": "code",
+     "en": "```scheme\n(define map$\n  (lambda (f$ list cont)\n    (if (empty? list)\n        (cont list)\n        (f$ (car list)\n            (lambda (f-car-res)\n              (map$ f$ (cdr list)\n                (lambda (map-f-cdr-res)\n                  (cont (cons f-car-res map-f-cdr-res)))))))))                  \n```\n\n",
+     "hash": "c4b83873d3953cae",
+     "lang": "scheme",
+     "noteHe": "‏`map$` המלאה — כדאי לשנן אותה כתבנית. שרשרת של שלושה שלבים: מפעילים ‏`f$` על האיבר הראשון; ההמשכית מקבלת ‏`f-car-res` וקוראת ל-`map$` על שאר הרשימה, כשהיא מעבירה גם את ‏`f$` הלאה; ההמשכית של זו מקבלת ‏`map-f-cdr-res`, בונה ‏`(cons f-car-res map-f-cdr-res)` ומעבירה ל-`cont`. שימו לב ש-`f-car-res` \"שורד\" בסגור לאורך כל הקריאה הרקורסיבית, וזה בדיוק המקום שבו נשמר הזיכרון של הרשימה כולה. שימו לב לחוסר עקביות קטן במקור: בשלב הביניים הקודם הפרמטר נקרא ‏`f-res`, וכאן ‏`f-car-res` — אותו דבר, רק שינוי שם בין הגרסאות. נקודה למחשבה: הסדר שנבחר כאן מפעיל את ‏`f$` על כל איבר **לפני** הירידה לשאר הרשימה, ולכן ‏`f$` תופעל משמאל לימין; בחירה הפוכה הייתה נותנת סדר הפוך — ומכיוון ש-`map` הרגילה אינה מבטיחה סדר, שוב רואים איך CPS מקבע החלטה שהייתה פתוחה."
+    }
+   ],
+   "headingHe": "טרנספורמציית CPS של פרוצדורות מסדר גבוה"
+  },
+  {
+   "id": "cm/4.2CPS:15",
+   "depth": 3,
+   "headingEn": "CPS Transformation of Conditionals with non-primitive Tests",
+   "raw": "### CPS Transformation of Conditionals with non-primitive Tests\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:15:0",
+     "type": "prose",
+     "en": "Consider the CPS transformation of the `filter` procedure:\n\n",
+     "hash": "fe9366d3dafdf9f4",
+     "he": "נתבונן בטרנספורמציית ה-CPS של הפרוצדורה `filter`:"
+    },
+    {
+     "id": "cm/4.2CPS:15:1",
+     "type": "code",
+     "en": "```scheme\n(define filter\n  (lambda (pred? list)\n    (cond ((empty? list) list)\n          ((pred? (car list)) \n           (cons (car list) (filter pred? (cdr list))))\n          (else (filter pred? (cdr list))))))\n```\n\n",
+     "hash": "a69fd7a20640f7d8",
+     "lang": "scheme",
+     "noteHe": "‏`filter` המוכרת: רשימה ריקה מוחזרת כמו שהיא; אם ‏`(pred? (car list))` מתקיים, שומרים את האיבר ומצרפים אליו את סינון השאר; אחרת מדלגים עליו וממשיכים. החידוש כאן, שבגללו הדוגמה מופיעה: הקריאה לפרוצדורת המשתמש ‏`pred?` יושבת ב**תנאי** של הענף השני, ולא בגוף. עד עכשיו כל התנאים שראינו היו פרימיטיביים, ולכן יכולנו להשאיר את מבנה ה-`cond` על כנו — כאן זה כבר לא יעבוד, כי חישוב התנאי עצמו דורש המשכית."
+    },
+    {
+     "id": "cm/4.2CPS:15:2",
+     "type": "prose",
+     "en": "The new configuration we meet is that the test part of the second branch is a user-procedure application `(pred? (car list))`.\nIn this case, we must change the structure of the `cond` so that we first compute the test value *outside* the cond, then route the conditional inside the continuation:\n\n",
+     "hash": "ea8758c4053a8110",
+     "he": "התצורה החדשה שאנחנו פוגשים היא שחלק התנאי של הענף השני הוא הפעלה של פרוצדורת משתמש `(pred? (car list))`.\nבמקרה הזה, עלינו לשנות את המבנה של ה-`cond` כך שנחשב תחילה את ערך התנאי *מחוץ* ל-cond, ואז ננתב את ההתניה אל תוך ההמשכית:"
+    },
+    {
+     "id": "cm/4.2CPS:15:3",
+     "type": "code",
+     "en": "```scheme\n(define filter$\n  (lambda (pred? list cont)\n    (cond ((empty? list) (cont list))\n          (else (pred?$ (car list)\n                  (lambda (pred-res)\n                    <<CPS-transformation \n                    (cond (pred-res (cons (car list) (filter pred? (cdr list))))\n                          (else (filter pred? (cdr list))))>> ))))))\n```\n\n",
+     "hash": "b323dfdec36e293b",
+     "lang": "scheme",
+     "noteHe": "כאן קורה השינוי המבני. ה-`cond` המקורי היה בן שלושה ענפים; בגרסה החדשה נשארו שניים: תנאי הבסיס ‏`(empty? list)`, ו-else. בענף ה-else מפעילים תחילה את ‏`pred?$` על ‏`(car list)`, ורק בתוך ההמשכית — שבה ‏`pred-res` הוא כבר **ערך בוליאני רגיל** ולא קריאה — נבנה ‏`cond` פנימי חדש שמחליט בין שני המקרים. כדאי לשנן את התבנית: תנאי לא-פרימיטיבי → מחלצים אותו החוצה כקריאת CPS, ומכניסים את ההסתעפות פנימה להמשכית. שימו לב לפרט קטן וחשוב: בגרסת ה-CPS הפרמטר נקרא ‏`pred?` בחתימה אבל מופעל כ-`pred?$` בגוף — חוסר עקביות במקור; לפי הכלל של \"הכול-או-כלום\" מהסעיף הקודם, החתימה צריכה להיות ‏`(lambda (pred?$ list cont) …)`."
+    },
+    {
+     "id": "cm/4.2CPS:15:4",
+     "type": "prose",
+     "en": "The transformation here is that the cond structure is split - in branches which can be evaluated all in tail-form and those which follow the test evaluation.\n\n",
+     "hash": "0a0d0908b9e7b563",
+     "he": "הטרנספורמציה כאן היא שמבנה ה-cond מתפצל — לענפים שאפשר להעריך את כולם בצורת זנב, ולאלה שבאים אחרי הערכת התנאי."
+    },
+    {
+     "id": "cm/4.2CPS:15:5",
+     "type": "prose",
+     "en": "The next step of the CPS-transform is as observed in previous examples:\n\n",
+     "hash": "8137a1a4c15ccfda",
+     "he": "הצעד הבא של טרנספורמציית ה-CPS הוא כפי שראינו בדוגמאות הקודמות:"
+    },
+    {
+     "id": "cm/4.2CPS:15:6",
+     "type": "code",
+     "en": "```scheme\n(define filter$\n  (lambda (pred? list cont)\n    (cond ((empty? list) (cont list))\n          (else (pred?$ (car list)\n                  (lambda (pred-res)\n                    (cond (pred-res (filter$ pred?$ (cdr list)\n                                      (lambda (filter-cdr-res)\n                                        (cont (cons (car list) filter-cdr-res)))))\n                          (else (filter$ pred?$ (cdr list) cont)))))))))\n```\n\n",
+     "hash": "8018034e58cd05ba",
+     "lang": "scheme",
+     "noteHe": "‏`filter$` המלאה. שימו לב להבדל בין שני הענפים של ה-`cond` הפנימי, וזו הנקודה היפה כאן: כשהתנאי מתקיים צריך לבנות ‏`cons` **אחרי** שהרקורסיה תחזור, ולכן נדרשת המשכית חדשה ‏`(lambda (filter-cdr-res) (cont (cons (car list) filter-cdr-res)))`; אבל כשהתנאי אינו מתקיים אין מה לעשות עם התוצאה — פשוט מעבירים את ‏`cont` המקורית הלאה. כלומר אותה פונקציה עצמה יכולה להיות בעמדת זנב בענף אחד ולא בשני. שימו לב גם ש-`(car list)` נלכד בסגור של ההמשכית — הוא נחוץ מאוחר יותר, אחרי שהרקורסיה תסתיים. אותה חוסר עקביות מהמקור נמשכת גם כאן: החתימה אומרת ‏`pred?` והגוף קורא ל-`pred?$`."
+    }
+   ],
+   "headingHe": "טרנספורמציית CPS של תנאים עם בדיקות לא-פרימיטיביות"
+  },
+  {
+   "id": "cm/4.2CPS:16",
+   "depth": 3,
+   "headingEn": "Summary: CPS Transformation",
+   "raw": "### Summary: CPS Transformation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:16:0",
+     "type": "prose",
+     "en": "We have learned how to transform any expression in the language into a tail-form CPS-equivalent expression.\nWhen evaluating the CPS-equivalent version of the expression, our interpreter yields a tail-recursive iterative\nprocess which does not consume control space (the stack does not grow in an unbounded way dependent on the parameters\nfed to the program).  Instead, the explicit continuation parameter which is added to all procedure calls records the\ncontrol context of the procedure applications.  This parameter does grow according to the size of the parameters.\n\n",
+     "hash": "49b673f065f0f8ae",
+     "he": "למדנו איך להמיר כל ביטוי בשפה לביטוי שקול-CPS בצורת זנב.\nכשמעריכים את הגרסה שקולת-ה-CPS של הביטוי, המפרש שלנו מייצר תהליך איטרטיבי רקורסיבי-זנב\nשאינו צורך מקום בקרה (המחסנית אינה גדלה באופן בלתי-חסום כתלות בפרמטרים\nשמוזנים לתוכנית). במקום זאת, פרמטר ההמשכית המפורש שנוסף לכל הקריאות לפרוצדורות מתעד את\nהקשר הבקרה של הפעלות הפרוצדורות. הפרמטר הזה כן גדל בהתאם לגודל הפרמטרים."
+    },
+    {
+     "id": "cm/4.2CPS:16:1",
+     "type": "prose",
+     "en": "Note how the CPS transformation is similar to the transformation from synchronous function calls to asynchronous function calls which we discussed in the previous lecture: application expressions appear in the CPS version in the same order in which they are evaluated; composed functions appear nested inside the body of the continuation in the same way as they appeared nested in the body of the callbacks of the asynchronous functions.  \n\n",
+     "hash": "b6a14a296a975f26",
+     "he": "שימו לב עד כמה טרנספורמציית ה-CPS דומה לטרנספורמציה מקריאות סינכרוניות לקריאות אסינכרוניות שדנו בה בהרצאה הקודמת: ביטויי ההפעלה מופיעים בגרסת ה-CPS באותו סדר שבו הם מוערכים; פונקציות מורכבות מופיעות מקוננות בתוך גוף ההמשכית בדיוק כמו שהופיעו מקוננות בתוך גוף ה-callbacks של הפונקציות האסינכרוניות."
+    },
+    {
+     "id": "cm/4.2CPS:16:2",
+     "type": "prose",
+     "en": "The difference between the event-driven model we discussed in the Node.js environment and the CPS model discussed in Scheme is that in the asynchronous model, the continuations (the tasks generated by asynchronous functions) are posted on the task-queue and executed by the interpreter according to the event-model while in the CPS model in Scheme, continuations are immediately invoked when the preceding call completes.\n\n",
+     "hash": "5e32081e7d8fca73",
+     "he": "ההבדל בין המודל מונחה-האירועים שדנו בו בסביבת Node.js לבין מודל ה-CPS שנדון ב-Scheme הוא שבמודל האסינכרוני, ההמשכיות (המשימות שנוצרות על ידי פונקציות אסינכרוניות) נדחפות לתור המשימות ומתבצעות על ידי המפרש בהתאם למודל האירועים, בעוד שבמודל ה-CPS ב-Scheme ההמשכיות מופעלות מיד כשהקריאה שקדמה להן מסתיימת."
+    }
+   ],
+   "headingHe": "סיכום: טרנספורמציית CPS"
+  },
+  {
+   "id": "cm/4.2CPS:17",
+   "depth": 2,
+   "headingEn": "Success-Fail Continuations",
+   "raw": "## Success-Fail Continuations\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:17:0",
+     "type": "prose",
+     "en": "A variant of the CPS model just introduced allows us to handle error conditions in a more flexible manner than was possible in the style we have discussed so far. (Success-fail continuations remind us of the structure of callbacks in Node.js and of promises - which expect one continuation for successful calls - passed in the `.then(success)` method, and one for the failure cases, passed in the `.catch(fail)` method.)\n\n",
+     "hash": "fa3d71c5f86c0382",
+     "he": "וריאנט של מודל ה-CPS שהצגנו זה עתה מאפשר לנו לטפל במצבי שגיאה בצורה גמישה יותר משהיה אפשרי בסגנון שדנו בו עד כה. (המשכיות הצלחה-כישלון מזכירות לנו את המבנה של callbacks ב-Node.js ושל הבטחות (promises) — שמצפות להמשכית אחת לקריאות מוצלחות, שמועברת במתודה `.then(success)`, ולאחת למקרי הכישלון, שמועברת במתודה `.catch(fail)`.)"
+    },
+    {
+     "id": "cm/4.2CPS:17:1",
+     "type": "prose",
+     "en": "Consider a procedure which receives a heterogeneous list and computes the sum of the numeric items in the list.\nIf any item in the list is not a number - we want to trigger an error and stop the computation (that is, we stop the traversal of the list as soon as a non-number item is detected).\n\n",
+     "hash": "78f738850f0e33e4",
+     "he": "נתבונן בפרוצדורה שמקבלת רשימה הטרוגנית ומחשבת את סכום האיברים המספריים שבה.\nאם איבר כלשהו ברשימה אינו מספר — אנחנו רוצים לעורר שגיאה ולעצור את החישוב (כלומר, אנחנו עוצרים את המעבר על הרשימה ברגע שמזוהה איבר שאינו מספר)."
+    },
+    {
+     "id": "cm/4.2CPS:17:2",
+     "type": "prose",
+     "en": "Let us first write a traditional implementation of this procedure, using the `error` primitive, which is the equivalent of throwing an exception:\n\n",
+     "hash": "f0427ea3eb77a54c",
+     "he": "נכתוב תחילה מימוש מסורתי של הפרוצדורה הזו, בעזרת הפרימיטיב `error`, שהוא המקבילה של זריקת חריגה:"
+    },
+    {
+     "id": "cm/4.2CPS:17:3",
+     "type": "code",
+     "en": "```scheme\n;; Signature: sumlist(li)\n;; Purpose: Sum the elements of a number list. \n;; If the list includes a non number element -- produce an error.\n;; Type: [List -> Number union ???]\n(define sumlist\n  (lambda (li)\n    (cond ((empty? li) 0)\n          ((not (number? (car li))) (error \"non numeric value!\"))\n          (else (+ (car li) (sumlist (cdr li)))))))\n```\n\n",
+     "hash": "9577bf72df99897d",
+     "lang": "scheme",
+     "noteHe": "המימוש ה\"רגיל\". שלושה ענפים: רשימה ריקה → 0; איבר שאינו מספר → ‏`(error …)`, שעוצר את כל החישוב; אחרת → מחברים את האיבר הראשון לסכום השאר. שימו לב לשורת הטיפוס בתיעוד: ‏`[List -> Number union ???]` — סימני השאלה הם של מחברי הקורס עצמם, והם מסמנים בעיה אמיתית: לפרימיטיב ‏`error` אין טיפוס החזרה סביר, כי הוא **לא חוזר**. זו בדיוק הנקודה שהסעיף הזה בא לפתור. שימו לב גם שהחיבור ‏`(+ (car li) (sumlist (cdr li)))` אינו בעמדת זנב, ולכן זו רקורסיה שצורכת מחסנית."
+    },
+    {
+     "id": "cm/4.2CPS:17:4",
+     "type": "prose",
+     "en": "Consider an iterative CPS version of this procedure, which uses success/fail continuations:\n\n",
+     "hash": "4ddd54f4381287d3",
+     "he": "נתבונן בגרסה איטרטיבית של הפרוצדורה הזו בסגנון CPS, שמשתמשת בהמשכיות הצלחה/כישלון:"
+    },
+    {
+     "id": "cm/4.2CPS:17:5",
+     "type": "code",
+     "en": "```scheme\n(define sumlist2\n  (lambda (li)\n    (letrec ((sumlist$\n               (lambda (li succ-cont fail-cont)\n                 (cond ((empty? li) (succ-cont 0))\n                       ((number? (car li))\n                        (sumlist$ (cdr li)\n                                  (lambda (sum-cdr) ;success continuation\n                                    (succ-cont (+ (car li) sum-cdr)))\n                                  fail-cont))\n                       ;; error condition: invoke error handler\n                       (else (fail-cont))))))\n       (sumlist$ li\n                 (lambda (x) x)\n                 (lambda () (display \"non numeric value!\"))))))\n```\n\n",
+     "hash": "392b2fa682c8bf00",
+     "lang": "scheme",
+     "noteHe": "עכשיו **שתי** המשכיות במקום אחת: ‏`succ-cont` ו-`fail-cont`. המבנה: ‏`sumlist2` היא עטיפה חיצונית שמגדירה ב-`letrec` את ‏`sumlist$` הפנימית ואז מפעילה אותה עם שתי המשכיות התחלתיות — הזהות להצלחה, והדפסת הודעה לכישלון. עקבו אחרי הענפים: רשימה ריקה → ‏`(succ-cont 0)`; איבר מספרי → ממשיכים לזנב הרשימה עם המשכית הצלחה **חדשה** שתוסיף את ‏`(car li)` לסכום שיחזור, ועם **אותה** ‏`fail-cont` בלי שינוי; איבר שאינו מספר → ‏`(fail-cont)` בלי ארגומנטים, וכאן קורה הדבר החשוב: כל שרשרת המשכיות ההצלחה שנבנתה עד כה פשוט **נזרקת**, כי אף אחד לא קורא לה. זו בדיוק ההתנהגות של זריקת חריגה, אבל בלי שום מנגנון מיוחד בשפה — רק פונקציות. כדאי לשנן: המשכית שלא מפעילים היא הדרך של CPS לומר \"ברח מכאן\". שימו לב גם ש-`(car li)` נלכד בסגור של המשכית ההצלחה ולכן זמין מאוחר יותר, ושכל הקריאות ל-`sumlist$` הן בעמדת זנב."
+    },
+    {
+     "id": "cm/4.2CPS:17:6",
+     "type": "prose",
+     "en": "Observe first that the presence of errors is problematic for our type system.\nWe do not know how to indicate, in the type of the procedure, the fact that it potentially throws an exception.\nFor comparison, think of how this condition is handled in Java.\n\n",
+     "hash": "65f8047b80e99ba7",
+     "he": "שימו לב תחילה שקיומן של שגיאות הוא בעייתי עבור מערכת הטיפוסים שלנו.\nאנחנו לא יודעים לציין, בטיפוס של הפרוצדורה, את העובדה שהיא עלולה לזרוק חריגה.\nלשם השוואה, חשבו איך המצב הזה מטופל ב-Java."
+    },
+    {
+     "id": "cm/4.2CPS:17:7",
+     "type": "prose",
+     "en": "In the CPS style, we handle errors by using continuations - instead of using one continuation as we did in the transformation discussed above, we carry 2 continuations: one for the successful computation path, and one for error conditions.\n\n",
+     "hash": "8204759a2e44581c",
+     "he": "בסגנון CPS, אנחנו מטפלים בשגיאות באמצעות המשכיות — במקום להשתמש בהמשכית אחת כפי שעשינו בטרנספורמציה שנדונה למעלה, אנחנו נושאים 2 המשכיות: אחת עבור מסלול החישוב המוצלח, ואחת עבור מצבי שגיאה."
+    },
+    {
+     "id": "cm/4.2CPS:17:8",
+     "type": "prose",
+     "en": "Observe the type of the `sumlist$` procedure above:\n\n",
+     "hash": "82e079d2be5c407e",
+     "he": "שימו לב לטיפוס של הפרוצדורה `sumlist$` שלמעלה:"
+    },
+    {
+     "id": "cm/4.2CPS:17:9",
+     "type": "code",
+     "en": "```scheme\n[List * [Number -> Number] * [Empty -> Void] -> (Number | Void)]\n```\n\n",
+     "hash": "45c80b39db9447ef",
+     "lang": "scheme",
+     "noteHe": "קראו את הטיפוס משמאל לימין: ‏`List` היא הרשימה; ‏`[Number -> Number]` היא המשכית ההצלחה (מקבלת את הסכום ומחזירה משהו — כאן הזהות); ‏`[Empty -> Void]` היא המשכית הכישלון, ו-`Empty` מציין שהיא **לא מקבלת ארגומנטים** (התאמה ל-`(fail-cont)` בקוד). טיפוס ההחזרה ‏`(Number | Void)` הוא איחוד: או שקיבלנו סכום, או ששום ערך משמעותי לא חזר — כי המסלול הסתיים בהדפסה. השוו למימוש הראשון, שטיפוס ההחזרה שלו היה ‏`Number union ???`: כאן ה-`???` נעלמו. **זו הפואנטה של כל הסעיף**: המשכיות הופכות את אפשרות הכישלון לחלק **מהטיפוס** במקום למנגנון סמוי בצד. זו בדיוק אותה תובנה שמאחורי ‏`Result`/`Either` מ-1.5 ומאחורי ‏`.then`/`.catch` של promises מ-4.1."
+    },
+    {
+     "id": "cm/4.2CPS:17:10",
+     "type": "prose",
+     "en": "This type indicates explicitly the fact that the procedure may follow two distinct paths - either the success leading to the `[Number -> Number]` continuation, \nor the failure path leading to the `[Empty -> Void]` path.\n\n",
+     "hash": "134ba97e491deff6",
+     "he": "הטיפוס הזה מציין במפורש את העובדה שהפרוצדורה עשויה לעקוב אחרי שני מסלולים נבדלים — או ההצלחה, שמובילה להמשכית `[Number -> Number]`,\nאו מסלול הכישלון, שמוביל למסלול `[Empty -> Void]`."
+    }
+   ],
+   "headingHe": "המשכיות הצלחה-כישלון"
+  },
+  {
+   "id": "cm/4.2CPS:18",
+   "depth": 3,
+   "headingEn": "Using Success-Fail Continuations for Search",
+   "raw": "### Using Success-Fail Continuations for Search\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:18:0",
+     "type": "prose",
+     "en": "Let us consider a procedure which traverses a data structure (for example an AST), searching for a node that meets a given criterion.  If such a node is met, we perform a success computation; else we perform a fail computation.\n\n",
+     "hash": "b03a6d79dc852252",
+     "he": "נתבונן בפרוצדורה שעוברת על מבנה נתונים (למשל AST), ומחפשת צומת שעונה על קריטריון נתון. אם נמצא צומת כזה, אנחנו מבצעים חישוב הצלחה; אחרת אנחנו מבצעים חישוב כישלון."
+    },
+    {
+     "id": "cm/4.2CPS:18:1",
+     "type": "prose",
+     "en": "In this case, we will use the `success` continuation to indicate that the search has completed, and that we continue the computation by processing the element found; while the `fail` continuation will be used to drive the search for other elements within the data structure, until, possibly, the data structure has been exhausted, in which case, the original fail continuation is applied, indicating a failure to find an element meeting the criterion.\n\n",
+     "hash": "f613a34b57f163da",
+     "he": "במקרה הזה, נשתמש בהמשכית ה-`success` כדי לציין שהחיפוש הסתיים, ושאנחנו ממשיכים את החישוב על ידי עיבוד האיבר שנמצא; בעוד שהמשכית ה-`fail` תשמש כדי להניע את החיפוש אחרי איברים אחרים בתוך מבנה הנתונים, עד שאולי מבנה הנתונים ימוצה, ובמקרה כזה תופעל המשכית הכישלון המקורית, שמציינת כישלון במציאת איבר שעונה על הקריטריון."
+    },
+    {
+     "id": "cm/4.2CPS:18:2",
+     "type": "prose",
+     "en": "The tree in this example is an unlabeled tree, that is, a tree whose branches are unlabeled,\nand whose leaves are labeled by atomic values. This is the standard view of an\nheterogeneous list. For example, ((3 4) 5 1) is a list representation of such a tree.\n\n",
+     "hash": "ddd5c54a7747511f",
+     "he": "העץ בדוגמה הזו הוא עץ לא-מתויג, כלומר עץ שהענפים שלו אינם מתויגים,\nוהעלים שלו מתויגים בערכים אטומיים. זו התפיסה הסטנדרטית של\nרשימה הטרוגנית. לדוגמה, ((3 4) 5 1) היא ייצוג ברשימה של עץ כזה."
+    },
+    {
+     "id": "cm/4.2CPS:18:3",
+     "type": "prose",
+     "en": "Tree interface:\n",
+     "hash": "d1f2b6020111a632",
+     "he": "ממשק העץ:"
+    },
+    {
+     "id": "cm/4.2CPS:18:4",
+     "type": "list",
+     "en": "* Constructors: `make-tree(t1,t2, ...), add-subtree(first,rest), make-leaf(data), empty-tree;`\n* Accessors: `first-subtree(tree), rest-subtree(tree), leaf-data(leaf);`\n* Predicates: `composite-tree?(t), leaf?(t), empty-tree?(t);`\n\n",
+     "hash": "eddc18a1723c176b",
+     "he": "* בנאים (Constructors): `make-tree(t1,t2, ...), add-subtree(first,rest), make-leaf(data), empty-tree;`\n* שולפים (Accessors): `first-subtree(tree), rest-subtree(tree), leaf-data(leaf);`\n* פרדיקטים (Predicates): `composite-tree?(t), leaf?(t), empty-tree?(t);`"
+    },
+    {
+     "id": "cm/4.2CPS:18:5",
+     "type": "prose",
+     "en": "In our simple implementation, we use:\n\n",
+     "hash": "405dcc23842ee132",
+     "he": "במימוש הפשוט שלנו, אנחנו משתמשים ב:"
+    },
+    {
+     "id": "cm/4.2CPS:18:6",
+     "type": "code",
+     "en": "```scheme\n(define make-tree list)\n(define add-subtree cons)\n(define make-leaf (lambda (x) x))\n(define empty-tree? empty?)\n(define first-subtree car)\n(define rest-subtree cdr)\n(define leaf-data (lambda (x) x))\n(define composite-tree? list?)\n(define leaf? (lambda (x) (not (composite-tree? x))))\n```\n\n",
+     "hash": "09659401fb1ba0b2",
+     "lang": "scheme",
+     "noteHe": "מימוש הממשק — ושימו לב עד כמה הוא \"ריק\": כל פעולה היא פשוט שם נרדף לפעולת רשימה קיימת. ‏`make-tree` הוא ‏`list`, ‏`first-subtree` הוא ‏`car`, ‏`rest-subtree` הוא ‏`cdr`, ו-`make-leaf`/`leaf-data` הן פונקציות הזהות — כלומר עלה **הוא** הערך עצמו. עץ מורכב מזוהה פשוט לפי היותו רשימה. זו הדגמה יפה של הפרדה בין ממשק (interface) למימוש (implementation), נושא שראינו כבר ב-2.3: הקוד שמשתמש בעץ מדבר בשפת עצים, ולכן אפשר להחליף את הייצוג בלי לגעת בו. שימו לב שכאן ‏`(define make-tree list)` קושר את **הערך** של ‏`list`, בלי ‏`lambda` — טכניקה שעובדת כי פרוצדורות הן ערכים מהמעלה הראשונה."
+    },
+    {
+     "id": "cm/4.2CPS:18:7",
+     "type": "prose",
+     "en": "The CPS procedure uses a success and a fail continuations. \n\n",
+     "hash": "4f8a11eb8e0cb40f",
+     "he": "פרוצדורת ה-CPS משתמשת בהמשכית הצלחה ובהמשכית כישלון."
+    },
+    {
+     "id": "cm/4.2CPS:18:8",
+     "type": "prose",
+     "en": "The important point in this procedure, is that when an interior node is processed, the procedure makes a non-deterministic decision: it starts the traversal of the first sub-tree, which may or may not contain the searched item.\nIf this first traversal succeeds, the search procedure completes; else we need to backtrack and search the other sub-trees.\nWe need to keep track of this decision point explicitly - so that this further search can be performed in the future if needed.\nThis is accomplished by constructing a fail-continuation which remembers what are the next sub-trees to be traversed.\nThe fail continuation is applied when the search reaches a leaf and fails.\n\n",
+     "hash": "bf24d301fffb461a",
+     "he": "הנקודה החשובה בפרוצדורה הזו היא שכשמעובד צומת פנימי, הפרוצדורה מקבלת החלטה לא-דטרמיניסטית: היא מתחילה את המעבר על תת-העץ הראשון, שעשוי להכיל את הפריט המבוקש או לא.\nאם המעבר הראשון הזה מצליח, פרוצדורת החיפוש מסתיימת; אחרת עלינו לחזור אחורה (backtrack) ולחפש בתתי-העצים האחרים.\nעלינו לעקוב אחרי נקודת ההחלטה הזו במפורש — כדי שהחיפוש הנוסף הזה יוכל להתבצע בעתיד אם יידרש.\nזה מושג על ידי בניית המשכית-כישלון שזוכרת מהם תתי-העצים הבאים שיש לעבור עליהם.\nהמשכית הכישלון מופעלת כשהחיפוש מגיע לעלה ונכשל."
+    },
+    {
+     "id": "cm/4.2CPS:18:9",
+     "type": "code",
+     "en": "```scheme\n;; Signature: leftmost-even(tree)\n;; Purpose: Find the leftmost even leaf of an unlabeled tree whose leaves are labeled by numbers. \n;; If no leaf is even, return #f.\n;; Type: [List -> Number union Boolean]\n;; Examples: (leftmost-even ’((1 2) (3 4 5))) ==> 2\n;;           (leftmost-even ’((1 1) (3 3) 5)) ==> #f\n(define leftmost-even\n  (lambda (tree)\n    (leftmost-even$ tree \n                    (lambda (x) x) \n                    (lambda () #f))))\n\n(define leftmost-even$\n  (lambda (tree succ-cont fail-cont)\n    (cond ((empty-tree? tree) (fail-cont))\n          ((leaf? tree)\n           (if (even? (leaf-data tree))\n               (succ-cont tree)\n               (fail-cont)))\n          (else ; Composite tree\n            (leftmost-even$ (first-subtree tree)\n                            succ-cont\n                            (lambda () (leftmost-even$ (rest-subtrees tree) ; (@)\n                                                       succ-cont\n                                                       fail-cont)))))))\n```\n\n",
+     "hash": "59465be4e08ca1ce",
+     "lang": "scheme",
+     "noteHe": "זו הדוגמה החזקה ביותר בדף — כדאי לשנן אותה. ‏`leftmost-even` היא עטיפה שמפעילה את ‏`leftmost-even$` עם הזהות כהמשכית הצלחה ועם ‏`(lambda () #f)` כהמשכית כישלון סופית. בגוף: עץ ריק → כישלון; עלה → אם הוא זוגי, הצלחה, אחרת כישלון; עץ מורכב → יורדים לתת-העץ הראשון עם **אותה** ‏`succ-cont`, אבל עם המשכית כישלון **חדשה**, המסומנת ב-`(@)`, שאומרת: \"אם החיפוש בתת-העץ הראשון נכשל — חפש בשאר תתי-העצים\". וזה הרעיון כולו: **המשכית הכישלון היא נקודת החזרה (backtracking point)**, שמורה כסגור. שימו לב שהמשכית הכישלון הפנימית לוכדת בסגור שלה גם את ‏`tree` וגם את ‏`fail-cont` המקורית, כך שנוצרת שרשרת של חלופות. השוו למודל ה\"נסה, ואם נכשלת חזור\" של Prolog — נראה אותו בפרק 5. הערה על המקור: הקוד קורא ל-`rest-subtrees` (ברבים) בעוד שהממשק שהוגדר למעלה מגדיר ‏`rest-subtree` (ביחיד) — הקוד לא ירוץ כמו שהוא. בנוסף, ענף העלה מחזיר ‏`(succ-cont tree)` ולא ‏`(succ-cont (leaf-data tree))`; במימוש הזה ‏`leaf-data` היא הזהות ולכן זה עובד במקרה, אבל זו הסתמכות על המימוש שהממשק בא למנוע. ולבסוף, הדוגמאות בתיעוד משתמשות בגרש טיפוגרפי ‏`’` במקום בגרש רגיל ‏`'`."
+    },
+    {
+     "id": "cm/4.2CPS:18:10",
+     "type": "prose",
+     "en": "The `leftmost-even` procedure performs an exhaustive search on the tree, until an even leaf is found. \nWhenever the search in the first sub-tree fails, it invokes a recursive search on the rest of the sub-trees. \nThis kind of search is a backtracking search policy: If the decision to search in the first sub-tree appears wrong, a retreat to the decision point occurs, and an alternative route is selected.\n\n",
+     "hash": "38a457803880bc15",
+     "he": "הפרוצדורה `leftmost-even` מבצעת חיפוש ממצה על העץ, עד שנמצא עלה זוגי.\nבכל פעם שהחיפוש בתת-העץ הראשון נכשל, היא מפעילה חיפוש רקורסיבי על שאר תתי-העצים.\nחיפוש מסוג זה הוא מדיניות חיפוש עם חזרה לאחור (backtracking): אם ההחלטה לחפש בתת-העץ הראשון מתבררת כשגויה, מתרחשת נסיגה לנקודת ההחלטה, ונבחר מסלול חלופי."
+    },
+    {
+     "id": "cm/4.2CPS:18:11",
+     "type": "prose",
+     "en": "Note that the fail continuation that is passed to the fail continuation that is constructed in the decision point (marked by @) is the fail continuation that is passed to leftmost-even$ as an argument. To understand that think about the decision points:\n",
+     "hash": "90ae5f3a963a7846",
+     "he": "שימו לב שהמשכית הכישלון שמועברת להמשכית הכישלון שנבנית בנקודת ההחלטה (המסומנת ב-@) היא המשכית הכישלון שמועברת ל-leftmost-even$ כארגומנט. כדי להבין את זה, חשבו על נקודות ההחלטה:"
+    },
+    {
+     "id": "cm/4.2CPS:18:12",
+     "type": "list",
+     "en": "* If the search in (first-subtree tree) succeeds, then the future is succ-cont.\n* If it fails, then the future is the search in (rest-subtrees tree).\n* If the search in (rest-subtrees tree) succeeds, the future is succ-cont.\n* If it fails, then the future is fail-cont.\n\n",
+     "hash": "e0229f7b501f264a",
+     "he": "* אם החיפוש ב-(first-subtree tree) מצליח, אז העתיד הוא succ-cont.\n* אם הוא נכשל, אז העתיד הוא החיפוש ב-(rest-subtrees tree).\n* אם החיפוש ב-(rest-subtrees tree) מצליח, העתיד הוא succ-cont.\n* אם הוא נכשל, אז העתיד הוא fail-cont."
+    },
+    {
+     "id": "cm/4.2CPS:18:13",
+     "type": "prose",
+     "en": "At last, a non-CPS version:\n\n",
+     "hash": "723459061549086d",
+     "he": "ולבסוף, גרסה שאינה CPS:"
+    },
+    {
+     "id": "cm/4.2CPS:18:14",
+     "type": "code",
+     "en": "```scheme\n(define leftmost-even\n  (lambda (tree)\n    (letrec ((iter (lambda (tree)\n                     (cond ((empty-tree? tree) #f)\n                           ((leaf? tree)\n                            (if (even? (leaf-data tree)) \n                                (leaf-data tree) \n                                #f))\n                           (else\n                             (let ((res-first (iter (first-subtree tree))))\n                               (if res-first\n                                   res-first\n                                   (iter (rest-subtrees tree)))))))))\n       (iter tree))))\n```       \n\n\n\n\n",
+     "hash": "7395d8a017a1c958",
+     "lang": "scheme",
+     "noteHe": "אותה פונקציה בלי המשכיות, לשם השוואה. במקום המשכית כישלון, מחזירים ‏`#f` כערך \"לא נמצא\", וב-`let` בודקים את ‏`res-first`: אם הוא אינו ‏`#f` מחזירים אותו, אחרת ממשיכים לשאר תתי-העצים. שימו לב שכאן ה\"חזרה לאחור\" קיימת גם כן, אבל היא מוסתרת בתוך תבנית של בדיקת ערך מיוחד. שני הבדלים חשובים לטובת גרסת ה-CPS: ראשית, ‏`(let ((res-first (iter …))) …)` **אינו** בעמדת זנב, ולכן הגרסה הזו צורכת מחסנית בעוד שגרסת ה-CPS אינה צורכת. שנית, ההסתמכות על ‏`#f` כסימן כישלון מערבבת \"ערך\" עם \"מצב\" — ואם ‏`#f` היה ערך לגיטימי בעץ, הקוד היה נשבר; המשכיות מפרידות בין שני המסלולים לחלוטין. שימו לב שהעלה מוחזר כאן כ-`(leaf-data tree)` ולא כ-`tree` — עוד חוסר עקביות קטן מול גרסת ה-CPS למעלה. וגם כאן ‏`rest-subtrees` נכתב ברבים במקום ‏`rest-subtree`."
+    }
+   ],
+   "headingHe": "שימוש בהמשכיות הצלחה-כישלון לחיפוש"
+  },
+  {
+   "id": "cm/4.2CPS:19",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.2CPS:19:0",
+     "type": "list",
+     "en": "* The operational semantics for the language we have considered support traditional control structures: conditionals, sequence and function invocation.\n* In Scheme, iterative processes are modeled using tail-recursive procedures - that is, procedures where recursive calls all occur in tail position, without any control context awaiting the result of the recursive call.\n\n* Given the operational semantics of Scheme we have implemented, we can determine whether a program will generate an iterative program through static analysis: if all user-procedure calls appear in tail positions only.  Expressions which meet this criterion are in **tail form**.\n\n* We can transform any expression in the language to another expression in Continuation Passing Style (CPS) which is CPS-equivalent to the original expression and is in tail-form.  \n* Procedures in CPS have an additional parameter called the *continuation* which determine how the result of the computation is to be processed.\n\n* One can adopt the success-fail continuation pattern to model procedures with error handlers or search procedures which may find items within complex data structures or fail to find them.  \n* When appropriate, success-fail continuation procedures are often simpler and easier to analyze than the corresponding non-CPS procedures.\n",
+     "hash": "de9876cef1b90339",
+     "he": "* הסמנטיקה התפעולית של השפה שבחנו תומכת במבני בקרה מסורתיים: תנאים, רצף והפעלת פונקציה.\n* ב-Scheme, תהליכים איטרטיביים ממודלים באמצעות פרוצדורות רקורסיביות-זנב — כלומר, פרוצדורות שבהן כל הקריאות הרקורסיביות מתרחשות בעמדת זנב, בלי שום הקשר בקרה שממתין לתוצאת הקריאה הרקורסיבית.\n\n* בהינתן הסמנטיקה התפעולית של Scheme שמימשנו, אנחנו יכולים לקבוע האם תוכנית תייצר תהליך איטרטיבי באמצעות ניתוח סטטי: אם כל הקריאות לפרוצדורות משתמש מופיעות בעמדות זנב בלבד. ביטויים שעונים על הקריטריון הזה נמצאים ב**צורת זנב** (tail form).\n\n* אנחנו יכולים להמיר כל ביטוי בשפה לביטוי אחר בסגנון העברת המשכיות (CPS), ששקול-CPS לביטוי המקורי ונמצא בצורת זנב.\n* לפרוצדורות בסגנון CPS יש פרמטר נוסף שנקרא *ההמשכית*, שקובע איך תוצאת החישוב תעובד.\n\n* אפשר לאמץ את תבנית המשכיות ההצלחה-כישלון כדי למדל פרוצדורות עם מטפלי שגיאות, או פרוצדורות חיפוש שעשויות למצוא פריטים בתוך מבני נתונים מורכבים או להיכשל במציאתם.\n* כשהדבר מתאים, פרוצדורות עם המשכיות הצלחה-כישלון הן לעיתים קרובות פשוטות יותר וקלות יותר לניתוח מהפרוצדורות המקבילות שאינן CPS."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "אילו מהביטויים הבאים נמצאים ב**צורת זנב** (tail form)? נניח ש-`f` ו-`g` הן פרוצדורות משתמש ו-`+`, `*`, `if` הם פרימיטיביים.\n```scheme\n(I)   (if (> x 0) (f x) (g x))\n(II)  (+ 1 (f x))\n(III) (f (+ x 1))\n(IV)  (if (f x) 0 1)\n```",
+   "options": [
+    "I ו-III בלבד",
+    "I, III ו-IV",
+    "I בלבד",
+    "כולם חוץ מ-II"
+   ],
+   "correct": 0,
+   "explanationHe": "‏**התשובה: I ו-III בלבד.**\n\n**(I) בצורת זנב.** התנאי `(> x 0)` הוא פרימיטיבי, ושתי הקריאות `(f x)` ו-`(g x)` יושבות בעמדות הזנב של ה-`if` — אף אחת מהן אינה עטופה בחישוב נוסף.\n\n**(II) אינו בצורת זנב.** ‏`(f x)` נמצא בעמדת ראש: אחרי שהוא חוזר, צריך עוד לחבר 1. זה בדיוק ההקשר שנשמר על המחסנית.\n\n**(III) בצורת זנב.** אל תתבלבלו מהקינון — ‏`(+ x 1)` הוא ארגומנט **פרימיטיבי**, ולכן הוא לא יוצר הקשר בקרה. הקריאה ל-`f` עצמה היא הביטוי כולו.\n\n**(IV) אינו בצורת זנב.** הקריאה `(f x)` יושבת בעמדת ה**תנאי** של ה-`if`, שהיא עמדת ראש: אחרי שהיא תחזור עוד צריך לבחור ענף. זו בדיוק הסיבה שבסעיף על `filter$` נאלצנו לפרק את מבנה ה-`cond`.\n\n**הכלל שכדאי לשנן**: מה שקובע הוא לא עומק הקינון אלא **האם קריאה לפרוצדורת משתמש נמצאת בעמדת ראש**. קריאות לפרימיטיבים לעולם אינן מפרות את צורת הזנב."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "נתונה הפונקציה `g` והמרתה ל-CPS. השלימו את `g$`:\n```scheme\n(define g\n  (lambda (x) (add1 (square x))))\n```\nכתבו את `g$` המלאה, והסבירו איזו קריאה מקבלת את `cont` המקורית ומדוע.",
+   "answerHe": "```scheme\n(define g$\n  (lambda (x cont)\n    (square$ x\n      (lambda (square-res)\n        (add1$ square-res cont)))))\n```\n\n‏**`add1$` מקבלת את `cont` המקורית**, כי היא הקריאה האחרונה — היא בעמדת זנב, ואין מה לעשות עם התוצאה שלה מלבד להעביר אותה הלאה. ‏`square$` לעומת זאת מקבלת המשכית **חדשה**, כי אחרי שהיא תחזור עוד צריך להפעיל את `add1`.",
+   "explanationHe": "‏**מה שנבדק כאן**: (1) היפוך הסדר — בקוד המקורי `square` היא הפנימית, ובגרסת ה-CPS היא הראשונה שנקראת; (2) שרק הקריאה האחרונה מקבלת את `cont`; (3) שם הפרמטר לפי המוסכמה `<שם-הפרוצדורה>-res`.\n\n**טעות נפוצה 1**: לכתוב `(cont (add1$ (square$ x …) …))` — כלומר להשאיר את הקינון ולעטוף ב-`cont`. זה מפספס את כל הרעיון: התוצאה של פונקציית CPS **אינה** ערך שמחזירים, אלא משהו שמועבר להמשכית.\n\n**טעות נפוצה 2**: לתת גם ל-`square$` את `cont` המקורית. אז `add1` פשוט לא היה מתבצע — התוצאה של `square` הייתה זולגת ישירות החוצה.\n\n**בדיקה עצמית**: לפי הגדרת שקילות-CPS, ‏`(g$ 3 (lambda (v) v))` צריך להחזיר בדיוק `(g 3)` = 10. עקבו: `square$` נותנת 9 להמשכית, שקוראת `(add1$ 9 cont)`, שנותנת 10 ל-`cont` = הזהות. ✓"
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "טוענים לפניכם: \"‏CPS פותר את בעיית גלישת המחסנית, ולכן תוכנית ב-CPS צורכת פחות זיכרון\". הפריכו או אשרו את הטענה בדיוק.",
+   "answerHe": "**הטענה נכונה בחציה ושגויה בחציה.**\n\n**מה נכון**: אחרי טרנספורמציית CPS כל הקריאות לפרוצדורות משתמש נמצאות בעמדת זנב. לכן **מחסנית הבקרה** אינה גדלה — במימוש שמבצע אופטימיזציית קריאת זנב לא תהיה גלישת מחסנית.\n\n**מה שגוי**: הזיכרון לא נעלם, הוא **הועבר**. ההקשר שישב קודם על המחסנית יושב עכשיו בשרשרת ההמשכיות המקוננות, כלומר בסגורים שמוקצים על הערמה (heap). ראינו זאת במפורש בפריסה של `k1`, `k2`, `k3`: `k1` מכילה את `k2` שמכילה את `k3`, ועומק הקינון גדל ליניארית ב-`n`. סיבוכיות המקום נשארת אותה סיבוכיות.\n\n**מה באמת הרווחנו**:\n1. **שליטה מפורשת** — הקשר הבקרה הפך מדבר סמוי שהמפרש מנהל לערך מהמעלה הראשונה שאפשר לשמור, להעביר, להתעלם ממנו (כמו ב-`fail-cont`) או לקרוא לו יותר מפעם אחת. זה מה שמאפשר חריגות, backtracking, גנרטורים וקו-רוטינות.\n2. **קיבוע סדר ההערכה** — מה שהיה לא-מוגדר בהפעלה `(f (g x) (h y))` הופך למפורש.\n3. **בסיס לכתיבת מפרש** שמסביר בקרה במקום לשאול אותה משפת-המטא — המטרה שהוצהרה בתחילת הדף.\n\n**והערה חשובה**: ב-Node.js, שאינו מבצע אופטימיזציית קריאת זנב, גרסת ה-CPS **תגלוש בכל זאת** — כי כל קריאת זנב עדיין פותחת מסגרת. כלומר CPS לבדו אינו מספיק; דרוש גם מימוש שמכבד קריאות זנב, או טכניקה נוספת (למשל trampoline).",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ההבחנה בין מחסנית הבקרה לערמה — הזיכרון עובר ולא נחסך; (2) הפניה לדוגמת `k1`/`k2`/`k3` או שקילה כללית של עומק הקינון; (3) לפחות שני רווחים אמיתיים (שליטה מפורשת / קיבוע סדר / בסיס למפרש); (4) בונוס משמעותי: לציין שב-Node.js הגרסה תגלוש בכל זאת כי אין TCO."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "בקוד `sumlist2` שראינו, מה קורה לשרשרת המשכיות ההצלחה שנבנתה עד לרגע שבו נתקלים באיבר שאינו מספר?",
+   "options": [
+    "היא נשמרת ומופעלת אחרי `fail-cont`",
+    "היא פשוט נזרקת — אף אחד לא קורא לה",
+    "היא מופעלת עם הערך `0`",
+    "היא מועברת כארגומנט ל-`fail-cont`"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: היא פשוט נזרקת.**\n\nבענף השגיאה הקוד מבצע `(fail-cont)` — ורק אותו. ‏`succ-cont`, על כל שרשרת ההמשכיות שנצברה במעבר על הרשימה, אינה מוזכרת ולכן **לא מופעלת לעולם**. מנקודת המבט של החישוב, כל העבודה שהצטברה מתאדה, ו-`fail-cont` היא זו שקובעת מה קורה הלאה.\n\n**וזו בדיוק המהות של חריגה (exception)**: \"עצור את מה שאתה עושה וקפוץ למקום אחר\". ההבדל הוא ש-CPS משיג את זה **בלי שום מנגנון מיוחד בשפה** — רק פונקציות מהמעלה הראשונה. שאלת מבחן קלאסית: \"הסבירו כיצד ניתן לממש `throw`/`catch` בעזרת המשכיות\".\n\n**למה השאר שגויים**: אין שום מנגנון שמפעיל המשכית \"אחרי\" אחרת — קריאה היא קריאה, ומה שלא נקרא פשוט אינו רץ (א'). הערך `0` מועבר ל-`succ-cont` רק בענף הרשימה הריקה, שהוא מסלול הצלחה (ג'). ו-`fail-cont` ב-`sumlist2` היא `(lambda () …)` חסרת ארגומנטים לגמרי, ולכן לא ניתן להעביר לה דבר (ד')."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "עקבו אחרי `(fact$ 4 (lambda (x) x))` וכתבו את ארבעת הצעדים הראשונים, בסגנון העקבות שבדף. מה עומק הקינון של ההמשכית ברגע שמגיעים לתנאי העצירה?",
+   "answerHe": "```scheme\n(fact$ 4 k4)                              ;; k4 = (lambda (x) x)\n(fact$ 3 (lambda (res) (k4 (* 4 res))))   ;; = k3\n(fact$ 2 (lambda (res) (k3 (* 3 res))))   ;; = k2\n(fact$ 1 (lambda (res) (k2 (* 2 res))))   ;; = k1\n(k1 1) => (k2 (* 2 1)) => (k3 (* 3 2)) => (k4 (* 4 6)) => 24\n```\n\n**עומק הקינון בתנאי העצירה: 4 המשכיות** — ‏`k1` עוטפת את `k2`, שעוטפת את `k3`, שעוטפת את `k4` (הזהות). באופן כללי העומק הוא `n`, כלומר ליניארי בקלט.",
+   "explanationHe": "‏**מה שנבדק**: (1) שבכל צעד `n` יורד ב-1 ובמקביל נבנית המשכית **חדשה** שעוטפת את הקודמת; (2) שהמכפלה מתבצעת רק בשלב ה\"פריקה\", אחרי תנאי העצירה — כלומר בסדר הפוך לבנייה; (3) שהעומק הוא `n` ולא קבוע.\n\n**טעות נפוצה**: לחשוב שהמכפלות מתבצעות בדרך פנימה, כמו ב-`fact-iter`. הן לא — ב-`fact$` שום כפל אינו מתבצע עד שמגיעים ל-`(cont 1)`. זה בדיוק ההבדל בין `fact-iter`, שצובר **ערך**, לבין `fact$`, שצובר **חישוב מושהה**.\n\n**קישור לתרגיל 3**: העומק הליניארי הזה הוא ההוכחה שהזיכרון עבר מהמחסנית לערמה ולא נחסך."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "בסעיף על `filter$` נאלצנו לשנות את **מבנה** ה-`cond`, בעוד שב-`sum-odd-squares$` השארנו אותו כמו שהוא. הסבירו מה בדיוק קובע מתי צריך לפרק את ה-`cond`, ותנו כלל כללי.",
+   "answerHe": "**הכלל: מה שקובע הוא מה יושב בעמדת ה*תנאי* (test), לא מה שיושב בגוף הענפים.**\n\nב-`sum-odd-squares$` שני התנאים היו `(empty? tree)` ו-`(not (list? tree))` — שילובים **פרימיטיביים**. פרימיטיב מסתיים מיד ואינו יוצר הקשר בקרה, ולכן אפשר להעריך אותו במקום ולהשאיר את ה-`cond` שלם. הטרנספורמציה נגעה רק לגופי הענפים.\n\nב-`filter$` התנאי של הענף השני היה `(pred? (car list))` — קריאה ל**פרוצדורת משתמש**. פרוצדורת CPS אינה מחזירה ערך, היא מעבירה אותו להמשכית; לכן אי אפשר להשתמש בה כתנאי \"במקום\". חייבים:\n1. להוציא את הקריאה החוצה: `(pred?$ (car list) (lambda (pred-res) …))`;\n2. ובתוך ההמשכית, שבה `pred-res` הוא כבר ערך רגיל, לבנות `cond` חדש שמסתעף עליו.\n\n**הכלל הכללי**: תנאי פרימיטיבי → מבנה ה-`cond` נשמר. תנאי שהוא קריאה לפרוצדורת משתמש → מחלצים אותו כקריאת CPS ראשונה, ומכניסים את ההסתעפות כולה אל תוך ההמשכית.\n\n**הכללה**: זה בעצם אותו כלל שראינו לגבי ארגומנטים — כל קריאה לפרוצדורת משתמש בעמדת ראש חייבת להיות מחולצת החוצה, וכל מה שהיה \"סביבה\" נכנס להמשכית. עמדת התנאי של `if`/`cond` היא פשוט עוד עמדת ראש.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) שההבחנה היא בין תנאי פרימיטיבי לתנאי שהוא קריאה לפרוצדורת משתמש; (2) הנימוק — פונקציית CPS אינה **מחזירה** ערך שאפשר לבדוק, אלא מעבירה אותו להמשכית; (3) שני צעדי הפירוק בפועל; (4) בונוס: ההכללה שעמדת התנאי היא עוד עמדת ראש, ולכן זה אינו כלל נפרד אלא אותו כלל."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "מדוע הרצת התוכנית הרקורסיבית-זנב `factIter` **במפרש ה-L5 שלנו** גורמת ל-`RangeError: Maximum call stack size exceeded`?",
+   "options": [
+    "מכיוון ש-L5 אינה תומכת בפרמטר מסוג צובר",
+    "מכיוון שהמפרש נשען על מחסנית הקריאות של שפת-המטא (JavaScript), שאינה מממשת אופטימיזציית קריאת זנב",
+    "מכיוון שהתוכנית אינה באמת בצורת זנב",
+    "מכיוון ש-‎10000! חורג מטווח ה-`number`"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: המפרש יורש את מודל הבקרה של שפת-המטא.**\n\nהמפרש שלנו לא מודל את מחסנית הקריאות במפורש — כל קריאה בשפת המושא (L5) מתורגמת לקריאה רקורסיבית של פונקציית ההערכה ב-JavaScript. מכיוון ש-Node.js אינו מבצע אופטימיזציית קריאת זנב, כל קריאה כזו פותחת מסגרת חדשה, גם כשהיא בעמדת זנב ב-L5. לכן המחסנית מתמלאת.\n\n**וזו הפואנטה של כל הדף**: המפרש אינו *מסביר* איך בקרה עובדת — הוא **משאיל** אותה. כדי לעמוד בדרישת Scheme היינו צריכים לייצג את הקשר הבקרה במפורש, וזה בדיוק מה ש-CPS נותן, ומה שיוביל למפרש `L7` שבו `eval` מקבלת המשכית כפרמטר.\n\n**למה השאר שגויים**: התוכנית **כן** רקורסיבית-זנב לפי ההגדרה התחבירית (ג') — וזו בדיוק הנקודה: רקורסיית זנב היא תכונה של הקוד, וביצוע איטרטיבי הוא תכונה של המימוש. צוברים נתמכים היטב (א'). וחריגה מטווח ה-`number` הייתה נותנת `Infinity`, לא שגיאת מחסנית (ד')."
+  }
+ ]
+}

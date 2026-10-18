@@ -1,0 +1,1749 @@
+{
+ "id": "cm/chap1",
+ "kind": "lecture",
+ "sourcePath": "class_material/chap1.md",
+ "titleEn": "Introduction",
+ "titleHe": "מבוא (Introduction)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/chap1:0",
+   "depth": 1,
+   "headingEn": "Introduction",
+   "raw": "# Introduction\n\n",
+   "blocks": [],
+   "headingHe": "מבוא"
+  },
+  {
+   "id": "cm/chap1:1",
+   "depth": 2,
+   "headingEn": "What the Course is About",
+   "raw": "## What the Course is About\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:1:0",
+     "type": "prose",
+     "en": "This course studies principles underlying the design of programming languages. It has four main objectives:\n\n",
+     "hash": "a67a637f51e93311",
+     "he": "הקורס הזה עוסק בעקרונות שמנחים את התכנון של שפות תכנות. יש לו ארבע מטרות עיקריות:"
+    },
+    {
+     "id": "cm/chap1:1:1",
+     "type": "list",
+     "en": "* Learning principles of programming languages: elements of programming languages;abstraction means; formal definition; concrete syntax, abstract syntax, perational semantics; program correctness – type checking and type inference systems. Key concepts in describing programming languages will emerge such as substitution, scope, reduction and structural induction. These tools will help us draft first proofs of correctness for programs and program transformations\n\n* Describing program execution by studying evaluators: interpreters, program transformers and compilers.\n\n* Comparing programming paradigms: Functional programming, Logic programming and Imperative programming.\n\n* Learning principles of program design: Abstraction, contracts, modular architecture, testing\n\n",
+     "hash": "e825c2ff704af957",
+     "he": "* לימוד עקרונות של שפות תכנות: אבני היסוד של שפות תכנות; אמצעי הפשטה; הגדרה פורמלית; תחביר קונקרטי (concrete syntax), תחביר מופשט (abstract syntax) וסמנטיקה אופרציונלית (operational semantics); נכונות תוכניות — מערכות לבדיקת טיפוסים (type checking) ולהסקת טיפוסים (type inference). בדרך יצוצו מושגי מפתח בתיאור שפות תכנות, כגון הצבה (substitution), תחום הכרה (scope), רדוקציה (reduction) ואינדוקציה מבנית (structural induction). כלים אלה יעזרו לנו לנסח הוכחות ראשונות של נכונות עבור תוכניות ועבור טרנספורמציות של תוכניות.\n\n* תיאור אופן הביצוע של תוכניות באמצעות לימוד מעריכים (evaluators): מפרשים (interpreters), טרנספורמטורים של תוכניות ומהדרים (compilers).\n\n* השוואת פרדיגמות תכנות: תכנות פונקציונלי (Functional Programming), תכנות לוגי (Logic Programming) ותכנות אימפרטיבי (Imperative).\n\n* לימוד עקרונות של תכנון תוכניות: הפשטה (abstraction), חוזים (contracts), ארכיטקטורה מודולרית ובדיקות (testing)."
+    },
+    {
+     "id": "cm/chap1:1:2",
+     "type": "prose",
+     "en": "The unifying underlying objective is to understand how programming languages work, why they are designed the way they are, and what good programming practices they encourage. Understanding these *principles of programming languages* will help us learn new languages, compare existing languages, choose the right language for a given task, and build our own language when needed.\n\n",
+     "hash": "2fc6b6efa5e93fbc",
+     "he": "המטרה המאחדת שבבסיס כולן היא להבין איך שפות תכנות עובדות, מדוע הן מתוכננות כפי שהן, ואילו הרגלי תכנות טובים הן מעודדות. הבנת *עקרונות שפות התכנות* האלה תעזור לנו ללמוד שפות חדשות, להשוות בין שפות קיימות, לבחור את השפה המתאימה למשימה נתונה, ולבנות שפה משלנו כשנזדקק לכך."
+    },
+    {
+     "id": "cm/chap1:1:3",
+     "type": "prose",
+     "en": "The course is a mixture of theory and practice. Theoretical topics are supported by implemented software, and course assignments involve programming. It combines two main threads:\n\n",
+     "hash": "f782adce1e666aac",
+     "he": "הקורס משלב תאוריה ומעשה. הנושאים התאורטיים נתמכים בתוכנה ממומשת, ומטלות הקורס כוללות תכנות. הקורס שוזר שני חוטים מרכזיים:"
+    },
+    {
+     "id": "cm/chap1:1:4",
+     "type": "list",
+     "en": "* **Meta-programming**: describing and developing software tools that manipulate programs - parse them, evaluate them, transform them, translate from one language to another; reason about code to prove that it has some desirable properties (related to correctness or performance) in a predictable manner. Specifically, we will learn how to develop interpreters for a functional language, and a program transformer which infers types of an untyped program and rewrites it into a typed form. We will also develop an interpreter for a logic programming language.\n\n* **Good programming practices**: encourage good programming practices and understand their importance through examples, and by applying them to develop meta-programming tools. The parsers, interpreters and transformers of programs we will develop will be practical examples of good programming.\n\n",
+     "hash": "647ad9d4b71f1edd",
+     "he": "* **מטא-תכנות (Meta-programming)**: תיאור ופיתוח של כלי תוכנה שמטפלים בתוכניות — מנתחים אותן תחבירית (parse), מעריכים אותן (evaluate), מבצעים עליהן טרנספורמציות, מתרגמים משפה אחת לאחרת; וכן הסקה לוגית על קוד כדי להוכיח, באופן צפוי, שיש לו תכונות רצויות (הקשורות לנכונות או לביצועים). באופן ספציפי, נלמד לפתח מפרשים (interpreters) לשפה פונקציונלית, וכן טרנספורמטור תוכניות שמסיק את הטיפוסים של תוכנית לא מטופסת ומשכתב אותה לצורה מטופסת. נפתח גם מפרש לשפת תכנות לוגי.\n\n* **הרגלי תכנות טובים**: עידוד הרגלי תכנות טובים והבנת חשיבותם דרך דוגמאות, ודרך יישומם בפיתוח כלי מטא-תכנות. המנתחים התחביריים (parsers), המפרשים והטרנספורמטורים שנפתח יהיו דוגמאות מעשיות לתכנות טוב."
+    },
+    {
+     "id": "cm/chap1:1:5",
+     "type": "prose",
+     "en": "A tool we will use to understand the structure of programming languages will be to compare different languages. Specifically, we will compare JavaScript (and some of its variants such as TypeScript), Scheme and Prolog. We will also refer to Java but without using it.\n\n",
+     "hash": "5b04e40795af60c5",
+     "he": "כלי שבו נשתמש כדי להבין את המבנה של שפות תכנות יהיה השוואה בין שפות שונות. באופן ספציפי, נשווה בין JavaScript (וכמה מהווריאנטים שלה, כמו TypeScript), Scheme ו-Prolog. נתייחס גם ל-Java, אך בלי להשתמש בה."
+    }
+   ],
+   "headingHe": "במה עוסק הקורס"
+  },
+  {
+   "id": "cm/chap1:2",
+   "depth": 2,
+   "headingEn": "Course Outline",
+   "raw": "## Course Outline\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:2:0",
+     "type": "list",
+     "en": "1. Chapter 1: Practical functional programming in TypeScript:\n    1. programming paradigms\n    2. elements of functional programming: higher-order functions, anonymous functions, closures, currying, lazy evaluation, immutable data, recursion.\n    3. advantages of functional programming\n    4. types, type checking, type inference\n    5. compound data structures, functional processing of JSON\n    6. typing functions, closures\n    7. currying, partial evaluation\n2. Chapter 2: Operational Semantics and Interpreters\n3. Chapter 3: Program Transformations: A Type Inference System\n4. Chapter 4: Abstraction over Control: Asynchronous programming, Generators, Lazy Data Structures, Continuations, building complex control constructs from continuations\n5. Chapter 5: Logic Programming; Logic Programming Interpreter\n\n",
+     "hash": "a7a6995728a9c55e",
+     "he": "1. פרק 1: תכנות פונקציונלי מעשי ב-TypeScript:\n    1. פרדיגמות תכנות\n    2. אבני היסוד של תכנות פונקציונלי: פונקציות מסדר גבוה (higher-order functions), פונקציות אנונימיות, סגורים (closures), קירור (currying), הערכה עצלה (lazy evaluation), נתונים בלתי-ניתנים-לשינוי (immutable), רקורסיה.\n    3. יתרונות התכנות הפונקציונלי\n    4. טיפוסים, בדיקת טיפוסים (type checking), הסקת טיפוסים (type inference)\n    5. מבני נתונים מורכבים, עיבוד פונקציונלי של JSON\n    6. מתן טיפוסים לפונקציות, סגורים\n    7. קירור (currying), הערכה חלקית (partial evaluation)\n2. פרק 2: סמנטיקה אופרציונלית ומפרשים\n3. פרק 3: טרנספורמציות של תוכניות: מערכת להסקת טיפוסים\n4. פרק 4: הפשטה מעל בקרה: תכנות אסינכרוני, גנרטורים (generators), מבני נתונים עצלים, המשכיות (continuations), בניית מבני בקרה מורכבים מהמשכיות\n5. פרק 5: תכנות לוגי; מפרש לשפת תכנות לוגי"
+    }
+   ],
+   "headingHe": "מתווה הקורס"
+  },
+  {
+   "id": "cm/chap1:3",
+   "depth": 1,
+   "headingEn": "1. Practical Functional Programming",
+   "raw": "# 1. Practical Functional Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:3:0",
+     "type": "prose",
+     "en": "In this chapter, we introduce the notion of programming language paradigm by introducing the Functional Programming (FP) paradigm and explaining its benefits.\nWe illustrate the recommended practices of FP using the TypeScript programming language - which is an extension of JavaScript which supports an advanced type system.  We introduce the notion of type systems, type checking and type inference on practical examples.  We illustrate through examples closures, higher order functions, currying, and recursive programming.\n\n",
+     "hash": "9e46b5b79328bd0e",
+     "he": "בפרק זה נציג את המושג פרדיגמת תכנות (programming paradigm) דרך היכרות עם פרדיגמת התכנות הפונקציונלי (Functional Programming, FP) והסבר של יתרונותיה.\nנדגים את הפרקטיקות המומלצות של FP באמצעות שפת TypeScript — הרחבה של JavaScript שתומכת במערכת טיפוסים מתקדמת. נציג את המושגים מערכת טיפוסים (type system), בדיקת טיפוסים (type checking) והסקת טיפוסים (type inference) דרך דוגמאות מעשיות. נדגים באמצעות דוגמאות סגורים (closures), פונקציות מסדר גבוה (higher-order functions), קירור (currying) ותכנות רקורסיבי."
+    }
+   ],
+   "headingHe": "1. תכנות פונקציונלי מעשי"
+  },
+  {
+   "id": "cm/chap1:4",
+   "depth": 2,
+   "headingEn": "1.1 Programming Paradigms",
+   "raw": "## 1.1 Programming Paradigms\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:4:0",
+     "type": "prose",
+     "en": "A programming paradigm is a way of programming - that recommends \"preferred practices\" and discourages or makes impossible \"risky practice.\"\n\n",
+     "hash": "f4cd39a4f6efdade",
+     "he": "פרדיגמת תכנות (programming paradigm) היא דרך לתכנת — כזו שממליצה על \"פרקטיקות מועדפות\", ומרתיעה מפני \"פרקטיקות מסוכנות\" או הופכת אותן לבלתי אפשריות."
+    },
+    {
+     "id": "cm/chap1:4:1",
+     "type": "prose",
+     "en": "References:\n\n",
+     "hash": "0933110bae7fed93",
+     "he": "מקורות לקריאה נוספת:"
+    },
+    {
+     "id": "cm/chap1:4:2",
+     "type": "list",
+     "en": "* [http://cs.lmu.edu/~ray/notes/paradigms/](http://cs.lmu.edu/~ray/notes/paradigms/)\n\n* [Wikipedia on Programming Paradigms](https://en.wikipedia.org/wiki/Programming_paradigm)\n\n",
+     "hash": "2020648dea728adc",
+     "he": "* [http://cs.lmu.edu/~ray/notes/paradigms/](http://cs.lmu.edu/~ray/notes/paradigms/)\n\n* [הערך \"Programming Paradigm\" בוויקיפדיה](https://en.wikipedia.org/wiki/Programming_paradigm)"
+    },
+    {
+     "id": "cm/chap1:4:3",
+     "type": "prose",
+     "en": "There exist multiple different **programming paradigms**:\n\n",
+     "hash": "b84c27dd0cadf222",
+     "he": "קיימות **פרדיגמות תכנות** רבות ושונות:"
+    },
+    {
+     "id": "cm/chap1:4:4",
+     "type": "list",
+     "en": "* **Imperative** --- Control flow is an explicit sequence of commands - mainly defined in contrast to \"declarative\".\n* **Declarative** --- Programs state the result you want, not how to get it - leaves flexibility to the language runtime to achieve the goal in optimized ways (for example, SQL and spreadsheets are declarative programming environments).\n* **Structured** --- Programs have clean, `goto`-free, nested control structures - arose in reaction to \"`goto` hell\" spaghetti code.\n* **Procedural** --- Imperative programming organized around hierarchies of nested procedure calls.\n* **Functional** --- Computation proceeds by (nested) function calls that avoid any global state mutation and through the definition of function composition.\n* **Object-oriented** --- Computation is effected by sending messages to objects; objects encapsulate state and exhibit behavior.\n* **Event-driven** --- Control flow is determined by asynchronous actions in reaction to events (from humans, sensors or other computations).\n* **Logic (rule-based)** --- Programmer specifies a set of facts and rules, and an engine infers the answers to questions.\n\n",
+     "hash": "ae54b576041937ed",
+     "he": "* **אימפרטיבית (Imperative)** --- זרימת הבקרה היא רצף מפורש של פקודות (commands) — מוגדרת בעיקר בניגוד ל\"דקלרטיבית\".\n* **דקלרטיבית (Declarative)** --- התוכנית מצהירה על התוצאה הרצויה, לא על הדרך להשיג אותה — ומשאירה לסביבת הריצה של השפה גמישות להשיג את המטרה בדרכים ממוטבות (לדוגמה, SQL וגיליונות אלקטרוניים הם סביבות תכנות דקלרטיביות).\n* **מובנית (Structured)** --- לתוכניות יש מבני בקרה נקיים ומקוננים, ללא `goto` — פרדיגמה שצמחה כתגובה ל\"גיהינום ה-`goto`\" של קוד ספגטי.\n* **פרוצדורלית (Procedural)** --- תכנות אימפרטיבי המאורגן סביב היררכיות של קריאות מקוננות לפרוצדורות.\n* **פונקציונלית (Functional)** --- החישוב מתקדם באמצעות קריאות (מקוננות) לפונקציות, שנמנעות מכל שינוי של מצב גלובלי, ובאמצעות הרכבת פונקציות (function composition).\n* **מונחית-עצמים (Object-oriented)** --- החישוב מתבצע על ידי שליחת הודעות לעצמים; עצמים מכמסים (encapsulate) מצב ומפגינים התנהגות.\n* **מונחית-אירועים (Event-driven)** --- זרימת הבקרה נקבעת על ידי פעולות אסינכרוניות בתגובה לאירועים (מבני אדם, מחיישנים או מחישובים אחרים).\n* **לוגית (מבוססת-כללים)** --- המתכנת מגדיר אוסף של עובדות (facts) וכללים (rules), ומנוע היסק מסיק את התשובות לשאילתות."
+    }
+   ],
+   "headingHe": "1.1 פרדיגמות תכנות"
+  },
+  {
+   "id": "cm/chap1:5",
+   "depth": 3,
+   "headingEn": "1.1.1 Relation between Programming Paradigms and Programming Languages",
+   "raw": "### 1.1.1 Relation between Programming Paradigms and Programming Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:5:0",
+     "type": "prose",
+     "en": "Programming Languages, by the way they are designed, make some programming paradigms easy to follow. When this is the case, we say that the language belongs to the paradigm (for example: *Scheme is a functional programming language*). In other words, programming paradigms are a way to classify programming languages (a paradigm is a **family of programming languages** that have similar properties).\n\n",
+     "hash": "49b8381d5e613aad",
+     "he": "שפות תכנות, מעצם האופן שבו הן מתוכננות, הופכות חלק מפרדיגמות התכנות לקלות ליישום. כשזה המצב, אנחנו אומרים שהשפה שייכת לפרדיגמה (לדוגמה: *Scheme היא שפת תכנות פונקציונלית*). במילים אחרות, פרדיגמות תכנות הן דרך לסווג שפות תכנות (פרדיגמה היא **משפחה של שפות תכנות** בעלות תכונות דומות)."
+    },
+    {
+     "id": "cm/chap1:5:1",
+     "type": "prose",
+     "en": "A given programming language can support more than one programming paradigm.\nFor example, C++ and Java are multi-paradigm languages, which support the Object-oriented paradigm, the Procedural paradigm, and in recent versions some aspect of the Functional paradigm.\n\n",
+     "hash": "64f363f6a433c933",
+     "he": "שפת תכנות נתונה יכולה לתמוך ביותר מפרדיגמת תכנות אחת.\nלדוגמה, C++ ו-Java הן שפות מרובות-פרדיגמות, שתומכות בפרדיגמה מונחית-העצמים, בפרדיגמה הפרוצדורלית, ובגרסאות האחרונות גם בהיבטים מסוימים של הפרדיגמה הפונקציונלית."
+    }
+   ],
+   "headingHe": "1.1.1 היחס בין פרדיגמות תכנות לשפות תכנות"
+  },
+  {
+   "id": "cm/chap1:6",
+   "depth": 3,
+   "headingEn": "1.1.2 Dimensions of Variability across Programming Paradigms",
+   "raw": "### 1.1.2 Dimensions of Variability across Programming Paradigms\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:6:0",
+     "type": "prose",
+     "en": "Paradigms are distinguished by programming practices they encourage and forbid (or make difficult). Historically, new paradigms emerge in reaction to problems faced over time by standard practitioners.\n\n",
+     "hash": "b6de3135622b11dd",
+     "he": "פרדיגמות נבדלות זו מזו בפרקטיקות התכנות שהן מעודדות ובאלה שהן אוסרות (או מקשות עליהן). היסטורית, פרדיגמות חדשות צומחות כתגובה לבעיות שמתכנתים מן השורה נתקלו בהן לאורך זמן."
+    },
+    {
+     "id": "cm/chap1:6:1",
+     "type": "prose",
+     "en": "The motivating forces and programming practices that are concerned by programming paradigms include:\n\n",
+     "hash": "d8a4c2dd3ad0522a",
+     "he": "הכוחות המניעים ופרקטיקות התכנות שפרדיגמות תכנות עוסקות בהם כוללים:"
+    },
+    {
+     "id": "cm/chap1:6:2",
+     "type": "list",
+     "en": "* **Control Flow**: how execution flows within the program (sequence and branches, in concurrent threads, in reactive manner, declarative)\n* **Code Organization**: how code is organized into a hiearchy of units (expressions, functions, modules, packages) and how these units are organized.\n* **Performance**: how code can be run fast, use less resources (RAM, disk, network), behave better (responsive, scalable) at runtime.\n* **Coupling and Reuse**: how easily code can be reused in different contexts.\n* **Testing**: how easy it is to test and verify that code is correct.\n* **Syntax**: how natural, brief, readable is the expression of code given the syntax of the language. Can the syntax of language be extended by the programmer.\n* **Domain**: to which application domain is the paradigm best applicable (server-side processing, database, GUI front-end, control system).\n\n",
+     "hash": "914fd5135b023a31",
+     "he": "* **זרימת בקרה (Control Flow)**: איך הביצוע זורם בתוך התוכנית (רצף והסתעפויות, ב-threads מקביליים, באופן ריאקטיבי, דקלרטיבי).\n* **ארגון קוד**: איך הקוד מאורגן בהיררכיה של יחידות (ביטויים, פונקציות, מודולים, חבילות) ואיך היחידות הללו מאורגנות.\n* **ביצועים**: איך אפשר להריץ קוד מהר, לצרוך פחות משאבים (זיכרון RAM, דיסק, רשת), ולהתנהג טוב יותר בזמן ריצה (תגובתיות, יכולת גדילה — scalability).\n* **צימוד ושימוש חוזר (Coupling and Reuse)**: באיזו קלות אפשר לעשות שימוש חוזר בקוד בהקשרים שונים.\n* **בדיקות (Testing)**: כמה קל לבדוק ולוודא שהקוד נכון.\n* **תחביר (Syntax)**: עד כמה ביטוי הקוד טבעי, תמציתי וקריא בהינתן תחביר השפה. האם המתכנת יכול להרחיב את תחביר השפה.\n* **תחום יישום (Domain)**: לאיזה תחום יישום הפרדיגמה מתאימה ביותר (עיבוד בצד שרת, בסיסי נתונים, ממשק משתמש גרפי, מערכות בקרה)."
+    }
+   ],
+   "headingHe": "1.1.2 ממדי השונות בין פרדיגמות תכנות"
+  },
+  {
+   "id": "cm/chap1:7",
+   "depth": 3,
+   "headingEn": "1.1.3 Key Programming Paradigms",
+   "raw": "### 1.1.3 Key Programming Paradigms\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:7:0",
+     "type": "prose",
+     "en": "Each paradigm puts emphasis on specific programming techniques which came to help on certain aspects of code quality. For example:\n\n",
+     "hash": "d77bdd72843be87d",
+     "he": "כל פרדיגמה שמה דגש על טכניקות תכנות מסוימות, שנועדו לסייע בהיבטים מסוימים של איכות הקוד. לדוגמה:"
+    },
+    {
+     "id": "cm/chap1:7:1",
+     "type": "list",
+     "en": "* **Structured programming**: encourages the use of structured control flow tools such as `if`/`else if`/`else`, `while` - and to avoid uncontrolled `goto`.\n* **Procedural programming**: encourages the use of small units of codes, called procedures, which encapsulate well-defined commands. Procedures interact through well defined interfaces published by each procedure (the *contract* of the procedure, including the signature of which arguments it expects, and which return value it returns), and local variables are used inside each procedure without affecting the state of the program outside the scope of the procedures. Key programming constructs associated to this paradigm are *procedures, local variables*. The key driving force behind procedural and modular programming was the desire to define independent *modules* as proposed in the classic article: Parnas, D.L. (1972). *On the Criteria To Be Used in Decomposing Systems into Modules* [Communications of the ACM 15 12: 1053–58](https://prl.ccs.neu.edu/img/p-tr-1971.pdf). The concepts of *high cohesion* within module and *low coupling* across modules are central to this approach.  The main languages associated to this paradigm are C and C++.\n* **Object-oriented programming**: models computation as the exchange of messages between independent objects. Data is encapsulated in units called objects, and can only be accessed through method calls. This paradigm evolved as a development of procedural programming, to encourage data abstraction, information hiding, polymorphism, and encapsulation. Key languages supporting OOP include Java and C++.\n* **Functional programming**: models computation as the evaluation of mathematical functions, with no side-effect and no mutation of state. We will develop this definition\nin this course. Key languages supporting Functional programming include Scheme, Haskell and JavaScript.\n\n",
+     "hash": "bb48dc342ed70544",
+     "he": "* **תכנות מובנה (structured programming)**: מעודד שימוש בכלי זרימת בקרה מובנים כגון `if`/`else if`/`else`, `while` — והימנעות מ-`goto` בלתי מבוקר.\n* **תכנות פרוצדורלי (procedural programming)**: מעודד שימוש ביחידות קוד קטנות, הנקראות פרוצדורות (procedures), שמכמסות פקודות מוגדרות היטב. פרוצדורות מתקשרות זו עם זו דרך ממשקים מוגדרים היטב שכל פרוצדורה מפרסמת (ה*חוזה* — contract — של הפרוצדורה, הכולל את החתימה: אילו ארגומנטים היא מצפה לקבל ואיזה ערך היא מחזירה), ומשתנים מקומיים (local variables) משמשים בתוך כל פרוצדורה בלי להשפיע על מצב התוכנית מחוץ לתחום ההכרה (scope) של הפרוצדורות. מבני התכנות המרכזיים שמזוהים עם פרדיגמה זו הם *פרוצדורות ומשתנים מקומיים*. הכוח המניע המרכזי מאחורי תכנות פרוצדורלי ומודולרי היה הרצון להגדיר *מודולים* עצמאיים, כפי שהוצע במאמר הקלאסי: Parnas, D.L.‏ (1972). ‏*On the Criteria To Be Used in Decomposing Systems into Modules*‏ [Communications of the ACM 15 12: 1053–58](https://prl.ccs.neu.edu/img/p-tr-1971.pdf). המושגים *לכידות גבוהה* (high cohesion) בתוך מודול ו*צימוד נמוך* (low coupling) בין מודולים מרכזיים בגישה זו. השפות העיקריות שמזוהות עם פרדיגמה זו הן C ו-C++.\n* **תכנות מונחה-עצמים (Object-Oriented Programming)**: ממדל חישוב כהחלפת הודעות בין עצמים עצמאיים. הנתונים מכומסים ביחידות הנקראות עצמים (objects), ואפשר לגשת אליהם רק דרך קריאות למתודות. פרדיגמה זו התפתחה כהמשך של התכנות הפרוצדורלי, כדי לעודד הפשטת נתונים, הסתרת מידע, פולימורפיזם וכימוס (encapsulation). שפות מפתח שתומכות ב-OOP כוללות את Java ו-C++.\n* **תכנות פונקציונלי (Functional Programming)**: ממדל חישוב כהערכה של פונקציות מתמטיות, ללא תופעות לוואי (side effects) וללא שינוי מצב (mutation). נפתח הגדרה זו לאורך הקורס. שפות מפתח שתומכות בתכנות פונקציונלי כוללות את Scheme,‏ Haskell ו-JavaScript."
+    }
+   ],
+   "headingHe": "1.1.3 פרדיגמות תכנות מרכזיות"
+  },
+  {
+   "id": "cm/chap1:8",
+   "depth": 2,
+   "headingEn": "1.2 Functional Programming",
+   "raw": "## 1.2 Functional Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:8:0",
+     "type": "prose",
+     "en": "We will start our investigation of programming language principles by studying a specific paradigm - called Functional Programming (FP).  We will first illustrate practical applications of this paradigm using JavaScript.\n\n",
+     "hash": "bc5b6e11c19a24c1",
+     "he": "נתחיל את החקירה שלנו של עקרונות שפות תכנות בלימוד פרדיגמה מסוימת — תכנות פונקציונלי (Functional Programming, FP). ראשית נדגים יישומים מעשיים של הפרדיגמה הזו באמצעות JavaScript."
+    },
+    {
+     "id": "cm/chap1:8:1",
+     "type": "prose",
+     "en": "Refer to these pages:\n",
+     "hash": "fc75ca3451d43f6c",
+     "he": "מומלץ לעיין בדפים הבאים:"
+    },
+    {
+     "id": "cm/chap1:8:2",
+     "type": "list",
+     "en": "* [https://wiki.haskell.org/Functional_programming](https://wiki.haskell.org/Functional_programming)\n* [CMU Course 15150 - Intro to Functional Programming notes](http://www.cs.cmu.edu/~15150/)\n\n",
+     "hash": "1218e2cf3fd7ec14",
+     "he": "* [https://wiki.haskell.org/Functional_programming](https://wiki.haskell.org/Functional_programming)\n* [הרצאות קורס CMU 15150 — מבוא לתכנות פונקציונלי](http://www.cs.cmu.edu/~15150/)"
+    },
+    {
+     "id": "cm/chap1:8:3",
+     "type": "prose",
+     "en": "**Functional Programming** (FP) is a paradigm of programming that is most similar to evaluation of expressions in mathematics. In functional programming, a program is viewed as an expression, which is evaluated by successive applications of functions to their arguments, and substitution of the result for the functional expression. Its origin is in the *lambda calculus* invented by Church in the 1930s.\n\n",
+     "hash": "3df205b60d8b1b0d",
+     "he": "**תכנות פונקציונלי** (Functional Programming, FP) היא פרדיגמת תכנות שדומה יותר מכל האחרות להערכת ביטויים במתמטיקה. בתכנות פונקציונלי, תוכנית נתפסת כביטוי (expression), שמוערך על ידי הפעלות עוקבות של פונקציות על הארגומנטים שלהן, והצבת התוצאה במקום הביטוי הפונקציונלי. מקורה של הפרדיגמה ב*תחשיב הלמבדא* (lambda calculus) שהמציא Church בשנות ה-30 של המאה ה-20."
+    }
+   ],
+   "headingHe": "1.2 תכנות פונקציונלי"
+  },
+  {
+   "id": "cm/chap1:9",
+   "depth": 3,
+   "headingEn": "1.2.1 Expressions and Values",
+   "raw": "### 1.2.1 Expressions and Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:9:0",
+     "type": "prose",
+     "en": "The most characteristic feature of functional programming is the lack of **state** during a computation. That is, a computation is not a sequence of states, created by commands (also called *statements*) that modify the states. Rather, a computation is a sequence of *expressions*, that result from the successive *evaluation* of sub-expressions. \n\n",
+     "hash": "8401e56726bb5a27",
+     "he": "המאפיין הבולט ביותר של תכנות פונקציונלי הוא היעדר **מצב (state)** במהלך חישוב. כלומר, חישוב אינו רצף של מצבים שנוצרים על ידי פקודות (commands, הנקראות גם *statements*) שמשנות את המצבים. במקום זאת, חישוב הוא רצף של *ביטויים (expressions)*, שנוצרים מ*הערכה (evaluation)* עוקבת של תת-ביטויים."
+    },
+    {
+     "id": "cm/chap1:9:1",
+     "type": "prose",
+     "en": "For example, the following expression is computed as follows:\n\n",
+     "hash": "918b09b93c8a3b74",
+     "he": "לדוגמה, הביטוי הבא מחושב כך:"
+    },
+    {
+     "id": "cm/chap1:9:2",
+     "type": "code",
+     "en": "```javascript\n(2 * 3) + (4 * 5);\n// Computation proceeds in steps:\n// step 1 - the sub-expression (2 * 3) is evaluated and becomes 6\n// step 2 - 6 replaces (2 * 3) in the expression: 6 + (4 * 5)\n// step 3 - the sub-expression (4 * 5) is evaluated and becomes 20\n// step 4 - 20 replaces (4 * 5) in the expression: 6 + 20\n// step 5 - 6 + 20 is evaluated and becomes 26\n// end: there are no more sub-expression to evaluate\n==> 26  // the value is returned\n```\n\n",
+     "hash": "151e0763e1c3c50e",
+     "lang": "javascript",
+     "noteHe": "הדוגמה ממחישה את מודל החישוב הפונקציונלי: הערכת ביטוי אריתמטי צעד-אחר-צעד. הביטוי `(2 * 3) + (4 * 5)` אינו \"מבוצע\" כפקודה אלא **מוערך**: בכל צעד בוחרים תת-ביטוי, מחשבים את ערכו, ומציבים את הערך במקום תת-הביטוי. תחילה `(2 * 3)` הופך ל-6, ואז `(4 * 5)` הופך ל-20, ולבסוף `6 + 20` הופך ל-26. שימו לב שאין כאן שום משתנה ושום שינוי מצב — רק סדרת הצבות (substitutions) שמסתיימת כשלא נותרו תת-ביטויים להעריך, ואז הערך הסופי (26) מוחזר. הסימון `==>` בסוף מציין את הערך שהמפרש מחזיר."
+    },
+    {
+     "id": "cm/chap1:9:3",
+     "type": "prose",
+     "en": "The expression (2 * 3) + (4 * 5) is transformed into a value by incrementally substituting sub-expressions into values.\n\n",
+     "hash": "2d201ad01a66f948",
+     "he": "הביטוי (2 * 3) + (4 * 5) הופך לערך על ידי הצבה הדרגתית של ערכים במקום תת-ביטויים."
+    },
+    {
+     "id": "cm/chap1:9:4",
+     "type": "prose",
+     "en": "Similarly, when we evaluate function calls:\n\n",
+     "hash": "e0b17f6bbcb3f564",
+     "he": "באופן דומה, כאשר אנו מעריכים קריאות לפונקציות:"
+    },
+    {
+     "id": "cm/chap1:9:5",
+     "type": "code",
+     "en": "```javascript\nfunction f(x) {\n    return x * x;\n}\n\nfunction g(y) {\n    return y + y;\n}\n\nf(2) + g(3);\n// Computation proceeds in steps:\n// step 1 - sub-expression f(2) is substituted by 2 * 2 \n//          (2 * 2) + g(3)\n// step 2 - sub-expression (2 * 2) is evaluated and becomes 4\n//          4 + g(3)\n// step 3 - sub-expression g(3) is substituted by 3 + 3\n//          4 + (3 + 3)\n// step 4 - sub-expression (3 + 3) is evaluated and becomes 6\n//          4 + 6\n// step 5 - 4 + 6 is evaluated and becomes 10\n// end: there are no more sub-expression to evaluate\n==> 10\n```\n\n",
+     "hash": "bfac922c2df5dc6c",
+     "lang": "javascript",
+     "noteHe": "כאן אותו מודל הצבה מורחב גם לקריאות לפונקציות. מוגדרות שתי פונקציות: `f` שמחזירה את `x * x`, ו-`g` שמחזירה את `y + y`. כדי להעריך את `f(2) + g(3)`, הקריאה `f(2)` מוחלפת בגוף הפונקציה כשבמקום הפרמטר `x` מוצב הארגומנט 2 — כלומר `2 * 2` — וזה מוערך ל-4. באופן דומה `g(3)` מוחלפת ב-`3 + 3` שמוערך ל-6, ולבסוף `4 + 6` מוערך ל-10. זהו בדיוק **מודל ההצבה (substitution model)** שנפתח בהמשך הקורס: קריאה לפונקציה = הצבת הארגומנטים בגוף הפונקציה והמשך ההערכה. שימו לב שאין צורך במצב או בזיכרון — כל המידע נמצא בביטוי עצמו."
+    }
+   ],
+   "headingHe": "1.2.1 ביטויים וערכים"
+  },
+  {
+   "id": "cm/chap1:10",
+   "depth": 3,
+   "headingEn": "1.2.2 No Side Effects",
+   "raw": "### 1.2.2 No Side Effects\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:10:0",
+     "type": "prose",
+     "en": "Computation in functional programming has no side-effects. In the examples above, we did not ask the program to \"print\" a result - instead we evaluated an expression (which is the program) and the interpreter returned the value of the expression (which conveniently got printed at the end of the evaluation).\n\n",
+     "hash": "96ca8afafe308f4d",
+     "he": "לחישוב בתכנות פונקציונלי אין תופעות לוואי (side effects). בדוגמאות למעלה לא ביקשנו מהתוכנית \"להדפיס\" תוצאה — במקום זאת הערכנו ביטוי (שהוא-הוא התוכנית), והמפרש (interpreter) החזיר את ערך הביטוי (שבנוחות רבה הודפס בסוף ההערכה)."
+    },
+    {
+     "id": "cm/chap1:10:1",
+     "type": "prose",
+     "en": "The only result of a functional computation is the computed value, and there are no additional changes that can take place during computation. Functional programming does not support **variable assignment** or **state mutation**. When external side-effects are required (sending data to an output device, to disk, to the network), FP tends to delay the side-effect and push it outside of the computation.\n\n",
+     "hash": "0a30ddba991aa1e9",
+     "he": "התוצאה היחידה של חישוב פונקציונלי היא הערך המחושב, ואין שינויים נוספים שיכולים להתרחש במהלך החישוב. תכנות פונקציונלי אינו תומך ב**השמה למשתנים (variable assignment)** או ב**שינוי מצב (state mutation)**. כאשר נדרשות תופעות לוואי חיצוניות (שליחת נתונים להתקן פלט, לדיסק, לרשת), FP נוטה לדחות את תופעת הלוואי ולדחוק אותה אל מחוץ לחישוב."
+    },
+    {
+     "id": "cm/chap1:10:2",
+     "type": "prose",
+     "en": "The key verbs to contrast between Imperative programming (IP) and FP are:\n\n",
+     "hash": "ff8800f2316283af",
+     "he": "פעלי המפתח שמבחינים בין תכנות אימפרטיבי (IP) לבין FP הם:"
+    },
+    {
+     "id": "cm/chap1:10:3",
+     "type": "list",
+     "en": "* In IP, commands (or statements) are executed, and through their effect, state is modified (mutated).\n* In FP, expressions are evaluated, and become values.\n\n",
+     "hash": "dd52e1169866eba7",
+     "he": "* ב-IP, פקודות (או statements) **מבוצעות (executed)**, ודרך ההשפעה שלהן המצב **משתנה (mutated)**.\n* ב-FP, ביטויים **מוערכים (evaluated)** והופכים ל**ערכים (values)**."
+    }
+   ],
+   "headingHe": "1.2.2 ללא תופעות לוואי"
+  },
+  {
+   "id": "cm/chap1:11",
+   "depth": 3,
+   "headingEn": "1.2.3 Higher Order Functions",
+   "raw": "### 1.2.3 Higher Order Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:11:0",
+     "type": "prose",
+     "en": "FP requires that functions be first-class, which means that they are treated like any other values:\n",
+     "hash": "ef7f42664129e5da",
+     "he": "FP דורש שפונקציות יהיו אזרחיות ממדרגה ראשונה (first-class), כלומר שיטופלו כמו כל ערך אחר:"
+    },
+    {
+     "id": "cm/chap1:11:1",
+     "type": "list",
+     "en": "* Functions can be passed as arguments to other functions\n* Functions can be returned as a result of a function\n* Functions can be anonymous (no names)\n\n",
+     "hash": "0043e65ad657e4f3",
+     "he": "* אפשר להעביר פונקציות כארגומנטים לפונקציות אחרות\n* פונקציה יכולה להיות מוחזרת כתוצאה של פונקציה\n* פונקציות יכולות להיות אנונימיות (ללא שם)"
+    },
+    {
+     "id": "cm/chap1:11:2",
+     "type": "prose",
+     "en": "For example, in this program, the function `square` is applied to each element in the array `a`, returning a new array which is bound to the variable `b`.\n\n",
+     "hash": "1c48cad379bbcc31",
+     "he": "לדוגמה, בתוכנית הזו הפונקציה `square` מופעלת על כל איבר במערך `a`, ומוחזר מערך חדש שנקשר למשתנה `b`."
+    },
+    {
+     "id": "cm/chap1:11:3",
+     "type": "code",
+     "en": "```javascript\nimport { map } from \"ramda\";\n\nfunction square(x) {\n    return x * x;\n}\n\nlet a = [1,2,3];\nlet b = map(square, a);\nconsole.log(b); // ==> [1,4,9]\n```\n\n",
+     "hash": "b5c682bb6fbfc146",
+     "lang": "javascript",
+     "noteHe": "זו הדוגמה הראשונה בקורס לפונקציה מסדר גבוה. השורה `import { map } from \"ramda\"` מייבאת את הפונקציה `map` מספריית `ramda` — ספריית עזר פונקציונלית ל-JavaScript שבה נרבה להשתמש. הקריאה `map(square, a)` מקבלת **פונקציה** (`square`) כארגומנט ראשון ומערך כארגומנט שני, מפעילה את הפונקציה על כל איבר, ומחזירה מערך חדש `[1,4,9]` — המערך המקורי `a` אינו משתנה. שימו לב ש-`square` מועברת בלי סוגריים: אנחנו מעבירים את הפונקציה עצמה כערך, לא קוראים לה. זה מדגים שפונקציות הן אזרחיות ממדרגה ראשונה (first-class) ב-JavaScript."
+    },
+    {
+     "id": "cm/chap1:11:4",
+     "type": "prose",
+     "en": "The function `map` receives a function as a parameter and an array - in this case the function `square`.  It applies square to each element in the array and returns the array whose elements are the returned values.\n\n",
+     "hash": "d367def4c6a17869",
+     "he": "הפונקציה `map` מקבלת פונקציה כפרמטר ומערך — במקרה זה את הפונקציה `square`. היא מפעילה את `square` על כל איבר במערך, ומחזירה את המערך שאיבריו הם הערכים המוחזרים."
+    },
+    {
+     "id": "cm/chap1:11:5",
+     "type": "prose",
+     "en": "The function that we pass as a parameter can be very simple, in which case we may skip giving it a name - in the same way as we do not give names to every sub-expressions in a\ncomplex arithmetic expression such as (2*3)+4:\n\n",
+     "hash": "dde3d1f451c92b2b",
+     "he": "הפונקציה שאנו מעבירים כפרמטר יכולה להיות פשוטה מאוד, ובמקרה כזה אפשר לוותר על מתן שם — בדיוק כפי שאיננו נותנים שם לכל תת-ביטוי בביטוי אריתמטי מורכב כמו (2*3)+4:"
+    },
+    {
+     "id": "cm/chap1:11:6",
+     "type": "code",
+     "en": "```javascript\nlet a = [1,2,3];\nlet b = map(x => x * x * x, a);\nconsole.log(b); // ==> [1,8,27]\n```\n\n",
+     "hash": "441283eafc5c9fbf",
+     "lang": "javascript",
+     "noteHe": "כאן במקום להגדיר פונקציה בעלת שם, מועברת ל-`map` פונקציה אנונימית: `x => x * x * x`. זהו ביטוי lambda בתחביר \"חץ שמן\" (fat-arrow) — פונקציה ללא שם שמקבלת `x` ומחזירה את החזקה השלישית שלו. התוצאה: `[1,8,27]`. משתמשים בפונקציה אנונימית כשהפונקציה פשוטה ומשמשת רק במקום אחד — אין טעם \"לבזבז\" עליה שם, כשם שלא נותנים שם לכל תת-ביטוי אריתמטי."
+    },
+    {
+     "id": "cm/chap1:11:7",
+     "type": "prose",
+     "en": "The expression `x => x * x * x` is called a *lambda* expression - it is an unnamed function which receives `x` as an argument and returns `x * x * x` as its value.\n\n",
+     "hash": "6454c34fe70bbfca",
+     "he": "הביטוי `x => x * x * x` נקרא ביטוי *lambda* — זוהי פונקציה ללא שם שמקבלת את `x` כארגומנט ומחזירה את `x * x * x` כערכה."
+    },
+    {
+     "id": "cm/chap1:11:8",
+     "type": "prose",
+     "en": "We will see later examples of functions that can return functions as values as well - for example, a function that given a function $$f$$ as a parameter returns a new function which computes the derivative of $$f$$.\n\n",
+     "hash": "b10bccf91d5e0ed7",
+     "he": "בהמשך נראה גם דוגמאות לפונקציות שמחזירות פונקציות כערכים — למשל, פונקציה שבהינתן פונקציה $$f$$ כפרמטר מחזירה פונקציה חדשה שמחשבת את הנגזרת של $$f$$."
+    }
+   ],
+   "headingHe": "1.2.3 פונקציות מסדר גבוה"
+  },
+  {
+   "id": "cm/chap1:12",
+   "depth": 3,
+   "headingEn": "1.2.4 Advantages of FP",
+   "raw": "### 1.2.4 Advantages of FP\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:12:0",
+     "type": "prose",
+     "en": "The advantages of FP include:\n",
+     "hash": "f9a762b890856e46",
+     "he": "בין יתרונות ה-FP:"
+    },
+    {
+     "id": "cm/chap1:12:1",
+     "type": "list",
+     "en": "* **Verification**: the way the program is executed is closely related to the way we prove and justify the correctness of a program mathematically. Proof by mathematical induction is closely related to the programming technique of **recursion**. Because functions have no side-effects, they behave like mathematical functions - each time they are called with the same parameters, they return the same values (this is called *determinism*).\n* **Parallelism**: Since expressions have no side-effects, it is natural to use parallel evaluation: the values of independent sub-expressions may be determined simultaneously, without fear of interference or conflict, and the final result is not affected by evaluation order. This enables programs to exploit available parallelism without fear of disrupting their correctness.\n* **Abstraction**: FP stresses data-centric computation, with operations that act on compound data structures as a whole, rather than via item-by-item processing. More generally, FP emphasizes the isolation of abstract types that clearly separate implementation from interface. Types are used to express and enforce abstraction boundaries, greatly enhancing maintainability of programs, and facilitating team development.\n\n",
+     "hash": "fb5d2bf8f24eaaaf",
+     "he": "* **אימות (Verification)**: הדרך שבה התוכנית מבוצעת קשורה קשר הדוק לדרך שבה אנו מוכיחים ומצדיקים מתמטית את נכונות התוכנית. הוכחה באינדוקציה מתמטית קשורה קשר הדוק לטכניקת התכנות של **רקורסיה (recursion)**. מכיוון שלפונקציות אין תופעות לוואי, הן מתנהגות כמו פונקציות מתמטיות — בכל פעם שהן נקראות עם אותם פרמטרים, הן מחזירות את אותם ערכים (תכונה שנקראת *דטרמיניזם*).\n* **מקביליות (Parallelism)**: מכיוון שלביטויים אין תופעות לוואי, טבעי להשתמש בהערכה מקבילית: אפשר לקבוע את ערכיהם של תת-ביטויים בלתי תלויים בו-זמנית, ללא חשש מהפרעה או התנגשות, והתוצאה הסופית אינה מושפעת מסדר ההערכה. זה מאפשר לתוכניות לנצל מקביליות זמינה בלי לחשוש לפגוע בנכונותן.\n* **הפשטה (Abstraction)**: FP שם דגש על חישוב ממוקד-נתונים, עם פעולות שפועלות על מבני נתונים מורכבים כמכלול, במקום עיבוד איבר-איבר. באופן כללי יותר, FP מדגיש בידוד של טיפוסים מופשטים שמפרידים בבירור בין מימוש לממשק. טיפוסים משמשים לביטוי ולאכיפה של מחסומי הפשטה (abstraction barriers), מה שמשפר מאוד את התחזוקתיות של תוכניות ומקל על פיתוח בצוות."
+    }
+   ],
+   "headingHe": "1.2.4 יתרונות התכנות הפונקציונלי"
+  },
+  {
+   "id": "cm/chap1:13",
+   "depth": 2,
+   "headingEn": "1.3 Using JavaScript to Illustrate FP",
+   "raw": "## 1.3 Using JavaScript to Illustrate FP\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:13:0",
+     "type": "prose",
+     "en": "We will use JavaScript examples to illustrate these points.\n\n",
+     "hash": "2870a3ddc5dd2386",
+     "he": "נשתמש בדוגמאות ב-JavaScript כדי להמחיש את הנקודות הללו."
+    },
+    {
+     "id": "cm/chap1:13:1",
+     "type": "prose",
+     "en": "JavaScript is **not** a purely functional language. It supports multiple paradigms - procedural programming, OOP and has support for FP as well. The primitives of the language sometimes contradict good practices recommended by FP (they allow easy mutation of variables or arrays - but we will learn to avoid these \"bad corners\" of the language). JavaScript has a long and tormented history - it started as a weak language, and became standardized into a more mature language since about 2016. The [EcmaScript standardization body](https://en.wikipedia.org/wiki/ECMAScript) has led this effort. We will exclusively use in the course the most recent version of JavaScript - called EcmaScript 2016 or **ES 7**.\n\n",
+     "hash": "ee397b5dab611e27",
+     "he": "JavaScript **אינה** שפה פונקציונלית טהורה. היא תומכת בפרדיגמות מרובות — תכנות פרוצדורלי, OOP, וגם תמיכה ב-FP. הפרימיטיבים של השפה סותרים לעיתים את הפרקטיקות הטובות ש-FP ממליץ עליהן (הם מאפשרים בקלות שינוי — mutation — של משתנים או מערכים; אבל נלמד להימנע מ\"פינות רעות\" אלה של השפה). ל-JavaScript היסטוריה ארוכה ומיוסרת — היא התחילה כשפה חלשה, ועברה סטנדרטיזציה לשפה בשלה יותר החל בסביבות 2016. [גוף התקינה EcmaScript](https://en.wikipedia.org/wiki/ECMAScript) הוביל את המאמץ הזה. בקורס נשתמש אך ורק בגרסה העדכנית ביותר של JavaScript — הנקראת EcmaScript 2016 או **ES 7**."
+    },
+    {
+     "id": "cm/chap1:13:2",
+     "type": "prose",
+     "en": "JavaScript is used extensively to support front-end user interface programming in Web and mobile applications within browsers. For such client GUI applications, recent frameworks such as *Angular* and *React* rely extensively on FP to make code easier to write, reuse and test.\n\n",
+     "hash": "0503e23db818b430",
+     "he": "JavaScript משמשת באופן נרחב לתכנות ממשקי משתמש בצד הלקוח (front-end) ביישומי Web ומובייל בתוך דפדפנים. עבור יישומי GUI כאלה בצד הלקוח, סביבות עבודה (frameworks) מודרניות כמו *Angular* ו-*React* נשענות במידה רבה על FP כדי להפוך את הקוד לקל יותר לכתיבה, לשימוש חוזר ולבדיקה."
+    },
+    {
+     "id": "cm/chap1:13:3",
+     "type": "prose",
+     "en": "JavaScript is increasingly used on the server-side as well, within the *Node.js* environment. Node is a JavaScript interpreter which can be invoked standalone. It has a large set of libraries that put emphasis on asynchronous programming - an aspect we will review later in the course.\n\n",
+     "hash": "5aca279c9a5f50d7",
+     "he": "JavaScript משמשת יותר ויותר גם בצד השרת, בתוך סביבת *Node.js*. ‏Node הוא מפרש JavaScript שאפשר להריץ באופן עצמאי. יש לו אוסף גדול של ספריות ששמות דגש על תכנות אסינכרוני — היבט שנסקור בהמשך הקורס."
+    },
+    {
+     "id": "cm/chap1:13:4",
+     "type": "prose",
+     "en": "We will use a variant of JavaScript called **TypeScript** - which is JavaScript with optional type annotations and type checking.\n\n",
+     "hash": "745fc6bf8baa41f5",
+     "he": "נשתמש בווריאנט של JavaScript בשם **TypeScript** — שהוא JavaScript עם הערות טיפוס (type annotations) אופציונליות ובדיקת טיפוסים (type checking)."
+    }
+   ],
+   "headingHe": "1.3 שימוש ב-JavaScript להדגמת FP"
+  },
+  {
+   "id": "cm/chap1:14",
+   "depth": 3,
+   "headingEn": "1.3.1 From Imperative to Procedural",
+   "raw": "### 1.3.1 From Imperative to Procedural\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:14:0",
+     "type": "prose",
+     "en": "To illustrate the differences among programming paradigms, we will demonstrate multiple iterations over a program that fulfills a simple requirement: We are asked to write a program to display a number value squared. We will then study how the program must be adapted when we introduce slight modifications of the requirement. All the examples are given in TypeScript.\n\n",
+     "hash": "a4d4bc8109861017",
+     "he": "כדי להמחיש את ההבדלים בין פרדיגמות תכנות, נדגים כמה גלגולים של תוכנית שממלאת דרישה פשוטה: אנו מתבקשים לכתוב תוכנית שמציגה ערך מספרי בריבוע. לאחר מכן נבחן כיצד צריך להתאים את התוכנית כשאנחנו מכניסים שינויים קלים בדרישה. כל הדוגמאות נתונות ב-TypeScript."
+    },
+    {
+     "id": "cm/chap1:14:1",
+     "type": "prose",
+     "en": "We first write a single command that performs as requested:\n\n",
+     "hash": "bba7bb560554054e",
+     "he": "תחילה נכתוב פקודה יחידה שמבצעת את המבוקש:"
+    },
+    {
+     "id": "cm/chap1:14:2",
+     "type": "code",
+     "en": "```typescript\nconsole.log(0 * 0); // ==> 0\n```\n\n",
+     "hash": "9fd86bd464214887",
+     "lang": "typescript",
+     "noteHe": "הפקודה `console.log(0 * 0)` מחשבת את `0 * 0` ומדפיסה את התוצאה (0) לקונסול. זוהי **פקודה (command / statement)** — אבן היסוד של התכנות האימפרטיבי: היא לא מחזירה ערך שימושי, אלא מבצעת תופעת לוואי (הדפסה למסך). זו נקודת הפתיחה שממנה נשכלל את התוכנית בהמשך."
+    },
+    {
+     "id": "cm/chap1:14:3",
+     "type": "prose",
+     "en": "The basic programming tool we used is a **command** - also called a **statement**.\n\n",
+     "hash": "ea40efa12ba76898",
+     "he": "כלי התכנות הבסיסי שהשתמשנו בו הוא **פקודה (command)** — הנקראת גם **statement**."
+    },
+    {
+     "id": "cm/chap1:14:4",
+     "type": "prose",
+     "en": "The requirement is slightly changed: we are now asked to print square values for a range of integer numbers from 0 to 4.\n\n",
+     "hash": "95db735e54c63ba7",
+     "he": "הדרישה משתנה מעט: כעת אנו מתבקשים להדפיס את ערכי הריבוע עבור טווח של מספרים שלמים מ-0 עד 4."
+    },
+    {
+     "id": "cm/chap1:14:5",
+     "type": "prose",
+     "en": "The \"level 0\" program that fulfils this requirement is obtained by creating a sequence of commands:\n\n",
+     "hash": "e5d5fe1770651558",
+     "he": "תוכנית \"רמה 0\" שממלאת את הדרישה הזו מתקבלת מיצירת רצף של פקודות:"
+    },
+    {
+     "id": "cm/chap1:14:6",
+     "type": "code",
+     "en": "```typescript\nconsole.log(0 * 0); // ==> 0\nconsole.log(1 * 1); // ==> 1\nconsole.log(2 * 2); // ==> 4\nconsole.log(3 * 3); // ==> 9\nconsole.log(4 * 4); // ==> 16\n```\n\n",
+     "hash": "6a768c634e1d2dd4",
+     "lang": "typescript",
+     "noteHe": "פתרון \"רמה 0\": חמש פקודות `console.log` זהות במבנה, אחת לכל מספר בטווח 0–4, כשבכל שורה הערך כתוב פעמיים באופן ידני (`2 * 2` וכו'). הקוד עובד, אבל הוא ידגים מיד את החולשות שהתכנות המובנה בא לפתור: שכפול קוד, אי-אפשר להתאים אותו לטווח אחר בלי לשכתב הכול, ומבנה הקוד לא משקף את מהות המשימה — \"בצע את אותה פעולה על כל ערך בטווח\"."
+    }
+   ],
+   "headingHe": "1.3.1 מאימפרטיבי לפרוצדורלי"
+  },
+  {
+   "id": "cm/chap1:15",
+   "depth": 3,
+   "headingEn": "1.3.2 Structured Programming",
+   "raw": "### 1.3.2 Structured Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:15:0",
+     "type": "prose",
+     "en": "Structured Programming starts with a critique of this \"level 0\" program:\n\n",
+     "hash": "086a030cfd8b2aa4",
+     "he": "התכנות המובנה מתחיל בביקורת על תוכנית \"רמה 0\" הזו:"
+    },
+    {
+     "id": "cm/chap1:15:1",
+     "type": "list",
+     "en": "* We observe code repetition\n* The program cannot be easily adapted to different values of the **parameters**: if the requirements are slightly changed - instead of *range of number from 0 to 4* to *range of numbers from 8 to 12* then the whole program must be rewritten.\n* The nature of the task is not reflected in the structure of the code: we asked to perform the same command multiple times on different values, this is not reflected in the way the program is written.  The program does not reflect the intention of the programmer in a transparent manner.\n\n",
+     "hash": "74f8eedf6e271c2d",
+     "he": "* אנו מבחינים בשכפול קוד.\n* לא ניתן להתאים בקלות את התוכנית לערכים שונים של ה**פרמטרים**: אם הדרישות משתנות מעט — במקום *טווח המספרים מ-0 עד 4* ל*טווח המספרים מ-8 עד 12* — יש לשכתב את כל התוכנית.\n* מהות המשימה אינה משתקפת במבנה הקוד: התבקשנו לבצע את אותה פקודה מספר פעמים על ערכים שונים, וזה לא בא לידי ביטוי באופן שבו התוכנית כתובה. התוכנית אינה משקפת את כוונת המתכנת באופן שקוף."
+    },
+    {
+     "id": "cm/chap1:15:2",
+     "type": "prose",
+     "en": "To address these weaknesses, we introduce programming constructs that help us improve the program.\n",
+     "hash": "db01d1be6deabea2",
+     "he": "כדי לטפל בחולשות אלה, אנו מכניסים מבני תכנות (programming constructs) שעוזרים לנו לשפר את התוכנית."
+    },
+    {
+     "id": "cm/chap1:15:3",
+     "type": "list",
+     "en": "* Use **variables** to capture the parameters - so that the same program can be applied to different values.\n* Use an **array data structure** to separate the data on which we want to execute the task and the task itself.\n* Use a **loop control flow structure** to express the fact that the same task is repeated multiple times on different values.\n\n",
+     "hash": "062303e8b8b576f2",
+     "he": "* שימוש ב**משתנים (variables)** כדי ללכוד את הפרמטרים — כך שאותה תוכנית תוכל לפעול על ערכים שונים.\n* שימוש ב**מבנה נתונים של מערך (array)** כדי להפריד בין הנתונים שעליהם אנו רוצים לבצע את המשימה לבין המשימה עצמה.\n* שימוש ב**מבנה בקרה של לולאה (loop)** כדי לבטא את העובדה שאותה משימה חוזרת על עצמה מספר פעמים על ערכים שונים."
+    },
+    {
+     "id": "cm/chap1:15:4",
+     "type": "code",
+     "en": "```typescript\nlet numbers = [0, 1, 2, 3, 4];\nfor (let i = 0; i < numbers.length; i++) {\n    console.log(numbers[i] * numbers[i]);\n}\n// ==>\n// 0\n// 1\n// 4\n// 9\n// 16\n```\n\n",
+     "hash": "d987a3e9b5882e34",
+     "lang": "typescript",
+     "noteHe": "הגרסה המובנית של התוכנית. השורה הראשונה מגדירה משתנה `numbers` שמאותחל למערך `[0, 1, 2, 3, 4]` — הנתונים הופרדו מהמשימה. לולאת ה-`for` מגדירה משתנה אינדקס `i` שמתחיל ב-0, רץ כל עוד `i < numbers.length`, וגדל ב-1 בכל איטרציה (`i++`). בגוף הלולאה, `numbers[i]` ניגש לאיבר במקום ה-`i`, והפקודה מדפיסה את הריבוע שלו. כך פקודה אחת בתוך לולאה מחליפה חמש פקודות משוכפלות, ומבנה הקוד משקף את המשימה: \"עבור כל איבר — הדפס את ריבועו\". שימו לב שהלולאה עדיין מבוססת על **mutation** של המשתנה `i` — נקודה שה-FP יבקר בהמשך."
+    },
+    {
+     "id": "cm/chap1:15:5",
+     "type": "prose",
+     "en": "The key **programming construct** that we have introduced in the programming language to support this scenario is the **`for`-loop**. This construct is closely associated to the array data structure. We also introduced variables - one for the array and one for the loop index which iterates over all the elements in the array (the `i` variable).\n\n",
+     "hash": "2cc8acc6ad841c65",
+     "he": "**מבנה התכנות** המרכזי שהכנסנו לשפת התכנות כדי לתמוך בתרחיש הזה הוא **לולאת ה-`for`**. המבנה הזה קשור קשר הדוק למבנה הנתונים של מערך. הוספנו גם משתנים — אחד עבור המערך ואחד עבור אינדקס הלולאה שעובר על כל האיברים במערך (המשתנה `i`)."
+    },
+    {
+     "id": "cm/chap1:15:6",
+     "type": "prose",
+     "en": "Now, if we want to apply the same program on different values (range 8 to 12 instead of 0 to 4), we need to copy the program, change the variable from \\[0...4\\] to \\[8...12\\]:\n\n",
+     "hash": "af0de40e8b741e95",
+     "he": "כעת, אם נרצה להפעיל את אותה תוכנית על ערכים שונים (טווח 8 עד 12 במקום 0 עד 4), נצטרך להעתיק את התוכנית ולשנות את המשתנה מ-\\[0...4\\] ל-\\[8...12\\]:"
+    },
+    {
+     "id": "cm/chap1:15:7",
+     "type": "code",
+     "en": "```typescript\nlet numbers = [8, 9, 10, 11, 12];\nfor (let i = 0; i < numbers.length; i++) {\n    console.log(numbers[i] * numbers[i]);\n}\n\n// ==>\n// 64\n// 81\n// 100\n// 121\n// 144\n```\n\n",
+     "hash": "f3c4d4737a67e2dc",
+     "lang": "typescript",
+     "noteHe": "אותה תוכנית בדיוק, רק שהמערך `numbers` אותחל הפעם ל-`[8, 9, 10, 11, 12]`, ולכן מודפסים הריבועים 64 עד 144. הנקודה שהדוגמה ממחישה היא דווקא החולשה: כדי להריץ על נתונים אחרים נאלצנו **להעתיק את כל התוכנית** ולשנות את ערך המשתנה. אין לנו עדיין דרך לארוז את המשימה כיחידה לשימוש חוזר שמקבלת את הנתונים כפרמטר — זה בדיוק מה שהתכנות הפרוצדורלי יוסיף בסעיף הבא."
+    }
+   ],
+   "headingHe": "1.3.2 תכנות מובנה"
+  },
+  {
+   "id": "cm/chap1:16",
+   "depth": 3,
+   "headingEn": "1.3.3 Procedural Programming",
+   "raw": "### 1.3.3 Procedural Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:16:0",
+     "type": "prose",
+     "en": "Procedural programming starts with a critique of structured programming:\n",
+     "hash": "5c9811d2c52e63d4",
+     "he": "התכנות הפרוצדורלי מתחיל בביקורת על התכנות המובנה:"
+    },
+    {
+     "id": "cm/chap1:16:1",
+     "type": "list",
+     "en": "* While we have obtained a more concise program to describe the task we want to achieve, and we have separated the parameters on which we apply the task from the task itself, we still need to copy the code for each run on different parameters.\n* The coupling between the code and the parameter is *accidental* - the usage of the variables (`numbers` and `i`) does not indicate that the code applies to these variables and no other code can manipulate these variables.\n\n",
+     "hash": "2d356d12f1e0e247",
+     "he": "* אף שקיבלנו תוכנית תמציתית יותר לתיאור המשימה שאנו רוצים לבצע, והפרדנו בין הפרמטרים שעליהם מופעלת המשימה לבין המשימה עצמה, אנחנו עדיין צריכים להעתיק את הקוד עבור כל הרצה על פרמטרים שונים.\n* הצימוד (coupling) בין הקוד לפרמטר הוא *מקרי* — השימוש במשתנים (`numbers` ו-`i`) אינו מציין שהקוד חל על המשתנים האלה, ואין מניעה שקוד אחר יטפל במשתנים האלה."
+    },
+    {
+     "id": "cm/chap1:16:2",
+     "type": "prose",
+     "en": "Procedural programming improves on these weaknesses by introducing:\n",
+     "hash": "8340b5171a71130b",
+     "he": "התכנות הפרוצדורלי משפר את החולשות הללו על ידי הוספת:"
+    },
+    {
+     "id": "cm/chap1:16:3",
+     "type": "list",
+     "en": "* **Procedures** --- commands with a well defined interface of input parameters / output parameters and expected behavior.\n* **Local variables** --- variables which are defined only within the scope of the procedure.\n\n",
+     "hash": "3759f8faf5517ef6",
+     "he": "* **פרוצדורות (procedures)** --- פקודות עם ממשק מוגדר היטב של פרמטרי קלט / פרמטרי פלט והתנהגות צפויה.\n* **משתנים מקומיים (local variables)** --- משתנים שמוגדרים רק בתוך תחום ההכרה (scope) של הפרוצדורה."
+    },
+    {
+     "id": "cm/chap1:16:4",
+     "type": "code",
+     "en": "```typescript\nfunction printSquares(numbers) {\n    for (let i = 0; i < numbers.length; i++) {\n        console.log(numbers[i] * numbers[i]);\n    }\n}\n\nprintSquares([0, 1, 2, 3, 4]);\n// ==>\n// 0\n// 1\n// 4\n// 9\n// 16\n\nprintSquares([8, 9, 10, 11, 12]);\n// ==>\n// 64\n// 81\n// 100\n// 121\n// 144\n```\n\n",
+     "hash": "ad2e1355440e0c85",
+     "lang": "typescript",
+     "noteHe": "כאן הלולאה נארזת בפרוצדורה `printSquares` שמקבלת את המערך כפרמטר `numbers`. עכשיו אפשר לקרוא לה פעמיים — פעם עם `[0,...,4]` ופעם עם `[8,...,12]` — **בלי לשכפל את הקוד**: שורת קריאה אחת לכל טווח. הפרמטר `numbers` והאינדקס `i` הם מקומיים לפרוצדורה, כך שהקשר בין הקוד לנתונים כבר אינו מקרי אלא מוגדר דרך ממשק (interface) ברור: שם הפונקציה + הפרמטר. זה הרעיון המרכזי של התכנות הפרוצדורלי — הפשטה על ידי מתן שם לרצף פקודות."
+    },
+    {
+     "id": "cm/chap1:16:5",
+     "type": "prose",
+     "en": "The programming constructs we introduced are **function** and **let** which defines local variables for a block of statements.\n\n",
+     "hash": "51489a3f622519af",
+     "he": "מבני התכנות שהוספנו הם **function** ו-**let**, שמגדיר משתנים מקומיים עבור בלוק של פקודות."
+    },
+    {
+     "id": "cm/chap1:16:6",
+     "type": "prose",
+     "en": "#### Procedures Interface\n\n",
+     "hash": "63aa5a9508b64b0e",
+     "he": "#### הממשק של פרוצדורות"
+    },
+    {
+     "id": "cm/chap1:16:7",
+     "type": "prose",
+     "en": "Procedures (also called functions) have a well defined interface:\n",
+     "hash": "80f30114ebf882d1",
+     "he": "לפרוצדורות (הנקראות גם פונקציות) יש ממשק מוגדר היטב:"
+    },
+    {
+     "id": "cm/chap1:16:8",
+     "type": "list",
+     "en": "* Name\n* Input parameters\n* Return value\n\n",
+     "hash": "df528a5af0895851",
+     "he": "* שם\n* פרמטרי קלט\n* ערך מוחזר"
+    },
+    {
+     "id": "cm/chap1:16:9",
+     "type": "prose",
+     "en": "The fact that the procedure is given a name is important: it is a form of **abstraction**. The name replaces a complex sequence of commands - and programmers can re-use the new procedure just by knowing its name. Procedures have parameters (the `numbers` parameter in the example above) and local variables (the variable `i` is introduced by the `let` construct as a local variable).\n\n",
+     "hash": "09a7cbec1b8b8509",
+     "he": "לעובדה שהפרוצדורה מקבלת שם יש חשיבות: זוהי צורה של **הפשטה (abstraction)**. השם מחליף רצף מורכב של פקודות — ומתכנתים יכולים לעשות שימוש חוזר בפרוצדורה החדשה רק על סמך הכרת שמה. לפרוצדורות יש פרמטרים (הפרמטר `numbers` בדוגמה למעלה) ומשתנים מקומיים (המשתנה `i` מוגדר באמצעות המבנה `let` כמשתנה מקומי)."
+    },
+    {
+     "id": "cm/chap1:16:10",
+     "type": "prose",
+     "en": "Consider now a slight change in the requirements: instead of printing the square of the numbers, we want to print the cube of the numbers.\n\n",
+     "hash": "bf0602f102795bf0",
+     "he": "נבחן כעת שינוי קל בדרישות: במקום להדפיס את ריבועי המספרים, אנחנו רוצים להדפיס את המספרים בחזקה שלישית (cube)."
+    },
+    {
+     "id": "cm/chap1:16:11",
+     "type": "prose",
+     "en": "We address this change by introducing a new function, which represents what we want to do on each element in the range of numbers, and we adapt the function `printSquares` to invoke this function instead.\n\n",
+     "hash": "9c22be02daf827d1",
+     "he": "אנו מטפלים בשינוי הזה על ידי הוספת פונקציה חדשה, שמייצגת את מה שאנחנו רוצים לעשות על כל איבר בטווח המספרים, והתאמת הפונקציה `printSquares` כך שתקרא לפונקציה הזו במקום."
+    },
+    {
+     "id": "cm/chap1:16:12",
+     "type": "code",
+     "en": "```typescript\n// We use a library function Math.pow \nfunction cube(number) {\n    return Math.pow(number, 3);\n}\n\nfunction printCubes(numbers) {\n    for (let i = 0; i < numbers.length; i++) {\n        console.log(cube(numbers[i]));\n    }\n}\n\nprintCubes([0, 1, 2, 3, 4]);\n// ==>\n// 0\n// 1\n// 8\n// 27\n// 64\n\nprintCubes([8, 9, 10, 11, 12]);\n// ==>\n// 512\n// 729\n// 1000\n// 1331\n// 1728\n```\n\n",
+     "hash": "bcc8838e6730874b",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `cube` מחשבת חזקה שלישית באמצעות פונקציית הספרייה `Math.pow(number, 3)` (העלאת `number` בחזקת 3). הפרוצדורה `printCubes` עוברת בלולאה על המערך, אך במקום לחשב את הערך ישירות בגוף הלולאה — היא קוראת ל-`cube(numbers[i])`. כך נוצרת חלוקת אחריות: `cube` יודעת *מה לחשב* על איבר בודד, ו-`printCubes` יודעת *איך לעבור* על המערך ולהדפיס. שתי הקריאות בהמשך מדגימות שימוש חוזר על שני טווחים שונים. שימו לב שהקריאה ל-`cube` \"קבועה בתוך\" `printCubes` — נקודה שנחזור אליה כשנדבר על הפשטה פונקציונלית."
+    },
+    {
+     "id": "cm/chap1:16:13",
+     "type": "prose",
+     "en": "#### Abstraction Barriers\n\n",
+     "hash": "e34b99f52ba6d8a8",
+     "he": "#### מחסומי הפשטה"
+    },
+    {
+     "id": "cm/chap1:16:14",
+     "type": "prose",
+     "en": "We see a first case of procedural abstraction in this example: the procedure `printCubes` iterates over an array, and applies the function `cube` on each element. The client of the `printCubes` procedure does not directly invoke the `cube` function - it is encapsulated inside the `printCubes` procedure.\n\n",
+     "hash": "812bb6c7c9de8076",
+     "he": "אנו רואים בדוגמה הזו מקרה ראשון של הפשטה פרוצדורלית: הפרוצדורה `printCubes` עוברת על מערך ומפעילה את הפונקציה `cube` על כל איבר. הלקוח (client) של הפרוצדורה `printCubes` אינו קורא ישירות לפונקציה `cube` — היא מכומסת (encapsulated) בתוך הפרוצדורה `printCubes`."
+    },
+    {
+     "id": "cm/chap1:16:15",
+     "type": "prose",
+     "en": "If such discipline is applied systematically, we can enforce abstraction barriers between collections of procedures: higher-level procedures only call lower-level procedures. To support such discipline, some languages introduce concepts such as modules or packages.\n\n",
+     "hash": "a0a0459c38ac6f16",
+     "he": "אם מיישמים משמעת כזו באופן שיטתי, אפשר לאכוף מחסומי הפשטה (abstraction barriers) בין אוספים של פרוצדורות: פרוצדורות ברמה גבוהה קוראות רק לפרוצדורות ברמה נמוכה יותר. כדי לתמוך במשמעת כזו, שפות מסוימות מוסיפות מושגים כמו מודולים (modules) או חבילות (packages)."
+    },
+    {
+     "id": "cm/chap1:16:16",
+     "type": "prose",
+     "en": "See [https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.2](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.2) for a discussion of Abstraction Barriers.\n\n",
+     "hash": "aeb5e82e50f5db76",
+     "he": "ראו דיון במחסומי הפשטה בכתובת [https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.2](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.2)."
+    }
+   ],
+   "headingHe": "1.3.3 תכנות פרוצדורלי"
+  },
+  {
+   "id": "cm/chap1:17",
+   "depth": 3,
+   "headingEn": "1.3.4 Testing Requirements",
+   "raw": "### 1.3.4 Testing Requirements\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:17:0",
+     "type": "prose",
+     "en": "We want to provide the capability to verify that a procedure is correct according to its specification. The function `printCubes` above is difficult to test - because it receives a parameter, but the only result of its execution is that a series of numbers are printed on the console. It is impossible to write an automated test that will verify that the procedure behaves as expected given a specific input.\n\n",
+     "hash": "c90fad4822a7def4",
+     "he": "אנחנו רוצים לספק את היכולת לוודא שפרוצדורה נכונה ביחס למפרט (specification) שלה. את הפונקציה `printCubes` שלמעלה קשה לבדוק — כי היא מקבלת פרמטר, אבל התוצאה היחידה של הרצתה היא שסדרת מספרים מודפסת לקונסול. אי אפשר לכתוב בדיקה אוטומטית שתוודא שהפרוצדורה מתנהגת כמצופה בהינתן קלט מסוים."
+    },
+    {
+     "id": "cm/chap1:17:1",
+     "type": "prose",
+     "en": "To address this limitation, we will refactor the program in 2 stages - data transformation and data output. \n",
+     "hash": "f42d7b283b9ad4ad",
+     "he": "כדי לטפל במגבלה הזו, נבצע רה-פקטורינג לתוכנית לשני שלבים — טרנספורמציית נתונים ופלט נתונים."
+    },
+    {
+     "id": "cm/chap1:17:2",
+     "type": "list",
+     "en": "* The data transformation stage receives an input parameter and returns a transformed value.\n* The data output stage only prints the transformed values.\n\n",
+     "hash": "372bcddb958ee0b0",
+     "he": "* שלב טרנספורמציית הנתונים מקבל פרמטר קלט ומחזיר ערך לאחר טרנספורמציה.\n* שלב פלט הנתונים רק מדפיס את הערכים לאחר הטרנספורמציה."
+    },
+    {
+     "id": "cm/chap1:17:3",
+     "type": "prose",
+     "en": "This allows us to test the data transformation procedure by feeding it some test data, and then checking that the output fulfills expectations.\n\n",
+     "hash": "2f640ed5b6ec2b3b",
+     "he": "זה מאפשר לנו לבדוק את פרוצדורת טרנספורמציית הנתונים על ידי הזנת נתוני בדיקה, ואז בדיקה שהפלט עומד בציפיות."
+    },
+    {
+     "id": "cm/chap1:17:4",
+     "type": "code",
+     "en": "```typescript\nexport function cubes(numbers) {\n    for (let i = 0; i < numbers.length; i++) {\n        numbers[i] = cube(numbers[i]);\n    }\n}\n\n// Use a library function Math.pow \nfunction cube(number) {\n    return Math.pow(number, 3);\n}\n\nfunction printArray(a) {\n    for (let i = 0; i < a.length; i++) {\n        console.log(a[i]);\n    }\n}\n\nfunction printCubes2(numbers) {\n    cubes(numbers);\n    printArray(numbers);\n}\n\n// Test\nprintCubes2([0, 1, 2, 3, 4]);\n// ==>\n// 0\n// 1\n// 8\n// 27\n// 64\n```\n\n",
+     "hash": "4478bb9bfd8ad23e",
+     "lang": "typescript",
+     "noteHe": "הרה-פקטורינג מפריד בין חישוב לפלט. הפונקציה `cubes` מבצעת רק את הטרנספורמציה: היא עוברת על המערך ומציבה `numbers[i] = cube(numbers[i])` — כלומר **משנה את המערך במקום (in-place mutation)**, ולא מדפיסה דבר. המילה `export` בתחילתה חושפת אותה לייבוא מקובץ בדיקות. `printArray` אחראית רק על הפלט — הדפסת כל איברי מערך. `printCubes2` מרכיבה את שתיהן: קודם `cubes(numbers)` ואז `printArray(numbers)`. עכשיו אפשר לבדוק את `cubes` אוטומטית — מזינים מערך ובודקים את תוכנו אחרי הקריאה — בלי צורך \"ללכוד\" פלט קונסול. שימו לב: `cubes` עדיין משנה את הפרמטר שלה — סגנון פרוצדורלי שה-FP יימנע ממנו."
+    },
+    {
+     "id": "cm/chap1:17:5",
+     "type": "prose",
+     "en": "To run an automatic test, we can now write a unit test in the following style:\n\n",
+     "hash": "98ff51e3417e2b68",
+     "he": "כדי להריץ בדיקה אוטומטית, אנו יכולים כעת לכתוב בדיקת יחידה (unit test) בסגנון הבא:"
+    },
+    {
+     "id": "cm/chap1:17:6",
+     "type": "code",
+     "en": "```typescript\nimport { cubes } from \"../lecture1\";\n\ndescribe(\"cubes\", () => {\n    it(\"does nothing to an empty array\", () => {\n        let numbers = [];\n        cubes(numbers);\n        expect(numbers.length).toEqual(0);\n    });\n\n    it(\"does not change invariant cubes\", () => {\n        let numbers = [0, 1];\n        cubes(numbers);\n        expect(numbers).toEqual([0, 1]);\n    });\n  \n    it(\"cubes the elements of an array\", () => {\n        let numbers = [1, 2, 3];\n        cubes(numbers);\n        expect(numbers).toEqual([1, 8, 27]);\n    });\n});\n```\n\n",
+     "hash": "62650384bd4235b8",
+     "lang": "typescript",
+     "noteHe": "זוהי בדיקת יחידה בסגנון Jest. השורה הראשונה מייבאת את `cubes` מהמודול שבו הוגדרה (זו הסיבה שסימנו אותה ב-`export`). הבלוק `describe` מקבץ בדיקות שקשורות לפונקציה `cubes`, וכל `it` מגדיר תרחיש בדיקה אחד עם תיאור קריא: מערך ריק נשאר ריק; מערך `[0, 1]` לא משתנה (כי 0 ו-1 הם נקודות שבת של חזקה שלישית); ו-`[1, 2, 3]` הופך ל-`[1, 8, 27]`. בכל בדיקה, `expect(...).toEqual(...)` משווה את התוצאה בפועל לתוצאה הצפויה. שימו לב לתבנית: בגלל ש-`cubes` משנה את המערך במקום, הבדיקה קוראת לה ואז בודקת את **המשתנה עצמו**, לא ערך מוחזר."
+    }
+   ],
+   "headingHe": "1.3.4 דרישות בדיקה (Testing)"
+  },
+  {
+   "id": "cm/chap1:18",
+   "depth": 3,
+   "headingEn": "1.3.5 Problems with the Procedural Paradigm",
+   "raw": "### 1.3.5 Problems with the Procedural Paradigm\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:18:0",
+     "type": "prose",
+     "en": "At this point, we have a *nice* version of our program:\n",
+     "hash": "74d28e693fe551f3",
+     "he": "בשלב זה יש לנו גרסה *נחמדה* של התוכנית שלנו:"
+    },
+    {
+     "id": "cm/chap1:18:1",
+     "type": "list",
+     "en": "* It is organized in layers of abstraction (`printCubes` > [`printArray`, `cubes`] > `cube`)\n* The procedures that operate over arrays (`cubes` and `printArray`) use a structured loop (`for`) to iterate over the items in a way that reflects the task.\n* It can be tested.\n\n",
+     "hash": "49e1938193fc44d5",
+     "he": "* היא מאורגנת בשכבות של הפשטה (`printCubes` > [`printArray`, `cubes`] > `cube`).\n* הפרוצדורות שפועלות על מערכים (`cubes` ו-`printArray`) משתמשות בלולאה מובנית (`for`) כדי לעבור על האיברים באופן שמשקף את המשימה.\n* אפשר לבדוק אותה."
+    },
+    {
+     "id": "cm/chap1:18:2",
+     "type": "prose",
+     "en": "These *good features* were encouraged by the facilities of the programming language we use:\n",
+     "hash": "b9b50fa5b46401f8",
+     "he": "*התכונות הטובות* האלה עודדו על ידי האמצעים שמספקת שפת התכנות שבה אנו משתמשים:"
+    },
+    {
+     "id": "cm/chap1:18:3",
+     "type": "list",
+     "en": "* It is easy to define arrays, give them names, initialize them with values, pass them as parameters, access their elements.\n* It is easy to define functions.\n* Functions can invoke other functions when knowing their name and the parameters they expect.\n* It is easy to test functions using facilities like Jest.\n\n",
+     "hash": "193129d6713f817e",
+     "he": "* קל להגדיר מערכים, לתת להם שמות, לאתחל אותם בערכים, להעביר אותם כפרמטרים, לגשת לאיברים שלהם.\n* קל להגדיר פונקציות.\n* פונקציות יכולות לקרוא לפונקציות אחרות כשהן מכירות את שמן ואת הפרמטרים שהן מצפות להם.\n* קל לבדוק פונקציות באמצעות כלים כמו Jest."
+    },
+    {
+     "id": "cm/chap1:18:4",
+     "type": "prose",
+     "en": "In other words, the language *encouraged us* to organize our program in a good manner.\n\n",
+     "hash": "b75de77d9986b537",
+     "he": "במילים אחרות, השפה *עודדה אותנו* לארגן את התוכנית שלנו בצורה טובה."
+    },
+    {
+     "id": "cm/chap1:18:5",
+     "type": "prose",
+     "en": "When we scale to larger and more interesting programs, we face new types of problems:\n",
+     "hash": "f2b2c75062a0933e",
+     "he": "כשאנחנו עוברים לתוכניות גדולות ומעניינות יותר, אנו נתקלים בסוגים חדשים של בעיות:"
+    },
+    {
+     "id": "cm/chap1:18:6",
+     "type": "list",
+     "en": "* The flow of variables across functions must be explained: are parameters passed by value (in parameters), or by reference (inout parameters) and how returned values are shared between the caller and the called function.\n* The responsibilities around data structures must be clarified: which functions can only read data, and which functions can read and modify data; when is data allocated and freed.\n\n",
+     "hash": "c5f39c399262ef81",
+     "he": "* יש להסביר את זרימת המשתנים בין פונקציות: האם פרמטרים מועברים לפי ערך (by value — פרמטרי in) או לפי הפניה (by reference — פרמטרי inout), ואיך ערכים מוחזרים משותפים בין הפונקציה הקוראת לפונקציה הנקראת.\n* יש להבהיר את חלוקת האחריות סביב מבני נתונים: אילו פונקציות רשאיות רק לקרוא נתונים, ואילו רשאיות לקרוא ולשנות; מתי נתונים מוקצים ומתי משתחררים."
+    },
+    {
+     "id": "cm/chap1:18:7",
+     "type": "prose",
+     "en": "We will return to these issues when we discuss variables and scopes. These aspects have motivated the development of the Object-oriented Paradigm.\n\n",
+     "hash": "b634d82be681f5f3",
+     "he": "נחזור לסוגיות אלה כשנדון במשתנים ובתחומי הכרה (scopes). ההיבטים האלה הניעו את פיתוחה של הפרדיגמה מונחית-העצמים."
+    },
+    {
+     "id": "cm/chap1:18:8",
+     "type": "prose",
+     "en": "For now, we will focus on the following issues of the procedural paradigm:\n",
+     "hash": "85dec3b2968abdc8",
+     "he": "לעת עתה, נתמקד בסוגיות הבאות של הפרדיגמה הפרוצדורלית:"
+    },
+    {
+     "id": "cm/chap1:18:9",
+     "type": "list",
+     "en": "* Procedural programming encourages shared state with mutation which makes concurrency difficult.\n* Procedural programming commits early to a step by step way to implement operations which prevents performance optimizations.\n* Procedural programming makes it difficult to create functional abstractions that are highly reusable.\n* Procedural programming makes it difficult to reason about code because of shared state and mutation.\n\n",
+     "hash": "cf88d078028bf747",
+     "he": "* תכנות פרוצדורלי מעודד מצב משותף (shared state) עם שינויי מצב (mutation), מה שמקשה על מקביליות (concurrency).\n* תכנות פרוצדורלי מתחייב מוקדם לאופן מימוש צעד-אחר-צעד של פעולות, מה שמונע אופטימיזציות של ביצועים.\n* תכנות פרוצדורלי מקשה על יצירת הפשטות פונקציונליות הניתנות לשימוש חוזר נרחב.\n* תכנות פרוצדורלי מקשה על הסקה לוגית על קוד (reasoning) בגלל מצב משותף ושינויי מצב."
+    },
+    {
+     "id": "cm/chap1:18:10",
+     "type": "prose",
+     "en": "We turn to how these issues are addressed by FP.\n\n",
+     "hash": "ad45cb7d7aafa604",
+     "he": "נעבור לראות איך FP מטפל בסוגיות הללו."
+    }
+   ],
+   "headingHe": "1.3.5 בעיות בפרדיגמה הפרוצדורלית"
+  },
+  {
+   "id": "cm/chap1:19",
+   "depth": 3,
+   "headingEn": "1.3.6 Concurrency",
+   "raw": "### 1.3.6 Concurrency\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:19:0",
+     "type": "prose",
+     "en": "Assume we run the procedure cubes in two concurrent threads (using an Executor as we have learned in SPL) on the same array numbers. (This is not possible in the TypeScript interpreter we are using - we will return to this aspect in the chapter discussing control flow - but variants of multi-threaded execution that can also cause safety problem are possible in TypeScript.)\n\n",
+     "hash": "d099f23650f00e0b",
+     "he": "נניח שאנחנו מריצים את הפרוצדורה `squares` בשני threads מקביליים (באמצעות Executor, כפי שלמדנו ב-SPL) על אותו מערך מספרים. (זה לא אפשרי במפרש TypeScript שבו אנו משתמשים — נחזור להיבט הזה בפרק שדן בזרימת בקרה — אבל וריאנטים של ביצוע מרובה-threads שעלולים לגרום לבעיות בטיחות אפשריים גם ב-TypeScript.)"
+    },
+    {
+     "id": "cm/chap1:19:1",
+     "type": "code",
+     "en": "```typescript\nfunction squares(numbers) {\n    for (let i = 0; i < numbers.length; i++) {\n        numbers[i] = numbers[i] * numbers[i];\n    }\n}\n\nlet n89 = [8, 9];\n\n// In Thread 1:\nsquares(n89);\n// In Thread 2:\nsquares(n89);\n```\n\n",
+     "hash": "6d465cf4612a5739",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `squares` משנה את המערך שקיבלה **במקום**: `numbers[i] = numbers[i] * numbers[i]`. המערך `n89` (`[8, 9]`) משותף לשני threads שכל אחד מהם קורא ל-`squares(n89)` על אותו מערך בדיוק. מכיוון שהפונקציה גם קוראת וגם כותבת למצב משותף, שני ה-threads עלולים \"לדרוך\" זה על זה — התרחיש המסוכן מפורט בטבלה הבאה. זו דוגמה קלאסית ל**מצב מרוץ (race condition)** שנובע משילוב של מצב משותף ו-mutation."
+    },
+    {
+     "id": "cm/chap1:19:2",
+     "type": "prose",
+     "en": "If the 2 threads are interleaved in an unfortunate sequence of events - the following scenario can occur:\n\n",
+     "hash": "9bb6c06cec0444fb",
+     "he": "אם שני ה-threads משתרגים (interleave) ברצף אירועים ביש-מזל — עלול להתרחש התרחיש הבא:"
+    },
+    {
+     "id": "cm/chap1:19:3",
+     "type": "table",
+     "en": "Thread 1          | Thread 2\n------------------|-----------------\nnumbers\\[0\\] = 64 | \nnumbers\\[1\\] = 81 | numbers\\[0\\] = 64\n",
+     "hash": "112660ba93fa8e7b",
+     "he": "Thread 1          | Thread 2\n------------------|-----------------\nnumbers\\[0\\] = 64 | \nnumbers\\[1\\] = 81 | numbers\\[0\\] = 64"
+    },
+    {
+     "id": "cm/chap1:19:4",
+     "type": "code",
+     "en": "                  | numbers\\[1\\] = 6561\n\n",
+     "hash": "7d26addc5bae10ec",
+     "noteHe": "זהו המשך הטבלה מהבלוק הקודם: Thread 2 מבצע `numbers[1] = 6561`. כלומר, Thread 2 מרבע את `numbers[1]` **אחרי** ש-Thread 1 כבר ריבע אותו (81 = 9 בריבוע, ואז 6561 = 81 בריבוע) — ריבוע כפול שמייצר ערך שגוי."
+    },
+    {
+     "id": "cm/chap1:19:5",
+     "type": "prose",
+     "en": "At the end of the execution, numbers may contain \\[64, 81\\], \\[4096, 6561\\], \\[4096, 81\\] or \\[64, 6561\\] or some even more unexpected values (4096 = 64 * 64, 6561 = 81 * 81).\n\n",
+     "hash": "326661f2f6a7d5f2",
+     "he": "בסוף הביצוע, `numbers` עשוי להכיל \\[64, 81\\], \\[4096, 6561\\], \\[4096, 81\\] או \\[64, 6561\\] — או ערכים מפתיעים אף יותר (4096 = 64 * 64, ‏6561 = 81 * 81)."
+    },
+    {
+     "id": "cm/chap1:19:6",
+     "type": "prose",
+     "en": "The problem is caused by the uncontrolled access to the shared variable numbers by two independent threads. As learned in SPL, the solution to this lack of concurrency safety can be to either use immutable data structures or to enforce mutual exclusion using locks.\n\n",
+     "hash": "7666796f9ea47dc9",
+     "he": "הבעיה נגרמת מהגישה הבלתי מבוקרת של שני threads עצמאיים למשתנה המשותף `numbers`. כפי שלמדנו ב-SPL, הפתרון להיעדר בטיחות מקביליות כזה יכול להיות שימוש במבני נתונים בלתי-ניתנים-לשינוי (immutable) או אכיפת מניעה הדדית (mutual exclusion) באמצעות מנעולים (locks)."
+    },
+    {
+     "id": "cm/chap1:19:7",
+     "type": "prose",
+     "en": "In the procedural paradigm, it is difficult to support immutability because shared variables and mutation are the natural way of passing information across procedures and modules. So that in the procedural programming paradigm, the default solution to enforce concurrency safety is to use locking.\n\n",
+     "hash": "720d106c4beb3bba",
+     "he": "בפרדיגמה הפרוצדורלית קשה לתמוך באי-שינוי (immutability), מכיוון שמשתנים משותפים ושינוי מצב הם הדרך הטבעית להעברת מידע בין פרוצדורות ומודולים. לכן בפרדיגמת התכנות הפרוצדורלי, פתרון ברירת המחדל לאכיפת בטיחות מקביליות הוא שימוש בנעילה (locking)."
+    },
+    {
+     "id": "cm/chap1:19:8",
+     "type": "prose",
+     "en": "But in turn, locking leads to problems of liveness - creating the possibility of deadlocks, starvation and other unpleasant phenomena.\n\n",
+     "hash": "63fe7a163071fb91",
+     "he": "אבל נעילה, בתורה, מובילה לבעיות של חיות (liveness) — ויוצרת אפשרות לקיפאון (deadlock), הרעבה (starvation) ותופעות לא נעימות אחרות."
+    },
+    {
+     "id": "cm/chap1:19:9",
+     "type": "prose",
+     "en": "In contrast, FP encourages immutable computation. \n\n",
+     "hash": "fafe92c30b6b99ec",
+     "he": "לעומת זאת, FP מעודד חישוב ללא שינוי מצב (immutable)."
+    },
+    {
+     "id": "cm/chap1:19:10",
+     "type": "prose",
+     "en": "Note that even without threads, mutation can still lead to unsafe computation. We will see examples of this when we learn about asynchronous computation and the type of interleaved computation we can generate with generators.\n\n",
+     "hash": "9b8982c9f8414370",
+     "he": "שימו לב שגם ללא threads, שינוי מצב עדיין עלול להוביל לחישוב לא בטוח. נראה דוגמאות לכך כשנלמד על חישוב אסינכרוני ועל סוג החישוב המשתרג שאפשר לייצר עם גנרטורים (generators)."
+    }
+   ],
+   "headingHe": "1.3.6 מקביליות"
+  },
+  {
+   "id": "cm/chap1:20",
+   "depth": 3,
+   "headingEn": "1.3.7 Declarative vs. Procedural",
+   "raw": "### 1.3.7 Declarative vs. Procedural\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:20:0",
+     "type": "prose",
+     "en": "Consider the loop control structure as we defined it. It involves a counter variable `i` that is defined for the scope of the loop, initialized to 0, and mutated from 0 to the length of the array over which we iterate (with the `i++` operator). This is one way to iterate over the elements of an array - which is described step by step in a procedural way, as a precise recipe.\n\n",
+     "hash": "779c6273e6f8cc24",
+     "he": "נתבונן במבנה הבקרה של הלולאה כפי שהגדרנו אותו. הוא כולל משתנה מונה `i` שמוגדר לתחום ההכרה של הלולאה, מאותחל ל-0, ומשתנה (mutated) מ-0 עד אורך המערך שעליו אנו עוברים (עם האופרטור `i++`). זוהי דרך אחת לעבור על איברי מערך — דרך שמתוארת צעד-אחר-צעד באופן פרוצדורלי, כמתכון מדויק."
+    },
+    {
+     "id": "cm/chap1:20:1",
+     "type": "prose",
+     "en": "In contrast, in FP, one would prefer to use a more abstract operation, called `map`, which consists of applying a function over all the elements of a container, and returning a new container that contains the results.\n\n",
+     "hash": "9d1acf640c34c86a",
+     "he": "לעומת זאת, ב-FP נעדיף להשתמש בפעולה מופשטת יותר, בשם `map`, שמהותה הפעלת פונקציה על כל איברי מכל (container) והחזרת מכל חדש שמכיל את התוצאות."
+    },
+    {
+     "id": "cm/chap1:20:2",
+     "type": "code",
+     "en": "```typescript\nfunction cubes3(numbers) {\n    return numbers.map(cube);\n}\n\ncubes3([0, 1, 2]); // ==> [ 0, 1, 8 ]\n```\n\n",
+     "hash": "3ce0989a74cbd54a",
+     "lang": "typescript",
+     "noteHe": "הגרסה הפונקציונלית של `cubes`: שורה אחת, `return numbers.map(cube)`, מחליפה את כל הלולאה. הקריאה `numbers.map(cube)` משתמשת ב-`map` כ**מתודה של אובייקט המערך**, מפעילה את `cube` על כל איבר, ומחזירה **מערך חדש** — המערך המקורי אינו משתנה (אין mutation). אין צורך במונה `i`, אין השמות, ואין תופעות לוואי: הפונקציה מחזירה ערך במקום לשנות את הפרמטר. הקריאה `cubes3([0, 1, 2])` מחזירה `[0, 1, 8]`."
+    },
+    {
+     "id": "cm/chap1:20:3",
+     "type": "prose",
+     "en": "The example above uses the `map` method of the array object. It receives as a parameter a function (`cube`). This is an example of functions as first class citizens in FP languages (also called **higher order functions**).\n\n",
+     "hash": "2e2fda1f7ac720ae",
+     "he": "הדוגמה למעלה משתמשת במתודה `map` של אובייקט המערך. היא מקבלת כפרמטר פונקציה (`cube`). זוהי דוגמה לפונקציות כאזרחיות ממדרגה ראשונה בשפות FP (מה שנקרא גם **פונקציות מסדר גבוה — higher order functions**)."
+    },
+    {
+     "id": "cm/chap1:20:4",
+     "type": "prose",
+     "en": "This version of the function does not change its parameter - instead, it returns a new array which contains the result. The result has the same length as the parameter. Note also that the operation `map` does not require a counter like `i` to iterate over the array. There is no mutation.\n\n",
+     "hash": "507bb1f6d5886c9c",
+     "he": "גרסה זו של הפונקציה אינה משנה את הפרמטר שלה — במקום זאת, היא מחזירה מערך חדש שמכיל את התוצאה. לתוצאה יש אותו אורך כמו לפרמטר. שימו לב גם שהפעולה `map` אינה דורשת מונה כמו `i` כדי לעבור על המערך. אין שינוי מצב (mutation)."
+    },
+    {
+     "id": "cm/chap1:20:5",
+     "type": "prose",
+     "en": "An alternative way to express the same FP tool is to use the `map` function instead of the array `map` method. This is illustrated in this example, using the `ramda` package which provides a large set of FP facilities for JavaScript:\n\n",
+     "hash": "ea96f593ac4b71ff",
+     "he": "דרך חלופית לבטא את אותו כלי FP היא להשתמש בפונקציה `map` במקום במתודת `map` של המערך. זה מודגם בדוגמה הבאה, באמצעות החבילה `ramda`, שמספקת אוסף גדול של כלי FP עבור JavaScript:"
+    },
+    {
+     "id": "cm/chap1:20:6",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\nmap(cube, [0, 1, 2]); // ==> [ 0, 1, 8 ]\n```\n\n",
+     "hash": "8381f71dfe580d28",
+     "lang": "typescript",
+     "noteHe": "אותה פעולה בדיוק, אבל הפעם `map` היא **פונקציה עצמאית** שמיובאת מספריית `ramda`, ולא מתודה של המערך: `map(cube, [0, 1, 2])` מקבלת את הפונקציה כארגומנט ראשון ואת המערך כארגומנט שני, ומחזירה `[0, 1, 8]`. הצורה הפונקציונלית הזו נוחה יותר להרכבה (composition) של פונקציות, כפי שנראה בסעיף על `compose`."
+    }
+   ],
+   "headingHe": "1.3.7 דקלרטיבי מול פרוצדורלי"
+  },
+  {
+   "id": "cm/chap1:21",
+   "depth": 3,
+   "headingEn": "1.3.8 Functional Abstractions",
+   "raw": "### 1.3.8 Functional Abstractions\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:21:0",
+     "type": "prose",
+     "en": "Consider the procedural program we have investigated:\n\n",
+     "hash": "5d184def8e0481d5",
+     "he": "נתבונן בתוכנית הפרוצדורלית שחקרנו:"
+    },
+    {
+     "id": "cm/chap1:21:1",
+     "type": "code",
+     "en": "```typescript\nfunction cubes(numbers) {\n    for (let i = 0; i < numbers.length; i++) {\n        numbers[i] = cube(numbers[i]);\n    }\n}\n\nfunction printArray(a) {\n    for (let i = 0; i < a.length; i++) {\n        console.log(a[i]);\n    }\n}\n\nfunction printCubes2(numbers) {\n    cubes(numbers);\n    printArray(numbers);\n}\n```\n\n",
+     "hash": "d46304b06837cd2b",
+     "lang": "typescript",
+     "noteHe": "זו תזכורת לגרסה הפרוצדורלית המלאה מהסעיפים הקודמים, שתשמש בסיס להשוואה: `cubes` משנה את המערך במקום (mutation) בעזרת לולאת `for`, ‏`printArray` מדפיסה כל איבר, ו-`printCubes2` מפעילה את שתיהן ברצף. הבעיה שנדון בה מיד: הפונקציה שמופעלת על כל איבר (`cube`) \"קבורה\" בתוך `cubes` — אם נרצה פעולה אחרת (למשל אקספוננט), ניאלץ לשכפל את כל הקוד."
+    },
+    {
+     "id": "cm/chap1:21:2",
+     "type": "prose",
+     "en": "We are given a slightly different requirement: compute the exponential value of all the elements in a list of numbers (instead of computing their cube).\n\n",
+     "hash": "1f54f50e4a4d28c4",
+     "he": "נותנים לנו דרישה מעט שונה: לחשב את הערך האקספוננציאלי של כל האיברים ברשימת מספרים (במקום לחשב את החזקה השלישית שלהם)."
+    },
+    {
+     "id": "cm/chap1:21:3",
+     "type": "prose",
+     "en": "To satisfy this in an easy way, we must find a way to pass the function we want to evaluate on each element as a parameter. Passing functions as parameters is possible in most paradigms, but it is made really easy in Functional Programming.\n\n",
+     "hash": "d4562327df1f3740",
+     "he": "כדי לענות על כך בקלות, עלינו למצוא דרך להעביר כפרמטר את הפונקציה שאנחנו רוצים להעריך על כל איבר. העברת פונקציות כפרמטרים אפשרית ברוב הפרדיגמות, אבל בתכנות פונקציונלי היא קלה במיוחד."
+    },
+    {
+     "id": "cm/chap1:21:4",
+     "type": "prose",
+     "en": "#### Map\n\n",
+     "hash": "9f78988ad0593cca",
+     "he": "#### Map"
+    },
+    {
+     "id": "cm/chap1:21:5",
+     "type": "prose",
+     "en": "The pattern we require consists of evaluating a function given as a parameter to every element of an array given as a second parameter. The result is a new array - in keeping with the principle of no side effect / no mutation of FP: the original array is left unmodified.\n\n",
+     "hash": "0c4d04362b575125",
+     "he": "התבנית שאנו זקוקים לה מורכבת מהערכת פונקציה, הנתונה כפרמטר, על כל איבר של מערך הנתון כפרמטר שני. התוצאה היא מערך חדש — בהתאם לעקרון היעדר תופעות הלוואי / היעדר שינוי המצב של FP: המערך המקורי נשאר ללא שינוי."
+    },
+    {
+     "id": "cm/chap1:21:6",
+     "type": "prose",
+     "en": "This pattern is immensely useful and is called map. As we have seen above, we can invoke map in two forms in TypeScript:\n",
+     "hash": "d8a932e8e3b50a16",
+     "he": "התבנית הזו שימושית לאין ערוך והיא נקראת map. כפי שראינו למעלה, אפשר להפעיל את map בשתי צורות ב-TypeScript:"
+    },
+    {
+     "id": "cm/chap1:21:7",
+     "type": "list",
+     "en": "* As a method of an array object.\n* As a function with 2 parameters.\n\n",
+     "hash": "c5a891cb9edb014d",
+     "he": "* כמתודה של אובייקט מערך.\n* כפונקציה עם 2 פרמטרים."
+    },
+    {
+     "id": "cm/chap1:21:8",
+     "type": "code",
+     "en": "```typescript\n[0, 1, 2, 3].map(Math.exp); // ==> [ 1, 2.718281828459045, 7.38905609893065, 20.085536923187668 ]\n\n// Similarly - using the Ramda map function:\nimport { map } from \"ramda\";\nmap(Math.exp, [0, 1, 2, 3]); // ==> [ 1, 2.718281828459045, 7.38905609893065, 20.085536923187668 ]\n```\n\n",
+     "hash": "b45ef87668827135",
+     "lang": "typescript",
+     "noteHe": "שתי הצורות של map זו לצד זו, הפעם עם `Math.exp` (הפונקציה האקספוננציאלית $$e^x$$): השורה הראשונה משתמשת במתודת המערך — `[0, 1, 2, 3].map(Math.exp)` — והשנייה בפונקציה של Ramda — `map(Math.exp, [0, 1, 2, 3])`. שתיהן מחזירות בדיוק את אותו מערך תוצאות (1, e, e בריבוע, e בשלישית). שימו לב איך הדרישה החדשה (\"אקספוננט במקום חזקה שלישית\") לא חייבה לכתוב שום לולאה חדשה — רק להעביר פונקציה אחרת ל-map. זה בדיוק כוחה של ההפשטה הפונקציונלית."
+    },
+    {
+     "id": "cm/chap1:21:9",
+     "type": "prose",
+     "en": "And similarly, we can use our own cube or square function:\n\n",
+     "hash": "7ce01cc20dbdebe1",
+     "he": "ובאופן דומה, אפשר להשתמש בפונקציית cube או square משלנו:"
+    },
+    {
+     "id": "cm/chap1:21:10",
+     "type": "code",
+     "en": "```typescript\nmap(cube, [0, 1, 2, 3]); // ==> [ 0, 1, 8, 27 ]\n```\n\n",
+     "hash": "37ac488f31ac2462",
+     "lang": "typescript",
+     "noteHe": "כאן מועברת ל-map פונקציה שהוגדרה על ידינו (`cube`) במקום פונקציית ספרייה: `map(cube, [0, 1, 2, 3])` מחזירה `[0, 1, 8, 27]`. ל-map לא משנה מאיפה הפונקציה הגיעה — כל פונקציה חד-פרמטרית מתאימה."
+    },
+    {
+     "id": "cm/chap1:21:11",
+     "type": "prose",
+     "en": "Compare this with the example above in procedural programming: we defined two functions `printSquares` and `printCubes` where the only difference was which function is applied on the elements of the array. Here, we have abstracted the function as a parameter.\n\n",
+     "hash": "422dfe046de43deb",
+     "he": "השוו זאת לדוגמה שראינו למעלה בתכנות פרוצדורלי: הגדרנו שתי פונקציות, `printSquares` ו-`printCubes`, שההבדל היחיד ביניהן היה איזו פונקציה מופעלת על איברי המערך. כאן, הפשטנו את הפונקציה והפכנו אותה לפרמטר."
+    },
+    {
+     "id": "cm/chap1:21:12",
+     "type": "prose",
+     "en": "#### Anonymous (Lambda) Functions\n\n",
+     "hash": "dacc173ce707a6f6",
+     "he": "#### פונקציות אנונימיות (Lambda)"
+    },
+    {
+     "id": "cm/chap1:21:13",
+     "type": "prose",
+     "en": "If we want to use a function that will only be used in the context of the map operation, we can use an anonymous function (also called a **lambda function**). The syntax in modern JavaScript for lambda functions is:\n\n",
+     "hash": "55cdcbfe1460ea15",
+     "he": "אם אנחנו רוצים להשתמש בפונקציה שתשמש רק בהקשר של פעולת ה-map, אפשר להשתמש בפונקציה אנונימית (הנקראת גם **פונקציית lambda**). התחביר ב-JavaScript מודרני לפונקציות lambda הוא:"
+    },
+    {
+     "id": "cm/chap1:21:14",
+     "type": "code",
+     "en": "```typescript\n(<parameters> ...) => <expression>\n```\n\n",
+     "hash": "2b618078ba092217",
+     "lang": "typescript",
+     "noteHe": "זו תבנית התחביר הכללית של פונקציית lambda ב-JavaScript: רשימת פרמטרים בסוגריים, החץ `=>`, ואחריו ביטוי שהוא הערך המוחזר — בלי מילת המפתח `function` ובלי `return`."
+    },
+    {
+     "id": "cm/chap1:21:15",
+     "type": "prose",
+     "en": "This is often called the fat-arrow notation. If there is only one parameter to a fat-arrow function, the parentheses are optional.\n\n",
+     "hash": "5d7a17db49e5a7aa",
+     "he": "תחביר זה נקרא לרוב \"החץ השמן\" (fat-arrow). אם לפונקציית fat-arrow יש פרמטר אחד בלבד, הסוגריים אופציונליים."
+    },
+    {
+     "id": "cm/chap1:21:16",
+     "type": "code",
+     "en": "```typescript\nmap((x) => x * x, [0, 1, 2, 3]); // ==> [ 0, 1, 4, 9 ]\n```\n\n",
+     "hash": "a57304b557060643",
+     "lang": "typescript",
+     "noteHe": "דוגמה לשימוש בפונקציית lambda בתוך map: הביטוי `(x) => x * x` הוא פונקציה אנונימית שמרבעת מספר, והיא מועברת ישירות ל-map בלי לקבל שם. התוצאה: `[0, 1, 4, 9]`."
+    },
+    {
+     "id": "cm/chap1:21:17",
+     "type": "prose",
+     "en": "The `function` syntax can also be used for anonymous functions - it requires the usage of the `return` statement:\n\n",
+     "hash": "9ddddf83971730e6",
+     "he": "אפשר להשתמש גם בתחביר `function` לפונקציות אנונימיות — הוא מחייב שימוש בפקודת `return`:"
+    },
+    {
+     "id": "cm/chap1:21:18",
+     "type": "code",
+     "en": "```typescript\nmap(function (x) { return x * x; }, [0, 1, 2, 3]); // ==> [ 0, 1, 4, 9 ]\n```\n\n",
+     "hash": "dff1d196c14eb107",
+     "lang": "typescript",
+     "noteHe": "אותה פונקציה אנונימית בתחביר הישן: `function (x) { return x * x; }` — בלי שם אחרי `function`, עם גוף בסוגריים מסולסלים ועם `return` מפורש. התוצאה זהה לגרסת החץ: `[0, 1, 4, 9]`. תחביר החץ קצר יותר ולכן מועדף בדרך כלל."
+    },
+    {
+     "id": "cm/chap1:21:19",
+     "type": "prose",
+     "en": "#### Filter\n\n",
+     "hash": "72ebf3496c9e4ca5",
+     "he": "#### Filter"
+    },
+    {
+     "id": "cm/chap1:21:20",
+     "type": "prose",
+     "en": "Consider yet another slight change in the requirements: we want to apply a function to a list of numbers, and then keep only the values that are even.\n\n",
+     "hash": "48c3f8c123958a7d",
+     "he": "נבחן עוד שינוי קל בדרישות: אנחנו רוצים להפעיל פונקציה על רשימת מספרים, ואז לשמור רק את הערכים הזוגיים."
+    },
+    {
+     "id": "cm/chap1:21:21",
+     "type": "code",
+     "en": "```typescript\nfunction isEven(n) {\n   return n % 2 == 0;\n}\n​\nfunction mapAndKeepEven(f, a) {\n    let fa = a.map(f);\n    let res = [];\n    for (let i = 0; i < fa.length; i++) {\n        if isEven(fa[i]) {\n            res = res.concat(fa[i]);\n        }\n    }\n    return res;\n}\n \nmapAndKeepEven((x) => x * x, [0, 1, 2, 3, 4, 5]); // ==> [ 0, 4, 16 ]\n```\n\n",
+     "hash": "ecbfe20a71cb20cc",
+     "lang": "typescript",
+     "noteHe": "מימוש \"מעורב\" של הדרישה החדשה: `isEven` הוא **פרדיקט (predicate)** — פונקציה שמחזירה אמת/שקר — שבודק זוגיות בעזרת שארית חלוקה (`n % 2 == 0`). ‏`mapAndKeepEven` קודם מפעילה `a.map(f)` (בסגנון פונקציונלי), אבל אז עוברת על התוצאה בלולאת `for` פרוצדורלית, ואוספת לתוך `res` רק איברים שעבורם `isEven` מחזיר אמת (`concat` מחזיר מערך חדש עם האיבר שנוסף). הקריאה לדוגמה מרבעת את `[0,...,5]` ומשאירה רק את הזוגיים: `[0, 4, 16]`. הקוד עובד אבל מערבב שתי משימות — מיפוי וסינון — ואת הסינון הוא כותב ידנית; בהמשך נראה שהתבנית הזו כבר קיימת כפונקציה מוכנה בשם `filter`. (הערה: השורה `if isEven(fa[i])` כפי שמופיעה במקור חסרה סוגריים סביב התנאי — ב-JavaScript תקני יש לכתוב `if (isEven(fa[i]))`.)"
+    },
+    {
+     "id": "cm/chap1:21:22",
+     "type": "prose",
+     "en": "As the name of the function indicates, `mapAndKeepEven` is achieving two things at once - mapping a function and filtering the output according to the value of predicate (in our case, `isEven`).\n\n",
+     "hash": "390634529037c274",
+     "he": "כפי ששם הפונקציה מרמז, `mapAndKeepEven` עושה שני דברים בבת אחת — מיפוי של פונקציה וסינון של הפלט לפי ערכו של פרדיקט (במקרה שלנו, `isEven`)."
+    },
+    {
+     "id": "cm/chap1:21:23",
+     "type": "prose",
+     "en": "The pattern of iterating over an array and keeping only elements that satisfy a condition is extremely useful.\n\n",
+     "hash": "6b187480142e3d17",
+     "he": "התבנית של מעבר על מערך ושמירת האיברים שמקיימים תנאי בלבד היא שימושית ביותר."
+    },
+    {
+     "id": "cm/chap1:21:24",
+     "type": "prose",
+     "en": "FP languages include a function to make this operation easy to use - most often called `filter`.\n\n",
+     "hash": "fb6ec3a9e7d8c1d6",
+     "he": "שפות FP כוללות פונקציה שהופכת את הפעולה הזו לקלה לשימוש — לרוב היא נקראת `filter`."
+    },
+    {
+     "id": "cm/chap1:21:25",
+     "type": "prose",
+     "en": "Like `map`, we can invoke `filter` as a method of the Array object or as a function with 2 parameters:\n\n",
+     "hash": "fd0705e494c2dfb9",
+     "he": "כמו `map`, אפשר להפעיל את `filter` כמתודה של אובייקט Array או כפונקציה עם 2 פרמטרים:"
+    },
+    {
+     "id": "cm/chap1:21:26",
+     "type": "code",
+     "en": "```typescript\n[1, 2, 3, 4].filter(isEven); // ==> [ 2, 4 ]\n\nimport { filter } from \"ramda\";\nfilter(isEven, [1, 2, 3, 4]); // ==> [ 2, 4 ]\n```\n\n",
+     "hash": "0c494c432ba0ac6a",
+     "lang": "typescript",
+     "noteHe": "שתי הצורות של `filter`: כמתודת מערך — `[1, 2, 3, 4].filter(isEven)` — וכפונקציה מ-ramda — `filter(isEven, [1, 2, 3, 4])`. שתיהן מקבלות פרדיקט, מחזירות מערך חדש שמכיל רק את האיברים שעבורם הפרדיקט מחזיר אמת (`[2, 4]`), ואינן משנות את המערך המקורי. שימו לב שאורך התוצאה עשוי להיות קצר מאורך הקלט — בניגוד ל-map ששומרת על האורך."
+    },
+    {
+     "id": "cm/chap1:21:27",
+     "type": "prose",
+     "en": "Using `filter`, we can rewrite our function `mapAndKeepEven` in the following manner:\n\n",
+     "hash": "b54732f7ff78074f",
+     "he": "באמצעות `filter`, אפשר לשכתב את הפונקציה `mapAndKeepEven` שלנו באופן הבא:"
+    },
+    {
+     "id": "cm/chap1:21:28",
+     "type": "code",
+     "en": "```typescript\nfunction mapAndKeepEven(f, a) {\n    let fa = a.map(f);\n    return fa.filter(isEven);\n}\n```\n\n",
+     "hash": "cffcb4182acf40ef",
+     "lang": "typescript",
+     "noteHe": "שכתוב של `mapAndKeepEven` עם הכלים הפונקציונליים: קודם `a.map(f)` מייצר מערך ממופה `fa`, ואז `fa.filter(isEven)` מחזיר רק את הזוגיים. הלולאה הידנית והמשתנה הצובר `res` נעלמו כליל — שתי שורות במקום שמונה, בלי mutation."
+    },
+    {
+     "id": "cm/chap1:21:29",
+     "type": "prose",
+     "en": "Or in a more concise manner:\n\n",
+     "hash": "c558cf3a4a230b23",
+     "he": "או באופן תמציתי יותר:"
+    },
+    {
+     "id": "cm/chap1:21:30",
+     "type": "code",
+     "en": "```typescript\nfunction mapAndKeepEven(f, a) {\n    return a.map(f).filter(isEven);\n}\n```\n\n",
+     "hash": "3212c15db5909cfa",
+     "lang": "typescript",
+     "noteHe": "אותו רעיון בשורה אחת: `a.map(f).filter(isEven)` — **שרשור (chaining)** של מתודות. הפלט של `map` (מערך) הוא האובייקט שעליו נקראת `filter`, כך שאין צורך במשתנה ביניים."
+    },
+    {
+     "id": "cm/chap1:21:31",
+     "type": "prose",
+     "en": "We realize the function is quite general, and we can abstract away the `isEven` predicate:\n\n",
+     "hash": "b66243c49878a31f",
+     "he": "אנחנו מבחינים שהפונקציה כללית למדי, ואפשר להפשיט (abstract away) גם את הפרדיקט `isEven`:"
+    },
+    {
+     "id": "cm/chap1:21:32",
+     "type": "code",
+     "en": "```typescript\nfunction mapAndFilter(f, pred, a) {\n    return a.map(f).filter(pred);\n}\n\nmapAndFilter(cube, isEven, [0, 1, 2, 3, 4]); // ==> [ 0, 8, 64 ]\n```\n\n",
+     "hash": "c7bc100a6af512ff",
+     "lang": "typescript",
+     "noteHe": "צעד ההפשטה האחרון: `mapAndFilter` מקבלת **שתי פונקציות** כפרמטרים — `f` למיפוי ו-`pred` לסינון — ומערך `a`, ומחזירה את `a.map(f).filter(pred)`. עכשיו גם הפעולה וגם התנאי הם פרמטרים, והפונקציה הפכה כללית לחלוטין. הקריאה לדוגמה — חזקה שלישית ואז סינון זוגיים — מחזירה `[0, 8, 64]`."
+    },
+    {
+     "id": "cm/chap1:21:33",
+     "type": "prose",
+     "en": "The `map` and `filter` functions are very convenient to chain together, when they are used as methods of the `Array` class:\n\n",
+     "hash": "637e91f2c549b290",
+     "he": "נוח מאוד לשרשר את הפונקציות `map` ו-`filter` יחד, כשמשתמשים בהן כמתודות של המחלקה `Array`:"
+    },
+    {
+     "id": "cm/chap1:21:34",
+     "type": "code",
+     "en": "```typescript\n[0, 1, 2, 3, 4, 5].map((x) => x * x).filter((x) => x % 2 === 0); // ==> [ 0, 4, 16 ]\n```\n\n",
+     "hash": "945dcc50b2f8ee40",
+     "lang": "typescript",
+     "noteHe": "דוגמת שרשור מלאה עם שתי פונקציות lambda: קודם `map((x) => x * x)` מרבע כל איבר ב-`[0,...,5]`, ואז `filter((x) => x % 2 === 0)` משאיר רק את הזוגיים — והתוצאה `[0, 4, 16]`. שימו לב לשימוש ב-`===` (השוואה קפדנית ב-JavaScript, ללא המרות טיפוסים מובלעות) — הצורה המועדפת על פני `==`."
+    },
+    {
+     "id": "cm/chap1:21:35",
+     "type": "prose",
+     "en": "#### Compose\n\n",
+     "hash": "b237a5d84a87eb52",
+     "he": "#### Compose"
+    },
+    {
+     "id": "cm/chap1:21:36",
+     "type": "prose",
+     "en": "Using Ramda's `map` and `filter` functions, instead of the array methods, we compose them as follows (as opposed to chain):\n\n",
+     "hash": "6b54df86098c3976",
+     "he": "כשמשתמשים בפונקציות `map` ו-`filter` של Ramda, במקום במתודות המערך, אנו מרכיבים (compose) אותן כך (בניגוד לשרשור):"
+    },
+    {
+     "id": "cm/chap1:21:37",
+     "type": "code",
+     "en": "```typescript\nfilter(isEven, map(cube, [0, 1, 2, 3, 4, 5])); // ==> [ 0, 8, 64 ]\n```\n\n",
+     "hash": "433e44393cba189d",
+     "lang": "typescript",
+     "noteHe": "כאן במקום שרשור מתודות יש **קינון של קריאות פונקציה**: הביטוי הפנימי `map(cube, [...])` מחושב קודם ומחזיר את מערך החזקות השלישיות, והתוצאה שלו מועברת כארגומנט ל-`filter(isEven, ...)`. קוראים את הביטוי \"מבפנים החוצה\" — קודם המיפוי ואז הסינון — והתוצאה `[0, 8, 64]`, בדיוק כמו בגרסת השרשור."
+    },
+    {
+     "id": "cm/chap1:21:38",
+     "type": "prose",
+     "en": "The operation that consists of composing functions is again a very general pattern. FP languages offer a function that receives as parameters a number of functions, and returns a new function which computes the composition of all the functions.\n\n",
+     "hash": "03d97e73064b89ec",
+     "he": "הפעולה של הרכבת פונקציות היא שוב תבנית כללית מאוד. שפות FP מציעות פונקציה שמקבלת כפרמטרים מספר פונקציות, ומחזירה פונקציה חדשה שמחשבת את ההרכבה (composition) של כל הפונקציות."
+    },
+    {
+     "id": "cm/chap1:21:39",
+     "type": "prose",
+     "en": "The Ramda `compose` function works in the following manner: `compose(f, g)` returns the function that computes for all parameter $$x$$ the value $$f(g(x))$$.\n\n",
+     "hash": "def94f57888d27bd",
+     "he": "הפונקציה `compose` של Ramda פועלת כך: `compose(f, g)` מחזירה את הפונקציה שמחשבת לכל פרמטר $$x$$ את הערך $$f(g(x))$$."
+    },
+    {
+     "id": "cm/chap1:21:40",
+     "type": "code",
+     "en": "```typescript\nimport { map, filter, compose } from \"ramda\";\n\nlet evenCubes = compose(filter(isEven), map(cube));\nevenCubes([0, 1, 2, 3, 4]); // ==> [ 0, 8, 64 ]\n```\n\n",
+     "hash": "f7d5a74d9fbd2e01",
+     "lang": "typescript",
+     "noteHe": "זו הדוגמה המתקדמת ביותר בפרק, והיא משלבת שני רעיונות. ראשית, `filter(isEven)` ו-`map(cube)` נקראות עם **ארגומנט אחד בלבד** במקום שניים — זהו **קירור (currying)** של Ramda: קריאה חלקית כזו מחזירה פונקציה חדשה שמחכה לארגומנט הנותר (המערך). שנית, `compose` מקבלת את שתי הפונקציות החלקיות האלה ומחזירה פונקציה חדשה, `evenCubes`, שמפעילה אותן מימין לשמאל: קודם `map(cube)` על הקלט, ואז `filter(isEven)` על התוצאה. שימו לב ש-`evenCubes` נבנתה **בלי להזכיר את המערך בכלל** — סגנון שנקרא point-free. הקריאה `evenCubes([0, 1, 2, 3, 4])` מחזירה `[0, 8, 64]`."
+    },
+    {
+     "id": "cm/chap1:21:41",
+     "type": "prose",
+     "en": "This example demonstrates three important aspects of the FP approach:\n",
+     "hash": "bcd9c7c691d9686a",
+     "he": "הדוגמה הזו ממחישה שלושה היבטים חשובים של גישת ה-FP:"
+    },
+    {
+     "id": "cm/chap1:21:42",
+     "type": "list",
+     "en": "* Functions can receive functions as parameters - including anonymous functions (lambda). For example, `map`, `filter` and `compose` receive functions as parameters.\n* Functions can return functions as a computed value. For example, `compose` returns a new function as a computed value.\n* Ramda functions that receive two arguments, such as `map` and `filter` behave interestingly when they are passed a single argument - this is called currying. This behavior makes it much easier to compose functions.\n\n",
+     "hash": "b5e7e955b02bc4e8",
+     "he": "* פונקציות יכולות לקבל פונקציות כפרמטרים — כולל פונקציות אנונימיות (lambda). לדוגמה, `map`,‏ `filter` ו-`compose` מקבלות פונקציות כפרמטרים.\n* פונקציות יכולות להחזיר פונקציות כערך מחושב. לדוגמה, `compose` מחזירה פונקציה חדשה כערך מחושב.\n* פונקציות של Ramda שמקבלות שני ארגומנטים, כמו `map` ו-`filter`, מתנהגות באופן מעניין כשמעבירים להן ארגומנט יחיד — התנהגות שנקראת קירור (currying). התנהגות זו מקלה מאוד על הרכבת פונקציות."
+    },
+    {
+     "id": "cm/chap1:21:43",
+     "type": "prose",
+     "en": "All of these features together encourage a style of programming in which new functions are built incrementally from smaller functions. This method is the basis of what we call functional abstractions - such as the family of operators map and filter (and more we will get to discover) or the operator compose.\n\n",
+     "hash": "9589c0725d7bad27",
+     "he": "כל התכונות הללו יחד מעודדות סגנון תכנות שבו פונקציות חדשות נבנות באופן הדרגתי מפונקציות קטנות יותר. השיטה הזו היא הבסיס למה שאנו מכנים הפשטות פונקציונליות — כמו משפחת האופרטורים map ו-filter (ועוד שנגלה בהמשך) או האופרטור compose."
+    }
+   ],
+   "headingHe": "1.3.8 הפשטות פונקציונליות"
+  },
+  {
+   "id": "cm/chap1:22",
+   "depth": 3,
+   "headingEn": "1.3.9 Reasoning about Code",
+   "raw": "### 1.3.9 Reasoning about Code\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:22:0",
+     "type": "prose",
+     "en": "Consider the following question about the function `evenCubes`: this is a function that first computes the cube of all the elements, and only then filters the results and keeps those that are even. \n\n",
+     "hash": "27bb718b161a0ede",
+     "he": "נבחן את השאלה הבאה על הפונקציה `evenCubes`: זוהי פונקציה שקודם מחשבת את החזקה השלישית של כל האיברים, ורק אחר כך מסננת את התוצאות ושומרת את הזוגיות שבהן."
+    },
+    {
+     "id": "cm/chap1:22:1",
+     "type": "prose",
+     "en": "A friendly consultant asks us whether it would be possible to reverse the order of the operations - and first apply the `filter` and only then apply `cube` on the remaining elements.\n\n",
+     "hash": "d3f9944e05a8e158",
+     "he": "יועץ ידידותי שואל אותנו אם אפשר להפוך את סדר הפעולות — קודם להפעיל את ה-`filter`, ורק אז להפעיל `cube` על האיברים שנותרו."
+    },
+    {
+     "id": "cm/chap1:22:2",
+     "type": "prose",
+     "en": "That is, we want to compare the following two functions: `compose(filter(isEven), map(cube))` and `compose(map(cube), filter(isEven))`.\n\n",
+     "hash": "80fcdd89a4ff8ad5",
+     "he": "כלומר, אנחנו רוצים להשוות בין שתי הפונקציות הבאות: `compose(filter(isEven), map(cube))` ו-`compose(map(cube), filter(isEven))`."
+    },
+    {
+     "id": "cm/chap1:22:3",
+     "type": "prose",
+     "en": "The motivation for this question is performance optimization: if we could filter first, and then apply the computation of the cube, we would save on the total number of computations performed to return the eventual result. That is, we know that `compose(map, filter)` is in general faster than `compose(filter, map)`.\n\n",
+     "hash": "eb6bdd0d8284ae6d",
+     "he": "המוטיבציה לשאלה היא אופטימיזציה של ביצועים: אם נוכל לסנן קודם, ורק אז להפעיל את חישוב החזקה השלישית, נחסוך במספר הכולל של החישובים שמבוצעים כדי להחזיר את התוצאה הסופית. כלומר, אנחנו יודעים ש-`compose(map, filter)` מהיר באופן כללי מ-`compose(filter, map)`."
+    },
+    {
+     "id": "cm/chap1:22:4",
+     "type": "prose",
+     "en": "Naturally, we only want to perform this optimization if we can guarantee that the two functions are equivalent.\n\n",
+     "hash": "4336a24e9b689f45",
+     "he": "מטבע הדברים, נרצה לבצע את האופטימיזציה הזו רק אם נוכל להבטיח ששתי הפונקציות שקולות (equivalent)."
+    },
+    {
+     "id": "cm/chap1:22:5",
+     "type": "prose",
+     "en": "#### Function Equivalence\n\n",
+     "hash": "a47ba37849a24dfa",
+     "he": "#### שקילות פונקציות"
+    },
+    {
+     "id": "cm/chap1:22:6",
+     "type": "prose",
+     "en": "What does it mean that two functions are equivalent? \n\n",
+     "hash": "1a3302eefd443737",
+     "he": "מה זה אומר ששתי פונקציות שקולות?"
+    },
+    {
+     "id": "cm/chap1:22:7",
+     "type": "prose",
+     "en": "In the mathematical sense, a function maps from one set of values (the domain of definition) to another set of values (the range of the function). Under these conditions, we will say that:\n\n",
+     "hash": "b49bb0d081a5905e",
+     "he": "במובן המתמטי, פונקציה ממפה מקבוצת ערכים אחת (תחום ההגדרה — domain) לקבוצת ערכים אחרת (הטווח — range). בתנאים אלה, נאמר כי:"
+    },
+    {
+     "id": "cm/chap1:22:8",
+     "type": "prose",
+     "en": "> Given $$D$$ the domain of the function $$f$$, $$R$$ the range of the function $$f$$, $$f$$ and $$g$$ are equivalent, which we will write $$f \\equiv g$$ iff $$g$$ has the same domain $$D$$, the same range $$R$$ and $$\\forall x \\in D,f(x) = g(x)$$.\n\n",
+     "hash": "a852db98a9cdef95",
+     "he": "> בהינתן $$D$$ תחום ההגדרה של הפונקציה $$f$$ ו-$$R$$ הטווח של הפונקציה $$f$$, הפונקציות $$f$$ ו-$$g$$ שקולות, ונסמן $$f \\equiv g$$, אם ורק אם ל-$$g$$ יש אותו תחום הגדרה $$D$$, אותו טווח $$R$$, ו-$$\\forall x \\in D,f(x) = g(x)$$."
+    },
+    {
+     "id": "cm/chap1:22:9",
+     "type": "prose",
+     "en": "In the functional programming paradigm, a pure function has no side effect (no shared variables are changed when the function is invoked). The same definition of function equivalence as for mathematical functions can be used for pure functions - except for two aspects that are specific to computation:\n",
+     "hash": "3b37a5e70fd31c75",
+     "he": "בפרדיגמת התכנות הפונקציונלי, לפונקציה טהורה (pure function) אין תופעות לוואי (שום משתנה משותף אינו משתנה כשהפונקציה נקראת). אפשר להשתמש באותה הגדרת שקילות כמו לפונקציות מתמטיות גם לפונקציות טהורות — למעט שני היבטים ייחודיים לחישוב:"
+    },
+    {
+     "id": "cm/chap1:22:10",
+     "type": "list",
+     "en": "* a computation can throw an exception (result in an error)\n* a computation (invocation of a function on parameters) can not terminate.\n\n",
+     "hash": "6eeaac8bfab2f5d5",
+     "he": "* חישוב יכול לזרוק חריגה (exception, כלומר להסתיים בשגיאה)\n* חישוב (הפעלת פונקציה על פרמטרים) עלול לא להסתיים (not terminate)."
+    },
+    {
+     "id": "cm/chap1:22:11",
+     "type": "prose",
+     "en": "The definition of functional equivalence becomes then:\n\n",
+     "hash": "5a02b5665edac62f",
+     "he": "הגדרת השקילות הפונקציונלית הופכת אז ל:"
+    },
+    {
+     "id": "cm/chap1:22:12",
+     "type": "prose",
+     "en": "> $$f$$ and $$g$$ (pure computational functions in the FP paradigm) are equivalent iff whenever $$f(x)$$ is evaluated to a value, $$g(x)$$ is evaluated to the same value, if $$f(x)$$ throws an exception, so does $$g(x)$$, and if $$f(x)$$ does not terminate, so does $$g(x)$$.\n\n",
+     "hash": "7839d172235da934",
+     "he": "> $$f$$ ו-$$g$$ (פונקציות חישוביות טהורות בפרדיגמת ה-FP) שקולות אם ורק אם בכל פעם ש-$$f(x)$$ מוערך לערך, $$g(x)$$ מוערך לאותו ערך; אם $$f(x)$$ זורק חריגה, כך גם $$g(x)$$; ואם $$f(x)$$ אינו מסתיים, כך גם $$g(x)$$."
+    },
+    {
+     "id": "cm/chap1:22:13",
+     "type": "prose",
+     "en": "#### Referential Transparency\n\n",
+     "hash": "26e35a410a6e80fb",
+     "he": "#### שקיפות רפרנציאלית"
+    },
+    {
+     "id": "cm/chap1:22:14",
+     "type": "prose",
+     "en": "Because this definition involves universal quantification (over all possible values of the parameter $$x$$), it is difficult to turn it into an operational process that can predict whether two functions are equivalent. It is the objective of programming languages semantic methods to provide tools to predict equivalence of programs.\n\n",
+     "hash": "dee6c8574cf2b7aa",
+     "he": "מכיוון שההגדרה הזו כוללת כימות אוניברסלי (על כל הערכים האפשריים של הפרמטר $$x$$), קשה להפוך אותה לתהליך אופרטיבי שיכול לחזות אם שתי פונקציות שקולות. זו מטרתן של שיטות סמנטיות לשפות תכנות — לספק כלים לחיזוי שקילות של תוכניות."
+    },
+    {
+     "id": "cm/chap1:22:15",
+     "type": "prose",
+     "en": "The semantics of pure functional programs is much easier to develop than that of procedural programs with side effects - because it can be based on an inductive process of evaluation of expressions which only focuses on the structure of the input expression. We will develop such tools in the course, relying extensively on types and the technique of structural induction.\n\n",
+     "hash": "ab3b9f481e901412",
+     "he": "הסמנטיקה של תוכניות פונקציונליות טהורות קלה בהרבה לפיתוח מזו של תוכניות פרוצדורליות עם תופעות לוואי — מפני שהיא יכולה להתבסס על תהליך אינדוקטיבי של הערכת ביטויים, שמתמקד אך ורק במבנה של ביטוי הקלט. נפתח כלים כאלה בקורס, תוך הסתמכות נרחבת על טיפוסים ועל טכניקת האינדוקציה המבנית (structural induction)."
+    },
+    {
+     "id": "cm/chap1:22:16",
+     "type": "prose",
+     "en": "The property of functional programs which makes this process easy is called **referential transparency**: it means that the value of a program (called an expression in FP) depends only on its sub-expressions, and that if you substitute a sub-expression in an expression by another expression that is equivalent, then the resulting expression is equivalent to the original.\n\n",
+     "hash": "944ba9cf09c2623b",
+     "he": "התכונה של תוכניות פונקציונליות שהופכת את התהליך הזה לקל נקראת **שקיפות רפרנציאלית (referential transparency)**: משמעותה שערכה של תוכנית (הנקראת ביטוי ב-FP) תלוי אך ורק בתת-הביטויים שלה, ושאם מציבים במקום תת-ביטוי בתוך ביטוי תת-ביטוי אחר השקול לו, אז הביטוי המתקבל שקול לביטוי המקורי."
+    },
+    {
+     "id": "cm/chap1:22:17",
+     "type": "prose",
+     "en": "Some consequences of referential transparency are that if one evaluates an expression twice, one obtains the same result. The relative order in which one evaluates (non-overlapping) sub-expressions of a program makes no difference to the value of the program. This property enables optimization methods such as parallel evaluation of sub-expressions to speed up code.\n\n",
+     "hash": "d51eca18605c11c9",
+     "he": "כמה מהמסקנות משקיפות רפרנציאלית: אם מעריכים ביטוי פעמיים, מקבלים את אותה תוצאה. הסדר היחסי שבו מעריכים תת-ביטויים (שאינם חופפים) של תוכנית אינו משנה את ערכה של התוכנית. התכונה הזו מאפשרת שיטות אופטימיזציה כמו הערכה מקבילית של תת-ביטויים להאצת קוד."
+    },
+    {
+     "id": "cm/chap1:22:18",
+     "type": "prose",
+     "en": "#### Proving Functions Equivalence\n\n",
+     "hash": "86cb6594141d9b64",
+     "he": "#### הוכחת שקילות פונקציות"
+    },
+    {
+     "id": "cm/chap1:22:19",
+     "type": "prose",
+     "en": "In our simple example, we want to check whether the following two functions are equivalent:\n\n",
+     "hash": "3d8272edc02861f9",
+     "he": "בדוגמה הפשוטה שלנו, אנחנו רוצים לבדוק אם שתי הפונקציות הבאות שקולות:"
+    },
+    {
+     "id": "cm/chap1:22:20",
+     "type": "prose",
+     "en": "$$f = compose(filter(isEven), map(cube))$$\n\n",
+     "hash": "87ad3c7f8cd3cf2a",
+     "he": "$$f = compose(filter(isEven), map(cube))$$"
+    },
+    {
+     "id": "cm/chap1:22:21",
+     "type": "prose",
+     "en": "$$g = compose(map(cube), filter(isEven))$$\n\n",
+     "hash": "3648c32e19f211e4",
+     "he": "$$g = compose(map(cube), filter(isEven))$$"
+    },
+    {
+     "id": "cm/chap1:22:22",
+     "type": "prose",
+     "en": "We define typing - so that we will check this equivalence on the domain of finite arrays of integer values. That is, we want to determine, for any value of a finite array of integer values $$a=[a_1,\\ldots,a_l]$$ whether $$f(a) = g(a)$$.\n\n",
+     "hash": "24b4ef7cfeffe92c",
+     "he": "אנחנו מגדירים טיפוסים — כך שנבדוק את השקילות הזו על התחום של מערכים סופיים של ערכים שלמים. כלומר, אנחנו רוצים לקבוע, לכל ערך של מערך סופי של מספרים שלמים $$a=[a_1,\\ldots,a_l]$$, האם $$f(a) = g(a)$$."
+    },
+    {
+     "id": "cm/chap1:22:23",
+     "type": "prose",
+     "en": "We proceed as follows:\n\n",
+     "hash": "3add6ce02b390a04",
+     "he": "נתקדם באופן הבא:"
+    },
+    {
+     "id": "cm/chap1:22:24",
+     "type": "prose",
+     "en": "$$ \\begin{align} f(a) &= filter(isEven, map(cube, a)) \\\\\n                      &= filter(isEven, [cube(a_1), \\ldots, cube(a_l)]) \\\\\n                 \\\\\n                 g(a) &= map(cube, filter(isEven, a)) \\\\\n                      &= map(cube, filter(isEven, [a_1, ..., a_l])) \\end{align} $$\n\n",
+     "hash": "35c0579ed8833029",
+     "he": "$$ \\begin{align} f(a) &= filter(isEven, map(cube, a)) \\\\\n                      &= filter(isEven, [cube(a_1), \\ldots, cube(a_l)]) \\\\\n                 \\\\\n                 g(a) &= map(cube, filter(isEven, a)) \\\\\n                      &= map(cube, filter(isEven, [a_1, ..., a_l])) \\end{align} $$"
+    },
+    {
+     "id": "cm/chap1:22:25",
+     "type": "prose",
+     "en": "To continue this analysis, we need to express the effect of applying $$filter$$ on an array. We write it as follows:\n\n",
+     "hash": "dd79f1fcf899854f",
+     "he": "כדי להמשיך את הניתוח, עלינו לבטא את ההשפעה של הפעלת $$filter$$ על מערך. נכתוב זאת כך:"
+    },
+    {
+     "id": "cm/chap1:22:26",
+     "type": "prose",
+     "en": "$$ \\begin{align}\n    filter(pred, [a_1, \\ldots, a_l]) &= [a_{i_1}, \\ldots, a_{i_k}] \\\\\n                                     &\\mid 1 \\leq i_1 < i_2 < \\ldots < i_k \\leq l, \\\\\n                                     &\\forall j \\in \\{i_1, \\ldots, i_k\\}, pred(a_j) ~\\text{is true} \\\\\n                                     &and\\\\\n                                     &\\forall j \\notin \\{i_1, \\ldots, i_k\\}, pred(a_j) ~\\text{is false}.\n   \\end{align} $$\n\n",
+     "hash": "62834da00fce4649",
+     "he": "$$ \\begin{align}\n    filter(pred, [a_1, \\ldots, a_l]) &= [a_{i_1}, \\ldots, a_{i_k}] \\\\\n                                     &\\mid 1 \\leq i_1 < i_2 < \\ldots < i_k \\leq l, \\\\\n                                     &\\forall j \\in \\{i_1, \\ldots, i_k\\}, pred(a_j) ~\\text{is true} \\\\\n                                     &and\\\\\n                                     &\\forall j \\notin \\{i_1, \\ldots, i_k\\}, pred(a_j) ~\\text{is false}.\n   \\end{align} $$"
+    },
+    {
+     "id": "cm/chap1:22:27",
+     "type": "prose",
+     "en": "Using this definition of the way $$filter$$ is computed, we obtain (we skip the false conditions):\n\n",
+     "hash": "6406e12210d3e774",
+     "he": "באמצעות הגדרה זו של האופן שבו $$filter$$ מחושב, אנחנו מקבלים (מדלגים על התנאים השקריים):"
+    },
+    {
+     "id": "cm/chap1:22:28",
+     "type": "prose",
+     "en": "$$ \\begin{align}\n    f(a) &= [cube(a_{i_1}), \\ldots, cube(a_{i_k})] \\\\\n    \\mid &  \\forall j \\in \\{i_1, \\ldots, i_k\\}, isEven(cube(a_j))\\\\\n         &and\\\\\n    g(a) &= map(cube, [a_{j_1}, \\ldots, a_{j_m}]) \\\\\n         &= [cube(a_{j_1}), \\ldots, cube(a_{j_m})] \\\\\n         & \\mid \\forall j \\in \\{j_1, \\ldots, j_m\\}, isEven(a_j)\n   \\end{align} $$\n\n",
+     "hash": "be9526d4723c376e",
+     "he": "$$ \\begin{align}\n    f(a) &= [cube(a_{i_1}), \\ldots, cube(a_{i_k})] \\\\\n    \\mid &  \\forall j \\in \\{i_1, \\ldots, i_k\\}, isEven(cube(a_j))\\\\\n         &and\\\\\n    g(a) &= map(cube, [a_{j_1}, \\ldots, a_{j_m}]) \\\\\n         &= [cube(a_{j_1}), \\ldots, cube(a_{j_m})] \\\\\n         & \\mid \\forall j \\in \\{j_1, \\ldots, j_m\\}, isEven(a_j)\n   \\end{align} $$"
+    },
+    {
+     "id": "cm/chap1:22:29",
+     "type": "prose",
+     "en": "To prove the equivalence, we must then prove that:\n\n",
+     "hash": "4f29031dd998ee6a",
+     "he": "כדי להוכיח את השקילות, עלינו אם כן להוכיח כי:"
+    },
+    {
+     "id": "cm/chap1:22:30",
+     "type": "prose",
+     "en": "$$ \\forall i \\in \\mathbb{N}, isEven(i) = isEven(cube(i)) $$\n\n",
+     "hash": "88afaf6518ea58c1",
+     "he": "$$ \\forall i \\in \\mathbb{N}, isEven(i) = isEven(cube(i)) $$"
+    },
+    {
+     "id": "cm/chap1:22:31",
+     "type": "prose",
+     "en": "We leave the end of the proof to the reader. \n\n",
+     "hash": "bb9fe0b4640c8b29",
+     "he": "את סוף ההוכחה נשאיר לקורא."
+    },
+    {
+     "id": "cm/chap1:22:32",
+     "type": "prose",
+     "en": "Note that the logical axiom we use that represent the relation between the expression $$filter(pred, a)$$ and its value, or between the expression $$map(f, a)$$ and its value are the key steps of the logical proof of equivalence between the expressions.\n\n",
+     "hash": "3bbd0f51770d51a7",
+     "he": "שימו לב שהאקסיומות הלוגיות שבהן אנו משתמשים, שמייצגות את היחס בין הביטוי $$filter(pred, a)$$ לערכו, או בין הביטוי $$map(f, a)$$ לערכו, הן צעדי המפתח בהוכחה הלוגית של השקילות בין הביטויים."
+    },
+    {
+     "id": "cm/chap1:22:33",
+     "type": "prose",
+     "en": "#### Computation Steps\n\n",
+     "hash": "9d1facfdc546a198",
+     "he": "#### צעדי חישוב"
+    },
+    {
+     "id": "cm/chap1:22:34",
+     "type": "prose",
+     "en": "The key point of this example is that we can predict the equivalence of two functions by applying **reduction steps**, where the invocation of a function on arguments is described as a sequence of steps, where each step is described as a computation rule.  We have seen above examples of such steps for the reduction of $$map$$ and of $$filter$$.\n\n",
+     "hash": "1f091a3eccc8bc9c",
+     "he": "הנקודה המרכזית של הדוגמה הזו היא שאנחנו יכולים לחזות את השקילות של שתי פונקציות על ידי הפעלת **צעדי רדוקציה (reduction steps)**, שבהם הפעלה של פונקציה על ארגומנטים מתוארת כסדרת צעדים, וכל צעד מתואר ככלל חישוב. ראינו למעלה דוגמאות לצעדים כאלה עבור הרדוקציה של $$map$$ ושל $$filter$$."
+    }
+   ],
+   "headingHe": "1.3.9 הסקה לוגית על קוד"
+  },
+  {
+   "id": "cm/chap1:23",
+   "depth": 2,
+   "headingEn": "1.4 Summary",
+   "raw": "## 1.4 Summary\n\n",
+   "blocks": [],
+   "headingHe": "1.4 סיכום"
+  },
+  {
+   "id": "cm/chap1:24",
+   "depth": 3,
+   "headingEn": "1.4.1 Programming Paradigms",
+   "raw": "### 1.4.1 Programming Paradigms\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:24:0",
+     "type": "list",
+     "en": "* A programming paradigm is a way of programming - that recommends preferred practices and discourages or makes impossible risky practices.\n* Imperative, Structured, Procedural, Functional, Object-Oriented, Event-driven, Flow-driven, Logic are examples of programming paradigms.\n* Programming Languages in their design make some paradigms easy to adopt.  Some languages support multiple paradigms.\n* Programming paradigms have evolved over time as reaction to problems observed in programming practice.\n* Paradigms have evolved to reduce code repetition, facilitate testing, enforce abstraction barriers to ease code reuse, encourage safe concurrency, allow performance optimizations through declarative programs, and allow reasoning about code.\n\n",
+     "hash": "a5bfeaad948c0e9d",
+     "he": "* פרדיגמת תכנות היא דרך לתכנת — היא ממליצה על פרקטיקות מועדפות ומרתיעה מפני פרקטיקות מסוכנות או הופכת אותן לבלתי אפשריות.\n* אימפרטיבית, מובנית, פרוצדורלית, פונקציונלית, מונחית-עצמים, מונחית-אירועים, מונחית-זרימה ולוגית — כולן דוגמאות לפרדיגמות תכנות.\n* שפות תכנות, בתכנונן, הופכות פרדיגמות מסוימות לקלות לאימוץ. שפות מסוימות תומכות בפרדיגמות מרובות.\n* פרדיגמות תכנות התפתחו לאורך זמן כתגובה לבעיות שנצפו בפרקטיקת התכנות.\n* פרדיגמות התפתחו כדי לצמצם שכפול קוד, להקל על בדיקות, לאכוף מחסומי הפשטה שמקלים על שימוש חוזר בקוד, לעודד מקביליות בטוחה, לאפשר אופטימיזציות ביצועים באמצעות תוכניות דקלרטיביות, ולאפשר הסקה לוגית על קוד."
+    }
+   ],
+   "headingHe": "1.4.1 פרדיגמות תכנות"
+  },
+  {
+   "id": "cm/chap1:25",
+   "depth": 3,
+   "headingEn": "1.4.2 Functional Programming",
+   "raw": "### 1.4.2 Functional Programming\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:25:0",
+     "type": "list",
+     "en": "* FP is a paradigm that encourages the usage of pure functions (with no shared state and mutation), and referential transparency (the value of an expression depends only on its sub-expressions).\n* FP achieves **functional abstractions** by using **higher-order functions**: one can define anonymous functions (lambda), functions can be passed as arguments to other functions, and functions can return computed functions as values.\n* `map`, `filter` and `compose` are highly reusable functional abstractions that operate over collections of values.\n* FP makes it easy to perform concurrent computation because there is no shared mutable state used in computation - and thus, no need to define risky locking mechanisms.\n\n",
+     "hash": "864fcf86bb7c66d8",
+     "he": "* FP היא פרדיגמה שמעודדת שימוש בפונקציות טהורות (ללא מצב משותף ושינוי מצב), ושקיפות רפרנציאלית (ערכו של ביטוי תלוי אך ורק בתת-הביטויים שלו).\n* FP משיג **הפשטות פונקציונליות** באמצעות **פונקציות מסדר גבוה**: אפשר להגדיר פונקציות אנונימיות (lambda), אפשר להעביר פונקציות כארגומנטים לפונקציות אחרות, ופונקציות יכולות להחזיר פונקציות מחושבות כערכים.\n* `map`,‏ `filter` ו-`compose` הן הפשטות פונקציונליות הניתנות לשימוש חוזר נרחב, שפועלות על אוספים של ערכים.\n* FP מקל על ביצוע חישוב מקבילי מפני שאין מצב משותף בר-שינוי בחישוב — ולכן אין צורך להגדיר מנגנוני נעילה מסוכנים."
+    }
+   ],
+   "headingHe": "1.4.2 תכנות פונקציונלי"
+  },
+  {
+   "id": "cm/chap1:26",
+   "depth": 3,
+   "headingEn": "1.4.3 Semantics of Programming Languages",
+   "raw": "### 1.4.3 Semantics of Programming Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/chap1:26:0",
+     "type": "list",
+     "en": "* One of the objectives of the field of semantics of programming languages is to predict the equivalence of programs.\n* Tools that support semantic analysis of programs include types, structural induction and the analysis of computation as a sequence of reduction steps.\n",
+     "hash": "11c2628f9e6ab500",
+     "he": "* אחת ממטרות התחום של סמנטיקה של שפות תכנות היא לחזות שקילות של תוכניות.\n* כלים שתומכים בניתוח סמנטי של תוכניות כוללים טיפוסים, אינדוקציה מבנית, וניתוח החישוב כסדרה של צעדי רדוקציה."
+    }
+   ],
+   "headingHe": "1.4.3 סמנטיקה של שפות תכנות"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "איזו מהטענות הבאות מתארת נכון את ההבדל המהותי בין תכנות פרוצדורלי (procedural) לתכנות פונקציונלי (Functional Programming)?",
+   "options": [
+    "תכנות פונקציונלי מבוסס על חישוב ביטויים (expressions) לערכים ללא תופעות לוואי, בעוד תכנות פרוצדורלי מבוסס על ביצוע פקודות שמשנות מצב",
+    "תכנות פונקציונלי מהיר יותר מתכנות פרוצדורלי בכל תרחיש",
+    "בתכנות פרוצדורלי אין פונקציות, ובתכנות פונקציונלי הכול פונקציות",
+    "תכנות פונקציונלי אינו מאפשר רקורסיה, ותכנות פרוצדורלי כן"
+   ],
+   "correct": 0,
+   "explanationHe": "ההבחנה המרכזית היא **מודל החישוב**: ב-FP תוכנית היא ביטוי שמוערך לערך (evaluation), ללא שינוי מצב (mutation) וללא תופעות לוואי (side effects). בתכנות פרוצדורלי התוכנית היא סדרת פקודות (statements) שמשנות מצב משותף. שאר הטענות שגויות עובדתית: מהירות תלויה בהקשר, בתכנות פרוצדורלי יש פרוצדורות, ורקורסיה היא דווקא כלי מרכזי ב-FP."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "מדוע היעדר תופעות לוואי (no side effects) מקל על תכנות מקבילי (concurrency)?",
+   "options": [
+    "כי פונקציות טהורות רצות תמיד במעבד נפרד",
+    "כי כאשר אין שינוי מצב משותף, אין מצבי מרוץ (race conditions) ואין צורך במנעולים (locks)",
+    "כי המהדר ממיר את הקוד לשפת מכונה יעילה יותר",
+    "כי תופעות לוואי אסורות על פי מפרט השפה"
+   ],
+   "correct": 1,
+   "explanationHe": "הבעיה המרכזית במקביליות היא **מצב משותף שמשתנה**: שני תהליכים שכותבים לאותו משתנה יוצרים מצב מרוץ (race condition), והפתרון המסורתי — נעילה (locking) — מביא לקיפאון (deadlock) ולהרעבה (starvation). כשאין שינוי מצב בכלל, כל חישוב תלוי רק בקלט שלו, ולכן אפשר להריץ חישובים במקביל בלי שום תיאום."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה יודפס, ומה העיקרון הפונקציונלי שהקטע מדגים?\n```javascript\nconst square = (x) => x * x;\nconst a = [1, 2, 3];\nconst b = a.map(square);\nconsole.log(a);\nconsole.log(b);\n```",
+   "answerHe": "יודפס `[1, 2, 3]` ואז `[1, 4, 9]`.",
+   "explanationHe": "`map` היא פונקציה מסדר גבוה (higher-order function) שמקבלת את `square` כארגומנט — פונקציות הן אזרח ממדרגה ראשונה (first-class citizen). חשוב לא פחות: `map` **אינה משנה** את המערך המקורי אלא מחזירה מערך חדש — זהו עקרון אי-השינוי (immutability). לכן `a` נשאר `[1, 2, 3]`."
+  },
+  {
+   "id": "ex4",
+   "type": "open",
+   "questionHe": "מנו את שלושת הכלים המרכזיים שפרדיגמת התכנות הפונקציונלי מספקת (כפי שהוצגו בפרק), והסבירו במשפט כל אחד.",
+   "answerHe": "1. **פונקציות כאזרח ממדרגה ראשונה (first-class citizen functions)** — פונקציות הן ערכים לכל דבר: אפשר להעבירן כארגומנטים, להחזירן כערכים ולשמרן במשתנים.\n2. **אי-שינוי (immutability)** — אין שינוי מצב של משתנים ומבני נתונים אחרי יצירתם; במקום לשנות, יוצרים ערכים חדשים.\n3. **הפשטות פונקציונליות (functional abstractions)** — תבניות מוכללות כמו `map`, `filter`, `reduce` שמכמסות (encapsulate) דפוסי עיבוד חוזרים ומחליפות לולאות מפורשות.",
+   "explanationHe": "בתשובה מלאה חשוב לציין את שלושת הרכיבים בשמם האנגלי ולהסביר כיצד כל אחד תורם ליכולת לחשוב על תוכנית כעל הערכת ביטויים ולא כסדרת פקודות."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "מהי שקיפות רפרנציאלית (referential transparency), ולמה היא חשובה ליכולת לנמק על קוד (reasoning about code)?",
+   "options": [
+    "היכולת לקרוא לפונקציה מכל מקום בתוכנית",
+    "האפשרות להחליף ביטוי בערך שלו (או בביטוי שקול) בכל מקום מבלי לשנות את משמעות התוכנית",
+    "האפשרות להצהיר על משתנים בלי לציין את הטיפוס שלהם",
+    "היכולת של המפרש להדפיס את ערכי הביניים של חישוב"
+   ],
+   "correct": 1,
+   "explanationHe": "כאשר אין תופעות לוואי, ערכו של ביטוי תלוי אך ורק בערכי רכיביו — ולכן מותר להחליף ביטוי בערכו (substitution) מבלי להשפיע על שאר התוכנית. זה מה שמאפשר נימוק אלגברי על תוכניות, בדיקות פשוטות יותר, ואופטימיזציות כמו הערכה עצלה (lazy evaluation) או מיטמון. בקוד עם mutation התכונה הזו נשברת: אותו ביטוי יכול להחזיר ערכים שונים בזמנים שונים."
+  },
+  {
+   "id": "ex6",
+   "type": "code-reading",
+   "questionHe": "הקטע הבא כתוב בסגנון פרוצדורלי. אילו שתי בעיות (שהוצגו בפרק) הוא מדגים ביחס לגרסה הפונקציונלית `numbers.map(x => x * x)`?\n```javascript\nlet squares = [];\nfor (let i = 0; i < numbers.length; i++) {\n    squares[i] = numbers[i] * numbers[i];\n}\n```",
+   "answerHe": "1. **חשיפת פרטי מימוש ותלות במבנה הנתונים** — הלולאה מקובעת לאינדקסים של מערך; מעבר למבנה נתונים אחר יחייב שכתוב. `map` מפשיטה את דפוס המעבר על האיברים.\n2. **שינוי מצב (mutation) ומשתנה עזר** — `squares` ו-`i` משתנים לאורך הריצה, מה שמקשה על נימוק, על בדיקות ועל מקביליות. בגרסה הפונקציונלית אין אף השמה חוזרת.",
+   "explanationHe": "זו בדיוק המוטיבציה של הפרק למעבר מהפרדיגמה הפרוצדורלית ל-FP: פחות קוד תבניתי (boilerplate), פחות הזדמנויות לבאגים של אינדקסים וגבולות, ואפשרות לנמק על הקוד כהרכבת פונקציות."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "הפרק מציג שני היבטים שמגדירים שפת תכנות: תחביר (syntax) וסמנטיקה (semantics). הסבירו את ההבדל, וציינו מהי סמנטיקה אופרציונלית (operational semantics).",
+   "answerHe": "**תחביר (syntax)** מגדיר אילו צירופי סימנים הם ביטויים חוקיים בשפה — הצורה של תוכניות. **סמנטיקה (semantics)** מגדירה מה המשמעות של הביטויים הללו — לאיזה ערך מוערך כל ביטוי. **סמנטיקה אופרציונלית (operational semantics)** היא הגדרת המשמעות באמצעות תיאור מדויק של *אלגוריתם ההערכה*: איך ממפים כל ביטוי בשפה לערך, צעד אחר צעד. בקורס נממש את ההגדרות האלה כמפרש (interpreter) — תוכנית שמריצה תוכניות.",
+   "explanationHe": "נקודות מפתח: ההבחנה צורה/משמעות, ההגדרה של סמנטיקה אופרציונלית כאלגוריתם הערכה, והקשר לרעיון המרכזי של הקורס — 'המפרש של שפת תכנות הוא בסך הכול עוד תוכנית'."
+  }
+ ]
+}

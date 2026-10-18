@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/L4/L4.ts",
+ "repo": "interpreters",
+ "path": "src/L4/L4.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L4/L4.ts",
+ "code": "import { readFileSync } from \"fs\";\nimport { parseL4, unparse } from \"./L4-ast\";\nimport { evalProgram } from \"./L4-eval\";\nimport { isClosure, valueToString, Value, Closure } from \"./L4-value\";\nimport { bind, either } from \"../shared/result\";\n\nconst filename = process.argv[2];\nif (!filename) {\n    console.error(\"Usage: L4 <filename>\");\n    process.exit(1);\n}\n\nlet source: string;\ntry {\n    source = readFileSync(filename, \"utf-8\");\n} catch (e) {\n    console.error(`Error reading file '${filename}': ${(e as Error).message}`);\n    process.exit(1);\n}\n\nconst stripComments = (x: string): string =>\n    x.replace(/;[^\\r\\n]*/g, '');\n\nconst displayClosure = (c: Closure): string => {\n    const params = c.params.map((p) => p.var).join(\" \");\n    const body = c.body.map(unparse).join(\" \");\n    return `<Closure (${params}) ${body}>`;\n};\n\nconst displayValue = (val: Value): string =>\n    isClosure(val) ? displayClosure(val) :\n    valueToString(val);\n\nconst result = bind(parseL4(stripComments(source)), evalProgram);\n\neither(\n    result,\n    (value) => console.log(displayValue(value)),\n    (message) => {\n        console.error(`Error: ${message}`);\n        process.exit(1);\n    }\n);\n",
+ "titleHe": "נקודת הכניסה של L4 — ואיזו משתי הגרסאות היא מריצה",
+ "descriptionHe": "תוכנית ההרצה של `L4`, וכמעט העתק של `L3.ts`: אותו צינור `bind(parse, eval)`, אותו `displayClosure`, אותו `either` להדפסה.\n\nשייך ל-**2.7–2.8**, ו⚠️ **הפרט האחד ששווה לבדוק בו הוא איזו משתי הגרסאות של `L4` הוא מייבא** — כי לתיקייה הזאת יש **שני מפרשים מלאים** זה לצד זה, ורק אחד מהם רץ בפועל.",
+ "annotations": [
+  {
+   "line": 1,
+   "noteHe": "⚠️ **הסתכלו על שורות 2–4: הייבוא הוא מ-`L4-eval` ומ-`L4-value` — כלומר מהגרסה *ללא* `-box`.**\n\nזה שווה לדעת לפני שמתחילים לקרוא את התיקייה: יש בה **שני מפרשים שלמים** — הזוגות `L4-eval` / `L4-eval-box`, `L4-env` / `L4-env-box`, `L4-value` / `L4-value-box`, `evalPrimitive` / `evalPrimitive-box`. הראשון בכל זוג הוא **המודל הטהור** (סביבה בלתי-משתנה, `letrec` דרך `RecEnv`, בלי `set!`), והשני הוא **מודל הקופסאות** (סביבה ניתנת לשינוי, סביבה גלובלית, `set!` נתמך).\n\n**ותוכנית ההרצה מחוברת לטהור בלבד.** לכן `(set! …)` בקובץ `.l4` יחזיר `\"To implement\"`, ולכן `test.l4` נאלץ לעטוף את `fact` ב-`letrec`. הגרסה עם `-box` נבדקת רק דרך קובצי הבדיקות. **אם משהו בהתנהגות לא מסתדר עם מה שקראתם — ודאו קודם באיזו גרסה מדובר.**"
+  },
+  {
+   "line": 21,
+   "noteHe": "⚠️ שימו לב ש-`stripComments` יושבת **כאן**, בתוכנית ההרצה — ולא בקובץ ה-AST כפי שהיה ב-`L3` (שם היא הייתה חלק מ-`parseL3`). המשמעות המעשית: ‏`parseL4` **אינה** מסירה הערות בעצמה, ולכן כל קורא אחר שלה — קובצי בדיקות, `evalParse` — חייב לזכור לעשות זאת בעצמו, אחרת קלט עם `;` ייכשל.\n\nזו נסיגה קטנה לעומת `L3`: הפונקציונליות זהה, אבל המיקום שלה גרוע יותר. (הבאג עצמו נשמר כמובן — אותו ביטוי רגולרי שאינו מכיר מחרוזות, ולכן `\"a;b\"` עדיין נחתך.)\n\nשאר הקובץ — `displayClosure` שמשתמשת ב-`unparse` כדי לעקוף את `closureToString` השבורה, והצינור `bind(parseL4(…), evalProgram)` — זהה ל-`L3.ts`, וההערות שם חלות גם כאן."
+  }
+ ]
+}

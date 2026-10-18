@@ -1,0 +1,983 @@
+{
+ "id": "cm/4.3Generators",
+ "kind": "lecture",
+ "sourcePath": "class_material/4.3Generators.md",
+ "titleEn": "Generators, Lazy Lists",
+ "titleHe": "גנרטורים, רשימות עצלות",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/4.3Generators:0",
+   "depth": 1,
+   "headingEn": "Generators, Lazy Lists",
+   "raw": "# Generators, Lazy Lists\n",
+   "blocks": [],
+   "headingHe": "גנרטורים, רשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:1:0",
+     "type": "prose",
+     "en": "In this section, we continue our analysis of control structures and the relation it has with *delayed computation*.\nWe first return to the notion of **coroutines**, which we met in [Section 4.1](4.1AsyncProgramming.html) in JavaScript, and attempt\nto simulate coroutines in the programming language $$L5$$.  \n\n",
+     "hash": "36c0d83ac9a2bd7f",
+     "he": "בסעיף הזה אנחנו ממשיכים את הניתוח שלנו של מבני בקרה ואת הקשר שלהם ל*חישוב מושהה*.\nתחילה נחזור למושג ה**קו-רוטינות** (coroutines), שפגשנו ב[סעיף 4.1](4.1AsyncProgramming.html) ב-JavaScript, וננסה\nלדמות קו-רוטינות בשפת התכנות $$L5$$."
+    },
+    {
+     "id": "cm/4.3Generators:1:1",
+     "type": "prose",
+     "en": "We then refine our understanding of such coroutines by describing them as an abstract data type which involves closures as delayed computations.  We call this type is called a **lazy list** (also known as *streams*).  We present a programming style based on lazy lists which has become known as the \n[functional reactive programming](https://en.wikipedia.org/wiki/Functional_reactive_programming) paradigm.  This style is particularly important \nin User Interface programming, and is prevalent in popular frameworks such as [Angular with RxJS](https://angular.io/guide/rx-library) and \n[ReactiveX](http://reactivex.io/intro.html).\n\n",
+     "hash": "a3cf63061da5bf56",
+     "he": "אחר כך נחדד את ההבנה שלנו את הקו-רוטינות האלה על ידי תיאורן כטיפוס נתונים מופשט שמערב סגורים כחישובים מושהים. אנחנו קוראים לטיפוס הזה **רשימה עצלה** (lazy list), הידועה גם בשם *זרמים* (streams). נציג סגנון תכנות שמבוסס על רשימות עצלות, שנודע כפרדיגמת\n[התכנות התגובתי הפונקציונלי](https://en.wikipedia.org/wiki/Functional_reactive_programming) (functional reactive programming). הסגנון הזה חשוב במיוחד\nבתכנות ממשקי משתמש, והוא רווח במסגרות עבודה פופולריות כמו [Angular עם RxJS](https://angular.io/guide/rx-library) ו-\n[ReactiveX](http://reactivex.io/intro.html)."
+    }
+   ],
+   "headingHe": "‏PPL 2023"
+  },
+  {
+   "id": "cm/4.3Generators:2",
+   "depth": 2,
+   "headingEn": "Constructing Coroutines with Delayed Computation",
+   "raw": "## Constructing Coroutines with Delayed Computation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:2:0",
+     "type": "prose",
+     "en": "Consider the following generator example in JavaScript, using the language constructs of function\\*, **yield** and the\n**Iterator** interface with the **IteratorResult** data type:\n\n",
+     "hash": "327dd109fd8a7fea",
+     "he": "נתבונן בדוגמת הגנרטור הבאה ב-JavaScript, שמשתמשת במבני השפה function\\*, ב-**yield** ובממשק **Iterator** עם טיפוס הנתונים **IteratorResult**:"
+    },
+    {
+     "id": "cm/4.3Generators:2:1",
+     "type": "code",
+     "en": "```typescript\nfunction f1(n) { return n+1; }\nfunction f2(n) { return n+2; }\nfunction f3(n) { return n+3; }\nfunction* gen1(n) {\n  yield f1(n);\n  yield f2(n);\n  yield f3(n);\n}\n\nconst g11 = gen1(0)\ng11.next()\n// --> { value: 1, done: false }\n\ng11.next()\n// --> { value: 2, done: false }\n\ng11.next()\n// --> { value: 3, done: false }\n\ng11.next()\n// --> { value: undefined, done: true }\n```\n\n",
+     "hash": "fbce77ea206f4cd2",
+     "lang": "typescript",
+     "noteHe": "תזכורת מהירה לגנרטורים מ-4.1, כנקודת מוצא. ‏`function*` (עם הכוכבית) מגדיר פונקציית גנרטור, ו-`yield` הוא \"החזר ערך אבל **אל תסיים** — עצור כאן וזכור איפה היית\". הקריאה ‏`gen1(0)` **לא** מריצה שום דבר מגוף הפונקציה; היא רק מחזירה אובייקט איטרטור. כל ‏`next()` מריץ עוד קטע עד ה-`yield` הבא ומחזיר ‏`{value, done}`. עקבו אחרי הפלט: 1, 2, 3, ואז ‏`{value: undefined, done: true}` — הקריאה הרביעית מגיעה לסוף הגוף, ולכן אין ערך. שימו לב לשתי תכונות שנצטרך לדמות ב-L5: **השהיה** (הגוף לא רץ עד שמבקשים) ו**מצב** (הגנרטור זוכר איפה עצר). התכונה השנייה היא מוטציה, וזו בדיוק הבעיה בשפה פונקציונלית."
+    },
+    {
+     "id": "cm/4.3Generators:2:2",
+     "type": "prose",
+     "en": "Let us build a function which behaves in a similar manner in $$L5$$.\n\n",
+     "hash": "43af6d77e9e77862",
+     "he": "בואו נבנה פונקציה שמתנהגת באופן דומה ב-$$L5$$."
+    }
+   ],
+   "headingHe": "בניית קו-רוטינות בעזרת חישוב מושהה"
+  },
+  {
+   "id": "cm/4.3Generators:3",
+   "depth": 3,
+   "headingEn": "Using (lambda () ...) to Delay Computation",
+   "raw": "### Using (lambda () ...) to Delay Computation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:3:0",
+     "type": "prose",
+     "en": "The basis of the model is to use (lambda () ...) to delay computation we do not want to execute immediately.\nThis is similar to the way we proceeded when defining the CPS approach: delayed computation is wrapped in closures.\n\n",
+     "hash": "bbc7004ebc6a4063",
+     "he": "הבסיס של המודל הוא להשתמש ב-(lambda () ...) כדי להשהות חישוב שאנחנו לא רוצים לבצע מיד.\nזה דומה לדרך שבה פעלנו כשהגדרנו את גישת ה-CPS: חישוב מושהה נעטף בסגורים."
+    }
+   ],
+   "headingHe": "שימוש ב-(lambda () ...) להשהיית חישוב"
+  },
+  {
+   "id": "cm/4.3Generators:4",
+   "depth": 3,
+   "headingEn": "A Functional Version of Iterators",
+   "raw": "### A Functional Version of Iterators\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:4:0",
+     "type": "prose",
+     "en": "There are two ingredients to coroutines in JavaScript:\n",
+     "hash": "76f3de3682b68ae7",
+     "he": "יש שני מרכיבים לקו-רוטינות ב-JavaScript:"
+    },
+    {
+     "id": "cm/4.3Generators:4:1",
+     "type": "list",
+     "en": "* The Iterator interface and the IteratorResult datatype.\n* The function* and yield mechanism\n\n",
+     "hash": "966244797b6502a3",
+     "he": "* ממשק ה-Iterator וטיפוס הנתונים IteratorResult.\n* מנגנון ה-function* וה-yield"
+    },
+    {
+     "id": "cm/4.3Generators:4:2",
+     "type": "prose",
+     "en": "Let us model iterators in our functional language $$L5$$.\nAn IteratorResult in JavaScript has two fields: value and done.\n\n",
+     "hash": "424bed6595ba7c51",
+     "he": "בואו נמדל איטרטורים בשפה הפונקציונלית שלנו $$L5$$.\nל-IteratorResult ב-JavaScript יש שני שדות: value ו-done."
+    },
+    {
+     "id": "cm/4.3Generators:4:3",
+     "type": "code",
+     "en": "```typescript\ninterface IteratorResult<T> { value: T; done: boolean; }\ninterface Iterator<T> { next(): IteratorResult<T>; }\n```\n\n",
+     "hash": "9a1f7dfb23f5a072",
+     "lang": "typescript",
+     "noteHe": "שני הממשקים שמאחורי כל גנרטור ב-JavaScript, בשתי שורות. ‏`IteratorResult<T>` הוא פשוט רשומה עם ערך ודגל סיום. ‏`Iterator<T>` הוא כל אובייקט שיש לו מתודה ‏`next()` שמחזירה ‏`IteratorResult<T>`. שימו לב שאין כאן שום קסם — ‏`for…of`, פירוק (destructuring) ו-`yield*` כולם עובדים מול הממשק הצנוע הזה. שימו לב גם לפרט הקריטי לשיעור הזה: ‏`next()` היא מתודה **ללא ארגומנטים שמחזירה ערך שונה בכל קריאה** — כלומר האובייקט הוא בר-שינוי (mutable). זו התכונה שנצטרך לפרק בגרסה הפונקציונלית."
+    },
+    {
+     "id": "cm/4.3Generators:4:4",
+     "type": "prose",
+     "en": "Through the usage of the method `next()`, we understand that objects which implement the `Iterator` interface are mutable.  For example, the state of the generator `g11` in the example above is updated, so that each time we call `g11.next()` we obtain a different value.  Each time `next()` is invoked, the generator advances to the next step of the computation - and it stops before completing the rest of the computation, until a new `next()` invocation.\n\n",
+     "hash": "b485707aaa851284",
+     "he": "דרך השימוש במתודה `next()`, אנחנו מבינים שאובייקטים שמממשים את ממשק ה-`Iterator` הם ברי-שינוי (mutable). לדוגמה, המצב של הגנרטור `g11` בדוגמה למעלה מתעדכן, כך שבכל פעם שאנחנו קוראים ל-`g11.next()` אנחנו מקבלים ערך אחר. בכל פעם ש-`next()` מופעלת, הגנרטור מתקדם לצעד הבא של החישוב — והוא עוצר לפני שהוא משלים את שארית החישוב, עד להפעלת `next()` חדשה."
+    },
+    {
+     "id": "cm/4.3Generators:4:5",
+     "type": "prose",
+     "en": "To adapt this mechanism to a functional language, we must disentangle the mutation from the aspect of delaying computation.\nWe thus define a data type for iterators which is immutable.  We adopt the general approach of *persistent mutable datatypes* in Functional Programming which we discussed in [Section 1.4](1.4TypesAndOperations.html) with the `Stack` example.  The key ingredient of this approach is to define each mutator function as a constructor.\nWe thus obtain an iterator data type with two constructors: `yield` and `next`:\n\n",
+     "hash": "409030dd3bdaefb5",
+     "he": "כדי להתאים את המנגנון הזה לשפה פונקציונלית, עלינו להפריד בין המוטציה לבין ההיבט של השהיית החישוב.\nלכן אנחנו מגדירים טיפוס נתונים לאיטרטורים שהוא בלתי-משתנה (immutable). אנחנו מאמצים את הגישה הכללית של *טיפוסי נתונים ברי-שינוי פרסיסטנטיים* (persistent mutable datatypes) בתכנות פונקציונלי, שדנו בה ב[סעיף 1.4](1.4TypesAndOperations.html) עם דוגמת ה-`Stack`. המרכיב המרכזי של הגישה הזו הוא להגדיר כל פונקציית שינוי (mutator) כבנאי.\nכך אנחנו מקבלים טיפוס נתונים של איטרטור עם שני בנאים: `yield` ו-`next`:"
+    },
+    {
+     "id": "cm/4.3Generators:4:6",
+     "type": "code",
+     "en": "```scheme\n;; An iterator is either the \"done\" iterator or a pair with the \n;; current value of the iterator and a continuation which returns\n;; the next value of the iterator when evaluated.\n;; Type Iterator<T> = done | Pair(T, (Empty -> Iterator<T>))\n\n;; Purpose: The yield Iterator constructor takes 2 arguments:\n;; - The value to return to the caller\n;; - The continuation to be executed when the Iterator is resumed (by invoking next())\n;; Signature: yield(result, continuation)\n;; Type: [T * [Empty -> Iterator<T>] -> Iterator<T>]\n(define yield\n  (lambda (res cont)\n    (cons res cont)))\n\n;; An iterator has 2 fields:\n;; - Next: execute the next step of the computation of the generator\n;; - Value: access the current value of the generator\n;; And a state predicate \n;; - done?: determines whether the generator has reached the end of the \n;;          computation.\n\n;; The accessors are iter->next, iter->value and iter->done?\n;; iter->next computes the next step of the iterator.\n\n;; Iter->next is a constructor - it returns the value of the next\n;; iterator by invoking the continuation.\n;; Once an iterator is done, next keeps returning done.\n;; Else - next computes the next step of the iterator by invoking the continuation.\n(define iter->next\n  (lambda (iter)\n    (if (iter->done? iter)\n        iter\n        (let ((cont (cdr iter)))\n          (if (eq? cont 'done)\n              cont\n              (cont))))))\n\n;; The value of a done iterator is 'done.\n;; Else read it from the pair.\n(define iter->value\n  (lambda (iter)\n    (if (iter->done? iter)\n        iter\n        (car iter))))\n\n(define iter->done?\n  (lambda (iter)\n    (eq? iter 'done)))\n\n```\n\n\n\n",
+     "hash": "848587977fe014e1",
+     "lang": "scheme",
+     "noteHe": "זהו ה-ADT של האיטרטור, ולב העניין נמצא בשורת הטיפוס: ‏`Iterator<T> = done | Pair(T, (Empty -> Iterator<T>))`. כלומר איטרטור הוא **או** הסמל ‏`'done`, **או** זוג שהראש שלו הוא הערך הנוכחי והזנב שלו הוא **thunk** — פרוצדורה חסרת ארגומנטים שכשמפעילים אותה מחזירה את האיטרטור הבא. שימו לב עד כמה זה פשוט: ‏`yield` הוא בסך הכול ‏`cons`. כל ה\"קסם\" הוא בכך שהאיבר השני אינו ערך אלא חישוב שטרם בוצע. ‏`iter->next` היא הפונקציה המעניינת: אם האיטרטור סיים היא מחזירה אותו כמו שהוא, אחרת היא שולפת את ה-thunk מה-`cdr` ו**מפעילה** אותו ב-`(cont)` — הסוגריים הריקים הם ההפעלה, וזה הרגע שבו הצעד הבא מחושב בפועל. ‏`iter->value` שולפת את ה-`car`, ו-`iter->done?` בודקת פשוט אם האיטרטור הוא הסמל ‏`'done`. **וזו הנקודה שכדאי לשנן**: ‏`iter->next` נקראת \"בנאי\" ולא \"מְשַׁנֶּה\" (mutator) — היא לא משנה את האיטרטור שקיבלה, אלא **מחזירה איטרטור חדש**. לכן אפשר להחזיק את האיטרטור הישן ולהריץ ממנו שוב, מה שבלתי אפשרי עם גנרטור של JavaScript. השוו ל-`Stack` הפרסיסטנטי מ-1.4 — אותו רעיון בדיוק. הערה על המקור: התיעוד מצהיר שה-`cont` הוא ‏`[Empty -> Iterator<T>]`, אבל ‏`iter->next` בודקת במפורש ‏`(eq? cont 'done)` — כלומר הקוד מרשה גם לזנב להיות הסמל ‏`'done`, אפשרות שהטיפוס המוצהר אינו מכסה."
+    }
+   ],
+   "headingHe": "גרסה פונקציונלית של איטרטורים"
+  },
+  {
+   "id": "cm/4.3Generators:5",
+   "depth": 3,
+   "headingEn": "Using the Iterator ADT to construct a Generator in $$L5$$",
+   "raw": "### Using the Iterator ADT to construct a Generator in $$L5$$\n\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:5:0",
+     "type": "prose",
+     "en": "Let us now use the iterator datatype we just defined to implement in $$L5$$ the coroutine `g2` which mimics the same behavior as `g1` in JavaScript.\n\n",
+     "hash": "4c191acafd24a328",
+     "he": "בואו נשתמש כעת בטיפוס הנתונים של האיטרטור שהגדרנו זה עתה כדי לממש ב-$$L5$$ את הקו-רוטינה `g2`, שמחקה את אותה התנהגות כמו `g1` ב-JavaScript."
+    },
+    {
+     "id": "cm/4.3Generators:5:1",
+     "type": "prose",
+     "en": "The implementation is a bit unpleasant because we need to explicitly add (lambda () ...) to delay the next steps\nof the computation after a yield.\n\n",
+     "hash": "ba7ce9ec31407aaa",
+     "he": "המימוש קצת לא נעים, מכיוון שאנחנו נדרשים להוסיף במפורש (lambda () ...) כדי להשהות את הצעדים הבאים\nשל החישוב אחרי yield."
+    },
+    {
+     "id": "cm/4.3Generators:5:2",
+     "type": "code",
+     "en": "```scheme\n;; Consider the following function g1\n(define f1\n  (lambda (n)\n    (print (+ n 1))\n    (+ n 1)))\n(define f2\n  (lambda (n)\n    (print (+ n 2))\n    (+ n 2)))\n(define f3\n  (lambda (n)\n    (print (+ n 3))\n    (+ n 3)))\n        \n(define g1\n  (lambda (n)\n    (f1 n)\n    (f2 n)\n    (f3 n)))\n\n;; Coroutine version of g1 with interruptions after each sub-function\n(define g2\n  (lambda (n)\n    (yield (f1 n) \n           (lambda ()\n             (yield (f2 n)\n                    (lambda ()\n                      (yield (f3 n)\n                             'done)))))))\n\n;; Invoke g2 and resume it\n(let ((iter (g2 0)))\n  ;; Iter is of the form (res . continuation)\n  (print (iter->value iter))\n  (iter->next iter))\n  \n;--> 112'(2 . #<procedure:...c/coroutine1.rkt:101:20>)\n```\n\n",
+     "hash": "462ce2d11252e12a",
+     "lang": "scheme",
+     "noteHe": "השוו את ‏`g1` ל-`g2` — זו ההשוואה המרכזית של הסעיף. ‏`g1` היא רצף רגיל: מפעילה ‏`f1`, ‏`f2`, ‏`f3` בזו אחר זו, בלי לעצור, ומחזירה רק את התוצאה האחרונה. ‏`g2` היא אותו רצף בדיוק, אבל אחרי כל שלב יש ‏`yield`, וההמשך עטוף ב-`(lambda () …)`. שימו לב לקינון: ה-thunk של השלב הראשון מכיל את ה-`yield` השני, שה-thunk שלו מכיל את השלישי, שהזנב שלו הוא ‏`'done`. **זו הפואנטה**: מה שב-JavaScript עשתה מילת המפתח ‏`yield` — לעצור באמצע ולזכור איפה — אנחנו משיגים כאן בלי שום תוספת לשפה, רק בעזרת סגורים. שימו לב שכל ‏`fi` מבצעת ‏`print` **ומחזירה** את הערך, כדי שנוכל לראות מתי בדיוק כל שלב רץ. עקבו אחרי הפלט המוזר ‏`112'(2 . #<procedure…>)` והוא יתבהר: ‏`(g2 0)` מפעילה מיד את ‏`(f1 0)` שמדפיסה **1**; ‏`(print (iter->value iter))` מדפיסה שוב **1**; ואז ‏`(iter->next iter)` מפעילה את ה-thunk, שמריץ ‏`(f2 0)` ומדפיסה **2** — ומכאן ‏\"112\". מה שה-REPL מציג בסוף הוא ערך ההחזרה: הזוג ‏`(2 . <thunk>)`, כלומר האיטרטור החדש. **שימו לב לנקודה הקריטית**: ‏`(f3 0)` עדיין **לא רצה** — ההשהיה עובדת."
+    },
+    {
+     "id": "cm/4.3Generators:5:3",
+     "type": "prose",
+     "en": "The execution yields the following process:\n",
+     "hash": "2b7c010c88ff9080",
+     "he": "הביצוע מייצר את התהליך הבא:"
+    },
+    {
+     "id": "cm/4.3Generators:5:4",
+     "type": "list",
+     "en": "* When `(g2 0)` is executed, we execute `(yield (f1 0) ...)` - which as a side-effect prints 1.\n  The local variable `iter` is now bound to the value returned by this yield.\n* We then print `(iter->value iter)` which prints the current value of the iterator, which is 1.\n* We then resume the coroutine by invoking `(iter->next iter)` - this executes `(yield 2 ...)` - which as a side effect, prints 2.\n\n",
+     "hash": "5e961fdc60cc8ce0",
+     "he": "* כאשר `(g2 0)` מתבצעת, אנחנו מבצעים את `(yield (f1 0) ...)` — שכתופעת לוואי מדפיס 1.\n  המשתנה המקומי `iter` קשור עכשיו לערך שהוחזר על ידי ה-yield הזה.\n* אחר כך אנחנו מדפיסים `(iter->value iter)`, שמדפיס את הערך הנוכחי של האיטרטור, שהוא 1.\n* אחר כך אנחנו מחדשים את הקו-רוטינה על ידי הפעלת `(iter->next iter)` — וזה מבצע את `(yield 2 ...)`, שכתופעת לוואי מדפיס 2."
+    },
+    {
+     "id": "cm/4.3Generators:5:5",
+     "type": "prose",
+     "en": "As was the case in JavaScript, we can use the Iterator Abstract Data Type to model infinite sequences.\n\n",
+     "hash": "840c90083364a2ad",
+     "he": "כפי שהיה המצב ב-JavaScript, אנחנו יכולים להשתמש בטיפוס הנתונים המופשט של האיטרטור כדי למדל סדרות אינסופיות."
+    },
+    {
+     "id": "cm/4.3Generators:5:6",
+     "type": "code",
+     "en": "```scheme\n;; ========================================================\n;; An infinite generator with yield\n(define integers\n  (lambda (from)\n    (letrec ((loop (lambda (n)\n                     (yield n (lambda () (loop (+ n 1)))))))\n      (loop from))))\n\n(define id1 (integers 0))\n```\n\n\n\n",
+     "hash": "729651156f27046e",
+     "lang": "scheme",
+     "noteHe": "גנרטור **אינסופי** בחמש שורות — וזה מה שמצדיק את כל המנגנון. ‏`integers` מקבלת נקודת התחלה ומגדירה ב-`letrec` לולאה רקורסיבית: כל צעד עושה ‏`yield` ל-`n` הנוכחי, ומשהה את ההמשך ב-`(lambda () (loop (+ n 1)))`. שימו לב שהרקורסיה **לעולם אינה מגיעה לתנאי עצירה**, ובכל זאת ‏`(integers 0)` מסתיימת מיד ומחזירה ערך — כי הקריאה הרקורסיבית עטופה ב-lambda ולכן אינה מתבצעת. **זו בדיוק ההגדרה של עצלות**: הסדרה אינסופית, אבל בכל רגע נתון חושב רק איבר אחד. ‏`id1` מחזיקה כעת את האיטרטור הראשון, ו-`(iter->value id1)` הוא 0. השוו לגנרטור ‏`naturalNumbers` מ-4.1 — אותו רעיון, בלי ‏`function*`. וכדאי לשנן: אילו היינו כותבים ‏`(yield n (loop (+ n 1)))` בלי ה-lambda, התוכנית הייתה נכנסת לרקורסיה אינסופית — ה-lambda היא כל ההבדל."
+    }
+   ],
+   "headingHe": "שימוש ב-ADT של האיטרטור לבניית גנרטור ב-$$L5$$"
+  },
+  {
+   "id": "cm/4.3Generators:6",
+   "depth": 3,
+   "headingEn": "Consuming Generators",
+   "raw": "### Consuming Generators\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:6:0",
+     "type": "prose",
+     "en": "In JavaScript, we used the generalized loop construct `for x of gen ...` to conveniently consume the values produced by a generator.  \nSimilarly, we define functions to ease the consumption of $$L5$$ generators.\n\n",
+     "hash": "bcf31465b569a14d",
+     "he": "ב-JavaScript השתמשנו במבנה הלולאה המוכלל `for x of gen ...` כדי לצרוך בנוחות את הערכים שגנרטור מייצר.\nבאופן דומה, אנחנו מגדירים פונקציות שמקלות על צריכת גנרטורים של $$L5$$."
+    },
+    {
+     "id": "cm/4.3Generators:6:1",
+     "type": "code",
+     "en": "```scheme\n;; ========================================================\n;; Generator / Iterator manipulators\n\n;; Purpose: add one item at the end of a list.\n;; Type: [List(T) * T -> List(T)]\n(define concat\n  (lambda (elts item)\n    (append elts (list item))))\n\n;; Purpose: convert a finite iterator to a list.\n;; Warning: would enter in an infinite loop on an infinite generator.\n;; Type: [Iterator(T) -> List(T)]\n(define iter->list\n  (lambda (iter)\n    (letrec ((loop (lambda (iter res)\n                     (if (iter->done? iter)\n                         res\n                         (loop (iter->next iter)\n                               (concat res (iter->value iter)))))))\n      (loop iter (list)))))\n\n;; Purpose: return the first n elements generated by an iterator as a list.\n;; Type: [Iterator(T) * Number -> List(T)]\n;; Returns a list of up to n elements - can be less if the generator is done before.\n;; On a done iterator, returns an empty list.\n(define iter->take\n  (lambda (iter n)\n    (letrec ((loop (lambda (iter n res)\n                     (if (<= n 0)\n                         res\n                         (if (iter->done? iter)\n                             res\n                             (loop (iter->next iter)\n                                   (- n 1)\n                                   (concat res (iter->value iter))))))))\n      (loop iter n (list)))))\n\n;; Purpose: return an iterator that yields at most n elements from another (possibly longer or infinite) iterator.\n;; Type: [Iterator(T) * Number -> Iterator(T)]\n(define iter->take*\n  (lambda (iter n)\n    (if (= n 0)\n        'done\n        (yield (iter->value iter)\n               (lambda () (iter->take* (iter->next iter) (- n 1)))))))\n```\n\n",
+     "hash": "8cf21fe22bcba575",
+     "lang": "scheme",
+     "noteHe": "ארבע פונקציות עזר לצריכת גנרטורים — שימו לב להבדל העקרוני ביניהן. ‏`concat` מוסיפה איבר בסוף רשימה. ‏`iter->list` צורכת את הגנרטור **כולו** ומחזירה רשימה רגילה; האזהרה בתיעוד רצינית — על גנרטור אינסופי כמו ‏`(integers 0)` היא לא תסתיים לעולם. ‏`iter->take` היא הגרסה הבטוחה: היא לוקחת לכל היותר ‏`n` איברים ועוצרת גם אם הגנרטור נגמר קודם, ולכן היא **כן** בטוחה על גנרטור אינסופי. וההבדל החשוב ביותר: ‏`iter->take` מחזירה **רשימה** (כלומר צורכת מיד), בעוד ש-`iter->take*` מחזירה **איטרטור חדש** — כלומר נשארת עצלה, ושום דבר לא מחושב עד שמבקשים. כדאי לשנן את ההבחנה הזו: פונקציה שמחזירה רשימה היא \"צרכן\", פונקציה שמחזירה איטרטור היא \"טרנספורמציה\". שימו לב גם ש-`concat` קוראת ל-`append` בכל איטרציה, כלומר בונה את הרשימה מחדש בכל צעד — ‏`iter->list` היא ריבועית ב-n; בקוד אמיתי היינו צוברים לאחור ומהפכים בסוף. הערה על המקור: ‏`iter->take*` **אינה בודקת** ‏`iter->done?`, בניגוד ל-`iter->take` שהתיעוד שלה מציין זאת במפורש. אם הגנרטור מסתיים לפני ‏`n` איברים, ‏`(iter->value 'done)` מחזירה את הסמל ‏`'done` והתוצאה תכיל אותו כאיבר — באג שקל לפספס."
+    },
+    {
+     "id": "cm/4.3Generators:6:2",
+     "type": "prose",
+     "en": "With these functions, we can easily consume elements from a generator:\n\n",
+     "hash": "6d9189029feac195",
+     "he": "בעזרת הפונקציות האלה, אנחנו יכולים לצרוך בקלות איברים מגנרטור:"
+    },
+    {
+     "id": "cm/4.3Generators:6:3",
+     "type": "code",
+     "en": "```scheme\n(iter->list (g2 0))\n;--> '(1 2 3)\n\n(iter->take (integers 0) 10)\n;--> '(0 1 2 3 4 5 6 7 8 9)\n```\n\n\n",
+     "hash": "4a6c8069babc7682",
+     "lang": "scheme",
+     "noteHe": "שתי שורות שמסכמות את הסעיף. הראשונה צורכת את הגנרטור הסופי ‏`g2` עד תומו ומקבלת ‏`'(1 2 3)` — בדיוק שלושת ה-yield-ים. השנייה לוקחת עשרה איברים מגנרטור **אינסופי** ומסתיימת בשלום. שימו לב שאילו כתבנו ‏`(iter->list (integers 0))` התוכנית הייתה נתקעת לנצח — וזו ההבחנה שכדאי לשנן: מבנה נתונים עצל מרשה לך לתאר משהו אינסופי, אבל **הצרכן** הוא זה שחייב להיות זהיר. שימו לב גם שהריצה של השורה הראשונה תדפיס 1, 2, 3 בדרך, בגלל ה-`print` שבתוך ‏`f1`–`f3`."
+    }
+   ],
+   "headingHe": "צריכת גנרטורים"
+  },
+  {
+   "id": "cm/4.3Generators:7",
+   "depth": 3,
+   "headingEn": "Higher-Order Generator Functions",
+   "raw": "### Higher-Order Generator Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:7:0",
+     "type": "prose",
+     "en": "One can refer to generators as *lists in comprehension*, and accordingly define higher-order functions\nsimilar to the map/filter/reduce family we explored in Chapter 1 for lists.\n\n",
+     "hash": "210b659cf9be5ed6",
+     "he": "אפשר להתייחס לגנרטורים כאל *רשימות בהבנה* (lists in comprehension), ובהתאם להגדיר פונקציות מסדר גבוה\nהדומות למשפחת map/filter/reduce שחקרנו בפרק 1 עבור רשימות."
+    },
+    {
+     "id": "cm/4.3Generators:7:1",
+     "type": "code",
+     "en": "```scheme\n;; Purpose: apply the procedure proc on each of the elements of a generator.\n;; This consumes all the elements of the generator.\n;; Type: [(T1 -> T2) * Iterator(T1) -> Void]\n(define iter->for-each\n  (lambda (proc iter)\n    (cond ((iter->done? iter) iter)\n          (else (proc (iter->value iter))\n                (iter->for-each proc (iter->next iter))))))\n\n;; Purpose: create a new generator returning (proc x) for each item x generated by iter.\n;; Type: [(T1 -> T2) * Iterator(T1) -> Iterator(T2)]\n(define iter->map\n  (lambda (proc iter)\n    (if (iter->done? iter)\n        iter\n        (yield (proc (iter->value iter))\n               (lambda () (iter->map proc (iter->next iter)))))))\n```\n\n",
+     "hash": "9fbf46674c1ef161",
+     "lang": "scheme",
+     "noteHe": "שוב אותה הבחנה, וכאן היא חדה במיוחד. ‏`iter->for-each` היא **צרכן**: היא מפעילה את ‏`proc` על כל איבר לתופעות הלוואי שלו, ולכן היא רצה עד סוף הגנרטור ומחזירה ‏`Void`. ‏`iter->map` היא **טרנספורמציה**: היא מחזירה ‏`(yield (proc …) (lambda () …))` — כלומר איטרטור חדש, ו-`proc` **לא** מופעלת על שום איבר עד שמבקשים אותו. ההבדל דרמטי: ‏`(iter->map square (integers 0))` מסתיימת מיד ומחזירה גנרטור של ריבועים, בעוד ש-`(iter->for-each print (integers 0))` תרוץ לנצח. **שאלת מבחן קלאסית**: \"האם הפונקציה הזו עצלה?\" — והתשובה נמצאת תמיד באותו מקום: האם הקריאה הרקורסיבית עטופה ב-`(lambda () …)` או לא. הערה על המקור: התיעוד של ‏`iter->for-each` מצהיר על טיפוס החזרה ‏`Void`, אבל ענף הסיום מחזיר את ‏`iter` (כלומר ‏`'done`) ולא ערך ריק."
+    },
+    {
+     "id": "cm/4.3Generators:7:2",
+     "type": "prose",
+     "en": "`iter->map` constructs a new generator on the basis of an existing one.\nThe resulting generator produces the same number of items as the original one.\n\n",
+     "hash": "c831ff95d1ab63d7",
+     "he": "‏`iter->map` בונה גנרטור חדש על בסיס גנרטור קיים.\nהגנרטור שמתקבל מייצר את אותו מספר איברים כמו המקורי."
+    },
+    {
+     "id": "cm/4.3Generators:7:3",
+     "type": "code",
+     "en": "```scheme\n(iter->take (iter->map (lambda (x) (* x x)) (integers 0)) 10)\n;--> '(0 1 4 9 16 25 36 49 64 81)\n\n(iter->for-each (lambda (i) (print i)) (iter->take* (integers 0) 10))\n;--> 0123456789'done\n```\n\n",
+     "hash": "3db68bf885940829",
+     "lang": "scheme",
+     "noteHe": "שתי דוגמאות שמראות איך משרשרים את הפונקציות. השורה הראשונה: ‏`iter->map` מרבעת כל איבר של גנרטור אינסופי — מיידית ובלי לחשב כלום — ורק ‏`iter->take` בחוץ צורכת עשרה איברים בפועל ומחזירה ‏`'(0 1 4 9 …)`. שימו לב לסדר: **התמרות עצלות בפנים, צרכן בחוץ**; זו התבנית שחוזרת בכל ספריות ה-streams. השורה השנייה מדגימה את הכיוון ההפוך — ‏`iter->take*` (עם הכוכבית) מגבילה את הגנרטור האינסופי לעשרה איברים אבל **נשארת גנרטור**, ורק ‏`iter->for-each` צורכת אותו ומדפיסה. הפלט ‏`0123456789'done` הוא עשרת המספרים שהודפסו, ואחריהם ערך ההחזרה של ‏`iter->for-each` — הסמל ‏`'done`, שהוא בדיוק חוסר-ההתאמה לטיפוס ‏`Void` שציינו בהערה הקודמת."
+    }
+   ],
+   "headingHe": "פונקציות גנרטור מסדר גבוה"
+  },
+  {
+   "id": "cm/4.3Generators:8",
+   "depth": 3,
+   "headingEn": "A Mutable Alternative Implementation of Generators",
+   "raw": "### A Mutable Alternative Implementation of Generators\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:8:0",
+     "type": "prose",
+     "en": "We could design a slight variant of the generators abstract data type using mutation.\nThis gives a result which behaves in a manner more similar to JavaScript generators.\n\n",
+     "hash": "a340d434fc07af31",
+     "he": "נוכל לתכנן וריאנט מעט שונה של טיפוס הנתונים המופשט של הגנרטורים, שמשתמש במוטציה.\nזה נותן תוצאה שמתנהגת בצורה דומה יותר לגנרטורים של JavaScript."
+    },
+    {
+     "id": "cm/4.3Generators:8:1",
+     "type": "prose",
+     "en": "The main idea of this model is that the `next()` operation must now actually mutate the generator.\nHence, the generator must hold a state - which remembers at any given stage the current value and the \ncontinuation needed to produce the next state.\n\n",
+     "hash": "94011530df805ead",
+     "he": "הרעיון המרכזי של המודל הזה הוא שהפעולה `next()` חייבת כעת לשנות בפועל את הגנרטור.\nלכן, הגנרטור חייב להחזיק מצב — שזוכר בכל שלב נתון את הערך הנוכחי ואת ההמשכית הדרושה כדי לייצר את המצב הבא."
+    },
+    {
+     "id": "cm/4.3Generators:8:2",
+     "type": "prose",
+     "en": "The following funtion illustrates how we obtain this behavior.  \nIn this function, the `make-generator` constructor creates a closure\nwhich encapsulates the state of the generator - which is a generator as described above.\nThe closure we construct exposes an interface for a `'next!` operation and a `value` accessor operation.\nThe client interfaces with the generator by sending a message with the name of the operation it wants to run.\n\n",
+     "hash": "bb902533692117e4",
+     "he": "הפונקציה הבאה ממחישה איך אנחנו משיגים את ההתנהגות הזו.\nבפונקציה הזו, הבנאי `make-generator` יוצר סגור\nשעוטף את מצב הגנרטור — שהוא גנרטור כפי שתואר למעלה.\nהסגור שאנחנו בונים חושף ממשק לפעולת `'next!` ולפעולת שולף `value`.\nהלקוח מתממשק עם הגנרטור על ידי שליחת הודעה עם שם הפעולה שהוא רוצה להריץ."
+    },
+    {
+     "id": "cm/4.3Generators:8:3",
+     "type": "code",
+     "en": "```scheme\n(define make-generator\n  (lambda (thunk)\n    (let ((gen (yield 'init thunk)))\n      (lambda (op)\n        (cond ((eq? op 'next!)\n               (set! gen (iter->next gen))\n               (iter->value gen))\n              ((eq? op 'value)\n               (iter->value gen))\n              (else (error \"Unknown operation\")))))))\n\n;; Same as g1 with interruptions and resume with mutable generator\n;; g3 behaves like the value of function* in JS\n(define g3\n  (lambda (n)\n    (make-generator \n     (lambda ()\n       (yield (f1 n) \n              (lambda ()\n                (yield (f2 n)\n                       (lambda ()\n                         (yield (f3 n)\n                                'done)))))))))\n\n(define gen (g3 0))\n(gen 'next!)\n;--> 11\n(gen 'next!)\n;--> 22\n(gen 'value)\n;--> 2\n(gen 'next!)\n;--> 33\n(gen 'next!)\n;--> 'done\n```\n\n",
+     "hash": "e63361309acdf39b",
+     "lang": "scheme",
+     "noteHe": "כאן חוזרת המוטציה, ואיתה תבנית מוכרת: **העברת הודעות** (message passing). ‏`make-generator` מקבלת thunk, שומרת אותו במשתנה מקומי ‏`gen` (מאותחל ל-`('init . thunk)`), ומחזירה סגור שמקבל פרמטר אחד — שם הפעולה. ‏`'next!` מבצעת ‏`(set! gen (iter->next gen))` ואז מחזירה את הערך; ‏`'value` רק קוראת. סימן הקריאה בסוף ‏`next!` הוא המוסכמה של Scheme לפעולה שמשנה מצב. **שימו לב שהסגור הוא האובייקט**: ‏`gen` הוא משתנה פרטי שאיש מבחוץ אינו יכול לגעת בו, בדיוק כמו שדה פרטי — זו אותה טכניקה שראינו ב-2.8 עם ‏`make-counter`. עקבו אחרי הפלט המשולב: ‏`(gen 'next!)` מדפיסה 1 (מתוך ‏`f1`) ו**מחזירה** 1, ולכן ה-REPL מראה ‏`11`; אחר כך ‏`22`; ‏`(gen 'value)` מחזירה 2 בלי להדפיס, כי היא לא מקדמת דבר — ולכן רק ‏`2`; אחר כך ‏`33`; והקריאה החמישית מחזירה ‏`'done`. שימו לב מדוע האחרונה עובדת: ה-`cdr` של האיטרטור האחרון הוא הסמל ‏`'done` ולא thunk, וזו בדיוק הבדיקה ‏`(eq? cont 'done)` שראינו ב-`iter->next`. **ההשוואה שכדאי לשנן**: ‏`g2` (הגרסה הפונקציונלית) מחזירה איטרטור חדש בכל צעד, ולכן אפשר לשמור מצב ישן ולהריץ ממנו שוב; ‏`g3` דורסת את המצב, בדיוק כמו גנרטור של JavaScript — נוח יותר, אבל אין דרך חזרה."
+    }
+   ],
+   "headingHe": "מימוש חלופי של גנרטורים בעזרת מוטציה"
+  },
+  {
+   "id": "cm/4.3Generators:9",
+   "depth": 2,
+   "headingEn": "Lazy Lists Derivation as Abstract Data Types",
+   "raw": "## Lazy Lists Derivation as Abstract Data Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:9:0",
+     "type": "prose",
+     "en": "We derived above the definition of Generators in $$L5$$ by mimicking the behavior of coroutines in JavaScript and attempting to derive a functional \nimplementation of coroutines using delayed computation with `(lambda () ...)` as the delaying operator and functional mutable data structures.\n\n",
+     "hash": "f6312607527fba2c",
+     "he": "גזרנו למעלה את ההגדרה של גנרטורים ב-$$L5$$ על ידי חיקוי ההתנהגות של קו-רוטינות ב-JavaScript, וניסיון לגזור מימוש פונקציונלי\nשל קו-רוטינות בעזרת חישוב מושהה עם `(lambda () ...)` כאופרטור ההשהיה, ובעזרת מבני נתונים פונקציונליים ברי-שינוי."
+    },
+    {
+     "id": "cm/4.3Generators:9:1",
+     "type": "prose",
+     "en": "Let us revisit this derivation of functional generators with one more model, based on type analysis.\nWe obtain an almost identical result - the focus here is on describing generators as sequences by describing their \ndata type. (This material is from [PPL Book, Mira Balaban 4.2](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf)).\n\n",
+     "hash": "298b5c256760e735",
+     "he": "בואו נבחן מחדש את הגזירה הזו של גנרטורים פונקציונליים עם מודל נוסף, המבוסס על ניתוח טיפוסים.\nאנחנו מקבלים תוצאה כמעט זהה — הדגש כאן הוא על תיאור גנרטורים כסדרות באמצעות תיאור\nטיפוס הנתונים שלהם. (החומר הזה לקוח מ-[ספר PPL, מירה בלבן 4.2](https://www.cs.bgu.ac.il/~mira/ppl-book-full.pdf))."
+    }
+   ],
+   "headingHe": "גזירת רשימות עצלות כטיפוסי נתונים מופשטים"
+  },
+  {
+   "id": "cm/4.3Generators:10",
+   "depth": 3,
+   "headingEn": "Reminder: The List Data Type in Scheme",
+   "raw": "### Reminder: The List Data Type in Scheme\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:10:0",
+     "type": "prose",
+     "en": "We define the regular list data type through an inductive type definition:\n\n",
+     "hash": "e742c01dfd2edcee",
+     "he": "אנחנו מגדירים את טיפוס הנתונים הרגיל של רשימה באמצעות הגדרת טיפוס אינדוקטיבית:"
+    },
+    {
+     "id": "cm/4.3Generators:10:1",
+     "type": "code",
+     "en": "```scheme\nList(T) = Empty | Pair(T, List(T))\n```\n\n",
+     "hash": "86c0af24e650c03f",
+     "lang": "scheme",
+     "noteHe": "משוואת הטיפוס של רשימה רגילה, ושווה לעצור עליה שנייה כי כל הסעיף הבא הוא וריאציה עליה. קראו אותה כך: רשימה של ‏`T` היא **או** ריקה, **או** זוג של איבר מטיפוס ‏`T` ורשימה נוספת של ‏`T`. שימו לב שההגדרה **רקורסיבית** — ‏`List(T)` מופיע בתוך ההגדרה של עצמו — ושהיא מסתיימת תמיד, כי כל זוג מקטין את הרשימה באיבר אחד. הקו האנכי ‏`|` הוא איחוד (union), וזו בדיוק הצורה של טיפוס אינדוקטיבי שראינו ב-1.4 וב-2.3 עבור ה-AST."
+    },
+    {
+     "id": "cm/4.3Generators:10:2",
+     "type": "prose",
+     "en": "This means that the set of all `List(T)` values contains:\n",
+     "hash": "4851534c6049ffdf",
+     "he": "פירוש הדבר הוא שקבוצת כל הערכים מטיפוס `List(T)` מכילה:"
+    },
+    {
+     "id": "cm/4.3Generators:10:3",
+     "type": "list",
+     "en": "* The Empty list (which we write: `'()`)\n* Non-empty lists - which are made up of a pair with a first element of type `T` and a second element of type `List(T)`.\n\n",
+     "hash": "9f0228e3b0bde71f",
+     "he": "* את הרשימה הריקה (שאותה אנחנו כותבים: `'()`)\n* רשימות לא-ריקות — שמורכבות מזוג עם איבר ראשון מטיפוס `T` ואיבר שני מטיפוס `List(T)`."
+    },
+    {
+     "id": "cm/4.3Generators:10:4",
+     "type": "prose",
+     "en": "We define a functional interface on this data type consisting a value constructor (`cons`), two accessors (`first` and `rest` also known as `car` and `cdr`) \nand two type predicates `empty?` and `list?`.\n\n\n",
+     "hash": "b542e07c8a943402",
+     "he": "אנחנו מגדירים על טיפוס הנתונים הזה ממשק פונקציונלי שמורכב מבנאי ערכים (`cons`), שני שולפים (`first` ו-`rest`, הידועים גם כ-`car` ו-`cdr`)\nושני פרדיקטים של טיפוס, `empty?` ו-`list?`."
+    }
+   ],
+   "headingHe": "תזכורת: טיפוס הנתונים List ב-Scheme"
+  },
+  {
+   "id": "cm/4.3Generators:11",
+   "depth": 3,
+   "headingEn": "Adapting the List Data Type to Lazy-Lists",
+   "raw": "### Adapting the List Data Type to Lazy-Lists\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:11:0",
+     "type": "prose",
+     "en": "We derive a similar type definition for **lazy lists** -- that is, lists whose first element is known and the rest of the list is a delayed computation which describes how to compute the rest of the list.  The list is not built `in extension` by filling it in memory with its items, but `in comprehension` by describing which elements belong to the list as a computation instead of listing the elements that belong to the list.  \n\n",
+     "hash": "d4affaa5892b5b1e",
+     "he": "אנחנו גוזרים הגדרת טיפוס דומה עבור **רשימות עצלות** (lazy lists) — כלומר, רשימות שהאיבר הראשון שלהן ידוע ושארית הרשימה היא חישוב מושהה שמתאר איך לחשב את שארית הרשימה. הרשימה אינה נבנית `בהרחבה` (in extension), על ידי מילויה בזיכרון עם האיברים שלה, אלא `בהבנה` (in comprehension), על ידי תיאור אילו איברים שייכים לרשימה כחישוב, במקום מנייה של האיברים ששייכים לרשימה."
+    },
+    {
+     "id": "cm/4.3Generators:11:1",
+     "type": "prose",
+     "en": "The way this idea is implemented in a large range of programming languages is described in this [Wikipedia article on List Comprehensions](https://en.wikipedia.org/wiki/List_comprehension).  List Comprehensions are particularly popular in Python.\n\n",
+     "hash": "19e24c309b70a706",
+     "he": "הדרך שבה הרעיון הזה ממומש במגוון רחב של שפות תכנות מתוארת ב[ערך הוויקיפדיה על List Comprehensions](https://en.wikipedia.org/wiki/List_comprehension). ‏List Comprehensions פופולריות במיוחד ב-Python."
+    },
+    {
+     "id": "cm/4.3Generators:11:2",
+     "type": "prose",
+     "en": "To describe this idea as a data type definition, we use the following type equation defining the new **Lzl** data type (which stands for *Lazy List*):\n",
+     "hash": "5f5aeead6a680574",
+     "he": "כדי לתאר את הרעיון הזה כהגדרת טיפוס נתונים, אנחנו משתמשים במשוואת הטיפוס הבאה, שמגדירה את טיפוס הנתונים החדש **Lzl** (ראשי תיבות של *Lazy List*):"
+    },
+    {
+     "id": "cm/4.3Generators:11:3",
+     "type": "code",
+     "en": "```scheme\nLzl(T) = Empty-Lzl | Pair(T, (Empty -> Lzl(T)))\n```\n\n",
+     "hash": "19352a9fbc26df6d",
+     "lang": "scheme",
+     "noteHe": "השוו שורה מול שורה למשוואת ‏`List(T)` שראינו לפני רגע — ההבדל הוא **מילה אחת**. שם: ‏`Pair(T, List(T))`; כאן: ‏`Pair(T, (Empty -> Lzl(T)))`. כלומר האיבר השני אינו הרשימה עצמה אלא **פונקציה חסרת ארגומנטים שמחזירה** את הרשימה. זה כל ההבדל בין רשימה רגילה לרשימה עצלה, וכדאי לשנן אותו בדיוק בצורה הזו. שימו לב שהמשוואה הזו זהה לחלוטין לטיפוס ה-`Iterator<T>` מתחילת הדף — מה שמאשר את מה שנאמר למעלה: הגענו לאותו מבנה משני כיוונים שונים, פעם מחיקוי קו-רוטינות ופעם מניתוח טיפוסים."
+    },
+    {
+     "id": "cm/4.3Generators:11:4",
+     "type": "prose",
+     "en": "In words, this means a value belongs to the type `Lzl(T)` either if it is the empty lazy list (`Empty-Lzl`) or if it is a pair with a first element of type T and the second element is a continuation, which when computed produces a `Lzl(T)` value.\n\n",
+     "hash": "d2c79730f9fa7d5f",
+     "he": "במילים, פירוש הדבר הוא שערך שייך לטיפוס `Lzl(T)` או אם הוא הרשימה העצלה הריקה (`Empty-Lzl`), או אם הוא זוג שהאיבר הראשון שלו מטיפוס T והאיבר השני שלו הוא המשכית, שכאשר היא מחושבת מייצרת ערך מטיפוס `Lzl(T)`."
+    },
+    {
+     "id": "cm/4.3Generators:11:5",
+     "type": "prose",
+     "en": "We derive from this type definition the functional interface to manipulate values that belong to the type:\n\n",
+     "hash": "bfad54b25bf9ed5b",
+     "he": "אנחנו גוזרים מהגדרת הטיפוס הזו את הממשק הפונקציונלי לטיפול בערכים ששייכים לטיפוס:"
+    },
+    {
+     "id": "cm/4.3Generators:11:6",
+     "type": "code",
+     "en": "```scheme\n;; The empty lazy list value (a singleton datatype)\n(define empty-lzl '())\n\n;; Purpose: Value constructor for non-empty lazy-list values\n;; Type: [T * [Empty -> LZL(T)] -> LZT(T)]\n(define cons-lzl cons)\n\n;; Accessors\n;; Type: [LZL(T) -> T]\n;; Precondition: Input is non-empty\n(define head car)\n\n;; Type: [LZL(T) -> LZL(T)]\n;; Precondition: Input is non-empty\n;; Note that this *executes* the continuation \n(define tail\n  (lambda (lzl)\n    ((cdr lzl))))\n\n;; Type predicate\n(define empty-lzl? empty?)\n```\n\n",
+     "hash": "29f5e6e6496fc69f",
+     "lang": "scheme",
+     "noteHe": "הממשק כולו, וכמעט כולו שמות נרדפים: ‏`empty-lzl` הוא ‏`'()`, ‏`cons-lzl` הוא ‏`cons`, ‏`head` הוא ‏`car`, ‏`empty-lzl?` הוא ‏`empty?`. **הפונקציה היחידה שיש בה בשר היא ‏`tail`** — והסוגריים הכפולים ‏`((cdr lzl))` הם הלב של כל הסעיף: הזוג הפנימי שולף את ה-thunk, והזוג החיצוני **מפעיל** אותו. כלומר ‏`head` היא זולה ומיידית, בעוד ש-`tail` היא זו שמבצעת עבודה בפועל ומחשבת את האיבר הבא. שימו לב עד כמה ההפרדה הזו חשובה: אפשר להסתכל על האיבר הראשון של רשימה אינסופית בלי לחשב שום דבר. הערה על המקור: שורת הטיפוס של ‏`cons-lzl` כותבת ‏`-> LZT(T)` במקום ‏`LZL(T)` — שגיאת הקלדה."
+    },
+    {
+     "id": "cm/4.3Generators:11:7",
+     "type": "prose",
+     "en": "This definition parallels that of regular lists - as recursive data types defined inductively.\nThe only difference is that the tail of the list is *delayed* by using a `(lambda () ...)` wrapper.\n\n",
+     "hash": "822d723532d17e2b",
+     "he": "ההגדרה הזו מקבילה לזו של רשימות רגילות — כטיפוסי נתונים רקורסיביים המוגדרים אינדוקטיבית.\nההבדל היחיד הוא שזנב הרשימה *מושהה* בעזרת עטיפה של `(lambda () ...)`."
+    },
+    {
+     "id": "cm/4.3Generators:11:8",
+     "type": "prose",
+     "en": "Explore the behavior of these definitions on simple values:\n\n",
+     "hash": "fd53b46bcc436143",
+     "he": "בואו נחקור את ההתנהגות של ההגדרות האלה על ערכים פשוטים:"
+    },
+    {
+     "id": "cm/4.3Generators:11:9",
+     "type": "code",
+     "en": "```scheme\n(define lzl1 empty-lzl)\n(define lzl2 (cons-lzl 1 (lambda () lzl1)))\n(define lzl3 (cons-lzl 2 (lambda () lzl2)))\n\n(head lzl3) \n;--> 2\n\n(tail lzl3)\n;--> '(1 . #<procedure>)\n\n(head (tail lzl3))\n;--> 1\n\n(emptly-lzl? (tail (tail lzl3)))\n;--> #t\n```\n\n",
+     "hash": "8498edd8c3c400b2",
+     "lang": "scheme",
+     "noteHe": "בנייה ידנית של רשימה עצלה **סופית** בת שני איברים, כדי לראות שהמנגנון עובד גם בקטן. בונים מהסוף להתחלה: ‏`lzl1` ריקה, ‏`lzl2` היא ‏(1, thunk→lzl1)‏, ‏`lzl3` היא ‏(2, thunk→lzl2)‏. לכן ‏`(head lzl3)` הוא 2. עכשיו שימו לב לפלט של ‏`(tail lzl3)`: ‏`'(1 . #<procedure>)` — זהו זוג נקודה (dotted pair) שהזנב שלו הוא פרוצדורה, וזו הראיה החזותית שהרשימה העצלה **אינה** רשימה רגילה. ‏`(head (tail lzl3))` הוא 1, ושתי הפעלות ‏`tail` מגיעות לרשימה הריקה. הערה על המקור: השורה האחרונה כותבת ‏`emptly-lzl?` במקום ‏`empty-lzl?` — שגיאת הקלדה שתיתן \"משתנה לא מוגדר\" אם תעתיקו את הקוד."
+    },
+    {
+     "id": "cm/4.3Generators:11:10",
+     "type": "prose",
+     "en": "Because the tail of lazy lists is computed, we can build inductively infinite sequences.\nIn contrast to regular recursive functions, lazy lists can be defined inductivey **without** a base case to terminate the recursion.\n\n",
+     "hash": "0368086a91d04027",
+     "he": "מכיוון שהזנב של רשימות עצלות מחושב, אנחנו יכולים לבנות אינדוקטיבית סדרות אינסופיות.\nבניגוד לפונקציות רקורסיביות רגילות, רשימות עצלות יכולות להיות מוגדרות אינדוקטיבית **בלי** מקרה בסיס שיסיים את הרקורסיה."
+    },
+    {
+     "id": "cm/4.3Generators:11:11",
+     "type": "code",
+     "en": "```scheme\n;; Signature: integers-from(n)\n;; Type: [number -> LZL(number)]\n(define integers-from\n  (lambda (n)\n    (cons-lzl n (lambda () (integers-from (+ n 1))))))\n\n(define ints (integers-from 0))\n\nints\n;--> '(0 . #<procedure>)\n```\n\n",
+     "hash": "b134b7747e4b28a7",
+     "lang": "scheme",
+     "noteHe": "‏`integers-from` היא המקבילה המדויקת של ‏`integers` שראינו בגרסת האיטרטורים — שוב סדרה אינסופית בשתי שורות, ושוב **בלי מקרה בסיס**. שימו לב שזו הפרה של כל מה שלמדנו על רקורסיה: פונקציה רקורסיבית בלי תנאי עצירה אמורה לא להסתיים. היא כן מסתיימת כאן מסיבה אחת בלבד — הקריאה הרקורסיבית עטופה ב-`(lambda () …)` ולכן אינה מתבצעת, אלא רק **מתוארת**. הפלט של ‏`ints` מאשר זאת: ‏`'(0 . #<procedure>)` — איבר אחד מחושב, וכל השאר הבטחה. כדאי לשנן את הניסוח: ברשימה עצלה, הרקורסיה נעצרת לא בגלל תנאי בקוד אלא בגלל שהצרכן הפסיק לבקש."
+    }
+   ],
+   "headingHe": "התאמת טיפוס הנתונים List לרשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:12",
+   "depth": 3,
+   "headingEn": "Manipulation of LZL Values",
+   "raw": "### Manipulation of LZL Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:12:0",
+     "type": "prose",
+     "en": "To manipulate easily `LZL` values, we define an extended functional interface - which is equivalent to the loops that we used in JavaScript.\n\n",
+     "hash": "fa1cea05c70b3dd4",
+     "he": "כדי לטפל בקלות בערכי `LZL`, אנחנו מגדירים ממשק פונקציונלי מורחב — ששקול ללולאות שבהן השתמשנו ב-JavaScript."
+    },
+    {
+     "id": "cm/4.3Generators:12:1",
+     "type": "code",
+     "en": "```scheme\n;; Signature: take(lz-lst,n)\n;; Type: [LzL * Number -> List]\n;; If n > length(lz-lst) then the result is lz-lst as a List\n(define take\n  (lambda (lz-lst n)\n    (if (or (= n 0) (empty-lzl? lz-lst))\n      empty-lzl\n      (cons (head lz-lst)\n            (take (tail lz-lst) (- n 1))))))\n\n; Signature: nth(lz-lst,n)\n;; Type: [LzL * Number -> T]\n;; Pre-condition: n < length(lz-lst)\n(define nth\n  (lambda (lz-lst n)\n    (if (= n 0)\n        (head lz-lst)\n        (nth (tail lz-lst) (sub1 n)))))\n```\n\n",
+     "hash": "8b274053b4f4b416",
+     "lang": "scheme",
+     "noteHe": "שני הצרכנים הבסיסיים. ‏`take` שולפת ‏`n` איברים ראשונים ומחזירה **רשימה רגילה** — שימו לב שהיא בונה ב-`cons` הרגיל, לא ב-`cons-lzl`, כי התוצאה כבר מחושבת במלואה. שימו לב גם לתנאי העצירה הכפול ‏`(or (= n 0) (empty-lzl? lz-lst))`: הראשון מגן מפני רשימה אינסופית, השני מטפל ברשימה שנגמרה מוקדם. ‏`nth` פשוט מפעילה ‏`tail` ‏`n` פעמים ואז ‏`head`. **הנקודה החשובה**: כל קריאה ל-`tail` מפעילה thunk, כלומר מחשבת בפועל — ולכן ‏`(nth ints 1000)` תבצע אלף חישובים. הערה על המקור: ענף הבסיס של ‏`take` מחזיר ‏`empty-lzl` ולא ‏`'()` \"רגיל\"; מכיוון ששניהם אותו ערך זה עובד, אבל זה מערבב את שני הטיפוסים — פונקציה שמוצהרת כמחזירה ‏`List` מחזירה כאן ערך שנקרא \"רשימה עצלה ריקה\". בנוסף ‏`nth` משתמשת ב-`sub1`, שהיא פונקציה של Racket ולא של Scheme התקני (‏`(- n 1)` היה נייטרלי יותר)."
+    },
+    {
+     "id": "cm/4.3Generators:12:2",
+     "type": "prose",
+     "en": "Observe that when we evaluate the following calls, the successive steps of the expansion of the integers-from lazy-list are repeated:\n\n",
+     "hash": "340d99ef5618c227",
+     "he": "שימו לב שכאשר אנחנו מעריכים את הקריאות הבאות, הצעדים העוקבים של הפריסה של הרשימה העצלה integers-from חוזרים על עצמם:"
+    },
+    {
+     "id": "cm/4.3Generators:12:3",
+     "type": "code",
+     "en": "```scheme\n(take ints 10)\n;--> '(0 1 2 3 4 5 6 7 8 9)\n\n(take ints 5)\n;--> '(0 1 2 3 4)\n```\n\n",
+     "hash": "1b8230a4cd979cee",
+     "lang": "scheme",
+     "noteHe": "שתי הקריאות עובדות כמצופה, אבל שימו לב למה שהפסקה שמעל אומרת — ובזה **נקודת החולשה** של המימוש הזה: הקריאה השנייה, ‏`(take ints 5)`, מחשבת **מחדש** את חמשת האיברים הראשונים, למרות שהקריאה הראשונה כבר חישבה אותם. ה-thunk הוא פונקציה, ופונקציה רצה מחדש בכל הפעלה — אין שום זיכרון של תוצאות. בשפות עם רשימות עצלות מובנות (Haskell) ובגרסאות משוכללות של המימוש הזה מוסיפים **מימואיזציה** (memoization): ה-thunk מחשב פעם אחת, שומר את התוצאה בקופסה (box), ומחזיר אותה בפעמים הבאות. **שאלת מבחן קלאסית**: \"כמה פעמים תופעל ‏`integers-from`?\" — וצריך לספור לפי מספר הפעלות ה-`tail`, לא לפי מספר האיברים הייחודיים. השוו לגישת הקופסאות מ-2.8."
+    }
+   ],
+   "headingHe": "טיפול בערכי LZL"
+  },
+  {
+   "id": "cm/4.3Generators:13",
+   "depth": 2,
+   "headingEn": "Computing with Lazy-Lists",
+   "raw": "## Computing with Lazy-Lists\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:13:0",
+     "type": "prose",
+     "en": "Besides representing sequences in comprehension, the model of lazy lists is a useful abstraction to describe recursive processes.\n\n",
+     "hash": "a1872ecd6c8a213b",
+     "he": "מלבד ייצוג סדרות בהבנה, מודל הרשימות העצלות הוא הפשטה שימושית לתיאור תהליכים רקורסיביים."
+    },
+    {
+     "id": "cm/4.3Generators:13:1",
+     "type": "prose",
+     "en": "Let us start with a simple idea: repeating a value an unbounded number of times.\n",
+     "hash": "c5b797b5819843a2",
+     "he": "נתחיל מרעיון פשוט: חזרה על ערך מספר בלתי-מוגבל של פעמים."
+    },
+    {
+     "id": "cm/4.3Generators:13:2",
+     "type": "code",
+     "en": "```scheme\n(define ones (cons-lzl 1 (lambda () ones)))\n\n(take ones 7)\n;--> '(1 1 1 1 1 1 1)\n```\n\n",
+     "hash": "77b02ced81a22394",
+     "lang": "scheme",
+     "noteHe": "ההגדרה הקצרה והמפתיעה ביותר בדף: ‏`ones` היא רשימה עצלה שהזנב שלה מחזיר את ‏`ones` — כלומר **את עצמה**. שימו לב שאין כאן פונקציה ואין פרמטרים, רק ‏`define` אחד שמפנה לעצמו. זה עובד מפני שבזמן ההגדרה ‏`ones` לא מוערכת בתוך ה-lambda; רק כשמישהו יקרא ל-`tail` ה-lambda תופעל, ואז ‏`ones` כבר קשורה. ‏`(take ones 7)` מחזירה שבעה אחדים. **כדאי לשנן**: זו הגדרה **מעגלית** ולא רקורסיבית — הרשימה מצביעה על עצמה, ולכן היא תופסת זיכרון קבוע ולא גדל, בניגוד ל-`integers-from` שבונה thunk חדש בכל צעד. השוו למבנה נתונים מעגלי, אבל בלי שום מוטציה."
+    },
+    {
+     "id": "cm/4.3Generators:13:3",
+     "type": "prose",
+     "en": "This computation is interesting because it is a form of infinite loop which is controlled by the caller.\n\n",
+     "hash": "ac6065184fafe35b",
+     "he": "החישוב הזה מעניין מכיוון שהוא סוג של לולאה אינסופית שנשלטת על ידי הקורא."
+    },
+    {
+     "id": "cm/4.3Generators:13:4",
+     "type": "prose",
+     "en": "Let us now describe a list of values which are built incrementally on top of each other.\nLet us build the list of all factorial values.\n\n",
+     "hash": "aebac97adc9beec6",
+     "he": "בואו נתאר כעת רשימה של ערכים שנבנים בהדרגה זה על גבי זה.\nבואו נבנה את רשימת כל ערכי העצרת."
+    },
+    {
+     "id": "cm/4.3Generators:13:5",
+     "type": "prose",
+     "en": "We start with a simple definition:\n\n",
+     "hash": "a97d6d788b41f622",
+     "he": "נתחיל מהגדרה פשוטה:"
+    },
+    {
+     "id": "cm/4.3Generators:13:6",
+     "type": "code",
+     "en": "```scheme\n(define fact \n  (lambda (n) \n    (if (= n 1)\n        1\n        (* n (fact (- n 1))))))\n        \n;; Type: [Number -> LzL(Number)]\n(define facts-from\n  (lambda (n)\n    (cons-lzl (fact n) \n              (lambda () (facts-from (+ n 1))))))\n```\n\n",
+     "hash": "11563fb0a918cb8b",
+     "lang": "scheme",
+     "noteHe": "הגישה ה\"תמימה\": ‏`facts-from` בונה את הרשימה העצלה של העצרות על ידי קריאה ל-`fact` **מאפס** בכל איבר. זה נכון אבל בזבזני — כדי לקבל את ‏`(fact 6)` הפונקציה מבצעת שוב את כל המכפלות שכבר עשתה עבור ‏`(fact 5)`, ולכן ‏`n` האיברים הראשונים עולים ‏$$O(n^2)$$ מכפלות. הסעיף הבא יראה את הגרסה החכמה. שימו לב לחזרה של ההערה מ-4.2: ‏`fact` כאן שוב נעצרת ב-`(= n 1)` ולא ב-`(= n 0)`, ולכן ‏`(facts-from 0)` יגרום לרקורסיה אינסופית כבר באיבר הראשון."
+    },
+    {
+     "id": "cm/4.3Generators:13:7",
+     "type": "prose",
+     "en": "When we observe the computation, we realize though, that if we know the prefix of this lazy-list, we can compute the next element in a faster way than by invoking `(fact (+ n 1))` - as long as we have access to the first element when we compute the tail.  We derive the following pattern of lazy-list construction:\n\n",
+     "hash": "8b8928e0d1e560c1",
+     "he": "כשאנחנו מתבוננים בחישוב, אנחנו מבינים עם זאת שאם אנחנו יודעים את הרישא (prefix) של הרשימה העצלה הזו, אנחנו יכולים לחשב את האיבר הבא בדרך מהירה יותר מאשר על ידי הפעלת `(fact (+ n 1))` — כל עוד יש לנו גישה לאיבר הראשון כשאנחנו מחשבים את הזנב. אנחנו גוזרים את תבנית הבנייה הבאה של רשימה עצלה:"
+    },
+    {
+     "id": "cm/4.3Generators:13:8",
+     "type": "code",
+     "en": "```scheme\n(define facts-gen\n  (lambda ()\n    (letrec ((loop (lambda (n fact-n)\n                     (cons-lzl fact-n \n                               (lambda () (loop (+ n 1) \n                                                (* (+ n 1) fact-n)))))))\n      (loop 1 1))))\n      \n(take (facts-gen) 6)\n;--> '(1 2 6 24 120 720)\n```\n\n",
+     "hash": "5a48813395fab310",
+     "lang": "scheme",
+     "noteHe": "הגרסה החכמה, וזו תבנית שכדאי לשנן. ‏`loop` מקבלת **שני** פרמטרים: ‏`n` — האינדקס הנוכחי, ו-`fact-n` — הערך שכבר חושב. כל צעד עושה ‏`cons-lzl` ל-`fact-n` המוכן, והזנב המושהה מעביר הלאה את ‏`(+ n 1)` ואת ‏`(* (+ n 1) fact-n)` — כלומר מכפיל את התוצאה הקודמת במקום לחשב עצרת שלמה. עכשיו כל איבר עולה מכפלה **אחת**, וכל ‏n האיברים הראשונים ‏$$O(n)$$ במקום ‏$$O(n^2)$$. שימו לב ש-`facts-gen` היא פונקציה חסרת ארגומנטים שמחזירה רשימה עצלה, ולכן ‏`(take (facts-gen) 6)` — הסוגריים הפנימיים חשובים. וודאו שהפלט מסתדר: ‏`(loop 1 1)` נותן ‎1!‎=1, אחר כך ‎2·1=2, ‎3·2=6, ‎4·6=24, ‎5·24=120, ‎6·120=720. **הצובר בתוך ה-thunk** הוא בדיוק אותו רעיון של ‏`fact-iter` מ-4.2, רק שכאן שומרים את כל התוצאות במקום רק את האחרונה."
+    },
+    {
+     "id": "cm/4.3Generators:13:9",
+     "type": "prose",
+     "en": "A good way to think about facts-gen is as the *unrolling of the fact computation*.  It returns the list of the values of a recursive computation.  The structure of the function is typical: the local function loop *remembers* the last computed value `fact-n` and passes it to the delayed computation in the tail.\n\n",
+     "hash": "981be9060180d61f",
+     "he": "דרך טובה לחשוב על facts-gen היא כעל *פריסה של חישוב ה-fact*. היא מחזירה את רשימת הערכים של חישוב רקורסיבי. המבנה של הפונקציה טיפוסי: הפונקציה המקומית loop *זוכרת* את הערך האחרון שחושב, `fact-n`, ומעבירה אותו לחישוב המושהה שבזנב."
+    },
+    {
+     "id": "cm/4.3Generators:13:10",
+     "type": "prose",
+     "en": "**Exercise:** Write a function `fibo-gen` which generates the successive values of the Fibonacci series.\nHint: the local function loop will have one more argument when compared to fact-gen.\n\n",
+     "hash": "336dfa7d53481d85",
+     "he": "**תרגיל:** כתבו פונקציה `fibo-gen` שמייצרת את הערכים העוקבים של סדרת פיבונאצ'י.\nרמז: לפונקציה המקומית loop יהיה ארגומנט אחד יותר בהשוואה ל-fact-gen."
+    }
+   ],
+   "headingHe": "חישוב בעזרת רשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:14",
+   "depth": 3,
+   "headingEn": "Composition of Lazy Lists",
+   "raw": "### Composition of Lazy Lists\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:14:0",
+     "type": "prose",
+     "en": "Lazy list composition functions operate over lzl values and return new lzl values.\n\n",
+     "hash": "1283e325fdcc2018",
+     "he": "פונקציות הרכבה של רשימות עצלות פועלות על ערכי lzl ומחזירות ערכי lzl חדשים."
+    },
+    {
+     "id": "cm/4.3Generators:14:1",
+     "type": "prose",
+     "en": "Let us consider the lzl-add operator: given two lzl(number), it returns the lzl of the sum of their respective values.\n\n",
+     "hash": "67ba3bcd1dced86b",
+     "he": "נתבונן באופרטור lzl-add: בהינתן שתי lzl(number), הוא מחזיר את ה-lzl של הסכום של הערכים המתאימים שלהן."
+    },
+    {
+     "id": "cm/4.3Generators:14:2",
+     "type": "code",
+     "en": "```scheme\n;; Signature: lzl-add(lz1,lz2)\n;; Type: [LzL(Number) * LzL(Number) -> LzL(number)]\n(define lzl-add\n  (lambda (lz1 lz2)\n    (cond ((empty-lzl? lz1) lz2)\n          ((empty-lzl? lz2) lz1)\n          (else (cons-lzl (+ (head lz1) (head lz2))\n                          (lambda () (lzl-add (tail lz1) (tail lz2))))))))\n```\n\n",
+     "hash": "fc33822660358960",
+     "lang": "scheme",
+     "noteHe": "חיבור איבר-איבר של שתי רשימות עצלות. המבנה מוכר: מחשבים את הראש מיד — ‏`(+ (head lz1) (head lz2))` — ומשהים את השאר ב-`(lambda () (lzl-add (tail lz1) (tail lz2)))`. שימו לב שהיא **נשארת עצלה**, ולכן אפשר לחבר שתי רשימות אינסופיות ולקבל תשובה מיידית. שימו לב גם לטיפול במקרי הקצה: אם אחת הרשימות ריקה מוחזרת האחרת כמו שהיא — כלומר זו התנהגות של \"המשך עם מה שנשאר\" ולא של \"עצור\", בחירה שראוי לשים לב אליה כי היא שונה מ-`zip` שהיה עוצר בקצרה מבין השתיים."
+    },
+    {
+     "id": "cm/4.3Generators:14:3",
+     "type": "prose",
+     "en": "This operator allows us to re-define the sequence of integers using lazy-list addition:\n\n",
+     "hash": "9e7e06422248b71e",
+     "he": "האופרטור הזה מאפשר לנו להגדיר מחדש את סדרת השלמים בעזרת חיבור רשימות עצלות:"
+    },
+    {
+     "id": "cm/4.3Generators:14:4",
+     "type": "code",
+     "en": "```scheme\n(define integers \n  (cons-lzl 0 \n            (lambda () (lzl-add ones integers))))\n```\n\n",
+     "hash": "7236fa088df9261b",
+     "lang": "scheme",
+     "noteHe": "הגדרה שכדאי לעצור עליה: ‏`integers` מוגדרת **במונחי עצמה**, בלי אף לולאה ובלי אף פונקציה רקורסיבית. קראו אותה כמשוואה: השלמים הם 0, ואחריהם ‏`ones + integers` — כלומר כל שלם הוא הקודם ועוד 1. בדקו: ‏integers = 0, 1, 2, 3, …‏; ‏ones = 1, 1, 1, …‏; הסכום איבר-איבר הוא 1, 2, 3, 4, …‏ — וזה בדיוק הזנב של ‏`integers`. ✓ **וזו הפואנטה של הסעיף**: החלפנו *איך לחשב* ב*מה מקיים*. השוו ל-`integers-from` מקודם — שם היה loop רקורסיבי; כאן יש רק זרימת נתונים. שימו לב שזה עובד רק בזכות ההשהיה: ‏`integers` מופיעה בתוך lambda, ולכן היא מוערכת רק אחרי שההגדרה כבר הושלמה."
+    },
+    {
+     "id": "cm/4.3Generators:14:5",
+     "type": "prose",
+     "en": "Similarly, let us define the sequence of Fibonacci numbers using lazy-list addition:\n\n",
+     "hash": "ad1292b7accd3b81",
+     "he": "באופן דומה, בואו נגדיר את סדרת מספרי פיבונאצ'י בעזרת חיבור רשימות עצלות:"
+    },
+    {
+     "id": "cm/4.3Generators:14:6",
+     "type": "code",
+     "en": "```scheme\n(define fib-numbers\n  (cons-lzl 0\n            (lambda () (cons-lzl 1 \n                                 (lambda () \n                                   (lzl-add (tail fib-numbers) fib-numbers))))))\n(take fib-numbers 7)\n;--> '(0 1 1 2 3 5 8)\n```\n\n",
+     "hash": "037932164acd2781",
+     "lang": "scheme",
+     "noteHe": "הדוגמה המפורסמת ביותר בכל נושא הרשימות העצלות — **שאלת מבחן קלאסית**. ‏`fib-numbers` מתחילה ב-0, אחר כך 1, וכל השאר הוא ‏`(lzl-add (tail fib-numbers) fib-numbers)` — כלומר הסדרה מוסטת באחד, ועוד הסדרה עצמה. זו בדיוק נוסחת הנסיגה ‏$$F_n = F_{n-1} + F_{n-2}$$, כתובה כמשוואה בין **רשימות** ולא בין מספרים. אימתו על שלושת האיברים הראשונים של הזנב: ‏1+0=1‏, ‏1+1=2‏, ‏2+1=3‏ — ואכן 0 1 1 2 3 5 8. שימו לב לשני ה-`lambda` המקוננים בהתחלה: צריך **שני** איברי בסיס לפני שהנוסחה הרקורסיבית יכולה לפעול, ולכן ‏`0` ו-`1` נכתבים במפורש. שימו לב גם לחוסר היעילות שהזכרנו קודם: בלי מימואיזציה, כל איבר גורר חישוב מחדש של איברים קודמים, ולכן ‏`(take fib-numbers 30)` יהיה איטי להחריד — בעוד שבשפה עם thunk-ים ממומאזים (Haskell) אותה הגדרה בדיוק היא ליניארית."
+    },
+    {
+     "id": "cm/4.3Generators:14:7",
+     "type": "prose",
+     "en": "What is remarkable about these definitions is that they replace loops and recursive functions (the inner functions `loop` in the examples above) with recursive data flow: the fib-numbers list is built incrementally from the prefix of the fib-numbers list.\n\n\n",
+     "hash": "94167d0e167e0ab9",
+     "he": "מה שמדהים בהגדרות האלה הוא שהן מחליפות לולאות ופונקציות רקורסיביות (הפונקציות הפנימיות `loop` בדוגמאות למעלה) בזרימת נתונים רקורסיבית: רשימת fib-numbers נבנית בהדרגה מתוך הרישא של רשימת fib-numbers."
+    }
+   ],
+   "headingHe": "הרכבה של רשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:15",
+   "depth": 3,
+   "headingEn": "Append and Interleave of Lazy Lists",
+   "raw": "### Append and Interleave of Lazy Lists\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:15:0",
+     "type": "prose",
+     "en": "Recall the definition of the `append` function for regular lists to return a list which contains all the elements in l1 followed by those in l2:\n\n",
+     "hash": "070d006ba317a05e",
+     "he": "היזכרו בהגדרה של הפונקציה `append` עבור רשימות רגילות, שמחזירה רשימה שמכילה את כל האיברים ב-l1 ואחריהם אלה שב-l2:"
+    },
+    {
+     "id": "cm/4.3Generators:15:1",
+     "type": "code",
+     "en": "```scheme\n;; Type: [List(T) * List(T) -> List(T)]\n(define append\n  (lambda (l1 l2)\n    (if (empty? l1)\n        l2\n        (cons (car l1)\n              (append (cdr l1) l2)))))\n```\n\n",
+     "hash": "312ca6e3492932ba",
+     "lang": "scheme",
+     "noteHe": "תזכורת ל-`append` הרגילה, כנקודת השוואה לשורה הבאה. הרקורסיה פשוטה: אם ‏`l1` ריקה מחזירים ‏`l2`, אחרת מעתיקים את הראש של ‏`l1` וממשיכים. שימו לב שהיא **חייבת** למצות את ‏`l1` כולה לפני שהיא נוגעת ב-`l2` — עובדה שנראית תמימה על רשימות סופיות, ותהיה הבעיה כולה על רשימות אינסופיות."
+    },
+    {
+     "id": "cm/4.3Generators:15:2",
+     "type": "prose",
+     "en": "Let us define a similar function for lazy lists:\n\n",
+     "hash": "bffb93cdd8dc51fd",
+     "he": "בואו נגדיר פונקציה דומה עבור רשימות עצלות:"
+    },
+    {
+     "id": "cm/4.3Generators:15:3",
+     "type": "code",
+     "en": "```scheme\n;; Signature: lzl-append(lz1, lz2)\n;; Type: [Lzl(T) * Lzl(T) -> Lzl(T)]\n(define lzl-append\n  (lambda (lz1 lz2)\n    (if (empty-lzl? lz1)\n        lz2\n        (cons-lzl (head lz1)\n                  (lambda () (lzl-append (tail lz1) lz2))))))\n```\n\n",
+     "hash": "bfbdd39511e3a325",
+     "lang": "scheme",
+     "noteHe": "‏`lzl-append` היא התרגום המילולי של ‏`append` לעולם העצל — אותו מבנה בדיוק, רק ש-`cons` הפך ל-`cons-lzl` והקריאה הרקורסיבית נעטפה ב-lambda. היא נכונה ועצלה, ובכל זאת הסעיף הבא יטען שהיא **לא מספיקה טובה**. שימו לב מדוע כבר עכשיו: ‏`lz2` מועברת הלאה בלי שנוגעים בה, וכדי להגיע אליה צריך קודם למצות את ‏`lz1` כולה."
+    },
+    {
+     "id": "cm/4.3Generators:15:4",
+     "type": "prose",
+     "en": "Observe the elements of the appended list: we see that all elements of the first lazy-list come before the second lazy-list. What if the first list is infinite? There is no way to reach the second list. \n\n",
+     "hash": "003796a8f85e5ebb",
+     "he": "שימו לב לאיברים של הרשימה המשורשרת: אנחנו רואים שכל האיברים של הרשימה העצלה הראשונה באים לפני הרשימה העצלה השנייה. ומה אם הרשימה הראשונה אינסופית? אין שום דרך להגיע לרשימה השנייה."
+    },
+    {
+     "id": "cm/4.3Generators:15:5",
+     "type": "prose",
+     "en": "This version does not satisfy a fundamental property of lazy-list functions: \n**Every finite part of a lazy-list “depends” on at most a finite part of the lazy-list.**\n\n",
+     "hash": "cf0b479a4dddfcc7",
+     "he": "הגרסה הזו אינה מקיימת תכונה יסודית של פונקציות על רשימות עצלות:\n**כל חלק סופי של רשימה עצלה \"תלוי\" לכל היותר בחלק סופי של הרשימה העצלה.**"
+    },
+    {
+     "id": "cm/4.3Generators:15:6",
+     "type": "prose",
+     "en": "Therefore, when dealing with possibly infinite lists, `append` is replaced by a different function we call `interleave()`.\n`interleave()` returns the elements of the lazy-lists in a way that guarantees that every element of the lazy-lists is reached within finite time:\n\n",
+     "hash": "58fa02484894b213",
+     "he": "לכן, כשמתמודדים עם רשימות שעשויות להיות אינסופיות, `append` מוחלפת בפונקציה אחרת שאנחנו קוראים לה `interleave()`.\n‏`interleave()` מחזירה את האיברים של הרשימות העצלות בדרך שמבטיחה שכל איבר של הרשימות העצלות יושג בזמן סופי:"
+    },
+    {
+     "id": "cm/4.3Generators:15:7",
+     "type": "code",
+     "en": "```scheme\n;; Signature: interleave(lz1, lz2)\n;; Type: [Lzl(T) * Lzl(T) -> Lzl(T)]\n(define interleave\n  (lambda (lz1 lz2)\n    (if (empty-lzl? lz1)\n        lz2\n        (cons-lzl (head lz1)\n                  (lambda () (interleave lz2 (tail lz1)))))))\n                  \n(take (lzl-append (integers-from 100) fib-numbers) 7)\n;--> '(100 101 102 103 104 105 106)\n(take (interleave (integers-from 100) fib-numbers) 7)\n'--> '(100 0 101 1 102 1 103)\n```\n\n",
+     "hash": "20d50f5240ec5e7b",
+     "lang": "scheme",
+     "noteHe": "ההבדל בין ‏`interleave` ל-`lzl-append` הוא **תו אחד** — בזנב כתוב ‏`(interleave lz2 (tail lz1))` במקום ‏`(lzl-append (tail lz1) lz2)`. שימו לב שהארגומנטים **מתחלפים** בכל צעד: לוקחים ראש מהראשונה, ואז השנייה הופכת לראשונה. התוצאה היא שהרשימות מתחלפות לסירוגין, וכל איבר של **שתיהן** מושג אחרי מספר סופי של צעדים. השוו את שני הפלטים: ‏`lzl-append` על ‏`(integers-from 100)` האינסופית מחזירה רק 100–106 — פיבונאצ'י לעולם לא יגיע; ‏`interleave` מחזירה ‏100, 0, 101, 1, 102, 1, 103 — לסירוגין. **כדאי לשנן** את התכונה מהפסקה שמעל, כי היא הקריטריון שמבדיל בין השתיים, ונחזור אליה בפרק 5 כשנדבר על סדר החיפוש בתכנות לוגי. הערה על המקור: השורה האחרונה פותחת ב-`'-->` במקום ‏`;-->` — כלומר היא אינה הערה אלא ציטוט (quote) שגוי תחבירית."
+    }
+   ],
+   "headingHe": "שרשור ושזירה של רשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:16",
+   "depth": 3,
+   "headingEn": "Higher Order Lazy List Functions",
+   "raw": "### Higher Order Lazy List Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:16:0",
+     "type": "prose",
+     "en": "Looking at `LZL` values as sequences, it is natural to adapt the sequence interface of map/filter/reduce to this data type as well.  \nThis perspective allows us to define interesting data dependencies to capture recursive relations in a compact way.\n\n",
+     "hash": "5ab9d8fe7ffc702c",
+     "he": "כשמסתכלים על ערכי `LZL` כעל סדרות, טבעי להתאים גם לטיפוס הנתונים הזה את ממשק הסדרות של map/filter/reduce.\nנקודת המבט הזו מאפשרת לנו להגדיר תלויות נתונים מעניינות, שלוכדות יחסים רקורסיביים בצורה קומפקטית."
+    },
+    {
+     "id": "cm/4.3Generators:16:1",
+     "type": "code",
+     "en": "```scheme\n;; Signature: lzl-map(f, lz)\n;; Type: [[T1 -> T2] * Lzl(T1) -> Lzl(T2)]\n(define lzl-map\n  (lambda (f lzl)\n    (if (empty-lzl? lzl)\n        lzl\n        (cons-lzl (f (head lzl))\n                  (lambda () (lzl-map f (tail lzl)))))))\n                  \n(take (lzl-map (lambda (x) (* x x)) ints) 5)\n;--> '(0 1 4 9 16)\n```\n\n",
+     "hash": "e8dbeeb7b03fe741",
+     "lang": "scheme",
+     "noteHe": "‏`lzl-map` — שוב אותה תבנית: מחשבים את ‏`(f (head lzl))` מיד ומשהים את השאר. שימו לב שהיא **עצלה לחלוטין**: ‏`f` לא מופעלת על אף איבר שלא ביקשו. הדוגמה מרבעת את השלמים ולוקחת חמישה — ‏`'(0 1 4 9 16)` — ואילו ‏`ints` היא אינסופית. השוו ל-`iter->map` מתחילת הדף: אותו קוד בדיוק, בשמות אחרים; זה מאשר שהאיטרטור והרשימה העצלה הם באמת אותו טיפוס."
+    },
+    {
+     "id": "cm/4.3Generators:16:2",
+     "type": "code",
+     "en": "```scheme\n;; Signature: lzl-filter(p,lz)\n;; Type: [[T1 -> Boolean] * Lzl(T1) -> LzL(T1)]\n(define lzl-filter\n  (lambda (p lzl)\n    (cond ((empty-lzl? lzl) lzl)\n          ((p (head lzl)) (cons-lzl (head lzl) \n                                    (lambda () (lzl-filter p (tail lzl)))))\n          (else (lzl-filter p (tail lzl))))))\n```\n\n",
+     "hash": "afd387eed30ed84a",
+     "lang": "scheme",
+     "noteHe": "‏`lzl-filter` דומה, אבל שימו לב להבדל **קריטי** בענף האחרון: כשהאיבר אינו עובר את הפרדיקט, הקוד קורא ל-`(lzl-filter p (tail lzl))` **בלי** לעטוף ב-`lambda` — כלומר הוא ממשיך לחפש **מיד**. וזה הכרחי: הפונקציה חייבת להחזיר רשימה עצלה שהראש שלה הוא איבר אמיתי, ולכן היא חייבת לדלג על כל האיברים הנפסלים לפני שהיא יכולה להחזיר משהו. **וזו גם הסכנה**: אם אחרי נקודה מסוימת אף איבר לא יעבור את הפרדיקט — למשל ‏`(lzl-filter (lambda (x) (< x 5)) ints)` — הפונקציה תיכנס ללולאה אינסופית שלא ניתן לעצור. **שאלת מבחן קלאסית**: \"האם ‏`lzl-filter` תמיד מסתיימת?\" והתשובה היא לא, בניגוד ל-`lzl-map`."
+    },
+    {
+     "id": "cm/4.3Generators:16:3",
+     "type": "prose",
+     "en": "Let us explore ways to define complex recursive definitions using these higher-order functions.\nWe develop here a generator of the sequence of prime numbers based on the sieve method:\n\n",
+     "hash": "91eacf10be4b0c11",
+     "he": "בואו נחקור דרכים להגדיר הגדרות רקורסיביות מורכבות בעזרת הפונקציות מסדר גבוה האלה.\nאנחנו מפתחים כאן גנרטור של סדרת המספרים הראשוניים המבוסס על שיטת הנפה (sieve):"
+    },
+    {
+     "id": "cm/4.3Generators:16:4",
+     "type": "code",
+     "en": "```scheme\n(define divisible?\n  (lambda (x y)\n    (= (remainder x y) 0)))\n\n(define no-sevens (lzl-filter (lambda (x) (not (divisible? x 7))) ints))\n\n(nth no-sevens 100) ;The 100th integer not divisible by 7:\n;--> 117\n```\n\n",
+     "hash": "0e1ee7b0bf4e2e2d",
+     "lang": "scheme",
+     "noteHe": "דוגמת חימום לפני הנפה. ‏`divisible?` בודקת שארית 0, ו-`no-sevens` מסננת מהשלמים את כל הכפולות של 7 — רשימה עצלה **אינסופית** שנבנתה בשורה אחת. ‏`(nth no-sevens 100)` מחזירה 117; אפשר לאמת: בין 1 ל-117 יש 16 כפולות של 7, ולכן נשארים 101 מספרים, והאחרון בהם הוא 117 (האינדוקס 100 הוא 0-בסיסי). שימו לב ש-`ints` מתחילה מ-0, ו-0 מתחלק ב-7 ולכן נופל מהרשימה. וכדאי לזכור את מחיר הביצוע: ‏`nth` מפעילה ‏`tail` מאה פעמים, וכל אחת מהן מריצה מחדש את שרשרת ה-thunk-ים."
+    },
+    {
+     "id": "cm/4.3Generators:16:5",
+     "type": "code",
+     "en": "```scheme\n;; lazy-list scaling: return (c*x for x in lzl)\n;; Signature: lzl-scale(c, lzl)\n;; Type: [Number * Lzl(Number) -> Lzl(Number)]\n(define lzl-scale\n  (lambda (c lzl)\n    (lzl-map (lambda (x) (* x c)) lzl)))\n```\n\n",
+     "hash": "fc0b95fe59c9194a",
+     "lang": "scheme",
+     "noteHe": "‏`lzl-scale` היא שורה אחת שבנויה כולה על ‏`lzl-map`: מכפילה כל איבר בקבוע ‏`c`. אין בה שום ‏`lambda ()` משלה — היא יורשת את העצלות מ-`lzl-map`, וזו נקודה שכדאי לשים לב אליה: ברגע שיש לך אוסף בסיסי של פעולות עצלות, כל מה שנבנה מעליהן עצל אוטומטית. היא תשמש מיד להגדרת חזקות 2."
+    },
+    {
+     "id": "cm/4.3Generators:16:6",
+     "type": "prose",
+     "en": "In a way similar to which we defined Fibonacci numbers as a recursive equation involving the Fib-nums sequence,\nwe define the generator of the powers of 2 as follows:\n",
+     "hash": "ae447814ae62d824",
+     "he": "בדרך דומה לזו שבה הגדרנו את מספרי פיבונאצ'י כמשוואה רקורסיבית שמערבת את סדרת Fib-nums,\nאנחנו מגדירים את הגנרטור של חזקות 2 כך:"
+    },
+    {
+     "id": "cm/4.3Generators:16:7",
+     "type": "code",
+     "en": "```scheme\n;; The lazy-list of powers of 2:\n(define double (cons-lzl 1 (lambda () (lzl-scale 2 double))))\n(take double 7)\n;--> '(1 2 4 8 16 32 64)\n```\n\n",
+     "hash": "164ff9c0130603ff",
+     "lang": "scheme",
+     "noteHe": "עוד הגדרה מעגלית יפה, באותו סגנון של ‏`integers` ו-`fib-numbers`: חזקות 2 הן 1, ואחריהן **כל החזקות כפול 2**. אימתו: אם ‏double = 1, 2, 4, 8, …‏ אז ‏2·double = 2, 4, 8, 16, …‏ — וזה בדיוק הזנב. ✓ שימו לב שההגדרה משתמשת ב-`double` בתוך גופה, בדיוק כמו ‏`ones`, ושוב זה עובד רק בזכות עטיפת ה-lambda. **הדפוס שכדאי לשנן** משלושת הסעיפים האחרונים: סדרה אינסופית מוגדרת על ידי איבר בסיס ‏`cons-lzl` ומשוואה שמבטאת את הזנב במונחי הסדרה עצמה."
+    }
+   ],
+   "headingHe": "פונקציות מסדר גבוה על רשימות עצלות"
+  },
+  {
+   "id": "cm/4.3Generators:17",
+   "depth": 3,
+   "headingEn": "Lazy-list Iteration",
+   "raw": "### Lazy-list Iteration\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.3Generators:17:0",
+     "type": "prose",
+     "en": "Recall the integers lazy-list creation function:\n",
+     "hash": "d1086dd89840406f",
+     "he": "היזכרו בפונקציית היצירה של הרשימה העצלה integers:"
+    },
+    {
+     "id": "cm/4.3Generators:17:1",
+     "type": "code",
+     "en": "```scheme\n(define integers-from\n  (lambda (n)\n    (cons-lzl n (lambda () (integers-from (+ n 1))))))\n```\n\n",
+     "hash": "69e7e52f4c785f80",
+     "lang": "scheme",
+     "noteHe": "תזכורת ל-`integers-from` מסעיף 11, כנקודת מוצא להכללה בשלושה שלבים. שימו לב לחלק שעומד להשתנות: ‏`(+ n 1)` — פעולת ה\"צעד\" שמובילה מאיבר לאיבר הבא. כרגע היא קבועה בתוך הקוד."
+    },
+    {
+     "id": "cm/4.3Generators:17:2",
+     "type": "prose",
+     "en": "It can be re-written as follows, where we explicitly abstract the step operation which makes us proceed from one element in the list to the next as the operation `(lambda (k) (+ k 1))`:\n",
+     "hash": "4c89b444a0367901",
+     "he": "אפשר לכתוב אותה מחדש כך, כשאנחנו מפשיטים במפורש את פעולת הצעד שמקדמת אותנו מאיבר אחד ברשימה לבא אחריו, כפעולה `(lambda (k) (+ k 1))`:"
+    },
+    {
+     "id": "cm/4.3Generators:17:3",
+     "type": "code",
+     "en": "```scheme\n(define integers-from\n  (lambda (n)\n    (cons-lzl n (lambda () (integers-from ((lambda (k) (+ k 1)) n))))))\n```\n\n",
+     "hash": "17a4e6b120ff061f",
+     "lang": "scheme",
+     "noteHe": "שלב ביניים מלאכותי אבל מלמד: ‏`(+ n 1)` נכתב מחדש כ-`((lambda (k) (+ k 1)) n)` — כלומר מגדירים lambda ומפעילים אותה מיד על ‏`n`. הפונקציה מתנהגת **בדיוק** אותו דבר; מה שהשתנה הוא שפעולת הצעד קיבלה עכשיו צורה של ערך נפרד שאפשר להצביע עליו. זו טכניקת ההפשטה הקלאסית: קודם מבודדים את מה שרוצים לשנות, ואז הופכים אותו לפרמטר — וזה בדיוק הצעד הבא."
+    },
+    {
+     "id": "cm/4.3Generators:17:4",
+     "type": "prose",
+     "en": "A further generalization replaces the concrete step function `(lambda (k) (+ k 1))` by a function parameter:\n\n",
+     "hash": "f35d7d21c7452b33",
+     "he": "הכללה נוספת מחליפה את פונקציית הצעד הקונקרטית `(lambda (k) (+ k 1))` בפרמטר פונקציה:"
+    },
+    {
+     "id": "cm/4.3Generators:17:5",
+     "type": "code",
+     "en": "```scheme\n;; Signature: integers-iterate(f,n)\n;; Type: [[Number -> Number] * Number -> Lzl(Number)]\n(define integers-iterate\n  (lambda (f n)\n    (cons-lzl n (lambda () (integers-iterate f (f n))))))\n    \n(take (integers-iterate (lambda (k) (+ k 1)) 3) 7)\n;--> '(3 4 5 6 7 8 9)\n\n(take (integers-iterate (lambda (k) (* k 2)) 3) 7)\n;--> '(3 6 12 24 48 96 192)\n\n(take (integers-iterate (lambda (k) k) 3) 7)\n;--> '(3 3 3 3 3 3 3)\n```\n\n",
+     "hash": "1c17f5ed9a96568f",
+     "lang": "scheme",
+     "noteHe": "ההכללה המלאה: ‏`integers-iterate` מקבלת פונקציית צעד ‏`f` וערך התחלתי ‏`n`, ומייצרת את הסדרה ‏n, f(n), f(f(n)), …‏ — כלומר את **מסלול האיטרציה** של ‏`f`. שלוש הדוגמאות מראות כמה חזק זה: ‏`(+ k 1)` נותן שלמים, ‏`(* k 2)` נותן חזקות, ופונקציית הזהות נותנת חזרה על ערך קבוע. שימו לב שהשם ‏`integers-iterate` כבר מטעה — היא עובדת על כל טיפוס, לא רק מספרים; בשפות אחרות הפונקציה הזו נקראת פשוט ‏`iterate` (ב-Haskell) או ‏`unfold`. **כדאי לשנן** את התבנית \"ערך התחלתי + פונקציית צעד\", כי כמעט כל סדרה אינסופית שנתקלים בה מתוארת כך."
+    },
+    {
+     "id": "cm/4.3Generators:17:6",
+     "type": "prose",
+     "en": "Observe that this simple generalization of `integers` covers the examples we defined above of the repetition (ones), the simple integers sequence, and the powers of two.\n\n",
+     "hash": "af11c1a30537a263",
+     "he": "שימו לב שההכללה הפשוטה הזו של `integers` מכסה את הדוגמאות שהגדרנו למעלה של החזרה (ones), של סדרת השלמים הפשוטה, ושל חזקות 2."
+    },
+    {
+     "id": "cm/4.3Generators:17:7",
+     "type": "code",
+     "en": "```scheme\n;; Primes – First definition\n(define primes\n  (cons-lzl 2 (lambda () (lzl-filter prime? (integers-from 3)))))\n\n(define prime?\n  (lambda (n)\n    (letrec ((iter (lambda (lz)\n                     (cond ((> (sqr (head lz)) n) #t)\n                           ((divisible? n (head lz)) #f)\n                           (else (iter (tail lz)))))))\n      (iter primes))))\n      \n(take primes 6)\n;--> '(2 3 5 7 11 13)\n```\n\n",
+     "hash": "120728e6436fbbe2",
+     "lang": "scheme",
+     "noteHe": "ההגדרה **הראשונה** של הראשוניים, וזו הגדרה מעגלית מתוחכמת: ‏`primes` מתחילה ב-2 וממשיכה בסינון השלמים מ-3 לפי הפרדיקט ‏`prime?` — ואילו ‏`prime?` עצמה משתמשת ב-`primes` כדי לבדוק ראשוניות. זו רקורסיה הדדית שעובדת רק בזכות ההשהיה: כשבודקים אם ‏`n` ראשוני, מספיק לחלק בראשוניים שכבר נמצאו, וכולם קטנים מ-`n`. ‏`prime?` עוברת על ‏`primes` ועוצרת ברגע ש-`(sqr (head lz))` עולה על ‏`n` — כלומר די לבדוק עד השורש, אופטימיזציה מוכרת. שימו לב לחוסר היעילות שהפסקה הבאה מצביעה עליו: כל בדיקה מתחילה מ-2 מחדש, ובלי מימואיזציה כל גישה ל-`primes` מחשבת מחדש את כל הרישא. הערה על המקור: ‏`primes` מוגדרת **לפני** ‏`prime?` ומשתמשת בה — זה חוקי כאן רק מפני שהשימוש עטוף ב-`lambda`, אבל זה שביר; בנוסף ‏`sqr` היא פונקציה של Racket ולא של Scheme התקני."
+    },
+    {
+     "id": "cm/4.3Generators:17:8",
+     "type": "prose",
+     "en": "The second definition we present avoids the redundancy of the computation above.\nIt implements the **sieve** algorithm. The lazy-list of primes can be created as follows:\n",
+     "hash": "e977ad8210ee2c5c",
+     "he": "ההגדרה השנייה שאנחנו מציגים נמנעת מהיתירות של החישוב שלמעלה.\nהיא מממשת את אלגוריתם ה**נפה** (sieve). את הרשימה העצלה של הראשוניים אפשר ליצור כך:"
+    },
+    {
+     "id": "cm/4.3Generators:17:9",
+     "type": "list",
+     "en": "* Start with the integers lazy-list: `[2,3,4,5,....]`.\n* Select the first prime: `2`.\n* Filter the current lazy-list from all multiples of 2: `[2,3,5,7,9,...]`\n* Select the next element on the list: `3`.\n* Filter the current lazy-list from all multiples of 3: `[2,3,5,6,11,13,17,...]`.\n* i-th step: Select the next element on the list: `k`. Surely it is a prime, since it is not a multiplication of any smaller integer.\n* Filter the current lazy-list from all multiples of `k`.\n* All elements of the resulting lazy-list are primes, and all primes are in the resulting lazy-list.\n\n",
+     "hash": "03a80158940acc68",
+     "he": "* מתחילים מהרשימה העצלה של השלמים: `[2,3,4,5,....]`.\n* בוחרים את הראשוני הראשון: `2`.\n* מסננים מהרשימה העצלה הנוכחית את כל הכפולות של 2: `[2,3,5,7,9,...]`\n* בוחרים את האיבר הבא ברשימה: `3`.\n* מסננים מהרשימה העצלה הנוכחית את כל הכפולות של 3: `[2,3,5,6,11,13,17,...]`.\n* צעד ה-i: בוחרים את האיבר הבא ברשימה: `k`. בוודאות הוא ראשוני, מכיוון שהוא אינו כפולה של אף מספר שלם קטן יותר.\n* מסננים מהרשימה העצלה הנוכחית את כל הכפולות של `k`.\n* כל האיברים של הרשימה העצלה שמתקבלת הם ראשוניים, וכל הראשוניים נמצאים ברשימה העצלה שמתקבלת."
+    },
+    {
+     "id": "cm/4.3Generators:17:10",
+     "type": "code",
+     "en": "```scheme\n;; Signature: sieve(lzl)\n;; Type: [Lzl(Number) -> Lzl(Number)]\n(define sieve\n  (lambda (lzl)\n    (cons-lzl (head lzl)\n              (lambda ()\n                (sieve (lzl-filter (lambda (x) (not (divisible? x (head lzl))))\n                                   (tail lzl)))))))\n                                   \n(define primes1 (sieve (integers-from 2)))\n(take primes1 7)\n;--> '(2 3 5 7 11 13 17)\n```\n\n",
+     "hash": "ff73f7a7f555b1ab",
+     "lang": "scheme",
+     "noteHe": "נפת ארטוסתנס בחמש שורות — הסיום המרשים של הדף. ‏`sieve` לוקחת רשימה עצלה, מכריזה שהראש שלה ראשוני, ומגדירה שהזנב הוא ‏`sieve` **של אותה רשימה אחרי סינון כל כפולות הראש**. כל ראשוני שמתגלה מוסיף עוד שכבת סינון מעל הקודמות, כך שנוצרת שרשרת מסננים ההולכת ומתארכת — בדיוק כמו הנפה הקלאסית, אבל בלי מערך ובלי גבול עליון. עקבו: ‏`(integers-from 2)` → הראש 2 ראשוני, מסננים זוגיים → הראש 3 ראשוני, מסננים כפולות 3 → 5, 7, 11… ✓ **הפואנטה שכדאי לשנן**: העצלות היא שמאפשרת לתאר את הנפה על **כל** השלמים בבת אחת; באלגוריתם רגיל היינו חייבים לבחור מראש עד איזה מספר לנפות. שימו לב ש-`(head lzl)` נלכד בסגור של המסנן, ולכן כל שכבה זוכרת \"את הראשוני שלה\". שימו לב גם למחיר: בלי מימואיזציה, ‏`(take primes1 100)` יריץ את כל שרשרת המסננים מחדש בכל צעד. הערה על המקור: בפירוט המילולי שמעל, השלב \"מסננים את כפולות 3\" נותן ‏`[2,3,5,6,11,13,17,...]` — אבל 6 היא כפולה של 2 **וגם** של 3 ולכן כבר סוננה, ו-7 חסר; הרשימה הנכונה היא ‏`[2,3,5,7,11,13,17,...]`."
+    }
+   ],
+   "headingHe": "איטרציה על רשימות עצלות"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו ההבדל **היחיד** בין משוואת הטיפוס של רשימה רגילה למשוואת הטיפוס של רשימה עצלה?\n```scheme\nList(T) = Empty | Pair(T, List(T))\nLzl(T)  = Empty-Lzl | Pair(T, (Empty -> Lzl(T)))\n```",
+   "options": [
+    "הרשימה העצלה חייבת להיות אינסופית",
+    "האיבר השני הוא פונקציה חסרת ארגומנטים שמחזירה את שארית הרשימה, במקום שארית הרשימה עצמה",
+    "הרשימה העצלה אינה יכולה להיות ריקה",
+    "האיבר הראשון ברשימה העצלה גם הוא מושהה"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: האיבר השני הוא thunk.**\n\n‏`Pair(T, List(T))` מול `Pair(T, (Empty -> Lzl(T)))` — ההבדל הוא שהזנב אינו הרשימה אלא **מתכון לחישובה**. מכאן נובע הכול: אפשר לתאר סדרה אינסופית, כי שום דבר מעבר לאיבר הראשון אינו קיים בזיכרון.\n\n**למה השאר שגויים**:\n- **א'** — רשימה עצלה יכולה בהחלט להיות סופית; ראינו `lzl2`/`lzl3` שנבנו ידנית ומסתיימות ב-`empty-lzl`. אינסופיות היא *אפשרות* שהטיפוס פותח, לא דרישה.\n- **ג'** — `Empty-Lzl` הוא בדיוק הענף הראשון של המשוואה.\n- **ד'** — ה**ראש תמיד מחושב**. זו נקודה שכדאי לשנן: `head` היא זולה ומיידית, ורק `tail` מבצעת עבודה. מבנה כזה נקרא לפעמים \"עצל בזנב בלבד\" (tail-lazy), בשונה מעצלות מלאה כמו ב-Haskell."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "מה יקרה כשנעריך כל אחת מהשורות הבאות? הניחו את ההגדרות מהדף.\n```scheme\n(define ints (integers-from 0))\n\n;; (א)\n(lzl-map (lambda (x) (* x x)) ints)\n\n;; (ב)\n(take (lzl-map (lambda (x) (* x x)) ints) 3)\n\n;; (ג)\n(lzl-filter (lambda (x) (< x 5)) ints)\n```",
+   "answerHe": "‏**(א)** מסתיימת מיד ומחזירה `'(0 . #<procedure>)`. ‏`lzl-map` מחשבת רק את הראש — ‏`(* 0 0)` — ומשהה את כל השאר.\n\n‏**(ב)** מחזירה `'(0 1 4)`. ‏`take` היא הצרכן, והיא מכריחה בדיוק שלושה איברים.\n\n‏**(ג)** **נתקעת בלולאה אינסופית.** ‏`lzl-filter` חייבת להחזיר רשימה שהראש שלה איבר אמיתי, ולכן היא מדלגת על איברים נפסלים **מיד, בלי עטיפת lambda**. אחרי 0,1,2,3,4 אף שלם לא יקיים `(< x 5)`, והחיפוש אחרי הראש הבא לעולם לא יסתיים.",
+   "explanationHe": "‏**מה שנבדק**: היכולת להכריע מה עצל ומה לא, לפי מקום אחד בקוד — האם הקריאה הרקורסיבית עטופה ב-`(lambda () …)`.\n\n**ההבדל הקריטי בין (ב) ל-(ג)**: ב-`lzl-map` **כל** האיברים עוברים, ולכן הראש נמצא תמיד אחרי צעד אחד. ב-`lzl-filter` הענף שבו הפרדיקט נכשל קורא לעצמו **בלי** lambda, כי אחרת הראש היה עלול להיות איבר שנפסל. זה נכון והכרחי — והמחיר הוא שהפונקציה אינה מובטחת להסתיים.\n\n**הכלל שכדאי לשנן**: `lzl-map` על רשימה אינסופית תמיד בטוחה; `lzl-filter` בטוחה רק אם הפרדיקט מקיים אינסוף איברים.\n\n**טעות נפוצה**: לענות ש-(א) מחזירה רשימה של ריבועים. היא מחזירה **זוג** שהזנב שלו פרוצדורה — וזה בדיוק מה שה-REPL מדפיס."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "פתרו את התרגיל מהדף: כתבו `fibo-gen`, שמייצרת את הרשימה העצלה של מספרי פיבונאצ'י, בסגנון של `facts-gen` (עם `loop` פנימי). אחר כך הסבירו במה הגישה הזו שונה מההגדרה `fib-numbers` שמבוססת על `lzl-add`.",
+   "answerHe": "```scheme\n(define fibo-gen\n  (lambda ()\n    (letrec ((loop (lambda (a b)\n                     (cons-lzl a (lambda () (loop b (+ a b)))))))\n      (loop 0 1))))\n\n(take (fibo-gen) 7)\n;--> '(0 1 1 2 3 5 8)\n```\n\nכפי שהרמז אומר, ל-`loop` יש כאן **שני** פרמטרים במקום אחד — כי כדי לחשב את האיבר הבא בפיבונאצ'י צריך לזכור שניים אחורה, בעוד שבעצרת די באחד.\n\n**ההבדל מ-`fib-numbers`:**\n\n| | `fibo-gen` | `fib-numbers` |\n|---|---|---|\n| הסגנון | **איך** לחשב — לולאה עם צוברים | **מה** מתקיים — משוואה בין רשימות |\n| המצב | מפורש, בפרמטרים `a` ו-`b` | מובלע במבנה הרשימה עצמה |\n| יעילות | כל איבר בעבודה קבועה, ‎$$O(n)$$ סה\"כ | בלי מימואיזציה — חישוב חוזר ויקר מאוד |\n\n‏`fibo-gen` היא בעצם `fact-iter` מ-4.2 שעוטפים כל שלב שלה ב-`cons-lzl` במקום לזרוק אותו: **צובר שכל ערכי הביניים שלו נשמרים**.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) קוד עובד עם `letrec` ושני צוברים ו-`(loop 0 1)` כערך התחלה; (2) העטיפה `(lambda () (loop b (+ a b)))` — בלעדיה רקורסיה אינסופית; (3) ההסבר שדרושים שני פרמטרים כי נוסחת הנסיגה מסתכלת שניים אחורה; (4) לפחות שני הבדלים מ-`fib-numbers` — הכי חשוב: `fibo-gen` מחזיקה מצב מפורש וקבוע ולכן יעילה, בעוד ש-`fib-numbers` מחשבת מחדש בלי מימואיזציה.\n\n**וריאציה מקובלת**: להתחיל מ-`(loop 1 1)` ולקבל `'(1 1 2 3 5 8 13)` — תלוי אם מגדירים את הסדרה מ-0 או מ-1. שתי התשובות נכונות אם מציינים את ההנחה."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "מדוע `lzl-append` אינה מתאימה לרשימות עצלות אינסופיות, בעוד ש-`interleave` כן?",
+   "options": [
+    "‏`lzl-append` אינה עצלה ולכן מחשבת את שתי הרשימות מיד",
+    "‏`lzl-append` חייבת למצות את הרשימה הראשונה כדי להגיע לשנייה, ולכן איברי השנייה לעולם אינם מושגים בזמן סופי",
+    "‏`interleave` מוותרת על איברים כדי להימנע מהבעיה",
+    "‏`lzl-append` שוגה כשאחת הרשימות ריקה"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: הבעיה היא סדר ההגעה, לא העצלות.**\n\nהתכונה שהדף מנסח: **כל חלק סופי של רשימה עצלה תלוי לכל היותר בחלק סופי של הרשימה העצלה.** ‏`lzl-append` מפרה אותה — כדי להגיע לאיבר הראשון של `lz2` צריך לעבור על *כל* `lz1`, ואם `lz1` אינסופית אין מספר סופי של צעדים שיביא לשם. ראינו זאת בפלט: `(take (lzl-append (integers-from 100) fib-numbers) 7)` מחזירה רק 100–106.\n\n‏`interleave` מחליפה בין הרשימות בכל צעד — `(interleave lz2 (tail lz1))` — ולכן כל איבר של **שתיהן** מושג אחרי מספר סופי של צעדים.\n\n**למה השאר שגויים**: `lzl-append` **כן** עצלה לגמרי — היא מחזירה `cons-lzl` עם זנב מושהה (א'); זה בדיוק מה שמלמד שעצלות לבדה אינה מספיקה. `interleave` אינה מוותרת על אף איבר, רק משנה את הסדר (ג'). והטיפול ברשימה ריקה תקין בשתיהן (ד').\n\n**קדימון**: אותו שיקול בדיוק יחזור בפרק 5, כשנשאל האם מנוע החיפוש של Prolog מוצא כל פתרון בזמן סופי."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "כמה פעמים תופעל פונקציית הצעד `(+ n 1)` שבתוך `integers-from` כשנריץ את הרצף הבא?\n```scheme\n(define ints (integers-from 0))\n(take ints 5)\n(take ints 5)\n```",
+   "answerHe": "**שמונה פעמים — ארבע בכל `take`.**\n\nכל `(take ints 5)` מפעילה `tail` ארבע פעמים (האיבר הראשון כבר מחושב בתוך `ints`, ואחריו צריך ארבעה צעדים כדי להגיע לחמישה איברים), וכל `tail` מפעילה thunk שמריץ את `(+ n 1)` פעם אחת.\n\n**הנקודה**: הקריאה השנייה **אינה** נהנית מהראשונה. אין שום מטמון — thunk הוא פונקציה, ופונקציה רצה מחדש בכל הפעלה.",
+   "explanationHe": "‏**מה שנבדק**: ההבנה שרשימה עצלה במימוש הזה **חסרת מימואיזציה** (memoization) — הנקודה שהדף מציין במפורש (\"the successive steps of the expansion are repeated\").\n\n**איך לתקן**: לעטוף כל thunk בקופסה (box) שמאחסנת את התוצאה בהפעלה הראשונה ומחזירה אותה אחר כך — בדיוק תבנית הקופסאות מ-2.8. אז שתי הקריאות יחד היו עולות ארבע הפעלות בלבד. בשפות כמו Haskell זו התנהגות ברירת המחדל, וזו הסיבה שהגדרות כמו `fib-numbers` יעילות שם ואיטיות כאן.\n\n**טעות נפוצה**: לספור חמש הפעלות ל-`take` במקום ארבע — האיבר הראשון של `ints` חושב כבר בזמן ה-`define`, לפני כל `tail`."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "בדף מוצגות שתי דרכים לממש גנרטורים ב-$$L5$$: הגרסה הפונקציונלית (`g2` עם `iter->next`) והגרסה עם מוטציה (`g3` עם `make-generator`). מהו ההבדל המהותי ביניהן, ומה כל אחת מרוויחה?",
+   "answerHe": "**ההבדל: מי מחזיק את המצב.**\n\nב-`g2`, ‏`iter->next` היא **בנאי** — היא לא נוגעת באיטרטור שקיבלה אלא מחזירה חדש. המצב נמצא בידי הקורא, שמחזיק את הערך שחזר אליו.\n\nב-`g3`, ‏`make-generator` עוטפת משתנה `gen` בסגור ומעדכנת אותו ב-`set!` בכל `'next!`. המצב פנימי ונסתר, והלקוח מדבר עם האובייקט בשליחת הודעות (`'next!`, `'value`).\n\n**מה מרוויחה הגרסה הפונקציונלית:**\n- **אפשר לחזור אחורה.** אם שמרתם איטרטור ישן, אפשר להריץ ממנו שוב ולקבל בדיוק אותה סדרה. זה בלתי אפשרי ב-`g3` וגם בגנרטור של JavaScript — שם המצב נדרס.\n- אפשר לפצל: שני צרכנים שונים יכולים לצאת מאותה נקודה ולהתקדם עצמאית.\n- קל יותר לנתח ולבדוק, כי אין תלות בהיסטוריית הקריאות.\n\n**מה מרוויחה גרסת המוטציה:**\n- ממשק נוח וקצר יותר — לא צריך להעביר את האיטרטור החדש הלאה ידנית;\n- התנהגות זהה לגנרטורים של JavaScript, כלומר מודל מוכר;\n- אפשר להעביר את הגנרטור כערך אחד יציב בלי לחשוש ש\"פספסו\" עדכון.\n\n**המחיר של המוטציה** הוא בדיוק היתרון של השנייה: אין דרך חזרה, ושני צרכנים שחולקים את אותו גנרטור גונבים זה מזה איברים.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הניסוח ש-`iter->next` היא בנאי ולא מְשַׁנֶּה, ולכן מחזירה איטרטור חדש; (2) שב-`g3` המצב נשמר בסגור ומתעדכן ב-`set!`; (3) לפחות יתרון אחד אמיתי לכל צד — הקריטי הוא שהגרסה הפונקציונלית מאפשרת להריץ מחדש ממצב שמור; (4) הקישור לרעיון ה-*persistent datatypes* מ-1.4, שממנו נגזרה כל הגישה.\n\n**בונוס**: לציין ש-`make-generator` היא בעצם תבנית העברת הודעות (message passing) — סגור שמקבל שם פעולה ומתנהג כאובייקט, אותה טכניקה כמו `make-counter` מ-2.8."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "מה מאפשר לרשימה עצלה להיות מוגדרת אינדוקטיבית **בלי מקרה בסיס**, כמו `(define ones (cons-lzl 1 (lambda () ones)))`?",
+   "options": [
+    "ש-Scheme מזהה הגדרות מעגליות ומטפלת בהן במיוחד",
+    "שהזנב עטוף ב-lambda ולכן אינו מוערך בזמן ההגדרה, אלא רק אם וכאשר הצרכן יבקש אותו",
+    "ש-`cons-lzl` בודקת אם הרשימה כבר קיימת",
+    "שהערך `1` הוא אטומי ולכן אינו דורש רקורסיה"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: ההשהיה.**\n\nהגדרה רקורסיבית בלי תנאי עצירה אמורה לא להסתיים — ואכן `(define ones (cons-lzl 1 ones))` הייתה נכשלת. מה שמציל היא ה-`lambda`: גוף ה-lambda אינו מוערך בזמן יצירתה, ולכן `ones` שבתוכה אינה נדרשת עדיין. עד שמישהו יקרא ל-`tail`, ההגדרה כבר הושלמה ו-`ones` קשורה.\n\n**הניסוח שכדאי לשנן**: ברשימה עצלה הרקורסיה נעצרת לא בגלל תנאי בקוד, אלא **בגלל שהצרכן הפסיק לבקש**. תנאי העצירה עבר מהיצרן לצרכן — וזו בדיוק הסיבה ש-`take` בטוחה ו-`iter->list` מסוכנת.\n\n**למה השאר שגויים**: אין ב-Scheme שום טיפול מיוחד בהגדרות מעגליות — הכול נובע מסמנטיקת ההערכה הרגילה של `lambda` (א'). ‏`cons-lzl` היא בסך הכול `cons` ואינה בודקת דבר (ג'). ואטומיות הערך `1` אינה קשורה — גם `(cons-lzl (f x) (lambda () …))` היה עובד (ד')."
+  }
+ ]
+}

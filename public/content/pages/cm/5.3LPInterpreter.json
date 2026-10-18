@@ -1,0 +1,1047 @@
+{
+ "id": "cm/5.3LPInterpreter",
+ "kind": "lecture",
+ "sourcePath": "class_material/5.3LPInterpreter.md",
+ "titleEn": "Logic Programming Interpreter",
+ "titleHe": "מפרש לתכנות לוגי",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/5.3LPInterpreter:0",
+   "depth": 1,
+   "headingEn": "Logic Programming Interpreter",
+   "raw": "# Logic Programming Interpreter\n\n",
+   "blocks": [],
+   "headingHe": "מפרש לתכנות לוגי"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:1",
+   "depth": 2,
+   "headingEn": "PPL2023",
+   "raw": "## PPL2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:1:0",
+     "type": "prose",
+     "en": "We describe an interpreter for Logic Programming written in Scheme.\nThe interpreter re-uses many of the tools we developed when developing interpreters for Functional Programming (the sequence $$L1$$ to $$L7$$ we introduced in previous chapters).  In particular, we reuse directly:\n",
+     "hash": "3022c438a3eea567",
+     "he": "אנו מתארים כאן מפרש (interpreter) לתכנות לוגי, הכתוב ב-Scheme.\nהמפרש עושה שימוש חוזר בהרבה מן הכלים שפיתחנו כשבנינו מפרשים לתכנות פונקציונלי (סדרת השפות מ-$$L1$$ עד $$L7$$ שהצגנו בפרקים הקודמים). באופן ישיר אנו ממחזרים:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:1:1",
+     "type": "list",
+     "en": "* The Substitution abstract data type\n* The Equation abstract data type\n* The unifier algorithm\n\n",
+     "hash": "85741a0a75fcac5f",
+     "he": "* את טיפוס הנתונים המופשט של ההצבה (Substitution)\n* את טיפוס הנתונים המופשט של המשוואה (Equation)\n* את אלגוריתם האוניפיקציה (unifier)"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:1:2",
+     "type": "prose",
+     "en": "We also implement the abstract syntax for LP using the same methodology we used for $$Li$$ - as a disjoint union type of expression types.\n\n",
+     "hash": "71baa952b63ab95f",
+     "he": "בנוסף, אנו מממשים את התחביר המופשט (abstract syntax) של LP באותה מתודולוגיה שהשתמשנו בה עבור $$Li$$ — כטיפוס איחוד זר (disjoint union type) של סוגי ביטויים."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:1:3",
+     "type": "prose",
+     "en": "The new part of the LP interpreter is the implementation of the `answer-query` algorithm.  Recall that the `answer-query` relies on two key ingredients:\n",
+     "hash": "206e212221c94ad4",
+     "he": "החלק החדש במפרש ה-LP הוא המימוש של אלגוריתם `answer-query`. נזכיר ש-`answer-query` נשען על שני מרכיבי מפתח:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:1:4",
+     "type": "list",
+     "en": "* Unification\n* The construction of a proof-tree given a program and a query.\n\n",
+     "hash": "22b6a7dad8997e81",
+     "he": "* אוניפיקציה\n* בנייה של עץ הוכחה (proof tree) בהינתן תוכנית ושאילתה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:1:5",
+     "type": "prose",
+     "en": "We describe the proof-tree construction algorithm through the usage of a data type we call **lazy tree** which is a generalization of the lazy tree we introduced in Chapter 4 to the case of a possibly infinite tree.\n\n\n",
+     "hash": "bb64f27a6591932f",
+     "he": "את אלגוריתם בניית עץ ההוכחה נתאר באמצעות טיפוס נתונים שנקרא לו **עץ עצל (lazy tree)**, שהוא הכללה של העץ העצל שהצגנו בפרק 4 למקרה של עץ שעומקו עשוי להיות אינסופי."
+    }
+   ],
+   "headingHe": "PPL2023"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:2",
+   "depth": 2,
+   "headingEn": "Architecture of the Logic Programming Interpreter",
+   "raw": "## Architecture of the Logic Programming Interpreter\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:2:0",
+     "type": "prose",
+     "en": "The overall system architecture is given in the following architecture diagram.\n",
+     "hash": "fbd77be3ed8db66c",
+     "he": "ארכיטקטורת המערכת כולה מתוארת בתרשים הארכיטקטורה שלהלן. *(שימו לב: התרשים עצמו אינו קיים בעמוד המקור — הרשימה שאחרי המשפט הזה היא כל מה שיש.)*"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:2:1",
+     "type": "list",
+     "en": "1. **Syntax**: This layer includes, so far, only an abstract syntax module LP-AST, which defines aconvenient interface to all syntactic elements in an LP program.\n2. **ADTs**: The LP related ADTs are Substitution and Term-equation, which are used for implementing a unification operation in Unify. \n3. **lazy-tree-ADT** represents an n-ary labeled tree (has labels on internal nodes), whose depth might be infinite. The constructor of lazy trees wraps the child-branches of a node with a lambda abstraction that enables laziness: it delays the construction of children nodes until requested.\n4. **LP-solver**: The Answer-Query module, defines the LP Gsel and Rsel, and the algorithm for proof-tree construction and search.\n\n\n",
+     "hash": "cf4749588450379e",
+     "he": "1. **תחביר (Syntax)**: השכבה הזאת כוללת, בשלב זה, רק מודול תחביר מופשט אחד — LP-AST — שמגדיר ממשק נוח לכל היחידות התחביריות שבתוכנית LP.\n2. **ADT-ים**: טיפוסי הנתונים המופשטים הייחודיים ל-LP הם Substitution ו-Term-equation, ובעזרתם ממומשת פעולת האוניפיקציה במודול Unify.\n3. **lazy-tree-ADT** מייצג עץ מתויג n-ארי (התיוג הוא על הצמתים הפנימיים), שעומקו עשוי להיות אינסופי. בנאי העצים העצלים עוטף את ענפי הבנים של כל צומת בהפשטת lambda שמאפשרת את העצלות: הוא דוחה את בניית צמתי הבנים עד לרגע שבו מבקשים אותם.\n4. **פותר ה-LP (LP-solver)**: מודול Answer-Query, שמגדיר את Gsel ואת Rsel של LP ואת האלגוריתם לבניית עץ ההוכחה ולחיפוש בו."
+    }
+   ],
+   "headingHe": "הארכיטקטורה של המפרש לתכנות לוגי"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:3",
+   "depth": 2,
+   "headingEn": "Scheme Programming Style",
+   "raw": "## Scheme Programming Style\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:3:0",
+     "type": "prose",
+     "en": "We implement this interpreter in Scheme (the subset of Scheme we have covered in $$L5$$).\nThe programming style we use is extremely close to the one we used in TypeScript: \n\n",
+     "hash": "d0e42f1e4430df20",
+     "he": "את המפרש הזה אנו מממשים ב-Scheme (תת-הקבוצה של Scheme שכיסינו ב-$$L5$$).\nסגנון התכנות שנשתמש בו קרוב מאוד לזה שהשתמשנו בו ב-TypeScript:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:1",
+     "type": "list",
+     "en": "* Data types are implemented as functional interfaces with a value constructor, type predicate and accessors. We do not use type annotations and type inference - but take care to describe the data structures we use as disjoint union types.\n\n* The naming convention we use for constructors are `make-TYPE`, type predicate is `TYPE?`, type accessors are functions named `TYPE->FIELDNAME`. \n\n* Disjoint union types are defined only by a type predicate - as was the case in TypeScript - for example:\n\n",
+     "hash": "1ae39fcc94657ed5",
+     "he": "* טיפוסי נתונים ממומשים כממשקים פונקציונליים עם בנאי ערכים (value constructor), פרדיקט טיפוס (type predicate) ופונקציות גישה (accessors). איננו משתמשים בהערות טיפוס (type annotations) ולא בהסקת טיפוסים — אבל מקפידים לתאר את מבני הנתונים שאנו משתמשים בהם כטיפוסי איחוד זר (disjoint union types).\n\n* מוסכמת השמות שאנו משתמשים בה: בנאים נקראים `make-TYPE`, פרדיקט הטיפוס נקרא `TYPE?`, ופונקציות הגישה לשדות הן פונקציות בשם `TYPE->FIELDNAME`.\n\n* טיפוסי איחוד זר מוגדרים על ידי פרדיקט טיפוס בלבד — כפי שהיה גם ב-TypeScript — לדוגמה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:2",
+     "type": "code",
+     "en": "```scheme\n;; Term: Symbol | Number | Variable | Compound-term\n\n;;  Signature: term?(x)\n;;  Type: [T -> Boolean]\n;;  Purpose: Type predicate for terms\n;;  Pre-conditions: -\n(define term?\n  (lambda (x)\n    (or (symbol? x)\n        (number? x)\n        (variable? x)\n        (compound-term? x))))\n```\n\n",
+     "hash": "d17f51f21fc334d8",
+     "lang": "scheme",
+     "noteHe": "הבלוק הזה הוא הדוגמה הקנונית לסגנון שכל העמוד בנוי עליו, וכדאי לפרק אותו לרכיביו. השורה הראשונה היא **הערה** ולא קוד: ‏`;; Term: Symbol | Number | Variable | Compound-term` מתעדת טיפוס איחוד זר (disjoint union) — ב-TypeScript זו הייתה הצהרת `type` אמיתית שהמהדר בודק, וב-Scheme היא תיעוד בלבד, כך שכל האחריות עוברת למתכנת. אחריה שלוש שורות התיעוד שסגנון הקורס דורש בכל פונקציה: `Signature` (השם והפרמטרים), `Type` (החתימה — כאן `[T -> Boolean]`, כלומר פרדיקט שמקבל כל ערך ומחזיר בוליאני) ו-`Pre-conditions` (כאן `-`, כלומר אין). הפונקציה עצמה היא `or` של ארבעה פרדיקטים, אחד לכל וריאנט של האיחוד: ‏`symbol?` ו-`number?` הם פרימיטיביים של Scheme שמזהים קבועים (constants), ו-`variable?`/`compound-term?` הם פרדיקטים שהמפרש מגדיר בעצמו. שימו לב שהאיחוד כאן **זר** באמת: משתנה מיוצג כרשימה `(var X)` ו-term מורכב כרשימה `(functor arg …)`, ואף אחד מהם אינו symbol ואינו number — ולכן סדר הבדיקות ב-`or` אינו משנה, וזו בדיוק התכונה שהופכת מבנה כזה לבטוח. ‏`compound-term?` תבדוק בתורה את ה-terms שבתוכה, כך שההגדרה הזאת היא **רקורסיבית**; וזה הפונקטור (functor) של 5.2 שהכניס את הרקורסיה הזאת לשפה מלכתחילה. כדאי לשנן את השלישייה `make-TYPE` / `TYPE?` / `TYPE->FIELD`: היא חוזרת בכל אחד מה-ADT-ים בעמוד הזה, ובמבחן היא הרמז המהיר לזהות איזה תפקיד ממלאת פונקציה שלא ראיתם קודם."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:3",
+     "type": "list",
+     "en": "* The structure of the recursive functions that traverse AST values follows the structure of the AST datatypes. The typical structure of the functions that we have used in TypeScript such as:\n",
+     "hash": "6cf1dd932f21a41e",
+     "he": "* מבנה הפונקציות הרקורסיביות שסורקות ערכי AST עוקב אחר מבנה טיפוסי ה-AST עצמם. המבנה הטיפוסי של הפונקציות שהשתמשנו בהן ב-TypeScript, כמו:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:4",
+     "type": "code",
+     "en": "```typescript\n  const typeTraversal = (x: TYPE): T =>\n    isSubTYPE1(x) ? do1(x) :\n    isSubTYPE2(x) ? do2(x) :\n    do3(x);\n```\n",
+     "hash": "64df6d65831ad1a2",
+     "lang": "typescript",
+     "noteHe": "‏`typeTraversal` איננו קוד אמיתי אלא **תבנית** (schema): ‏`TYPE`, `SubTYPE1` ו-`do1` הם מקומות ריקים שממלאים בכל מימוש קונקרטי. הרעיון: פונקציה שסורקת ערך מטיפוס איחוד זר נכתבת כשרשרת של אופרטורים תלת-מקומיים (`? :`), אחד לכל וריאנט, כשהתנאי הוא תמיד **פרדיקט הטיפוס** של אותו וריאנט והענף הוא הטיפול המתאים לו. הוריאנט האחרון אינו נבדק כלל אלא מקבל את ברירת המחדל (`do3(x)`) — זה חוסך בדיקה, אבל גם אומר שערך לא-חוקי יטופל בשקט כאילו היה `SubTYPE3`, וזו טעות נפוצה. ב-TypeScript יש כאן בונוס שאין ב-Scheme: אם `isSubTYPE1` נכתב כ-type guard, המהדר **מצמצם** את הטיפוס בתוך הענף, ולכן `do1` מקבל ארגומנט מוקלד ולא `any`. השוו ל-2.5 ול-3.1 — כל פונקציה שעברה שם על ה-AST נראתה בדיוק כך."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:5",
+     "type": "prose",
+     "en": "is implemented in Scheme as:\n",
+     "hash": "a09ba58cc2336558",
+     "he": "ממומש ב-Scheme כך:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:6",
+     "type": "code",
+     "en": "```scheme\n  (define type-traversal \n    (lambda (x)\n      (cond ((sub-type1? x) (do1 x))\n            ((sub-type2? x) (do2 x))\n            (else (do3 x)))))\n```\n\n",
+     "hash": "fac3f9fa7c7cdf4f",
+     "lang": "scheme",
+     "noteHe": "אותה תבנית בדיוק, ב-Scheme. ‏`cond` מקבל רשימה של פסוקיות, וכל פסוקית היא **בעצמה רשימה** בצורה `(<תנאי> <ביטוי>)` — מכאן הסוגריים הכפולים ב-`((sub-type1? x) (do1 x))`, ושכחה שלהם היא הטעות התחבירית הנפוצה ביותר של מי שבא מ-TypeScript. ‏`cond` מעריך את התנאים לפי הסדר, מלמעלה למטה, ועוצר בראשון שמחזיר ערך שאינו `#f`; ‏`else` היא פסוקית ברירת המחדל, המקבילה ל-`do3(x)` בשרשרת התלת-מקומית. ההתאמה בין שני הבלוקים היא אחד-לאחד, ולכן כל מה שלמדנו על מעבר על AST בפרקים 2–3 עובר לכאן ללא שינוי מהותי. ההבדל היחיד, וכדאי לזכור אותו: ב-Scheme אין צמצום טיפוסים, ולכן `do1` פשוט **סומכת** על כך שהפרדיקט שלפניה כבר בדק את הצורה — אם קוראים ל-`do1` ישירות, שום דבר לא יעצור אותנו."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:3:7",
+     "type": "list",
+     "en": "* We use in general Scheme lists instead of TypeScript arrays and Scheme symbols instead of TypeScript strings.\n\n",
+     "hash": "6a3296e02531c885",
+     "he": "* באופן כללי אנו משתמשים ברשימות של Scheme במקום במערכים של TypeScript, ובסמלים (symbols) של Scheme במקום במחרוזות."
+    }
+   ],
+   "headingHe": "סגנון התכנות ב-Scheme"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:4",
+   "depth": 3,
+   "headingEn": "Error Handling",
+   "raw": "### Error Handling\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:4:0",
+     "type": "prose",
+     "en": "We can implement the Result monad in Scheme the same way we did in TypeScript. \nHere we take a shortcut for the sake of brevity, and implement error handling in the interpreter by using exceptions in Scheme.  \nExceptions are thrown in Racket using the `error` primitive - which interrupts the current code and returns to the toplevel execution with an error value.\nFor example:\n\n",
+     "hash": "4e04019746b1c87b",
+     "he": "אנחנו יכולים לממש את מונאדת Result ב-Scheme בדיוק כפי שעשינו ב-TypeScript.\nכאן אנו נוקטים קיצור דרך לשם הקיצור, ומממשים את הטיפול בשגיאות במפרש באמצעות חריגות (exceptions) של Scheme.\nחריגות נזרקות ב-Racket באמצעות הפרימיטיב `error` — שמפסיק את ריצת הקוד הנוכחי וחוזר לרמת ההרצה העליונה (toplevel) עם ערך שגיאה.\nלדוגמה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:4:1",
+     "type": "code",
+     "en": "```scheme\n(define program->procedure \n  (lambda (program predicate)\n    (let ((procedure (assoc predicate program)))\n      (if procedure\n          procedure\n          (error 'program->procedure\n                 \"Program does not include predicate ~s\" predicate)))))\n```\n\n\n",
+     "hash": "e80a79c3a5c0a5b4",
+     "lang": "scheme",
+     "noteHe": "‏`program->procedure` מקבלת תוכנית ופרדיקט, ומחזירה את הפרוצדורה שמגדירה את הפרדיקט הזה. ‏`assoc` הוא פרימיטיב של Scheme שמחפש ברשימת שיוך (association list) את האיבר שה-`car` שלו שווה למפתח שביקשנו: כאן התוכנית היא רשימת פרוצדורות, וכל פרוצדורה מתחילה בתג `(predicate arity)` — ולכן `assoc` מוצאת את הפרוצדורה לפי התג הזה (ראו את הקידוד בסעיף הבא). אם אין התאמה, `assoc` מחזירה `#f`, ולכן ה-`if` נשען על מוסכמת האמיתות של Scheme: ‏`#f` הוא **הערך השקרי היחיד** בשפה, וכל דבר אחר — כולל הרשימה הריקה! — נחשב אמיתי. שימו לב שהערך המוחזר הוא כל האיבר שנמצא, כולל התג עצמו, ולא רק רשימת הפסוקיות. ‏`error` הוא הפרימיטיב של Racket לזריקת חריגה: הארגומנט הראשון הוא סמל שמזהה את מקור השגיאה (מקובל לשים את שם הפונקציה), השני הוא מחרוזת פורמט, ו-`~s` הוא מציין המקום שאליו מוזרק הערך של `predicate`. כדאי להשוות ל-3.2–3.3, שם כל פונקציה החזירה `Result` (כלומר `Ok` או `Failure`) והכישלון היה **ערך** שעובר בשרשרת החישוב: כאן, לעומת זאת, החריגה קופצת מיד לרמה העליונה, ולכן אי אפשר לתפוס אותה, לתקן ולהמשיך — זהו קיצור דרך מודע שהעמוד מודה בו במפורש. שאלת מבחן קלאסית: מה היתרון של מונאדת Result על חריגות? התשובה: הטיפוס עצמו מתעד את אפשרות הכישלון והמהדר מאלץ לטפל בה, בעוד חריגה איננה נראית בחתימת הפונקציה כלל."
+    }
+   ],
+   "headingHe": "טיפול בשגיאות"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:5",
+   "depth": 2,
+   "headingEn": "LP Abstract Syntax",
+   "raw": "## LP Abstract Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:5:0",
+     "type": "prose",
+     "en": "To simplify the code of the interpreter, we do not implement tagged disjoint types the way we did in TypeScript.\nWe also do not implement a parser / unparser to read logic programs in concrete syntax and convert them to their AST representation.  Instead, we use a *readable S-exp-based AST encoding*.  \n\n",
+     "hash": "d79c782c7969d08a",
+     "he": "כדי לפשט את הקוד של המפרש, אנחנו לא מממשים טיפוסי איחוד זר עם תגיות (tagged disjoint types) כפי שעשינו ב-TypeScript.\nגם parser / unparser איננו מממשים, כלומר אין לנו דרך לקרוא תוכניות לוגיות בתחביר הקונקרטי ולהמיר אותן לייצוג ה-AST שלהן. במקום זאת אנו משתמשים ב*קידוד AST קריא המבוסס על S-expression*."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:1",
+     "type": "prose",
+     "en": "In this approach, a programs is represented as a list of the abstract representations of its procedures. Note that this list\nactually represents a set. For example, the program:\n",
+     "hash": "bfcec2c84b7a6d0b",
+     "he": "בגישה הזאת, תוכנית מיוצגת כרשימה של הייצוגים המופשטים של הפרוצדורות שלה. שימו לב שהרשימה הזאת מייצגת בפועל **קבוצה**. לדוגמה, התוכנית:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:2",
+     "type": "code",
+     "en": "```prolog\nExample1:\n% Signature: append(List1, List2, List3)/3\n% Purpose: List3 is the concatenation of List1 and List2.\nappend([], Xs, Xs).\nappend([X|Xs], Y, [X|Zs] ) :- append(Xs, Y, Zs).\nmember(X, Ys) :- append(Zs, [X|Xs], Ys).\n```\n",
+     "hash": "8b2df1a1902ec75d",
+     "lang": "prolog",
+     "noteHe": "זו התוכנית שתשמש דוגמה רצה לכל אורך העמוד, כתובה בתחביר Prolog הרגיל של 5.2. שתי הפסוקיות של `append/3` הן ההגדרה הרקורסיבית המוכרת: שרשור של רשימה ריקה עם `Xs` מחזיר `Xs` (עובדה — מקרה הבסיס), ואחרת מקלפים את האיבר הראשון מן הרשימה הראשונה, משרשרים רקורסיבית את הזנב, ומחזירים את אותו איבר בראש התוצאה. ‏`member/2` מוגדר כאן **דרך** `append` ולא ברקורסיה עצמאית: ‏`X` הוא איבר ב-`Ys` אם ורק אם ניתן לפצל את `Ys` לרישא כלשהי `Zs` ולסיפא שמתחילה ב-`X`. זהו בדיוק מוד ה\"פיצול\" של `append/3` שראינו ב-5.2 — אותו פרדיקט עצמו, אלא שהפעם הארגומנט השלישי חסום (bound) והשניים הראשונים חופשיים, וה-backtracking מייצר את כל n+1 הפיצולים בזה אחר זה. שימו לב לשלוש מגרעות במקור: ל-`member` **אין** שורות `% Signature`/`% Purpose`, למרות שסגנון הקורס דורש אותן בכל פרדיקט; הפסוקית השנייה של `append` קוראת לארגומנט השני `Y` ולא `Ys` כמו בפסוקית הראשונה, ונכתבה עם רווח מיותר לפני הסוגר (`[X|Zs] )`); ובגוף של `member` המשתנים `Zs` ו-`Xs` מופיעים פעם אחת בלבד — משתני singleton, ש-Prolog אמיתי היה מזהיר עליהם ומצפה במקומם ל-`_`."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:3",
+     "type": "prose",
+     "en": "is represented as the list:\n",
+     "hash": "cc711c3647ca5a12",
+     "he": "מיוצגת כרשימה הבאה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:4",
+     "type": "code",
+     "en": "```scheme\n( ((append 3) \n   (0 ((append empty (var Xs) (var Xs))\n       true))\n   (1 ((append (cons (var X) (var Xs))\n               (var Y)\n               (cons (var X) (var Zs)))\n       (append (var Xs) (var Y) (var Zs)))) )\n       \n  ((member 2)\n   (0 ((member (var X) (var Ys))\n       (append (var Zs)\n               (cons (var X) (var Xs))\n               (var Ys)) )) )\n```\n\n",
+     "hash": "3063a675b92161d4",
+     "lang": "scheme",
+     "noteHe": "זהו קידוד ה-AST של אותה תוכנית בדיוק, כרשימת S-expression של Scheme: במקום לכתוב parser, פשוט **כותבים את עץ התחביר ישירות**. קראו אותו מבחוץ פנימה. הרשימה החיצונית היא התוכנית, ובתוכה שתי פרוצדורות. כל פרוצדורה מתחילה בתג `(append 3)` או `(member 2)` — הזוג (פרדיקט, מקומיות) שמזהה אותה, וזה בדיוק המפתח ש-`assoc` חיפשה בבלוק הקודם — ואחריו באות הפסוקיות, ממוספרות מ-0. כל פסוקית היא `(<מספר> (<ראש> . <גוף>))`, ולכן `(0 ((append empty (var Xs) (var Xs)) true))` פירושו: ראש `append(empty, Xs, Xs)` וגוף `(true)`. כאן נמצא הטריק המרכזי של הקידוד: **עובדה מקודדת ככלל שגופו `true`**, כדי שלמפרש יהיה מבנה אחיד אחד בלבד לטפל בו, ולא שני מקרים נפרדים. שלוש מוסכמות תרגום ה-terms מופיעות כאן כולן: קבוע נשאר סמל Scheme (`empty`), משתנה הוא הזוג `(var X)`, ו-term מורכב הוא `(functor arg …)` — ולכן הרשימה `[X|Xs]` של Prolog הופכת ל-`(cons (var X) (var Xs))`, כי ב-LP רשימה איננה טיפוס אלא רק `cons` מקונן (5.2). **באג במקור:** הבלוק הזה אינו מאוזן בסוגריים — הסוגר `(` הראשון, זה שפותח את רשימת התוכנית כולה, **מעולם לא נסגר** (35 סוגריים פותחים מול 34 סוגרים); הדבקה שלו ל-Racket תשאיר את ה-REPL תלוי בהמתנה להשלמת הביטוי. חסר `)` אחד בסוף. ולסיום, שאלת מבחן קלאסית: הטקסט אומר שהרשימה הזאת \"מייצגת קבוצה\", כלומר מבחינה סמנטית הסדר לא אמור להשפיע — אבל `Rsel` (סעיף 13) עוברת על הפסוקיות **בסדר שבו הן כתובות**, ולכן הסדר קובע גם את סדר התשובות וגם את עצם השאלה אם החישוב מסתיים בכלל. זהו אותו פער בין המשמעות ההצהרתית והמשמעות התפעולית שראינו ב-`ancestor`/`ancestor2` (5.1) וב-`reverse` (5.2)."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:5",
+     "type": "prose",
+     "en": "Note the following conventions in this encoding:\n",
+     "hash": "832d54a58551f722",
+     "he": "שימו לב למוסכמות הבאות בקידוד הזה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:5:6",
+     "type": "list",
+     "en": "* A program is encoded as a list of procedures.\n* Each procedure is encoded as a list:\n  * starting with the `(predicate arity)` tag - for example `append/3` is encoded as `(append 3)` and `member/2` is encoded as `(member 2)`.\n  * Then a list of clauses (rules or facts).\n  * Facts are encoded as rules with a body containing only the `true` atomic formula - so that all clauses are represented as rules.\n  * Rules are numbered, starting at 0.\n* Rules are represented as a list `(<number> (<head> . <body>))` within each procedure.\n* An atomic formula `pred(arg1, arg2, arg3)` is represented as `(pred arg1 arg2 arg3)`.\n* Terms are represented as:\n  * Constants as Scheme constants (symbol or number)\n  * Variables as a pair `(var <Varname>)`\n  * Composite terms `functor(arg1,arg2)` as `(functor arg1 arg2)`\n    * In particular, lists are represented as nested `cons` terms.\n\n\n",
+     "hash": "e0cc077b4de7af53",
+     "he": "* תוכנית מקודדת כרשימה של פרוצדורות.\n* כל פרוצדורה מקודדת כרשימה:\n  * שמתחילה בתג `(predicate arity)` — לדוגמה, `append/3` מקודד כ-`(append 3)` ו-`member/2` מקודד כ-`(member 2)`.\n  * ואחריו רשימה של פסוקיות (כללים או עובדות).\n  * עובדות מקודדות ככללים שגופם מכיל את הנוסחה האטומית `true` בלבד — כך שכל הפסוקיות מיוצגות ככללים.\n  * הכללים ממוספרים, כשהמספור מתחיל ב-0.\n* כללים מיוצגים כרשימה `(<number> (<head> . <body>))` בתוך הפרוצדורה שלהם.\n* נוסחה אטומית `pred(arg1, arg2, arg3)` מיוצגת כ-`(pred arg1 arg2 arg3)`.\n* Terms מיוצגים כך:\n  * קבועים — כקבועים של Scheme (סמל או מספר)\n  * משתנים — כזוג `(var <Varname>)`\n  * terms מורכבים `functor(arg1,arg2)` — כ-`(functor arg1 arg2)`\n    * ובפרט, רשימות מיוצגות כ-terms מקוננים של `cons`."
+    }
+   ],
+   "headingHe": "התחביר המופשט של LP"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:6",
+   "depth": 3,
+   "headingEn": "LP-AST Functional Interface",
+   "raw": "### LP-AST Functional Interface\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:6:0",
+     "type": "list",
+     "en": "* program: (a list of procedures)\n",
+     "hash": "1144647fcfc2c8cc",
+     "he": "* program (תוכנית): רשימה של פרוצדורות"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:1",
+     "type": "code",
+     "en": "```scheme   \n   (make-program procedures-set)\n   (program->predicates program)\n   (program->procedure program predicate)\n   (program->procedure->numbered-rules program predicate)\n   (program->procedure->rule program predicate number)\n```\n",
+     "hash": "23bf6c09cbb83031",
+     "lang": "scheme",
+     "noteHe": "חמש הפונקציות של השכבה העליונה. ‏`make-program` הוא הבנאי, והפרמטר שלו נקרא `procedures-set` כדי להזכיר שמדובר בקבוצה ולא בסדרה. ‏`program->predicates` מחזירה את רשימת התגים `(pred arity)` של כל הפרוצדורות בתוכנית — כלומר את \"טבלת התוכן\" שלה. ‏`program->procedure` היא בדיוק הפונקציה שראינו בבלוק הקודם (ה-`assoc` שזורקת חריגה אם הפרדיקט לא קיים). שימו לב לתבנית השמות עם החץ הכפול: ‏`program->procedure->numbered-rules` היא **מסלול** בעץ התחביר — קח תוכנית, ירד לפרוצדורה, ומשם לרשימת הכללים הממוספרים; ו-`program->procedure->rule` יורדת שלב נוסף ומחזירה כלל בודד לפי מספרו. זו מוסכמת שמות בלבד, לא תחביר של השפה: השם הוא מחרוזת אחת שהמתכנת בחר, וה-`->` בו הוא תו רגיל לגמרי (ב-Scheme מותרים ב-identifier תווים ש-TypeScript לא היה מרשה). טעות שכדאי להיות ערים לה: הרשימה כאן היא **התיעוד** של הממשק, אבל `Rsel` בסעיף 13 קוראת ל-`program->procedure->rules` — בלי ה-`numbered-` — שם שאינו מופיע ברשימה הזאת כלל. אי-התאמה בין הממשק המתועד לקוד בפועל."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:2",
+     "type": "list",
+     "en": "* procedure: (a list of rules with heads for the same pred/n)\n",
+     "hash": "36007cf9acf8bfa3",
+     "he": "* procedure (פרוצדורה): רשימה של כללים שהראשים של כולם הם לאותו `pred/n`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:3",
+     "type": "code",
+     "en": "```scheme\n   (make-procedure rules)\n   (procedure->predicate procedure)\n   (procedure->numbered-rules procedure)\n```   \n",
+     "hash": "3f84a5da3c36bb7e",
+     "lang": "scheme",
+     "noteHe": "שכבת הפרוצדורה. הדבר המעניין כאן הוא מה ש**אין** בבנאי: ‏`make-procedure` מקבלת רשימת כללים בלבד — לא את התג `(pred arity)`. התג מחושב מן הכללים עצמם, כלומר מהראש של הכלל הראשון (הפרדיקט שבראשו ומספר הארגומנטים שלו). מכאן נובע תנאי מקדים שכל ההגדרה נשענת עליו: כל הראשים חייבים להיות של אותו פרדיקט ובאותה מקומיות — ושום דבר בקוד אינו אוכף אותו, כך שערבוב שני פרדיקטים באותה קריאה ל-`make-procedure` ייצור בשקט פרוצדורה שבורה שרק חלק מכלליה יימצאו אי פעם. ‏`procedure->predicate` מחזירה את התג הזה, ו-`procedure->numbered-rules` את הכללים עם המספרים שלהם. בסעיף 15 תראו את הבנאי בפעולה: ‏`(make-procedure (list app1 app2))`."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:4",
+     "type": "list",
+     "en": "* rule:\n",
+     "hash": "7e556eed251f5af6",
+     "he": "* rule (כלל):"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:5",
+     "type": "code",
+     "en": "```scheme   \n    (make-rule head body)\n    (rule->head rule)\n    (rule->body rule)\n```   \n",
+     "hash": "96e03df68c4aa0ca",
+     "lang": "scheme",
+     "noteHe": "ה-ADT הפשוט ביותר בעמוד: כלל הוא בסך הכול זוג של ראש (head) וגוף (body), עם בנאי ושתי פונקציות גישה. שתי נקודות שכדאי לשים לב אליהן. ראשית, הגוף הוא **רשימה** של נוסחאות אטומיות (צירוף — conjunction), ולא נוסחה בודדת — ולכן עובדה נבנית כ-`(make-rule head (list 'true))`, בדיוק כפי שראינו בקידוד של סעיף 5. שנית, **מספר הכלל אינו חלק מן הכלל**: הוא נשמר בשכבת הפרוצדורה, ב-`numbered-rules`, כי הוא מזהה את מקום הכלל בתוכנית ולא תכונה שלו. בסעיף 7 יתווסף לכלל אביזר נוסף, `rule->vars`, שמאפשר לשנות את שמות המשתנים שלו."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:6",
+     "type": "list",
+     "en": "* atomic-formula: #t | #f | <predication>\n",
+     "hash": "2e4bce596b0a7679",
+     "he": "* atomic-formula (נוסחה אטומית): ‏`#t | #f | <predication>`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:7",
+     "type": "code",
+     "en": "```scheme\n    (make-atomic-formula #t)\n    (make-atomic-formula #f)\n    (make-predication predicate terms)\n```   \n",
+     "hash": "f94d039bcdf056e4",
+     "lang": "scheme",
+     "noteHe": "נוסחה אטומית היא אחד משלושה דברים: הקבוע \"אמת\", הקבוע \"שקר\", או predication — כלומר `pred(t1 … tn)` — שנבנה ב-`make-predication` מפרדיקט ומרשימת terms. זהו בדיוק מבנה האיחוד הזר שהוגדר ב-5.1. שתי הערות חשובות. ראשית, **אי-התאמה במקור**: הממשק כאן מצהיר שהאמת והשקר הם הבוליאניים `#t` ו-`#f`, אבל הקידוד בסעיף 5 משתמש ב**סמל** `true` (`… (var Xs)) true))`), ו-`Gsel` בסעיף 13 בודקת במפורש `(eq? goal 'true)`, וגם סעיף 15 כותב `(list 'true)`. כלומר בפועל כל המפרש עובד עם הסמל `'true`, והתיעוד כאן מדבר על טיפוס אחר. שנית, `#f` (או `false`) אינו מופיע בשום מקום אחר בעמוד, וזה לא במקרה: ל-LP כפי שהוגדר ב-5.1 אין שלילה, ולכן לנוסחה אטומית \"שקר\" אין שום תפקיד באלגוריתם — כישלון מיוצג על ידי **היעדר** ענף מצליח בעץ ההוכחה, לא על ידי ערך שקר."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:8",
+     "type": "list",
+     "en": "* variable:\n",
+     "hash": "f50b289a9b41ed75",
+     "he": "* variable (משתנה):"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:9",
+     "type": "code",
+     "en": "```scheme\n    (make-variable name)\n    (variable->name var)\n    (rename-variable var number)\n```   \n",
+     "hash": "caf169747f765b33",
+     "lang": "scheme",
+     "noteHe": "בנאי ופונקציית גישה שגרתיים — ואחריהם החריג המעניין. ‏`rename-variable var number` איננה חלק מן התבנית `make/predicate/accessor`: היא איננה בונה ואיננה קוראת, אלא **מייצרת משתנה חדש** מן הקיים על ידי הוספת מספר גרסה. פונקציה כזאת לא הופיעה באף AST שראינו בפרקים 2–4, והיא כאן מסיבה אחת: ב-LP חייבים לשנות את שמות המשתנים של כלל בכל פעם שהוא נשלף מן התוכנית, אחרת משתנה מן הכלל ומשתנה מן השאילתה שנקראים באותו שם ייחשבו בטעות לאותו משתנה, והאוניפיקציה תיכשל או תיתן תשובה שגויה. זה הצעד שהודגש ב-5.1 (מדוע שינוי השמות הכרחי ב-`proof-tree`) ושתרגול 11 שאלה 4 מדגימה מה נשבר בלעדיו. הסעיף הבא מוקדש כולו לייצוג הזה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:10",
+     "type": "list",
+     "en": "* compound term:\n",
+     "hash": "3421574e026e28a6",
+     "he": "* compound term (term מורכב):"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:11",
+     "type": "code",
+     "en": "```scheme\n    (make-compound-term functor terms)\n```   \n",
+     "hash": "2bd826eae2c70486",
+     "lang": "scheme",
+     "noteHe": "‏term מורכב נבנה מפונקטור (functor) ומרשימת terms — למשל `(make-compound-term 'cons (list x xs))` נותן `(cons x xs)`. שימו לב שהרשימה כאן חלקית: מופיע רק הבנאי, בלי פונקציות גישה מן הסוג `compound-term->functor` / `compound-term->terms`, אף שהאוניפיקציה (סעיף 10) חייבת לפרק term מורכב לפונקטור ולארגומנטים כדי לייצר מהם משוואות, ואף ש-`compound-term?` כבר הופיע בסעיף 3. הממשק המתועד פשוט לא שלם. והנקודה שכדאי לשנן, ישר מ-5.2: מבחינה מבנית `(cons x xs)` נראה **בדיוק** כמו predication `(member x xs)` — אותה רשימה, אותה צורה. רק **המקום בפסוקית** מבדיל ביניהם: מה שמופיע כמטרה הוא נוסחה אטומית, ומה שמופיע כארגומנט הוא term מורכב. זו הסיבה שהמפרש לא יכול להסתמך על הצורה בלבד ומעבירים לו את הקידוד מן המקום הנכון."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:12",
+     "type": "list",
+     "en": "* query:\n",
+     "hash": "a435320d909847db",
+     "he": "* query (שאילתה):"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:6:13",
+     "type": "code",
+     "en": "```scheme\n    (make-query atomic-formulas)\n    (query->goals query)\n```   \n\n\n",
+     "hash": "90916117a14ca7ea",
+     "lang": "scheme",
+     "noteHe": "שאילתה היא רשימה של נוסחאות אטומיות, ו-`query->goals` מחזירה אותן. הרשימה הזאת היא **צירוף (conjunction)** — כל המטרות צריכות להתקיים יחד — והסדר שבו הן מוחזרות הוא הסדר שעליו `Gsel` תעבור בסעיף 13. שני אביזרים נוספים של השאילתה יופיעו בהמשך: ‏`query->vars` (סעיף 7), שמשמש בסוף כדי להטיל את ההצבה על משתני השאילתה המקוריים בלבד, ו-`success-query?` (סעיף 13), שבודק אם כל המטרות שנשארו הן `true` — כלומר אם הגענו לעלה הצלחה. כדאי לשנן את המקבילה: השאילתה כאן היא הצומת בעץ ההוכחה של 5.1, וכל צעד של המפרש מחליף מטרה אחת בגוף הכלל שהותאם לה."
+    }
+   ],
+   "headingHe": "הממשק הפונקציונלי של LP-AST"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:7",
+   "depth": 3,
+   "headingEn": "Variables Representation and Access",
+   "raw": "### Variables Representation and Access\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:7:0",
+     "type": "prose",
+     "en": "A frequent operation in the interpreter consists of retrieving a rule from a program, and renaming all the variables in the rule.  To facilitate this operation, variables can be encoded in two ways:\n\n",
+     "hash": "7e7f67fe0a2ea123",
+     "he": "פעולה שחוזרת שוב ושוב במפרש היא שליפת כלל מן התוכנית ושינוי השמות של כל המשתנים שבו. כדי להקל על הפעולה הזאת, משתנים יכולים להיות מקודדים בשתי דרכים:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:1",
+     "type": "list",
+     "en": "* Regular variable, as read from the program.\n* Renamed variable - a variable annotated with a *version number* (which according to our convention corresponds to the layer of the proof-tree as we expand it breadth-first).\n\n",
+     "hash": "5d797b63319a84d8",
+     "he": "* משתנה רגיל, כפי שנקרא מן התוכנית.\n* משתנה משונה-שם (renamed variable) — משתנה שצורף לו *מספר גרסה* (version number), שלפי המוסכמת שלנו מתאים לשכבה בעץ ההוכחה, שכן אנו מרחיבים אותו לרוחב (breadth-first)."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:2",
+     "type": "prose",
+     "en": "For example, the rule:\n",
+     "hash": "9f0b25d793d2f5fb",
+     "he": "לדוגמה, הכלל:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:3",
+     "type": "code",
+     "en": "```prolog\nmember(X, Ys) :- append(Zs, [X|Xs], Ys).\n```\n",
+     "hash": "0c6deca22cfc664f",
+     "lang": "prolog",
+     "noteHe": "זהו כלל `member/2` מן התוכנית לדוגמה, ועכשיו הוא **מושא** הדיון ולא הדוגמה עצמה: שלושת המשתנים שבו — `X`, `Ys` ו-`Zs`, ועוד `Xs` שבתוך הרשימה — הם המשתנים שיצטרכו לקבל שמות חדשים בכל פעם שהכלל נשלף. שימו לב שהשמות `X` ו-`Xs` הם שמות מקומיים לכלל, בלי שום קשר ל-`X` שיופיע בשאילתה של המשתמש; זו בדיוק ההנחה שהמפרש חייב לאכוף בעצמו."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:4",
+     "type": "prose",
+     "en": "is encoded originally as follows (within the `member/2` procedure):\n\n",
+     "hash": "33bade3caa638eb3",
+     "he": "מקודד במקור כך (בתוך הפרוצדורה `member/2`):"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:5",
+     "type": "code",
+     "en": "```scheme\n      ((member (var X) (var Ys))\n       (append (var Zs)\n               (cons (var X) (var Xs))\n               (var Ys)))\n```\n\n",
+     "hash": "72b3ff365678899d",
+     "lang": "scheme",
+     "noteHe": "זהו אותו כלל בקידוד ה-AST, בצורתו כפי שהיא כתובה בתוכנית: הזוג `(<ראש> . <גוף>)`, כשכל משתנה הוא רשימה בת שני איברים — `(var X)`. שימו לב ש-`[X|Xs]` של Prolog הפך ל-`(cons (var X) (var Xs))`, כלומר הרשימה נפרשה ל-`cons` מקונן. זהו ה\"מקור\" שאליו נשווה את הבלוק הבא."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:6",
+     "type": "prose",
+     "en": "When this rule is retrieved from the program (using the RSel procedure) - it will be renamed as:\n\n",
+     "hash": "0d70d94ece636b01",
+     "he": "כשהכלל הזה נשלף מן התוכנית (באמצעות הפרוצדורה RSel) — הוא ישונה-שם ויקבל את הצורה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:7",
+     "type": "code",
+     "en": "```scheme\n      ((member (var X 1) (var Ys 1))\n       (append (var Zs 1)\n               (cons (var X 1) (var Xs 1))\n               (var Ys 1)))\n```\n\n",
+     "hash": "104a3f4eec36330a",
+     "lang": "scheme",
+     "noteHe": "השוו לבלוק הקודם: אותו כלל בדיוק, אלא שכל משתנה הפך מ-`(var X)` בת שני איברים ל-`(var X 1)` בת שלושה. שלוש נקודות שכדאי לשנן. ראשית, **כל** המשתנים בכלל מקבלים את **אותו** מספר גרסה — 1 כאן — כי שינוי השם צריך להיות עקבי בתוך הכלל: אם `X` בראש היה מקבל 1 ו-`X` בגוף היה מקבל 2, הקשר ביניהם היה נשבר והכלל היה מאבד את משמעותו. שנית, המספר הוא חלק **מזהות המשתנה**, לא תווית נלווית: ‏`(var X)` ו-`(var X 1)` הם שני משתנים שונים לחלוטין, אף ששמם זהה, ולכן השוואת משתנים חייבת להשוות את כל הרשימה ולא רק את השם. שלישית, הייצוג הזה הוא איחוד זר קטן בפני עצמו — משתנה הוא `(var name)` **או** `(var name n)` — ולכן `variable?` צריך לקבל את שתי האורכים; זה הטריק שמאפשר לאותו ADT לשרת גם את התוכנית הכתובה וגם את העצם המשונה. וזו התשובה לשאלה \"למה בכלל צריך שינוי שם\": בלעדיו, אם המשתמש שואל `?- member(1, X)` וגם הכלל מכיל `X`, האוניפיקציה תחשוב שמדובר באותו משתנה ותייצר תשובה שגויה — הדוגמה המפורשת בתרגול 11 שאלה 4 ובסעיף 13 של 5.1."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:8",
+     "type": "prose",
+     "en": "and the variable counter (1) will be incremented each time the rule is retrieved.\n\n",
+     "hash": "92fa819717830a19",
+     "he": "ומונה המשתנים (1) יגדל באחד בכל פעם שהכלל נשלף."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:9",
+     "type": "prose",
+     "en": "To support the renaming operation, each compound AST type has a method that computes the list of variable terms it contains.\n\n",
+     "hash": "59d425329356ca66",
+     "he": "כדי לתמוך בפעולת שינוי השם, לכל טיפוס AST מורכב יש מתודה שמחשבת את רשימת ה-terms מסוג משתנה שהוא מכיל."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:10",
+     "type": "list",
+     "en": "* rule->vars\n* atomic-formula->vars\n* predication->vars\n* term->vars\n* query->vars\n\n",
+     "hash": "b6c1169ab2c7e3f9",
+     "he": "* rule->vars\n* atomic-formula->vars\n* predication->vars\n* term->vars\n* query->vars"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:7:11",
+     "type": "prose",
+     "en": "All of these return a list of variables without repetition.\n\n\n",
+     "hash": "30aec6238bbdef4d",
+     "he": "כל אחת מהן מחזירה רשימת משתנים **בלי חזרות**."
+    }
+   ],
+   "headingHe": "ייצוג משתנים והגישה אליהם"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:8",
+   "depth": 2,
+   "headingEn": "Substitutions ADT",
+   "raw": "## Substitutions ADT\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:8:0",
+     "type": "prose",
+     "en": "The Substitution ADT is a direct adaptation of the substitution-ADT module from the type inference system we saw in \n[Chapter 3](https://www.cs.bgu.ac.il/~ppl192/wiki.files/code/types/L5-substitution-adt.ts). It is translated in Scheme\nand adapted to the datatypes of LP: a substitution is a finite mapping from Variable to Term with occur-check.\n\n",
+     "hash": "2d038f4aac18ae5a",
+     "he": "ה-ADT של ההצבה (Substitution) הוא התאמה ישירה של מודול substitution-ADT ממערכת הסקת הטיפוסים שראינו ב[פרק 3](https://www.cs.bgu.ac.il/~ppl192/wiki.files/code/types/L5-substitution-adt.ts). הוא תורגם ל-Scheme\nוהותאם לטיפוסי הנתונים של LP: הצבה היא העתקה סופית ממשתנה ל-term, עם בדיקת היקרות (occurs check)."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:1",
+     "type": "prose",
+     "en": "The ADT consists of:\n\n",
+     "hash": "c5ca5340c75b3f45",
+     "he": "ה-ADT מורכב מ:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:2",
+     "type": "list",
+     "en": "* Constructor: `make-sub(variables, terms)`, which also checks for circularity (occur-check).\n* Getters: `sub->variables`, `sub->terms`, `sub->get-var(sub,var)` which returns the value of var, if defined, or error otherwise.\n* Predicates: `sub?`, `empty-sub?`, `non-empty-sub?`, `sub-equal?`\n\n",
+     "hash": "a8aab2cacf65c2d3",
+     "he": "* בנאי: `make-sub(variables, terms)`, שגם בודק מעגליות (בדיקת היקרות — occurs check).\n* פונקציות גישה: `sub->variables`, `sub->terms`, ו-`sub->get-var(sub,var)` שמחזירה את הערך של `var` אם הוא מוגדר, ואחרת זורקת שגיאה.\n* פרדיקטים: `sub?`, `empty-sub?`, `non-empty-sub?`, `sub-equal?`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:3",
+     "type": "prose",
+     "en": "Operations:\n\n",
+     "hash": "1ef28d2ed2ce3f8e",
+     "he": "פעולות:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:4",
+     "type": "list",
+     "en": "1. `extend-sub(sub, var, term)` which extends `sub` with the binding `var=term`\n2. Application of a substitution to LP terms, atomic formulas and queries:\n   * `sub-apply(sub, term)`\n   * `sub-apply-atomic-formula`\n   * `sub-apply-query`\n   * `sub-apply-rule`\n3. Restriction of a substitution: `sub-restrict(sub, vars)` (also called `projection`)\n4. Substitution combination: `sub-combine(sub1, sub2)`\n\n\n\n",
+     "hash": "609f7c01f8d4b8c0",
+     "he": "1. `extend-sub(sub, var, term)` — מרחיבה את `sub` בקישור `var=term`\n2. הפעלת הצבה על terms, על נוסחאות אטומיות ועל שאילתות של LP:\n   * `sub-apply(sub, term)`\n   * `sub-apply-atomic-formula`\n   * `sub-apply-query`\n   * `sub-apply-rule`\n3. הגבלה (restriction) של הצבה: `sub-restrict(sub, vars)` (נקראת גם `projection`, כלומר הטלה)\n4. הרכבת הצבות: `sub-combine(sub1, sub2)`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:5",
+     "type": "prose",
+     "en": "Examples:\n\n",
+     "hash": "1889f03338b79bba",
+     "he": "דוגמאות:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:8:6",
+     "type": "code",
+     "en": "```scheme\n;; {T7 = Number, T8 = f(m(T5, Number), T3)} o {T5 = T7, T8 = Boolean}\n;; => {T5 = T7, T7 = Number, T8 = f(m(T7, Number), T3)}\n> (sub-combine\n    (make-sub '((var T7) (var T8))\n              '(Number [f (m (var T5) Number) (var T3)]))\n    (make-sub '((var T5) (var T8))\n              '((var T7) Boolean)))\n\n'(sub ((var T5) (var T7) (var T8))\n ((var T7) Number (f (m (var T7) Number) (var T3))))\n\n;; f(X) o {X = 1} => f(1)\n> (sub-apply (make-sub '((var X)) '(1))\n             (make-compound-term 'f '((var X))))\n\n'(f 1)\n```\n\n\n",
+     "hash": "8e88d41403d1cb47",
+     "lang": "scheme",
+     "noteHe": "שתי דוגמאות שכדאי לעבוד עליהן ביד, כי הן בדיוק מה שהמבחן שואל. **הדוגמה הראשונה — הרכבה.** שתי שורות ההערה למעלה כותבות את התרגיל בסימון המתמטי: ‏`{T7 = Number, T8 = f(m(T5, Number), T3)} o {T5 = T7, T8 = Boolean}`. הכלל של `sub-combine(sub1, sub2)` הוא: קח את הערכים של `sub1` והפעל עליהם את `sub2`, ואז הוסף את הקישורים של `sub2` שהמשתנה שלהם **אינו** כבר בתחום של `sub1`. נעקוב: הערך של `T8` ב-`sub1` הוא `f(m(T5, Number), T3)`, ו-`sub2` מחליף `T5` ב-`T7`, ולכן הוא הופך ל-`f(m(T7, Number), T3)`; הערך של `T7` הוא `Number` ו-`sub2` לא נוגע בו; הקישור `T5 = T7` של `sub2` מתווסף כי `T5` אינו בתחום של `sub1`; והקישור `T8 = Boolean` **נזרק**, כי `T8` כבר קשור ב-`sub1` — הקישור הקודם גובר. זו בדיוק הסיבה שהרכבה איננה `∪` (איחוד) ואיננה חילופית. שימו לב לכיוון: לפי התיעוד במקור, ‏`sub-combine(sub1, sub2)` מקיים `(sub-apply result term) = (sub-apply sub2 (sub-apply sub1 term))`, כלומר ה-`o` כאן אומר \"**שמאל קודם**\" — הפוך מהקריאה המתמטית המקובלת של `f ∘ g`. זו מלכודת מבחן ממש: השוו לתרגול 11, שם ההרכבה על מסלול בעץ ההוכחה נעשית **מהשורש כלפי העלה** — אותו כיוון בדיוק. עוד דבר שכדאי לשים לב אליו: התוצאה מכילה גם `T5 = T7` וגם `T7 = Number`, כלומר היא **איננה אידמפוטנטית** — הפעלה אחת עליה תיתן `T5 → T7` ולא `T5 → Number`, וצריך להפעיל שוב כדי להגיע עד הסוף. אותה מלכודת בדיוק צוינה במקור של 3.2 בדוגמת ה-mgu. טכנית: הסוגריים המרובעים ב-`[f (m (var T5) Number) (var T3)]` הם בדיוק כמו סוגריים עגולים ב-Racket, ואין להם משמעות נפרדת. **הדוגמה השנייה — הפעלה.** ‏`(make-compound-term 'f '((var X)))` בונה את ה-term `(f (var X))`, והפעלת ההצבה `{X = 1}` עליו מחזירה `(f 1)`: ההצבה נכנסת **פנימה** לתוך ה-term המורכב ומחליפה את המשתנה בכל מקום שהוא מופיע בו, ולא רק ברמה החיצונית. זהו אותו מודול בדיוק שראינו ב-3.2/3.3, עם הבדל אחד: שם המפתחות היו משתני טיפוס והערכים טיפוסים, וכאן המפתחות הם משתני LP והערכים terms. אותו אלגוריתם, מטען אחר."
+    }
+   ],
+   "headingHe": "ה-ADT של ההצבות"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:9",
+   "depth": 2,
+   "headingEn": "Terms Equations ADT",
+   "raw": "## Terms Equations ADT\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:9:0",
+     "type": "prose",
+     "en": "The unifier is implemented as a term equations solver - that is, to unify 2 atomic-formulas, we split the atomic-formulas into a sequence of equations which pair the terms of each atomic formula one by one, and then solve the equations iteratively.  When complex terms are met, they are split into more equations.\n\n",
+     "hash": "a43d2858abe5feba",
+     "he": "המאחד (unifier) ממומש כפותר משוואות בין terms — כלומר, כדי לאחד שתי נוסחאות אטומיות אנחנו מפצלים אותן לסדרה של משוואות שמזווגות את ה-terms של כל נוסחה אחד לאחד, ואז פותרים את המשוואות באופן איטרטיבי. כשנתקלים ב-terms מורכבים, מפצלים אותם למשוואות נוספות."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:9:1",
+     "type": "prose",
+     "en": "The Terms Equations ADT is just a pair data structure for two terms:\n\n",
+     "hash": "6ca88862c21241d1",
+     "he": "ה-ADT של משוואות בין terms הוא בסך הכול מבנה נתונים של זוג, עבור שני terms:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:9:2",
+     "type": "list",
+     "en": "* Constructor: `make-equation(term1, term2)`\n* Getters: `equation->left`, `equation->right`\n* Predicates: `equation?`\n\n",
+     "hash": "bf8e2a3be77ca193",
+     "he": "* בנאי: `make-equation(term1, term2)`\n* פונקציות גישה: `equation->left`, `equation->right`\n* פרדיקטים: `equation?`"
+    }
+   ],
+   "headingHe": "ה-ADT של משוואות בין terms"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:10",
+   "depth": 2,
+   "headingEn": "Unify",
+   "raw": "## Unify\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:10:0",
+     "type": "prose",
+     "en": "The unification operation operates over atomic formulas and terms. This is an adaptation of the solve module from the type inference system. The unification algorithm uses the equation solving method:\n\n",
+     "hash": "257486f118061aa4",
+     "he": "פעולת האוניפיקציה פועלת על נוסחאות אטומיות ועל terms. זו התאמה של מודול solve ממערכת הסקת הטיפוסים. אלגוריתם האוניפיקציה משתמש בשיטת פתרון המשוואות:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:10:1",
+     "type": "list",
+     "en": "1. For atomic elements – either compares if equal, different, or can create a substitution (non-circular);\n2. For compound arguments with the same predicate or functor and the same arity, creates equations from corresponding elements, and repeats unification.\n\n",
+     "hash": "8eb46b4e7c9e7c82",
+     "he": "1. עבור איברים אטומיים — או שמשווים אם הם זהים או שונים, או שיוצרים הצבה (שאינה מעגלית);\n2. עבור ארגומנטים מורכבים עם אותו פרדיקט או פונקטור ואותה מקומיות — יוצרים משוואות מן האיברים המתאימים, וחוזרים על האוניפיקציה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:10:2",
+     "type": "list",
+     "en": "* Main procedure: `unify-formulas`\n* Equation solvers: `solve-equations(equation-list)`, `solve(equations, substitution)`\n* Helpers: `unifiable-structure(equation)`, `split-equation(equation)`\n\n",
+     "hash": "9020fdc56b80b066",
+     "he": "* הפרוצדורה הראשית: `unify-formulas`\n* פותרי המשוואות: `solve-equations(equation-list)`, `solve(equations, substitution)`\n* פונקציות עזר: `unifiable-structure(equation)`, `split-equation(equation)`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:10:3",
+     "type": "prose",
+     "en": "**Examples** \n",
+     "hash": "7177838a55ab1030",
+     "he": "**דוגמאות**"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:10:4",
+     "type": "code",
+     "en": "```scheme\n(test (unify-formulas 'true 'true) \n=> \n'(sub () ()))\n\n;; unify( member(f(X1), cons(f(2), [])\n;;        member(X, L) )\n;; => {L = cons(f(2), []), X = f(X1)}\n(test (unify-formulas\n '(member (f (var X1)) (cons (f 2) empty))\n '(member (var X) (var L)))\n =>\n '(sub ((var L) (var X))\n       ((cons (f 2) empty) (f (var X1)))))\n```\n\n\n",
+     "hash": "037cc6d513616cc9",
+     "lang": "scheme",
+     "noteHe": "שתי בדיקות שמתמצתות את כל האלגוריתם שנשנן ב-5.1 ובהרחבת הפונקטורים של 5.2. **הראשונה**: איחוד של `true` עם `true` מצליח ומחזיר `'(sub () ())` — ההצבה הריקה. שימו לב לייצוג: הצבה היא רשימה מתויגת `(sub <רשימת משתנים> <רשימת terms>)`, ולכן הצבה ריקה היא התג ושתי רשימות ריקות. זהו המקרה של \"הצלחה בלי מידע חדש\", והוא בדיוק מה שיקרה כשמטרה תותאם לגוף `true` של עובדה. **השנייה**: איחוד `member(f(X1), cons(f(2), empty))` עם `member(X, L)`. עבדו לפי האלגוריתם: אותו פרדיקט (`member`) ואותה מקומיות (2), ולכן מפצלים לשתי משוואות — `f(X1) = X` ו-`cons(f(2), empty) = L`. שתיהן מן הצורה \"term מול משתנה\", ולכן כל אחת הופכת ישר לקישור, ומתקבל ה-mgu `{X = f(X1), L = cons(f(2), empty)}` — וזה מה שמודפס, כשהמשתנים מסודרים ורשימת ה-terms מקבילה להם לפי המקום. שימו לב שהמשתנה `X1` **נשאר חופשי** בתוצאה: האוניפיקציה קושרת רק את מה שהיא חייבת, וזו בדיוק המשמעות של \"הכללי ביותר\" ב-mgu. ובנוגע לבדיקת ההיקרות (occurs check) של 5.2: כאן היא לא נדרשת כי `X` ו-`X1` הם משתנים שונים, אבל אם הנוסחה השנייה הייתה `member(X1, L)`, המשוואה `f(X1) = X1` הייתה **נכשלת** על בדיקת ההיקרות, כי `X1` מופיע בתוך ה-term שהוא אמור להיקשר אליו. שתי הערות טכניות: שורת ההערה במקור, `;; unify( member(f(X1), cons(f(2), [])`, חסרים בה שני סוגריים סוגרים, והיא גם מערבבת את `[]` של Prolog עם `empty` של הקידוד שבקוד ממש מתחתיה; ובעיקר — הדוגמאות כאן מראות רק הצלחות, ואף לא אחת מהן מגלה שכשהאוניפיקציה **נכשלת** `unify-formulas` מחזירה את הסמל `'fail`. זה חשוב, כי בסעיף 13 `Rsel` מסננת בדיוק לפי `(eq? 'fail …)`."
+    }
+   ],
+   "headingHe": "אוניפיקציה (Unify)"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:11",
+   "depth": 2,
+   "headingEn": "Lazy-Tree-ADT",
+   "raw": "## Lazy-Tree-ADT\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:11:0",
+     "type": "prose",
+     "en": "A lazy tree is represented as a *lazy tree-list* whose head is the root-node and whose tail is a regular list of lazy-trees:\n`(root (lambda () (list lzt1 lzt2 ... lztn)))`\n\n",
+     "hash": "222def28add68554",
+     "he": "עץ עצל מיוצג כ*רשימת-עץ עצלה*, שהראש שלה הוא צומת השורש והזנב שלה הוא רשימה רגילה של עצים עצלים:\n`(root (lambda () (list lzt1 lzt2 ... lztn)))`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:1",
+     "type": "prose",
+     "en": "This is a lazy representation for labeled trees with finite branching, but possibly infinite depth. \n\n",
+     "hash": "7d6af31d22b6b9d4",
+     "he": "זהו ייצוג עצל לעצים מתויגים עם הסתעפות סופית, אבל עומק שעשוי להיות אינסופי."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:2",
+     "type": "list",
+     "en": "* `empty-lzt` represents the empty lazy-tree\n* A leaf is represented by: `(root (lambda () empty-lzt))`\n* If `n` represents a node, and `lzt1, ..., lztn` represent lazy-trees, then:\n",
+     "hash": "be2bb78bd5404f8a",
+     "he": "* ‏`empty-lzt` מייצג את העץ העצל הריק\n* עלה מיוצג כך: `(root (lambda () empty-lzt))`\n* אם `n` מייצג צומת, ו-`lzt1, ..., lztn` מייצגים עצים עצלים, אז:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:3",
+     "type": "code",
+     "en": "```scheme\n(make-lzt n (lambda () (list (make-lzt n1 (lambda () (make-lzt ...))) \n                             (make-lzt n2 (lambda () (make-lzt ...)))\n                             …………\n                             (make-lzt nm (lambda () (make-lzt ...))))\n ))\n```\n",
+     "hash": "26999c620591d488",
+     "lang": "scheme",
+     "noteHe": "זו לא דוגמה קונקרטית אלא **סכימה** של הצורה הכללית: ‏`n`, `n1`…`nm` הם תיוגי הצמתים, ו-`…………` הוא סימן להשמטה ולא קוד. הדבר היחיד שחייבים לקרוא כאן הוא **איפה יושבת ה-lambda**: ‏`make-lzt` מקבלת שני ארגומנטים — התיוג של השורש, ו-thunk (פונקציה בלי פרמטרים) שמחזיר את רשימת תתי-העצים. זו כל העצלות. בלי ה-lambda, בניית העץ הייתה מחייבת לבנות בו-זמנית את כל צאצאיו, וכל צאצא את שלו — כלומר עץ אינסופי לא היה ניתן לבנייה בכלל, וגם עץ סופי-אך-ענק היה עולה זמן וזיכרון לפני שהסתכלנו עליו בכלל. עם ה-lambda, בניית עץ היא פעולה בזמן קבוע, וכל שכבה מחושבת רק כשמישהו קורא ל-`lzt->branches`. זהו בדיוק הטריק של `cons-lzl` מ-4.3, מוכלל מרשימות לעצים: שם דחינו זנב אחד, כאן דוחים רשימה של בנים. שימו לב לחוסר-דיוק בסכימה עצמה: ה-lambda-ות הפנימיות כתובות כמחזירות `(make-lzt ...)`, כלומר עץ בודד, ולא **רשימה** של עצים כפי שהייצוג מחייב (`(list …)`). זה סימון מקוצר-מדי במקור, לא כלל אמיתי — ובקוד שיבוא בהמשך הן תמיד מחזירות רשימה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:4",
+     "type": "prose",
+     "en": "represents the above lazy-tree. \n\n",
+     "hash": "da08a763af851b22",
+     "he": "מייצג את העץ העצל שלמעלה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:5",
+     "type": "prose",
+     "en": "The ADT consists of:\n\n",
+     "hash": "c5ca5340c75b3f45",
+     "he": "ה-ADT מורכב מ:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:6",
+     "type": "list",
+     "en": "* Constructors: `make-lzt`, `make-lzt-leaf`, `empty-lzt`, `expand-lzt(node, node-expander)`.\n* Getters: `lzt->root`, `leaf-data`, `lzt->branches`, `lzt->first-branch`, `lzt->rest-branches`, `lzt->take-branches(lzt,n)`,\n`lzt->nth-level(lzt, n)`\n* Predicates: `empty-lzt?`, `lzt?`, `composite-lzt?`\n\n",
+     "hash": "7407ff82f610e6d8",
+     "he": "* בנאים: `make-lzt`, `make-lzt-leaf`, `empty-lzt`, `expand-lzt(node, node-expander)`.\n* פונקציות גישה: `lzt->root`, `leaf-data`, `lzt->branches`, `lzt->first-branch`, `lzt->rest-branches`, `lzt->take-branches(lzt,n)`,\n`lzt->nth-level(lzt, n)`\n* פרדיקטים: `empty-lzt?`, `lzt?`, `composite-lzt?`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:7",
+     "type": "prose",
+     "en": "The key operation to understand is `expand-lzt`:\n",
+     "hash": "37c55ac5c264283e",
+     "he": "הפעולה שחשוב להבין היא `expand-lzt`:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:8",
+     "type": "code",
+     "en": "```scheme\n(define expand-lzt\n (lambda (root node-expander)\n   (let ((child-nodes (node-expander root)))\n     (make-lzt root\n       (lambda ()\n         (map (lambda (node)\n                (expand-lzt node node-expander))\n              child-nodes))))))\n```\n\n",
+     "hash": "48a7dedfa6501b45",
+     "lang": "scheme",
+     "noteHe": "שבע שורות שהן לב העמוד כולו, שווה לקרוא אותן לאט. ‏`expand-lzt` מקבלת שני דברים: תיוג של שורש, ופונקציה `node-expander` שיודעת לחשב, בהינתן תיוג של צומת, את **רשימת תיוגי הבנים הישירים** שלו. היא מחזירה עץ עצל שלם. הרעיון: אנחנו לא מתארים את העץ על ידי בנייתו, אלא על ידי כלל מקומי אחד — \"מה הבנים של צומת\" — והעץ נוצר מעצמו מן הכלל הזה. שורה אחר שורה: ‏`(node-expander root)` מחשב את תיוגי הבנים, ואז `make-lzt` מייצר צומת שהשורש שלו הוא `root` וה-thunk שלו הוא lambda שרק כשיקראו לה תעשה `map` של `expand-lzt` על כל אחד מן הבנים — כלומר תרחיב אותם באותה דרך, רקורסיבית. שימו לב לפרט חשוב ולא-מובן-מאליו: ה-`let` נמצא **מחוץ** ל-lambda, ולכן קריאה ל-`expand-lzt` מפעילה את `node-expander` **פעם אחת מיד**, ורק ההרחבה של הבנים נדחית. כלומר העץ עצל שכבה-שכבה ולא \"עצל לגמרי\" — וזה מספיק, כי שכבה אחת היא תמיד סופית (ההסתעפות סופית, גם כשהעומק אינסופי). וכאן צריך לחזור על האזהרה מ-4.3: אין כאן שום מימואיזציה. ה-thunk מורץ מחדש בכל קריאה ל-`lzt->branches`, ולכן מעבר פעמיים על אותו עץ יחשב הכול פעמיים — במפרש LP זה אומר לבנות מחדש את כל תת-עץ ההוכחה. וזו התשובה לשאלה \"למה הקדשנו שיעור שלם לרשימות עצלות בפרק 4\": עץ ההוכחה של שאילתה יכול להיות אינסופי (`ancestor2` מ-5.1 הוא הדוגמה), ולכן **חייבים** לייצג אותו כך."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:9",
+     "type": "prose",
+     "en": "`expand-lzt` is the natural way to construct lazy trees.\nConsider the following example of a finite lazy tree:\n\n",
+     "hash": "d6fb17d4b835ea80",
+     "he": "‏`expand-lzt` היא הדרך הטבעית לבנות עצים עצלים.\nהתבוננו בדוגמה הבאה של עץ עצל סופי:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:10",
+     "type": "code",
+     "en": "```scheme\n(define ft01 \n  (expand-lzt '() \n    (lambda (node)\n      (if (> (length node) 2) \n          empty-lzt \n          (map (lambda (n) (cons n node)) \n               '(0 1))))))\n```\n\n",
+     "hash": "e7455816e4b90e43",
+     "lang": "scheme",
+     "noteHe": "דוגמה קונקרטית, וכל התוכן שלה הוא ה-`node-expander` שבפנים. השורש הוא `'()` — הרשימה הריקה. בהינתן צומת (שהוא רשימה של אפסים ואחדים), ה-expander עושה `(map (lambda (n) (cons n node)) '(0 1))`, כלומר מייצר **שני** בנים: את הצומת עם `0` בראשו ואת הצומת עם `1` בראשו. תנאי העצירה הוא `(> (length node) 2)`: צומת שאורכו 3 ומעלה מקבל רשימת בנים ריקה, כלומר הוא עלה. לכן העץ הוא בינארי מלא בעומק 3, ובסך הכול 1+2+4+8 = 15 צמתים. שימו לב לענף העצירה: הוא מחזיר `empty-lzt`, כלומר את העץ העצל **הריק**, במקום להחזיר **רשימת תיוגים ריקה** (`empty` או `'()`) — וזה מה שה-expander אמור להחזיר לפי החתימה שלו. זה עובד רק במקרה, כי `empty-lzt` מוגדר בקוד המקור כ-`(define empty-lzt empty)`, כלומר הוא **אותו ערך** בדיוק כמו הרשימה הריקה. זה בלבול טיפוסים ולא באג פעיל, אבל הוא אותו בלבול בדיוק שהופיע ב-4.3, שם `take` החזיר `empty-lzl` במקום `'()` — כדאי לזהות את התבנית, כי במבחן שאלה כזאת נראית כמו קוד תקין."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:11",
+     "type": "list",
+     "en": "* The nodes in this lazy tree are labeled with a list of numbers (0 or 1).\n* The root contains a list of length 0.\n* The children of a node are of the form (0 . parent) and (1 . parent)\n* When a node has a label with length 3, it has no children.\n\n",
+     "hash": "d10afc919ccb5f3b",
+     "he": "* הצמתים בעץ העצל הזה מתויגים ברשימה של מספרים (0 או 1).\n* השורש מכיל רשימה באורך 0.\n* הבנים של צומת הם מן הצורה (0 . parent) ו-(1 . parent)\n* כשלצומת יש תיוג באורך 3, אין לו בנים."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:12",
+     "type": "prose",
+     "en": "If we print all the node labels in this tree, we obtain:\n",
+     "hash": "72946016ef0acd00",
+     "he": "אם נדפיס את כל תיוגי הצמתים בעץ הזה, נקבל:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:13",
+     "type": "code",
+     "en": "```scheme\n'(() (0) (0 0) (0 0 0) (1 0 0) (1 0) (0 1 0) (1 1 0) (1) (0 1) (0 0 1) (1 0 1) (1 1) (0 1 1) (1 1 1))\n```\n\n",
+     "hash": "d4f127638f6d1469",
+     "lang": "scheme",
+     "noteHe": "ספרו: 15 צמתים, כפי שחישבנו. אבל שני דברים בפלט הזה מבלבלים כמעט את כולם בפעם הראשונה. ראשית, **הסדר**: הוא לא לפי שכבות אלא **סריקת עומק (DFS) בסדר תחילי (preorder)** — שורש, ואז כל תת-העץ השמאלי במלואו, ואז הימני. לכן אחרי `(0 0)` מגיע מיד `(0 0 0)`, בנו, ולא `(1 0)`, אחיו. שנית, **התיוגים נקראים מימין לשמאל**: כל בן נוצר ב-`(cons n node)`, כלומר הספרה החדשה נדחפת לראש הרשימה, ולכן `(1 0 0)` הוא המסלול שורש → 0 → 0 → 1, והאיבר האחרון ברשימה הוא הצעד הראשון בעץ. כדאי לשים לב גם לכך שסריקת ה-DFS הזאת עומדת במתח מסוים עם מה שנאמר בסעיף 7 — ששם מספר הגרסה של המשתנים מתאים לשכבה בעץ, בהרחבה לרוחב (breadth-first). לגבי עץ סופי זה חסר חשיבות, אבל לגבי עץ הוכחה אינסופי זה הכול: כפי שנראה בסעיף 12, DFS על עץ אינסופי יכול לצעוד לנצח בענף שמאלי אחד ולעולם לא להגיע לתשובה שיושבת בענף הימני — וזה בדיוק מה שקורה ל-`ancestor2` ב-5.1."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:14",
+     "type": "prose",
+     "en": "`expand-lzt` describes a tree by providing a function that computes the direct children given a root node.\nGiven this function, `expand-lzt` produces a lazy tree which generates the nodes level by level.\n\n",
+     "hash": "4d1377c3c408eb2d",
+     "he": "‏`expand-lzt` מתארת עץ על ידי אספקת פונקציה שמחשבת את הבנים הישירים בהינתן צומת שורש.\nבהינתן הפונקציה הזאת, `expand-lzt` מייצרת עץ עצל שמחשב את הצמתים שכבה אחר שכבה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:15",
+     "type": "prose",
+     "en": "This method can be used to produce infinite trees naturally.  Consider the following simple variation:\n\n",
+     "hash": "e49cc9f5fceb5f01",
+     "he": "בשיטה הזאת אפשר לייצר עצים אינסופיים בצורה טבעית. התבוננו בווריאציה הפשוטה הבאה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:16",
+     "type": "code",
+     "en": "```scheme\n(define it01 \n  (expand-lzt '() \n    (lambda (node)\n      (map (lambda (n) (cons n node)) \n           '(0 1)))))\n```\n\n",
+     "hash": "173d9c21462bfb73",
+     "lang": "scheme",
+     "noteHe": "השוו לבלוק הקודם: זה אותו קוד בדיוק, פחות תנאי העצירה. אין `if`, ולכן לכל צומת יש תמיד שני בנים, והעץ אינסופי בעומקו. הנקודה שכדאי לעצור עליה: הגדרת `it01` **מסתיימת מיד** ואינה נתקעת. זו כל התמורה על העצלות — `expand-lzt` הפעילה את ה-expander פעם אחת בלבד, קיבלה שני תיוגי בנים, ועטפה את המשך העבודה ב-thunk שאף אחד עוד לא קרא לו. עץ אינסופי הוא כאן **ערך תקין לחלוטין** שאפשר להעביר בפרמטר, ורק פעולת סריקה שתתעקש לקרוא את כולו תיתקע. זהו המודל המדויק של עץ ההוכחה שהמפרש בונה בסעיף 13: שם ה-expander איננו \"הוסף 0 או 1\" אלא \"הפעל Gsel ואז Rsel\", אבל המבנה זהה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:11:17",
+     "type": "prose",
+     "en": "This generates an infinite tree with all binary digits as nodes.\n\n\n\n",
+     "hash": "c112be3c3978651a",
+     "he": "זה מייצר עץ אינסופי שצמתיו הם כל הסדרות של ספרות בינאריות."
+    }
+   ],
+   "headingHe": "ה-ADT של העץ העצל (Lazy-Tree-ADT)"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:12",
+   "depth": 3,
+   "headingEn": "LZT Operations",
+   "raw": "### LZT Operations\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:12:0",
+     "type": "prose",
+     "en": "There are three procedures for scanning a lazy tree:\n\n",
+     "hash": "7e4e430900949cb3",
+     "he": "יש שלוש פרוצדורות לסריקת עץ עצל:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:12:1",
+     "type": "list",
+     "en": "* `lzt-filter(lzt, filterP)` – returns a list of nodes that satisfy the filter predicate; does not terminate on infinite lazy trees.\n",
+     "hash": "7e3e4d1863863cac",
+     "he": "* ‏`lzt-filter(lzt, filterP)` — מחזירה רשימה של הצמתים שמקיימים את פרדיקט הסינון; אינה מסתיימת על עצים עצלים אינסופיים."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:12:2",
+     "type": "code",
+     "en": "```scheme\n(define lzt-filter\n  (lambda (lzt filterP)\n    (letrec ((collect (lambda (lzt)\n                        (let ((children (flatmap collect (lzt->branches lzt))))\n                          (if (filterP (lzt->root lzt))\n                            (cons (lzt->root lzt) children)\n                            children)))))\n      (if (empty-lzt? lzt)\n          empty\n          (collect lzt)))))\n```\n\n",
+     "hash": "cfc4c23784a30df4",
+     "lang": "scheme",
+     "noteHe": "הפונקציה עוטפת ב-`letrec` פונקציית עזר רקורסיבית `collect`, ואת המקרה הריק היא מטפלת בנפרד: עץ ריק מחזיר `empty`. ‏`collect` על צומת עושה שני דברים: קודם `(flatmap collect (lzt->branches lzt))` — כלומר מפעילה את עצמה על כל הבנים ומשרשרת את הרשימות שחזרו לרשימה שטוחה אחת — ואז, אם השורש עצמו מקיים את `filterP`, דוחפת אותו לראש התוצאה, ואחרת מחזירה רק את מה שנאסף מן הבנים. שימו לב לסדר בפלט: מכיוון שהשורש נדחף בראש, הרשימה הסופית יוצאת בסדר תחילי (preorder) — בדיוק הפלט שראינו בסעיף הקודם. **וכאן הגוטצ'ה שכל השאלה סובבת סביבו**: השורה `(let ((children (flatmap collect …)))` מוערכת **לפני** ה-`if`, כי Scheme היא שפה להוטה (eager). כלומר `collect` תמיד סורקת את כל תת-העץ במלואו, בלי קשר לפרדיקט ובלי קשר לכמה תוצאות כבר נמצאו — ולכן על עץ אינסופי היא לא מסתיימת לעולם, גם אם התוצאה הראשונה יושבת בשורש. העצלות שבנינו בבנאי נהרסת כאן על ידי הצורך להחזיר **רשימה רגילה**: רשימה רגילה מחייבת שכל איבריה יחושבו. הפתרון הוא לא לתקן את הפונקציה הזאת אלא להחזיר טיפוס אחר — רשימה עצלה — וזה בדיוק `lzt-filter->lzl` שבסוף הסעיף. השוו ל-4.3: אותו לקח בדיוק, שם `lzl-filter` היה חייב לעטוף את הרקורסיה ב-lambda."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:12:3",
+     "type": "list",
+     "en": "* `lzt-find-first(lzt, filterP)` – returns the first node that satisfies the filter predicate. Might not terminate for infinite lazy trees (if the path to the first success node is infinite)\n\n* `lzt-filter->lzl(lzt, filterP)` – returns a lazy list of all nodes that satisfy the filter predicate.\n\n",
+     "hash": "5a8c5305d7ea5f71",
+     "he": "* ‏`lzt-find-first(lzt, filterP)` — מחזירה את הצומת הראשון שמקיים את פרדיקט הסינון. עשויה לא להסתיים עבור עצים עצלים אינסופיים (אם המסלול אל צומת ההצלחה הראשון הוא אינסופי)\n\n* ‏`lzt-filter->lzl(lzt, filterP)` — מחזירה רשימה עצלה של כל הצמתים שמקיימים את פרדיקט הסינון."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:12:4",
+     "type": "prose",
+     "en": "For example:\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:12:5",
+     "type": "code",
+     "en": "```scheme\n(lzt-find-first it01 (lambda (node) (> (length node) 4)))\n'(0 0 0 0 0)\n\n(lzt-filter it01 (lambda (node) (< (length node) 4)))\n--> Infinite loop\n\n(lzt-filter->lzl it01 (lambda (node) (= (length node) 4)))\n--> A lazy list which returns 16 elements then loops for ever\n```\n\n\n\n\n\n",
+     "hash": "d4378b49b1286a3b",
+     "lang": "scheme",
+     "noteHe": "שלוש הרצות על `it01`, העץ **האינסופי**, וכל אחת מהן ממחישה התנהגות אחרת — כדאי לשנן את השלישייה הזאת. (א) ‏`lzt-find-first` עם הפרדיקט \"אורך גדול מ-4\" מחזירה `'(0 0 0 0 0)`: היא צועדת ב-DFS במסלול השמאלי ביותר, שבו כל בן ראשון נוצר על ידי `(cons 0 …)`, ומחזירה את הצומת הראשון באורך 5 שהיא פוגשת. היא מסתיימת רק במקרה — כי המטרה מושגת בעומק סופי על המסלול שהיא בחרה; אם הפרדיקט היה מתקיים למשל רק בצמתים שכולם 1, היא הייתה יורדת לנצח באפסים ולעולם לא מגיעה. (ב) ‏`lzt-filter` נתקעת בלופ אינסופי, ובאופן שנראה אבסורדי במיוחד: הפרדיקט הוא \"אורך קטן מ-4\", שמתקיים בסך הכול ב-15 צמתים, וכולם קרובים לשורש — אבל כפי שראינו בבלוק הקודם הפונקציה סורקת את כל העץ בלי קשר לפרדיקט, ולכן היא לא תחזיר אף פעם כלום. (ג) ‏`lzt-filter->lzl` עם \"אורך שווה בדיוק ל-4\" מחזירה רשימה עצלה שנותנת 16 איברים ואז נתקעת: 16 כי יש בדיוק $$2^4$$ צמתים באורך 4, ונתקעת כי אחריהם היא ממשיכה לחפש עוד התאמות שלא קיימות — לעולם. הלקח המדויק: העצלות איננה הופכת את החישוב לכריע. היא ממירה \"לא מחזיר שום דבר לעולם\" ל\"מחזיר כל תשובה שהוא מוצא, בזמן סביר, ואחר כך אולי לא נעצר\" — כלומר **נאותות בלי שלמות** במובן של 5.1. זה בדיוק ההתנהגות של Prolog: התשובות מגיעות אחת-אחת, והשאילתה שאין לה עוד תשובות פשוט לא חוזרת."
+    }
+   ],
+   "headingHe": "פעולות על עצים עצלים (LZT Operations)"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:13",
+   "depth": 2,
+   "headingEn": "Answer-Query Algorithm",
+   "raw": "## Answer-Query Algorithm\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:13:0",
+     "type": "prose",
+     "en": "We are now ready to review the implementation of the Answer-Query algorithm in the LP Interpreter:\nThe main functions of the `answer-query.rkt` module are:\n",
+     "hash": "b9fbcf58b3feac20",
+     "he": "עכשיו אנחנו מוכנים לעבור על המימוש של אלגוריתם Answer-Query במפרש ה-LP.\nהפונקציות הראשיות של המודול `answer-query.rkt` הן:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:1",
+     "type": "list",
+     "en": "* answer-query, which has two variants: `answer-query-first` and `answer-query-lzl`\n* `LP-node-expander`, `expand-query`\n* `Gsel`, `Rsel`\n\n",
+     "hash": "782501a55907116b",
+     "he": "* answer-query, שיש לה שתי גרסאות: `answer-query-first` ו-`answer-query-lzl`\n* ‏`LP-node-expander`, `expand-query`\n* ‏`Gsel`, `Rsel`"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:2",
+     "type": "prose",
+     "en": "`answer-query` creates a proof tree as a lazy tree, whose nodes are labeled by a list of: \n",
+     "hash": "05563e39a84ae87a",
+     "he": "‏`answer-query` יוצרת עץ הוכחה בצורת עץ עצל, שצמתיו מתויגים ברשימה של:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:3",
+     "type": "list",
+     "en": "* Query and a substitution. \n\n",
+     "hash": "d02c2d959481b2c7",
+     "he": "* שאילתה והצבה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:4",
+     "type": "prose",
+     "en": "The substitution is the combination of all substitutions on the tree branches. \nThe nodes of the proof tree are defined in the data structure `PT-node`, with the getters: \n",
+     "hash": "3ca12c6dcc118c76",
+     "he": "ההצבה היא ההרכבה של כל ההצבות שעל ענפי העץ.\nצמתי עץ ההוכחה מוגדרים במבנה הנתונים `PT-node`, ולו פונקציות הגישה:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:5",
+     "type": "list",
+     "en": "* PT-node->query \n* PT-node->sub\n\n",
+     "hash": "1c8e849934c92932",
+     "he": "* PT-node->query \n* PT-node->sub"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:6",
+     "type": "prose",
+     "en": "The proof tree is created using the `expand-lzt` constructor of lazy trees, using the procedure `LP-node-expander`, which performs the main actions of the LP interpreter:\n",
+     "hash": "9ecefc9feb0d373b",
+     "he": "עץ ההוכחה נוצר באמצעות הבנאי `expand-lzt` של עצים עצלים, עם הפרוצדורה `LP-node-expander`, שמבצעת את הפעולות העיקריות של מפרש ה-LP:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:7",
+     "type": "list",
+     "en": "1. Applying `Gsel` on the query.\n2. Applying `Rsel` on the selected goal.\n3. Creating the new queries for the child node.\n4. Creating the new combined substitutions for the child nodes.\n\n",
+     "hash": "a9655b80b5071cc5",
+     "he": "1. הפעלת `Gsel` על השאילתה.\n2. הפעלת `Rsel` על המטרה שנבחרה.\n3. יצירת השאילתות החדשות לצומת הבן.\n4. יצירת ההצבות המורכבות החדשות עבור צמתי הבנים."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:8",
+     "type": "code",
+     "en": "```scheme\n(define LP-node-expander\n (lambda (PT-node program)\n   (let ((query (PT-node->query PT-node))\n         (sub (PT-node->sub PT-node)))\n     (if (success-query? query)\n         empty\n         (let* ((selected-goal (Gsel query))\n                (rule-subs (Rsel selected-goal program))\n                (new-queries \n                  (map (lambda (rule-sub)\n                         (expand-query query selected-goal rule-sub))\n                       rule-subs))\n                (new-subs\n                  (map (lambda (rule-sub)\n                         (sub-combine sub (rule-sub->sub rule-sub)))\n                       rule-subs)))\n     (map make-PT-node new-queries new-subs))))))\n```\n\n",
+     "hash": "c1230b8ead71b935",
+     "lang": "scheme",
+     "noteHe": "זו הפונקציה המרכזית של כל הפרק: כל צעד של מפרש LP, בשמונה שורות. כדאי למפות אותה שורה-שורה על הפסאודו-קוד של `proof-tree`/`apply-rules` שכתבנו ב-5.1. תחילה מפרקים את הצומת לשני חלקיו — השאילתה שנשארה לפתור והצבה שנצברה עד כאן. אם `success-query?` מחזירה אמת (כלומר כל המטרות שנשארו הן `true`), מחזירים `empty` — אין בנים, וההרחבה נעצרת. אחרת: ‏`Gsel` בוחרת מטרה אחת מן השאילתה; ‏`Rsel` מחזירה את **רשימת** הזוגות (כלל, הצבה) שהמטרה הזאת מתאחדת עם ראשם — ואורך הרשימה הזאת הוא **מקדם ההסתעפות** של הצומת, כלומר מספר האפשרויות שהמפרש ינסה. לכל זוג כזה בונים שני דברים במקביל: ‏`expand-query` מייצרת את השאילתה של הבן (המטרה מוחלפת בגוף הכלל), ו-`sub-combine sub (rule-sub->sub rule-sub)` מרכיבה את ההצבה שנצברה עד כאן עם ההצבה החדשה מן האוניפיקציה — כך שכל צומת נושא איתו את **כל** המידע שנאסף על המסלול מן השורש, ואין צורך בשלב הרכבה נפרד בסוף. לבסוף `(map make-PT-node new-queries new-subs)` — זהו `map` של Scheme על **שתי** רשימות בבת אחת, שמזווג את השאילתה ה-i עם ההצבה ה-i; זה תקין כאן כי שתי הרשימות נוצרו מ-`map` על אותה `rule-subs`, ולכן אורכן זהה. ועכשיו הפרט הכי חשוך שכדאי לעצור עליו: הפונקציה מחזירה `empty` בשני מצבים שונים לחלוטין — כשהשאילתה הצליחה, וכש-`Rsel` לא מצאה אף כלל מתאים (עלה **כישלון**). מבחינת מבנה העץ שני העלים נראים זהים, וההבחנה ביניהם נעשית רק בסעיף 14, על ידי `LP-success-leaf?`. שאלת מבחן קלאסית. שימו לב גם שהפונקציה מקבלת **שני** ארגומנטים, בעוד `expand-lzt` דורשת expander של ארגומנט אחד — הפער הזה נסגר בסגור שבסעיף 14."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:9",
+     "type": "code",
+     "en": "```scheme\n; Signature: expand-query(query, goal, rule-sub)\n; Type: [Query * AtomicFormula * RuleSub -> Query]\n; Purpose: Given a rule-sub (rule sub)\n; and a query (G1 ... Gi-1 Goal Gi+1 ... Gn)\n; where rule is ( Head -> Body )\n; and Unify(Goal, Head) = sub\n; compute [G1 ... Gi-1 Body Gi+1 ... Gn] o sub\n(define expand-query \n  (lambda (query goal rule-sub)\n    (let ((prefix-suffix (split-list (query->goals query) goal))) \n       (sub-apply-query (rule-sub->sub rule-sub)\n                        (make-query (append (car prefix-suffix)\n                                            (rule->body (rule-sub->rule rule-sub))\n                                            (cdr prefix-suffix)))))\n    ))\n```\n\n",
+     "hash": "ce8c6a739ee91f73",
+     "lang": "scheme",
+     "noteHe": "‏`expand-query` היא הצעד שנקרא ב-5.1 `apply-rules`, וכל השאלה היא מה בדיוק היא עושה עם המטרה שנבחרה. ‏`split-list (query->goals query) goal` מפצלת את רשימת המטרות סביב המטרה שנבחרה ומחזירה זוג: ה-`car` הוא הרישא (המטרות שלפניה) וה-`cdr` הוא הסיפא (המטרות שאחריה) — **והמטרה עצמה נעלמת**, היא אינה נכללת באף אחד מן השניים. אחר כך `append` מחבר שלושה חלקים בסדר הזה: רישא, **גוף הכלל** שהותאם, וסיפא. כלומר גוף הכלל נכנס בדיוק **במקום** שבו עמדה המטרה, ולא בסוף הרשימה — וזה מה ששומר על סדר המטרות שנותרו ומכתיב את סדר החישוב בהמשך. ואז השורה שהיא כל העניין: ‏`sub-apply-query` מפעילה את ההצבה על **כל** השאילתה החדשה — הרישא, גוף הכלל והסיפא גם יחד. זו הנקודה שהודגשה ב-5.1 (ותרגיל ex4 שם הוקדש לה): הטעות הנפוצה היא להפעיל את σ רק על גוף הכלל שהוכנס, אבל אז המידע שהאוניפיקציה גילתה לא היה מגיע למטרות האחיות, ומכניזם העברת המידע של תכנות לוגי היה נשבר לגמרי. שני דיוקים בתיעוד שמעל הקוד: הוא כותב את הכלל כ-`( Head -> Body )` בעוד כלל הוא `Head :- Body` (החץ בכיוון ההפוך למה שהסימון מרמז), ו-`[…] o sub` משתמש ב-`o` במשמעות של \"שמאל קודם\" שראינו בסעיף 8."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:10",
+     "type": "prose",
+     "en": "The key functions of `GSel` and `RSel` rely on the ADTs for queries and rules defined in the AST:\n\n",
+     "hash": "b9b73cb7a72474ce",
+     "he": "הפונקציות המרכזיות `GSel` ו-`RSel` נשענות על ה-ADT-ים של שאילתות ושל כללים שהוגדרו ב-AST:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:11",
+     "type": "code",
+     "en": "```scheme\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n; Signature: Gsel(query)\n; Type: [Query -> Predication]\n; Purpose: select one goal in the query that is not true.\n; Pre-conditions: (and (not (success-query? query)) (not (empty? (query->goals query))))\n; Tests: -\n(define Gsel\n  (lambda (query)\n    (first (filter (lambda (goal) (not (eq? goal 'true))) \n                   (query->goals query)))))\n\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n; Signature: Rsel(goal, program)\n; Type: [AtomicFormula * Program -> List(Rule-Sub)]\n; Purpose: Compute the list of pairs (rule, sub) that match goal in the program.\n; Pre-conditions: -\n; Tests: -\n(define Rsel \n  (lambda (goal program)\n    (let* ((predicate (predication->predicate goal))   ;; Predicate is a list (pred arity)\n           (rules (map rename-rule (program->procedure->rules program predicate)))\n           (rule-subs (map (lambda (rule) (make-rule-sub \n                                           rule\n                                           (unify-formulas goal (rule->head rule))))\n                           rules)))\n      (filter (lambda (rule-sub) (not (eq? 'fail (rule-sub->sub rule-sub))))\n              rule-subs))))\n```\n\n",
+     "hash": "4eaf273850c94198",
+     "lang": "scheme",
+     "noteHe": "שתי כלל-הבחירה של LP, שב-5.1 היו מופשטים לגמרי, כאן מקבלים מימוש קונקרטי בשלוש שורות כל אחד. **‏`Gsel`** מסננת מן השאילתה את כל המטרות ששוות ל-`'true` ולוקחת את ה-`first` שנשארה — כלומר בוחרת את **המטרה השמאלית ביותר שאינה `true`**. זו בדיוק בחירת המטרה של Prolog. שימו לב שהיא נשענת שוב על הסמל `'true` ולא על `#t` (בניגוד לתיעוד בסעיף 6), ושהתנאי המקדים בתיעוד — שהשאילתה איננה הצלחה ואיננה ריקה — הוא מה שמבטיח שיש בכלל איבר לקחת; ‏`first` על רשימה ריקה הייתה זורקת שגיאה. **‏`Rsel`** עושה ארבעה דברים בזה אחר זה: מוציאה את התג `(pred arity)` מן המטרה (ההערה בקוד מזכירה שהפרדיקט הוא **רשימה** ולא סמל); שולפת את כל כללי הפרוצדורה המתאימה ומשנה את שמות המשתנים של כל אחד מהם ב-`map rename-rule`; מנסה לאחד את המטרה עם ראש כל כלל משונה-שם ומצמידה לו את ההצבה שהתקבלה, ב-`make-rule-sub`; ולבסוף **מסננת** את הכללים שהאוניפיקציה שלהם החזירה `'fail`. מה שנשאר הוא רשימת כל הכללים שאפשר להמשיך איתם — ולכן `Rsel` איננה בוחרת כלל אחד אלא מייצרת את כל ההסתעפות בבת אחת, וסדר הבנים הוא סדר הכללים בתוכנית. שלוש נקודות לזכור: (א) שינוי השם קורה **כאן**, לפני האוניפיקציה, ולא אחריה — אחרת המשתנים היו מתנגשים; (ב) כאן נמצא היישוב של הסתירה-לכאורה מ-5.1, \"קבוצת התשובות אינה תלויה ב-Gsel/Rsel אבל `ancestor2` נתקע\": קבוצת העלים המצליחים בעץ באמת אינה תלויה בכלל הבחירה, אבל **הסדר** שבו הסריקה תפגוש אותם — ולכן גם השאלה אם תגיע אליהם בזמן סופי — תלוי בו לחלוטין; (ג) אי-התאמה במקור: הקוד קורא ל-`program->procedure->rules`, שם שאינו מופיע בממשק המתועד של סעיף 6 (שם רשומות `program->procedure->numbered-rules` ו-`program->procedure->rule`)."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:12",
+     "type": "prose",
+     "en": "Observe that `RSel` performs renaming of the rules when they are retrieved from the program.\nThis is made easy by the encoding of renamed-variables as `(var X <n>)` and by the accessors `rule->vars` defined in the AST module.\n\n",
+     "hash": "3bb4b13e3479ee7d",
+     "he": "שימו לב ש-`RSel` מבצעת את שינוי השם של הכללים בזמן שהם נשלפים מן התוכנית.\nהדבר נעשה בקלות בזכות הקידוד של משתנים משונים-שם כ-`(var X <n>)` ובזכות פונקציות הגישה `rule->vars` שהוגדרו במודול ה-AST."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:13:13",
+     "type": "code",
+     "en": "```scheme\n; Signature: rename-rule(rule)\n; Type: [Rule -> Rule]\n; Purpose: Return a copy of rule with all variables renamed consistently\n; Pre-conditions: -\n; Tests: \n; (rename-rule (make-rule '(member (var X) (cons (var H) (var L))) '((member (var X) (var L)))))\n; => '((member (var X 2) (cons (var H 2) (var L 2))) ((member (var X 2) (var L 2))))\n(define rename-rule\n  (let ((n 0))\n    (lambda (rule)\n      (set! n (+ n 1))\n      (let ((vars (rule->vars rule)))\n        (let ((new-vars (map (lambda (var) (rename-variable var n)) vars )))\n          (sub-apply-rule (make-sub vars new-vars) rule))))))\n```\n\n\n",
+     "hash": "be2d0b088763ec5f",
+     "lang": "scheme",
+     "noteHe": "שימו לב קודם כול למקום שבו יושב ה-`let`: הוא **מחוץ** ל-`lambda`, ולכן `(let ((n 0)) …)` מורץ פעם אחת בלבד, כשההגדרה נטענת, ו-`n` הוא משתנה מקומי אחד ש**כל** הקריאות ל-`rename-rule` חולקות. זהו סְגור (closure) מעל מצב פרטי — מונה. וזה בדיוק הבאג של `make-counter-sel` בתרגול 6, אלא שכאן המיקום הזה הוא **הנכון**: אנחנו רוצים מונה גלובלי יחיד, כי כל שליפה של כלל בכל מקום בעץ חייבת לקבל מספר גרסה שטרם נעשה בו שימוש, ואם כל קריאה הייתה מייצרת מונה חדש כל הכללים היו מקבלים 1 ושינוי השם היה חסר תועלת. ההמשך פשוט ואלגנטי: ‏`set!` מקדם את המונה, `rule->vars` מחזירה את המשתנים השונים שבכלל, `rename-variable` מטביע בכל אחד מהם את `n`, `make-sub vars new-vars` בונה מזה **הצבה**, ו-`sub-apply-rule` מפעילה אותה על הכלל כולו. כלומר שינוי שם איננו פעולה חדשה — הוא סתם עוד הצבה, וזו הסיבה שהוא יוצא עקבי אוטומטית על הראש ועל הגוף גם יחד. שתי הערות ביקורתיות. ראשית, ה-`set!` כאן הוא **תופעת הלוואי היחידה** במפרש שכולו פונקציונלי, ולכן `rename-rule` איננה שקופה רפרנציאלית (referential transparency): שתי קריאות על אותו כלל מחזירות תוצאות שונות. שנייה ונובעת ממנה: שימו לב שדוגמת הבדיקה בתיעוד מצפה לגרסה **2** ולא 1 — כלומר הבדיקה מניחה שקראו ל-`rename-rule` פעם אחת לפני כן. בדיקה כזאת תלויה בסדר ההרצה ותיכשל אם יריצו אותה לבד או אחרי שינוי בקוד שמעליה; זו מגרעת אמיתית בקוד המקור, והיא ההמחשה הישירה למה שמצב משתנה עושה לבדיקות."
+    }
+   ],
+   "headingHe": "אלגוריתם Answer-Query"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:14",
+   "depth": 3,
+   "headingEn": "Computing Answers given a Proof-Tree",
+   "raw": "### Computing Answers given a Proof-Tree\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:14:0",
+     "type": "prose",
+     "en": "Eventually, given a lazy-tree data structure representing a proof-tree, we read off the answers to a query by producing a lazy-list of substitutions:\n",
+     "hash": "f309162a1cfee361",
+     "he": "לבסוף, בהינתן מבנה הנתונים של עץ עצל שמייצג עץ הוכחה, אנחנו קוראים ממנו את התשובות לשאילתה על ידי ייצור רשימה עצלה של הצבות:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:14:1",
+     "type": "list",
+     "en": "* The proof-tree is started using a root node with the query and an empty substitution\n* Answer-query expands the tree into a lazy tree representing the full proof-tree\n* We extract from the proof-tree the success leaves, and for each one, read the substitution associated to the leaf and project it to keep only the variables that were present in the query.\n\n",
+     "hash": "5cf204d5fd913a99",
+     "he": "* עץ ההוכחה מתחיל מצומת שורש שמכיל את השאילתה ואת ההצבה הריקה\n* ‏Answer-query מרחיבה את העץ לעץ עצל שמייצג את עץ ההוכחה המלא\n* אנחנו מחלצים מעץ ההוכחה את עלי ההצלחה, ולכל אחד מהם קוראים את ההצבה שמשויכת לעלה ומטילים אותה כך שיישארו רק המשתנים שהופיעו בשאילתה."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:14:2",
+     "type": "code",
+     "en": "```scheme\n; Signature: answer-query-lzl(query, program)\n; Type: [Query * Program -> LZL(Sub)]\n; Purpose: Return a LZL of answers\n; Pre-conditions: -\n; Tests: -\n(define answer-query-lzl\n  (lambda (query program)\n    (letrec ((node-expander (lambda (node)\n                              (LP-node-expander node program))))\n      (let* ((pt (expand-lzt (make-PT-node query empty-sub) node-expander))\n             (answer-PT-nodes-lzl (lzt-filter->lzl pt LP-success-leaf?)))\n        (lzl-map (lambda (PT-node)\n                   (sub-restrict (PT-node->sub PT-node)\n                                 (query->vars query)))\n                 answer-PT-nodes-lzl)))))\n```\n\n",
+     "hash": "0dd3437dcfd99607",
+     "lang": "scheme",
+     "noteHe": "חמש שורות שמחברות את כל העמוד, וכל אחת מהן היא שלב אחר באלגוריתם. ה-`letrec` בהתחלה הוא **מתאם** (adapter) בלבד: הוא עוטף את `LP-node-expander` הדו-ארגומנטית בפונקציה חד-ארגומנטית שלוכדת את `program` בסגור שלה, כי `expand-lzt` דורשת expander מן הטיפוס `[Node -> List(Node)]` בדיוק. (בפועל `let` פשוט היה מספיק כאן — אין קריאה עצמית — ו-`letrec` הוא זהירות מיותרת.) ‏`(expand-lzt (make-PT-node query empty-sub) node-expander)` בונה את עץ ההוכחה: השורש הוא השאילתה של המשתמש בצירוף ההצבה **הריקה** — עדיין לא ידוע כלום. ‏`lzt-filter->lzl` מסננת את העץ לפי `LP-success-leaf?` ומחזירה **רשימה עצלה** של עלי ההצלחה; זו הפונקציה שבסעיף 12 ראינו שמחזירה תשובות אחת-אחת ואז אולי לא נעצרת, ולכן זו בדיוק ההתנהגות של Prolog מול המשתמש. ולבסוף `lzl-map` הופכת כל עלה לתשובה: ‏`PT-node->sub` מוציאה את ההצבה שנצברה על המסלול מן השורש (זכרו — היא נבנתה תוך כדי, על ידי `sub-combine` שבתוך ה-expander, ולכן אין כאן שלב הרכבה נפרד), ו-`sub-restrict` מטילה אותה על `(query->vars query)`, כלומר משאירה **רק** את משתני השאילתה המקורית וזורקת את כל המשתנים הפנימיים מסוג `(var Xs 7)` שנוצרו בשינויי השם. זהו בדיוק המרשם שנוסח בתרגול 11: הרכיבו את ההצבות מן השורש כלפי העלה, ואז הגבילו למשתני השאילתה — שני הצעדים, באותו סדר. ושימו לב מה **אין** כאן: אין לופ, אין מחסנית, אין backtracking מפורש. כל החיפוש והחזרה לאחור מתחבאים בעצלות של העץ ובסריקה של `lzt-filter->lzl`."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:14:3",
+     "type": "prose",
+     "en": "The combination of Lazy-lists and Lazy-Trees allows a compact description of the operational semantics of LP which can operate on infinite trees.\n\n\n",
+     "hash": "44c361fb8037fa15",
+     "he": "השילוב של רשימות עצלות ועצים עצלים מאפשר תיאור קומפקטי של הסמנטיקה התפעולית של LP, כזה שיכול לעבוד גם על עצים אינסופיים."
+    }
+   ],
+   "headingHe": "חישוב התשובות בהינתן עץ הוכחה"
+  },
+  {
+   "id": "cm/5.3LPInterpreter:15",
+   "depth": 3,
+   "headingEn": "Testing the LP Interpreter",
+   "raw": "### Testing the LP Interpreter\n\n",
+   "blocks": [
+    {
+     "id": "cm/5.3LPInterpreter:15:0",
+     "type": "prose",
+     "en": "Since we did not implement a parser, we encode programs using AST constructors:\n",
+     "hash": "e86d1bc4ad68ed0b",
+     "he": "מכיוון שלא מימשנו parser, אנחנו מקודדים תוכניות באמצעות הבנאים של ה-AST:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:15:1",
+     "type": "code",
+     "en": "```scheme\n(define app1 (make-rule '(append empty (var Xs) (var Xs)) (list 'true)))\n(define app2 (make-rule \n              '(append (cons (var X) (var Xs)) (var Y) (cons (var X) (var Zs)))\n              '((append (var Xs) (var Y) (var Zs))) ))\n(define app-proc (make-procedure (list app1 app2)))\n\n(define mem1 (make-rule '(member (var X) (var Ys)) \n                        '((append (var Zs) (cons (var X) (var Xs)) (var Ys))) ))\n(define mem-proc (make-procedure (list mem1)))\n\n(define prog-app-mem\n  (make-program (list app-proc mem-proc)))\n```\n\n",
+     "hash": "9d75d69312eea8eb",
+     "lang": "scheme",
+     "noteHe": "אותה תוכנית `append`/`member` מסעיף 5, אבל הפעם נבנית בבנאים במקום להיכתב כליטרל אחד גדול — וזו גם התשובה המעשית לבאג הסוגריים שראינו שם: הבנאים לא נותנים לטעות כזאת לקרות. ‏`app1` הוא **העובדה** `append([], Xs, Xs)`, ולכן גופו הוא `(list 'true)`. ‏`app2` הוא הכלל הרקורסיבי, וגופו הוא רשימה עם קריאה רקורסיבית אחת. ‏`(make-procedure (list app1 app2))` אורז את שניהם לפרוצדורה אחת, ומכאן — כפי שהוסבר בסעיף 6 — התג `(append 3)` נגזר מן הראשים עצמם; שימו לב שהסדר בקריאה הזאת הוא הסדר שבו `Rsel` תנסה את הכללים. ‏`mem1` הוא הכלל היחיד של `member/2`, ו-`make-program` אורזת את שתי הפרוצדורות לתוכנית. שתי הערות קטנות: הגוף של `app1` נכתב `(list 'true)` ושל `app2` נכתב `'((append …))` — שתי דרכים שקולות לבנות את אותה רשימה, וחבל שהעמוד מערבב ביניהן באותו בלוק; ושימו לב ש-`empty` כאן הוא **קבוע של LP** שמייצג את `[]` של Prolog, ולא הרשימה הריקה של Scheme — הוא סמל שהאוניפיקציה תשווה כמו כל קבוע אחר."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:15:2",
+     "type": "prose",
+     "en": "Queries are submitted as follows:\n\n",
+     "hash": "45386969d3760789",
+     "he": "שאילתות מוגשות כך:"
+    },
+    {
+     "id": "cm/5.3LPInterpreter:15:3",
+     "type": "code",
+     "en": "```scheme\n; ?- member(X, [1])\n(define query-member1 (make-query (list '(member (var X) (cons 1 empty)))))\n\n(test (answer-query query-member1 prog-app-mem)\n       =>\n       '((sub ((var X)) (1))))\n```\n\n",
+     "hash": "fe12c9b2d7067e84",
+     "lang": "scheme",
+     "noteHe": "השאילתה `?- member(X, [1])` — בקידוד: רשימת מטרות באורך 1, והרשימה `[1]` נכתבת `(cons 1 empty)`. כדאי לעקוב אחרי החישוב, הוא קצר. הכלל היחיד של `member` מוחלף בגופו, ולכן השאילתה החדשה היא `append(Zs, cons(X, Xs), cons(1, empty))` (עם שמות משונים). לפי `append`, יש שני כללים לנסות: הכלל הרקורסיבי דורש שהארגומנט הראשון יהיה `cons`, וגם שהוא ייתן פיצול שבו הסיפא ריקה — מה שנכשל, כי `cons(X, Xs)` לעולם לא יתאחד עם `empty`; ואילו העובדה נותנת `Zs = empty` ואת השוויון `cons(X, Xs) = cons(1, empty)`, שממנו `X = 1` ו-`Xs = empty`. יש בדיוק פיצול אחד תקין של רשימה בת איבר אחד, ולכן בדיוק תשובה אחת. הפלט `'((sub ((var X)) (1)))` — רשימה עם הצבה אחת שקושרת `X = 1` — הוא ההוכחה ש-`sub-restrict` עשתה את שלה: אין בו שום `(var Zs 3)` ואין שום שאריות של שינויי השם. שימו לב לשני פרטים במקור: הבדיקה קוראת ל-`answer-query`, שם ש**אינו** מופיע בין הפונקציות שסעיף 13 הכריז עליהן (`answer-query-first` ו-`answer-query-lzl`); והערך המצופה הוא רשימה רגילה ולא רשימה עצלה, ולכן `answer-query` כאן היא בהכרח עוטף שמכריח (forces) את הרשימה העצלה לרשימה ממש — מה שמותר רק כי אנחנו יודעים מראש שהעץ הזה סופי."
+    },
+    {
+     "id": "cm/5.3LPInterpreter:15:4",
+     "type": "code",
+     "en": "```scheme\n; ?- append([1],[2],X)\n(define query-append12X (make-query (list '(append (cons 1 empty) (cons 2 empty) (var X)))))\n\n(test (answer-query query-append12X prog-app-mem)\n        =>\n        '((sub ((var X)) ((cons 1 (cons 2 empty))))))\n```        \n\n",
+     "hash": "5b00db2ca0ef2f2d",
+     "lang": "scheme",
+     "noteHe": "השאילתה השנייה, `?- append([1],[2],X)`, היא המוד ה\"רגיל\" של `append` — שרשור. המסלול היחיד: הארגומנט הראשון הוא `cons(1, empty)`, ולכן מתאים הכלל הרקורסיבי, שמפרק אותו ומייצר את המטרה `append(empty, cons(2, empty), Zs)`; עליה מתאימה העובדה, שקושרת `Zs = cons(2, empty)`; ובחזרה לראש, `X = cons(1, cons(2, empty))`. עומק שלוש, עלה מצליח אחד, ולכן תשובה אחת בלבד. שימו לב שהתשובה מודפסת בקידוד הפנימי, `(cons 1 (cons 2 empty))`, ולא כ-`[1,2]` — כי כפי שנאמר בסעיף 5 אין למפרש הזה unparser, והפלט הוא ה-AST עצמו. ושווה להשוות: **אותו פרדיקט בדיוק** שכאן מחזיר תשובה יחידה, החזיר ב-5.2 ארבע תשובות כשהריצו אותו במוד ההפוך (`?- append(Xs, Ys, [a,b,c])`) — ההבדל אינו בתוכנית אלא רק בשאלה איזה ארגומנט הגיע חסום. זהו הסיכום של כל הפרק בשורה אחת: התוכנית היא **יחס**, והמוד הוא שאלה של שימוש."
+    }
+   ],
+   "headingHe": "בדיקת המפרש של LP"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "בקוד של `expand-lzt`, הקריאה `(node-expander root)` יושבת ב-`let` שנמצא **מחוץ** ל-`(lambda () …)`:\n\n```scheme\n(define expand-lzt\n (lambda (root node-expander)\n   (let ((child-nodes (node-expander root)))\n     (make-lzt root\n       (lambda ()\n         (map (lambda (node) (expand-lzt node node-expander))\n              child-nodes))))))\n```\n\nמה המשמעות המדויקת של המיקום הזה?",
+   "options": [
+    "כל העץ נבנה מיד בזמן הקריאה, וה-lambda היא רק אופטימיזציה שחוסכת הקצאות זיכרון",
+    "קריאה ל-`expand-lzt` מרחיבה שכבה אחת מיד, ורק ההרחבה של הבנים נדחית — ולכן גם בניית עץ אינסופי מסתיימת",
+    "שום דבר לא מחושב עד לקריאה הראשונה ל-`lzt->branches`, כולל תיוגי הבנים של השורש",
+    "‏`child-nodes` מחושב מחדש בכל קריאה ל-`lzt->branches`, ולכן ה-`let` שקול לחישוב בתוך ה-lambda"
+   ],
+   "correct": 1,
+   "explanationHe": "ה-`let` מוערך בזמן הקריאה ל-`expand-lzt`, ולכן תיוגי הבנים של השורש מחושבים **מיד** — שכבה אחת, שהיא תמיד סופית כי ההסתעפות סופית. ה-`map` שמרחיב כל בן רקורסיבית יושב בתוך ה-lambda, ולכן הוא נדחה, וזה מה שמאפשר להגדיר `it01` (עץ אינסופי) בלי להיתקע.\n\nמסיח 1 שגוי: בלי הדחייה בניית עץ אינסופי לא הייתה מסתיימת כלל — זו לא אופטימיזציה אלא תנאי אפשרות.\nמסיח 3 שגוי: זהו התיאור של עצלות מלאה, וכאן שכבה אחת דווקא כן מחושבת מיד. מבחינה מעשית זה לא מזיק, אבל זה הבדל אמיתי שכדאי לדעת.\nמסיח 4 שגוי: ‏`child-nodes` נלכד בסגור (closure) וחושב פעם אחת. מה שכן מחושב מחדש בכל קריאה הוא ה-`map` שבתוך ה-lambda — אין מימואיזציה, בדיוק כמו ברשימות העצלות של 4.3, ולכן מעבר פעמיים על אותו עץ בונה את כל תתי-העצים פעמיים."
+  },
+  {
+   "id": "ex2",
+   "type": "open",
+   "questionHe": "‏`LP-node-expander` מחזירה רשימת בנים ריקה (`empty`) בשני מצבים שונים לגמרי. מהם? ואם מבנה העץ לא מבדיל ביניהם, איך המפרש בכל זאת יודע מי מהם תשובה ומי כישלון?",
+   "answerHe": "**שני המצבים:**\n\n1. **עלה הצלחה** — `(success-query? query)` מחזירה אמת, כלומר כל המטרות שנשארו בשאילתה הן `true`. אין מה להוכיח יותר, ולכן אין בנים.\n2. **עלה כישלון** — השאילתה איננה הצלחה, `Gsel` בוחרת מטרה, אבל `Rsel` מחזירה רשימה **ריקה**: אף כלל בתוכנית לא מתאחד עם המטרה הזאת (או שאין פרוצדורה כזאת, או שכל האוניפיקציות החזירו `'fail` וסוננו). אז `new-queries` ו-`new-subs` ריקות, ו-`(map make-PT-node '() '())` מחזיר `'()`.\n\nכלומר מבחינת מבנה העץ העצל שני העלים **זהים לחלוטין** — צומת בלי בנים.\n\n**ההבחנה נעשית מחוץ ל-expander**, בסעיף 14: ‏`answer-query-lzl` קוראת ל-`lzt-filter->lzl pt LP-success-leaf?`, ו-`LP-success-leaf?` בודקת את **תיוג הצומת** ולא את מבנהו — כלומר בודקת אם השאילתה שבתוך ה-`PT-node` היא שאילתת הצלחה. עלי הכישלון פשוט לא עוברים את הסינון ונעלמים בשקט.",
+   "explanationHe": "תשובה נכונה חייבת להכיל: (א) שני המצבים — success-query מול Rsel שהחזירה רשימה ריקה; (ב) האמירה שמבנה העץ אינו מבדיל ביניהם, כי שניהם צומת חסר בנים; (ג) שההבחנה נעשית על ידי `LP-success-leaf?` בשלב הסינון, לפי **תיוג** הצומת. נקודה עמוקה שכדאי להוסיף: זו הסיבה שכישלון ב-LP אינו ערך ואינו שגיאה אלא **היעדר** — אין נוסחה `false` ואין שלילה, בהתאמה מדויקת ל-LP כפי שהוגדר ב-5.1."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "‏`it01` הוא העץ העצל **האינסופי** שכל צומת בו מקבל שני בנים. מה מחזירה כל אחת משלוש הקריאות, ובעיקר — הסבירו את השנייה:\n\n```scheme\n(lzt-find-first it01 (lambda (node) (> (length node) 4)))\n(lzt-filter     it01 (lambda (node) (< (length node) 4)))\n(lzt-filter->lzl it01 (lambda (node) (= (length node) 4)))\n```\n\nהפרדיקט השני מתקיים ב-15 צמתים בלבד, וכולם ליד השורש. איך זה ייתכן שהקריאה בכל זאת לא מסתיימת?",
+   "answerHe": "1. ‏`(0 0 0 0 0)` — סריקת עומק במסלול השמאלי ביותר, שבו כל בן ראשון נוצר ב-`(cons 0 …)`; זהו הצומת הראשון באורך 5 שנפגש.\n2. **לופ אינסופי** — לא מחזירה כלום, לעולם.\n3. רשימה עצלה שנותנת **16** איברים (כל הצמתים באורך 4, כלומר $$2^4$$) ואחר כך נתקעת.\n\n**ההסבר לשנייה** נמצא בשורה אחת בקוד:\n\n```scheme\n(let ((children (flatmap collect (lzt->branches lzt))))\n  (if (filterP (lzt->root lzt)) …))\n```\n\n‏Scheme היא שפה להוטה (eager), ולכן `children` מוערך **לפני** שה-`if` נבדק בכלל. כלומר `collect` יורדת ותמיד סורקת את **כל** תת-העץ, בלי שום קשר לפרדיקט ובלי שום קשר לכמה תוצאות כבר נמצאו. הפרדיקט משפיע רק על מה שנכנס לרשימה, לא על מה שנסרק. על עץ אינסופי הרקורסיה הזאת אינה נעצרת, ולכן אף תוצאה — גם לא זו שבשורש — לא מגיעה חזרה.\n\nהשורש הבעיה הוא **טיפוס הפלט**: רשימה רגילה מחייבת שכל איבריה יחושבו לפני שהיא מוחזרת. התיקון אינו בפונקציה אלא בטיפוס — להחזיר רשימה **עצלה**, וזה בדיוק `lzt-filter->lzl`.",
+   "explanationHe": "הנקודה שהמבחן מחפש: העצלות של הבנאי אינה מגנה על שום דבר אם פעולת הסריקה מחזירה מבנה נתונים להוט. השוו ל-4.3, שם `lzl-filter` היה חייב לעטוף את הרקורסיה שלו ב-lambda מאותה סיבה בדיוק. שימו לב גם למה שהשלישית מלמדת: העצלות איננה הופכת את החישוב לכריע — היא ממירה 'לא מחזיר כלום לעולם' ל'מחזיר כל תשובה שהוא מוצא ואחר כך אולי לא נעצר', כלומר נאותות בלי שלמות (5.1). זו בדיוק ההתנהגות של Prolog מול המשתמש."
+  },
+  {
+   "id": "ex4",
+   "type": "open",
+   "questionHe": "בהגדרת `rename-rule`, ה-`let ((n 0))` יושב **מחוץ** ל-`lambda`:\n\n```scheme\n(define rename-rule\n  (let ((n 0))\n    (lambda (rule)\n      (set! n (+ n 1))\n      …)))\n```\n\n(א) מה היה קורה אם ה-`let` היה נכנס **פנימה**, לתוך ה-`lambda`? (ב) מדוע דוגמת הבדיקה שבתיעוד מצפה לגרסה `2` ולא `1`, ומה זה מלמד?",
+   "answerHe": "**(א)** אם ה-`let` היה בתוך ה-`lambda`, `n` היה נוצר מחדש בכל קריאה ואז מקודם ל-1 — כלומר **כל** שליפה של **כל** כלל הייתה מקבלת את מספר הגרסה 1. אז שני כללים שנשלפו בשכבות שונות של עץ ההוכחה, או אפילו אותו כלל שנשלף פעמיים בענפים שונים, היו מקבלים בדיוק את אותם שמות משתנים — `(var X 1)` בשניהם — והתנגשות השמות שכל מנגנון שינוי-השם בא למנוע הייתה חוזרת בדלת האחורית. האוניפיקציה הייתה מזהה משתנים זרים כזהים, וזה מייצר תשובות שגויות או כישלונות מדומים.\n\nהמיקום מחוץ ל-`lambda` יוצר סְגור (closure) מעל מצב פרטי — מונה **גלובלי יחיד** שכל הקריאות חולקות, וזה בדיוק מה שדרוש: מספר גרסה שטרם נעשה בו שימוש בכל שליפה, בכל מקום בעץ. שימו לב שזה **היפוך** של הבאג ב-`make-counter-sel` מתרגול 6: שם המיקום הזה היה טעות, כי רצינו מפעל שמייצר מונים עצמאיים; כאן הוא הפתרון, כי רוצים מונה אחד. המיקום של ה-`let` ביחס ל-`lambda` הוא השאלה, והתשובה תלויה במה שרוצים.\n\n**(ב)** דוגמת הבדיקה מצפה ל-`(var X 2)` מפני שהיא מניחה שקראו ל-`rename-rule` **פעם אחת קודם**. כלומר הבדיקה תלויה בהיסטוריית ההרצה: הרצה שלה לבד תיתן גרסה 1 והבדיקה תיכשל; הוספת קריאה כלשהי לפניה תשבור אותה שוב. זה מלמד שני דברים: (1) ‏`set!` כאן הוא תופעת הלוואי היחידה במפרש שכולו פונקציונלי, ולכן `rename-rule` איננה שקופה רפרנציאלית — שתי קריאות על אותו קלט מחזירות תוצאות שונות; (2) זו בדיוק העלות המעשית של מצב משתנה: הבדיקות מאבדות את היכולת להיות בלתי-תלויות. חלופה שמשמרת את התכונה הפונקציונלית היא להעביר את המונה כפרמטר מפורש ולהחזיר אותו יחד עם הכלל — או להשתמש בעומק הצומת בעץ, שהוא ממילא ידוע.",
+   "explanationHe": "תשובה נכונה חייבת: (א) לזהות שהמיקום מחוץ ל-lambda יוצר מונה יחיד משותף, ולתאר את הכישלון הקונקרטי אם הוא היה בפנים (כל הכללים מקבלים גרסה 1 → התנגשות שמות חוזרת); (ב) להסביר שהבדיקה תלויה בסדר ההרצה, ולקשור זאת לאיבוד השקיפות הרפרנציאלית. ההשוואה ל-`make-counter-sel` של תרגול 6 היא בונוס אמיתי — אותו מיקום קוד, פעם באג ופעם תיקון."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "נתונה התוכנית:\n\n```prolog\np(a).\nq(X) :- p(X), r(X).\n```\n\nוהשאילתה `?- q(Z), s(Z).`\n\nעקבו אחרי צעד אחד של `LP-node-expander`: מהי השאילתה של צומת הבן? ציינו במדויק מה `split-list` מחזירה, מה `append` מחבר, ועל מה `sub-apply-query` מופעלת.",
+   "answerHe": "‏`Gsel` בוחרת את המטרה השמאלית שאינה `true`, כלומר `q(Z)`.\n\n‏`Rsel` שולפת את הכלל `q(X) :- p(X), r(X)`, **משנה את שמות משתניו** (נניח לגרסה 1) ומקבלת `q(X1) :- p(X1), r(X1)`, ואז מאחדת `q(Z)` עם הראש `q(X1)`. מתקבלת ההצבה `σ = {Z = X1}`.\n\nב-`expand-query`:\n\n* ‏`(split-list '(q(Z) s(Z)) q(Z))` מחזירה את הזוג `(() . (s(Z)))` — רישא ריקה, סיפא `(s(Z))`, **והמטרה `q(Z)` עצמה נזרקת** ואינה נכללת באף אחד מהם.\n* ‏`append` מחבר שלושה חלקים בסדר: רישא, **גוף הכלל**, סיפא → `(p(X1), r(X1), s(Z))`. שימו לב שהגוף נכנס בדיוק **במקום** שבו עמדה המטרה, לא בסוף.\n* ‏`sub-apply-query` מפעילה את `σ` על **כל** השאילתה החדשה, ולכן התוצאה היא:\n\n```\n(p(X1), r(X1), s(X1))\n```\n\n**הפרט המכריע**: המטרה `s(Z)` לא נגעה בכלל בכלל שהופעל, ובכל זאת היא הפכה ל-`s(X1)`. אילו `σ` הייתה מופעלת רק על גוף הכלל שהוכנס, `s(Z)` הייתה נשארת `s(Z)` — והקשר בין התשובה ש-`p`/`r` ייתנו לבין הארגומנט של `s` היה נשבר לחלוטין.",
+   "explanationHe": "זהו מנגנון העברת המידע היחיד של תכנות לוגי, והטעות הנפוצה היא בדיוק זו: להפעיל את σ רק על הגוף המוכנס. שתי נקודות נוספות שראוי שיופיעו בתשובה: (1) ‏`split-list` **מוציאה** את המטרה הנבחרת — היא מוחלפת, לא נשמרת; (2) הרישא כאן ריקה, אבל היא לא תמיד ריקה: ‏`Gsel` מסננת מטרות `true`, ולכן שאילתה כמו `(true, b(Y), c(Y))` תיתן רישא `(true)`. בהמשך החישוב `p(X1)` תתאחד עם העובדה `p(a)`, ההצבה תצטבר ל-`{Z = X1, X1 = a}`, ובסוף `sub-restrict` תשאיר רק את `Z`."
+  },
+  {
+   "id": "ex6",
+   "type": "mcq",
+   "questionHe": "איזו הצבה נושא צומת בעץ ההוכחה שבונה `LP-node-expander`?",
+   "options": [
+    "רק את ההצבה שהתקבלה מן האוניפיקציה האחרונה, בקשת שנכנסת לצומת הזה",
+    "את ההרכבה של כל ההצבות שעל המסלול מן השורש עד הצומת, שנצברת תוך כדי בנייה על ידי `sub-combine`",
+    "את **איחוד** כל ההצבות שעל המסלול מן השורש, כי ההצבות בענף אחד תמיד זרות זו לזו",
+    "את ההרכבה של כל ההצבות שעל המסלול, כשהיא כבר מוגבלת (restricted) למשתני השאילתה המקורית"
+   ],
+   "correct": 1,
+   "explanationHe": "בקוד: ‏`(sub-combine sub (rule-sub->sub rule-sub))` — ה-`sub` של צומת האב מורכב עם ההצבה החדשה של הקשת, והתוצאה היא ה-`sub` של הבן. לכן כל צומת נושא את ההרכבה המלאה של המסלול, ואין צורך במעבר הרכבה נפרד בסוף.\n\nמסיח 1 שגוי: אז המידע שנצבר בקשתות הקודמות היה נאבד, והתשובה בעלה לא הייתה קושרת את משתני השאילתה כלל.\nמסיח 3 שגוי משתי סיבות: הרכבה איננה איחוד (הרכבה מפעילה את ההצבה החדשה על ערכי הקודמת — ראו את הדוגמה בסעיף 8), וההנחה שההצבות זרות פשוט אינה נכונה — כל המנגנון בנוי על כך שאותם משתנים חוזרים בקשתות עוקבות.\nמסיח 4 שגוי בשלב: ההגבלה קורית **רק בסוף**, ב-`answer-query-lzl`, על עלי ההצלחה. אם היו מגבילים בכל צומת, המשתנים הפנימיים מסוג `(var X1 3)` היו נזרקים תוך כדי, ואיתם כל המידע שאמור לזרום למטרות שנשארו."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "מפו את המימוש של סעיפים 13–14 על האלגוריתם המופשט שכתבנו ב-5.1: איזו פרוצדורת Scheme מבצעת כל צעד של `answer-query` / `proof-tree` / `apply-rules`? ומה, בסופו של דבר, מחליף את ה-backtracking?",
+   "answerHe": "**תשובת מודל:**\n\n| הצעד המופשט (5.1) | המימוש ב-5.3 |\n|---|---|\n| צומת בעץ ההוכחה = שאילתה + הצבה | ‏`PT-node`, עם `PT-node->query` ו-`PT-node->sub` |\n| השורש = השאילתה עם ההצבה הריקה | ‏`(make-PT-node query empty-sub)` |\n| ‏Gsel — בחירת מטרה | ‏`Gsel`: המטרה השמאלית שאינה `true` |\n| ‏Rsel — בחירת כלל | ‏`Rsel`: **כל** הכללים שראשם מתאחד עם המטרה, בסדר התוכנית |\n| שינוי שם המשתנים של הכלל | ‏`rename-rule`, בתוך `Rsel`, לפני האוניפיקציה |\n| ‏`Unify(Goal, Head) = σ` | ‏`unify-formulas`, ומחזירה `'fail` בכישלון |\n| ‏`apply-rules` — החלפת המטרה בגוף הכלל והפעלת σ על השאילתה כולה | ‏`expand-query` |\n| צבירת ההצבה על הענף | ‏`sub-combine` בתוך `LP-node-expander` |\n| בניית העץ כולו | ‏`expand-lzt` עם `LP-node-expander` כ-node-expander |\n| איתור העלים המצליחים | ‏`lzt-filter->lzl` עם `LP-success-leaf?` |\n| קריאת התשובה מן העלה | ‏`sub-restrict` על `(query->vars query)` |\n\n**ומה מחליף את ה-backtracking?** שום דבר בקוד — אין מחסנית מפורשת, אין `undo`, אין לופ חיפוש. ה-backtracking מתפרק לשני דברים שכבר קיימים: (1) ‏`Rsel` איננה בוחרת כלל אחד ומתחרטת, אלא מייצרת מיד את **כל** הבנים, כך ש\"נסה אפשרות אחרת\" הוא פשוט \"היכנס לענף אחר בעץ\"; (2) העצלות של `expand-lzt` דואגת שהענפים שלא נסרקו לא ייבנו כלל, ולכן ייצור כל האפשרויות בבת אחת אינו עולה כלום. \"החזרת המצב לאחור\" מיותרת כי אין מצב משותף להחזיר — כל צומת נושא את ההצבה שלו, וההצבות פרסיסטנטיות.",
+   "explanationHe": "זה תרגיל הסיכום של הפרק, ותשובה טובה מראה שהמפרש הוא תרגום ישיר של הפסאודו-קוד ולא אלגוריתם חדש. חייבים להופיע: ‏`Gsel`/`Rsel`, שינוי השם **בתוך** `Rsel`, `expand-query` כ-`apply-rules`, `sub-combine` כצבירה על הענף, ו-`sub-restrict` כצעד האחרון. הנקודה החשובה בחלק השני: המימוש ההצהרתי הזה מתאפשר בגלל שילוב של שני דברים שנלמדו בנפרד — עצים עצלים (4.3) והצבות פרסיסטנטיות (3.2/3.3). זו הסיבה שהמפרש כולו נכנס בכ-40 שורות, בעוד מפרש Prolog אימפרטיבי דורש מחסנית trail ופעולות undo מפורשות."
+  },
+  {
+   "id": "ex8",
+   "type": "code-reading",
+   "questionHe": "בשורה האחרונה של `answer-query-lzl` יש `sub-restrict`:\n\n```scheme\n(lzl-map (lambda (PT-node)\n           (sub-restrict (PT-node->sub PT-node)\n                         (query->vars query)))\n         answer-PT-nodes-lzl)\n```\n\nאיך הייתה נראית התשובה ל-`?- member(X, [1])` בלי ה-`sub-restrict`, ומדוע הפעולה הזאת נקראת גם `projection` (הטלה)?",
+   "answerHe": "עם `sub-restrict` התשובה היא `'(sub ((var X)) (1))` — קישור אחד בלבד.\n\nבלעדיו הייתה מוחזרת ההצבה **המלאה** שנצברה על הענף, שכוללת גם את כל המשתנים הפנימיים שנוצרו בשינויי השם — משהו בסגנון:\n\n```\n(sub ((var X) (var Xs 1) (var Ys 1) (var Zs 1) (var Xs 2) …)\n     (1 empty (cons 1 empty) empty empty …))\n```\n\nכלומר כל תולדות החישוב, כולל משתנים שהמשתמש מעולם לא כתב ושהמספרים שלהם תלויים במונה הגלובלי של `rename-rule` — ולכן אפילו אינם יציבים בין הרצות. לא תשובה, אלא יומן ריצה.\n\n**מדוע \"הטלה\"**: הצבה היא העתקה מקבוצת משתנים ל-terms, ו-`sub-restrict(sub, vars)` מצמצמת את **התחום** שלה לתת-קבוצת המשתנים שנתנו לה. זו בדיוק פעולת ההטלה (projection) של האלגברה הרלציונית מ-5.1: מוותרים על עמודות ומשאירים רק את אלה שמעניינות. השם `projection` מופיע במפורש בתיעוד ה-ADT בסעיף 8.",
+   "explanationHe": "שתי נקודות חייבות להופיע: (א) בלי ההגבלה חוזרים כל המשתנים הפנימיים של שינויי השם, כלומר תשובה שאינה קריאה ואף אינה יציבה בין הרצות; (ב) הקשר לאלגברה הרלציונית — הגבלת תחום ההצבה = הטלה. שווה להוסיף שההגבלה קורית **רק כאן**, בסוף, ולא בכל צומת — כי המשתנים הפנימיים דרושים לחישוב עצמו, והם מיותרים רק לאחר שהגענו לעלה. זהו גם הצעד השני במרשם של תרגול 11: הרכיבו מן השורש כלפי העלה, ואז הגבילו למשתני השאילתה."
+  }
+ ]
+}

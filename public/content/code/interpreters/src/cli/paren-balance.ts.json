@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/cli/paren-balance.ts",
+ "repo": "interpreters",
+ "path": "src/cli/paren-balance.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/cli/paren-balance.ts",
+ "code": "// paren-balance.ts\n// Tracks net parenthesis / bracket depth in a string,\n// respecting string literals (\"...\") and semicolon line-comments.\n\nexport const parenDepth = (s: string): number => {\n    let depth = 0;\n    let inString = false;\n    let i = 0;\n    while (i < s.length) {\n        const ch = s[i];\n        if (inString) {\n            if (ch === '\\\\') {\n                i += 2;   // skip escaped character\n                continue;\n            }\n            if (ch === '\"') inString = false;\n        } else {\n            if (ch === '\"') {\n                inString = true;\n            } else if (ch === ';') {\n                // skip rest of line (comment)\n                while (i < s.length && s[i] !== '\\n') i++;\n                continue;\n            } else if (ch === '(' || ch === '[') {\n                depth++;\n            } else if (ch === ')' || ch === ']') {\n                depth--;\n            }\n        }\n        i++;\n    }\n    return depth;\n};\n\n// True when s is non-empty and all opened parens are closed.\nexport const isComplete = (s: string): boolean =>\n    s.trim().length > 0 && parenDepth(s) <= 0;\n",
+ "titleHe": "paren-balance — האם המשתמש סיים להקליד ביטוי",
+ "descriptionHe": "קובץ תשתית של ה-REPL (`repl.ts` באותה תיקייה), ולא חומר של שיעור מסוים. תפקידו לענות על שאלה אחת: **האם מה שהמשתמש הקליד עד כה הוא ביטוי שלם?** אם לא, ה-REPL ימשיך לקרוא שורות נוספות לפני שינסה לנתח.\n\nלמרות שהוא אינו נלמד באף עמוד, שווה להסתכל בו דקה, כי הוא **הסורק (scanner) הקטן ביותר בפרויקט** ומדגים בשלושים שורות את מה שכל מנתח תחבירי חייב לעשות: לספור סוגריים תוך שהוא מבחין בין סוגר אמיתי לסוגר שנמצא בתוך מחרוזת או בתוך הערה. ⚠️ והשוו אותו ל-`stripComments` שב-`L3-ast.ts`, `L4.ts` ו-`L7.ts` — שם אותה משימה נעשית בביטוי רגולרי אחד שאינו יודע דבר על מחרוזות, ולכן `(define s \"a;b\")` נשבר. **הקובץ הזה עושה נכון בדיוק את מה שהמנתח התחבירי עושה לא נכון**, והשניים יושבים באותו מאגר.",
+ "annotations": [
+  {
+   "line": 5,
+   "noteHe": "‏**מכונת מצבים בעשרים שורות**, וזה בדיוק מה שסורק (scanner) של שפה עושה. המצב הוא משתנה בוליאני יחיד, `inString`, והוא מפצל את ההתנהגות לשניים: בתוך מחרוזת שום תו אינו נחשב סוגר, ומחוץ לה `(`/`[` מעלים את העומק ו-`)`/`]` מורידים. שני הפרטים שהופכים אותו לנכון הם אלה שקל לשכוח: `\\\\` בשורה 12 מדלג על **שני** תווים, כך ש-`\"a\\\"b\"` לא ייחשב כמחרוזת שנסגרה; ו-`;` בשורה 20 מדלג עד סוף השורה, כך שסוגר בתוך הערה אינו נספר. ⚠️ עצרו והשוו ל-`stripComments`, שמופיע בשלושה קבצים בפרויקט כביטוי רגולרי `/;[^\\r\\n]*/g` **ואינו מכיר מחרוזות כלל** — ולכן קוטע `(define s \"a;b\")` באמצע ויוצר שגיאת תחביר על קלט חוקי. אותה בעיה, שני פתרונות, ורק אחד מהם נכון. כדאי לשנן את הלקח הכללי: **ביטוי רגולרי אינו יכול להחליף סורק בעל מצב**, כי \"האם אני בתוך מחרוזת\" הוא מידע שנצבר לאורך הקלט. שימו לב גם לסגנון — `let`, `while`, `i += 2` — קוד הכרחי ומשנה-מצב, נדיר בפרויקט הזה; לסריקת תווים תו-אחר-תו זו הבחירה הסבירה."
+  },
+  {
+   "line": 35,
+   "noteHe": "‏`isComplete` היא כל מה שה-REPL באמת צריך, ושווה לשים לב לפרט אחד: התנאי הוא `parenDepth(s) <= 0` ולא `=== 0`. כלומר קלט כמו `(+ 1 2))`, שבו יש סוגר סוגר מיותר, ייחשב \"שלם\". זו **החלטה נכונה בהקשר של REPL** — עדיף להעביר קלט שגוי למנתח התחבירי, שידע לומר מה הבעיה, מאשר להיתקע ולהמשיך לחכות לקלט שלעולם לא יאזן את הביטוי. כדאי לשים לב שזו הבחנה בין שני תפקידים: הפונקציה הזאת אינה **בודקת תקינות** אלא רק **מחליטה מתי להפסיק לקרוא**, ובדיקת התקינות שייכת ל-`parseL5`. ⚠️ מגבלה שכדאי להכיר: הסורק אינו מכיר קבועי-תו של Scheme, ולכן `#\\(` ייספר כסוגר פותח."
+  }
+ ]
+}

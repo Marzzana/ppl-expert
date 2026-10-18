@@ -1,0 +1,8 @@
+{
+ "id": "practice/week4/src/shared/type-predicates.ts",
+ "repo": "practice",
+ "path": "week4/src/shared/type-predicates.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/week4/src/shared/type-predicates.ts",
+ "code": "// ========================================================\n// Type utilities\nexport const isArray = Array.isArray;\nexport const isString = (x: any): x is string => typeof x === \"string\";\nexport const isNumber = (x: any): x is number => typeof x === \"number\";\nexport const isBoolean = (x: any): x is boolean => typeof x === \"boolean\";\nexport const isError = (x: any): x is Error => x instanceof Error;\n\n// A weird method to check that a string is a string encoding of a number\nexport const isNumericString = (x: string): boolean => JSON.stringify(+x) === x;\n\n// A predicate for a valid identifier\nexport type Identifier = string;\nexport const isIdentifier = (x: any): x is Identifier =>\n    /[A-Za-z][A-Za-z0-9]*/i.test(x);"
+}

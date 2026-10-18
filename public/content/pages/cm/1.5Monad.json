@@ -1,0 +1,1006 @@
+{
+ "id": "cm/1.5Monad",
+ "kind": "lecture",
+ "sourcePath": "class_material/1.5Monad.md",
+ "titleEn": "Composition and Monads",
+ "titleHe": "הרכבה ומונאדות (Composition and Monads)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/1.5Monad:0",
+   "depth": 1,
+   "headingEn": "Composition and Monads",
+   "raw": "# Composition and Monads\n\n",
+   "blocks": [],
+   "headingHe": "הרכבה ומונאדות (Composition and Monads)"
+  },
+  {
+   "id": "cm/1.5Monad:1",
+   "depth": 3,
+   "headingEn": "PPL 2023",
+   "raw": "### PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:1:0",
+     "type": "prose",
+     "en": "We have introduced a taste of functional programming using TypeScript and identified the following practices:\n",
+     "hash": "0bac97a41ad85802",
+     "he": "הצגנו עד כה טעימה מתכנות פונקציונלי (Functional Programming) באמצעות TypeScript, וזיהינו את הפרקטיקות הבאות:"
+    },
+    {
+     "id": "cm/1.5Monad:1:1",
+     "type": "list",
+     "en": "* Focus on expressions - avoid statements\n* Use immutable variables and data structures - avoid mutations\n* Use functions as the primary abstraction method\n* Use higher-order functions to define high-level patterns\n* Define types using set operations (union, product, intersection, disjoint union)\n* Define recursive data types on the basis of disjoint union of base type and recursive type\n* Define functions over types with the pattern that the structure of the function reflects the structure of the type\n\n",
+     "hash": "6e098d0c5fd1fa44",
+     "he": "* התמקדות בביטויים (expressions) — הימנעות ממשפטים (statements)\n* שימוש במשתנים ובמבני נתונים בלתי-משתנים — הימנעות משינויי מצב (mutations)\n* שימוש בפונקציות כאמצעי ההפשטה המרכזי\n* שימוש בפונקציות מסדר גבוה (higher-order functions) כדי להגדיר תבניות ברמה גבוהה\n* הגדרת טיפוסים באמצעות פעולות על קבוצות (איחוד, מכפלה, חיתוך, איחוד זר)\n* הגדרת טיפוסי נתונים רקורסיביים על בסיס איחוד זר של טיפוס בסיס וטיפוס רקורסיבי\n* הגדרת פונקציות על טיפוסים לפי התבנית שבה מבנה הפונקציה משקף את מבנה הטיפוס"
+    },
+    {
+     "id": "cm/1.5Monad:1:2",
+     "type": "prose",
+     "en": "This unit introduces a new functional programming practice which focuses on **composition**.\nIt defines the **monad** design pattern which inherited its name from [Category Theory](https://en.wikipedia.org/wiki/Category_theory).\n\n",
+     "hash": "fa585392f1c3b2d3",
+     "he": "יחידה זו מציגה פרקטיקה חדשה של תכנות פונקציונלי, שמתמקדת ב**הרכבה (composition)**.\nהיא מגדירה את תבנית העיצוב **מונאדה (Monad)**, שירשה את שמה מ[תורת הקטגוריות (Category Theory)](https://en.wikipedia.org/wiki/Category_theory)."
+    },
+    {
+     "id": "cm/1.5Monad:1:3",
+     "type": "prose",
+     "en": "It summarizes material presented in the following introductory lectures:\n",
+     "hash": "88950a193c2786eb",
+     "he": "היא מסכמת חומר שהוצג בהרצאות המבוא הבאות:"
+    },
+    {
+     "id": "cm/1.5Monad:1:4",
+     "type": "list",
+     "en": "* [Absolute Best Intro to Monads for Software Engineers](https://www.youtube.com/watch?v=C2w45qRc3aU) (Video 25mn)\n* [Bartosz Mikewski - Category Theory 3.2: Kleisli category](https://www.youtube.com/watch?v=i9CU4CuHADQ) (Video 1h10). This is a more mathematical description of the same material.\n* [Scott Waschlin - The Power of Composition](https://www.youtube.com/watch?v=vDe-4o8Uwl8) (Video 1h05)\n\n",
+     "hash": "e39589c293eaf67b",
+     "he": "* [Absolute Best Intro to Monads for Software Engineers](https://www.youtube.com/watch?v=C2w45qRc3aU) (סרטון, 25 דקות)\n* [Bartosz Mikewski - Category Theory 3.2: Kleisli category](https://www.youtube.com/watch?v=i9CU4CuHADQ) (סרטון, שעה ו-10 דקות). זהו תיאור מתמטי יותר של אותו החומר.\n* [Scott Waschlin - The Power of Composition](https://www.youtube.com/watch?v=vDe-4o8Uwl8) (סרטון, שעה ו-5 דקות)"
+    },
+    {
+     "id": "cm/1.5Monad:1:5",
+     "type": "prose",
+     "en": "The TypeScript code associated to this unit is in [monads/](https://github.com/bguppl/interpreters/blob/master/src/monads).\n\n",
+     "hash": "5987c3895c5e41bd",
+     "he": "קוד ה-TypeScript המלווה את היחידה נמצא בתיקייה [monads/](https://github.com/bguppl/interpreters/blob/master/src/monads)."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/1.5Monad:2",
+   "depth": 2,
+   "headingEn": "Motivating Example: Logging",
+   "raw": "## Motivating Example: Logging\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:2:0",
+     "type": "prose",
+     "en": "We have seen how to define complex types and how to compose types with OR and AND operators:\n",
+     "hash": "770a00ebcb1398ea",
+     "he": "ראינו כיצד מגדירים טיפוסים מורכבים וכיצד מרכיבים טיפוסים באמצעות אופרטורים של OR ושל AND:"
+    },
+    {
+     "id": "cm/1.5Monad:2:1",
+     "type": "list",
+     "en": " * AND: tuple or array or map\n * OR: union (discriminated union) usually product types\n\n",
+     "hash": "255b345bda15c408",
+     "he": "* AND: טופל (tuple) או מערך (array) או מפה (map)\n* OR: איחוד (union) — לרוב איחוד ממותג (discriminated union) של טיפוסי מכפלה (product types)"
+    },
+    {
+     "id": "cm/1.5Monad:2:2",
+     "type": "prose",
+     "en": "Given complex values, the following scenario become obstables to \"easy composition\" of functions:\n",
+     "hash": "72d2e5b7b21ad63c",
+     "he": "בהינתן ערכים מורכבים, התרחישים הבאים הופכים למכשולים בפני \"הרכבה קלה\" של פונקציות:"
+    },
+    {
+     "id": "cm/1.5Monad:2:3",
+     "type": "list",
+     "en": "* Functions with multiple parameters: for example: `replace(oldValue: string, newValue: string, inputStr: string) => string` - \nit is difficult to use this function inside a pipe of functions because the previous function would supply only one value and it expects three.\nIn general, the solution to this obstacle is to use currying (define a function `replace(oldValue)(newValue)(inputStr)` combined with partial functions - functions where some of the parameters are fixed.\n* Functions with one input but multiple possible outputs (the return type is a union). In this case, the next function in the pipe must be able to deal with the multiple options of the union.\n* Different types of inputs - multiple possible outputs\n* Multiple inputs - One output\n* Multiple inputs - Multiple outputs\n\n",
+     "hash": "689a527b2efcba1a",
+     "he": "* פונקציות עם כמה פרמטרים: לדוגמה `replace(oldValue: string, newValue: string, inputStr: string) => string` — קשה להשתמש בפונקציה כזו בתוך pipe של פונקציות, כי הפונקציה הקודמת בשרשרת מספקת ערך אחד בלבד ואילו היא מצפה לשלושה. באופן כללי, הפתרון למכשול הזה הוא קירור (currying) — הגדרת פונקציה בצורה `replace(oldValue)(newValue)(inputStr)` — בשילוב פונקציות חלקיות (partial functions): פונקציות שבהן חלק מהפרמטרים קבועים מראש.\n* פונקציות עם קלט יחיד אך כמה פלטים אפשריים (טיפוס ההחזרה הוא איחוד). במקרה כזה, הפונקציה הבאה ב-pipe חייבת להיות מסוגלת להתמודד עם כל האפשרויות של האיחוד.\n* טיפוסי קלט שונים — כמה פלטים אפשריים\n* כמה קלטים — פלט יחיד\n* כמה קלטים — כמה פלטים"
+    },
+    {
+     "id": "cm/1.5Monad:2:4",
+     "type": "prose",
+     "en": "A general solution to these problems of composition is to wrap unions and products of values into complex types and to override the \ncomposition operator for each of these complex types.  We will demonstrate this general approach over multiple examples, and then regroup\nto identify the commonality across these examples.\n\n",
+     "hash": "5c60e3ca7541c25b",
+     "he": "פתרון כללי לבעיות ההרכבה האלה הוא לעטוף איחודים ומכפלות של ערכים בתוך טיפוסים מורכבים, ולדרוס (override) את אופרטור ההרכבה עבור כל אחד מהטיפוסים המורכבים האלה. נדגים את הגישה הכללית הזו על כמה דוגמאות, ולאחר מכן נחזור ונזהה את המשותף לכל הדוגמאות."
+    },
+    {
+     "id": "cm/1.5Monad:2:5",
+     "type": "prose",
+     "en": "Consider simple full functions `[number => number]`:\n",
+     "hash": "9f9b977c36d65857",
+     "he": "נתבונן בפונקציות מלאות ופשוטות מטיפוס `[number => number]`:"
+    },
+    {
+     "id": "cm/1.5Monad:2:6",
+     "type": "code",
+     "en": "```typescript\nconst square = (x: number): number => x * x;\nconst inc = (x: number): number => x + 1;\n```\n\n",
+     "hash": "0b2c7c0c6fd7e293",
+     "lang": "typescript",
+     "noteHe": "מוגדרות כאן שתי פונקציות \"רגילות\" מטיפוס אחיד `[number => number]`: הפונקציה `square` מחזירה את ריבוע הקלט (`x * x`), והפונקציה `inc` מוסיפה 1 לקלט. הן משמשות נקודת פתיחה לדיון: כשכל הפונקציות חולקות אותו טיפוס קלט ופלט, ההרכבה ביניהן טריוויאלית — הפלט של האחת מתאים תמיד לקלט של האחרת."
+    },
+    {
+     "id": "cm/1.5Monad:2:7",
+     "type": "prose",
+     "en": "It is easy to compose them anyway we want:\n",
+     "hash": "d86317b82b20c9f5",
+     "he": "קל להרכיב אותן בכל דרך שנרצה:"
+    },
+    {
+     "id": "cm/1.5Monad:2:8",
+     "type": "code",
+     "en": "```\ninc(square(2));\n\npipe(square, inc)(2);\n```\n\n",
+     "hash": "653d37eee16371a9",
+     "noteHe": "שתי דרכים שקולות להרכיב את הפונקציות: `inc(square(2))` — קינון ישיר, שבו קודם מחושב 2 בריבוע (4) ואז מוסיפים 1 ומקבלים 5; ו-`pipe(square, inc)(2)` — האופרטור `pipe` יוצר פונקציה חדשה שמפעילה את הפונקציות משמאל לימין, ומחזיר את אותה תוצאה (5). המסר: כל עוד הטיפוסים אחידים, כל שילוב וסדר של הרכבה עובדים בלי מאמץ."
+    },
+    {
+     "id": "cm/1.5Monad:2:9",
+     "type": "prose",
+     "en": "Consider a new requirement: We want to trace the calls to all these functions.\nThis may be needed for debugging a system in production or for auditing reasons.\n\n",
+     "hash": "8c1555fb242da341",
+     "he": "נתבונן כעת בדרישה חדשה: אנו רוצים לתעד (trace) את הקריאות לכל הפונקציות האלה.\nדרישה כזו עשויה להידרש לצורך דיבוג של מערכת בסביבת ייצור (production) או מטעמי ביקורת (auditing)."
+    },
+    {
+     "id": "cm/1.5Monad:2:10",
+     "type": "prose",
+     "en": "We do not want to introduce the I/O operation as part of the computation to avoid breaking separation of concerns and introducing a global dependency on a logger\nwhich would make it difficult to run these functions in concurrent runtime environment (this would require serialization of the logging operations).\n\n",
+     "hash": "3b1753d359ef8e6f",
+     "he": "איננו רוצים להכניס את פעולת ה-I/O כחלק מהחישוב עצמו, כדי לא לשבור את עקרון הפרדת האחריויות (separation of concerns) וכדי לא ליצור תלות גלובלית ברכיב logger — תלות כזו הייתה מקשה להריץ את הפונקציות האלה בסביבת ריצה מקבילית (concurrent), שכן היא הייתה מחייבת סריאליזציה של פעולות הרישום."
+    },
+    {
+     "id": "cm/1.5Monad:2:11",
+     "type": "prose",
+     "en": "Instead, we settle for this protocol:\n",
+     "hash": "eb07f2bc2f598bb1",
+     "he": "במקום זאת, נסתפק בפרוטוקול הבא:"
+    },
+    {
+     "id": "cm/1.5Monad:2:12",
+     "type": "list",
+     "en": "* We wrap the result in a map and add a logs field\n* The logs field accumulates the logs as operations are performed.\n\n",
+     "hash": "e798004f1f887830",
+     "he": "* נעטוף את התוצאה במפה (map) ונוסיף שדה logs\n* השדה logs צובר את הודעות הלוג ככל שהפעולות מתבצעות."
+    },
+    {
+     "id": "cm/1.5Monad:2:13",
+     "type": "code",
+     "en": "```typescript\n\ninc(square(2)) --> \n{\n\tresult: 5,\n\tlogs: [\n\t\t\"Squared 2 to get 4\",\n\t\t\"Added 1 to 4 to get 5\"\n\t]\n}\n```\n\n",
+     "hash": "fb17af9af87e68ab",
+     "lang": "typescript",
+     "noteHe": "זו איננה תוכנית ממשית אלא איור של הפרוטוקול הרצוי (החץ `-->` מסמן \"אמור להחזיר\"): במקום להחזיר רק את המספר 5, החישוב `inc(square(2))` יחזיר אובייקט עם שדה `result` שמכיל את התוצאה המספרית, ושדה `logs` — מערך מחרוזות שצובר תיאור מילולי של כל פעולה שבוצעה בדרך, לפי סדר הביצוע."
+    }
+   ],
+   "headingHe": "דוגמה מניעה: רישום לוגים (Logging)"
+  },
+  {
+   "id": "cm/1.5Monad:3",
+   "depth": 3,
+   "headingEn": "First Attempt: Not Composable",
+   "raw": "### First Attempt: Not Composable\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:3:0",
+     "type": "prose",
+     "en": "To support this approach, we introduce a wrapper type which keeps track of the logs list.\n",
+     "hash": "19fdaa148b52514f",
+     "he": "כדי לתמוך בגישה זו, נגדיר טיפוס עוטף (wrapper) שעוקב אחרי רשימת הלוגים."
+    },
+    {
+     "id": "cm/1.5Monad:3:1",
+     "type": "code",
+     "en": "```typescript\ntype NumberWithLogs = {\n  result: number;\n  logs: string[];\n};\n\n// First attempt:\nconst square1 = (x: number): NumberWithLogs => ({\n  result: x * x,\n  logs: [`Squared ${x} to get ${x * x}`],\n});\n\n// the input param is a wrapper which \"remembers\" what has already been performed.\n// the operation concatenates a new line to the logs field\nconst inc1 = (x: NumberWithLogs): NumberWithLogs => ({\n  result: x.result + 1,\n  logs: [...x.logs, `Added 1 to ${x.result} to get ${x.result + 1}`],\n});\n\n// { result: 5, logs: [ 'Squared 2 to get 4', 'Added 1 to 4 to get 5' ] }\nconsole.log(inc1(square1(2)));\n```\n\n",
+     "hash": "504bee15b4ce7c29",
+     "lang": "typescript",
+     "noteHe": "מגדירים את הטיפוס העוטף `NumberWithLogs` — רשומה עם שדה מספרי `result` ושדה `logs` שהוא מערך מחרוזות. הפונקציה `square1` מקבלת מספר רגיל ומחזירה `NumberWithLogs` (טיפוס \"אלכסוני\" — `[number => NumberWithLogs]`): היא מחשבת את הריבוע ומייצרת רשימת לוגים עם הודעה אחת. לעומתה, `inc1` מקבלת כבר ערך עטוף מטיפוס `NumberWithLogs`: היא מוסיפה 1 ל-`x.result`, ובאמצעות אופרטור ה-spread (`[...x.logs, …]`) משרשרת הודעת לוג חדשה לרשימה הקיימת — בלי לשנות את המערך המקורי (שמירה על אי-שינוי, immutability). ההרכבה `inc1(square1(2))` עובדת כאן \"במקרה\", כי הפלט של `square1` תואם בדיוק את הקלט של `inc1` — אבל כפי שנראה מיד, הטיפוסים אינם אחידים ולכן שילובים אחרים נכשלים."
+    },
+    {
+     "id": "cm/1.5Monad:3:2",
+     "type": "prose",
+     "en": "We now have a problems these functions are not composable!\n\n",
+     "hash": "7f60d3f6c84076c8",
+     "he": "כעת נוצרה בעיה — הפונקציות האלה אינן ניתנות להרכבה!"
+    },
+    {
+     "id": "cm/1.5Monad:3:3",
+     "type": "list",
+     "en": "* `inc1(5)` --> bad type\n* `square1(square1(2))` --> bad type\n* `square1(inc1(2))` --> bad type\n\n",
+     "hash": "207835597264ae1e",
+     "he": "* `inc1(5)` — שגיאת טיפוס\n* `square1(square1(2))` — שגיאת טיפוס\n* `square1(inc1(2))` — שגיאת טיפוס"
+    },
+    {
+     "id": "cm/1.5Monad:3:4",
+     "type": "prose",
+     "en": "In general - we observe that \"uniform\" function types `[N => N]` became \"non-uniform\" `[N => NwL]` and `[NwL => NwL]`.\n\n",
+     "hash": "73bc74603f8b9cd9",
+     "he": "באופן כללי, אנו רואים שטיפוסי הפונקציות ה\"אחידים\" `[N => N]` הפכו ל\"לא אחידים\": `[N => NwL]` ו-`[NwL => NwL]`."
+    },
+    {
+     "id": "cm/1.5Monad:3:5",
+     "type": "prose",
+     "en": "To resolve this lack of compasability - let us:\n",
+     "hash": "74d9b54134be6137",
+     "he": "כדי לפתור את חוסר יכולת ההרכבה, נבצע שני צעדים:"
+    },
+    {
+     "id": "cm/1.5Monad:3:6",
+     "type": "list",
+     "en": "1. disentangle the construction and maintenance of the logs list from the computation.\n2. align all operations to the same type\n\n",
+     "hash": "9be71bb1935ede27",
+     "he": "1. נפריד את הבנייה והתחזוקה של רשימת הלוגים מהחישוב עצמו.\n2. ניישר את כל הפעולות לאותו טיפוס."
+    }
+   ],
+   "headingHe": "ניסיון ראשון: לא ניתן להרכבה"
+  },
+  {
+   "id": "cm/1.5Monad:4",
+   "depth": 3,
+   "headingEn": "Aligning Function Types to Lifted Functions",
+   "raw": "### Aligning Function Types to Lifted Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:4:0",
+     "type": "prose",
+     "en": "Let's first create a \"constructor\" for the new type (we will call this a **wrapper**).\n",
+     "hash": "a66a738cdfd2fbd6",
+     "he": "תחילה ניצור \"בנאי\" (constructor) לטיפוס החדש (נקרא לו **עוטף — wrapper**)."
+    },
+    {
+     "id": "cm/1.5Monad:4:1",
+     "type": "code",
+     "en": "```typescript\n// The wrapper moves the initial parameter into the \"NumberWithLogs\" domain\nconst wrapNumberWithLogs = (x: number): NumberWithLogs => ({\n  result: x,\n  logs: [],\n});\n```\n\n",
+     "hash": "9f41b240b6c3305e",
+     "lang": "typescript",
+     "noteHe": "`wrapNumberWithLogs` הוא ה\"בנאי\" של הטיפוס העוטף: הוא מקבל מספר רגיל ומחזיר אותו עטוף כ-`NumberWithLogs` עם רשימת לוגים ריקה (`logs: []`). זהו אופרטור \"אלכסוני\" שמעביר ערך מהעולם הרגיל (number) אל העולם המועשר (NumberWithLogs) — נקודת הכניסה לכל שרשרת חישובים בתחום החדש."
+    },
+    {
+     "id": "cm/1.5Monad:4:2",
+     "type": "prose",
+     "en": "We then align all the functions to the same shape `[NumberWithLogs => NumberWithLogs]`:\n",
+     "hash": "7407c1d5c9e81de6",
+     "he": "לאחר מכן ניישר את כל הפונקציות לאותה צורה `[NumberWithLogs => NumberWithLogs]`:"
+    },
+    {
+     "id": "cm/1.5Monad:4:3",
+     "type": "code",
+     "en": "```typescript\nconst square2 = (x: NumberWithLogs): NumberWithLogs => ({\n  result: x.result * x.result,\n  logs: [...x.logs, `Squared ${x.result} to get ${x.result * x.result}`],\n});\n\n// This mechanism is now composable when we use the wrapper where needed\nconsole.log(square2(square2(wrapNumberWithLogs(2))));\nconsole.log(inc1(wrapNumberWithLogs(5)));\n\npipe(wrapNumberWithLogs, inc1, square2)(5);\n```\n\n",
+     "hash": "91f857712529823f",
+     "lang": "typescript",
+     "noteHe": "`square2` מיושרת כעת לצורה האחידה `[NumberWithLogs => NumberWithLogs]`: היא קוראת את הערך מ-`x.result`, מעלה אותו בריבוע, ומשרשרת הודעת לוג חדשה לרשימה הקיימת. מכיוון שכל הפונקציות חולקות עכשיו אותו טיפוס, אפשר לקנן אותן חופשי — למשל `square2(square2(...))` — ובלבד שמתחילים בערך עטוף שמיוצר בעזרת `wrapNumberWithLogs`. השורה האחרונה מדגימה שגם `pipe` הרגיל עובד: קודם עוטפים את 5, ואז מפעילים `inc1` ו-`square2` ברצף. הבעיה שנותרה (ותטופל בהמשך): כל פונקציה כזו חוזרת בעצמה על אותו קוד שרשור לוגים."
+    },
+    {
+     "id": "cm/1.5Monad:4:4",
+     "type": "prose",
+     "en": "Graphically - we think of two planes:\n",
+     "hash": "817b6f96a5c22030",
+     "he": "באופן גרפי, נחשוב על שני מישורים:"
+    },
+    {
+     "id": "cm/1.5Monad:4:5",
+     "type": "list",
+     "en": "* the \"plain type\" (numbers in our example)\n* the \"embellished type\" (NumberWithLogs in our example)\n* \n",
+     "hash": "ae55014ef2807cd0",
+     "he": "* הטיפוס ה\"פשוט\" (plain) — מספרים בדוגמה שלנו\n* הטיפוס ה\"מועשר\" (embellished) — `NumberWithLogs` בדוגמה שלנו\n*"
+    },
+    {
+     "id": "cm/1.5Monad:4:6",
+     "type": "prose",
+     "en": "The last pipe can be described as this route:\n",
+     "hash": "cdb115e780da9ff6",
+     "he": "את ה-pipe האחרון אפשר לתאר כמסלול הבא:"
+    },
+    {
+     "id": "cm/1.5Monad:4:7",
+     "type": "code",
+     "en": "```\nNumberWithLogs       NwL[5] -inc1-> NwL[6] --square2--> NwL[36]\n                     /\n                  wrap\n                  /\nNumber          5\n```\n\n",
+     "hash": "8ef19dc168bc0f29",
+     "noteHe": "דיאגרמת \"שני המישורים\": השורה התחתונה מייצגת את מישור הטיפוס הפשוט (Number), והשורה העליונה את מישור הטיפוס המועשר (NumberWithLogs, מקוצר NwL). הערך 5 מתחיל במישור התחתון; האופרטור `wrap` מטפס באלכסון ומעביר אותו למישור המועשר (NwL[5]); ומשם הפונקציות המורמות `inc1` ו-`square2` נעות אופקית בתוך המישור המועשר: NwL[5] הופך ל-NwL[6] ואז ל-NwL[36] — כשכל צעד גם צובר לוג."
+    },
+    {
+     "id": "cm/1.5Monad:4:8",
+     "type": "prose",
+     "en": "In this diagram:\n",
+     "hash": "13a0c467270ee544",
+     "he": "בדיאגרמה זו:"
+    },
+    {
+     "id": "cm/1.5Monad:4:9",
+     "type": "list",
+     "en": "* `wrap` is a **diagonal** operator (from normal type to embellished type)\n* `inc1` and `square2` are **lifted** operators (instead of `[number=>number]` - they are `[NumberWithLogs => NumberWithLogs]`\n\n",
+     "hash": "2035ce4e5e65f491",
+     "he": "* `wrap` הוא אופרטור **אלכסוני** (diagonal) — מהטיפוס הרגיל אל הטיפוס המועשר\n* `inc1` ו-`square2` הם אופרטורים **מורמים** (lifted) — במקום `[number=>number]` הם `[NumberWithLogs => NumberWithLogs]`"
+    }
+   ],
+   "headingHe": "יישור טיפוסי הפונקציות לפונקציות מורמות (Lifted)"
+  },
+  {
+   "id": "cm/1.5Monad:5",
+   "depth": 3,
+   "headingEn": "Disentangling Logs from Functions Logic",
+   "raw": "### Disentangling Logs from Functions Logic\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:5:0",
+     "type": "prose",
+     "en": "When we observe the resulting code, we realize it contains repeated code in the lifted functions:\nWe see in all functions of type `[NumberWithLogs => NumberWithLogs]` the same code will appear:\n",
+     "hash": "317d073dc18729e3",
+     "he": "כשאנו מתבוננים בקוד שהתקבל, אנו מבחינים שהוא מכיל קוד חוזר בפונקציות המורמות:\nבכל הפונקציות מטיפוס `[NumberWithLogs => NumberWithLogs]` יופיע אותו קטע קוד:"
+    },
+    {
+     "id": "cm/1.5Monad:5:1",
+     "type": "code",
+     "en": "```typescript\n logs: [...x.logs, `...abc`]\n```\n\n",
+     "hash": "fbbc4fab8d86dde6",
+     "lang": "typescript",
+     "noteHe": "זו שורת הקוד שחוזרת בכל פונקציה מורמת: שרשור רשימת הלוגים הקיימת (`...x.logs`) עם הודעת לוג חדשה. בדיוק את החזרתיות הזו נרצה להפשיט החוצה למקום אחד."
+    },
+    {
+     "id": "cm/1.5Monad:5:2",
+     "type": "prose",
+     "en": "This repetition is a bad smell of something wrong - we want to abstract it away.\nWe also want to fix the violation of \"separation of concern\": the new lifted functions (`inc1`, `square2`) must \"know about log concatenation\" - we want\nthe function to only know about how to compute (increment, square).\n\n\n",
+     "hash": "98aba4cff948e478",
+     "he": "חזרתיות כזו היא \"ריח רע\" (bad smell) המעיד שמשהו לא תקין — נרצה להפשיט אותה החוצה.\nנרצה גם לתקן את ההפרה של עקרון \"הפרדת האחריויות\": הפונקציות המורמות החדשות (`inc1`, `square2`) נאלצות \"לדעת על שרשור לוגים\" — ואנחנו רוצים שכל פונקציה תדע רק כיצד לחשב (להוסיף אחת, להעלות בריבוע)."
+    },
+    {
+     "id": "cm/1.5Monad:5:3",
+     "type": "code",
+     "en": "```typescript\n// =================================================\n// Remove the duplicated code:\n\n// Just an intermediary step towards a solution:\n// Separate log concatenation logic from core of function\nconst square3 = (x: NumberWithLogs): NumberWithLogs => {\n  // Code that is specific to 'square'\n  const result = {\n    result: x.result * x.result,\n    logs: [`Squared ${x.result} to get ${x.result * x.result}`],\n  };\n  // Code is always the same for all [NwL => NwL] functions\n  return {\n    result: result.result,\n    logs: [...x.logs, ...result.logs],\n  };\n};\n```\n\n",
+     "hash": "fe55a3fd09f1065e",
+     "lang": "typescript",
+     "noteHe": "`square3` הוא שלב ביניים בדרך לפתרון: גוף הפונקציה מפוצל לשני חלקים מובחנים. החלק הראשון הוא הקוד הייחודי ל-square — חישוב הריבוע ויצירת אובייקט עם הודעת לוג יחידה (שימו לב: רק ההודעה החדשה, בלי הלוגים הישנים). החלק השני זהה בכל הפונקציות מטיפוס `[NwL => NwL]` — הוא ממזג את הלוגים הישנים (`x.logs`) עם החדשים (`result.logs`). הפיצול הזה חושף בבירור שאת החלק השני אפשר להפשיט לפונקציה כללית נפרדת."
+    },
+    {
+     "id": "cm/1.5Monad:5:4",
+     "type": "prose",
+     "en": "Let us now \"abstract away\" the repeated code in a separate function.\nWe will write the application of functions in the \"NumberWithlogs domain\" as:\n",
+     "hash": "c7a4dad1ffa2c20e",
+     "he": "כעת \"נפשיט\" את הקוד החוזר לפונקציה נפרדת.\nנכתוב את הפעלת הפונקציות ב\"תחום NumberWithLogs\" באופן הבא:"
+    },
+    {
+     "id": "cm/1.5Monad:5:5",
+     "type": "code",
+     "en": "```typescript\n// Invoke a function on a plain type value:\ninc(5);\n\n// Invoke a function on a NumberWithLogs value\nrunWithLogs(wrapWithLogs(5), inc);\n```\n\n",
+     "hash": "a09ff33edcc937a3",
+     "lang": "typescript",
+     "noteHe": "השוואה בין שני פרוטוקולי ההפעלה: בעולם הטיפוסים הפשוטים קוראים לפונקציה ישירות — `inc(5)`. בעולם NumberWithLogs נכתוב `runWithLogs(wrapWithLogs(5), inc)`: קודם עוטפים את הערך, ואז פונקציה כללית בשם `runWithLogs` מקבלת את הערך העטוף ואת פונקציית הטרנספורמציה, ומטפלת בעצמה בכל לוגיקת שרשור הלוגים. כלומר, `runWithLogs` \"דורסת\" את אופרטור הפעלת הפונקציה עבור הטיפוס המועשר."
+    },
+    {
+     "id": "cm/1.5Monad:5:6",
+     "type": "prose",
+     "en": "In our intermediary version, we used `inc1(wrapWithLogs(5))`.\nNow, `runWithLogs` will deal with log concatenation and the function will only do the part that is specific to the transformation it computes.\n\n",
+     "hash": "f15fddf266bed9c4",
+     "he": "בגרסת הביניים שלנו השתמשנו ב-`inc1(wrapWithLogs(5))`.\nכעת `runWithLogs` תטפל בשרשור הלוגים, והפונקציה עצמה תבצע רק את החלק הייחודי לטרנספורמציה שהיא מחשבת."
+    },
+    {
+     "id": "cm/1.5Monad:5:7",
+     "type": "code",
+     "en": "```typescript\n// Infer the type of runWithLogs:\nconst runWithLogs = (\n  x: NumberWithLogs,\n  transform: (y: number) => NumberWithLogs\n) => {\n  // transform is the \"parametric\" transformation\n  // different for each function\n  // It is a diagonal operator\n  const newNumberWithLogs = transform(x.result);\n  // The constant part is abstacted here\n  return {\n    result: newNumberWithLogs.result,\n    logs: [...x.logs, ...newNumberWithLogs.logs],\n  };\n};\n```\n\n",
+     "hash": "f7d246306065c9e6",
+     "lang": "typescript",
+     "noteHe": "`runWithLogs` היא לב הפתרון (בהמשך נזהה אותה כאופרטור ה-bind של המונאדה). היא מקבלת שני פרמטרים: ערך עטוף `x` מטיפוס `NumberWithLogs`, ופונקציה אלכסונית `transform` מטיפוס `(y: number) => NumberWithLogs` — החלק ה\"פרמטרי\" שמשתנה מפונקציה לפונקציה. היא מחלצת את הערך הפשוט `x.result`, מפעילה עליו את `transform`, ואז מבצעת את החלק הקבוע שהופשט: שרשור הלוגים הישנים (`x.logs`) עם הלוגים שהטרנספורמציה ייצרה. כך הידע על \"איך משרשרים לוגים\" נמצא במקום אחד ויחיד בקוד."
+    },
+    {
+     "id": "cm/1.5Monad:5:8",
+     "type": "prose",
+     "en": "The signature of the \"transform\" functions is simplified:\n",
+     "hash": "39d964b3f89e2c21",
+     "he": "החתימה של פונקציות ה\"טרנספורמציה\" הופכת פשוטה יותר:"
+    },
+    {
+     "id": "cm/1.5Monad:5:9",
+     "type": "list",
+     "en": "* Take a simple number as parameter\n* Return a NumberWithLogs with a single log message\n\n",
+     "hash": "c00d9946bec2a1dc",
+     "he": "* מקבלות מספר פשוט כפרמטר\n* מחזירות NumberWithLogs עם הודעת לוג יחידה"
+    },
+    {
+     "id": "cm/1.5Monad:5:10",
+     "type": "prose",
+     "en": "Such transform functions all have the following structure:\n",
+     "hash": "edbe74e6681a31c7",
+     "he": "לכל פונקציות טרנספורמציה כאלה יש את המבנה הבא:"
+    },
+    {
+     "id": "cm/1.5Monad:5:11",
+     "type": "list",
+     "en": "* Diagonal: from \"Normal type\" (number) to \"Embellished Type\" (NumberWithLogs)\n* They do not \"know\" about how to \"compute\" the embellished type (concatenate logs)\n\n",
+     "hash": "d584d33da80a8b67",
+     "he": "* אלכסוניות: מ\"טיפוס רגיל\" (number) ל\"טיפוס מועשר\" (NumberWithLogs)\n* הן אינן \"יודעות\" כיצד \"לחשב\" את הטיפוס המועשר (כלומר, כיצד לשרשר לוגים)"
+    },
+    {
+     "id": "cm/1.5Monad:5:12",
+     "type": "code",
+     "en": "```typescript\nconst square4 = (x: number): NumberWithLogs => ({\n  result: x * x,\n  logs: [`Squared ${x} to get ${x * x}`],\n});\n\nconst inc4 = (x: number): NumberWithLogs => ({\n  result: x + 1,\n  logs: [`Added 1 to ${x} to get ${x + 1}`],\n});\n\n// Usage: we can now combine the calls in any combination\n//        we only need to start with a \"wrapped\" value in the embellished type\nconst a = wrapNumberWithLogs(5);\nconst b = runWithLogs(a, inc4);\nconst c = runWithLogs(b, square4);\nconst d = runWithLogs(c, square4);\nconsole.log(d);\n/*\n{\n  result: 1296,\n  logs: [\n    'Added 1 to 5 to get 6',\n    'Squared 6 to get 36',\n    'Squared 36 to get 1296'\n  ]\n}\n*/\n```\n\n",
+     "hash": "73946112b020b201",
+     "lang": "typescript",
+     "noteHe": "`square4` ו-`inc4` הן הגרסאות ה\"נקיות\" הסופיות: פונקציות אלכסוניות `[number => NumberWithLogs]` שכל אחת מהן יודעת רק לחשב את הפעולה שלה ולייצר הודעת לוג יחידה — בלי שום ידע על שרשור לוגים. בשימוש: מתחילים בעטיפת הערך ההתחלתי (`wrapNumberWithLogs(5)`), ואז כל צעד הוא קריאה `runWithLogs(ערך קודם, פונקציה)`. הפלט הסופי מראה שהלוגים נצברו אוטומטית בסדר הביצוע: 5 הפך ל-6 (inc4), ל-36 (square4) ולבסוף ל-1296 (square4) — ושלוש ההודעות מופיעות ברשימה."
+    },
+    {
+     "id": "cm/1.5Monad:5:13",
+     "type": "prose",
+     "en": "If we want to use pipe, we realize the regular `pipe` function does not fit:\n",
+     "hash": "0844de03f932e4e7",
+     "he": "אם נרצה להשתמש ב-pipe, נגלה שפונקציית ה-`pipe` הרגילה אינה מתאימה:"
+    },
+    {
+     "id": "cm/1.5Monad:5:14",
+     "type": "code",
+     "en": "```typescript\nNumberWithLogs       NwL[5]  NwL[6]  NwL[36] NwL[1296]\n                     /   |   /  |   /    |   /\n                   wrap  | inc  | square | square\n                   /     |/     |/       |/\nnumber            5      5      6       36\n```\n\n",
+     "hash": "5ad629333553788a",
+     "lang": "typescript",
+     "noteHe": "הדיאגרמה מראה מדוע `pipe` רגיל לא מתאים לפונקציות האלכסוניות: כל פונקציה (inc, square) יוצאת מהמישור התחתון (number) ומטפסת באלכסון אל המישור העליון (NwL). כדי לחבר צעד לצעד צריך בכל פעם \"לרדת\" חזרה למישור התחתון — לחלץ את `result` מתוך העטיפה ולמזג את הלוגים — הקווים האנכיים בדיאגרמה מייצגים את הירידה הזו. זה בדיוק התפקיד של `runWithLogs`, ולכן נדרש pipe מיוחד שמשתמש בו בין צעד לצעד."
+    },
+    {
+     "id": "cm/1.5Monad:5:15",
+     "type": "prose",
+     "en": "If we want to \"connect\" diagonal operators, we must add the logic of the `runWithLogs` operator to consume the value returned by a function and pass it to the next.\na new version of pipe is needed - that knows about the logic of this type with its running protocol.\n\n",
+     "hash": "9bd92e2cf5813800",
+     "he": "אם נרצה \"לחבר\" אופרטורים אלכסוניים, עלינו להוסיף את הלוגיקה של האופרטור `runWithLogs`, שצורכת את הערך שהוחזר מפונקציה אחת ומעבירה אותו לפונקציה הבאה.\nנדרשת גרסה חדשה של pipe — כזו שמכירה את הלוגיקה של הטיפוס הזה ואת פרוטוקול ההרצה שלו."
+    },
+    {
+     "id": "cm/1.5Monad:5:16",
+     "type": "prose",
+     "en": "Let us define `pipeWithLogs` which combines a sequence of diagonal operators and \"overrides\" the composition operator by using `runWithLogs`:\n\n",
+     "hash": "ca5bef2cb35d9509",
+     "he": "נגדיר את `pipeWithLogs`, שמרכיבה סדרה של אופרטורים אלכסוניים ו\"דורסת\" את אופרטור ההרכבה באמצעות שימוש ב-`runWithLogs`:"
+    },
+    {
+     "id": "cm/1.5Monad:5:17",
+     "type": "code",
+     "en": "```typescript\nconst isEmpty = <T>(l: T[]): boolean => l.length === 0;\n// @Precondition: l is non-empty\nconst first = <T>(l: T[]): T => l[0];\nconst rest = <T>(l: T[]): T[] => l.slice(1);\n\nconst pipeWithLogs = (\n  ...funcs: ((x: number) => NumberWithLogs)[]\n): ((x: number) => NumberWithLogs) =>\n  isEmpty(funcs)\n    ? wrapNumberWithLogs\n    : (x: number) => runWithLogs(first(funcs)(x), pipeWithLogs(...rest(funcs)));\n\nconst e = pipeWithLogs(inc4, square4, square4)(5);\nconsole.log(e);\n```\n\n",
+     "hash": "3199d34a19ba0379",
+     "lang": "typescript",
+     "noteHe": "בראש הקוד שלוש פונקציות עזר לרשימות: `isEmpty` בודקת ריקנות, `first` מחזירה את האיבר הראשון, ו-`rest` את שאר הרשימה. `pipeWithLogs` מקבלת מספר משתנה של פונקציות אלכסוניות (`...funcs`) ומחזירה פונקציה אלכסונית אחת מטיפוס `[number => NumberWithLogs]`. ההגדרה רקורסיבית: אם רשימת הפונקציות ריקה — מחזירים את `wrapNumberWithLogs` (שמתפקד כאיבר היחידה של ההרכבה); אחרת, מחזירים פונקציה שמפעילה את הפונקציה הראשונה על `x`, ומעבירה את התוצאה העטופה דרך `runWithLogs` אל ההרכבה הרקורסיבית של שאר הפונקציות. כך ההרכבה \"דורסת\" את אופרטור ההרכבה הרגיל `f(g(x))` ומחליפה אותו בשרשור באמצעות `runWithLogs`. הקריאה בדוגמה מחשבת ((5+1)²)² = 1296 עם כל הלוגים."
+    }
+   ],
+   "headingHe": "הפרדת הלוגים מהלוגיקה של הפונקציות"
+  },
+  {
+   "id": "cm/1.5Monad:6",
+   "depth": 2,
+   "headingEn": "Generalization: The Monad Design Pattern",
+   "raw": "## Generalization: The Monad Design Pattern\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:6:0",
+     "type": "prose",
+     "en": "The design pattern we just described is called a **Monad**. Its aim is to facilitate composition of complex functions.\n\n",
+     "hash": "f5e48409409d95ed",
+     "he": "תבנית העיצוב שתיארנו זה עתה נקראת **מונאדה (Monad)**. מטרתה להקל על הרכבה של פונקציות מורכבות."
+    },
+    {
+     "id": "cm/1.5Monad:6:1",
+     "type": "prose",
+     "en": "Monads have 3 components:\n",
+     "hash": "fbad8a18668a2c70",
+     "he": "למונאדה שלושה מרכיבים:"
+    },
+    {
+     "id": "cm/1.5Monad:6:2",
+     "type": "list",
+     "en": "* Wrapper Type (in our example `NumberWithLogs`)\n* Wrap Function (in our example `wrapNumberWithLogs`)\n* Run function: runs a diagonal transformation on a monadic value (`runWithLogs`)\n\n",
+     "hash": "a61263832399128e",
+     "he": "* טיפוס עוטף (Wrapper Type) — בדוגמה שלנו `NumberWithLogs`\n* פונקציית עטיפה (Wrap Function) — בדוגמה שלנו `wrapNumberWithLogs`\n* פונקציית הרצה (Run function): מריצה טרנספורמציה אלכסונית על ערך מונאדי — בדוגמה שלנו `runWithLogs`"
+    },
+    {
+     "id": "cm/1.5Monad:6:3",
+     "type": "prose",
+     "en": "To be convinced of the generality of this approach, let us examine another well known monad: `Option`.\n\n",
+     "hash": "729a4f570f43ad8f",
+     "he": "כדי להשתכנע בכלליות של הגישה, נבחן מונאדה מוכרת נוספת: `Option`."
+    }
+   ],
+   "headingHe": "הכללה: תבנית העיצוב מונאדה (Monad)"
+  },
+  {
+   "id": "cm/1.5Monad:7",
+   "depth": 3,
+   "headingEn": "The Option Monad",
+   "raw": "### The Option Monad\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:7:0",
+     "type": "prose",
+     "en": "Option is used to encapsulate the fact that a parameter may have a concrete value or be undefined.\nFor example:\n",
+     "hash": "ea802fbb054d93e6",
+     "he": "Option משמשת לכמס (encapsulate) את העובדה שפרמטר עשוי להחזיק ערך ממשי או להיות undefined.\nלדוגמה:"
+    },
+    {
+     "id": "cm/1.5Monad:7:1",
+     "type": "list",
+     "en": "* `x: number` \n* `y: Option<number>` can be a number OR nothing\n* `Option<User>` can be a User OR nothing\n\n",
+     "hash": "29c1f5a5f5464be7",
+     "he": "* `x: number`\n* `y: Option<number>` — יכול להיות מספר או כלום\n* `Option<User>` — יכול להיות User או כלום"
+    },
+    {
+     "id": "cm/1.5Monad:7:2",
+     "type": "prose",
+     "en": "We implement `Option` with the disjoint union pattern:\n\n",
+     "hash": "591fd4a7619d2a18",
+     "he": "נממש את `Option` באמצעות תבנית האיחוד הזר (disjoint union):"
+    },
+    {
+     "id": "cm/1.5Monad:7:3",
+     "type": "code",
+     "en": "```typescript\ntype Option<T> = Some<T> | None;\ntype None = { tag: \"none\" };\ntype Some<T> = { tag: \"some\"; value: T };\n\n// Type predicate\nconst isSome = <T>(x: any): x is Some<T> => x.tag === \"some\";\nconst some = <T>(x: T): Option<T> => ({ value: x, tag: \"some\" });\nconst none = (): None => ({ tag: \"none\" });\nconst isNone = <T>(x: any): x is None => x.tag === \"none\";\n\n// Wrap factory\nconst wrap = <T>(x: T | undefined): Option<T> =>\n  x === undefined ? none() : some(x);\n\n// Override application operator for Option\nconst bind = <T1, T2>(\n  input: Option<T1>,\n  transform: (x: T1) => Option<T2>\n): Option<T2> => (isSome(input) ? transform(input.value) : input);\n\n// Override composition operator for Option - composition uses bind\nconst pipeOption2 =\n  <T1, T2, T3>(f1: (x: T1) => Option<T2>, f2: (x: T2) => Option<T3>) =>\n  (x: T1) =>\n    bind(f1(x), f2);\n\nconst pipeOption3 =\n  <T1, T2, T3, T4>(\n    f1: (x: T1) => Option<T2>,\n    f2: (x: T2) => Option<T3>,\n    f3: (x: T3) => Option<T4>\n  ) =>\n  (x: T1) =>\n    bind(bind(f1(x), f2), f3);\n```\n\n",
+     "hash": "f81284970d779f4c",
+     "lang": "typescript",
+     "noteHe": "זהו מימוש מלא של מונאדת Option. הטיפוס `Option<T>` הוא איחוד ממותג (discriminated union) של שתי חלופות: `Some<T>` — רשומה עם `tag: \"some\"` וערך ממשי בשדה `value`, ו-`None` — רשומה עם `tag: \"none\"` בלבד. הפונקציות `isSome` ו-`isNone` הן פרדיקטי טיפוס (type predicates, בעזרת `x is …`) שמאפשרים ל-TypeScript לצמצם את הטיפוס בענפי if; `some` ו-`none` הם הבנאים. פונקציית ה-wrap ממירה ערך מטיפוס `T | undefined` ל-Option: ערך undefined הופך ל-`none()` וכל ערך אחר נעטף ב-`some`. האופרטור `bind` דורס את הפעלת הפונקציה: אם הקלט הוא Some — מפעילים את `transform` על הערך הפנימי; אם הוא None — מחזירים אותו כמות שהוא, בלי להפעיל את הפונקציה (התנהגות של \"קצר חשמלי\" שמדלגת על שאר החישוב). לבסוף, `pipeOption2` ו-`pipeOption3` דורסים את אופרטור ההרכבה עבור 2 או 3 פונקציות אלכסוניות, באמצעות קינון קריאות bind."
+    }
+   ],
+   "headingHe": "מונאדת Option"
+  },
+  {
+   "id": "cm/1.5Monad:8",
+   "depth": 3,
+   "headingEn": "Example Code Without Option",
+   "raw": "### Example Code Without Option\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:8:0",
+     "type": "prose",
+     "en": "Let us hypothesize a common situation: we invoke an API call that returns information about the current user, which contains an optional field of type Pet, \nwhich also contains an optional nickName field.  All the functions could return an \"undefined\" value when the object is missing.\n\n",
+     "hash": "739c00a48c693984",
+     "he": "נניח מצב נפוץ: אנו מבצעים קריאת API שמחזירה מידע על המשתמש הנוכחי; המידע מכיל שדה אופציונלי מטיפוס Pet, שמכיל בעצמו שדה אופציונלי nickName. כל הפונקציות עשויות להחזיר ערך undefined כאשר האובייקט חסר."
+    },
+    {
+     "id": "cm/1.5Monad:8:1",
+     "type": "code",
+     "en": "```typescript\ntype User = { name: string; pet: Pet | undefined };\ntype Pet = { nickName: string | undefined };\n\nconst getCurrentUser1 = (): User | undefined => ({\n  name: \"Michael\",\n  pet: { nickName: \"doggy\" },\n});\n\nconst getPet1 = (user: User): Pet | undefined => user.pet;\n\nconst getNickName1 = (pet: Pet): string | undefined => pet.nickName;\n```\n\n",
+     "hash": "7c69ba19c4383ac2",
+     "lang": "typescript",
+     "noteHe": "דוגמה לקוד \"מהעולם האמיתי\" בלי Option: `User` מכיל שדה `pet` שעשוי להיות undefined, ו-`Pet` מכיל שדה `nickName` שעשוי להיות undefined גם הוא. כל אחת משלוש הפונקציות — `getCurrentUser1`, `getPet1` ו-`getNickName1` — מחזירה איחוד מהצורה `X | undefined`. מכיוון שכל פונקציה מצפה לקלט \"אמיתי\" אבל עלולה לקבל undefined מקודמתה, אי-אפשר לשרשר אותן ישירות."
+    },
+    {
+     "id": "cm/1.5Monad:8:2",
+     "type": "prose",
+     "en": "Such functions are difficult to compose because they return a union of two incompatible values (true value or undefined).\nWe need to add \"guards\" before passing the return value to another function. This leads to the usage of many `if` statements.\n\n",
+     "hash": "7c7ef6bfb7c35503",
+     "he": "פונקציות כאלה קשות להרכבה, כי הן מחזירות איחוד של שני ערכים שאינם תואמים זה לזה (ערך אמיתי או undefined).\nעלינו להוסיף \"שומרים\" (guards) לפני העברת ערך ההחזרה לפונקציה אחרת — וזה מוביל לשימוש במשפטי `if` רבים."
+    },
+    {
+     "id": "cm/1.5Monad:8:3",
+     "type": "prose",
+     "en": "We would like to write a simple composition:\n",
+     "hash": "5bc6ea371450482a",
+     "he": "היינו רוצים לכתוב הרכבה פשוטה:"
+    },
+    {
+     "id": "cm/1.5Monad:8:4",
+     "type": "code",
+     "en": "```typescript\ngetNickName1(getPet1(getCurrentUser1()));\n// or:\npipe(getCurrentUser1, getPet1, getNickName1)();\n```\n\n",
+     "hash": "af749b495f4ec288",
+     "lang": "typescript",
+     "noteHe": "כך הייתה נראית ההרכבה ה\"נאיבית\" שהיינו רוצים לכתוב — קינון ישיר או pipe. אבל היא אינה עוברת בדיקת טיפוסים: למשל, `getPet1` מצפה לקבל `User`, אך `getCurrentUser1` עלולה להחזיר `undefined`."
+    },
+    {
+     "id": "cm/1.5Monad:8:5",
+     "type": "prose",
+     "en": "Instead we need to write a complex functions with many `if` statements:\n\n",
+     "hash": "53b729809db3f878",
+     "he": "במקום זאת, אנו נאלצים לכתוב פונקציה מסורבלת עם משפטי `if` רבים:"
+    },
+    {
+     "id": "cm/1.5Monad:8:6",
+     "type": "code",
+     "en": "```typescript\nconst getPetNickName1 = (): string | undefined => {\n  const user: User | undefined = getCurrentUser1();\n  if (user === undefined) return undefined;\n\n  const userPet: Pet | undefined = getPet1(user);\n  if (userPet === undefined) return undefined;\n\n  const userPetNickName: string | undefined = getNickName1(userPet);\n  if (userPetNickName === undefined) return undefined;\n  return userPetNickName;\n};\n\nconsole.log(getPetNickName1());\n```\n\n",
+     "hash": "d8e907331d82b2e2",
+     "lang": "typescript",
+     "noteHe": "זהו הפתרון הידני: אחרי כל קריאה לפונקציה מוסיפים בדיקת שומר — `if (… === undefined) return undefined` — שמפסיקה את החישוב ומחזירה undefined אם הערך חסר. שלוש הבדיקות זהות במבנה שלהן; זהו קוד תבניתי (boilerplate) שחוזר על עצמו ומסתיר את הלוגיקה האמיתית של הפונקציה (user ← pet ← nickName). זו בדיוק החזרתיות שמונאדת Option תפשיט עבורנו."
+    }
+   ],
+   "headingHe": "קוד לדוגמה ללא Option"
+  },
+  {
+   "id": "cm/1.5Monad:9",
+   "depth": 3,
+   "headingEn": "Code With Option",
+   "raw": "### Code With Option\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:9:0",
+     "type": "prose",
+     "en": "Let us now encapsulate all the cases of potential undefined use with the Option monad.\n\n",
+     "hash": "c310fa5cfbdf91d5",
+     "he": "נכמס כעת את כל המקרים של undefined אפשרי באמצעות מונאדת Option."
+    },
+    {
+     "id": "cm/1.5Monad:9:1",
+     "type": "code",
+     "en": "```typescript\nconst getCurrentUser2 = (): Option<User> =>\n  some({ name: \"Michael\", pet: { nickName: \"doggy\" } });\n\n// No mention of \"undefined\" - no if\nconst getPetNickName2 = (): Option<string> => {\n  const user: Option<User> = getCurrentUser2();\n  const userPet: Option<Pet> = bind(user, (user: User) => wrap(user.pet));\n  const userPetNickName = bind(userPet, (pet: Pet) => wrap(pet.nickName));\n  return userPetNickName;\n};\n\nconsole.log(getPetNickName2());\n```\n\n",
+     "hash": "640a3401573b6c72",
+     "lang": "typescript",
+     "noteHe": "`getCurrentUser2` מחזירה כעת `Option<User>` (כאן — ערך `some` קבוע לצורך הדוגמה). שימו לב שבגוף `getPetNickName2` אין אף משפט `if` ואף אזכור של undefined: כל צעד הוא קריאה `bind(ערך קודם, x => wrap(...))` — הפונקציה `wrap` ממירה שדות אופציונליים (`user.pet`, `pet.nickName`) לערכי Option, ו-`bind` מדלג אוטומטית על ההמשך אם התקבל none בשלב כלשהו. כל לוגיקת השומרים עברה לתוך המונאדה."
+    },
+    {
+     "id": "cm/1.5Monad:9:2",
+     "type": "prose",
+     "en": "This function `hides` all the potential undefined cases inside the `bind` operator of the Option monad.\n\n",
+     "hash": "7ee0f4e0b8be2561",
+     "he": "הפונקציה הזו \"מסתירה\" את כל מקרי ה-undefined האפשריים בתוך האופרטור `bind` של מונאדת Option."
+    },
+    {
+     "id": "cm/1.5Monad:9:3",
+     "type": "prose",
+     "en": "We could compose the bind calls to highlight the composition nature of the code:\n\n",
+     "hash": "a62a2cabb5f83b18",
+     "he": "נוכל להרכיב את קריאות ה-bind זו בתוך זו, כדי להבליט את אופי ההרכבה של הקוד:"
+    },
+    {
+     "id": "cm/1.5Monad:9:4",
+     "type": "code",
+     "en": "```typescript\nconst getPetNickName3 = (): Option<string> =>\n  bind(getCurrentUser2(), (user: User) =>\n    bind(wrap(user.pet), (pet: Pet) => wrap(pet.nickName))\n  );\n\nconsole.log(getPetNickName3());\n```\n\n",
+     "hash": "ef71113861d3fbec",
+     "lang": "typescript",
+     "noteHe": "אותה פונקציה, הפעם בסגנון מקונן: קריאות ה-bind משורשרות זו בתוך זו כביטוי יחיד, ללא משתני ביניים. הצורה הזו מדגישה שמדובר בהרכבה טהורה של טרנספורמציות — כל bind מקבל את תוצאת הקודם ומעביר אותה הלאה."
+    }
+   ],
+   "headingHe": "קוד עם Option"
+  },
+  {
+   "id": "cm/1.5Monad:10",
+   "depth": 3,
+   "headingEn": "Code With \"pipe functional composition\"",
+   "raw": "### Code With \"pipe functional composition\"\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:10:0",
+     "type": "prose",
+     "en": "Operators that can be composed in a bind chain must have type T1 => Option<T2>.\nThey are \"diagonal\" from \"normal types\" to \"option types\".\nThe resulting composition is also \"diagonal\".\n\n",
+     "hash": "85699b06f4c83289",
+     "he": "אופרטורים שניתן להרכיב בשרשרת bind חייבים להיות מטיפוס `T1 => Option<T2>`.\nהם \"אלכסוניים\" — מ\"טיפוסים רגילים\" ל\"טיפוסי Option\".\nגם ההרכבה המתקבלת היא \"אלכסונית\"."
+    },
+    {
+     "id": "cm/1.5Monad:10:1",
+     "type": "prose",
+     "en": "We define a `pipeOption` composition function which overrides function composition - and instead of compute `f(g(x))` (as the normal pipe does),\nwill use `bind(g(x), f)`.\n\n",
+     "hash": "b0270d8340551b93",
+     "he": "נגדיר פונקציית הרכבה `pipeOption`, שדורסת את הרכבת הפונקציות הרגילה — במקום לחשב `f(g(x))` (כפי שעושה pipe רגיל), היא תשתמש ב-`bind(g(x), f)`."
+    },
+    {
+     "id": "cm/1.5Monad:10:2",
+     "type": "code",
+     "en": "```typescript\nconst getPet2 = (user: User): Option<Pet> => wrap(user.pet);\n\nconst getNickName2 = (pet: Pet): Option<string> => wrap(pet.nickName);\n\n// Can be composed as:\nconst getPetNickName4 = pipeOption(getCurrentUser2, getPet2, getNickName2);\n\nconsole.log(getPetNickName4(undefined));\n// => { value: 'doggy', tag: 'some' }\n```\n\n",
+     "hash": "b71ed278ec111059",
+     "lang": "typescript",
+     "noteHe": "הופכים את שתי פונקציות הגישה לאלכסוניות: `getPet2` ו-`getNickName2` מחזירות Option באמצעות `wrap` על השדה האופציונלי. כעת `pipeOption` מרכיב את שלוש הפונקציות לפונקציה אחת `getPetNickName4` — קוד קצר, ללא שומרים וללא קינון. הקריאה מועברת עם הארגומנט `undefined` (כי ל-`getCurrentUser2` אין פרמטר אמיתי), והתוצאה היא הערך העטוף `{ value: 'doggy', tag: 'some' }`."
+    }
+   ],
+   "headingHe": "קוד עם \"הרכבה פונקציונלית בעזרת pipe\""
+  },
+  {
+   "id": "cm/1.5Monad:11",
+   "depth": 2,
+   "headingEn": "The List Monad",
+   "raw": "## The List Monad\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:11:0",
+     "type": "prose",
+     "en": "So far we have described two distinct monads:\n",
+     "hash": "cdd074c6b67aef3d",
+     "he": "עד כה תיארנו שתי מונאדות שונות:"
+    },
+    {
+     "id": "cm/1.5Monad:11:1",
+     "type": "list",
+     "en": "* `NumberWithLogs`: encapsulate logs manipulation around numeric computations\n* `Option`: encapsulate the possibility that computations may return a real value or an undefined value.\n\n",
+     "hash": "6beaa87d57134f93",
+     "he": "* `NumberWithLogs`: מכמסת את הטיפול בלוגים סביב חישובים מספריים\n* `Option`: מכמסת את האפשרות שחישובים יחזירו ערך ממשי או ערך undefined."
+    },
+    {
+     "id": "cm/1.5Monad:11:2",
+     "type": "prose",
+     "en": "We now describe the well-known `List` container as a monad - that is, using the terminology of a monadic container type, a wrap constructor and a bind application operator.\nBased on these definitions, we also created a monad-specific pipe operator for generalized composition of diagonal operators.\n\n",
+     "hash": "f66f1a65e605f005",
+     "he": "כעת נתאר את המכל (container) המוכר `List` כמונאדה — כלומר, במונחים של טיפוס מכל מונאדי, בנאי wrap ואופרטור הפעלה bind.\nעל בסיס ההגדרות האלה יצרנו גם אופרטור pipe ייעודי למונאדה, המשמש להרכבה מוכללת של אופרטורים אלכסוניים."
+    },
+    {
+     "id": "cm/1.5Monad:11:3",
+     "type": "prose",
+     "en": "We will then extend the general interface of monads to include the `map` operator and `fold` operators which are general to all monads.\n  \n",
+     "hash": "ac43da35f44c71df",
+     "he": "לאחר מכן נרחיב את הממשק הכללי של מונאדות כך שיכלול את האופרטור `map` ואת אופרטורי ה-`fold`, שהם כלליים לכל המונאדות."
+    },
+    {
+     "id": "cm/1.5Monad:11:4",
+     "type": "code",
+     "en": "```typescript\n// Observe the similarity of the functions between two monads: Option and List\n\n// Recursive Type definition\nexport type List<T> = Empty | NonEmptyList<T>;\nexport type Empty = [];\nexport type NonEmptyList<T> = [T, ...Array<T>];\n\n// Type predicates\nexport const isEmpty = <T>(x: Array<T>): x is Empty => x.length === 0;\nexport const isNonEmpty = <T>(x: Array<T>): x is NonEmptyList<T> => x.length > 0;\n\n// Type accessors\nexport const first = <T>(x: NonEmptyList<T>): T => x[0];\nexport const rest = <T>(x: NonEmptyList<T>): List<T> => <List<T>>x.slice(1);\n\n// Wrapper\nexport const wrapList = <T>(x: T): NonEmptyList<T> => [x];\n\n// Bind (for lists, it is also nnown as flatMap)\n// Since List is a recursive type, bind is a recursive function\nexport const bindList = <T1, T2>(\n  l: List<T1>,\n  f: (x: T1) => List<T2>\n): List<T2> => (isEmpty(l) ? l : [...f(first(l)), ...bindList(rest(l), f)]);\n```\n\n",
+     "hash": "50057f0fe6b07589",
+     "lang": "typescript",
+     "noteHe": "מימוש List כמונאדה, במבנה מקביל בדיוק ל-Option. הטיפוס רקורסיבי: `List<T>` הוא איחוד זר של `Empty` (טופל ריק `[]`) ו-`NonEmptyList<T>` (טופל עם איבר ראשון ועוד מערך איברים — `[T, ...Array<T>]`). הפונקציות `isEmpty` ו-`isNonEmpty` הן פרדיקטי טיפוס; `first` ו-`rest` הן פונקציות הגישה לראש הרשימה ולזנבה. פונקציית ה-wrap של המונאדה היא `wrapList`, שעוטפת ערך יחיד ברשימה בת איבר אחד `[x]`. האופרטור `bindList` (המוכר גם בשם flatMap) הוא רקורסיבי, כי הטיפוס עצמו רקורסיבי: על רשימה ריקה הוא מחזיר אותה כמות שהיא; אחרת הוא מפעיל את `f` על הראש (ומקבל רשימה), ומשרשר אותה — באמצעות spread כפול — עם תוצאת הקריאה הרקורסיבית על הזנב. השרשור הזה הוא שמבצע את ה\"שיטוח\" (flatten) של רשימת הרשימות."
+    },
+    {
+     "id": "cm/1.5Monad:11:5",
+     "type": "prose",
+     "en": "Let us experiment with these functions:\n  \n",
+     "hash": "b997fb0dfd337baa",
+     "he": "נתנסה בפונקציות האלה:"
+    },
+    {
+     "id": "cm/1.5Monad:11:6",
+     "type": "code",
+     "en": "```typescript\n// =================================================\n// Examples\n\nconst l1: Empty = [];\nconst l2: NonEmptyList<number> = [1];\nconst l3: NonEmptyList<number> = [1, 2];\n\ndeepStrictEqual(first(l2), 1);\ndeepStrictEqual(first(l3), 1);\n\ndeepStrictEqual(rest(l2), []);\ndeepStrictEqual(rest(l3), [2]);\n\nbindList([], (x: number) => wrapList(x));\n// -> []\n\nbindList([1,2], (x: number) => wrapList(x));\n// -> [1, 2]\n  \nbindList([1,2], (x: number) => [x, x+1]);\n// -> [1,2,2,3]\n  \nbindList([1,2], (x: number) => x%2 === 0 ? [x/2] : [x/2, x/2 + 1]);\n// -> [0.5, 1.5, 1]\n```\n\n",
+     "hash": "83d4bac069181360",
+     "lang": "typescript",
+     "noteHe": "דוגמאות שימוש (`deepStrictEqual` היא בדיקת שוויון עמוק — עוברת בשקט אם הערכים שווים): `first` ו-`rest` מחזירות ראש וזנב של `[1]` ושל `[1, 2]`. הקריאות ל-`bindList` מדגימות את התנהגות המונאדה: עם `wrapList` כפונקציה — bindList היא פונקציית הזהות (כל איבר נעטף ברשימה בת איבר אחד וההדבקה מחזירה את הרשימה המקורית). עם `x => [x, x+1]` — כל איבר תורם שני איברים, ולכן `[1,2]` הופכת ל-`[1,2,2,3]`. הדוגמה האחרונה מראה שהפונקציה יכולה להחזיר מספר שונה של תוצאות לכל קלט: 1 (אי-זוגי) תורם את `[0.5, 1.5]` ו-2 (זוגי) תורם רק את `[1]` — סה\"כ `[0.5, 1.5, 1]`."
+    },
+    {
+     "id": "cm/1.5Monad:11:7",
+     "type": "prose",
+     "en": "`bindList` operates in a way slightly similar to `map`: it takes as parameter a list and a diagonal function `f` - from `T1 => List<T2>`,\nit applies `f` to all the elements in the list and instead of returning the list of all values (like map would do), it returns the concatenation of all the values \n(because all the values are lists).  For this reason, it is also known as **flatMap**.\n\n",
+     "hash": "9d0428cbe4727b98",
+     "he": "`bindList` פועלת באופן דומה במקצת ל-`map`: היא מקבלת כפרמטרים רשימה ופונקציה אלכסונית `f` — מטיפוס `T1 => List<T2>` — ומפעילה את `f` על כל אברי הרשימה; אבל במקום להחזיר את רשימת כל הערכים (כפי ש-map הייתה עושה), היא מחזירה את השרשור של כל הערכים (מכיוון שכל הערכים הם בעצמם רשימות). מסיבה זו היא מוכרת גם בשם **flatMap**."
+    },
+    {
+     "id": "cm/1.5Monad:11:8",
+     "type": "prose",
+     "en": "`pipeList` composes a list of diagonal functions using the bindList (flatMap) mechanism.\n\n",
+     "hash": "6f99154038e4e482",
+     "he": "`pipeList` מרכיבה רשימה של פונקציות אלכסוניות באמצעות מנגנון bindList (flatMap)."
+    },
+    {
+     "id": "cm/1.5Monad:11:9",
+     "type": "code",
+     "en": "```typescript\n  \n// Compose and apply\ndeepStrictEqual(\n  pipeList(\n    () => [],\n    (x: number) => wrapList(x * 2),\n    (x: number) => wrapList(1 / x)\n  )(),\n  []\n);\n\ndeepStrictEqual(\n  pipeList(\n    () => [1],\n    (x: number) => [x * 2],\n    (x: number) => [1 / x]\n  )(),\n  [0.5]\n);\n\ndeepStrictEqual(\n  pipeList(\n    () => [1, 2], //                           [1,    2   ]\n    (x: number) => [x - 1, x], //              [0, 1, 1, 2]\n    (x: number) => (x === 0 ? [] : [1 / x]) // [   1, 1, 1/2]\n  )(),\n  [1, 1, 0.5]\n);\n\ndeepStrictEqual(\n  pipeList(\n    () => [1, 2], //                  [1,               2]\n    (x: number) => [x * 2, x * 4], // [2,      4,       4,       8]\n    (x: number) => [1 / x, x * x] //  [1/2, 4, 1/4, 16, 1/4, 16, 1/8, 64]\n  )(),\n  [0.5, 4, 0.25, 16, 0.25, 16, 0.125, 64]\n);\n```\n  \n",
+     "hash": "e74470c1fe0b47b2",
+     "lang": "typescript",
+     "noteHe": "ארבע דוגמאות ל-`pipeList`. בראשונה, השלב הראשון מחזיר `[]` — ולכן כל ההמשך נשאר ריק (בדומה ל-none של Option שמקצר את החישוב). בשנייה, שרשרת של רשימות בנות איבר אחד מתנהגת כמו הרכבה רגילה: 1 → 2 → 0.5. שתי הדוגמאות האחרונות מדגימות את \"התפשטות העץ\" (ההערות בקוד מציגות את התוצאה אחרי כל שלב): כל פונקציה מופעלת על כל אחת מהתוצאות הקודמות, ותוצאותיה משורשרות. שלב יכול \"לסנן\" — למשל להחזיר `[]` עבור 0 כדי למנוע חלוקה באפס (בדוגמה השלישית), או \"להכפיל\" — להחזיר שני ערכים לכל קלט, וכך מ-2 ערכים התחלתיים מתקבלים 8 בסוף (בדוגמה הרביעית)."
+    },
+    {
+     "id": "cm/1.5Monad:11:10",
+     "type": "prose",
+     "en": "`pipeList` expands a tree of computations, where each operator is applied to each of the previous results and can return 0 values ([]), 1 value ([x]) \nor multiple values ([x, x+1]).\n\n",
+     "hash": "5b34fef773b0ec14",
+     "he": "`pipeList` פורסת עץ של חישובים, שבו כל אופרטור מופעל על כל אחת מהתוצאות הקודמות, ויכול להחזיר 0 ערכים (`[]`), ערך אחד (`[x]`) או כמה ערכים (`[x, x+1]`)."
+    }
+   ],
+   "headingHe": "מונאדת הרשימה (List)"
+  },
+  {
+   "id": "cm/1.5Monad:12",
+   "depth": 3,
+   "headingEn": "Fold: unlift from Monad to Regular Values",
+   "raw": "### Fold: unlift from Monad to Regular Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:12:0",
+     "type": "code",
+     "en": "```typescript\n// fold: unlift from the List monad back to normal types\n\n// foldList is very close to the function we have met under the name reduce\n// Like bindList (flatMap), foldList is recursive to fold the recursive type into a simple value.\n// foldList(l:List<T1>, ()=>T2, (firstVal:T1, restFolded: T2)=>T2)\n// Example:\n// foldList([], () => 0, (firstVal: number, restFolded: number) => firstVal + restFolded) -> 0\n// foldList([1,2,3], () => 0, (firstVal: number, restFolded: number) => firstVal + restFolded) -> 6\nexport const foldList = <T1, T2>(\n  l: List<T1>,\n  handleEmpty: () => T2,\n  handleNonEmpty: (firstVal: T1, restFolded: T2) => T2\n): T2 =>\n  isEmpty(l)\n    ? handleEmpty()\n    : handleNonEmpty(first(l), foldList(rest(l), handleEmpty, handleNonEmpty));\n\n// Examples\ndeepStrictEqual(\n  foldList(\n    l1,\n    () => 0,\n    (val: number, acc) => val + acc\n  ),\n  0\n);\n\ndeepStrictEqual(\n  foldList(\n    l2,\n    () => 0,\n    (val, acc) => val + acc\n  ),\n  1\n);\n\ndeepStrictEqual(\n  foldList(\n    l3,\n    () => 0,\n    (val, acc) => val + acc\n  ),\n  3\n);\n```\n\n",
+     "hash": "e3ec39216a4ca209",
+     "lang": "typescript",
+     "noteHe": "`foldList` \"מורידה\" (unlift) ערך מונאדי בחזרה לטיפוס רגיל — היא קרובה מאוד לפונקציה שהכרנו בשם reduce. היא מקבלת רשימה ושתי פונקציות טיפול (handlers), אחת לכל תת-טיפוס של הטיפוס המונאדי: `handleEmpty` מטפלת ברשימה ריקה (מקרה הבסיס), ו-`handleNonEmpty` מקבלת את האיבר הראשון (`firstVal`) ואת תוצאת הקיפול הרקורסיבי של הזנב (`restFolded`). כמו `bindList`, גם `foldList` רקורסיבית — מבנה הפונקציה משקף את מבנה הטיפוס הרקורסיבי. בדוגמאות מחשבים סכום איברים: על `[]` מתקבל 0 (ערך הבסיס), על `[1]` מתקבל 1, ועל `[1, 2]` מתקבל 3."
+    },
+    {
+     "id": "cm/1.5Monad:12:1",
+     "type": "prose",
+     "en": "In the same way we defined `foldList`, we can define `foldOption`:\n\n",
+     "hash": "ca644536ad46beea",
+     "he": "באותו אופן שבו הגדרנו את `foldList`, נוכל להגדיר את `foldOption`:"
+    },
+    {
+     "id": "cm/1.5Monad:12:2",
+     "type": "code",
+     "en": "```typescript\n// foldOption(o:Option<T1>, ()=>T2, (val:T1)=>T3)\n// Example:\n// foldOption(none(), () => undefined, (val: number) => val) -> undefined\n// foldOption(some(1), () => undefined, (val: number) => val) -> 1\nexport const foldOption = <T1, T2, T3>(\n  o: Option<T1>,\n  handleNone: () => T2,\n  handleSome: (val: T1) => T3\n) => (isSome(o) ? handleSome(o.value) : handleNone());\n\n// Examples\ndeepStrictEqual(\n  foldOption(\n    none(),\n    () => undefined,\n    (val) => val\n  ),\n  undefined\n);\n\ndeepStrictEqual(\n  foldOption(\n    some(1),\n    () => undefined,\n    (val) => val\n  ),\n  1\n);\n```\n\n",
+     "hash": "1057a83df3afeb6e",
+     "lang": "typescript",
+     "noteHe": "`foldOption` בנויה באותה תבנית בדיוק: פונקציית טיפול לכל תת-טיפוס של המונאדה — `handleNone` מופעלת כשאין ערך, ו-`handleSome` מקבלת את הערך הפנימי כשהוא קיים. בניגוד ל-foldList, כאן אין רקורסיה כי הטיפוס אינו רקורסיבי. בדוגמאות: קיפול `none()` מחזיר undefined, וקיפול `some(1)` מחזיר את הערך 1 — כלומר, fold היא הדרך המסודרת \"לצאת\" מהמונאדה חזרה לעולם הערכים הרגילים."
+    },
+    {
+     "id": "cm/1.5Monad:12:3",
+     "type": "prose",
+     "en": "Observe how similar the two fold functions are: `foldList` and `foldOption` are both used to `unlift` a monadic value into a simple type.\nThey have as parameters a monadic value, and a handler function that matches each of the component subtypes of the monad type (none and some for Option,\nempty and non-empty for List).\n\n  \n",
+     "hash": "430bb761ece10303",
+     "he": "שימו לב עד כמה שתי פונקציות ה-fold דומות זו לזו: `foldList` ו-`foldOption` משמשות שתיהן ל\"הורדה\" (unlift) של ערך מונאדי לטיפוס פשוט.\nהפרמטרים שלהן הם ערך מונאדי ופונקציית טיפול (handler) המתאימה לכל אחד מתתי-הטיפוסים המרכיבים את הטיפוס המונאדי (none ו-some עבור Option; ריקה ולא-ריקה עבור List)."
+    }
+   ],
+   "headingHe": "Fold: הורדה (unlift) מהמונאדה חזרה לערכים רגילים"
+  },
+  {
+   "id": "cm/1.5Monad:13",
+   "depth": 3,
+   "headingEn": "Map: Lift Functions",
+   "raw": "### Map: Lift Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:13:0",
+     "type": "prose",
+     "en": "The curried mapList operator takes as input a flat function `[T1 => T2]` and returns a lifted function `[List<T1> => List<T2>]`.\n\n",
+     "hash": "d452a36d029a4de6",
+     "he": "האופרטור המקורר mapList מקבל כקלט פונקציה שטוחה `[T1 => T2]` ומחזיר פונקציה מורמת `[List<T1> => List<T2>]`."
+    },
+    {
+     "id": "cm/1.5Monad:13:1",
+     "type": "code",
+     "en": "```typescript\n// mapList\n// Known as map\nexport const mapList =\n  <T1, T2>(f: (x: T1) => T2): ((y: List<T1>) => List<T2>) =>\n  (l: List<T1>) =>\n    bindList(l, (x: T1) => wrapList(f(x)));\n\n// Examples\ndeepStrictEqual(mapList((x: number) => x * 2)([]), []);\ndeepStrictEqual(mapList((x: number) => x * 2)([1]), [2]);\ndeepStrictEqual(mapList((x: number) => x * 2)([1,2]), [2, 4]);\n```\n\n",
+     "hash": "a6b0f2edbebb8bac",
+     "lang": "typescript",
+     "noteHe": "`mapList` מוגדרת אך ורק באמצעות bind ו-wrap: היא מקבלת פונקציה שטוחה `f` ומחזירה את גרסתה המורמת — על כל איבר ברשימה מפעילים את `f`, עוטפים את התוצאה עם `wrapList` לרשימה בת איבר אחד, ו-`bindList` משטח את הכול חזרה לרשימה אחת. כלומר, map הוא מקרה פרטי של bind, שבו הפונקציה תמיד מחזירה בדיוק ערך אחד. שימו לב שהפונקציה מקוררת (curried): קודם מקבלים את `f`, ומתקבלת פונקציה שממתינה לרשימה. הדוגמאות: הכפלה ב-2 על `[]`, `[1]` ו-`[1,2]` נותנת `[]`, `[2]` ו-`[2, 4]`."
+    },
+    {
+     "id": "cm/1.5Monad:13:2",
+     "type": "prose",
+     "en": "Similarly, we can define a `mapOption` operator for the Option monad:\n",
+     "hash": "14dac997cf47aa0b",
+     "he": "באופן דומה, נוכל להגדיר אופרטור `mapOption` עבור מונאדת Option:"
+    },
+    {
+     "id": "cm/1.5Monad:13:3",
+     "type": "code",
+     "en": "```typescript\n// mapOption: flat [T1=>T2] to lifted [Option<T1>=>Option<T2>]\nexport const mapOption =\n  <T1, T2>(f: (x: T1) => T2): ((y: Option<T1>) => Option<T2>) =>\n  (y: Option<T1>) =>\n    bindOption(y, (x: T1) => wrapOption(f(x)));\n\n// Examples\ndeepStrictEqual(mapOption((x: number) => x * 2)(none()),  none());\ndeepStrictEqual(mapOption((x: number) => x * 2)(some(1)), some(2));\n```\n\n",
+     "hash": "592af48aa3c40681",
+     "lang": "typescript",
+     "noteHe": "`mapOption` בנויה מבנית באופן זהה ל-`mapList`: אותה נוסחה בדיוק — `bindOption(y, x => wrapOption(f(x)))` — רק עם bind ו-wrap של מונאדת Option. על `none()` התוצאה נשארת `none()` (הפונקציה לא מופעלת כלל), ועל `some(1)` עם הכפלה ב-2 מתקבל `some(2)`. הזהות המבנית בין שתי ההגדרות היא הנקודה: map נגזרת מהלוגיקה הכללית של מונאדות."
+    },
+    {
+     "id": "cm/1.5Monad:13:4",
+     "type": "prose",
+     "en": "Observe that the map functions for List and Option are defined in an almost identical manner: we compose bind, wrap and f in a specific manner, according to the general logic of monads.\n\n",
+     "hash": "eed17d7db0c7ca98",
+     "he": "שימו לב שפונקציות ה-map של List ושל Option מוגדרות באופן כמעט זהה: אנו מרכיבים את bind, את wrap ואת f באופן מסוים, בהתאם ללוגיקה הכללית של מונאדות."
+    }
+   ],
+   "headingHe": "Map: הרמת פונקציות"
+  },
+  {
+   "id": "cm/1.5Monad:14",
+   "depth": 3,
+   "headingEn": "Chain: Lift Diagonal Functions",
+   "raw": "### Chain: Lift Diagonal Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:14:0",
+     "type": "prose",
+     "en": "In some cases, we are interested in combining a sequence of diagonal operators in which case the specialized pipeOption or pipeList functions will work.\nBut in other cases, we would like to combine diagonal and flat operators ('[T1 => Option<T2>]` and `[T1 => T2]`).  In this case, neither `pipe` nor `pipeOption`\nare appropriate.\n\n",
+     "hash": "452067485631c6aa",
+     "he": "במקרים מסוימים נרצה לשלב סדרה של אופרטורים אלכסוניים — ואז הפונקציות הייעודיות pipeOption או pipeList יעשו את העבודה.\nאך במקרים אחרים נרצה לשלב אופרטורים אלכסוניים ושטוחים יחד (`[T1 => Option<T2>]` וגם `[T1 => T2]`). במקרה כזה, לא `pipe` ולא `pipeOption` מתאימות."
+    },
+    {
+     "id": "cm/1.5Monad:14:1",
+     "type": "prose",
+     "en": "For such cases, we define the `chain` operator which lifts a diagonal operator into a lifted operator:\n",
+     "hash": "41a92354ed5c420d",
+     "he": "למקרים כאלה נגדיר את האופרטור `chain`, שמרים אופרטור אלכסוני לאופרטור מורם:"
+    },
+    {
+     "id": "cm/1.5Monad:14:2",
+     "type": "code",
+     "en": "```typescript\nexport const chainList =\n  <T1, T2>(f: (x: T1) => List<T2>): ((y: List<T1>) => List<T2>) =>\n  (y: List<T1>) => bindList(y, f);\n\nexport const chainOption =\n  <T1, T2>(f: (x: T1) => Option<T2>): ((y: Option<T1>) => Option<T2>) =>\n  (y: Option<T1>) => bindOption(y, f);\n```\n\n",
+     "hash": "7b41b4022db47482",
+     "lang": "typescript",
+     "noteHe": "`chainList` ו-`chainOption` הן פשוט גרסאות מקוררות (curried) של bind עם סדר פרמטרים הפוך: הן מקבלות רק את הפונקציה האלכסונית `f` ומחזירות פונקציה מורמת מטיפוס `[M<T1> => M<T2>]`, שממתינה לערך המונאדי. ההיפוך הזה — הפונקציה קודם, הערך אחר כך — הוא שמאפשר לשבץ אותן ישירות כשלבים בתוך pipe רגיל."
+    },
+    {
+     "id": "cm/1.5Monad:14:3",
+     "type": "prose",
+     "en": "Here is an example of a lifted composition:\n    \n",
+     "hash": "d4082bd4722250cc",
+     "he": "הנה דוגמה להרכבה מורמת:"
+    },
+    {
+     "id": "cm/1.5Monad:14:4",
+     "type": "code",
+     "en": "```typescript\n// All the functions are lifted in the monadic domain [Option<T> => Option<T>]\n// We can now combine safe and unsafe functions in a single pipe.\npipe(\n\twrapOption,                                       // lift the parameter \n\tmapOption((x: number) => x * x),                  // safe function - always succeeds, map it\n\tchainOption((x) => x === 0 ? none() : some(1/x)), // unsafe function - chain it\n\tmapOption((x) => x * x)                           // safe function - map it\n)(5);\n```\n\n",
+     "hash": "2c1804fc65e8de6b",
+     "lang": "typescript",
+     "noteHe": "הדוגמה משלבת הכול ב-pipe רגיל אחד: `wrapOption` מרים את הפרמטר 5 לעולם המונאדי; פונקציות \"בטוחות\" — שתמיד מצליחות, כמו העלאה בריבוע — מורמות באמצעות `mapOption`; והפונקציה ה\"לא בטוחה\" `1/x` — שנכשלת עבור 0 ולכן היא אלכסונית ומחזירה `none()` או `some(1/x)` — מורמת באמצעות `chainOption`. אחרי ההרמה, כל השלבים הם מטיפוס אחיד `[Option<number> => Option<number>]`, ולכן `pipe` הרגיל עובד. החישוב: 5 → some(25) → some(1/25) → some(1/625); אילו בשלב כלשהו היה מתקבל none, שאר השלבים היו מדלגים עליו אוטומטית."
+    }
+   ],
+   "headingHe": "Chain: הרמת פונקציות אלכסוניות"
+  },
+  {
+   "id": "cm/1.5Monad:15",
+   "depth": 2,
+   "headingEn": "The Monad Interface",
+   "raw": "## The Monad Interface\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.5Monad:15:0",
+     "type": "prose",
+     "en": "We can now summarize the key operators defined consistently over any monad `M`:\n\n",
+     "hash": "ff6a43b12af9808c",
+     "he": "נוכל כעת לסכם את אופרטורי המפתח המוגדרים באופן עקבי עבור כל מונאדה `M`:"
+    },
+    {
+     "id": "cm/1.5Monad:15:1",
+     "type": "list",
+     "en": "* **bind**: apply a diagonal transform `f: [T1 => M[T2]]` to monadic value `M[t1]`. \nThis is the most basic operator, which overrides function application for normal types. Instead of calling `f(x)` we use `bind(x, f)`.\n* **wrap**: wraps a plain value into a monadic value. `wrap: T => M[T]`.  wrap is the unit (neutral) element of composition: `bind(x, wrap) -> x` and `pipeM()` returns wrap.\n* **map**: lifts horizontal transform from values to monadic values: for `f: T1 => T2`, we have `map(f): M[T1] => M[T2]`\n* **chain**: lifts diagonal transforms to lifted transform: `chain: (T1 => M[T2]) => (M[T1] => M[T2])`\n* **pipeM**: specialized composition of a sequence of diagonal operators - its value is itself a diagonal operator.\n* **fold**: convert a monadic value to a plain value with handlers for each sub-type of the monadic type. `fold: (x: M[T1], handleA: () => T2, handleB: (curr: T1, acc: T2) => T2) => T2`\n\n",
+     "hash": "c0613703de5e0e27",
+     "he": "* **bind**: מפעיל טרנספורמציה אלכסונית `f: [T1 => M[T2]]` על ערך מונאדי `M[t1]`. זהו האופרטור הבסיסי ביותר, הדורס את הפעלת הפונקציות של טיפוסים רגילים: במקום לקרוא `f(x)` נשתמש ב-`bind(x, f)`.\n* **wrap**: עוטף ערך פשוט לערך מונאדי. `wrap: T => M[T]`. האופרטור wrap הוא איבר היחידה (הנייטרלי) של ההרכבה: `bind(x, wrap) -> x`, וקריאה `pipeM()` ללא ארגומנטים מחזירה את wrap.\n* **map**: מרים טרנספורמציה אופקית מערכים לערכים מונאדיים: עבור `f: T1 => T2` נקבל `map(f): M[T1] => M[T2]`\n* **chain**: מרים טרנספורמציה אלכסונית לטרנספורמציה מורמת: `chain: (T1 => M[T2]) => (M[T1] => M[T2])`\n* **pipeM**: הרכבה ייעודית של סדרת אופרטורים אלכסוניים — הערך שלה הוא בעצמו אופרטור אלכסוני.\n* **fold**: ממיר ערך מונאדי לערך פשוט בעזרת פונקציות טיפול (handlers) לכל תת-טיפוס של הטיפוס המונאדי. `fold: (x: M[T1], handleA: () => T2, handleB: (curr: T1, acc: T2) => T2) => T2`"
+    },
+    {
+     "id": "cm/1.5Monad:15:2",
+     "type": "prose",
+     "en": "The most useful monads are:\n",
+     "hash": "780dbe5a43cafaaa",
+     "he": "המונאדות השימושיות ביותר הן:"
+    },
+    {
+     "id": "cm/1.5Monad:15:3",
+     "type": "list",
+     "en": "* **`Option<T>`** = `None | Some<T>`: encapsulates the logic of having a value or none\n* **`Result<T>`** = `Failure | Ok<T>`: which we use extensively in the rest of the semester, encapsulates the logic of succeeding a computation or failing with an error\n* **`Either<T1, T2>`** = `Left<T1> | Right<T2>`: encapsulates the logic of two divergent results for a computation\n* **`List<T>`** = `Empty | NonEmpty<T>`: encapsulates the logic of computations that may return 0, 1  or more results.\n* **`Task<T>`**: encapsulate the logic of asynchronous computations that may fail or timeout\n* **`State<T>`**: encapsulate stateful computations which may update a shared state and return a value.\n",
+     "hash": "8a90d0cc127fc111",
+     "he": "* **`Option<T>`** = `None | Some<T>`: מכמסת את הלוגיקה של \"יש ערך או אין ערך\"\n* **`Result<T>`** = `Failure | Ok<T>`: נשתמש בה רבות בהמשך הסמסטר; מכמסת את הלוגיקה של חישוב שמצליח או נכשל עם שגיאה\n* **`Either<T1, T2>`** = `Left<T1> | Right<T2>`: מכמסת את הלוגיקה של שתי תוצאות שונות אפשריות לחישוב\n* **`List<T>`** = `Empty | NonEmpty<T>`: מכמסת את הלוגיקה של חישובים שעשויים להחזיר 0, 1 או יותר תוצאות.\n* **`Task<T>`**: מכמסת את הלוגיקה של חישובים אסינכרוניים שעשויים להיכשל או לפוג (timeout)\n* **`State<T>`**: מכמסת חישובים בעלי מצב (stateful), שעשויים לעדכן מצב משותף ולהחזיר ערך."
+    }
+   ],
+   "headingHe": "ממשק המונאדה"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהם שלושת המרכיבים של תבנית העיצוב מונאדה (Monad)?",
+   "options": [
+    "טיפוס עוטף (Wrapper Type), פונקציית עטיפה (wrap), פונקציית הרצה (bind/run)",
+    "בנאי (constructor), פונקציית גישה (accessor), פרדיקט טיפוס (type predicate)",
+    "map, filter, reduce",
+    "טיפוס איחוד, טיפוס מכפלה, טיפוס רקורסיבי"
+   ],
+   "correct": 0,
+   "explanationHe": "מונאדה מורכבת משלושה מרכיבים: טיפוס עוטף (למשל NumberWithLogs או Option), פונקציית wrap שמעבירה ערך פשוט לעולם המונאדי (איבר היחידה של ההרכבה), ופונקציית הרצה (bind) שמפעילה טרנספורמציה אלכסונית על ערך מונאדי. המסיח השני מתאר כלים כלליים של הגדרת טיפוסים בקורס, לא את מרכיבי המונאדה; map/filter/reduce הם אופרטורים על רשימות (ו-map/fold אמנם נגזרים מהמונאדה, אך אינם ההגדרה שלה); המסיח הרביעי מתאר דרכי בניית טיפוסים ולא את התבנית."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "נתונה פונקציה אלכסונית `f: (x: number) => Option<number>`. איזה אופרטור הופך אותה לפונקציה מורמת מטיפוס `[Option<number> => Option<number>]`, כך שאפשר לשבץ אותה בתוך pipe רגיל?",
+   "options": [
+    "mapOption",
+    "chainOption",
+    "wrapOption",
+    "foldOption"
+   ],
+   "correct": 1,
+   "explanationHe": "chain מרים אופרטור אלכסוני `(T1 => M[T2])` לאופרטור מורם `(M[T1] => M[T2])` — זו בדיוק גרסה מקוררת של bind. לעומתו, mapOption מרים פונקציה שטוחה `[T1 => T2]` (אם נפעיל אותו על f נקבל Option מקונן — Option<Option<number>>); wrapOption עוטף ערך, לא פונקציה; ו-foldOption פועל בכיוון ההפוך — מוריד ערך מונאדי לערך רגיל."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nconsole.log(bindList([1, 2], (x: number) => [x, x * 10]));\n```",
+   "answerHe": "`[1, 10, 2, 20]`",
+   "explanationHe": "bindList (flatMap) מפעיל את הפונקציה על כל איבר ומשרשר את הרשימות שהתקבלו: עבור 1 מתקבל [1, 10], עבור 2 מתקבל [2, 20], והשרשור נותן [1, 10, 2, 20]. שימו לב להבדל מ-map, שהיה מחזיר רשימה מקוננת [[1, 10], [2, 20]] — ה'שיטוח' הוא בדיוק מה שמבדיל בין bind ל-map."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "מה יהיה ערך הביטוי הבא?\n```typescript\npipe(\n  wrapOption,\n  mapOption((x: number) => x - 5),\n  chainOption((x: number) => x === 0 ? none() : some(10 / x)),\n  mapOption((x: number) => x + 1)\n)(5);\n```",
+   "answerHe": "`{ tag: \"none\" }` — כלומר none()",
+   "explanationHe": "wrapOption(5) נותן some(5); ההחסרה נותנת some(0); בשלב ה-chain הערך הוא 0, ולכן הפונקציה מחזירה none() (מניעת חלוקה באפס); ומרגע שהתקבל none, השלב האחרון (mapOption) מדלג עליו ומחזיר את ה-none כמות שהוא — זו התנהגות ה'קצר החשמלי' של bind: `bind(none, f) = none` בלי להפעיל את f."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "מה מחזיר הביטוי `bind(some(5), wrap)` במונאדת Option?",
+   "options": [
+    "some(some(5))",
+    "some(5)",
+    "none()",
+    "5"
+   ],
+   "correct": 1,
+   "explanationHe": "wrap הוא איבר היחידה (הנייטרלי) של ההרכבה המונאדית: `bind(x, wrap) -> x`. הקלט הוא some(5), ולכן bind מפעיל את wrap על הערך הפנימי 5 ומקבל בחזרה some(5). המסיח הראשון שגוי כי bind אינו עוטף פעמיים (זה ההבדל מ-map על פונקציה אלכסונית); המסיח האחרון שגוי כי bind נשאר בעולם המונאדי — רק fold מחזיר ערך רגיל."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הסבירו מדוע הפונקציות `square1: [number => NumberWithLogs]` ו-`inc1: [NumberWithLogs => NumberWithLogs]` מהניסיון הראשון אינן ניתנות להרכבה חופשית, וכיצד תבנית המונאדה פותרת את הבעיה.",
+   "answerHe": "הבעיה: הטיפוסים אינם אחידים. square1 היא אלכסונית [N => NwL] ו-inc1 היא מורמת [NwL => NwL], ולכן שילובים כמו inc1(5), square1(square1(2)) או square1(inc1(2)) נכשלים בבדיקת הטיפוסים — הפלט של פונקציה אחת אינו תואם את הקלט של האחרת. בנוסף, כל פונקציה מורמת חייבת לחזור על קוד שרשור הלוגים, בניגוד לעקרון הפרדת האחריויות. הפתרון המונאדי: (1) כל הפונקציות נכתבות כאלכסוניות אחידות [number => NumberWithLogs] שיודעות רק לחשב ולייצר הודעת לוג יחידה; (2) פונקציית wrap (wrapNumberWithLogs) מכניסה את הערך ההתחלתי לעולם המועשר עם רשימת לוגים ריקה; (3) אופרטור bind (runWithLogs) דורס את הפעלת הפונקציה — מחלץ את result, מפעיל את הטרנספורמציה, ומשרשר את הלוגים במקום אחד ויחיד. כך כל שרשרת חישובים אפשרית באמצעות bind (או pipeWithLogs), והידע על תחזוקת הלוגים מופרד לחלוטין מהלוגיקה החישובית.",
+   "explanationHe": "נקודות מפתח: זיהוי חוסר האחידות של הטיפוסים ([N => NwL] מול [NwL => NwL]) כמקור הבעיה; ציון הפרת הפרדת האחריויות (שכפול קוד שרשור הלוגים); תיאור שלושת מרכיבי הפתרון — יישור כל הפונקציות לצורה אלכסונית, wrap כנקודת כניסה, ו-bind שמרכז את הלוגיקה הקבועה."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "הגדירו את `mapList` אך ורק באמצעות `bindList` ו-`wrapList`, והסבירו מדוע ההגדרה הזו כללית לכל מונאדה.",
+   "answerHe": "ההגדרה: `const mapList = <T1, T2>(f: (x: T1) => T2) => (l: List<T1>) => bindList(l, (x: T1) => wrapList(f(x)));` — מפעילים את הפונקציה השטוחה f על כל איבר, עוטפים את התוצאה ברשימה בת איבר אחד באמצעות wrapList, ו-bindList משטח את רשימת הרשימות חזרה לרשימה אחת. ההגדרה כללית לכל מונאדה כי היא משתמשת רק בשני אופרטורי הליבה של ממשק המונאדה — bind ו-wrap — בלי שום ידע ספציפי על מבנה הרשימה: אותה נוסחה בדיוק מגדירה את mapOption (`bindOption(y, x => wrapOption(f(x)))`) ואת map של כל מונאדה אחרת. במילים אחרות, map הוא מקרה פרטי של bind שבו הטרנספורמציה תמיד מצליחה ומחזירה בדיוק ערך אחד.",
+   "explanationHe": "נקודות מפתח: הנוסחה bind(l, x => wrap(f(x))); ההבנה ש-wrap הופך את f השטוחה לאלכסונית 'טריוויאלית'; והטיעון לכלליות — ההגדרה נשענת רק על ממשק המונאדה (bind + wrap), ולכן זהה בכל מונאדה, כפי שמודגם בזהות המבנית בין mapList ל-mapOption."
+  },
+  {
+   "id": "ex8",
+   "type": "code-reading",
+   "questionHe": "מה יהיה ערך הביטוי הבא?\n```typescript\nfoldList([2, 3, 4], () => 1, (val: number, acc: number) => val * acc);\n```",
+   "answerHe": "`24`",
+   "explanationHe": "foldList מקפלת את הרשימה רקורסיבית לפי מבנה הטיפוס: על הרשימה הריקה מופעל handleEmpty שמחזיר 1 (איבר היחידה של הכפל), ובכל שלב מוכפל האיבר הראשון בתוצאת קיפול הזנב: 4·1=4, ואז 3·4=12, ואז 2·12=24. זו בדיוק התבנית של reduce — fold 'מוריד' (unlift) ערך מונאדי (רשימה) לערך פשוט (מספר)."
+  }
+ ]
+}

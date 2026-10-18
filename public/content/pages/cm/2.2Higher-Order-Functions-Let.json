@@ -1,0 +1,929 @@
+{
+ "id": "cm/2.2Higher-Order-Functions-Let",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.2Higher-Order-Functions-Let.md",
+ "titleEn": "2.2 - Higher Order Functions in Scheme and Local Variables",
+ "titleHe": "2.2 — פונקציות מסדר גבוה ב-Scheme ומשתנים מקומיים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:0",
+   "depth": 1,
+   "headingEn": "2.2 - Higher Order Functions in Scheme and Local Variables",
+   "raw": "# 2.2 - Higher Order Functions in Scheme and Local Variables\n",
+   "blocks": [],
+   "headingHe": "2.2 — פונקציות מסדר גבוה (Higher-Order Functions) ב-Scheme ומשתנים מקומיים"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:1:0",
+     "type": "prose",
+     "en": "In the previous lecture, we defined a programming language (which is a subset of Scheme) by introducing the elements of the \nprogramming language incrementally.  We first defined $$L1$$ which consists of primitive atomic data types (number and boolean), the possibility to define global variables (with the define special form) and recursive combinations of primitive operations.\n\n",
+     "hash": "90148678e3e50d6f",
+     "he": "בהרצאה הקודמת הגדרנו שפת תכנות (תת-קבוצה של Scheme) על ידי הצגה הדרגתית של רכיבי השפה. תחילה הגדרנו את $$L1$$, שמורכבת מטיפוסי נתונים אטומיים פרימיטיביים (מספר וערך בוליאני), מהאפשרות להגדיר משתנים גלובליים (עם הצורה המיוחדת define) ומצירופים רקורסיביים של פעולות פרימיטיביות."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:1:1",
+     "type": "prose",
+     "en": "We then introduced conditonal expressions (the `if` and `cond` forms) and user defined procedures (the `lambda` expressions which evaluate into Closures) in $$L2$$.  We observed that $$L2$$ is already capable of describing infinite computations and supports the definition of recursive procedures.\n\n",
+     "hash": "9588724cd0fc2de8",
+     "he": "לאחר מכן הצגנו ב-$$L2$$ ביטויי תנאי (הצורות `if` ו-`cond`) ופרוצדורות מוגדרות-משתמש (ביטויי `lambda` שמוערכים לסגורים). ראינו ש-$$L2$$ כבר מסוגלת לתאר חישובים אינסופיים ותומכת בהגדרת פרוצדורות רקורסיביות."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:1:2",
+     "type": "prose",
+     "en": "We finally extended $$L2$$ into $$L3$$ by introducing compound data values - with the Pair and List data constructors and the corresponding procedures (cons, car, cdr) and primitive values (empty list and literal notation for pairs and list values).\n\n",
+     "hash": "661255a54cf7104e",
+     "he": "לבסוף הרחבנו את $$L2$$ ל-$$L3$$ עם ערכי נתונים מורכבים — בנאי הזוג (Pair) והרשימה (List), הפרוצדורות המתאימות (cons, car, cdr) והערכים הפרימיטיביים (הרשימה הריקה וכתיב ליטרלי לערכי זוג ורשימה)."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:1:3",
+     "type": "prose",
+     "en": "We now complete the definition of the language on which we will work - by studying how it supports higher order functions (this does not require any modification to $$L3$$) and supporting local variables (this does require an addition to the language).\n\n",
+     "hash": "14f59aa0ba273159",
+     "he": "כעת נשלים את הגדרת השפה שעליה נעבוד — נלמד כיצד היא תומכת בפונקציות מסדר גבוה (זה אינו דורש שום שינוי ב-$$L3$$) ובמשתנים מקומיים (וזה כן דורש תוספת לשפה)."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:2",
+   "depth": 2,
+   "headingEn": "Higher Order Procedures in $$L3$$",
+   "raw": "## Higher Order Procedures in $$L3$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:2:0",
+     "type": "prose",
+     "en": "Can we define higher-order functions in $$L3$$?\n\n",
+     "hash": "c6f6f08658cc3038",
+     "he": "האם אפשר להגדיר פונקציות מסדר גבוה ב-$$L3$$?"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:2:1",
+     "type": "prose",
+     "en": "For all the procedures we will define in $$Li$$ from this point on, we will attach a **contract** in the form of formatted comments.  The contract includes at least:\n",
+     "hash": "9437a4046b6a5271",
+     "he": "לכל הפרוצדורות שנגדיר ב-$$Li$$ מנקודה זו והלאה, נצרף **חוזה (contract)** בצורת הערות מעוצבות. החוזה כולל לפחות:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:2:2",
+     "type": "code",
+     "en": "```scheme\n;; Signature:\n;; Type:\n;; Purpose:\n```\n\n",
+     "hash": "7187d3654acf5ff7",
+     "lang": "scheme",
+     "noteHe": "תבנית החוזה: `Signature` — שם הפונקציה ושמות הפרמטרים; `Type` — טיפוס הפונקציה בשפת הטיפוסים של הקורס; `Purpose` — תיאור מילולי של מה הפונקציה עושה. ההערות (שורות שמתחילות ב-`;;`) אינן קוד — הן תיעוד שילווה כל פרוצדורה בקורס, וחשוב להתרגל לקרוא ולכתוב אותן: במבחנים מצפים לחוזה כזה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:2:3",
+     "type": "prose",
+     "en": "Within these comments, we use a type langage to define the type of expressions which is extremely close to the TypeScript type language - but restricted to the data types that we have defined in our language - Pair and List instead of Arrays and Maps.\nFor function types, we write `[T1 * T2 -> T3]` for a function taking 2 parameters of type `T1` and `T2` and returning a value of type `T3`.  We denote type variables by using type names that start with a capital T.  In the next Chapter, we will formalize this type language and implement meta-programs operating over it (type checker and type inference systems).\n\n",
+     "hash": "89bb218aae4d9f12",
+     "he": "בתוך ההערות האלה אנו משתמשים בשפת טיפוסים להגדרת טיפוס הביטויים, שקרובה מאוד לשפת הטיפוסים של TypeScript — אבל מוגבלת לטיפוסי הנתונים שהגדרנו בשפה שלנו — Pair ו-List במקום מערכים ומפות.\nלטיפוסי פונקציות נכתוב `[T1 * T2 -> T3]` עבור פונקציה שמקבלת שני פרמטרים מטיפוסים `T1` ו-`T2` ומחזירה ערך מטיפוס `T3`. משתני טיפוס מסומנים בשמות טיפוס שמתחילים ב-T גדולה. בפרק הבא נפרמל את שפת הטיפוסים הזו ונממש מטא-תוכניות שפועלות עליה (בודק טיפוסים ומערכות הסקת טיפוסים)."
+    }
+   ],
+   "headingHe": "פרוצדורות מסדר גבוה ב-$$L3$$"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:3",
+   "depth": 3,
+   "headingEn": "Map",
+   "raw": "### Map\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:0",
+     "type": "prose",
+     "en": "Let us try to define our favorite higher-order functions:\n\n",
+     "hash": "4c0acadcae9cb235",
+     "he": "ננסה להגדיר את הפונקציות מסדר גבוה האהובות עלינו:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:1",
+     "type": "code",
+     "en": "```scheme\n;; Signature: map(f,l)\n;; Type: [ (T1->T2) * List(T1) -> List(T2)]\n;; Purpose: Apply f to all elements in l and return the list of the results.\n(define map\n  (lambda (f l)\n    (if (empty? l)\n        '()\n        (cons (f (car l))\n              (map f (cdr l))))))\n```\n\n",
+     "hash": "7f59ad968109b33c",
+     "lang": "scheme",
+     "noteHe": "מימוש `map` ב-$$L3$$ — בדיוק לפי תבנית העיבוד של רשימות: מקרה בסיס — רשימה ריקה מוחזרת כמו שהיא; מקרה אינדוקטיבי — בונים רשימה חדשה עם `cons`, שהראש שלה הוא `(f (car l))` — הפעלת הפונקציה שהתקבלה כפרמטר על האיבר הראשון — והזנב הוא קריאה רקורסיבית על שאר הרשימה. הטיפוס `[(T1->T2) * List(T1) -> List(T2)]` אומר: פונקציה מ-T1 ל-T2 ורשימת T1 נותנות רשימת T2. שימו לב ש-`f` מופיעה בעמדת אופרטור `(f (car l))` — פונקציות הן ערכים רגילים, ולכן זה עובד בלי שום תוספת לשפה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:2",
+     "type": "prose",
+     "en": "The key part to verify according to the evaluation rules - is that the invocation of `(f (car l))` will be evaluated as expected according to the evaluation rules of $$L3$$.\n\n",
+     "hash": "b3fcde2c3a68121b",
+     "he": "החלק המרכזי שצריך לוודא לפי כללי ההערכה — הוא שההפעלה `(f (car l))` תוערך כמצופה לפי כללי ההערכה של $$L3$$."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:3",
+     "type": "prose",
+     "en": "Verify it!\n\n",
+     "hash": "0262ae0c791e498b",
+     "he": "ודאו זאת!"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:4",
+     "type": "code",
+     "en": "```scheme\n(map (lambda (x) (* x x)) '(1 2 3 4 5)) ;--> '(1 4 9 16 25)\n\n(map (lambda (x) (> x 2)) '(1 2 3 4))   ;--> '(#f #f #t #t)\n```\n\n",
+     "hash": "f0434c88f3744a61",
+     "lang": "scheme",
+     "noteHe": "שתי הפעלות של `map`: הראשונה עם פונקציית ריבוע — כל איבר מוחלף בריבועו; השנייה עם פרדיקט `(> x 2)` — והתוצאה היא רשימה של ערכים בוליאניים. שימו לב שהדוגמה השנייה מדגימה את הטיפוס הגנרי: T2 לא חייב להיות שווה ל-T1 (כאן T1 = Number, ‏T2 = Boolean)."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:3:5",
+     "type": "prose",
+     "en": "Verify that the type we specified for `map` is correct by checking that all the sub-expressions used in the body of the function `map` are well typed.\n\n",
+     "hash": "0c6797e6a2f34013",
+     "he": "ודאו שהטיפוס שציינו עבור `map` נכון, על ידי בדיקה שכל תת-הביטויים בגוף הפונקציה `map` מטופסים היטב (well typed)."
+    }
+   ],
+   "headingHe": "Map"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:4",
+   "depth": 3,
+   "headingEn": "Filter",
+   "raw": "### Filter\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:4:0",
+     "type": "code",
+     "en": "```scheme\n;; Signature: filter(pred,l)\n;; Type: [ (T->Boolean) * List(T) -> List(T) ]\n;; Purpose: Return the list of elements in l that satisfy pred.\n(define filter\n  (lambda (pred l)\n    (if (empty? l)\n        '()\n        (if (pred (car l))\n            (cons (car l) (filter pred (cdr l)))\n            (filter pred (cdr l))))))\n```\n\n",
+     "hash": "97808eacccdb679f",
+     "lang": "scheme",
+     "noteHe": "מימוש `filter`: לכל איבר יש **שלושה** מסלולים אפשריים — רשימה ריקה (בסיס), איבר שעובר את הפרדיקט (נשמר עם `cons` וממשיכים על הזנב), ואיבר שנכשל (פשוט ממשיכים על הזנב בלי לשמור אותו). ההבדל מ-`map`: כאן הטיפוס של איברי הפלט זהה לזה של הקלט — `List(T) -> List(T)` — כי `filter` רק בורר, לא ממיר."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:4:1",
+     "type": "code",
+     "en": "```scheme\n(filter even? '(0 1 2 3 4))              ;--> '(0 2 4)\n(filter (lambda (x) (> x 2)) '(1 2 3 4)) ;--> '(3 4)\n```\n\n",
+     "hash": "13e82fa5a92a243e",
+     "lang": "scheme",
+     "noteHe": "דוגמאות: `even?` הוא פרדיקט פרימיטיבי של Scheme (האם המספר זוגי) — נשארים 0, 2, 4. בדוגמה השנייה הפרדיקט הוא lambda אנונימית — נשארים רק האיברים הגדולים מ-2."
+    }
+   ],
+   "headingHe": "Filter"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:5",
+   "depth": 3,
+   "headingEn": "Reduce",
+   "raw": "### Reduce\n\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:5:0",
+     "type": "code",
+     "en": "```scheme\n;; Signature: reduce(reducer, init, l)\n;; Type: [(T1 * T2 -> T2) * T2 * List(T1) -> T2]\n;; Purpose: Combine all the values of l using reducer\n;;   (reduce + 0 '(1 2 3)) --> (+ 1 (+ 2 (+ 3 0)))\n(define reduce\n  (lambda (reducer init l)\n    (if (empty? l)\n        init\n        (reducer (car l) \n                 (reduce reducer init (cdr l))))))\n```\n\n",
+     "hash": "d4e4ac5c672b1e4f",
+     "lang": "scheme",
+     "noteHe": "`reduce` מקפל רשימה לערך יחיד: אם הרשימה ריקה — מחזירים את ערך ההתחלה `init`; אחרת מפעילים את `reducer` על הראש ועל תוצאת הקיפול הרקורסיבי של הזנב. ההערה בחוזה מראה את צורת הקינון: `(reduce + 0 '(1 2 3))` נפתח ל-`(+ 1 (+ 2 (+ 3 0)))` — הצירוף מתבצע **מימין לשמאל** (מהסוף להתחלה), וה-`init` הוא האיבר הפנימי ביותר. זו גרסה רקורסיבית \"רגילה\" (לא רקורסיית זנב)."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:5:1",
+     "type": "prose",
+     "en": "Compare this first definition of `reduce` with this one:\n\n",
+     "hash": "2577453c1ba6aea7",
+     "he": "השוו את ההגדרה הראשונה של `reduce` עם זו:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:5:2",
+     "type": "code",
+     "en": "```scheme\n;; Signature: reduce2(reducer, init, l)\n;; Type: [(T1 * T2 -> T2) * T2 * List(T1) -> T2]\n;; Purpose: Combine all the values of l using reducer\n;;   (reduce2 + 0 '(1 2 3)) --> ?\n(define reduce2\n  (lambda (reducer init l)\n    (if (empty? l)\n        init\n        (reduce2 reducer\n                 (reducer (car l) init)\n                 (cdr l)))))\n```\n\n",
+     "hash": "e14c96870001190b",
+     "lang": "scheme",
+     "noteHe": "`reduce2` צובר את התוצאה **בדרך פנימה**: במקום לקנן את הקריאה הרקורסיבית בתוך `reducer`, הוא מעביר את הצבירה החלקית `(reducer (car l) init)` כ-`init` החדש. לכן `(reduce2 + 0 '(1 2 3))` מחושב כ-`(+ 3 (+ 2 (+ 1 0)))` — הצירוף מתבצע **משמאל לימין**. זו רקורסיית זנב (הקריאה הרקורסיבית היא הביטוי האחרון). סימן השאלה בחוזה הוא במקור — במכוון, כדי שתחשבו על התשובה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:5:3",
+     "type": "prose",
+     "en": "Are the two functions `reduce` and `reduce2` equivalent?\n\n",
+     "hash": "e6a49324b4fce0fd",
+     "he": "האם שתי הפונקציות `reduce` ו-`reduce2` שקולות? (רמז: עבור `+` התוצאה זהה כי חיבור אסוציאטיבי וקומוטטיבי; אבל עבור `reducer` שאינו כזה — למשל `cons` — הסדר משנה את התוצאה.)"
+    }
+   ],
+   "headingHe": "Reduce"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:6",
+   "depth": 3,
+   "headingEn": "Procedures as Parameters",
+   "raw": "### Procedures as Parameters\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:0",
+     "type": "prose",
+     "en": "Let us observe the process of defining functional abstractions through abstraction of repeated patterns of code.\n\n",
+     "hash": "1adf60297c01d2d8",
+     "he": "נתבונן בתהליך של הגדרת הפשטות פונקציונליות באמצעות הפשטה של תבניות קוד חוזרות."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:1",
+     "type": "prose",
+     "en": "Consider a procedure that computes the sum of the numbers in a range [a, b]:\n\n",
+     "hash": "71868af50ea11084",
+     "he": "נתבונן בפרוצדורה שמחשבת את סכום המספרים בטווח [a, b]:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:2",
+     "type": "code",
+     "en": "```scheme\n;; Signature: sum-integers(a,b)\n;; Type: (Number*Number)->Number\n;; Purpose: compute the sum of all integers a to b\n(define sum-integers \n  (lambda (a b)\n    (if (> a b)\n        0\n        (+ a (sum-integers (+ a 1) b)))))\n```\n\n",
+     "hash": "9a48fc78eb2024b2",
+     "lang": "scheme",
+     "noteHe": "סכימת מספרים שלמים בטווח: אם `a` עבר את `b` — הסכום ריק (0); אחרת מחברים את `a` עם הסכום הרקורסיבי של הטווח שמתחיל ב-`(+ a 1)`. שימו לב לתבנית: תנאי עצירה על הטווח, פעולה על האיבר הנוכחי, וקידום לאיבר הבא."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:3",
+     "type": "prose",
+     "en": "Let us then define a procedure to compute the sum of the cubes of all the numbers between a and b:\n",
+     "hash": "7d5a0147fde02bb4",
+     "he": "נגדיר כעת פרוצדורה שמחשבת את סכום הקוביות (חזקה שלישית) של כל המספרים בין a ל-b:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:4",
+     "type": "code",
+     "en": "```scheme\n(define cube (lambda (x) (* x x x)))\n\n;; Signature: sum-cubes(a,b)\n;; Type: (Number*Number)->Number\n;; Purpose: compute the sum of the cube of all integers a to b\n(define sum-cubes \n  (lambda (a b)\n    (if (> a b)\n        0\n        (+ (cube a) (sum-cubes (+ a 1) b)))))\n```\n\n",
+     "hash": "c892a6dc9d2ead16",
+     "lang": "scheme",
+     "noteHe": "אותה תבנית בדיוק כמו `sum-integers`, בהבדל אחד: במקום לחבר את `a` עצמו, מחברים את `(cube a)`. ההבדל היחיד בין שתי הפונקציות הוא **מה עושים לכל איבר** — רמז חזק לכך שאפשר להפשיט את התבנית."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:5",
+     "type": "prose",
+     "en": "Consider yet a third function - used to compute a numerical approximation of $$\\pi$$ using the formula:\n$$ 1/a\\times(a+2) + 1/(a+4)\\times(a+6) + 1/(a+8)*(a+10) + \\ldots$$\n\n",
+     "hash": "c5a8655e668cf494",
+     "he": "נתבונן בפונקציה שלישית — המשמשת לחישוב קירוב נומרי של $$\\pi$$ באמצעות הנוסחה:\n$$ 1/a\\times(a+2) + 1/(a+4)\\times(a+6) + 1/(a+8)*(a+10) + \\ldots$$"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:6",
+     "type": "prose",
+     "en": "This formula converges to $$\\pi/8$$ when starting with $$a=1$$.\n\n",
+     "hash": "d56e1bdda7c70f43",
+     "he": "הנוסחה הזו מתכנסת ל-$$\\pi/8$$ כשמתחילים עם $$a=1$$."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:7",
+     "type": "code",
+     "en": "```scheme\n;; Signature: pi-sum(a,b)\n;; Type: (Number*Number)->Number\n;; Purpose: compute the sum of 1/a*(a+2) + ... + 1/(a+4n)*(a+4n+2) \n;;          s.t. a+4n <= b < a + 4(n + 1)\n(define pi-sum\n  (lambda (a b)\n    (if (> a b)\n        0\n        (+ (/ 1 (* a (+ a 2)))\n           (pi-sum (+ a 4) b)))))\n```\n\n",
+     "hash": "e930b64b8fca5458",
+     "lang": "scheme",
+     "noteHe": "שוב אותה תבנית, עם שני שינויים: האיבר הנוכחי הוא `(/ 1 (* a (+ a 2)))` (ולא `a` או הקוביה שלו), והקידום הוא בקפיצות של 4 — `(+ a 4)`. כלומר התבנית משתנה בשני צירים: **מה מחשבים לכל איבר** (term) ו**איך מתקדמים לאיבר הבא** (next)."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:8",
+     "type": "prose",
+     "en": "Let us now try to **generalize** the structure of these 3 procedures - that is, define a functional abstraction that describes the commonality between these 3 functions.\n\n",
+     "hash": "a77c8e5aba2ffa54",
+     "he": "ננסה עכשיו **להכליל** את המבנה של שלוש הפרוצדורות האלה — כלומר, להגדיר הפשטה פונקציונלית שמתארת את המשותף בין שלוש הפונקציות."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:9",
+     "type": "prose",
+     "en": "We observe the following repeated pattern:\n",
+     "hash": "204aaee6304e81c4",
+     "he": "אנו מזהים את התבנית החוזרת הבאה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:10",
+     "type": "code",
+     "en": "```scheme\n(define <name>\n  (lambda (a b)\n    (if (> a b)\n        0\n        (+ (<term> a)\n           (<name> (<next> a) <b>)\n```\n\n",
+     "hash": "e8353bb847f4b44f",
+     "lang": "scheme",
+     "noteHe": "זו **סכימת התבנית** (לא קוד רץ — `<name>`, `<term>`, `<next>` הם מצייני-מקום): כל שלוש הפונקציות זהות עד כדי שלושת החורים האלה — שם הפונקציה, הפעולה על האיבר, וכלל הקידום. כשמזהים תבנית כזו, הצעד הפונקציונלי הטבעי הוא להפוך את החורים לפרמטרים."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:11",
+     "type": "prose",
+     "en": "Based on this observation, we define a functional abstraction:\n\n",
+     "hash": "8d22f0a846266636",
+     "he": "על סמך התצפית הזו, נגדיר הפשטה פונקציונלית:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:12",
+     "type": "code",
+     "en": "```scheme\n;; Signature: sum(term, a, next, b)\n;; Type: [ [Number->Number] * Number * [Number->Number] * Number -> Number]\n;; Purpose: Compute the sum: (term a) + (term (next a)) + .... + (term n) \n;;          where n = (next (next (... (next a)))) <= b and (next n) > b.\n(define sum\n  (lambda (term a next b)\n    (if (> a b)\n        0\n        (+ (term a)\n           (sum term (next a) next b)))))\n```\n\n",
+     "hash": "e618cec7ae9e92eb",
+     "lang": "scheme",
+     "noteHe": "ההפשטה `sum` — הכללה של שלוש הפונקציות: היא מקבלת את `term` (מה לחשב לכל איבר) ואת `next` (איך להתקדם) **כפרמטרים שהם פונקציות**, לצד גבולות הטווח. הטיפוס `[[Number->Number] * Number * [Number->Number] * Number -> Number]` מראה ששני פרמטרים הם בעצמם פונקציות — זו בדיוק ההגדרה של פונקציה מסדר גבוה. זהו עיבוד של הדוגמה המפורסמת מ-SICP סעיף 1.3."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:13",
+     "type": "prose",
+     "en": "We can now redefine the 3 procedures above using the new `sum` abstraction:\n\n",
+     "hash": "3d392a204a226ae2",
+     "he": "כעת נוכל להגדיר מחדש את שלוש הפרוצדורות למעלה באמצעות ההפשטה החדשה `sum`:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:14",
+     "type": "code",
+     "en": "```scheme\n(define sum-integers2\n  (lambda (a b)\n    (sum identity a add1 b)))\n    \n(define sum-cubes2\n  (lambda (a b)\n    (sum cube a add1 b)))\n    \n(define pi-sum2\n  (lambda (a b)\n    (sum pi-term a pi-next b)))\n    \n(define pi-term \n  (lambda (x)\n    (/ 1.0 (* x (+ x 2)))))\n    \n(define pi-next\n  (lambda (n) (+ n 4)))\n```\n\n\n",
+     "hash": "a9a37e5909802358",
+     "lang": "scheme",
+     "noteHe": "שלוש ההגדרות המקוריות מתקצרות לשורה אחת כל אחת — קריאה ל-`sum` עם הפונקציות המתאימות: `sum-integers2` משתמשת ב-`identity` (פונקציית הזהות) וב-`add1` (הוספת 1) — שתיהן פרימיטיביות ב-Racket; `sum-cubes2` מחליפה רק את ה-term ל-`cube`; ו-`pi-sum2` מגדירה term ו-next משלה (`pi-term`, `pi-next`). שימו לב ל-`1.0` ב-`pi-term` — כדי לקבל חישוב בנקודה צפה ולא שברים."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:15",
+     "type": "prose",
+     "en": "Given this new functional abstraction `sum` - we can define other functions. For example, a numerical approximation of the definite integral of a numerical function using the formula:\n\n",
+     "hash": "1f44fff2124fee76",
+     "he": "בהינתן ההפשטה הפונקציונלית החדשה `sum` — אפשר להגדיר פונקציות נוספות. למשל, קירוב נומרי של האינטגרל המסוים של פונקציה נומרית באמצעות הנוסחה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:16",
+     "type": "prose",
+     "en": "$$\\int_{a}^{b} f(x) dx = [\\sum_{n=1}^{\\left \\lceil{b-a/dx}\\right \\rceil } f(a+ n\\times dx + dx/2)]\\times dx$$\n\n",
+     "hash": "cd36bdbba3e7a24d",
+     "he": "$$\\int_{a}^{b} f(x) dx = [\\sum_{n=1}^{\\left \\lceil{b-a/dx}\\right \\rceil } f(a+ n\\times dx + dx/2)]\\times dx$$"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:17",
+     "type": "prose",
+     "en": "for a small value of $$dx$$.\n\n",
+     "hash": "d625e0447503f47a",
+     "he": "עבור ערך קטן של $$dx$$."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:18",
+     "type": "prose",
+     "en": "As we spot a sum in this formula, the `sum` abstraction is relevant for the implementation:\n\n",
+     "hash": "c2d9ea464c468f44",
+     "he": "מכיוון שאנו מזהים סכום בנוסחה הזו, ההפשטה `sum` רלוונטית למימוש:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:19",
+     "type": "code",
+     "en": "```scheme\n(define dx 0.001)\n(define add-dx (lambda (x) (+ x dx)))\n\n;; Signature: integral(f,a,b)\n;; Type: [ [Number->Number] * Number * Number -> Number]\n;; Purpose: Compute an approximation of the definite integral of f between a and b.\n(define integral\n  (lambda (f a b)\n    (* (sum f (+ a (/ dx 2.0)) add-dx b)\n       dx)))\n```\n\n",
+     "hash": "a22cce7cdaecc22b",
+     "lang": "scheme",
+     "noteHe": "מימוש האינטגרל בעזרת `sum`: הפונקציה `f` עצמה משמשת כ-term (מחשבים את ערכה בכל נקודת דגימה), ‏`add-dx` היא ה-next (מתקדמים בצעדי `dx`), ומתחילים מ-`(+ a (/ dx 2.0))` — אמצע תת-הקטע הראשון (שיטת נקודת האמצע). את הסכום מכפילים ב-`dx` — רוחב כל תת-קטע. שימו לב איך הפשטה אחת (`sum`) משרתת בעיה חדשה לגמרי בלי שינוי."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:20",
+     "type": "prose",
+     "en": "Example:\n\n",
+     "hash": "872887e563e75957",
+     "he": "דוגמה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:6:21",
+     "type": "code",
+     "en": "```scheme\n(integral cube 0 1) ;--> 0.249999875000001 (True value is 0.25)\n```\n\n",
+     "hash": "ee049bfd7de25e9f",
+     "lang": "scheme",
+     "noteHe": "בדיקה: האינטגרל של $$x^3$$ בין 0 ל-1 שווה אנליטית ל-$$1/4$$. הקירוב הנומרי עם `dx` = 0.001 נותן 0.249999875 — קרוב מאוד לערך האמיתי 0.25; הפער הזעיר הוא שגיאת הדיסקרטיזציה."
+    }
+   ],
+   "headingHe": "פרוצדורות כפרמטרים"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:7",
+   "depth": 2,
+   "headingEn": "Local Variables",
+   "raw": "## Local Variables \n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:0",
+     "type": "prose",
+     "en": "Up to this point, we only defined global variables using the `define` special form.\n\n",
+     "hash": "3add2838af1753ed",
+     "he": "עד לנקודה זו, הגדרנו רק משתנים גלובליים באמצעות הצורה המיוחדת `define`."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:1",
+     "type": "prose",
+     "en": "Local variables are a programming language feature which encourages programmers to limit the scope within which variables are known, and to avoid *hidden dependencies* between global variables and functions that refer to them.\n\n",
+     "hash": "ad1baef868fc56ac",
+     "he": "משתנים מקומיים הם מנגנון של שפת תכנות שמעודד מתכנתים להגביל את התחום שבו משתנים מוכרים, ולהימנע מ*תלויות נסתרות (hidden dependencies)* בין משתנים גלובליים לפונקציות שמפנות אליהם."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:2",
+     "type": "prose",
+     "en": "When defining a local variable, we must provide:\n",
+     "hash": "2053593f1cc779f7",
+     "he": "כשמגדירים משתנה מקומי, עלינו לספק:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:3",
+     "type": "list",
+     "en": "* A way to name the variable\n* How to initialize the variable\n* A way to decide what is the scope of the variable - that is, what is the part of the program where this variable is visible.\n\n",
+     "hash": "8664a0a40cb4d0f7",
+     "he": "* דרך לתת שם למשתנה\n* איך לאתחל את המשתנה\n* דרך לקבוע מהו תחום ההכרה (scope) של המשתנה — כלומר, מהו חלק התוכנית שבו המשתנה גלוי."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:4",
+     "type": "prose",
+     "en": "Up to this point, we observed variables in only two contexts:\n",
+     "hash": "37f43254a1c2d52b",
+     "he": "עד עכשיו ראינו משתנים בשני הקשרים בלבד:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:5",
+     "type": "list",
+     "en": "* In `define` statements `(define <var> <exp>)`\n* In `lambda` expressions `(lambda (<var> ...) <exp>)`\n\n",
+     "hash": "38ea4af770d8a88f",
+     "he": "* בהצהרות `define`: ‏`(define <var> <exp>)`\n* בביטויי `lambda`: ‏`(lambda (<var> ...) <exp>)`"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:7:6",
+     "type": "prose",
+     "en": "We first define the notions of **scope**, and **bound** and **free** variable occurrences before introducing local variables in the language.\n\n",
+     "hash": "cf99f7e6db7a06e0",
+     "he": "נגדיר תחילה את המושגים **תחום הכרה (scope)** ומופעי משתנה **קשורים (bound)** ו**חופשיים (free)**, לפני שנציג משתנים מקומיים בשפה."
+    }
+   ],
+   "headingHe": "משתנים מקומיים (Local Variables)"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:8",
+   "depth": 3,
+   "headingEn": "Parameters, Scope, Bound and Free Variable Occurrences",
+   "raw": "### Parameters, Scope, Bound and Free Variable Occurrences\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:0",
+     "type": "prose",
+     "en": "A `lambda` form includes parameters and a body. \nWithin a `lambda` expression, the body is the **scope** of the parameters - this means that all the variables that\noccur within the body are intended to be **bound** to the parameters.  This is the case even if there is preceding definition of a variable with the same name.  \n\n",
+     "hash": "4b4268ef033c96a2",
+     "he": "צורת `lambda` כוללת פרמטרים וגוף.\nבתוך ביטוי `lambda`, הגוף הוא **תחום ההכרה (scope)** של הפרמטרים — כלומר, כל המשתנים שמופיעים בגוף אמורים להיות **קשורים (bound)** לפרמטרים. זה נכון גם אם קיימת הגדרה קודמת של משתנה באותו שם."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:1",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:2",
+     "type": "code",
+     "en": "```scheme\n(define x 1)\n\n(lambda (x) (* x x)) ;--> occurrences of x in the body refer \n                     ;to the parameter variable x \n                     ;and NOT to the global variable x.\n```\n\n",
+     "hash": "1a419ef1737a1cac",
+     "lang": "scheme",
+     "noteHe": "הדגמה של **הסתרה (shadowing)**: קיים משתנה גלובלי `x` שערכו 1, אבל בתוך גוף ה-lambda הפרמטר `x` \"מסתיר\" אותו — כל מופע של `x` בגוף מתייחס לפרמטר, לא למשתנה הגלובלי. זה כלל יסוד: הפרמטר תמיד גובר בתוך תחום ההכרה שלו. שאלת מבחן קלאסית: מה יחזיר `((lambda (x) (* x x)) 5)` אחרי `(define x 1)`? התשובה 25, לא 1."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:3",
+     "type": "prose",
+     "en": "In such a case, we say that the occurrences of `x` in the body of the `lambda` expression are **bound occurrences**.\nOther variables are said to occur **free**.\n\n",
+     "hash": "43a9d4dbdab9dce4",
+     "he": "במקרה כזה, אנו אומרים שהמופעים של `x` בגוף ביטוי ה-`lambda` הם **מופעים קשורים (bound occurrences)**.\nעל משתנים אחרים אומרים שהם מופיעים **חופשיים (free)**."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:4",
+     "type": "prose",
+     "en": "For example, in the expression:\n\n",
+     "hash": "00733d7ee8802df4",
+     "he": "לדוגמה, בביטוי:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:5",
+     "type": "code",
+     "en": "```scheme\n(lambda (f a b dx)\n  (* (sum f\n          (+ a (/ dx 2.0))\n          (lambda (x) (+ x dx))\n          b)\n     dx))\n```\n\n",
+     "hash": "c3936d89e99fbe93",
+     "lang": "scheme",
+     "noteHe": "זהו גוף הפונקציה `integral` מהסעיף הקודם, כתוב כ-lambda אנונימית. ההבחנה החשובה כאן: `f`, `a`, `b`, `dx` כולם פרמטרים של ה-lambda החיצונית ולכן **קשורים**; לעומתם `sum` אינו פרמטר של אף lambda בביטוי — הוא מופיע **חופשי** ומשמעותו נקבעת מהסביבה החיצונית (הסביבה הגלובלית). שימו לב גם ל-lambda הפנימית `(lambda (x) (+ x dx))`: `x` קשור בה, ואילו `dx` חופשי **בתוכה** אך קשור בביטוי כולו."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:8:6",
+     "type": "prose",
+     "en": "the variables `f`, `a`, `b`, `dx` all occur **bound** - while the variable `sum` occurs **free**.\n\n",
+     "hash": "dd8f41575a7828e4",
+     "he": "המשתנים `f`, `a`, `b`, `dx` כולם מופיעים **קשורים** — ואילו המשתנה `sum` מופיע **חופשי**."
+    }
+   ],
+   "headingHe": "פרמטרים, תחום הכרה, ומופעים קשורים וחופשיים של משתנים"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:9",
+   "depth": 3,
+   "headingEn": "Deriving the Let Shortcut Notation",
+   "raw": "### Deriving the Let Shortcut Notation\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:0",
+     "type": "prose",
+     "en": "Consider the computation of the following function:\n\n",
+     "hash": "1f7de0f9914a3e69",
+     "he": "נתבונן בחישוב הפונקציה הבאה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:1",
+     "type": "prose",
+     "en": "$$f(x,y) = x(1+xy)^2+y(1-y)+(1+xy)(1-y)$$\n\n",
+     "hash": "620435671554b7de",
+     "he": "$$f(x,y) = x(1+xy)^2+y(1-y)+(1+xy)(1-y)$$"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:2",
+     "type": "prose",
+     "en": "Let us implement a Scheme procedure to compute this function:\n\n",
+     "hash": "f0683e38c52443ed",
+     "he": "נממש פרוצדורת Scheme שמחשבת את הפונקציה הזו:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:3",
+     "type": "code",
+     "en": "```scheme\n(define f\n  (lambda (x y)\n    (+ (* x \n          (square (+ 1 (* x y))))\n       (* y\n          (- 1 y))\n       (* (+ 1 (* x y))\n          (- 1 y)))))\n```\n\n",
+     "hash": "d9df7c64e11a840d",
+     "lang": "scheme",
+     "noteHe": "תרגום ישיר של הנוסחה לקוד: שלושה מחוברים שנסכמים ב-`+` אחד (שימו לב ש-`+` ב-Scheme מקבל כמה אופרנדים). המחובר הראשון `x·(1+xy)²`, השני `y·(1-y)`, השלישי `(1+xy)·(1-y)`. הבעיה שהקוד הזה מדגים: תת-הביטויים `(+ 1 (* x y))` ו-`(- 1 y)` מופיעים **פעמיים כל אחד**."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:4",
+     "type": "prose",
+     "en": "We observe that the same sub-expressions are repeated:\n`(+ 1 (* x y))` and `(- 1 y)`.\n\n",
+     "hash": "8206b4445e633a08",
+     "he": "אנו רואים שאותם תת-ביטויים חוזרים על עצמם:\n`(+ 1 (* x y))` ו-`(- 1 y)`."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:5",
+     "type": "prose",
+     "en": "This not only makes it more difficult to read the code - it also makes the computation slower - because these expressions will actually be computed twice each time the function is invoked.\n\n",
+     "hash": "e21ca3bd44eeb1dd",
+     "he": "זה לא רק מקשה על קריאת הקוד — זה גם מאט את החישוב, כי הביטויים האלה יחושבו למעשה פעמיים בכל הפעלה של הפונקציה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:6",
+     "type": "prose",
+     "en": "One way to avoid these repetitions is to **abstract away** the repeated sub-expressions - in exactly the same way we abstracted away the repeated sub-expressions when defining the `sum` abstraction.\n\n",
+     "hash": "49614a0054bb7342",
+     "he": "דרך אחת להימנע מהחזרות האלה היא **להפשיט** את תת-הביטויים החוזרים — בדיוק כפי שהפשטנו את תת-הביטויים החוזרים בהגדרת ההפשטה `sum`."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:7",
+     "type": "prose",
+     "en": "Our abstraction mechanism involves defining new functions:\n\n",
+     "hash": "6ec7e1500f042487",
+     "he": "מנגנון ההפשטה שלנו כרוך בהגדרת פונקציות חדשות:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:8",
+     "type": "code",
+     "en": "```scheme\n(define f1 \n  (lambda (x y) (+ 1 (* x y))))\n  \n(define f2\n  (lambda (y) (- 1 y)))\n```\n\n",
+     "hash": "9bd583183fa55d53",
+     "lang": "scheme",
+     "noteHe": "שתי פונקציות עזר גלובליות שמכמסות את תת-הביטויים החוזרים: `f1` מחשבת את `1+xy` ו-`f2` את `1-y`. פתרון עובד — אבל שימו לב למחיר: יצרנו שני שמות גלובליים חדשים שרלוונטיים רק לפונקציה אחת."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:9",
+     "type": "prose",
+     "en": "Using these two helper functions, we can rewrite `f` as:\n\n",
+     "hash": "c7807fecc1eeeb3a",
+     "he": "בעזרת שתי פונקציות העזר האלה, אפשר לכתוב מחדש את `f` כך:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:10",
+     "type": "code",
+     "en": "```scheme\n(define f\n  (lambda (x y)\n    (+ (* x (square (f1 x y)))\n       (* y (f2 y))\n       (* (f1 x y) (f2 y)))))\n```\n\n",
+     "hash": "22fb53f53f5bb365",
+     "lang": "scheme",
+     "noteHe": "הקוד קריא הרבה יותר — אבל הבעיה של החישוב הכפול **לא נפתרה**: `(f1 x y)` ו-`(f2 y)` עדיין מחושבות פעמיים כל אחת. רק החזרתיות התחבירית הוסתרה, לא החזרתיות החישובית."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:11",
+     "type": "prose",
+     "en": "The problem is that we need to define names for these helpers - and define new functions for each one.\n\n",
+     "hash": "1cd7900fe6284716",
+     "he": "הבעיה היא שאנחנו נדרשים להגדיר שמות לפונקציות העזר האלה — ולהגדיר פונקציה חדשה לכל אחת."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:12",
+     "type": "prose",
+     "en": "Alternatively - we can proceed as follows:\n\n",
+     "hash": "6e142ca6c5ac154c",
+     "he": "לחלופין — אפשר להמשיך כך:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:13",
+     "type": "prose",
+     "en": "Let $$a = 1+xy$$,\n    $$b = 1-y$$,\n    $$f(x,y) = xa^2+yb+ab$$\n    \n",
+     "hash": "2a469bae32e8f72d",
+     "he": "נסמן $$a = 1+xy$$,\n    $$b = 1-y$$,\n    $$f(x,y) = xa^2+yb+ab$$"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:14",
+     "type": "prose",
+     "en": "Which in Scheme is implemented as:\n\n",
+     "hash": "0a51aacb781ea642",
+     "he": "מה שממומש ב-Scheme כך:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:15",
+     "type": "code",
+     "en": "```scheme\n(define f\n  (lambda (x y)\n  \n    ((lambda (a b)\n        (+ (* x (square a))\n           (* y b)\n           (* a b)))\n           \n      ;; Values of a and b which depend on x and y\n      (+ 1 (* x y))\n      (- 1 y))\n    ))\n```\n\n",
+     "hash": "fd0ee6b8d0f2970c",
+     "lang": "scheme",
+     "noteHe": "הטריק המרכזי של הסעיף — **הפעלה מיידית של lambda אנונימית**: מגדירים lambda עם פרמטרים `a` ו-`b` (שהם בעצם המשתנים המקומיים הרצויים), ומיד מפעילים אותה על הערכים `(+ 1 (* x y))` ו-`(- 1 y)`. שימו לב לסוגריים החיצוניים: `((lambda (a b) …) val1 val2)` — האופרטור הוא בעצמו ביטוי lambda. עכשיו כל ביטוי מחושב **פעם אחת בלבד**, ואין צורך בשמות גלובליים. הערכים מחושבים מחוץ לתחום ההכרה של `a` ו-`b` — נקודה חשובה שנחזור אליה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:9:16",
+     "type": "prose",
+     "en": "This structure is convenient - it allows us to define local variables `a` and `b` which are defined within the scope of `x` and `y` and are only used within a single expression.\n\n",
+     "hash": "87b278fff4a7d871",
+     "he": "המבנה הזה נוח — הוא מאפשר לנו להגדיר משתנים מקומיים `a` ו-`b` שמוגדרים בתוך תחום ההכרה של `x` ו-`y`, ומשמשים רק בתוך ביטוי יחיד."
+    }
+   ],
+   "headingHe": "גזירת כתיב הקיצור Let"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:10",
+   "depth": 3,
+   "headingEn": "The Let abbreviation",
+   "raw": "### The Let abbreviation\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:0",
+     "type": "prose",
+     "en": "The syntactic form of the definition of local variables is not readable - because the value which initializes\nthe local variables (`a` and `b`) are far away from their declaration.\n\n",
+     "hash": "17a7f194e26fd5e6",
+     "he": "הצורה התחבירית של הגדרת משתנים מקומיים אינה קריאה — כי הערכים שמאתחלים את המשתנים המקומיים (`a` ו-`b`) רחוקים מההצהרה עליהם."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:1",
+     "type": "prose",
+     "en": "The Scheme language defines a **syntactic abbreviation** which is internally turned into the same lambda application form called the `let` form to encourage programmers to use this construct.\n\n",
+     "hash": "d862e6e0d1c1df9c",
+     "he": "שפת Scheme מגדירה **קיצור תחבירי (syntactic abbreviation)** — הנקרא צורת `let` — שמומר פנימית לאותה צורת הפעלת lambda, כדי לעודד מתכנתים להשתמש במבנה הזה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:2",
+     "type": "prose",
+     "en": "The structure of the `let` expression is:\n\n",
+     "hash": "25d459448211cc71",
+     "he": "מבנה ביטוי ה-`let` הוא:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:3",
+     "type": "code",
+     "en": "```scheme\n(let ( (<var1> <exp1>)\n       (<var2> <exp2>)\n       ...\n       (<varn> <expn>) )\n   <body>)\n```\n\n",
+     "hash": "54c66a78b776ca02",
+     "lang": "scheme",
+     "noteHe": "תבנית התחביר של `let`: אחרי המילה `let` באה **רשימת קשירות** בסוגריים — כל קשירה היא זוג `(<שם> <ביטוי אתחול>)` — ואחריה גוף. שימו לב לשכבת הסוגריים הכפולה: סוגריים חיצוניים עוטפים את כל רשימת הקשירות, וסוגריים פנימיים לכל קשירה. זו טעות תחבירית נפוצה במבחנים."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:4",
+     "type": "prose",
+     "en": "Internally, this form is replaced by the equivalent syntactic form:\n\n",
+     "hash": "28cec25ad8d638dd",
+     "he": "פנימית, הצורה הזו מוחלפת בצורה התחבירית השקולה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:5",
+     "type": "code",
+     "en": "```scheme\n( (lambda (<var1> ... <varn>) <body>)\n  <exp1> ... <expn> )\n```\n\n",
+     "hash": "661c9eef1031de91",
+     "lang": "scheme",
+     "noteHe": "זהו הכתיב-מחדש (rewrite) של `let`: כל שמות המשתנים הופכים לפרמטרים של lambda שגופה הוא גוף ה-let, וביטויי האתחול הופכים לארגומנטים בהפעלה. **מסקנה חשובה**: `let` אינו מוסיף כוח לשפה — הוא סוכר תחבירי (syntactic sugar) בלבד, ולכן גם לא נדרש עבורו כלל הערכה חדש."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:6",
+     "type": "prose",
+     "en": "Hence its evaluation rule is already defined as per the rules of $$L3$$ evaluation.\n\n",
+     "hash": "91aec05ef8d4caa5",
+     "he": "לכן כלל ההערכה שלו כבר מוגדר לפי כללי ההערכה של $$L3$$."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:7",
+     "type": "prose",
+     "en": "Still, it is useful to remember the way `let` forms are evaluated:\n",
+     "hash": "93ca92d8932bd3c4",
+     "he": "ובכל זאת, כדאי לזכור את האופן שבו צורות `let` מוערכות:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:10:8",
+     "type": "list",
+     "en": "* The let variables have scope over the body of the let only.\n* Each `<vari>` is bound to the value of each `<expi>`.  \n* All the bindings are performed *simultaneously* - they do not depend on each other.\n* The initial values `<expi>` are computed *outside the scope* of the let.\n* The evaluation of the let form involves the creation of closure value and its application to the initial values.\n\n",
+     "hash": "dd856227f6dd4688",
+     "he": "* למשתני ה-let יש תחום הכרה על גוף ה-let בלבד.\n* כל `<vari>` נקשר לערכו של `<expi>`.\n* כל הקשירות מתבצעות *בו-זמנית* — הן אינן תלויות זו בזו.\n* ערכי האתחול `<expi>` מחושבים *מחוץ לתחום ההכרה* של ה-let.\n* הערכת צורת ה-let כרוכה ביצירת ערך סגור (closure) ובהפעלתו על ערכי האתחול."
+    }
+   ],
+   "headingHe": "קיצור ה-Let"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:11",
+   "depth": 2,
+   "headingEn": "Procedures as Returned Values",
+   "raw": "## Procedures as Returned Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:11:0",
+     "type": "prose",
+     "en": "We have seen so far examples of higher order procedures that receive procedures as parameters.\nLet us now review cases where procedures return computed procedures.\n\n",
+     "hash": "d9fb8f08fcb7bd57",
+     "he": "ראינו עד כה דוגמאות לפרוצדורות מסדר גבוה שמקבלות פרוצדורות כפרמטרים.\nכעת נסקור מקרים שבהם פרוצדורות **מחזירות** פרוצדורות מחושבות."
+    }
+   ],
+   "headingHe": "פרוצדורות כערכים מוחזרים"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:12",
+   "depth": 3,
+   "headingEn": "Returning a Closure",
+   "raw": "### Returning a Closure\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:0",
+     "type": "prose",
+     "en": "Let us first work out the mechanics of procedures returning procedure values:\n\n",
+     "hash": "059260b41714a61c",
+     "he": "נבחן תחילה את המכניקה של פרוצדורות שמחזירות ערכי פרוצדורה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:1",
+     "type": "prose",
+     "en": "We first start from an expression that has a concrete value (a number) and abstract it away on each of the variables that occur in the expression:\n",
+     "hash": "443f3694bfd42543",
+     "he": "נתחיל מביטוי שערכו קונקרטי (מספר), ונפשיט אותו על כל אחד מהמשתנים שמופיעים בו:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:2",
+     "type": "code",
+     "en": "```scheme\n(define x 3)\n(define y 0)\n\n(+ x y y) ;--> 3\n(lambda (x) (+ x y y)) ;--> #<Closure (x) (+ x 0 0)>\n(lambda (y) (lambda (x) (+ x y y))) ;--> #<Closure (y) (lambda (x) (+ x y y))>\n```\n\n",
+     "hash": "b52e20be488e85ab",
+     "lang": "scheme",
+     "noteHe": "שלוש רמות הפשטה של אותו ביטוי, עם `x`=3 ו-`y`=0 בסביבה הגלובלית:\n1. `(+ x y y)` — שני המשתנים חופשיים, ולכן מתקבל ערך קונקרטי: 3.\n2. `(lambda (x) (+ x y y))` — הפשטנו על `x`. הערך המתקבל הוא סגור, ושימו לב לסימון `#<Closure (x) (+ x 0 0)>`: המשתנה החופשי `y` **הוצב** בערכו (0) בזמן יצירת הסגור, ואילו `x` נשאר פרמטר.\n3. `(lambda (y) (lambda (x) …))` — הפשטנו גם על `y`: מתקבל סגור שגופו הוא בעצמו ביטוי lambda. עכשיו אין בו משתנים חופשיים כלל."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:3",
+     "type": "prose",
+     "en": "Now, let us apply these closure values:\n\n",
+     "hash": "7177d121d7c00ede",
+     "he": "כעת נפעיל את ערכי הסגור האלה:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:4",
+     "type": "code",
+     "en": "```scheme\n( (lambda (x) (+ x y y)) 5 ) ;--> 5\n( (lambda (y) (lambda (x) (+ x y y))) 2) ;--> #<Closure (x) (+ x 2 2)>\n( ((lambda (y) (lambda (x) (+ x y y))) 2) 5) ;--> 9\n```\n\n",
+     "hash": "e42c950fa162e7eb",
+     "lang": "scheme",
+     "noteHe": "הפעלת שלושת הסגורים (עדיין עם `y`=0 גלובלי):\n1. `((lambda (x) (+ x y y)) 5)` → 5 + 0 + 0 = 5.\n2. הפעלת הסגור החיצוני על 2 מחזירה **סגור חדש** `#<Closure (x) (+ x 2 2)>` — ה-2 כבר הוצב בגוף. זו הנקודה המרכזית: פונקציה שמחזירה פונקציה.\n3. הפעלה כפולה: קודם על 2 (מקבלים את הסגור מ-2) ואז על 5 → 5 + 2 + 2 = 9. שימו לב לתחביר `((f 2) 5)` — קודם קוראים ל-`f` עם 2, ואת התוצאה (סגור) מפעילים על 5. זהו קירור (currying)."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:12:5",
+     "type": "prose",
+     "en": "The important point to notice is that when a Closure value is constructed, the value of the free variables is substituted\nin the body of the closure.  For example, in the second expression above, the closure value has no free variable `y` - but the occurrences of `y` have been substituted by 2.\n\n",
+     "hash": "3179a13cb5f3c0ef",
+     "he": "הנקודה החשובה שיש לשים לב אליה היא שכאשר נבנה ערך סגור, ערכם של המשתנים החופשיים **מוצב** בגוף הסגור. למשל, בביטוי השני למעלה, לערך הסגור אין משתנה חופשי `y` — המופעים של `y` הוחלפו ב-2."
+    }
+   ],
+   "headingHe": "החזרת סגור (Closure)"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:13",
+   "depth": 3,
+   "headingEn": "Derivative Example",
+   "raw": "### Derivative Example\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:0",
+     "type": "prose",
+     "en": "We design a function which given a numeric function as a parameter, returns a new function which computes a numerical approximation of the derivative of the function - using the formula:\n$$f'(x) = [f(x+dx)-f(x)]/dx$$\n\n",
+     "hash": "697f49dd6a8b60df",
+     "he": "נתכנן פונקציה שמקבלת פונקציה נומרית כפרמטר ומחזירה פונקציה חדשה שמחשבת קירוב נומרי של הנגזרת שלה — לפי הנוסחה:\n$$f'(x) = [f(x+dx)-f(x)]/dx$$"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:1",
+     "type": "code",
+     "en": "```scheme\n;; Signature: derive(f, dx)\n;; Type: [ (Number->Number) * Number -> (Number->Number) ]\n;; Purpose: Construct a function that computes a numerical approx\n;;          of the derivative of f with resolution dx.\n(define derive\n  (lambda (f dx)\n    (lambda (x)\n      (/ (- (f (+ x dx))\n            (f x))\n         dx))))\n```\n\n\n\n",
+     "hash": "f3e9a8f6d3f2bb21",
+     "lang": "scheme",
+     "noteHe": "`derive` היא פונקציה מסדר גבוה בשני הכיוונים: היא **מקבלת** פונקציה `f` ו**מחזירה** פונקציה. שימו לב למבנה: ה-lambda החיצונית מקבלת `(f dx)`, וגופה הוא lambda פנימית שמקבלת `x` — וכשמפעילים אותה, היא מחשבת את נוסחת ההפרשים. הטיפוס בחוזה מתעד זאת במפורש: `[(Number->Number) * Number -> (Number->Number)]` — הפלט הוא בעצמו טיפוס פונקציה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:2",
+     "type": "prose",
+     "en": "When this function is evaluated, it returns a Closure value which *remembers* the value of `dx` that was used.\n\n",
+     "hash": "62f53f36a2eeea37",
+     "he": "כשהפונקציה הזו מוערכת, היא מחזירה ערך סגור ש*זוכר* את הערך של `dx` שבו נעשה שימוש."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:3",
+     "type": "code",
+     "en": "```scheme\n(let [(f1 (derive square 0.001))\n      (f2 (derive square 0.1)) ]\n  (display (f1 2))  ;--> 4.000999999999699 (Real value is 4)\n  (f2 2)) ;--> 4.100000000000001 \n```\n\n",
+     "hash": "8a71d2fc551c56ce",
+     "lang": "scheme",
+     "noteHe": "שימוש ב-`let` כדי ליצור שני סגורים שונים מאותה פונקציה: `f1` היא הנגזרת של `square` ברזולוציה 0.001 ו-`f2` ברזולוציה 0.1. שניהם מחשבים את הנגזרת בנקודה 2 (הערך האמיתי: 4), אבל `f1` מדויק בהרבה (4.001 לעומת 4.1) — כי `dx` שלו קטן יותר. זה מדגים ש**כל סגור זוכר את ה-`dx` שלו**. (`display` מדפיס למסך; שימו לב גם שכאן `let` נכתב עם סוגריים מרובעים `[...]` — ב-Racket זה שקול לחלוטין לסוגריים עגולים.)"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:4",
+     "type": "prose",
+     "en": "We can iterate this procedure to compute the nth derivative of a numerical function:\n\n",
+     "hash": "0969640a6f21d43b",
+     "he": "אפשר לחזור על הפרוצדורה הזו כדי לחשב את הנגזרת ה-n-ית של פונקציה נומרית:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:5",
+     "type": "code",
+     "en": "```scheme\n;; Signature: nth-deriv(f,n)\n;; Type: [ (Number->Number) * Number -> (Number->Number) ]\n;; Purpose: construct a function that computes a numerical approximation of the nth derivative of f\n(define nth-deriv\n  (lambda (f n)\n    (lambda (x)\n      (if (= n 0)\n          (f x)\n          ( (nth-deriv (derive f 0.0001) (- n 1)) x)))))\n```\n\n",
+     "hash": "93c28b03522f3ef4",
+     "lang": "scheme",
+     "noteHe": "`nth-deriv` מחזירה מיד סגור (ה-lambda הפנימית `(lambda (x) …)`), וכל העבודה הרקורסיבית נדחית לרגע שבו הסגור הזה יופעל על `x` בפועל: אם `n` הוא 0 — פשוט מפעילים את `f`; אחרת גוזרים פעם אחת (`(derive f 0.0001)`), קוראים רקורסיבית עם `n-1`, ומפעילים את התוצאה על `x`. זו גרסת ההערכה ה\"מאוחרת\" (late) — הסגורים נוצרים רק בזמן ההפעלה."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:6",
+     "type": "prose",
+     "en": "Consider an alternative definition:\n\n",
+     "hash": "dfc9f51b2703a5bf",
+     "he": "נתבונן בהגדרה חלופית:"
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:7",
+     "type": "code",
+     "en": "```scheme\n(define nth-deriv-early\n  (lambda (f n)\n    (if (= n 0)\n        f\n        (derive (nth-deriv-early f (- n 1)) 0.0001))))\n```\n\n",
+     "hash": "17de13a2f35d94ab",
+     "lang": "scheme",
+     "noteHe": "הגרסה ה\"מוקדמת\" (early): אין כאן lambda עוטפת — הרקורסיה מתבצעת **מיד** בזמן הקריאה ל-`nth-deriv-early`, ובונה את שרשרת הסגורים כולה לפני שהתוצאה מוחזרת. ההבדל המהותי מ-`nth-deriv`: מתי נוצרים הסגורים. כאן — פעם אחת, בזמן ההגדרה; שם — מחדש בכל הפעלה. לכן הגרסה המוקדמת יעילה יותר אם קוראים לתוצאה כמה פעמים."
+    },
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:13:8",
+     "type": "prose",
+     "en": "The time at which the closures are created is different.  Trace the behavior and comment on which version is more desirable.\n\n\n",
+     "hash": "9b32a8fd3c773d75",
+     "he": "הזמן שבו הסגורים נוצרים שונה בין שתי הגרסאות. עקבו אחר ההתנהגות והביעו דעה איזו גרסה עדיפה."
+    }
+   ],
+   "headingHe": "דוגמה: נגזרת"
+  },
+  {
+   "id": "cm/2.2Higher-Order-Functions-Let:14",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.2Higher-Order-Functions-Let:14:0",
+     "type": "list",
+     "en": "1. To define a programming language, we provide: \n   1. The syntax of the language - which defines the set of all possible **expressions** in the language.\n   2. The set of all possible **values** that can be computed by the language.\n   3. Computation rules for each type of expression.\n2. Scheme is a functional programming language which has a minimalistic definition.  We defined a subset of Scheme characterized by the following syntax:\n   1. Atomic syntactic expressions: literal numbers, literal booleans, a set of variables bound to primitive functions.\n   2. All compound expressions are built using a list notation - `(e1 ... en)` - with spaces between the sub-expressions.\n   3. Compound expressions are grouped in 2 families: special forms and non-special forms.\n   4. The special forms we defined are:\n      * define\n      * lambda\n      * if\n      * cond\n      * let\n3. The computed values are the union of the following types:\n   * number\n   * boolean\n   * primitive function\n   * closure\n   * pair\n   * list\n4. Computation rules define how to compute recursively the value of each type of expression in the syntax. They define the semantics of the language.\n5. Compound values in the Scheme subset we consider are of type Pair(T1,T2) and List(T).\n   * Pair(T1,T2) denotes the cartesian product of types T1 and T2.\n   * The value constructor for values of type Pair is the `cons` primitive function.\n   * The accessors for values of type Pair are `car` and `cdr` and type predicate `pair?`.\n   * List(T) is defined inductively as:\n     * Either empty-list (denoted '()).\n     * Or `(<val> . <list>)` where `<val>` is in T and `<list>` is in List(T).\n   * List(T) is implemented in Scheme using Union(Pair(T,List(T)), EmptyList).\n   \n",
+     "hash": "ede7f6d6ab67fb26",
+     "he": "1. כדי להגדיר שפת תכנות, אנו מספקים:\n   1. את התחביר של השפה — המגדיר את קבוצת כל ה**ביטויים** האפשריים בשפה.\n   2. את קבוצת כל ה**ערכים** האפשריים שהשפה יכולה לחשב.\n   3. כללי חישוב לכל סוג ביטוי.\n2. Scheme היא שפת תכנות פונקציונלית בעלת הגדרה מינימליסטית. הגדרנו תת-קבוצה של Scheme המאופיינת בתחביר הבא:\n   1. ביטויים תחביריים אטומיים: מספרים ליטרליים, ערכים בוליאניים ליטרליים, וקבוצת משתנים הקשורים לפונקציות פרימיטיביות.\n   2. כל הביטויים המורכבים נבנים באמצעות כתיב רשימה — `(e1 ... en)` — עם רווחים בין תת-הביטויים.\n   3. ביטויים מורכבים מקובצים לשתי משפחות: צורות מיוחדות וצורות לא-מיוחדות.\n   4. הצורות המיוחדות שהגדרנו הן:\n      * define\n      * lambda\n      * if\n      * cond\n      * let\n3. הערכים המחושבים הם האיחוד של הטיפוסים הבאים:\n   * number\n   * boolean\n   * פונקציה פרימיטיבית\n   * סגור (closure)\n   * זוג (pair)\n   * רשימה (list)\n4. כללי החישוב מגדירים כיצד לחשב רקורסיבית את ערכו של כל סוג ביטוי בתחביר. הם מגדירים את הסמנטיקה של השפה.\n5. ערכים מורכבים בתת-קבוצת ה-Scheme שאנו בוחנים הם מטיפוס Pair(T1,T2) ו-List(T).\n   * Pair(T1,T2) מציין את המכפלה הקרטזית של הטיפוסים T1 ו-T2.\n   * בנאי הערכים עבור ערכים מטיפוס Pair הוא הפונקציה הפרימיטיבית `cons`.\n   * פונקציות הגישה לערכים מטיפוס Pair הן `car` ו-`cdr`, ופרדיקט הטיפוס הוא `pair?`.\n   * List(T) מוגדר אינדוקטיבית כך:\n     * או הרשימה הריקה (המסומנת `'()`).\n     * או `(<val> . <list>)` כאשר `<val>` שייך ל-T ו-`<list>` שייך ל-List(T).\n   * List(T) ממומש ב-Scheme באמצעות Union(Pair(T,List(T)), EmptyList)."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "code-reading",
+   "questionHe": "בהינתן ההגדרות הבאות, מה יחזיר הביטוי האחרון?\n```scheme\n(define y 10)\n(define g (lambda (y) (lambda (x) (+ x y))))\n(define h (g 3))\n(h 1)\n```",
+   "answerHe": "‏4.",
+   "explanationHe": "‏`(g 3)` מחזיר סגור שבו המשתנה `y` **נקשר ל-3** (הפרמטר של ה-lambda החיצונית), ולכן הגוף הוא למעשה `(+ x 3)`. ההפעלה `(h 1)` נותנת 1+3=4. המשתנה הגלובלי `y`=10 אינו רלוונטי — הפרמטר מסתיר אותו (shadowing) בתוך תחום ההכרה."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "מהי הצורה השקולה של `(let ((a 1) (b 2)) (+ a b))` לפי כלל הכתיב-מחדש של `let`?",
+   "options": [
+    "`((lambda (a b) (+ a b)) 1 2)`",
+    "`(lambda (a b) (+ a b) 1 2)`",
+    "`(define a 1) (define b 2) (+ a b)`",
+    "`((lambda (a) ((lambda (b) (+ a b)) 2)) 1)`"
+   ],
+   "correct": 0,
+   "explanationHe": "‏`let` הוא סוכר תחבירי: השמות הופכים לפרמטרים של lambda שגופה הוא גוף ה-let, וביטויי האתחול הופכים לארגומנטים בהפעלה. אפשרות 4 היא הצורה של `let*` (קשירות מקוננות, כל אחת בתחום של הקודמת) — לא של `let`, שבו הקשירות **בו-זמניות**. אפשרות 3 שגויה כי `define` יוצר משתנים גלובליים, לא מקומיים."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה יחזיר הביטוי הבא, ומדוע? (שימו לב היטב לתחומי ההכרה)\n```scheme\n(define x 5)\n(let ((x 2)\n      (y (* x 3)))\n  (+ x y))\n```",
+   "answerHe": "‏17.",
+   "explanationHe": "זו שאלת מבחן קלאסית על `let`: **ערכי האתחול מחושבים מחוץ לתחום ההכרה של ה-let**. לכן `(* x 3)` משתמש ב-`x` הגלובלי (5) ונותן 15 — ולא ב-`x`=2 של ה-let. בגוף ה-let, לעומת זאת, `x` הוא כבר 2, ולכן `(+ 2 15)` = 17. אם היה מדובר ב-`let*`, התוצאה הייתה 8."
+  },
+  {
+   "id": "ex4",
+   "type": "open",
+   "questionHe": "בביטוי הבא, אילו מופעי משתנים קשורים (bound) ואילו חופשיים (free)?\n```scheme\n(lambda (x)\n  (+ x (* y (square x))))\n```",
+   "answerHe": "**קשורים**: כל שלושת המופעים של `x` — הם קשורים לפרמטר של ה-lambda.\n**חופשיים**: `y`, וכן `square` (ואפשר לטעון גם `+` ו-`*` — כולם משתנים שאינם פרמטרים של ה-lambda, ומשמעותם נקבעת מהסביבה החיצונית).",
+   "explanationHe": "הכלל: מופע של משתנה הוא **קשור** אם קיים lambda (או let) עוטף שאחד מפרמטריו נושא את אותו שם; אחרת הוא **חופשי**. שמות של פונקציות שמופיעים בעמדת אופרטור הם משתנים לכל דבר — ולכן גם הם מופיעים חופשיים."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "מהו הטיפוס של `derive` שהוגדרה כ-`(lambda (f dx) (lambda (x) (/ (- (f (+ x dx)) (f x)) dx)))`?",
+   "options": [
+    "`[Number * Number -> Number]`",
+    "`[(Number->Number) * Number -> (Number->Number)]`",
+    "`[(Number->Number) * Number -> Number]`",
+    "`[(Number->Number) -> Number]`"
+   ],
+   "correct": 1,
+   "explanationHe": "‏`derive` מקבלת שני פרמטרים: פונקציה `f` מטיפוס `Number->Number` ומספר `dx`. גוף ה-lambda החיצונית הוא **ביטוי lambda** — ולכן הערך המוחזר הוא סגור, כלומר פונקציה `Number->Number`. זו פונקציה מסדר גבוה בשני הכיוונים: מקבלת פונקציה ומחזירה פונקציה."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הסבירו את התהליך שהוביל מ-`sum-integers`, `sum-cubes` ו-`pi-sum` להפשטה `sum`. אילו שני דברים הפכו לפרמטרים ולמה?",
+   "answerHe": "שלוש הפונקציות חלקו מבנה זהה: תנאי עצירה `(> a b)` עם ערך 0, חיבור של פעולה כלשהי על האיבר הנוכחי, וקריאה רקורסיבית על האיבר הבא. ההבדלים היו בשני מקומות בלבד: (1) **מה מחשבים לכל איבר** — `a` עצמו / `(cube a)` / `(/ 1 (* a (+ a 2)))`, ו-(2) **איך מתקדמים לאיבר הבא** — `(+ a 1)` לעומת `(+ a 4)`. לכן הפכנו את שניהם לפרמטרים שהם פונקציות: `term` ו-`next`, וקיבלנו `(sum term a next b)` שמכליל את שלושתן — ואפילו משרתת בעיה חדשה (חישוב אינטגרל).",
+   "explanationHe": "זהו התהליך המרכזי של הפרק: זיהוי תבנית חוזרת → הפיכת החלקים המשתנים לפרמטרים → קבלת הפשטה פונקציונלית לשימוש חוזר. העובדה שהפרמטרים הם **פונקציות** היא מה שהופך את `sum` לפונקציה מסדר גבוה."
+  },
+  {
+   "id": "ex7",
+   "type": "code-reading",
+   "questionHe": "עבור ההגדרות של `reduce` ו-`reduce2` מהשיעור, מה יחזיר כל אחד מהביטויים הבאים?\n```scheme\n(reduce cons '() '(1 2 3))\n(reduce2 cons '() '(1 2 3))\n```",
+   "answerHe": "‏`(reduce cons '() '(1 2 3))` → `'(1 2 3)` — כי הקיפול מימין: `(cons 1 (cons 2 (cons 3 '())))`.\n`(reduce2 cons '() '(1 2 3))` → `'(3 2 1)`.\n\n**המפתח הוא סדר הארגומנטים**: ההגדרה מהשיעור היא `(reducer (car l) init)` — כלומר **האיבר ראשון, הצובר שני**. מכאן המעקב:\n\n| צעד | האיבר | הצובר לפני | `(cons איבר צובר)` |\n|---|---|---|---|\n| 1 | `1` | `'()` | `'(1)` |\n| 2 | `2` | `'(1)` | `'(2 1)` |\n| 3 | `3` | `'(2 1)` | `'(3 2 1)` |\n\nהרשימה הריקה נשארת בכל צעד בסוף שרשרת ה-`cdr`, ולכן התוצאה היא רשימה תקינה.",
+   "explanationHe": "זו ההוכחה ש-`reduce` ו-`reduce2` **אינם שקולים**: עבור `+` התוצאה זהה כי חיבור אסוציאטיבי וקומוטטיבי, אבל `cons` אינו כזה — וההבדל בסדר הצבירה (מימין לשמאל לעומת משמאל לימין) הופך את הרשימה. `reduce2` הוא בעצם מימוש של `reverse` כשמשתמשים בו עם `cons`.\n\n⚠️ **שימו לב היטב לסדר הארגומנטים של `reducer` — כאן נופלים.** ההגדרה מהשיעור היא `(reducer (car l) init)`: האיבר ראשון, הצובר **שני**. דווקא עם `cons` זה קריטי, כי רשימה נבנית רק כאשר החלק שכבר הוא רשימה יושב בארגומנט **השני** (ראו את ההערה על בניית רשימות ב-2.1). אילו הסדר היה הפוך, `(reducer init (car l))`, היינו מקבלים `((('() . 1) . 2) . 3)` — מבנה זוגות שגדל שמאלה, ששרשרת ה-`cdr` שלו נגמרת במספר ולכן **אינו רשימה כלל**. שימו לב שגם חתימת הטיפוס מאשרת את הסדר: `[(T1 * T2 -> T2) * T2 * List(T1) -> T2]` — ‏`reducer` מקבל איבר (`T1`) ואז צובר (`T2`), ומחזיר צובר. כשלא בטוחים בסדר הארגומנטים, הטיפוס מכריע בלי לעקוב אחרי החישוב."
+  }
+ ]
+}

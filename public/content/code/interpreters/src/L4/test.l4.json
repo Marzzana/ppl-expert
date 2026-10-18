@@ -1,0 +1,16 @@
+{
+ "id": "interpreters/src/L4/test.l4",
+ "repo": "interpreters",
+ "path": "src/L4/test.l4",
+ "lang": "scheme",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L4/test.l4",
+ "code": "(L4\n  ; Basic arithmetic and defines\n  (define x 5)\n  (define y 3)\n\n  ; Let expression: binds a and b locally\n  (define let-result\n    (let ((a 10) (b 20))\n      (+ a b)))           ; let-result = 30\n\n  ; Higher-order function: apply f twice\n  (define twice\n    (lambda (f x)\n      (f (f x))))\n\n  (define add1 (lambda (n) (+ n 1)))\n\n  ; Letrec for recursion - factorial\n  (define fact\n    (letrec ((fact (lambda (n)\n                     (if (= n 0)\n                         1\n                         (* n (fact (- n 1)))))))\n      fact))\n\n  ; Closures capture their environment\n  (define make-adder\n    (lambda (n)\n      (lambda (x) (+ n x))))\n\n  (define add5 (make-adder 5))\n\n  ; Final expression:\n  ;   twice add1 applied to 0 => 2\n  ;   fact(5) => 120\n  ;   add5(3) => 8\n  ;   total => 130\n  (+ (twice add1 0) (+ (fact 5) (add5 3)))\n)\n",
+ "titleHe": "תוכנית L4 לדוגמה — ולמה fact עטופה ב-letrec",
+ "descriptionHe": "קלט לדוגמה בשפה `L4`, שמריצים בעזרת `npx ts-node src/L4/L4.ts src/L4/test.l4`.\n\nשייך ל-**2.7–2.8**, וכדאי לקרוא אותו **בצמוד ל-`test.l3`**. שתי התוספות הגלויות הן `let` ו-`letrec`, אבל ⚠️ **הפרט המעניין ביותר הוא צורת הכתיבה של `fact` בשורות 19–24** — היא נראית מסורבלת שלא לצורך, וזו בדיוק העדות לשינוי הסמנטי הגדול של השיעור. ראו את ההערה שם.",
+ "annotations": [
+  {
+   "line": 1,
+   "noteHe": "כדאי לקרוא את הקובץ לצד `test.l3` ולסמן את ההפרש. שורות 3–4 ו-12–16 זהות במהותן; מה שנוסף הוא `let` (שורה 8) ו-`letrec` (שורה 20).\n\n**ושורות 19–24 הן הפרט שהכי שווה לעצור עליו.** ב-`test.l3` הפקטוריאל נכתב פשוט:\n`(define fact (lambda (n) … (fact (- n 1)) …))`. כאן הוא נכתב **עטוף ב-`letrec` וסביבו `define`** — ניסוח מסורבל שנראה מיותר. אז למה?\n\n**כי ב-`L4` הניסוח הפשוט כבר לא עובד.** ‏`L3` פעל במודל ההצבה: לסְגור לא הייתה סביבה, וגופו הוערך בסביבת ה**קורא** — שבה `fact` כבר היה מוגדר, ולכן הרקורסיה הסתדרה במקרה. ‏`L4` עבר למודל הסביבה: `evalProc` שומר בסְגור את הסביבה **שבה הוא נוצר**, ובאותו רגע `fact` עדיין לא קיים (‏`evalDefineExps` מעריך את אגף ימין **לפני** שהוא מרחיב את הסביבה). לכן הקריאה הרקורסיבית תיכשל ב-`var not found`.\n\n‏`letrec` הוא הפתרון: הוא בונה סביבה שבה השמות קיימים **לפני** שהערכים מחושבים. **כדאי לשנן את הרצף הזה — הוא כל 2.8**: מודל הסביבה תיקן את הבעיות של מודל ההצבה, ובדרך **שבר את הרקורסיה**, ו-`letrec` הוא התיקון. (ובגרסת ה-`-box`, שאותה `L4.ts` **אינה** מריצה, `define` עצמו לומד לעשות זאת — ואז העטיפה מיותרת.)\n\nשווה גם לשים לב לשורות 27–31: `make-adder` מחזירה סְגור שמשתמש ב-`n` החיצוני, ו-`add5` שומר אותו. כאן, בניגוד ל-`L3`, `add5` הוא באמת סְגור **עם סביבה** — אילו הדפסתם אותו, הייתם רואים גוף שבו `n` **לא** הוצב פנימה.\n\nוהשורה האחרונה מחשבת `2 + 120 + 8 = 130` — כלומר כל שלוש היכולות (סדר גבוה, רקורסיה, סְגור) נבדקות בביטוי אחד."
+  }
+ ]
+}

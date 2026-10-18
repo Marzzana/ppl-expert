@@ -1,0 +1,24 @@
+{
+ "id": "interpreters/src/shared/list.ts",
+ "repo": "interpreters",
+ "path": "src/shared/list.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/shared/list.ts",
+ "code": "// List operations similar to car/cdr/cadr in Scheme\nimport { all } from \"ramda\";\n\nexport type List<T> = T[];\nexport type Empty = [];\nexport type NonEmptyList<T> = [T, ...T[]];\n\nexport const cons = <T>(x: T, xs: List<T>): List<T> => [x, ...xs];\nexport const first = <T>([x, ..._xs]: NonEmptyList<T>): T => x;\nexport const second = <T>([_x0, x1, ..._xs]: NonEmptyList<T>): T => x1;\nexport const rest = <T>([_, ...xs]: NonEmptyList<T>): List<T> => xs;\nexport const isNonEmptyList = <T>(xs: any): xs is NonEmptyList<T> =>\n  Array.isArray(xs) && xs.length > 0;\nexport const isEmpty = <T>(xs: any): xs is Empty =>\n  Array.isArray(xs) && ! isNonEmptyList<T>(xs);\n\n// A useful type predicate for homogeneous lists\nexport const allT = <T>(isT: (x: any) => x is T, x: any[]): x is T[] =>\n  all(isT, x);\n",
+ "titleHe": "car/cdr ב-TypeScript — רשימות Scheme מעל מערכים",
+ "descriptionHe": "עשרים שורות שמביאות את פעולות הרשימה של Scheme ל-TypeScript: `cons`, `first` (שהוא `car`), `second` (שהוא `cadr`) ו-`rest` (שהוא `cdr`), יחד עם פרדיקטים לרשימה ריקה ולא-ריקה.\n\nשייך ל-**2.3 והלאה** — זהו אחד מקובצי היסוד ש-`L1` עד `L5` נשענים עליהם, וכל מנתח תחבירי בקורס משתמש בו כדי לפרק ביטויי S. הוא גם הבסיס ל-`result.ts` ול-`optional.ts` שלידו.\n\nמה שכדאי לשים לב אליו: **`NonEmptyList<T>` אינו מוסכמה אלא טיפוס אמיתי** (`[T, ...T[]]`), ולכן המהדר עצמו מונע `car` על רשימה ריקה — הטעות הנפוצה ביותר בפרק 2. וכדאי גם לזכור את המחיר שהתרגום גובה: `cons` כאן היא **העתקת מערך**, לא פעולה בזמן קבוע.",
+ "annotations": [
+  {
+   "line": 4,
+   "noteHe": "שלושת הטיפוסים, ורק אחד מהם עושה עבודה. ‏`List<T>` הוא בסך הכול כינוי ל-`T[]` — הוא קיים כדי שהקוד ייקרא כמו Scheme, ואינו מוסיף שום בטיחות. ‏`NonEmptyList<T> = [T, ...T[]]` הוא **הטיפוס האמיתי כאן**: רשימה שיש בה לפחות איבר אחד, ו-TypeScript יודע זאת.\n\nוזה מה שהופך את `first` ו-`rest` שלמטה לבטוחות. ב-Scheme, `(car '())` היא שגיאת ריצה — הטעות הנפוצה ביותר בפרק 2. כאן היא **שגיאת קומפילציה**, כי `first` פשוט אינה מקבלת `List<T>` אלא רק `NonEmptyList<T>`. **כדאי לשים לב לתבנית**: אין כאן שום בדיקה בזמן ריצה, ובכל זאת המקרה נמנע — זו בדיוק הטענה של פרק 3 על מה שמערכת טיפוסים קונה."
+  },
+  {
+   "line": 8,
+   "noteHe": "ארבע הפעולות, וכולן שורה אחת. שימו לב לסגנון: `first`, `second` ו-`rest` **מפרקות את הארגומנט כבר בחתימה** (`([x, ..._xs])`), ומשתמשות בקידומת `_` לשמות שאינן צריכות — מוסכמה שמונעת אזהרת \"משתנה לא בשימוש\" מהמהדר. הקוד קריא, אבל שווה לזכור שזו סוכר תחבירי בלבד: מאחורי הקלעים אלה `xs[0]` ו-`xs.slice(1)`.\n\n⚠️ **ומחיר שכדאי להכיר**: `cons` מוגדרת כ-`[x, ...xs]`, כלומר **מעתיקה את כל המערך**. ב-Scheme `cons` היא פעולה בזמן קבוע שרק מוסיפה תא לרשימה מקושרת; כאן היא לינארית, ולכן בנייה של רשימה באורך n בעזרת `cons` חוזרת עולה **ריבועית**. אותה הערה בדיוק עלתה על `cons` ב-`monads/list.ts`. זה לא מזיק במפרש לימודי, אבל זו הדגמה טובה לכך ש**תרגום נאמן מבחינה סמנטית אינו בהכרח נאמן מבחינת סיבוכיות**.\n\nשימו לב גם ש-`isEmpty` מוגדרת דרך **שלילת** `isNonEmptyList` ולא ישירות — כך יש רק מקום אחד שבו ההגדרה של \"לא ריקה\" נכתבת, ואי אפשר ששני הפרדיקטים יסתרו זה את זה. ניסוח קטן וטוב."
+  },
+  {
+   "line": 17,
+   "noteHe": "‏`allT` היא פרדיקט שמרים פרדיקט של איבר יחיד לפרדיקט של **רשימה הומוגנית**: בהינתן `isT`, היא בודקת שכל איברי המערך מקיימים אותו — ומכריזה למהדר `x is T[]`.\n\nזה נשמע טכני, אבל זו פונקציה מרכזית: היא זו שמאפשרת ל-`parser.ts` לכתוב `isCompoundSexp = x => isArray(x) && allT(isSexp, x)`, כלומר לזהות ביטוי S מורכב **ברקורסיה** ובשורה אחת. בלעדיה כל בדיקת מבנה מקוננת הייתה צריכה לולאה ידנית והמרת טיפוס כפויה.\n\n(‏`all` מיובאת מ-Ramda ואינה אלא `every` של JavaScript בסדר ארגומנטים מותאם לקארינג — ראו 1.4.)"
+  }
+ ]
+}

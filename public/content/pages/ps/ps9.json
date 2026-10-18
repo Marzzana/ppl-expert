@@ -1,0 +1,704 @@
+{
+ "id": "ps/ps9",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps9.md",
+ "titleEn": "Asynchronous Programming in TypeScript",
+ "titleHe": "תכנות אסינכרוני ב-TypeScript",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps9:0",
+   "depth": 1,
+   "headingEn": "Asynchronous Programming in TypeScript",
+   "raw": "# Asynchronous Programming in TypeScript\n",
+   "blocks": [],
+   "headingHe": "תכנות אסינכרוני ב-TypeScript"
+  },
+  {
+   "id": "ps/ps9:1",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #9",
+   "raw": "## Practical Session - Week #9\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:1:0",
+     "type": "prose",
+     "en": "We exercise techniques of asynchronous programming in TypeScript.\n",
+     "hash": "d90e3103c4ee14a8",
+     "he": "אנחנו מתרגלים טכניקות של תכנות אסינכרוני ב-TypeScript."
+    },
+    {
+     "id": "ps/ps9:1:1",
+     "type": "list",
+     "en": "* How to invoke Node methods that take a callback parameter - such as `fs.writeFile` or `http.get`.\n* How to process the callback methods when we want to compose successive / conditional calls inside callbacks.\n* How promises help to compose asynchronous calls.\n* How the `async` and `await` syntax simplifies promises.\n\n",
+     "hash": "aaa0876cbc609842",
+     "he": "* איך להפעיל מתודות של Node שמקבלות פרמטר callback — כמו `fs.writeFile` או `http.get`.\n* איך לעבד את מתודות ה-callback כשאנחנו רוצים להרכיב קריאות עוקבות / מותנות בתוך callbacks.\n* איך הבטחות עוזרות להרכיב קריאות אסינכרוניות.\n* איך התחביר `async` ו-`await` מפשט הבטחות."
+    }
+   ],
+   "headingHe": "תרגול — שבוע #9"
+  },
+  {
+   "id": "ps/ps9:2",
+   "depth": 2,
+   "headingEn": "The Callback",
+   "raw": "## The Callback\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:2:0",
+     "type": "prose",
+     "en": "One way to handle asynchronous operations in a programming language\nis to provide a _callback_ function as a parameter.\nThe callback function would then be called when the asynchronous operation ended.\n\n",
+     "hash": "ce397222fceea8e3",
+     "he": "דרך אחת לטפל בפעולות אסינכרוניות בשפת תכנות\nהיא לספק פונקציית _callback_ כפרמטר.\nפונקציית ה-callback תיקרא אז כשהפעולה האסינכרונית הסתיימה."
+    },
+    {
+     "id": "ps/ps9:2:1",
+     "type": "code",
+     "en": "```typescript\nimport fs from 'fs';\n\nfs.writeFile('hello_world.txt', 'Hello World!', function (err) {\n    if (err) {\n        console.log(err);\n    } else {\n        console.log('Wrote \"Hello World\" to hello_world.txt');\n    }\n});\n```\n\n",
+     "hash": "e241b1408b2461fd",
+     "lang": "typescript",
+     "noteHe": "הדוגמה הפשוטה ביותר ל-callback ב-Node: כתיבה לקובץ. שימו לב לשלושת הארגומנטים של `fs.writeFile` — שם הקובץ, התוכן, וה-callback. שימו לב שה-callback כאן מקבל **פרמטר אחד בלבד** (`err`), כי לכתיבה אין ערך להחזיר; בקריאה מקובץ הוא היה מקבל `(err, data)`. **התבנית שכדאי לזהות**: `if (err) … else …` בתוך ה-callback — זו הצורה הבסיסית של טיפול בשגיאות אסינכרוני, וגם המקור לכל הסיבוכיות שהסעיף הזה עומד להראות. שימו לב שהקוד משתמש ב-`function (err) {…}` ולא בפונקציית חץ — שקול לגמרי כאן, וכתיב מיושן במקצת. **הנקודה שכדאי לזכור מ-4.1**: השורה שאחרי הקריאה ל-`writeFile` תתבצע **לפני** ה-callback, כי הקריאה אינה חוסמת."
+    },
+    {
+     "id": "ps/ps9:2:2",
+     "type": "prose",
+     "en": "This approach has two issues:\n\n",
+     "hash": "758c3f80927c908a",
+     "he": "לגישה הזו יש שתי בעיות:"
+    },
+    {
+     "id": "ps/ps9:2:3",
+     "type": "list",
+     "en": "1) Callbacks are not standardized.\n   <br><br>\n   With different APIs the callback is expected to be either the last parameter, \n   the first parameter, a property on a config parameter, \n   a property set on the calling object, etc., \n   <br><br>\n   In some conventions the first parameter was expected to be either an `Error` or `null` and the second parameter was the result of the asynchronous computation,\n   while with other conventions it was the order was reversed, another convention \n   returned a compound object containing error or result, etc.,\n",
+     "hash": "ca097bd067703884",
+     "he": "1) ‏Callbacks אינם מתוקננים.\n   <br><br>\n   ב-APIs שונים ה-callback מצופה להיות או הפרמטר האחרון,\n   הפרמטר הראשון, מאפיין על פרמטר תצורה,\n   מאפיין שמוגדר על האובייקט הקורא, וכדומה,\n   <br><br>\n   במוסכמות מסוימות הפרמטר הראשון היה מצופה להיות או `Error` או `null`, והפרמטר השני היה התוצאה של החישוב האסינכרוני,\n   בעוד שבמוסכמות אחרות הסדר היה הפוך, ומוסכמה נוספת\n   החזירה אובייקט מורכב שמכיל שגיאה או תוצאה, וכדומה,"
+    },
+    {
+     "id": "ps/ps9:2:4",
+     "type": "prose",
+     "en": "<br><br>\n2) The second problem, nicknamed \"callback hell\".\n   <br><br>\n    It's hard to write and read composed asynchronous operations. Complex flows that involve a few asynchronous operations quickly becomes \nhard to write and even harder to read. For example:\n\n",
+     "hash": "3c382c65919ebe35",
+     "he": "<br><br>\n2) הבעיה השנייה, שכונתה \"גיהינום ה-callbacks\" (callback hell).\n   <br><br>\n    קשה לכתוב ולקרוא פעולות אסינכרוניות מורכבות. זרימות מסובכות שכוללות כמה פעולות אסינכרוניות הופכות במהירות\nלקשות לכתיבה וקשות אף יותר לקריאה. לדוגמה:"
+    },
+    {
+     "id": "ps/ps9:2:5",
+     "type": "code",
+     "en": "```typescript\nfunction nestedSequentialRequests(baseUrl, studentName) {\n    let args = {\n        headers: { \"Content-Type\": \"application/json\"},\n    };\n    request.get(baseUrl+\"/posts\", args, function(err, httpResponse, body) {\n        if (err || httpResponse.statusCode >= 400) {\n            console.error('something went wrong on the first request:', err);\n        } else {\n            // Process the return value of the first GET request: extract max(id)\n            // console.log(\"Server response: \", body);\n            let students = JSON.parse(body),\n                maxStud = students.reduce(((prev, cur)=> (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0});\n            console.log(\"Current max Id = \", maxStud.id);\n            let newStud = {id: Number(maxStud.id) + 1, title: studentName, author: \"st\"+(Number(maxStud.id)+1)};\n\n            // Submit a second request\n            let args = {\n                url: baseUrl+\"/posts\",\n                headers: { 'Content-Type': 'application/json' },\n                form: newStud\n            };\n            request.post(args, function(err, httpResponse, body) {\n                if (err || httpResponse.statusCode >= 400) {\n                    console.error('something went wrong in the second request:', err)\n                }  else {\n                    console.log(\"Created student: \", newStud);\n                    console.log(\"Server response: \", body);\n                }\n            });\n        }\n    });\n};\n```\n\n",
+     "hash": "7763ccc00be079d2",
+     "lang": "typescript",
+     "noteHe": "**\"גיהינום ה-callbacks\" בדוגמה אמיתית** — וכדאי להסתכל על צורת הקוד לפני שקוראים אותו לעומק: שימו לב לפירמידה של הזחות ולכך שהקוד \"זולג\" ימינה. **מה הקוד עושה**: שתי בקשות HTTP עוקבות — קודם `GET /posts` כדי לקבל את רשימת הסטודנטים, ואז `POST /posts` כדי להוסיף סטודנט חדש עם `id` שגדול באחד מהמקסימום הקיים. **החלק המעניין באמצע**: `students.reduce(((prev, cur) => (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0})` — זהו `reduce` שמוצא את האיבר עם ה-`id` המקסימלי, כשהערך ההתחלתי `{id:0}` משמש כ\"אלמנט ניטרלי\". שימו לב ל-`Number(...)` בכל השוואה: ה-`id`-ים מגיעים מ-JSON כמחרוזות, ובלי ההמרה `\"9\" > \"10\"` היה מחזיר `true` (השוואה לקסיקוגרפית) — **באג קלאסי**. **הבעיות שהקוד הזה מדגים**, שאותן הפסקאות מעל מונות: (1) הבקשה השנייה חייבת להיות **בתוך** ה-callback של הראשונה, כי היא תלויה בתוצאה שלה; (2) `if (err || httpResponse.statusCode >= 400)` חוזר **פעמיים** — טיפול בשגיאות משוכפל בכל רמה; (3) שימו לב שהמשתנה `args` מוגדר **פעמיים** באותה פונקציה, בשני תחומי הכרה שונים — קריא מאוד לא, ומקור בלבול. **השוו לגרסאות המשופרות בהמשך הדף**: אותה לוגיקה בדיוק תיכתב עם הבטחות ואז עם `async/await`, ותוכלו לראות את הפירמידה מתיישרת."
+    },
+    {
+     "id": "ps/ps9:2:6",
+     "type": "prose",
+     "en": "So how did we compose callbacks?\n\n",
+     "hash": "8e2bb51d019ee268",
+     "he": "אז איך הרכבנו callbacks?"
+    },
+    {
+     "id": "ps/ps9:2:7",
+     "type": "prose",
+     "en": "We had to **nest** the callbacks.  We start from the first method that we want to invoke.  Then in the callback of the first method, we invoke the second function.\nThat is, instead of `f(g(x))` - we used the following pattern:\n\n",
+     "hash": "348feccde2254f2f",
+     "he": "היינו צריכים **לקנן** את ה-callbacks. אנחנו מתחילים מהמתודה הראשונה שאנחנו רוצים להפעיל. אחר כך, בתוך ה-callback של המתודה הראשונה, אנחנו מפעילים את הפונקציה השנייה.\nכלומר, במקום `f(g(x))` — השתמשנו בתבנית הבאה:"
+    },
+    {
+     "id": "ps/ps9:2:8",
+     "type": "code",
+     "en": "```\ng(x, (gRes) => f(gRes))\n```\n\n",
+     "hash": "f12d3f2c50eff113",
+     "noteHe": "תבנית ההרכבה בצורתה המינימלית — שורה אחת שמסכמת את כל הסעיף. השוו ל-`f(g(x))` הסינכרוני: שם `g` נכתב **פנימה** ו-`f` בחוץ; כאן ההפך. **הסיבה**: `g` אינה מחזירה ערך שאפשר להעביר ל-`f`, ולכן צריך לתת לה **מראש** את מה שיש לעשות עם התוצאה — כלומר את ההמשך. זו בדיוק CPS: הפרמטר `(gRes) => f(gRes)` הוא ההמשכית של `g`. שימו לב שהתבנית הזו מקננת: הרכבה של שלוש פונקציות תדרוש `h(x, (hRes) => g(hRes, (gRes) => f(gRes)))`, ומכאן הפירמידה."
+    },
+    {
+     "id": "ps/ps9:2:9",
+     "type": "prose",
+     "en": "where the function `(gRes) => f(gRes)` is the callback to g.\n\n",
+     "hash": "150eb1f6569fe812",
+     "he": "כאשר הפונקציה `(gRes) => f(gRes)` היא ה-callback ל-g."
+    },
+    {
+     "id": "ps/ps9:2:10",
+     "type": "prose",
+     "en": "**NOTE**: Observe that the order of the functions is inverted from regular composition, instead of `f(g(x))` where `f` appears first and `g` second,\nwe write `g` first, then `f` - which reflects the order in which the functions are invoked.\n\n",
+     "hash": "d6d651c9b3bac210",
+     "he": "**שימו לב**: הבחינו שסדר הפונקציות הפוך מהרכבה רגילה. במקום `f(g(x))`, שבו `f` מופיעה ראשונה ו-`g` שנייה,\nאנחנו כותבים קודם `g` ואחר כך `f` — מה שמשקף את הסדר שבו הפונקציות מופעלות."
+    }
+   ],
+   "headingHe": "ה-Callback"
+  },
+  {
+   "id": "ps/ps9:3",
+   "depth": 2,
+   "headingEn": "Promises to the rescue",
+   "raw": "## Promises to the rescue\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:3:0",
+     "type": "prose",
+     "en": "As we have observed in the example above, it is not practical to combine asynchronous functions.\n",
+     "hash": "38303c6f45f69d3a",
+     "he": "כפי שהבחנו בדוגמה שלמעלה, אינו מעשי לשלב פונקציות אסינכרוניות."
+    },
+    {
+     "id": "ps/ps9:3:1",
+     "type": "list",
+     "en": "* It is difficult to compose/\"pipe\" functions into each other\n* It is difficult to handle errors and propagate them\n\n",
+     "hash": "66bb98de2c01574f",
+     "he": "* קשה להרכיב/\"לצנרת\" (pipe) פונקציות זו לתוך זו\n* קשה לטפל בשגיאות ולהפיץ אותן"
+    },
+    {
+     "id": "ps/ps9:3:2",
+     "type": "prose",
+     "en": "[Promises](http://exploringjs.com/es6/ch_promises.html) are a technique that was introduced to make asynchronous composition more convenient.\n\n",
+     "hash": "3bc676a37da1af66",
+     "he": "[הבטחות](http://exploringjs.com/es6/ch_promises.html) (Promises) הן טכניקה שהוצגה כדי להפוך הרכבה אסינכרונית לנוחה יותר."
+    },
+    {
+     "id": "ps/ps9:3:3",
+     "type": "prose",
+     "en": "A Promise object is a proxy for the result we expect to receive in the future, which is delivered via that object.\nBecause it takes time to obtain the value (when the promise encapsulates an asynchronous computation) - the promise may be\nin several states:\n",
+     "hash": "62c904ea55169ab2",
+     "he": "אובייקט Promise הוא מתווך (proxy) לתוצאה שאנחנו מצפים לקבל בעתיד, שנמסרת דרך האובייקט הזה.\nמכיוון שלוקח זמן להשיג את הערך (כאשר ההבטחה עוטפת חישוב אסינכרוני) — ההבטחה יכולה להיות\nבכמה מצבים:"
+    },
+    {
+     "id": "ps/ps9:3:4",
+     "type": "list",
+     "en": "* Before the result is ready, the Promise is pending.\n* If a result is available, the Promise is fulfilled.\n* If an error happened, the Promise is rejected.\n\n",
+     "hash": "3ab147414eb7d85f",
+     "he": "* לפני שהתוצאה מוכנה, ההבטחה היא pending (ממתינה).\n* אם תוצאה זמינה, ההבטחה היא fulfilled (מקוימת).\n* אם התרחשה שגיאה, ההבטחה היא rejected (נדחתה)."
+    },
+    {
+     "id": "ps/ps9:3:5",
+     "type": "prose",
+     "en": "A Promise is **settled** if the computation it represents has completed - it is either fulfilled or rejected.\nA Promise is settled exactly once and then remains unchanged (it is \"set\" only once).\n\n",
+     "hash": "4b44b29b3e2f5be8",
+     "he": "הבטחה היא **מוכרעת** (settled) אם החישוב שהיא מייצגת הושלם — כלומר היא או מקוימת או נדחתה.\nהבטחה מוכרעת בדיוק פעם אחת ואז נשארת בלתי משתנה (היא \"נקבעת\" רק פעם אחת)."
+    }
+   ],
+   "headingHe": "הבטחות באות לעזרה"
+  },
+  {
+   "id": "ps/ps9:4",
+   "depth": 3,
+   "headingEn": "Reacting to Promise State Changes",
+   "raw": "### Reacting to Promise State Changes\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:4:0",
+     "type": "prose",
+     "en": "Promise reactions are callbacks that you register with the Promise method then(), to be notified of a fulfillment or a rejection.\n\n",
+     "hash": "996618660e1a6b12",
+     "he": "תגובות של הבטחה (Promise reactions) הן callbacks שאתם רושמים באמצעות מתודת ההבטחה then(), כדי לקבל הודעה על קיום (fulfillment) או על דחייה (rejection)."
+    },
+    {
+     "id": "ps/ps9:4:1",
+     "type": "prose",
+     "en": "A **thenable** is an object that has a Promise-style then() method.\n\n",
+     "hash": "d299ad63a1db2e79",
+     "he": "**thenable** הוא אובייקט שיש לו מתודת then() בסגנון Promise."
+    },
+    {
+     "id": "ps/ps9:4:2",
+     "type": "prose",
+     "en": "Changing states: There are two operations for changing the state of a Promise - `resolve()` and `reject()`.\nAfter either one of them is invoked once, further invocations have no effect.\n",
+     "hash": "3d886514e6b933a7",
+     "he": "שינוי מצבים: יש שתי פעולות לשינוי המצב של הבטחה — `resolve()` ו-`reject()`.\nלאחר שאחת מהן הופעלה פעם אחת, להפעלות נוספות אין שום השפעה."
+    },
+    {
+     "id": "ps/ps9:4:3",
+     "type": "list",
+     "en": "* Rejecting a Promise moves the Promise to the *rejected* state.  It means the encapsulated computation has raised an error.\n* Resolving a Promise has different effects, depending on what value you are resolving with:\n    * Resolving with a normal (non-thenable) value fulfills the Promise - the promise moves to state *fulfilled*.\n    * Resolving a Promise P with a thenable T means that P will now continue with T’s computation and state, including its fulfillment or rejection value. The appropriate P reactions (callbacks) will get called once T settles (or are called immediately if T is already settled).\n\n",
+     "hash": "74a7b5d021ad11ed",
+     "he": "* דחיית הבטחה מעבירה את ההבטחה למצב *rejected*. זה אומר שהחישוב העטוף העלה שגיאה.\n* לפתירת (resolving) הבטחה יש השפעות שונות, בהתאם לערך שבו אתם פותרים:\n    * פתירה בערך רגיל (שאינו thenable) **מקיימת** את ההבטחה — ההבטחה עוברת למצב *fulfilled*.\n    * פתירת הבטחה P ב-thenable ‏T אומרת ש-P תמשיך כעת עם החישוב והמצב של T, כולל ערך הקיום או הדחייה שלה. תגובות P המתאימות (ה-callbacks) ייקראו ברגע ש-T מוכרעת (או ייקראו מיד אם T כבר מוכרעת)."
+    }
+   ],
+   "headingHe": "תגובה לשינויי מצב של הבטחה"
+  },
+  {
+   "id": "ps/ps9:5",
+   "depth": 3,
+   "headingEn": "Building and Using Promises",
+   "raw": "### Building and Using Promises\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:5:0",
+     "type": "prose",
+     "en": "The following function returns a result asynchronously, via a Promise:\n\n",
+     "hash": "130715c65886446d",
+     "he": "הפונקציה הבאה מחזירה תוצאה באופן אסינכרוני, דרך הבטחה:"
+    },
+    {
+     "id": "ps/ps9:5:1",
+     "type": "prose",
+     "en": "This is a factory for a Promise object - it receives as a parameter the functions resolve and reject to involve in case the requested computation completes or throws an error:\n\n",
+     "hash": "e1f35c633cc4e374",
+     "he": "זהו מפעל (factory) לאובייקט Promise — הוא מקבל כפרמטר את הפונקציות resolve ו-reject שיש להפעיל במקרה שהחישוב המבוקש מסתיים או זורק שגיאה:"
+    },
+    {
+     "id": "ps/ps9:5:2",
+     "type": "code",
+     "en": "```typescript\nfunction asyncFunc() {\n    return new Promise(\n        function (resolve, reject) {\n            // ···\n            resolve(result);\n            // ···\n            reject(error);\n        });\n}\n```\n\n",
+     "hash": "9da111880ed63a95",
+     "lang": "typescript",
+     "noteHe": "שלד סכמטי (שימו לב ל-`···` שמחליף קוד אמיתי) שמראה את **המבנה** של בניית הבטחה: `new Promise(function (resolve, reject) {…})` — הבנאי מקבל פונקציה אחת עם שני פרמטרים, ששניהם **פונקציות** שהבנאי מספק לנו. קוראים ל-`resolve(result)` בהצלחה ול-`reject(error)` בכישלון. **שימו לב שהשלד מטעה במתכוון**: כאן שתי הקריאות מופיעות בזו אחר זו כאילו שתיהן תתבצענה, אבל בקוד אמיתי הן תמיד יהיו בשני ענפים של `if/else` — בדיוק כמו ב-`readFilePromise` מ-4.1. **וזה קשור לכלל שהסעיף הקודם ניסח**: אם בכל זאת שתיהן ייקראו, השנייה **לא תעשה כלום** — הבטחה מוכרעת פעם אחת בלבד וההכרעה בלתי הפיכה. שימו לב שאין כאן פרמטר טיפוס גנרי (`new Promise` ולא `new Promise<string>`) — כתיב פחות מדויק מזה של 4.1."
+    },
+    {
+     "id": "ps/ps9:5:3",
+     "type": "prose",
+     "en": "We call asyncFunc() as follows:\n\n",
+     "hash": "8181140a7a376c62",
+     "he": "אנחנו קוראים ל-asyncFunc() כך:"
+    },
+    {
+     "id": "ps/ps9:5:4",
+     "type": "code",
+     "en": "```typescript\nasyncFunc()\n  .then(result => { /* ··· */ })\n  .catch(error => { /* ··· */ });\n```\n\n",
+     "hash": "93e6e4589e0b2c02",
+     "lang": "typescript",
+     "noteHe": "צד הלקוח, בשלוש שורות: קוראים לפונקציה, ומשרשרים `.then` להצלחה ו-`.catch` לכישלון. **שימו לב לסימטריה הנאה בין שני הצדדים**: מי שבונה את ההבטחה מקבל `resolve`/`reject` וקורא לאחד מהם; מי שצורך אותה רושם `then`/`catch` ומקבל את התוצאה באחד מהם. `resolve` מוביל ל-`then`, ו-`reject` מוביל ל-`catch`. **זה הצמד שכדאי לזכור** — הוא מסביר את כל המנגנון. שימו לב שהצורך אינו יודע ואינו צריך לדעת אם ההבטחה כבר מוכרעת או לא: אם היא עדיין ממתינה, המטפל יישמר ויופעל אחר כך; אם היא כבר מוכרעת, הוא יופעל כמעט מיד."
+    }
+   ],
+   "headingHe": "בנייה ושימוש בהבטחות"
+  },
+  {
+   "id": "ps/ps9:6",
+   "depth": 3,
+   "headingEn": "Chaining http Requests with Promises",
+   "raw": "### Chaining http Requests with Promises\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:6:0",
+     "type": "prose",
+     "en": "Let us re-implement the example above with requests encapsulated as Promises.\n\n",
+     "hash": "585bbeff16106d82",
+     "he": "בואו נממש מחדש את הדוגמה שלמעלה עם בקשות שעטופות כהבטחות."
+    },
+    {
+     "id": "ps/ps9:6:1",
+     "type": "prose",
+     "en": "We will use a http-request module which produces a Promise object when we invoke it:\n\n",
+     "hash": "991ad18dec795c3d",
+     "he": "נשתמש במודול http-request שמייצר אובייקט Promise כשאנחנו מפעילים אותו:"
+    },
+    {
+     "id": "ps/ps9:6:2",
+     "type": "prose",
+     "en": "> note that promise based http requests have been standardtized in the browser and are coming to node (currently experimental in node 18)\n\n",
+     "hash": "3cd7a9986c58eb93",
+     "he": "> שימו לב שבקשות http מבוססות-הבטחות תוקננו בדפדפן ומגיעות ל-node (כרגע ניסיוני ב-node 18)"
+    },
+    {
+     "id": "ps/ps9:6:3",
+     "type": "prose",
+     "en": "It is installed with npm:\n\n",
+     "hash": "ddfbdaa0264f32e5",
+     "he": "הוא מותקן עם npm:"
+    },
+    {
+     "id": "ps/ps9:6:4",
+     "type": "code",
+     "en": "```\nnpm install request-promise-native --save\n```\n\n",
+     "hash": "07ebc832cd36ed31",
+     "noteHe": "פקודת ההתקנה של החבילה. `--save` מוסיף אותה ל-`package.json` כתלות של הפרויקט (ב-npm מודרני זו התנהגות ברירת המחדל, ולכן הדגל מיותר). שימו לב לשם: `request-promise-native` הוא **עטיפה** סביב הספרייה `request` — הוא עושה בדיוק את מה שראינו ב-4.1 בשם promisification, אלא שמישהו כבר עשה זאת בשבילנו. **הערה מעשית שכדאי להכיר**: גם `request` וגם `request-promise-native` הוכרזו מיושנות (deprecated) מאז; בקוד חדש משתמשים ב-`fetch` המובנה, כפי שההערה בפסקה מעל מציינת."
+    },
+    {
+     "id": "ps/ps9:6:5",
+     "type": "prose",
+     "en": "We first simply rewrite the callback version using promises instead of callbacks:\n\n",
+     "hash": "c587b67e5d6d08a0",
+     "he": "תחילה אנחנו פשוט משכתבים את גרסת ה-callback באמצעות הבטחות במקום callbacks:"
+    },
+    {
+     "id": "ps/ps9:6:6",
+     "type": "code",
+     "en": "```typescript\n// Request Promise Native\nconst rpn = require('Request-Promise-Native');\n\n// get request using request-promise-native\nfunction createStudentPromise(baseUrl: string, studentName: string) {\n    // GET request \n    const request = {\n        method: 'GET',\n        uri: baseUrl+\"/posts\",\n        headers: {\"Content-Type\": \"application/json\"},\n    };\n    rpn(request)\n        .then((data) => {\n          let students = JSON.parse(data),\n              maxStud = students.reduce(((prev, cur)=> (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0});\n          console.log(\"Current max Id = \", maxStud.id);\n          let newStud = {id: Number(maxStud.id) + 1, title: studentName, author: \"st\"+(Number(maxStud.id)+1)};\n          console.log('Newstud = ', newStud);\n          // Submit a second request\n          let args = {\n                method: 'POST',\n                url: baseUrl+\"/posts\",  \n                headers: { 'Content-Type': 'application/json' },\n                form: newStud\n          };\n          rpn(args)\n            .then((data)=> {\n                    console.log(\"Created student: \", newStud);\n                    console.log(\"Server response: \", data);\n            })\n            .catch((err)=> console.error('something went wrong in the second request:', err));\n        })\n        .catch(function (err) {\n            console.error('something went wrong on the request: Error'); \n        });\n        \n    // this will be executed *before* the callback is executed\n    console.log(\"GET submitted to retrieve list of students\");\n};\n```\n\n",
+     "hash": "69d3ea1a0f86cb0f",
+     "lang": "typescript",
+     "noteHe": "**זו הגרסה שנראית כמו שיפור אבל אינה** — וזו כל הפואנטה של הסעיף, אז שווה להסתכל על **צורת** הקוד. החלפנו `request.get(..., callback)` ב-`rpn(request).then(...)`, אבל הבקשה השנייה עדיין יושבת **בתוך** ה-`then` של הראשונה, ויש `.catch` **בכל רמה** בנפרד. כלומר הפירמידה נשארה, וגם שכפול הטיפול בשגיאות. **הבחנה שכדאי לעשות**: המסקנה הנכונה אינה \"הבטחות אינן עוזרות\" אלא \"הבטחות עוזרות רק אם משתמשים בהן נכון\" — והשימוש הנכון הוא **להחזיר** את ההבטחה במקום לקנן אותה, כפי שהסעיף הבא מראה. שימו לב לשורה האחרונה בפונקציה, `console.log(\"GET submitted…\")`, ולהערה שמעליה: היא תתבצע **לפני** כל ה-`then`-ים, כי `rpn(request)` רק רושם את הבקשה וחוזר מיד. **שימו לב לשגיאה במקור**: ה-`require` כתוב `require('Request-Promise-Native')` באותיות גדולות, בעוד ששם החבילה שהותקנה בפקודה שמעל הוא `request-promise-native` באותיות קטנות. ב-Windows וב-macOS זה יעבוד (מערכות קבצים חסרות רגישות לאותיות), אבל ב-Linux — כלומר בכל שרת ייצור — זה ייכשל. באג קלאסי ומעצבן."
+    }
+   ],
+   "headingHe": "שרשור בקשות http עם הבטחות"
+  },
+  {
+   "id": "ps/ps9:7",
+   "depth": 3,
+   "headingEn": "Chaining instead of Nesting",
+   "raw": "### Chaining instead of Nesting\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:7:0",
+     "type": "prose",
+     "en": "The version above has the same nested structure as the one we observed with callbacks - it did not improve pn this respect - we require an embedded level for each step in a sequence of operations, and the error handling branches are also nested inside the callbacks.\n\n",
+     "hash": "bb6907df8565d0bc",
+     "he": "לגרסה שלמעלה יש אותו מבנה מקונן כמו זה שהבחנו בו עם callbacks — היא לא השתפרה בהיבט הזה. אנחנו דורשים רמה משובצת עבור כל שלב ברצף פעולות, וגם ענפי הטיפול בשגיאות מקוננים בתוך ה-callbacks."
+    },
+    {
+     "id": "ps/ps9:7:1",
+     "type": "prose",
+     "en": "The solution to avoid such nesting is to return a Promise from inside the then() of another promise.\nWhen this is achieved, we can then benefit from the chaining capabilities of promises:\n\n",
+     "hash": "81487c5777dd0c4b",
+     "he": "הפתרון להימנע מקינון כזה הוא **להחזיר** הבטחה מתוך ה-then() של הבטחה אחרת.\nכשמשיגים זאת, אנחנו יכולים ליהנות מיכולות השרשור של הבטחות:"
+    },
+    {
+     "id": "ps/ps9:7:2",
+     "type": "code",
+     "en": "```typescript\n// get request using request-promise-native\nfunction createStudentPromiseChain(baseUrl: string, studentName: string) {\n    // GET request \n    const request = {\n        method: 'GET',\n        uri: baseUrl+\"/posts\",\n        headers: {\"Content-Type\": \"application/json\"},\n    };\n    rpn(request)\n        .then((data) => {\n          let students = JSON.parse(data),\n              maxStud = students.reduce(((prev, cur)=> (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0});\n          let newStud = {id: Number(maxStud.id) + 1, title: studentName, author: \"st\"+(Number(maxStud.id)+1)};\n          // Submit a second request\n          let args = {\n                method: 'POST',\n                url: baseUrl+\"/posts\",  \n                headers: { 'Content-Type': 'application/json' },\n                form: newStud\n            };\n            return rpn(args);  // **** This is the key change\n        })\n        .then((data) => {       // **** This second then() is chained at the same level as the first\n            console.log(\"Server response: \", data);\n        })\n        // All error handlers can be chained - error will be propagated\n        .catch((err) => console.error('something went wrong in a request:', String(err).substring(0,200)+'...'));\n};\n```\n\n",
+     "hash": "d579b6880cdaef32",
+     "lang": "typescript",
+     "noteHe": "**הגרסה המתוקנת, וההערות בקוד מצביעות בעצמן על השינוי.** ההבדל היחיד לעומת הבלוק הקודם: במקום לקרוא ל-`rpn(args).then(...)` **בתוך** ה-`then` הראשון, כותבים `return rpn(args);` — ומסיימים שם את המטפל. ה-`then` השני מגיע אז **באותה רמת הזחה** של הראשון, לא בתוכו. שימו לב שההערה בקוד מסמנת זאת במפורש: `**** This is the key change`. **למה זה עובד** — וזו התכונה מ-4.1 שכדאי לשנן: כשמטפל `then` מחזיר הבטחה, השרשרת **ממתינה לה**, וה-`then` הבא מקבל את הערך שהיא נפתרה אליו (השטחה / flattening). אילו היינו שוכחים את ה-`return`, ה-`then` השני היה מקבל `undefined` והפעולות היו מתרחשות בסדר לא צפוי — **הטעות הנפוצה ביותר בעבודה עם הבטחות**. **והשיפור השני**: יש כאן `.catch` **אחד בלבד** בסוף, שתופס כשל בשתי הבקשות. שימו לב ל-`String(err).substring(0,200)+'...'` — סתם קיצור של הודעת שגיאה ארוכה לצורכי קריאות, ולא חלק מהמנגנון. **השוו את שני הבלוקים זה מול זה** — אותה לוגיקה בדיוק, ורק צורת הכתיבה השתנתה; זה התרגיל הכי מלמד בדף."
+    },
+    {
+     "id": "ps/ps9:7:3",
+     "type": "prose",
+     "en": "When we return promises instead of nesting them, we obtain code whose structure reflects the sequence of calls we intend.\nError handling can also be centralized into a single `catch` handler instead of repeated for each invocation.\n\n",
+     "hash": "f60e9757c12c828d",
+     "he": "כאשר אנחנו מחזירים הבטחות במקום לקנן אותן, אנחנו מקבלים קוד שהמבנה שלו משקף את רצף הקריאות שאנחנו מתכוונים אליו.\nאפשר גם לרכז את הטיפול בשגיאות למטפל `catch` יחיד, במקום לחזור עליו עבור כל הפעלה."
+    },
+    {
+     "id": "ps/ps9:7:4",
+     "type": "prose",
+     "en": "As a matter of style, we understand that we should disentangle the code that creates the asynchronous tasks from the code that processes the values the tasks return.  \n\n",
+     "hash": "6cb43e36133cd09d",
+     "he": "מבחינת סגנון, אנחנו מבינים שכדאי להפריד את הקוד שיוצר את המשימות האסינכרוניות מהקוד שמעבד את הערכים שהמשימות מחזירות."
+    },
+    {
+     "id": "ps/ps9:7:5",
+     "type": "code",
+     "en": "```typescript\n// Separate simple functions which generate promises\n// from a function that combines the promises together\n\nfunction getStudents(baseUrl: string) {\n    const request = {\n        method: 'GET',\n        uri: baseUrl+\"/posts\",\n        headers: {\"Content-Type\": \"application/json\"},\n    };\n    return rpn(request);\n}\n\nfunction createStudent(baseUrl: string, student: Student) {\n    let request = {\n        method: 'POST',\n        url: baseUrl+\"/posts\",  \n        headers: { 'Content-Type': 'application/json' },\n        form: student\n    };\n    return rpn(request);\n}\n\nfunction createStudentChain(baseUrl: string, studentName: string) {\n    getStudents(baseUrl)\n    .then(data => {\n        let students = JSON.parse(data),\n            maxStud = students.reduce(((prev, cur)=> (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0}),\n            newStud = {id: Number(maxStud.id) + 1, title: studentName, author: \"st\"+(Number(maxStud.id)+1)};\n          return createStudent(baseUrl, newStud);\n    })\n    .then(data => {\n        console.log(\"Student created: \", data);\n    })\n    .catch(err => {\n        console.error(\"Something went wrong: \", String(err).substring(0,100)+'...');\n    });\n};\n```\n\n",
+     "hash": "aeb4a66ce50c743f",
+     "lang": "typescript",
+     "noteHe": "**אותו קוד, מפורק לשלוש פונקציות** — וזה השיפור השלישי והאחרון בסעיף, הפעם סגנוני ולא מנגנוני. `getStudents` ו-`createStudent` הן פונקציות **קטנות ומשעממות**: כל אחת בונה אובייקט בקשה ומחזירה `rpn(request)`. הן אינן מכילות שום לוגיקה של זרימה. ו-`createStudentChain` היא ההרכבה: שרשרת `then` נקייה שקוראים אותה מלמעלה למטה — הבא סטודנטים, צור סטודנט, הדפס. **מה הרווחנו**: (1) שתי הפונקציות הקטנות ניתנות לשימוש חוזר ולבדיקה בנפרד; (2) פונקציית ההרכבה מתארת **מה** קורה ולא **איך** מדברים עם השרת; (3) פרטי ה-HTTP (כותרות, מתודות, כתובות) מרוכזים במקום אחד. **זה בדיוק העיקרון שהפסקה שמעל מנסחת** — הפרדה בין יצירת המשימות לבין עיבוד התוצאות שלהן, והוא נכון גם בקוד סינכרוני. שימו לב שהטיפוס `Student` מופיע בחתימה של `createStudent` אבל **אינו מוגדר בשום מקום בדף** — הוא היה נראה בערך `{id: number, title: string, author: string}`. שימו לב גם ש-`createStudentChain` **אינה מחזירה** את השרשרת — כלומר הקורא אינו יכול לדעת מתי היא הסתיימה; להוסיף `return` לפני `getStudents(baseUrl)` היה שיפור אמיתי, וזו שאלה טובה לתרגול."
+    }
+   ],
+   "headingHe": "שרשור במקום קינון"
+  },
+  {
+   "id": "ps/ps9:8",
+   "depth": 3,
+   "headingEn": "Higher Order Callbacks Combinations",
+   "raw": "### Higher Order Callbacks Combinations\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:8:0",
+     "type": "prose",
+     "en": "**Question**: how do we use promises to iterate over a list of values and perform an asynchronous operation on each value?\n\n",
+     "hash": "7bc08e4ed72c0ebb",
+     "he": "**שאלה**: איך אנחנו משתמשים בהבטחות כדי לעבור על רשימה של ערכים ולבצע פעולה אסינכרונית על כל ערך?"
+    },
+    {
+     "id": "ps/ps9:8:1",
+     "type": "prose",
+     "en": "Let us consider an example: we want to delete all the items in the server that have an id larger than 10.\n\n",
+     "hash": "b0a658dd1b3ca64c",
+     "he": "בואו נתבונן בדוגמה: אנחנו רוצים למחוק את כל הפריטים בשרת שה-id שלהם גדול מ-10."
+    },
+    {
+     "id": "ps/ps9:8:2",
+     "type": "prose",
+     "en": "One solution would be to chain the calls to the operation.\n\n",
+     "hash": "d19c3b69f4de39d2",
+     "he": "פתרון אחד יהיה לשרשר את הקריאות לפעולה."
+    },
+    {
+     "id": "ps/ps9:8:3",
+     "type": "code",
+     "en": "```typescript\nfunction deleteStudent(baseUrl: string, id: string) {\n    const request = {\n        method: 'DELETE',\n        uri: baseUrl+\"/posts/\"+id,\n        headers: {\"Content-Type\": \"application/json\"},\n    };\n    console.log(\"Submitted delete request for \", id);\n    return rpn(request);\n}\n\nfunction deleteStudentsWithLargeId(baseUrl: string) {\n    return getStudents(baseUrl)\n        .then(data => {\n            let students = JSON.parse(data);\n            students.forEach(s => s.id > 10 ?\n                deleteStudent(baseUrl, s.id).then(data => console.log(\"Student \", s.id, \" is deleted\")) :\n                console.log(\"Student \", s.id, \" is not deleted.\"));\n        })\n        .catch(err => console.error(\"Error :\", err));\n}\n```\n\n",
+     "hash": "0f4611785f9f71df",
+     "lang": "typescript",
+     "noteHe": "**קוד שנראה תקין אבל מכיל באג עדין — ושתי השאלות שאחריו נועדו לחשוף אותו.** `deleteStudent` שגרתית: בונה בקשת `DELETE` ומחזירה הבטחה. הבעיה ב-`deleteStudentsWithLargeId`, ובמיוחד בשימוש ב-**`forEach`**. עקבו: `students.forEach(s => … deleteStudent(...).then(...) … )` — הפונקציה שמועברת ל-`forEach` **יוצרת** הבטחה, אבל `forEach` **מתעלם לחלוטין מהערך המוחזר** של הפונקציה שהוא מפעיל. כלומר כל הבקשות נשלחות, אבל אף אחת מהן אינה מחוברת לשרשרת. **שתי ההשלכות** (וזו בדיוק התשובה לשתי השאלות שהדף שואל מיד): (1) המחיקות **אינן** מתבצעות בזו אחר זו — כולן נשלחות כמעט בבת אחת ומתחרות ביניהן; (2) ה-`then` החיצוני מסתיים ברגע שה-`forEach` חוזר, כלומר `deleteStudentsWithLargeId` **מוכרעת לפני** שהמחיקות הסתיימו — הקורא שיעשה `.then(...)` עליה יופעל מוקדם מדי. **הכלל שכדאי לשנן**: `forEach` ופונקציות אסינכרוניות אינם מסתדרים — הוא זורק את ההבטחות. הפתרון הוא `map` (שכן מחזיר אותן) יחד עם `Promise.all`, כפי שנראה בהמשך הסעיף, או רקורסיה לביצוע סדרתי. שימו לב שגם ה-`.catch` בסוף **אינו** תופס כשל של מחיקה בודדת, מאותה סיבה בדיוק."
+    },
+    {
+     "id": "ps/ps9:8:4",
+     "type": "list",
+     "en": "* Do the delete operations above happen in sequence or in parallel?\n* Does the `deleteStudentsWithLargeId` return after all students have been deleted?\n\n",
+     "hash": "f91366d12908eb47",
+     "he": "* האם פעולות המחיקה שלמעלה מתרחשות ברצף או במקביל?\n* האם `deleteStudentsWithLargeId` חוזרת רק אחרי שכל הסטודנטים נמחקו?"
+    },
+    {
+     "id": "ps/ps9:8:5",
+     "type": "prose",
+     "en": "**Question**: How can we force the asynchronous calls to be performed one after the other with no overlap _and_ make sure to wait until the end of all operations?\n\n",
+     "hash": "25a6d91f0feff07f",
+     "he": "**שאלה**: איך אנחנו יכולים לאלץ את הקריאות האסינכרוניות להתבצע אחת אחרי השנייה בלי חפיפה, _וגם_ לוודא שנמתין עד סוף כל הפעולות?"
+    },
+    {
+     "id": "ps/ps9:8:6",
+     "type": "prose",
+     "en": "**Answer**: We can invoke the subsequent asynchronous functions in the scope of the then() resolution of the previous calls.\n\n",
+     "hash": "f97d0c6e59dcb20b",
+     "he": "**תשובה**: אנחנו יכולים להפעיל את הפונקציות האסינכרוניות העוקבות בתחום ההכרה של פתירת ה-then() של הקריאות הקודמות."
+    },
+    {
+     "id": "ps/ps9:8:7",
+     "type": "code",
+     "en": "```typescript\nfunction createManyStudents(baseUrl: string, names: string[]) {\n    if (names.length === 0) {\n        return Promise.resolve();\n    } else {\n        return getStudents(baseUrl)\n        .then(data => {\n            let students = JSON.parse(data),\n                maxStud = students.reduce(((prev, cur)=> (Number(cur.id) > Number(prev.id)) ? cur : prev), {id:0}),\n                newStud = {id: Number(maxStud.id) + 1, title: names[0], author: \"st\"+(Number(maxStud.id)+1)};\n            return createStudent(baseUrl, newStud);\n        })\n        .then(data => {\n            console.log(\"Student created: \", data);\n            names.shift();\n            return createManyStudents(baseUrl, names);     // Invoke the next only after the previous has completed.\n        })\n        .catch(err => {\n            console.error(\"Something went wrong: \", err);\n        });\n    }\n}\n```\n\n",
+     "hash": "eeb4b9cfa248070a",
+     "lang": "typescript",
+     "noteHe": "**ביצוע סדרתי באמצעות רקורסיה** — הפתרון לשאלה שנשאלה מעל. `createManyStudents` יוצרת סטודנטים אחד-אחד, וכל אחד נוצר **רק אחרי** שהקודם הסתיים. עקבו אחרי המבנה: מקרה בסיס `names.length === 0` שמחזיר `Promise.resolve()` — **הבטחה שכבר מוכרעת**, כלומר \"אין מה לעשות, סיימתי\"; זו תבנית חשובה שכדאי להכיר, מקבילה ל-`'()` בסוף רשימה. ואז השרשרת: מביאים את הסטודנטים, יוצרים אחד חדש, ובתוך ה-`then` השני **מסירים את השם הראשון** (`names.shift()`) ו**מחזירים קריאה רקורסיבית** — וזה מה שמבטיח שהקריאה הבאה תתחיל רק עכשיו. ההערה בקוד מסמנת זאת: `Invoke the next only after the previous has completed`. **השוו ל-`forEach` שנכשל**: שם ההבטחות נזרקו, וכאן כל הבטחה **מוחזרת** ולכן מתחברת לשרשרת. **גוטצ'ה שכדאי לשים לב אליה**: `names.shift()` **משנה את המערך** של הקורא (mutation) — אם הקורא ישתמש ב-`names` אחרי הקריאה, הוא ימצא אותו ריק. גרסה נקייה יותר הייתה מעבירה `names.slice(1)` ולא נוגעת במקור. שימו לב גם שהקוד עושה `getStudents` **מחדש בכל איטרציה** רק כדי לגלות את ה-`id` המקסימלי — נכון פונקציונלית (כי הרשימה גדלה בכל צעד) אבל יקר: n בקשות מיותרות."
+    },
+    {
+     "id": "ps/ps9:8:8",
+     "type": "prose",
+     "en": "We can also run the operations in parallel using `Promise.all` which accepts and array of promises\nand resolved when all of them are resolved.\n\n",
+     "hash": "b5d08d1242786fb1",
+     "he": "אנחנו יכולים גם להריץ את הפעולות במקביל באמצעות `Promise.all`, שמקבל מערך של הבטחות\nונפתר כשכולן נפתרות."
+    },
+    {
+     "id": "ps/ps9:8:9",
+     "type": "code",
+     "en": "```typescript\nfunction deleteStudentsWithLargeId(baseUrl: string) {\n    return getStudents(baseUrl)\n        .then(data => {\n            let students = JSON.parse(data);\n            \n            const deleteRequests = students.filter(s => {\n                if (s.id > 10) {\n                    return true;\n                } else {\n                    console.log(\"Student \", s.id, \" is not deleted.\")\n                    return false;\n                }\n            }).map(s => deleteStudent(baseUrl, s.id)\n                       .then(data => console.log(\"Student \", s.id, \" is deleted\"))\n            )\n            return Promise.all(deleteRequests)\n        })\n        .catch(err => console.error(\"Error :\", err));\n}\n```\n\n",
+     "hash": "931d7f001e49ec5d",
+     "lang": "typescript",
+     "noteHe": "**הגרסה המתוקנת של `deleteStudentsWithLargeId`, וההשוואה לבלוק הראשון בסעיף היא הלימוד המרכזי.** שני השינויים: (1) `forEach` הוחלף ב-`filter` + **`map`** — ו-`map` **כן מחזיר** את ההבטחות, כך שמתקבל מערך של הבטחות במשתנה `deleteRequests`; (2) `return Promise.all(deleteRequests)` — שמחזיר הבטחה **אחת** שנפתרת כשכל ההבטחות במערך נפתרו, ומכיוון שהיא מוחזרת מה-`then`, השרשרת ממתינה לה. **וכך נענות שתי השאלות מהדף**: הפעולות עדיין מתבצעות **במקביל** (כולן נשלחות מיד), אבל הפונקציה **כן** ממתינה לכולן לפני שהיא מוכרעת. **ההבחנה החשובה בין שני הפתרונות שהסעיף מציג**: הרקורסיה (הבלוק הקודם) נותנת ביצוע **סדרתי** — איטי אבל עדין לשרת ומבטיח סדר; `Promise.all` נותן ביצוע **מקבילי** — מהיר בהרבה אבל שולח n בקשות בבת אחת. **כדאי לדעת מתי לבחור מה**, וזו שאלת מבחן טובה: אם הפעולות תלויות זו בזו (או שהשרת מוגבל) — סדרתי; אם הן עצמאיות — `Promise.all`. **שימו לב לגוטצ'ה של `Promise.all`**: אם **הבטחה אחת** נדחית, כל ה-`Promise.all` נדחה מיד — והשאר ממשיכות לרוץ ברקע בלי שאיש מחכה להן. אם רוצים \"חכה לכולן ותגיד לי מי הצליחה\", התשובה היא `Promise.allSettled`. שימו לב שה-`filter` כאן משמש גם להדפסה (תופעת לוואי בתוך פרדיקט) — עובד, אבל סגנון מפוקפק."
+    }
+   ],
+   "headingHe": "שילובים של Callbacks מסדר גבוה"
+  },
+  {
+   "id": "ps/ps9:9",
+   "depth": 2,
+   "headingEn": "Better promises with the `async`/`await` syntax",
+   "raw": "## Better promises with the `async`/`await` syntax\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:9:0",
+     "type": "prose",
+     "en": "In newer version of Javascript you can use the `async` keyword to declare that a function that always return a promise\nand use the `await` keyword be for an expression that evaluates to a promise to indicate not to continue execution until that promise is resolved (similar to `Promise.prototype.then`).\nWhen that awaited promise is rejected an exception is thrown (similar to `Promise.prototype.catch`).\n\n",
+     "hash": "3d3660febae0e8a9",
+     "he": "בגרסאות חדשות יותר של Javascript אתם יכולים להשתמש במילת המפתח `async` כדי להצהיר שפונקציה מחזירה תמיד הבטחה,\nולהשתמש במילת המפתח `await` לפני ביטוי שמוערך להבטחה כדי לציין שלא להמשיך בביצוע עד שההבטחה הזו נפתרת (בדומה ל-`Promise.prototype.then`).\nכאשר ההבטחה שממתינים לה נדחית, נזרקת חריגה (בדומה ל-`Promise.prototype.catch`)."
+    },
+    {
+     "id": "ps/ps9:9:1",
+     "type": "prose",
+     "en": "This special syntax enables us to write a promise based code that look more natural. It is important to note that underneath the syntax the same `Promise` object are being used conceptually.\n\n",
+     "hash": "13e117fde3a4b9e5",
+     "he": "התחביר המיוחד הזה מאפשר לנו לכתוב קוד מבוסס-הבטחות שנראה טבעי יותר. חשוב לציין שמתחת לתחביר נעשה שימוש מושגית באותם אובייקטי `Promise` עצמם."
+    },
+    {
+     "id": "ps/ps9:9:2",
+     "type": "prose",
+     "en": "Here is an example of the `async` syntax alone:\n\n",
+     "hash": "6eb45971eb31d405",
+     "he": "הנה דוגמה לתחביר ה-`async` לבדו:"
+    },
+    {
+     "id": "ps/ps9:9:3",
+     "type": "code",
+     "en": "```typescript\n//Asynchronous function\nasync function greeting1() {\n    return 'Hello, world!';\n}\n\nconst greeting2 = async () => 'Hello, World';\n\n// in both cases the type is () => Promise<string>\n// so we cant just use the value \n// console.log(greeting1) will print a Promise object\n// we need to do the following\ngreeting1().then(s => console.log(s))\n```\n\n",
+     "hash": "b38f23115b270971",
+     "lang": "typescript",
+     "noteHe": "שתי דרכים להצהיר על פונקציית `async` — כפונקציה רגילה (`async function greeting1()`) וכפונקציית חץ (`const greeting2 = async () => …`), שקולות לגמרי. **וההערות בקוד הן העיקר כאן**: הטיפוס של שתיהן הוא `() => Promise<string>` **ולא** `() => string`, למרות ש-`return 'Hello, world!'` מחזיר מחרוזת פשוטה. ולכן `console.log(greeting1())` ידפיס אובייקט Promise ולא את הטקסט — וזו טעות שכל מי שמתחיל עם `async` עושה. הדרך הנכונה היא `greeting1().then(s => console.log(s))`, כפי שהשורה האחרונה מדגימה, או `console.log(await greeting1())` בתוך פונקציית `async`. **שימו לב לשגיאה קטנה בהערה שבקוד**: כתוב `console.log(greeting1)` בלי סוגריים — כלומר הפונקציה עצמה ולא הפעלה שלה; זה היה מדפיס את **קוד הפונקציה**, לא אובייקט Promise. הכוונה הייתה `console.log(greeting1())`."
+    },
+    {
+     "id": "ps/ps9:9:4",
+     "type": "prose",
+     "en": "The `await` is only valid within an `async` function (and also at the top level in newer javascript runtimes):\n\n",
+     "hash": "704cb0071298b1cb",
+     "he": "ה-`await` תקף רק בתוך פונקציית `async` (וגם ברמה העליונה בסביבות זמן ריצה חדשות יותר של javascript):"
+    },
+    {
+     "id": "ps/ps9:9:5",
+     "type": "code",
+     "en": "```typescript\nasync function greeting3() {\n    const hello = await new Promise((resolve) => {\n        setTimeout(() => resolve('Hello'), 1000)\n    });\n    const world = await new Promise((resolve) => {\n        setTimeout(() => resolve('world'), 1000)\n    });\n    return `${hello}, ${world}!`\n}\n```\n\n",
+     "hash": "e43ebf9751c34d25",
+     "lang": "typescript",
+     "noteHe": "‏`greeting3` — **שני `await` בזה אחר זה, וזה יותר איטי ממה שנראה**. כל אחת משתי ההבטחות ממתינה שנייה אחת באמצעות `setTimeout`, אבל מכיוון שה-`await` השני מתחיל **רק אחרי** שהראשון הסתיים, סך הזמן הוא **שתי שניות** ולא אחת. שימו לב שאין כאן שום תלות בין שתי ההבטחות — `world` אינו זקוק ל-`hello` — ולכן ההמתנה הסדרתית היא **בזבוז מוחלט**. זו בדיוק השאלה שהדף שואל מיד בהמשך, והתשובה נמצאת בבלוק הבא עם `Promise.all`. **כדאי לשנן את הכלל**: `await` רצוף על פעולות **בלתי תלויות** הוא באג ביצועים נפוץ; אם אין תלות, הריצו במקביל. שימו לב לתבנית של יצירת השהיה: `new Promise((resolve) => setTimeout(() => resolve('Hello'), 1000))` — אותה תבנית `wait` שראינו ב-4.1. שימו לב גם ל-`` `${hello}, ${world}!` `` — template literal של JavaScript, שקול לשרשור מחרוזות."
+    },
+    {
+     "id": "ps/ps9:9:6",
+     "type": "code",
+     "en": "```typescript \nasync function greeting4() {\n    const [hello, world] =  await Promise.all([\n        new Promise((resolve) => {\n            setTimeout(() => resolve('Hello'), 1000)\n        }),\n        new Promise((resolve) => {\n            setTimeout(() => resolve('world'), 1000)\n        })\n    ]);\n    return `${hello}, ${world}!`\n}\n```\n\n",
+     "hash": "eb53c97d1f911e2c",
+     "lang": "typescript",
+     "noteHe": "‏`greeting4` — **אותה תוצאה בחצי מהזמן**, וזו ההשוואה שהסעיף בנוי אליה. ההבדל: `await` **אחד** על `Promise.all([...])` שעוטף את שתי ההבטחות. שתיהן נוצרות ומופעלות **מיד**, שני הטיימרים רצים במקביל, וסך הזמן הוא **שנייה אחת**. **שימו לב לתבנית הפירוק (destructuring)**: `const [hello, world] = await Promise.all([...])` — `Promise.all` נפתר למערך של התוצאות **בסדר של ההבטחות בקלט** (ולא בסדר שבו הן הסתיימו!), ואנחנו מפרקים אותו לשני משתנים. **זו נקודה חשובה שכדאי לזכור**: הסדר במערך התוצאה מובטח, גם אם ההבטחה השנייה הסתיימה ראשונה. **הכלל המעשי שכדאי לקחת מהזוג `greeting3`/`greeting4`**: אם הפעולות תלויות זו בזו — `await` רצוף; אם הן עצמאיות — `Promise.all`. השוו לאותה הבחנה בין רקורסיה ל-`Promise.all` בסעיף הקודם; זו אותה שאלה בדיוק בשני הקשרים."
+    },
+    {
+     "id": "ps/ps9:9:7",
+     "type": "prose",
+     "en": "**Question:** The functions above execution is sequential or parallel?\n\n\n",
+     "hash": "61ea1f31dbf146dc",
+     "he": "**שאלה:** האם הביצוע של הפונקציות שלמעלה סדרתי או מקבילי?"
+    },
+    {
+     "id": "ps/ps9:9:8",
+     "type": "prose",
+     "en": "Here is our createManyStudents function written using `async` / `await`:\n\n",
+     "hash": "8f70ba36638bdbc6",
+     "he": "הנה פונקציית createManyStudents שלנו כתובה באמצעות `async` / `await`:"
+    },
+    {
+     "id": "ps/ps9:9:9",
+     "type": "code",
+     "en": "```typescript\nasync function createManyStudents2(baseUrl: string, names: string[]) {\n    if (names.length === 0) {\n        return;\n    } else {\n        try {\n            const data = await getStudents(baseUrl);\n            const students = JSON.parse(data);\n            const maxStud = students.reduce(((prev, cur) => (Number(cur.id) > Number(prev.id)) ? cur : prev), {id: 0});\n            let currStudId = Number(maxStud.id) + 1\n            for (const name of names) {\n                newStud = {id: currStudId, title: name, author: `st${currStudId}`};\n                await createStudent(baseUrl, newStud);\n                currStudId++;\n            }\n        } catch (err) {\n            console.error(\"Something went wrong: \", err);\n        }\n    }\n}\n```\n\n\n",
+     "hash": "e8d852a6dcba3fc2",
+     "lang": "typescript",
+     "noteHe": "**אותה `createManyStudents` בגרסת `async/await` — והשוו אותה לגרסה הרקורסיבית בסעיף 8.** מה שהיה רקורסיה עם `names.shift()` הפך כאן ל**לולאת `for…of` רגילה**, ומה שהיה `.catch` הפך ל-`try/catch`. **זו התמורה האמיתית של `async/await`**: לולאה על פעולות אסינכרוניות, שהייתה דורשת רקורסיה, נכתבת כלולאה פשוטה. ה-`await createStudent(...)` בתוך הלולאה מבטיח שכל יצירה מסתיימת לפני שהבאה מתחילה — **סדרתי**, בדיוק כמו הרקורסיה. **שיפור נוסף שקל לפספס**: הגרסה הזו קוראת ל-`getStudents` **פעם אחת בלבד** מחוץ ללולאה, ומנהלת מונה `currStudId` שגדל בעצמו — במקום n קריאות מיותרות לשרת כמו בגרסה הרקורסיבית. **שימו לב לבאג אמיתי בקוד**: השורה `newStud = {...}` **חסרה הצהרה** (`const`/`let`) — במצב לא-קפדני זה יוצר משתנה גלובלי, וב-TypeScript או במצב `strict` זו שגיאת קומפילציה. הצורה הנכונה היא `const newStud = {...}`. שימו לב גם ש-`return;` במקרה הבסיס מחזיר `undefined` שנעטף אוטומטית ב-`Promise<void>` — שקול ל-`Promise.resolve()` שבגרסה הקודמת, אבל קצר יותר."
+    }
+   ],
+   "headingHe": "הבטחות טובות יותר עם התחביר `async`/`await`"
+  },
+  {
+   "id": "ps/ps9:10",
+   "depth": 2,
+   "headingEn": "A few notes on iterator and Generator types",
+   "raw": "## A few notes on iterator and Generator types\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps9:10:0",
+     "type": "prose",
+     "en": "In the lecture you saw generator function, that can used inside loops similarly to arrays (but can have custom logic, be infinite etc.,)\n\n",
+     "hash": "27ca9bb39d16dea2",
+     "he": "בהרצאה ראיתם פונקציית גנרטור, שאפשר להשתמש בה בתוך לולאות בדומה למערכים (אבל היא יכולה להכיל לוגיקה מותאמת, להיות אינסופית וכדומה)"
+    },
+    {
+     "id": "ps/ps9:10:1",
+     "type": "code",
+     "en": "```typescript\nfunction * count3() {\n    yield 1;\n    yield 2;\n    yield 3;\n}\n```\n\n",
+     "hash": "3fc78e9610ab395a",
+     "lang": "typescript",
+     "noteHe": "גנרטור מינימלי: שלושה `yield` מפורשים. שימו לב לרווח ב-`function * count3()` — שקול ל-`function* count3()`; מקום הכוכבית אינו משנה. הסעיף הזה שונה מהקודמים: הוא אינו על אסינכרוניות אלא על **הטיפוסים** שמאחורי הגנרטורים, ובמיוחד על השאלה מה בדיוק `count3()` מחזירה. שווה להחזיק את השאלה הזו בראש בזמן קריאת הסעיף."
+    },
+    {
+     "id": "ps/ps9:10:2",
+     "type": "prose",
+     "en": "we know that we can iterate over count3() \n",
+     "hash": "c0e6dcaf20e48475",
+     "he": "אנחנו יודעים שאנחנו יכולים לעבור באיטרציה על count3()"
+    },
+    {
+     "id": "ps/ps9:10:3",
+     "type": "code",
+     "en": "```typescript\nfor (const n of count3()) {\n    console.log(n)\n}\n```\n\n",
+     "hash": "3d70364d9c589da1",
+     "lang": "typescript",
+     "noteHe": "לולאת `for…of` על הגנרטור — מדפיסה `1 2 3`. שימו לב שאיננו קוראים ל-`next()` ואיננו בודקים `done`; הלולאה עושה זאת בשבילנו. **וזו בדיוק הנקודה שהשאלה בפסקה הבאה מחדדת**: הקוד הזה עובד בלי מחשבה, אבל **למה** הוא עובד? מה `count3()` מחזירה שמאפשר ל-`for…of` לצרוך אותה? התשובה דורשת שני פרוטוקולים נפרדים, שהסעיף מציג מיד."
+    },
+    {
+     "id": "ps/ps9:10:4",
+     "type": "prose",
+     "en": "***Question:*** But what exactly did count3() return?\n\n",
+     "hash": "fa35ae465248e72f",
+     "he": "***שאלה:*** אבל מה בדיוק count3() החזירה?"
+    },
+    {
+     "id": "ps/ps9:10:5",
+     "type": "prose",
+     "en": "we can also use **yeild*** keyeord this way and get the same result\n\n",
+     "hash": "415465b514491dfc",
+     "he": "אנחנו יכולים גם להשתמש במילת המפתח **yeild*** בדרך הזו ולקבל את אותה תוצאה"
+    },
+    {
+     "id": "ps/ps9:10:6",
+     "type": "code",
+     "en": "```typescript\nfunction * count3() {\n    yield* [1, 2, 3];\n}\n```\n\n",
+     "hash": "046629c60e5fb63e",
+     "lang": "typescript",
+     "noteHe": "‏`yield*` (עם כוכבית) — **אופרטור שונה מ-`yield` הרגיל**, וההבדל חשוב. `yield [1,2,3]` היה מוסר את **המערך כולו** כערך בודד; `yield* [1,2,3]` **מאציל** (delegates) לאיטרבל ומוסר את איבריו **אחד-אחד**. כלומר הגרסה הזו שקולה לחלוטין לשלושת ה-`yield` המפורשים בבלוק הראשון. **שימושים אופייניים**: להאציל לגנרטור אחר (`yield* otherGen()`) או לפרוס מערך, וזה מייתר לולאות `for` שכל תפקידן להעביר איברים. **שימו לב לשגיאת כתיב במקור**: בפסקה שמעל כתוב `yeild*` במקום `yield*` — שיכול אותיות, ולא מילת מפתח אמיתית."
+    },
+    {
+     "id": "ps/ps9:10:7",
+     "type": "prose",
+     "en": "<br>\n\n",
+     "hash": "65aef1adba8672a5",
+     "he": "<br>"
+    },
+    {
+     "id": "ps/ps9:10:8",
+     "type": "prose",
+     "en": "To understand this we need the following two protocols:\n\n",
+     "hash": "01927ae3038a559f",
+     "he": "כדי להבין את זה אנחנו צריכים את שני הפרוטוקולים הבאים:"
+    },
+    {
+     "id": "ps/ps9:10:9",
+     "type": "prose",
+     "en": "First, *JavaScript* defines the following very general **iterator protocol**:\n\n",
+     "hash": "9b2f80fd6cd5ffa2",
+     "he": "ראשית, *JavaScript* מגדירה את **פרוטוקול האיטרטור** (iterator protocol) הכללי מאוד הבא:"
+    },
+    {
+     "id": "ps/ps9:10:10",
+     "type": "code",
+     "en": "```typescript\ninterface IteratorResult<T> {\n    value: T;\n    done: boolean;\n}\ninterface Iterator<T> {\n    next(): IteratorResult<T>;\n}\n```\n\n",
+     "hash": "f4b102bd7a8497aa",
+     "lang": "typescript",
+     "noteHe": "**פרוטוקול האיטרטור** — זהה למה שראינו ב-4.1, אלא שכאן הוא **גנרי** (`<T>`) ולא `any`, וזה כתיב מדויק יותר. `Iterator<T>` הוא כל דבר עם מתודה `next()` שמחזירה `{value, done}`. **הנקודה שכדאי לתפוס לקראת הפרוטוקול השני**: איטרטור יודע לתת את **האיבר הבא**, אבל הוא **אינו** אומר \"אפשר לעבור עליי בלולאה\". זו הבחנה שנראית פדנטית ובעצם היא הליבה של הסעיף: `for…of` אינו עובד עם איטרטור אלא עם **איטרבל**, וזה שני דברים שונים."
+    },
+    {
+     "id": "ps/ps9:10:11",
+     "type": "prose",
+     "en": "The second protocol we need the **iterable protocol**. \nIn JavaScript any object can hook into the `for-of` construct (and the `...` spread syntax)\nby adding a special function name `Symbol.iterator` that returns an iterator. This is called the iterable protocol:\n\n",
+     "hash": "8e831bc2604511ef",
+     "he": "הפרוטוקול השני שאנחנו צריכים הוא **פרוטוקול האיטרבל** (iterable protocol).\nב-JavaScript, כל אובייקט יכול להתחבר למבנה `for-of` (ולתחביר הפריסה `...`)\nעל ידי הוספת פונקציה מיוחדת בשם `Symbol.iterator` שמחזירה איטרטור. זה נקרא פרוטוקול האיטרבל:"
+    },
+    {
+     "id": "ps/ps9:10:12",
+     "type": "code",
+     "en": "```typescript\ninterface Iterable<T> {\n    [Symbol.iterator](): Iterator<T>;\n}\n```\n\n",
+     "hash": "a8246bd3dad87537",
+     "lang": "typescript",
+     "noteHe": "**פרוטוקול האיטרבל** — שורה אחת, אבל שווה לפרק אותה. `[Symbol.iterator](): Iterator<T>` — הסוגריים המרובעים סביב שם המתודה הם תחביר של **מפתח מחושב** (computed key): שם המתודה אינו המחרוזת `\"Symbol.iterator\"` אלא הערך של הסמל המיוחד `Symbol.iterator`. **למה סמל ולא שם רגיל?** כדי שלא תהיה התנגשות עם מתודה שהמתכנת קרא לה `iterator` — סמלים הם מפתחות ייחודיים מובטחים. **ההבחנה בין שני הפרוטוקולים, וזה מה שכדאי לשנן**: *איטרטור* הוא מי שיודע לתת את האיבר הבא (`next()`); *איטרבל* הוא מי שיודע **לספק איטרטור** (`[Symbol.iterator]()`). ‏`for…of` דורש **איטרבל**. וזו הסיבה שמערכים עובדים ב-`for…of` — למערך יש `Symbol.iterator` מובנה. **וזו גם התשובה לשאלה שהדף שאל**: `count3()` מחזירה אובייקט שהוא **גם** איטרטור **וגם** איטרבל, כפי שהפסקה הבאה מסבירה."
+    },
+    {
+     "id": "ps/ps9:10:13",
+     "type": "prose",
+     "en": "The generator functions that you saw in the lectures act in the same manner. \nWe can iterate over their return type because they return an iterable object, more specifically the return type of a generator is both an iterator and an iterable (that returns the same iterator)\n\n",
+     "hash": "733f9ab6fd368346",
+     "he": "פונקציות הגנרטור שראיתם בהרצאות פועלות באותו אופן.\nאנחנו יכולים לעבור באיטרציה על טיפוס ההחזרה שלהן מכיוון שהן מחזירות אובייקט איטרבל — ובאופן ספציפי יותר, טיפוס ההחזרה של גנרטור הוא גם איטרטור וגם איטרבל (שמחזיר את אותו איטרטור)"
+    },
+    {
+     "id": "ps/ps9:10:14",
+     "type": "prose",
+     "en": "***Question:*** Can you write the return type of the `count3` function?\n\n\n",
+     "hash": "bd9258f151d8247b",
+     "he": "***שאלה:*** האם אתם יכולים לכתוב את טיפוס ההחזרה של הפונקציה `count3`?"
+    },
+    {
+     "id": "ps/ps9:10:15",
+     "type": "prose",
+     "en": "<br><br>\n\n\n\n",
+     "hash": "a71f3b4b32669f2d",
+     "he": "<br><br>"
+    },
+    {
+     "id": "ps/ps9:10:16",
+     "type": "code",
+     "en": "```typescript\ninterface Generator<T> extends Iterator<T> {\n    [Symbol.iterator](): Generator<T>;\n}\n\ninterface GeneratorFunction {\n    (...args: any[]): Generator;\n}\n```\n\n",
+     "hash": "6fbe9ca6bfb2f5ea",
+     "lang": "typescript",
+     "noteHe": "**התשובה לשאלה, ושווה להתעכב על השורה הראשונה.** `interface Generator<T> extends Iterator<T>` — גנרטור הוא **איטרטור** (ולכן יש לו `next()`), **וגם** יש לו `[Symbol.iterator]()` ולכן הוא **איטרבל**. וההחזרה של אותה מתודה היא `Generator<T>` — כלומר **הוא מחזיר את עצמו**. זו הנקודה המושגית: כשלולאת `for…of` מבקשת איטרטור מהגנרטור, היא מקבלת אותו הגנרטור עצמו. **ההשלכה המעשית שכדאי להכיר**: גנרטור אינו ניתן לשימוש חוזר. אם תריצו `for…of` עליו פעמיים, המעבר השני לא ידפיס כלום — כי הגנרטור כבר הגיע ל-`done` ואין \"התחלה מחדש\". השוו למערך, שכל `Symbol.iterator` שלו מייצר איטרטור **חדש**, ולכן אפשר לעבור עליו כמה פעמים. **טעות נפוצה** היא לשמור `const g = count3()` ולהניח שאפשר לעבור עליו פעמיים. `GeneratorFunction` בהמשך היא פשוט הטיפוס של הפונקציה `function*` עצמה — כל פונקציה שמחזירה `Generator`. שימו לב שבשורה הזו כתוב `Generator` בלי פרמטר טיפוס, בעוד שהממשק מעליה מוגדר כ-`Generator<T>` — חוסר עקביות במקור, וב-TypeScript אמיתי זה היה דורש `Generator<any>`."
+    },
+    {
+     "id": "ps/ps9:10:17",
+     "type": "prose",
+     "en": "That is, a generator function (`function *`) returns an *iterator* that also adheres to the *iterable* protocol thus can be used with `for-of` and `...`. Its `Symbol.iterator`  returns the generator itself.\n\n\n\n",
+     "hash": "c5a0e16b40b8ae3e",
+     "he": "כלומר, פונקציית גנרטור (`function *`) מחזירה *איטרטור* שמקיים גם את פרוטוקול ה-*איטרבל*, ולכן אפשר להשתמש בו עם `for-of` ועם `...`. ה-`Symbol.iterator` שלו מחזיר את הגנרטור עצמו."
+    }
+   ],
+   "headingHe": "כמה הערות על טיפוסי איטרטור וגנרטור"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "**שתי השאלות מהדף (נשארו ללא תשובה מפורשת)**, על הגרסה הראשונה של `deleteStudentsWithLargeId` שמשתמשת ב-`forEach`:\n\n1. האם פעולות המחיקה מתרחשות ברצף או במקביל?\n2. האם `deleteStudentsWithLargeId` חוזרת רק אחרי שכל הסטודנטים נמחקו?\n\nנמקו, וקשרו לתיקון שהדף מציג בהמשך.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n**1. במקביל.** ‏`forEach` מפעיל את הפונקציה על כל איבר בזה אחר זה **בלי להמתין לכלום** — הוא אינו מכיר הבטחות. לכן כל הקריאות ל-`deleteStudent` נשלחות כמעט בבת אחת, וכל בקשות ה-`DELETE` מתחרות ביניהן ברשת. הסדר שבו הן **יסתיימו** אינו מובטח כלל, ולכן גם סדר ההדפסות `\"Student N is deleted\"` אינו צפוי.\n\n**2. לא.** וזו הבעיה החמורה יותר. הפונקציה שמועברת ל-`forEach` **מחזירה** הבטחה (`deleteStudent(...).then(...)`), אבל `forEach` **מתעלם מהערך המוחזר** של ה-callback שהוא מפעיל — הוא זורק אותו. לכן:\n- ה-`then` החיצוני מסתיים ברגע שה-`forEach` חוזר, כלומר אחרי ש**נשלחו** כל הבקשות אבל לפני שאף אחת **הסתיימה**.\n- ההבטחה ש-`deleteStudentsWithLargeId` מחזירה נפתרת באותו רגע.\n- קורא שיכתוב `deleteStudentsWithLargeId(url).then(() => console.log(\"all done\"))` יראה `all done` **לפני** הודעות המחיקה.\n\n**השלכה שלישית שקל לפספס**: ה-`.catch` בסוף השרשרת **אינו** תופס כשל של מחיקה בודדת, מאותה סיבה — ההבטחות של המחיקות אינן מחוברות לשרשרת, ולכן דחייה של אחת מהן היא `unhandled rejection`.\n\n**הכלל הכללי**: `forEach` ופעולות אסינכרוניות אינם מסתדרים. `forEach` בנוי לתופעות לוואי סינכרוניות בלבד.\n\n**התיקון שהדף מציג** מחליף `forEach` ב-`map` + `Promise.all`:\n```typescript\nconst deleteRequests = students.filter(...).map(s => deleteStudent(baseUrl, s.id).then(...));\nreturn Promise.all(deleteRequests);\n```\n`map` **כן מחזיר** את ההבטחות, `Promise.all` הופך את המערך שלהן להבטחה אחת, וה-`return` מחבר אותה לשרשרת. **שימו לב שהתיקון משנה רק את התשובה לשאלה 2** — הפעולות עדיין מתרחשות במקביל, אבל עכשיו הפונקציה כן ממתינה לכולן. אם היינו רוצים ביצוע **סדרתי**, היה צריך רקורסיה (כמו `createManyStudents`) או לולאת `for…of` עם `await`.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) 'במקביל' עם הנימוק ש-`forEach` אינו ממתין; (2) 'לא' לשאלה השנייה, עם ההסבר המדויק ש-`forEach` **זורק את הערך המוחזר** של ה-callback ולכן ההבטחות אינן מחוברות לשרשרת; (3) ההשלכה הנצפית — `all done` יודפס לפני הודעות המחיקה; (4) שגם ה-`catch` אינו תופס כשלים של מחיקות בודדות; (5) התיקון עם `map` + `Promise.all`, **וההבחנה שהוא מתקן רק את שאלה 2 ולא הופך את הביצוע לסדרתי**. הטעות הנפוצה היא לחשוב שהתיקון הופך את הפעולות לסדרתיות."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "**השאלה מהדף (נשארה ללא תשובה):** האם הביצוע של `greeting3` ושל `greeting4` סדרתי או מקבילי? מה זמן הריצה של כל אחת, ומדוע?\n```typescript\nasync function greeting3() {\n    const hello = await new Promise((resolve) => { setTimeout(() => resolve('Hello'), 1000) });\n    const world = await new Promise((resolve) => { setTimeout(() => resolve('world'), 1000) });\n    return `${hello}, ${world}!`\n}\n\nasync function greeting4() {\n    const [hello, world] = await Promise.all([\n        new Promise((resolve) => { setTimeout(() => resolve('Hello'), 1000) }),\n        new Promise((resolve) => { setTimeout(() => resolve('world'), 1000) })\n    ]);\n    return `${hello}, ${world}!`\n}\n```",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n**`greeting3` — סדרתי, כ-2000 מילישניות.** שני ה-`await` מתבצעים בזה אחר זה: ההבטחה השנייה **נוצרת** רק אחרי שהראשונה נפתרה, ולכן הטיימר השני מתחיל למנות רק בשנייה השנייה. סך הכול 1000 + 1000.\n\n**`greeting4` — מקבילי, כ-1000 מילישניות.** שתי ההבטחות נוצרות **מיד**, בתוך הליטרל של המערך שמועבר ל-`Promise.all` — ולכן שני הטיימרים מתחילים למנות באותו רגע. `Promise.all` נפתר כשהאחרונה מביניהן נפתרת, כלומר אחרי שנייה אחת.\n\n**הנקודה המכרעת שקל לפספס**: מה שקובע אינו `await` אלא **מתי ההבטחה נוצרת**. הבטחה מתחילה לרוץ ברגע שהיא נבנית, לא ברגע שממתינים לה. ב-`greeting3` הבנייה עצמה מעוכבת; ב-`greeting4` שתי הבנייות קורות מיד.\n\nלכן גם הגרסה הזו הייתה מקבילית, **בלי** `Promise.all`:\n```typescript\nconst p1 = new Promise(...);   // שתיהן נוצרות מיד\nconst p2 = new Promise(...);\nconst hello = await p1;        // שני ה-await אינם מוסיפים זמן\nconst world = await p2;\n```\n\n**מתי כל אחת נכונה**: מכיוון ש-`world` אינו תלוי ב-`hello`, ההמתנה הסדרתית ב-`greeting3` היא **בזבוז מוחלט** — `greeting4` עדיפה. אבל אם ההבטחה השנייה הייתה **זקוקה** לתוצאה הראשונה (למשל `fetch(url + hello)`), הסדר הסדרתי היה הכרחי ו-`Promise.all` בלתי אפשרי.\n\n**שני פרטים נוספים על `Promise.all`**: (1) מערך התוצאות שומר על **סדר הקלט**, לא על סדר הסיום — ולכן הפירוק `[hello, world]` נכון גם אם השנייה הסתיימה ראשונה; (2) אם הבטחה **אחת** נדחית, כל ה-`Promise.all` נדחה מיד. אם רוצים להמתין לכולן ולדעת מי הצליחה, משתמשים ב-`Promise.allSettled`.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) `greeting3` סדרתי ~2000ms, `greeting4` מקבילי ~1000ms; (2) **הנימוק המדויק** — מה שקובע הוא מתי ההבטחה **נוצרת**, לא מתי ממתינים לה; (3) ההדגמה שאפשר לקבל מקביליות בלי `Promise.all` על ידי יצירת שתי ההבטחות מראש; (4) שההמתנה הסדרתית מוצדקת רק כשיש תלות בין הפעולות; (5) ששני הפרטים על `Promise.all` — סדר התוצאות לפי הקלט, ודחייה מיידית עם `allSettled` כחלופה. תשובה שאומרת רק 'סדרתי/מקבילי' בלי לזהות שהגורם הוא רגע היצירה מפספסת את העיקר."
+  },
+  {
+   "id": "q3",
+   "type": "open",
+   "questionHe": "**השאלות מהסעיף האחרון (נשארו ללא תשובה מלאה):** מה בדיוק מחזירה `count3()`, ומהו טיפוס ההחזרה שלה? הסבירו דרך שני הפרוטוקולים, ומה ההשלכה המעשית החשובה שנובעת מהם.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n**מה היא מחזירה.** לא את הערכים `1, 2, 3` ולא מערך שלהם — היא מחזירה **אובייקט גנרטור**, שאף אחד מגופה עוד לא רץ. הגוף מתחיל לרוץ רק בקריאה הראשונה ל-`next()`.\n\n**הטיפוס:** `Generator<number>`, שמוגדר כך:\n```typescript\ninterface Generator<T> extends Iterator<T> {\n    [Symbol.iterator](): Generator<T>;\n}\n```\n\n**שני הפרוטוקולים, וזו ההבחנה שהסעיף בנוי סביבה:**\n- **איטרטור** (`Iterator<T>`) — יש לו `next()` שמחזירה `{value, done}`. כלומר הוא יודע לתת את **האיבר הבא**.\n- **איטרבל** (`Iterable<T>`) — יש לו `[Symbol.iterator]()` שמחזירה איטרטור. כלומר הוא יודע **לספק** איטרטור.\n\n‏`for…of` דורש **איטרבל**, לא איטרטור. ואובייקט הגנרטור הוא **שניהם**: הוא מרחיב את `Iterator<T>` (ולכן יש לו `next()`), ובנוסף יש לו `[Symbol.iterator]()` — ש**מחזירה את עצמו**. זה מה שמאפשר גם `g.next()` ידני וגם `for (const n of count3())`.\n\n**ההשלכה המעשית החשובה — גנרטור אינו ניתן לשימוש חוזר.** מכיוון ש-`[Symbol.iterator]()` מחזירה את הגנרטור **עצמו** ולא איטרטור חדש, מעבר שני עליו לא יניב כלום:\n```typescript\nconst g = count3();\nfor (const n of g) console.log(n);   // 1 2 3\nfor (const n of g) console.log(n);   // כלום! הגנרטור מותש\n```\nהפתרון הוא לקרוא ל-`count3()` מחדש בכל מעבר.\n\n**השוו למערך**: `[1,2,3]` הוא איטרבל אבל **אינו** איטרטור (אין לו `next()`), וה-`Symbol.iterator` שלו מייצר איטרטור **חדש** בכל קריאה — ולכן אפשר לעבור עליו שוב ושוב. **זו בדיוק הסיבה ששני הפרוטוקולים הופרדו**: הפרדה בין 'אוסף שאפשר לעבור עליו' לבין 'מצב של מעבר מסוים'.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) שהיא מחזירה אובייקט גנרטור ושהגוף עוד לא רץ; (2) הטיפוס `Generator<number>`; (3) ההגדרה של **שני** הפרוטוקולים וההבחנה ביניהם — `next()` מול `[Symbol.iterator]()`; (4) ש-`for…of` דורש איטרבל, ושגנרטור הוא שניהם כי `Symbol.iterator` שלו מחזיר את עצמו; (5) **ההשלכה** — גנרטור אינו ניתן לשימוש חוזר, עם דוגמה, וההשוואה למערך שכן. תשובה שרק אומרת 'מחזירה איטרטור' בלי ההבחנה בין שני הפרוטוקולים ובלי השימוש-החוזר מפספסת את מה שהסעיף בא ללמד."
+  }
+ ]
+}

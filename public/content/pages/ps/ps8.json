@@ -1,0 +1,466 @@
+{
+ "id": "ps/ps8",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps8.md",
+ "titleEn": "ps8",
+ "titleHe": "מערכת הסקת טיפוסים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps8:0",
+   "depth": 0,
+   "headingEn": "",
+   "raw": "",
+   "blocks": [
+    {
+     "id": "ps/ps8:0:0",
+     "type": "prose",
+     "en": "﻿<h1><b>Type Inference System</b></h1>\n\n",
+     "hash": "87b8e462f8938ee6",
+     "he": "<h1><b>מערכת הסקת טיפוסים</b></h1>"
+    }
+   ]
+  },
+  {
+   "id": "ps/ps8:1",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #8",
+   "raw": "<h2><b>Practical Session - Week #8</b></h2>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:1:0",
+     "type": "prose",
+     "en": "The Type Inference System is a TypeScript Implementation of the algorithm for Type Checking and Inference using Type Equations.\n\n\n",
+     "hash": "f49e7136ea71cc0c",
+     "he": "מערכת הסקת הטיפוסים היא מימוש ב-TypeScript של האלגוריתם לבדיקת טיפוסים ולהסקת טיפוסים באמצעות משוואות טיפוס."
+    }
+   ],
+   "headingHe": "תרגול — שבוע #8"
+  },
+  {
+   "id": "ps/ps8:2",
+   "depth": 2,
+   "headingEn": "System Architecture",
+   "raw": "## System Architecture\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:2:0",
+     "type": "prose",
+     "en": "The layers of the system are:\n\n",
+     "hash": "865d2e49fc358a3d",
+     "he": "שכבות המערכת הן:"
+    },
+    {
+     "id": "ps/ps8:2:1",
+     "type": "list",
+     "en": "- Abstract Syntax for L5 Expressions and for Type Expressions.\n\n- The key data types manipulated in the algorithm, Type Equations and Type Substitutions.\n\n- The logic of the algorithm is implemented in three functional packages: Exp-to-Pool, Exp-to-Equations and the top-level algorithm Solve.\n\n\n",
+     "hash": "0638565e96007e1a",
+     "he": "- תחביר מופשט עבור ביטויי L5 ועבור ביטויי טיפוס.\n\n- טיפוסי הנתונים המרכזיים שמתופעלים באלגוריתם: משוואות טיפוס והצבות טיפוס.\n\n- הלוגיקה של האלגוריתם ממומשת בשלוש חבילות פונקציונליות: Exp-to-Pool, ‏Exp-to-Equations והאלגוריתם ברמה העליונה Solve."
+    }
+   ],
+   "headingHe": "ארכיטקטורת המערכת"
+  },
+  {
+   "id": "ps/ps8:3",
+   "depth": 2,
+   "headingEn": "Layer 1: Languages Definitions",
+   "raw": "## Layer 1: Languages Definitions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:3:0",
+     "type": "prose",
+     "en": "The Type Inference algorithm maps expressions in one language (L5 expressions) into expressions in another language (Type Expressions).\n\n",
+     "hash": "b44ac07e589bd78c",
+     "he": "אלגוריתם הסקת הטיפוסים ממפה ביטויים בשפה אחת (ביטויי L5) לביטויים בשפה אחרת (ביטויי טיפוס)."
+    },
+    {
+     "id": "ps/ps8:3:1",
+     "type": "prose",
+     "en": "The lower level of the Type Inference system implements the Abstract Syntax interfaces for expressions in these two languages.\n\n",
+     "hash": "78311634c2eeaa7f",
+     "he": "הרמה הנמוכה של מערכת הסקת הטיפוסים מממשת את ממשקי התחביר המופשט עבור ביטויים בשתי השפות האלה."
+    },
+    {
+     "id": "ps/ps8:3:2",
+     "type": "prose",
+     "en": "#### [L5-AST](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-ast.ts)\n\n",
+     "hash": "0dddc3d3cc44bec9",
+     "he": "#### [L5-AST](https://github.com/bguppl/interpreters/blob/master/src/L5/L5-ast.ts)"
+    },
+    {
+     "id": "ps/ps8:3:3",
+     "type": "prose",
+     "en": "Implements parser and abstract syntax for the following BNF concrete syntax:\n\n",
+     "hash": "639345babd2477cb",
+     "he": "מממש מנתח תחבירי ותחביר מופשט עבור התחביר הקונקרטי הבא ב-BNF:"
+    },
+    {
+     "id": "ps/ps8:3:4",
+     "type": "code",
+     "en": "```typescript\n/*\n<program> ::= (L5 <exp>+)                  / Program(exps:List(exp))\n<exp> ::= <define> | <cexp>                / DefExp | CExp\n<define> ::= ( define <var-decl> <cexp> )  / DefExp(var:VarDecl, val:CExp)\n<var> ::= <identifier>                     / VarRef(var:string)\n<cexp> ::= <number>                        / NumExp(val:number)\n        |  <boolean>                       / BoolExp(val:boolean)\n        |  <string>                        / StrExp(val:string)\n        |  <var-ref>\n        |  ( lambda ( <var-decl>* ) <cexp>+ ) | ( lambda ( <var-decl>* ) : <TExp> <cexp>+ ) / ProcExp(args:VarDecl[], body:CExp[], returnTE: TExp))\n        |  ( if <cexp> <cexp> <cexp> )     / IfExp(test: CExp, then: CExp, alt: CExp)\n        |  ( quote <sexp> )                / LitExp(val:SExp)\n        |  ( <cexp> <cexp>* )              / AppExp(operator:CExp, operands:CExp[]))\n        |  ( let ( <binding>* ) <cexp>+ )  / LetExp(bindings:Binding[], body:CExp[]))\n        |  ( letrec ( binding*) <cexp>+ )  / LetrecExp(bindings:Bindings[], body: CExp)\n        |  ( set! <var> <cexp>)            / SetExp(var: varRef, val: CExp)\n<binding>  ::= ( <var-decl> <cexp> )            / Binding(var:VarDecl, val:Cexp)\n<prim-op>  ::= + | - | * | / | < | > | = | not |  eq? | string=?\n                 | cons | car | cdr | list? | number?\n                 | boolean? | symbol? | string?\n                 | display | newline\n<num-exp>  ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref>  ::= an identifier token         / VarRef(var)\n<var-decl> ::= an identifier token | (var : TExp) / VarRef(var, TE: TExp) ##### L5\n<sexp>     ::= symbol | number | bool | string | ( <sexp>* )              ##### L3\n*/\n```\n\n",
+     "hash": "22e0125218dd7bba",
+     "lang": "typescript",
+     "noteHe": "ה-BNF המלא של $$L5$$ — **השפה העשירה ביותר בקורס**, וכדאי להשוות אותה ל-L1 שראינו ב-ps4. שימו לב מה נוסף מאז: `IfExp`, ‏`ProcExp` (lambda), ‏`LitExp` (ציטוט), ‏`LetExp`, ‏`LetrecExp` ו-`SetExp`. **החידוש של L5 לעומת L4 הוא הערות הטיפוס**, ושימו לב היכן בדיוק הן מופיעות — בשתי שורות בלבד: בשורת ה-`ProcExp` יש **שתי** חלופות, אחת בלי הערת טיפוס החזרה (`( lambda ( <var-decl>* ) <cexp>+ )`) ואחת איתה (`… : <TExp> …`); ובשורת ה-`<var-decl>`, שיכולה להיות מזהה פשוט **או** `(var : TExp)`. שתי החלופות בכל מקום הן בדיוק מה שהופך את ההערות ל**אופציונליות** — וזה מה שמאפשר הסקת טיפוסים במקום בדיקה בלבד. שימו לב לתגיות `##### L5` ו-`##### L3` בסוף שתי השורות האחרונות: הן מסמנות באיזה שלב של הקורס כל כלל נוסף, כלומר ה-BNF הזה נבנה בשכבות. שימו לב לרשימת `<prim-op>` — היא ארוכה בהרבה מזו של L1 (שהיו בה שמונה פרימיטיבים), וכוללת כעת פעולות על רשימות (`cons`, `car`, `cdr`), פרדיקטי טיפוס (`number?`, `boolean?`) ופעולות עם תופעות לוואי (`display`, `newline`). **שימו לב לאי-דיוק במקור**: השורה של `<var-decl>` ממפה ל-`VarRef(var, TE: TExp)`, אבל צומת הצהרה הוא `VarDecl` ולא `VarRef` — זו בדיוק ההבחנה שהדגשנו ב-ps4, וכאן היא נכתבה בטעות."
+    },
+    {
+     "id": "ps/ps8:3:5",
+     "type": "prose",
+     "en": "Note that we introduce optional type annotations in the L5 syntax in 2 places only:\n\n",
+     "hash": "100c5ff01fc62b78",
+     "he": "שימו לב שאנחנו מציגים הערות טיפוס אופציונליות בתחביר של L5 בשני מקומות בלבד:"
+    },
+    {
+     "id": "ps/ps8:3:6",
+     "type": "list",
+     "en": "- As part of VarDecl in the form `(var : type-expression)`\n\n- As part of ProcExp in the return type of the procedure in the form: `(lambda ((x : number) (y : number)) : number ...)`\n\n",
+     "hash": "e66f96fdffd308aa",
+     "he": "- כחלק מ-VarDecl בצורה `(var : type-expression)`\n\n- כחלק מ-ProcExp בטיפוס ההחזרה של הפרוצדורה בצורה: `(lambda ((x : number) (y : number)) : number ...)`"
+    },
+    {
+     "id": "ps/ps8:3:7",
+     "type": "prose",
+     "en": "#### [TExp-AST](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts)\n\n\n",
+     "hash": "15cd47e635c99951",
+     "he": "#### [TExp-AST](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts)"
+    },
+    {
+     "id": "ps/ps8:3:8",
+     "type": "code",
+     "en": "```typescript\n/*\nType checking language\nSyntax with optional type annotations for var declarations and function return types.\n\n<texp>         ::= <atomic-te> | <compound-te> | <tvar>\n<atomic-te>    ::= <num-te> | <bool-te> | <void-te> | <str-te>\n<num-te>       ::= number   // num-te()\n<bool-te>      ::= boolean  // bool-te()\n<str-te>       ::= string   // str-te()\n<void-te>      ::= void     // void-te()\n<compound-te>  ::= <proc-te> | <tuple-te>\n<non-tuple-te> ::= <atomic-te> | <proc-te> | <tvar>\n<proc-te>      ::= [ <tuple-te> -> <non-tuple-te> ] // proc-te(param-tes: list(te), return-te: te)\n<tuple-te>     ::= <non-empty-tuple-te> | <empty-te>\n<non-empty-tuple-te> ::= ( <non-tuple-te> *)* <non-tuple-te> // tuple-te(tes: list(te))\n<empty-te>     ::= Empty\n<tvar>         ::= a symbol starting with T // tvar(id: Symbol, contents; Box(string|boolean))\n*/\n```\n\n",
+     "hash": "01376c4036ef7c62",
+     "lang": "typescript",
+     "noteHe": "ה-BNF של **שפת הטיפוסים** — שימו לב שזו שפה בפני עצמה, עם תחביר משלה, לגמרי בנפרד מ-L5. זהו הרעיון המרכזי: הסקת טיפוסים היא מיפוי מ**שפה אחת** (L5) ל**שפה אחרת** (TExp). שלוש החלופות ברמה העליונה: אטומי, מורכב, או משתנה טיפוס. **האטומיים** הם ארבעה: `number`, `boolean`, `string` ו-`void` (הטיפוס של `display` ו-`newline`). **המורכבים** מוגדרים כ-`proc-te` או `tuple-te`, וכאן שווה לעצור: `<proc-te> ::= [ <tuple-te> -> <non-tuple-te> ]` — הסוגריים המרובעים הם חלק מהתחביר, אגף שמאל הוא **טופל** (רשימת טיפוסי הפרמטרים) ואגף ימין הוא טיפוס יחיד. ההגדרה של `<non-tuple-te>` היא שמונעת טופל בתוך טופל, כלומר אין טיפוסי פרמטרים מקוננים ישירות; היא גם הסיבה שטיפוס שמחזיר פונקציה נכתב עם סוגריים פנימיים, `number -> (number -> boolean)`. **`<empty-te> ::= Empty`** הוא הטופל הריק, וזה מסביר את `[Empty -> _S]` שראינו בכללי הטיפוס של פרוצדורה בלי פרמטרים. **`<tvar> ::= a symbol starting with T`** — כל סמל שמתחיל ב-T הוא משתנה טיפוס, וזו המוסכמה שבזכותה `T1` ו-`Tx` מזוהים אוטומטית. שימו לב לשדה `contents` בהערה של `tvar`: זו בדיוק הקופסה של ההשמה החד-כיוונית מ-3.3. **שימו לב לשגיאות דפוס במקור**: בהערה של `tvar` כתוב `contents;` בנקודה-פסיק במקום נקודתיים, והטיפוס `Box(string|boolean)` שגוי — הקופסה מחזיקה `undefined | TExp`, לא מחרוזת או בוליאני."
+    },
+    {
+     "id": "ps/ps8:3:9",
+     "type": "prose",
+     "en": "The definition of the TExp data types, the parser of TExp is provided in file [TExp.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts)\n\n",
+     "hash": "56c8d523055ae38a",
+     "he": "ההגדרה של טיפוסי הנתונים TExp והמנתח התחבירי של TExp מסופקים בקובץ [TExp.ts](https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts)"
+    },
+    {
+     "id": "ps/ps8:3:10",
+     "type": "prose",
+     "en": "Examples of Types Expressions:\n",
+     "hash": "884517bb9928b2c5",
+     "he": "דוגמאות לביטויי טיפוסים:"
+    },
+    {
+     "id": "ps/ps8:3:11",
+     "type": "list",
+     "en": "* `number`\n* `boolean`\n* `void`\n* `number -> boolean`\n* `number * number -> boolean`\n* `number -> (number -> boolean)`\n* `empty -> number`\n* `empty -> void`\n\n",
+     "hash": "ee1518d6c2ca2ca1",
+     "he": "* `number`\n* `boolean`\n* `void`\n* `number -> boolean`\n* `number * number -> boolean`\n* `number -> (number -> boolean)`\n* `empty -> number`\n* `empty -> void`"
+    },
+    {
+     "id": "ps/ps8:3:12",
+     "type": "code",
+     "en": "```typescript\n// Purpose: Compute the type of an expression\n// Traverse the AST and check the type according to the exp type.\nexport const typeofExp = (exp: A.Parsed, tenv: E.TEnv): Result<T.TExp> =>\n    A.isNumExp(exp) ? makeOk(T.makeNumTExp()) :\n    A.isBoolExp(exp) ? makeOk(T.makeBoolTExp()) :\n    A.isStrExp(exp) ? makeOk(T.makeStrTExp()) :\n    A.isPrimOp(exp) ? TC.typeofPrim(exp) :\n    A.isVarRef(exp) ? E.applyTEnv(tenv, exp.var) :\n    A.isIfExp(exp) ? typeofIf(exp, tenv) :\n    A.isProcExp(exp) ? typeofProc(exp, tenv) :\n    A.isAppExp(exp) ? typeofApp(exp, tenv) :\n    A.isLetExp(exp) ? typeofLet(exp, tenv) :\n    A.isLetrecExp(exp) ? typeofLetrec(exp, tenv) :\n    A.isDefineExp(exp) ? typeofDefine(exp, tenv) :\n    A.isProgram(exp) ? typeofProgram(exp, tenv) :\n    makeFailure(`Unknown type: ${JSON.stringify(exp, null, 2)}`);\n```\n\n\n",
+     "hash": "389f13ce6e76444a",
+     "lang": "typescript",
+     "noteHe": "‏`typeofExp` — **הפונקציה הראשית של בודק הטיפוסים**, ושווה לשים לב לצורתה: שרשרת של שתים-עשרה בדיקות `is…`, אחת לכל סוג צומת ב-AST, בסדר של פשוט-לפני-מורכב. חמש הראשונות הן העלים ומחזירות תשובה מיד — מספר, בוליאני, מחרוזת, פרימיטיב (דרך `typeofPrim`) והפניה למשתנה. שימו לב ל-`isVarRef` שקוראת ל-`applyTEnv(tenv, exp.var)`: זו חיפוש בסביבת הטיפוסים, ובדיוק כאן נכנס ה-`Tenv` לתמונה — הוא הזיכרון שאומר מה הטיפוס של כל משתנה בתחום ההכרה הנוכחי. שבע הבאות מאצילות לפונקציית עזר ייעודית לכל מבנה (`typeofIf`, `typeofProc`, `typeofApp` וכן הלאה), וכל אחת מהן מממשת **כלל טיפוס אחד** מאלה שלמדנו. הענף האחרון הוא `makeFailure` לצומת בלתי מזוהה. **הנקודה שכדאי לשנן**: המבנה של בודק הטיפוסים משקף אחד-לאחד את קבוצת כללי הטיפוס — כלל אחד, פונקציה אחת. **וההערה שקושרת את הדף כולו**: זהו בדיוק אותו קוד שב-3.3 נאמר עליו שהוא הופך לאלגוריתם הסקת טיפוסים בלי שינוי, למעט החלפת `checkEqualType` מבדיקת שוויון לאוניפיקציה. שימו לב שהפונקציה מקבלת `A.Parsed` ולא `A.Exp` — טיפוס רחב יותר שכולל גם `Program`, וזו הסיבה שיש ענף `isProgram`."
+    }
+   ],
+   "headingHe": "שכבה 1: הגדרות השפות"
+  },
+  {
+   "id": "ps/ps8:4",
+   "depth": 2,
+   "headingEn": "Layer 2: Substitution and Equation ADTs",
+   "raw": "## Layer 2: Substitution and Equation ADTs\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:4:0",
+     "type": "prose",
+     "en": "The Type Inference algorithm is defined in terms of 2 basic formal tools:\n\n",
+     "hash": "f6bbf5d5c7a447dc",
+     "he": "אלגוריתם הסקת הטיפוסים מוגדר במונחים של 2 כלים פורמליים בסיסיים:"
+    },
+    {
+     "id": "ps/ps8:4:1",
+     "type": "list",
+     "en": "* **Type Substitutions** are finite mappings of Type Variables to Type Expressions.\n\n* **Equations** are pairs that state that a left Type Expression is to be held equivalent to a right Type Expression.\n\n",
+     "hash": "9d5b7eb6d0568ef8",
+     "he": "* **הצבות טיפוס** (Type Substitutions) הן מיפויים סופיים ממשתני טיפוס לביטויי טיפוס.\n\n* **משוואות** (Equations) הן זוגות שקובעים שביטוי טיפוס שמאלי ייחשב שקול לביטוי טיפוס ימני."
+    },
+    {
+     "id": "ps/ps8:4:2",
+     "type": "prose",
+     "en": "**Equations** are the tool we use to represent a typing statement in the algorithm.\n\n",
+     "hash": "b239e8085daa3a14",
+     "he": "**משוואות** הן הכלי שאנחנו משתמשים בו כדי לייצג טענת טיפוס באלגוריתם."
+    }
+   ],
+   "headingHe": "שכבה 2: טיפוסי הנתונים המופשטים של הצבה ומשוואה"
+  },
+  {
+   "id": "ps/ps8:5",
+   "depth": 3,
+   "headingEn": "Substitution ADT",
+   "raw": "### Substitution ADT\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:5:0",
+     "type": "code",
+     "en": "```typescript\nexport interface Sub {tag: \"Sub\"; vars: TVar[]; tes: TExp[]; }\nexport const isSub = (x: any): x is Sub => x.tag === \"Sub\";\n```\n\n",
+     "hash": "b74911b39eca1347",
+     "lang": "typescript",
+     "noteHe": "ההגדרה של טיפוס ההצבה, בשתי שורות. שימו לב לייצוג: **שני מערכים מקבילים** — `vars: TVar[]` ו-`tes: TExp[]` — ולא מערך של זוגות. כלומר `vars[i]` והביטוי `tes[i]` הם קשירה אחת, והמשמר שחייב להתקיים הוא ששני המערכים באותו אורך. זה מסביר למה ב-3.3 ראינו ב-`extendSub` שני `cons` נפרדים, אחד לכל מערך. `isSub` הוא פרדיקט הטיפוס הרגיל שבודק את ה-`tag`. שימו לב שההגדרה כאן היא `interface` ולא `type` — שקול לצורכינו, וחוסר עקביות סגנונית בקוד הקורס. שימו לב גם שההצבה הריקה אינה מופיעה כאן; ב-3.3 היא היוותה טיפוס נפרד באיחוד, ובקובץ המלא היא מיוצגת כ-`Sub` עם שני מערכים ריקים."
+    },
+    {
+     "id": "ps/ps8:5:1",
+     "type": "prose",
+     "en": "The interface of the Substitution ADT includes:\n\n",
+     "hash": "f43776efb22153cd",
+     "he": "הממשק של ה-Substitution ADT כולל:"
+    },
+    {
+     "id": "ps/ps8:5:2",
+     "type": "list",
+     "en": "* `makeSub(variables, type-expressions)`\n\n* `subGet(sub, var)` - lookup a variable in a substitution\n\n* `extendSub(sub, var, te)` - create a new substitution by adding a single pair `{var:te}` to `sub`\n\n* `applySub(sub, te)` - replace type variables inside te according to sub\n\n* `combineSub(sub1, sub2)` - compute a new sub such that: `applySub(sub, te) = applySub(sub2, applySub(sub1, te))` for all `te`\n\n",
+     "hash": "23ccf3540900d3d4",
+     "he": "* `makeSub(variables, type-expressions)`\n\n* `subGet(sub, var)` — חיפוש משתנה בהצבה\n\n* `extendSub(sub, var, te)` — יצירת הצבה חדשה על ידי הוספת זוג בודד `{var:te}` ל-`sub`\n\n* `applySub(sub, te)` — החלפת משתני טיפוס בתוך te בהתאם ל-sub\n\n* `combineSub(sub1, sub2)` — חישוב sub חדש כך ש: `applySub(sub, te) = applySub(sub2, applySub(sub1, te))` עבור כל `te`"
+    }
+   ],
+   "headingHe": "טיפוס הנתונים המופשט של הצבה"
+  },
+  {
+   "id": "ps/ps8:6",
+   "depth": 3,
+   "headingEn": "Equation ADT",
+   "raw": "### Equation ADT\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:6:0",
+     "type": "code",
+     "en": "```typescript\nexport interface Equation {left: T.TExp, right: T.TExp}\nexport const makeEquation = (l: T.TExp, r: T.TExp): Equation => ({left: l, right: r});\n```\n\n\n",
+     "hash": "7e755c12fb3acd4c",
+     "lang": "typescript",
+     "noteHe": "טיפוס המשוואה — שתי שורות, וזה הכול. משוואה היא פשוט רשומה עם שני שדות, `left` ו-`right`, ששניהם `TExp`. **שימו לב למה שאין כאן**: אין `tag`, בשונה מכל שאר טיפוסי הנתונים בקורס — כי `Equation` אינו חלק מאיחוד זר ואין צורך להבחין אותו מטיפוסים אחרים. אין גם פרדיקט `isEquation`. **הנקודה המושגית**: משוואה היא הייצוג של **טענת טיפוס** באלגוריתם, כפי שהפסקה שמעל אמרה — כלומר הצהרה שהאלגוריתם ינסה לקיים, ולא בדיקה שהוא מבצע. שימו לב שהשמות `left`/`right` שרירותיים לגמרי: המשוואה סימטרית, ואכן ראינו ב-3.3 שהפותר מטפל בשני הכיוונים באמצעות אותו ענף `checkTVarEqualTypes` עם ארגומנטים מוחלפים."
+    }
+   ],
+   "headingHe": "טיפוס הנתונים המופשט של משוואה"
+  },
+  {
+   "id": "ps/ps8:7",
+   "depth": 2,
+   "headingEn": "Layer 3: Exp-to-Pool, Exp-to-Equations, Solve",
+   "raw": "## Layer 3: Exp-to-Pool, Exp-to-Equations, Solve\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:7:0",
+     "type": "list",
+     "en": "* `expToPool(exp)` - traverses the AST of a Scheme Expression and maps each sub-expression in the AST to distinct Type Variables\n\n    What is `Pool`?\n\n    ```typescript\n    export interface PoolItem {e: A.Exp, te: T.TExp}\n    export type Pool = PoolItem[];\n    ```\n\n    ```typescript\n    // Purpose: Traverse the abstract syntax tree L5-exp\n    //          and collect all sub-expressions into a Pool of fresh type variables.\n    // Example:\n    // bind(p('(+ x 1)'), (s) => mapv(parseL5Exp(s), (e) => TE.expToPool(e))) =>\n    // Ok([[AppExp(PrimOp(+), [VarRef(x), NumExp(1)]), TVar(16)],\n    //     [NumExp(1), TVar(15)],\n    //     [VarRef(x), TVar(14)],\n    //     [PrimOp(+), TVar(13)]])\n    export const expToPool = (exp: A.Exp): Pool => {\n        const findVars = (e: A.Exp, pool: Pool): Pool =>\n            A.isAtomicExp(e) ? extendPool(e, pool) :\n            A.isProcExp(e) ? extendPool(e, reducePool(findVars, e.body, reducePoolVarDecls(extendPoolVarDecl, e.args, pool))) :\n            A.isCompoundExp(e) ? extendPool(e, reducePool(findVars, A.expComponents(e), pool)) :\n            makeEmptyPool();\n        return findVars(exp, makeEmptyPool());\n    };\n    ```\n\n* `poolToEquations(pool)` applies type formulae to propagate constraints from the syntactic structure of the L5 Expression to constraints (equations) among the type variables of the pool.\n\n    There are **specific constraints derived for each type of syntactic construct** according to the semantics of the L5 programming language\n\n    ```typescript\n    // Purpose: Return a set of equations for a given Exp encoded as a pool\n    // @Pre: pool is the result of expToPool(exp)\n    export const poolToEquations = (pool: Pool): Opt.Optional<Equation[]> => {\n        // VarRef generate no equations beyond that of var-decl - remove them.\n        const poolWithoutVars: Pool = R.filter(R.propSatisfies(R.complement(A.isVarRef), 'e'), pool);\n        return Opt.mapv(Opt.mapOptional((e: A.Exp) => makeEquationsFromExp(e, pool), R.map(R.prop('e'), poolWithoutVars)), (eqns: Equation[][]) => \n                    flatten(eqns));\n    };\n    \n    // Signature: make-equation-from-exp(exp, pool)\n    // Purpose: Return a single equation\n    // @Pre: exp is a member of pool\n    export const makeEquationsFromExp = (exp: A.Exp, pool: Pool): Opt.Optional<Equation[]> =>\n        // An application must respect the type of its operator\n        // Type(Operator) = [T1 * .. * Tn -> Te]\n        // Type(Application) = Te\n        A.isAppExp(exp) ? Opt.bind(inPool(pool, exp.rator), (rator: T.TExp) =>\n                                Opt.bind(Opt.mapOptional((e) => inPool(pool, e), exp.rands), (rands: T.TExp[]) =>\n                                    Opt.mapv(inPool(pool, exp), (e: T.TExp) => \n                                        [makeEquation(rator, T.makeProcTExp(rands, e))]))) :\n        // The type of procedure is (T1 * ... * Tn -> Te)\n        // where Te is the type of the last exp in the body of the proc.\n        // and   Ti is the type of each of the parameters.\n        // No need to traverse the other body expressions - they will be\n        // traversed by the overall loop of pool->equations\n        A.isProcExp(exp) ? Opt.bind(inPool(pool, exp), (left: T.TExp) =>\n                                    Opt.mapv(Opt.bind(safeLast(exp.body), (last: A.CExp) => inPool(pool, last)), (ret: T.TExp) =>\n                                        [makeEquation(left, T.makeProcTExp(R.map((vd) => vd. texp, exp.args), ret))])) :\n        // The type of a number is Number\n        A.isNumExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeNumTExp())]) :\n        // The type of a boolean is Boolean\n        A.isBoolExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeBoolTExp())]) :\n        // The type of a string is String\n        A.isStrExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeStrTExp())]) :\n        // The type of a primitive procedure is given by the primitive.\n        A.isPrimOp(exp) ? Opt.bind(inPool(pool, exp), (left: T.TExp) =>\n                                    Opt.mapv(Res.resultToOptional(TC.typeofPrim(exp)), (right: T.TExp) =>\n                                        [makeEquation(left, right)])) : Opt.makeNone();\n    \n    ```\n\n* `inferType(L5expr)` - applies the whole logic of the type inference algorithm.\n\n    The main steps of the algorithm are reflected in this top-level fragment:\n\n    ```typescript\n    // Signature: inferType(exp)\n    // Purpose: Infer the type of an expression using the equations method\n    // Example: unparseTExp(inferType(parse('(lambda (f x) (f (f x)))')))\n    //          ==> '((T_1 -> T_1) * T_1 -> T_1)'\n    export const inferType = (exp: A.Exp): Opt.Optional<T.TExp> => {\n        const pool = expToPool(exp);\n        const equations = poolToEquations(pool);\n        const sub = Opt.bind(equations, (eqns: Equation[]) => Res.resultToOptional(solveEquations(eqns)));\n        // Extract the computed type of the root expression from the pool\n        const texp = inPool(pool, exp);\n        // Replace all TVars in the computed type by their type expression\n        return Opt.bind(sub, (sub: S.Sub) =>\n                    Opt.mapv(texp, (texp: T.TExp) =>\n                        T.isTVar(texp) ? S.subGet(sub, texp) : texp))\n    };\n    ```\n\n",
+     "hash": "0397f78630d317a6",
+     "he": "* `expToPool(exp)` — עובר על ה-AST של ביטוי Scheme וממפה כל תת-ביטוי ב-AST למשתני טיפוס נפרדים\n\n    מהי `Pool`?\n\n    ```typescript\n    export interface PoolItem {e: A.Exp, te: T.TExp}\n    export type Pool = PoolItem[];\n    ```\n\n    ```typescript\n    // Purpose: Traverse the abstract syntax tree L5-exp\n    //          and collect all sub-expressions into a Pool of fresh type variables.\n    // Example:\n    // bind(p('(+ x 1)'), (s) => mapv(parseL5Exp(s), (e) => TE.expToPool(e))) =>\n    // Ok([[AppExp(PrimOp(+), [VarRef(x), NumExp(1)]), TVar(16)],\n    //     [NumExp(1), TVar(15)],\n    //     [VarRef(x), TVar(14)],\n    //     [PrimOp(+), TVar(13)]])\n    export const expToPool = (exp: A.Exp): Pool => {\n        const findVars = (e: A.Exp, pool: Pool): Pool =>\n            A.isAtomicExp(e) ? extendPool(e, pool) :\n            A.isProcExp(e) ? extendPool(e, reducePool(findVars, e.body, reducePoolVarDecls(extendPoolVarDecl, e.args, pool))) :\n            A.isCompoundExp(e) ? extendPool(e, reducePool(findVars, A.expComponents(e), pool)) :\n            makeEmptyPool();\n        return findVars(exp, makeEmptyPool());\n    };\n    ```\n\n* `poolToEquations(pool)` מיישם נוסחאות טיפוס כדי להפיץ אילוצים מהמבנה התחבירי של ביטוי ה-L5 לאילוצים (משוואות) בין משתני הטיפוס של הבריכה.\n\n    יש **אילוצים ספציפיים שנגזרים עבור כל סוג של מבנה תחבירי** בהתאם לסמנטיקה של שפת התכנות L5\n\n    ```typescript\n    // Purpose: Return a set of equations for a given Exp encoded as a pool\n    // @Pre: pool is the result of expToPool(exp)\n    export const poolToEquations = (pool: Pool): Opt.Optional<Equation[]> => {\n        // VarRef generate no equations beyond that of var-decl - remove them.\n        const poolWithoutVars: Pool = R.filter(R.propSatisfies(R.complement(A.isVarRef), 'e'), pool);\n        return Opt.mapv(Opt.mapOptional((e: A.Exp) => makeEquationsFromExp(e, pool), R.map(R.prop('e'), poolWithoutVars)), (eqns: Equation[][]) => \n                    flatten(eqns));\n    };\n    \n    // Signature: make-equation-from-exp(exp, pool)\n    // Purpose: Return a single equation\n    // @Pre: exp is a member of pool\n    export const makeEquationsFromExp = (exp: A.Exp, pool: Pool): Opt.Optional<Equation[]> =>\n        // An application must respect the type of its operator\n        // Type(Operator) = [T1 * .. * Tn -> Te]\n        // Type(Application) = Te\n        A.isAppExp(exp) ? Opt.bind(inPool(pool, exp.rator), (rator: T.TExp) =>\n                                Opt.bind(Opt.mapOptional((e) => inPool(pool, e), exp.rands), (rands: T.TExp[]) =>\n                                    Opt.mapv(inPool(pool, exp), (e: T.TExp) => \n                                        [makeEquation(rator, T.makeProcTExp(rands, e))]))) :\n        // The type of procedure is (T1 * ... * Tn -> Te)\n        // where Te is the type of the last exp in the body of the proc.\n        // and   Ti is the type of each of the parameters.\n        // No need to traverse the other body expressions - they will be\n        // traversed by the overall loop of pool->equations\n        A.isProcExp(exp) ? Opt.bind(inPool(pool, exp), (left: T.TExp) =>\n                                    Opt.mapv(Opt.bind(safeLast(exp.body), (last: A.CExp) => inPool(pool, last)), (ret: T.TExp) =>\n                                        [makeEquation(left, T.makeProcTExp(R.map((vd) => vd. texp, exp.args), ret))])) :\n        // The type of a number is Number\n        A.isNumExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeNumTExp())]) :\n        // The type of a boolean is Boolean\n        A.isBoolExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeBoolTExp())]) :\n        // The type of a string is String\n        A.isStrExp(exp) ? Opt.mapv(inPool(pool, exp), (left: T.TExp) => [makeEquation(left, T.makeStrTExp())]) :\n        // The type of a primitive procedure is given by the primitive.\n        A.isPrimOp(exp) ? Opt.bind(inPool(pool, exp), (left: T.TExp) =>\n                                    Opt.mapv(Res.resultToOptional(TC.typeofPrim(exp)), (right: T.TExp) =>\n                                        [makeEquation(left, right)])) : Opt.makeNone();\n    \n    ```\n\n* `inferType(L5expr)` — מיישם את כל הלוגיקה של אלגוריתם הסקת הטיפוסים.\n\n    השלבים העיקריים של האלגוריתם משתקפים בקטע הזה שברמה העליונה:\n\n    ```typescript\n    // Signature: inferType(exp)\n    // Purpose: Infer the type of an expression using the equations method\n    // Example: unparseTExp(inferType(parse('(lambda (f x) (f (f x)))')))\n    //          ==> '((T_1 -> T_1) * T_1 -> T_1)'\n    export const inferType = (exp: A.Exp): Opt.Optional<T.TExp> => {\n        const pool = expToPool(exp);\n        const equations = poolToEquations(pool);\n        const sub = Opt.bind(equations, (eqns: Equation[]) => Res.resultToOptional(solveEquations(eqns)));\n        // Extract the computed type of the root expression from the pool\n        const texp = inPool(pool, exp);\n        // Replace all TVars in the computed type by their type expression\n        return Opt.bind(sub, (sub: S.Sub) =>\n                    Opt.mapv(texp, (texp: T.TExp) =>\n                        T.isTVar(texp) ? S.subGet(sub, texp) : texp))\n    };\n    ```"
+    },
+    {
+     "id": "ps/ps8:7:1",
+     "type": "prose",
+     "en": "The key logic of the algorithm lies in the `solveEquations` algorithm – which turns a list of **Type Equations** into a single coherent **Type Substitution** which satisfies all the constraints.\n\n",
+     "hash": "03dcadd756760049",
+     "he": "הלוגיקה המרכזית של האלגוריתם נמצאת באלגוריתם `solveEquations` — שהופך רשימה של **משוואות טיפוס** ל**הצבת טיפוס** אחת ומגובשת שמקיימת את כל האילוצים."
+    },
+    {
+     "id": "ps/ps8:7:2",
+     "type": "prose",
+     "en": "`solveEquations` relies on the computation of unification between two type expressions – as shown in the following fragment:\n\n",
+     "hash": "bbaa106b5f5333b8",
+     "he": "‏`solveEquations` נשען על חישוב אוניפיקציה בין שני ביטויי טיפוס — כפי שמוצג בקטע הבא:"
+    },
+    {
+     "id": "ps/ps8:7:3",
+     "type": "code",
+     "en": "```typescript\nexport const solveEquations = (equations: Equation[]): Res.Result<S.Sub> =>\n    solve(equations, S.makeEmptySub());\n\n// Purpose: Solve the equations, starting from a given substitution.\n//          Returns the resulting substitution, or error, if not solvable\nconst solve = (equations: Equation[], sub: S.Sub): Res.Result<S.Sub> => {\n    \n    if (!isNonEmptyList<Equation>(equations)) {\n        return Res.makeOk(sub);\n    }\n\n    const solveVarEq = (tvar: T.TVar, texp: T.TExp): Res.Result<S.Sub> =>\n        Res.bind(S.extendSub(sub, tvar, texp), sub2 => solve(rest(equations), sub2));\n\n    const bothSidesEqualVars = (eq: Equation): boolean =>\n        T.isTVar(eq.left) && T.isTVar(eq.right) && T.eqTVar(eq.left, eq.right);\n    \n    const handleBothSidesAtomic = (l: T.AtomicTExp , r: T.AtomicTExp): Res.Result<S.Sub> =>\n        T.eqAtomicTExp(l, r)\n        ? solve(rest(equations), sub)\n        : Res.makeFailure(`Equation with non-equal atomic type ${format(eq)}`);\n\n    const eq = makeEquation(S.applySub(sub, first(equations).left),\n                            S.applySub(sub, first(equations).right));\n\n    return bothSidesEqualVars(eq) ? solve(rest(equations), sub) :\n           T.isTVar(eq.left) ? solveVarEq(eq.left, eq.right) :\n           T.isTVar(eq.right) ? solveVarEq(eq.right, eq.left) :\n           T.isAtomicTExp(eq.left) && T.isAtomicTExp(eq.right) ? handleBothSidesAtomic(eq.left , eq.right) :\n           T.isCompoundTExp(eq.left) && T.isCompoundTExp(eq.right) && canUnify(eq) ?\n                solve(R.concat(rest(equations), splitEquation(eq)), sub) :\n           Res.makeFailure(`Equation contains incompatible types ${format(eq)}`);\n};\n\n    const eq = makeEquation(S.applySub(sub, first(equations).left),\n                            S.applySub(sub, first(equations).right));\n\n    return T.isTVar(eq.left) ? solveVarEq(eq.left, eq.right) :\n           T.isTVar(eq.right) ? solveVarEq(eq.right, eq.left) :\n           bothSidesAtomic(eq) ? handleBothSidesAtomic(eq) :\n           T.isCompoundTExp(eq.left) && T.isCompoundTExp(eq.right) && canUnify(eq) ?\n                solve(R.concat(rest(equations), splitEquation(eq)), sub) :\n           Res.makeFailure(`Equation contains incompatible types ${JSON.stringify(eq, null, 2)}`);\n};\n```\n\n",
+     "hash": "39d3b537dc9f3ed2",
+     "lang": "typescript",
+     "noteHe": "הפותר — זהה כמעט לחלוטין לזה שראינו ב-3.3, עם שיפור אחד ובאג אחד. **השיפור**: הענף הראשון בשרשרת הוא כאן `bothSidesEqualVars(eq)`, שבודק אם **שני** האגפים הם אותו משתנה טיפוס בדיוק (`isTVar` על שניהם **וגם** `eqTVar`) — ואם כן, ממשיכים בלי לעשות דבר. זה מטפל במפורש במשוואות טאוטולוגיות כמו `Tx = Tx`, בדיוק אלה שראינו נוצרות מכנית בדוגמאות של 3.2. בגרסה של 3.3 המקרה הזה טופל בתוך `checkEqualType`; כאן הוא מקבל ענף משלו בראש השרשרת. שאר הענפים זהים: משתנה משמאל, משתנה מימין, שני אטומים, שני מורכבים עם `canUnify` (פיצול), וברירת מחדל של כישלון. שימו לב גם שבדיקת המקרה הריק הועברה לראש הפונקציה (`if (!isNonEmptyList…)`) לפני הגדרת פונקציות העזר — שינוי סגנוני בלבד. **⚠️ שימו לב לבאג במקור הקורס**: הקטע הזה מכיל את הגוף **פעמיים**. אחרי ה-`};` שסוגר את `solve`, מופיעים שוב `const eq = …` וה-`return` — קוד שיושב מחוץ לכל פונקציה ולא היה מתקמפל. הכפילות הזו היא שרידים מגרסה קודמת, ואפשר לזהות זאת לפי שהעותק השני קורא ל-`bothSidesAtomic(eq)` — פונקציה שאינה מוגדרת בגרסה הזו כלל (בגרסה הזו הבדיקה נעשית בשורה עם `isAtomicTExp` על שני האגפים). **התעלמו מהעותק השני** וקראו רק את גוף הפונקציה הראשון."
+    },
+    {
+     "id": "ps/ps8:7:4",
+     "type": "prose",
+     "en": "Compound type expressions are unified by unifying their components one by one.\n\n",
+     "hash": "1dd211d724898b9e",
+     "he": "ביטויי טיפוס מורכבים מאוחדים על ידי איחוד הרכיבים שלהם אחד-אחד."
+    },
+    {
+     "id": "ps/ps8:7:5",
+     "type": "prose",
+     "en": "This is implemented by these 2 functions:\n\n",
+     "hash": "4b835fe74d96932b",
+     "he": "זה ממומש על ידי 2 הפונקציות האלה:"
+    },
+    {
+     "id": "ps/ps8:7:6",
+     "type": "code",
+     "en": "```typescript\n// Signature: canUnify(equation)\n// Purpose: Compare the structure of the type expressions of the equation\nconst canUnify = (eq: Equation): boolean =>\n    T.isProcTExp(eq.left) && T.isProcTExp(eq.right) &&\n    (eq.left.paramTEs.length === eq.right.paramTEs.length);\n\n// Signature: splitEquation(equation)\n// Purpose: For an equation with unifyable type expressions,\n//          create equations for corresponding components.\n// Type: [Equation -> List(Equation)]\n// Example: splitEquation(\n//            makeEquation(parseTExp('(T1 -> T2)'),\n//                         parseTExp('(T3 -> (T4 -> T4))')) =>\n//            [ {left:T2, right: (T4 -> T4)},\n//              {left:T3, right: T1)} ]\n// @Pre: isCompoundExp(eq.left) && isCompoundExp(eq.right) && canUnify(eq)\nconst splitEquation = (eq: Equation): Equation[] =>\n    (T.isProcTExp(eq.left) && T.isProcTExp(eq.right)) ?\n        R.zipWith(makeEquation,\n                  cons(eq.left.returnTE, eq.left.paramTEs),\n                  cons(eq.right.returnTE, eq.right.paramTEs)) :\n    [];\n```\n\n\n",
+     "hash": "ee5ecf0d3951709b",
+     "lang": "typescript",
+     "noteHe": "‏`canUnify` ו-`splitEquation` — זהות למה שראינו ב-3.3, ולכן זו הזדמנות טובה לחזור עליהן. `canUnify` בודקת שני דברים: ששני האגפים טיפוסי פרוצדורה, ושמספר הפרמטרים זהה. `splitEquation` מפרקת: `R.prepend(returnTE, paramTEs)` על כל אגף בונה רשימה עם טיפוס ההחזרה בראש, ו-`R.zipWith(makeEquation, …)` מזווג את שתי הרשימות ומייצר `n+1` משוואות. **שימו לב שאותה שגיאה בדוגמה שבהערות חוזרת גם כאן**: המשוואה השנייה מוצגת כ-`{left:T3, right: T1)}`, אבל לפי הקוד האגף השמאלי בא מהביטוי השמאלי ולכן צריך להיות `{left:T1, right:T3}`; יש גם סוגר מיותר. **התרגיל שכדאי לעשות**: קחו את הדוגמה שבהערה והריצו את הקוד בראש — `(T1 -> T2)` מול `(T3 -> (T4 -> T4))` נותן שתי משוואות, `T2 = (T4 -> T4)` (טיפוסי ההחזרה) ו-`T1 = T3` (הפרמטרים)."
+    }
+   ],
+   "headingHe": "שכבה 3: Exp-to-Pool, ‏Exp-to-Equations, ‏Solve"
+  },
+  {
+   "id": "ps/ps8:8",
+   "depth": 2,
+   "headingEn": "Exercise: Extend the Type Inference system to support `if` expressions",
+   "raw": "## Exercise: Extend the Type Inference system to support `if` expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:8:0",
+     "type": "prose",
+     "en": "The part of the Type Inference System which \"knows\" L5 Expressions is the function `makeEquationsFromExp(exp, pool)`.\n\n",
+     "hash": "15fbbd28f12486da",
+     "he": "החלק של מערכת הסקת הטיפוסים ש\"מכיר\" ביטויי L5 הוא הפונקציה `makeEquationsFromExp(exp, pool)`."
+    },
+    {
+     "id": "ps/ps8:8:1",
+     "type": "prose",
+     "en": "The structure of this function is a case for each type of L5 expression.\n\n",
+     "hash": "2f5e17b16c3ef7c5",
+     "he": "המבנה של הפונקציה הזו הוא מקרה עבור כל סוג של ביטוי L5."
+    },
+    {
+     "id": "ps/ps8:8:2",
+     "type": "prose",
+     "en": "The code we provide supports:\n",
+     "hash": "37cca9c8d963879f",
+     "he": "הקוד שאנחנו מספקים תומך ב:"
+    },
+    {
+     "id": "ps/ps8:8:3",
+     "type": "list",
+     "en": "* Procedure\n* Application\n* Number and Boolean\n* Primitive Procedures extend the code to support Scheme expressions of the type `if`.\n\n",
+     "hash": "5a792b475c17a085",
+     "he": "* פרוצדורה\n* הפעלה\n* מספר ובוליאני\n* פרוצדורות פרימיטיביות — הרחיבו את הקוד כך שיתמוך בביטויי Scheme מהסוג `if`."
+    },
+    {
+     "id": "ps/ps8:8:4",
+     "type": "prose",
+     "en": "From Typing Rule for `if`-expressions the type equations derived from a composite `if`-expression: `(if _p _c _a)` we derive 3 equations:\n",
+     "hash": "52ee78e69907e727",
+     "he": "מכלל הטיפוס לביטויי `if`, משוואות הטיפוס שנגזרות מביטוי `if` מורכב: `(if _p _c _a)` — אנחנו גוזרים 3 משוואות:"
+    },
+    {
+     "id": "ps/ps8:8:5",
+     "type": "list",
+     "en": "* `Tp = boolean`\n* `Tc = Ta`\n* `Tif = Ta`\n\n",
+     "hash": "f3bffec9f10fb580",
+     "he": "* `Tp = boolean`\n* `Tc = Ta`\n* `Tif = Ta`"
+    },
+    {
+     "id": "ps/ps8:8:6",
+     "type": "code",
+     "en": "```typescript\n// Purpose: compute the type of an if-exp\n// Typing rule:\n//   if type<test>(tenv) = boolean\n//      type<then>(tenv) = t1\n//      type<else>(tenv) = t1\n// then type<(if test then else)>(tenv) = t1\nconst typeofIf = (ifExp: A.IfExp, tenv: E.TEnv): Result<T.TExp> => {\n    const testTE = typeofExp(ifExp.test, tenv);\n    const thenTE = typeofExp(ifExp.then, tenv);\n    const altTE = typeofExp(ifExp.alt, tenv);\n    const constraint1 = bind(testTE, (testTE: T.TExp) => checkEqualType(testTE, T.makeBoolTExp(), ifExp));\n    const constraint2 = bind(thenTE, (thenTE: T.TExp) => \n                            bind(altTE, (altTE: T.TExp) => \n                                checkEqualType(thenTE, altTE, ifExp)));\n    return bind(constraint1, (_c1: true) =>\n                bind(constraint2, (_c2: true) => thenTE));\n};\n```\n\n\n",
+     "hash": "8d5c9b45435535c7",
+     "lang": "typescript",
+     "noteHe": "‏`typeofIf` — **שימו לב שזה קוד מבודק הטיפוסים, לא מחולל המשוואות**, וזו נקודת בלבול מרכזית בסעיף הזה. הפונקציה מחשבת את הטיפוסים של שלושת הרכיבים, ואז מפעילה **שני** אילוצים: `constraint1` דורש שהתנאי יהיה `boolean`, ו-`constraint2` דורש ששני הענפים יהיו זהים. אם שניהם עברו, מחזירים את `thenTE` כטיפוס של ה-`if` כולו. ההערות בראש הקוד מנסחות את כלל הטיפוס במדויק — שווה להשוות אותן לשלוש המשוואות שברשימה שמעליהן. **שימו לב לכך ש-`checkEqualType` כאן היא הגרסה מ-3.3 שמבצעת אוניפיקציה**, ולכן היא לא רק בודקת אלא **כופה** את השוויון — וזו הסיבה שהקוד הזה עובד גם בהסקת טיפוסים ולא רק בבדיקה. **מה התרגיל בעצם מבקש**: את המקבילה של הקוד הזה בגישת **משוואות הטיפוס** — כלומר ענף `isIfExp` ב-`makeEquationsFromExp` שיחזיר את שלוש המשוואות כנתונים, במקום לפתור אותן במקום. הקוד לזה **אינו** מופיע בדף; יש לו תשובת מודל בתרגילים בסוף. **שימו לב לשגיאת עריכה במקור**: הפריט הרביעי ברשימת המבנים הנתמכים קורא `Primitive Procedures extend the code to support Scheme expressions of the type if` — שתי אמירות שנדחסו לשורה אחת; הכוונה היא ש\"פרוצדורות פרימיטיביות\" הן הפריט האחרון ברשימה, ו\"הרחיבו את הקוד לתמיכה ב-if\" הוא ניסוח התרגיל."
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "תרגיל: הרחיבו את מערכת הסקת הטיפוסים כך שתתמוך בביטויי `if`"
+  },
+  {
+   "id": "ps/ps8:9",
+   "depth": 2,
+   "headingEn": "Substitution",
+   "raw": "## Substitution\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps8:9:0",
+     "type": "code",
+     "en": "```typescript\n// Implementation of the Substitution ADT\n// ========================================================\n// A substitution is represented as a 2 element list of equal length\n// lists of variables and type expression.\n// The empty substitution is [[], []]\n\nexport type Sub = {tag: \"Sub\"; vars: TVar[]; tes: TExp[]; }\nexport const isSub = (x: any): x is Sub => x.tag === \"Sub\";\n\n// Constructors:\n// Signature: makeSub(vars, tes)\n// Purpose: Create a substitution in which the i-th element of 'variables'\n//          is mapped to the i-th element of 'tes'.\n// Example: makeSub(\n//             map(parseTE, [\"x\", \"y\", \"z\"]),\n//             map(parseTE, [\"number\", \"boolean\", \"(number -> number)\"])\n//          => {tag: \"Sub\", vars: [x y z], [numTexp, boolTexp, ProcTexp([NumTexp, NumTexp])]}\n//          makeSub(map(parseTE, [\"x\", \"y\", \"z\"]),\n//                  map(parseTE, [\"number\", \"boolean\", \"(z -> number)\"]))\n//          => error makeSub: circular substitution\n// Pre-condition: (length variables) = (length tes)\n//                variables has no repetitions (set)\nexport const makeSub = (vars: TVar[], tes: TExp[]): Result<Sub> =>\n    mapv(zipWithResult(checkNoOccurrence, vars, tes), _ => ({ tag: \"Sub\", vars: vars, tes: tes }));\n\nexport const makeEmptySub = (): Sub => ({tag: \"Sub\", vars: [], tes: []});\n```\n\n",
+     "hash": "9ac4d17e077aa20c",
+     "lang": "typescript",
+     "noteHe": "המימוש של ה-Substitution ADT, עם התיעוד המלא. ההערה בראש הקוד מבהירה את הייצוג: **שתי רשימות באורך שווה** — משתנים וביטויי טיפוס — וההצבה הריקה היא `[[], []]`. עברו על שתי הדוגמאות שבהערות של `makeSub`, כי הן מלמדות: הראשונה בונה הצבה תקינה של שלושה משתנים; **השנייה נכשלת** — `makeSub([\"x\",\"y\",\"z\"], [\"number\",\"boolean\",\"(z -> number)\"])` מחזירה `error makeSub: circular substitution`, כי `z` ממופה לביטוי שמכיל את `z` עצמו. זו בדיוק בדיקת ההיקרות בפעולה, וכאן רואים אותה על דוגמה קונקרטית. שימו לב לשורת המימוש: `mapv(zipWithResult(checkNoOccurrence, vars, tes), _ => ({tag, vars, tes}))` — הבדיקה מופעלת על **כל** הזוגות במקביל דרך `zipWithResult`, וההצבה נבנית רק אם כולם עברו. **שימו לב לשני התנאים המוקדמים**: אורכי הרשימות שווים, **ואין חזרות** ברשימת המשתנים (`variables has no repetitions (set)`) — התנאי השני נשמע טכני אבל הוא מהותי: אילו משתנה הופיע פעמיים, ההצבה לא הייתה פונקציה. שימו לב שהטיפוס מוגדר כאן כ-`type` ולא כ-`interface`, בשונה מהקטע בסעיף 5 — אותו טיפוס, שני כתיבים; חוסר עקביות במקור."
+    },
+    {
+     "id": "ps/ps8:9:1",
+     "type": "prose",
+     "en": "Whenever creating a substitution, we verify that the invariant holds that when a `TVar` is associated to a `TExp`, it does not occur inside the `TExp`.\n\n",
+     "hash": "8ea10807a0129ce8",
+     "he": "בכל פעם שאנחנו יוצרים הצבה, אנחנו מוודאים שהמשמר מתקיים: שכאשר `TVar` משויך ל-`TExp`, הוא אינו מופיע בתוך ה-`TExp`."
+    },
+    {
+     "id": "ps/ps8:9:2",
+     "type": "prose",
+     "en": "This is enforced by this function:\n\n",
+     "hash": "76f2c54a0db02c71",
+     "he": "זה נאכף על ידי הפונקציה הזו:"
+    },
+    {
+     "id": "ps/ps8:9:3",
+     "type": "code",
+     "en": "```typescript\n// Purpose: when attempting to bind tvar to te in a sub - check whether tvar occurs in te.\n// Return error if a circular reference is found.\nexport const checkNoOccurrence = (tvar: TVar, te: TExp): Result<true> => {\n    const check = (e: TExp): Result<true> =>\n        isTVar(e) ? ((e.var === tvar.var) ? bind(unparseTExp(te), up => makeFailure(`Occur check error - circular sub ${tvar.var} in ${JSON.stringify(up, null, 2)}`)) : \n                                            makeOk(true)) :\n        isAtomicTExp(e) ? makeOk(true) :\n        isProcTExp(e) ? bind(mapResult(check, e.paramTEs), _ => check(e.returnTE)) :\n        makeFailure(`Bad type expression ${e} in ${JSON.stringify(te, null, 2)}`);\n    return check(te);\n};\n```\n\n",
+     "hash": "bd74c1dcde800c7e",
+     "lang": "typescript",
+     "noteHe": "‏`checkNoOccurrence` — זו אותה פונקציה בדיוק שראינו בתחילת 3.3, ולכן זו הזדמנות לחזרה. שלושת המקרים: משתנה טיפוס (השוואת שמות עם `e.var === tvar.var`; אם זהה — `Occur check error`), טיפוס אטומי (`Ok` מיד, אין מה לחפש), וטיפוס פרוצדורה (רקורסיה על טיפוסי הפרמטרים ואז על טיפוס ההחזרה). **הנקודה שכדאי לשנן**: הבדיקה היא **רקורסיבית לכל העומק** — לא מספיק לבדוק אם `te` שווה ל-`tvar`; צריך לחפש אותו גם עמוק בתוך טיפוסים מקוננים כמו `[[T1 -> Number] -> Boolean]`. **וזה גם מקור העלות**: מעבר מלא על ביטוי הטיפוס בכל ניסיון קשירה, וזה הרכיב היקר חישובית של האלגוריתם. ההבדל היחיד מהגרסה ב-3.3 הוא שכאן הודעת השגיאה משתמשת ב-`JSON.stringify` במקום להדפיס את המחרוזת ישירות — פרט קוסמטי."
+    },
+    {
+     "id": "ps/ps8:9:4",
+     "type": "prose",
+     "en": "Note on how we compare two substitutions to perform tests In order to compare two substitutions, we “normalize” them by sorting their string representation and then compare the strings.\n\n",
+     "hash": "e311257be1a33db8",
+     "he": "הערה על האופן שבו אנחנו משווים שתי הצבות כדי לבצע בדיקות: כדי להשוות שתי הצבות, אנחנו \"מנרמלים\" אותן על ידי מיון הייצוג המחרוזתי שלהן, ואז משווים את המחרוזות."
+    },
+    {
+     "id": "ps/ps8:9:5",
+     "type": "prose",
+     "en": "This in effect achieves set equality:\n",
+     "hash": "16eb2889d93dec6a",
+     "he": "זה משיג בפועל שוויון קבוצות:"
+    },
+    {
+     "id": "ps/ps8:9:6",
+     "type": "code",
+     "en": "```typescript\nexport const subToStr = (sub: Sub): Result<string> =>\n    bindResult(zipWithResult((v, t) => bindResult(unparseTExp(t), up => makeOk(`${v.var}:${up}`)), sub.vars, sub.tes),\n               (vts: string[]) => makeOk(vts.sort().join(\", \")));\n```\n\n",
+     "hash": "597195e51a69407c",
+     "lang": "typescript",
+     "noteHe": "‏`subToStr` — פונקציה קצרה עם רעיון נאה. היא ממירה כל קשירה למחרוזת בצורה `שם:טיפוס` (למשל `T1:number`), ואז — וזו הנקודה — **ממיינת** את המחרוזות (`vts.sort()`) לפני שהיא מחברת אותן בפסיקים. **למה למיין?** כי הצבה היא מבחינה מושגית **קבוצה** של קשירות, והסדר שבו הן מאוחסנות במערכים שרירותי לגמרי. `{T1:number, T2:boolean}` ו-`{T2:boolean, T1:number}` הן אותה הצבה, אבל הייצוג הפנימי שלהן שונה, ולכן השוואה ישירה של המערכים הייתה נכשלת. המיון \"מנרמל\" את הייצוג, וכך השוואת המחרוזות משיגה **שוויון קבוצות** — בדיוק כפי שהפסקה שמעל אומרת. **השוו לבעיה דומה שראינו ב-3.3**: שם `equivalentTEs` נדרשה כדי להשוות טיפוסים עד כדי שינוי שם; כאן `subToStr` נדרשת כדי להשוות הצבות עד כדי סדר. בשני המקרים הבעיה זהה במהותה — הייצוג הפנימי מכיל מידע שרירותי שאינו חלק מהמשמעות."
+    },
+    {
+     "id": "ps/ps8:9:7",
+     "type": "prose",
+     "en": "Example of `applySub` from `L5-substitutions-ADT-tests.ts`:\n\n",
+     "hash": "f6f3893766902034",
+     "he": "דוגמה ל-`applySub` מתוך `L5-substitutions-ADT-tests.ts`:"
+    },
+    {
+     "id": "ps/ps8:9:8",
+     "type": "code",
+     "en": "```typescript\nexport const applySub = (sub: Sub, te: TExp): TExp =>\n    isEmptySub(sub) ? te :\n    isAtomicTExp(te) ? te :\n    isTVar(te) ? subGet(sub, te) :\n    isProcTExp(te) ? makeProcTExp(map((te) => applySub(sub, te), te.paramTEs), applySub(sub, te.returnTE)) :\n    te;\n\ndescribe('applySub', () => {\n        it('applies a substitution on a type expression', () => {\n            const sub1 = sub([\"T1\", \"T2\"], [\"number\", \"boolean\"]);\n            const te1 = parseTE(\"(T1 * T2 -> T1)\");\n            const unparsed = bind(sub1, (sub: S.Sub) =>\n                                bind(te1, (te: TExp) =>\n                                    unparseTExp(S.applySub(sub, te))));\n            expect(unparsed).toEqual(makeOk(\"(number * boolean -> number)\"));\n        });\n    });\n```\n\n",
+     "hash": "02007f1a60a801fc",
+     "lang": "typescript",
+     "noteHe": "‏`applySub` ובדיקה שמדגימה אותה. **המימוש** הוא מעבר רקורסיבי על ביטוי הטיפוס עם ארבעה מקרים: הצבה ריקה → מחזירים את הביטוי כמו שהוא; טיפוס אטומי → אין בו משתנים, מחזירים כמו שהוא; משתנה טיפוס → `subGet(sub, te)`, כלומר שולפים את ערכו מההצבה; טיפוס פרוצדורה → בונים טיפוס פרוצדורה **חדש** שבו ההצבה הופעלה רקורסיבית על כל טיפוסי הפרמטרים ועל טיפוס ההחזרה. שימו לב שהפונקציה **בונה ביטוי חדש** ואינה משנה את הקיים — סגנון פונקציונלי טהור, בניגוד ל-`tvarSetContents` בגרסה של 3.3. **הבדיקה** ממחישה זאת: ההצבה `{T1:number, T2:boolean}` מופעלת על הטיפוס `(T1 * T2 -> T1)` ומניבה `(number * boolean -> number)`. שימו לב ש-`T1` מופיע **פעמיים** בביטוי המקורי, ובשני המקומות הוא הוחלף באותו ערך — זו ה\"החלפה העקבית\" שההגדרה הפורמלית דורשת. **תרגיל שכדאי לעשות**: החליפו בראש את הטיפוס ל-`((T1 -> T2) * T1 -> T2)` וחשבו מה תהיה התוצאה."
+    },
+    {
+     "id": "ps/ps8:9:9",
+     "type": "prose",
+     "en": "Example of `combineSub` From `L5-substitutions-ADT-tests.ts`:\n\n",
+     "hash": "1738fb57cf1bddfe",
+     "he": "דוגמה ל-`combineSub` מתוך `L5-substitutions-ADT-tests.ts`:"
+    },
+    {
+     "id": "ps/ps8:9:10",
+     "type": "code",
+     "en": "```typescript\n    describe('combineSub', () => {\n        it('combines substitutions (the o operator)', () => {\n            // {T1:(number -> S1), T2:(number -> S4)} o {T3:(number -> S2)} =>\n            // {T1:(number -> S1), T2:(number -> S4), T3:(number -> S2)}\n            const sub11 = sub([\"T1\", \"T2\"], [\"(number -> S1)\", \"(number -> S4)\"]);\n            const sub12 = sub([\"T3\"], [\"(number -> S2)\"]);\n            const expected1 = bind(sub([\"T1\", \"T2\", \"T3\"], [\"(number -> S1)\", \"(number -> S4)\", \"(number -> S2)\"]), subToStr);\n            const res1 = bind(safe2(S.combineSub)(sub11, sub12), subToStr);\n            expect(res1).toEqual(expected1);\n        });\n    });\n```\n",
+     "hash": "60a1e8cfdfff573b",
+     "lang": "typescript",
+     "noteHe": "בדיקה של `combineSub` — ושימו לב שזו הדוגמה **הקלה** של הרכבת הצבות. ההערה בקוד נותנת את התוצאה מראש: `{T1:…, T2:…} o {T3:…}` מניב את שלוש הקשירות יחד. **למה זה קל כאן?** מכיוון ששתי ההצבות **זרות לחלוטין** — אין משתנה משותף בין תחומי ההגדרה שלהן (`T1,T2` מול `T3`), ואף אחד מהערכים אינו מזכיר משתנה מהתחום של השנייה. לכן ההרכבה מצטמצמת לאיחוד פשוט. **השוו לדוגמה המורכבת ב-3.2**, שבה `T1` הופיע בשתי ההצבות ואגף ימני הזכיר `T3` — שם היה צריך גם להפעיל את ההצבה השנייה על הביטויים של הראשונה, וגם למחוק מהשנייה את המשתנים שכבר מוגדרים בראשונה. **טעות נפוצה שהדוגמה הזו עלולה לחזק**: להסיק שהרכבת הצבות היא תמיד איחוד. היא אינה — היא איננה אפילו סימטרית. שימו לב שההשוואה נעשית דרך `subToStr` על שני הצדדים, בדיוק בגלל בעיית הסדר שהוסברה למעלה. שימו לב גם ש-`safe2(S.combineSub)(sub11, sub12)` מפעיל פונקציה דו-מקומית על שני ערכי `Result` — אותה תבנית שראינו ב-ps4."
+    }
+   ],
+   "headingHe": "הצבה"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "**התרגיל מהדף (נשאר ללא פתרון):** הרחיבו את `makeEquationsFromExp` כך שתתמוך בביטויי `if`. כתבו את הענף החסר, והסבירו מדוע הקוד של `typeofIf` שהדף מציג **אינו** התשובה.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n```typescript\n// An if-exp must have a boolean test, and both branches\n// must have the same type - which is the type of the if-exp.\n// Type(test) = boolean\n// Type(then) = Type(alt) = Type(if-exp)\nA.isIfExp(exp) ? Opt.bind(inPool(pool, exp.test), (test: T.TExp) =>\n                   Opt.bind(inPool(pool, exp.then), (then: T.TExp) =>\n                     Opt.bind(inPool(pool, exp.alt), (alt: T.TExp) =>\n                       Opt.mapv(inPool(pool, exp), (ifTE: T.TExp) =>\n                         [makeEquation(test, T.makeBoolTExp()),\n                          makeEquation(then, alt),\n                          makeEquation(ifTE, then)])))) :\n```\n\nהענף מוצב בשרשרת של `makeEquationsFromExp`, למשל אחרי הענף של `isProcExp`.\n\n**שלושת הצעדים:**\n1. שולפים מהבריכה את משתני הטיפוס של ארבעת הצמתים: התנאי, שני הענפים, וביטוי ה-`if` עצמו. ארבע קריאות `inPool` מקוננות ב-`bind`.\n2. בונים את שלוש המשוואות בדיוק כפי שהרשימה בדף מגדירה: `Ttest = boolean`, ‏`Tthen = Talt`, ו-`Tif = Tthen`.\n3. מחזירים אותן כ**מערך**. שימו לב שזה הענף הראשון שמחזיר יותר ממשוואה אחת — כל שאר הענפים מחזירים מערך בן איבר אחד, ולכן טיפוס ההחזרה `Optional<Equation[]>` כבר מתאים בלי שינוי.\n\n**מדוע `typeofIf` אינו התשובה.** הוא שייך ל**גישה אחרת** — בודק הטיפוסים בגרסת האוניפיקציה הישירה מ-3.3. הוא **פותר** את האילוצים במקום, על ידי קריאה ל-`checkEqualType` שכופה שוויון ומשנה את ה-`TVar`-ים בדרך, ואז **מחזיר טיפוס**. הענף שנדרש כאן, לעומת זאת, אינו פותר דבר: הוא רק **מייצר נתונים** — שלוש משוואות שיצטברו לרשימה, ויפתרו מאוחר יותר על ידי `solveEquations`. זהו ההבדל בין שני המימושים שהוא נושא כל הדף:\n- מחולל משוואות → מחזיר `Optional<Equation[]>`, אינו נוגע במשתנים.\n- בודק/מסיק ישיר → מחזיר `Result<TExp>`, משנה משתנים תוך כדי.\n\n**הערה על ניסוח המשוואות.** הדף כותב את השלישית כ-`Tif = Ta` ואני כתבתי `Tif = Tthen`. שקול לגמרי, כי המשוואה השנייה כבר מאלצת `Tthen = Talt`; האוניפיקציה תגיע לאותה תוצאה משתי הצורות.\n\n**בדיקה שכדאי להריץ.** על `(if #t 1 2)` הענף מייצר `Tbool = boolean`, ‏`Tnum1 = Tnum2`, ‏`Tif = Tnum1`; יחד עם משוואות העלים (`Tnum1 = number` וכו') מתקבל `Tif = number`. ועל `(if #t 1 #f)` מתקבלת סתירה `number = boolean` — כלומר הביטוי נדחה, וזה הרווח האמיתי מהרחבה הזו.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ארבע שאילתות `inPool` — לתנאי, לשני הענפים, **ולביטוי ה-if עצמו** (שכחת האחרון היא הטעות הנפוצה); (2) שלוש המשוואות הנכונות, כולל `makeBoolTExp()` לתנאי; (3) החזרת **מערך בן שלושה איברים**, וההבחנה שזה הענף הראשון שמחזיר יותר ממשוואה אחת; (4) ההסבר מדוע `typeofIf` אינו התשובה — הוא מ**גישת האוניפיקציה הישירה**, פותר במקום ומחזיר `Result<TExp>`, בעוד שהנדרש כאן הוא ייצור נתונים שמחזיר `Optional<Equation[]>`; (5) בונוס: דוגמת בדיקה שמראה גם מקרה מצליח וגם סתירה על `(if #t 1 #f)`."
+  }
+ ]
+}

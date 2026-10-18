@@ -1,0 +1,24 @@
+{
+ "id": "interpreters/src/cps/L7.ts",
+ "repo": "interpreters",
+ "path": "src/cps/L7.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/cps/L7.ts",
+ "code": "import { readFileSync } from \"fs\";\nimport { parseL5 } from \"../L5/L5-ast\";\nimport { evalProgram } from \"./L7c-eval\";\nimport { isClosure, valueToString, Value, Closure } from \"../L5/L5-value\";\nimport { bind, either } from \"../shared/result\";\n\nconst filename = process.argv[2];\nif (!filename) {\n    console.error(\"Usage: L7 <filename>\");\n    process.exit(1);\n}\n\nlet source: string;\ntry {\n    source = readFileSync(filename, \"utf-8\");\n} catch (e) {\n    console.error(`Error reading file '${filename}': ${(e as Error).message}`);\n    process.exit(1);\n}\n\nconst stripComments = (x: string): string =>\n    x.replace(/;[^\\r\\n]*/g, '');\n\nconst displayClosure = (c: Closure): string => {\n    const params = c.params.map((p) => p.var).join(\" \");\n    return `<Closure (${params}) ${c.body}>`;\n};\n\nconst displayValue = (val: Value): string =>\n    isClosure(val) ? displayClosure(val) :\n    valueToString(val);\n\nconst result = bind(parseL5(stripComments(source)), evalProgram);\n\neither(\n    result,\n    (value) => console.log(displayValue(value)),\n    (message) => {\n        console.error(`Error: ${message}`);\n        process.exit(1);\n    }\n);\n",
+ "titleHe": "L7.ts — תוכנית ההרצה של שרשרת מפרשי CPS",
+ "descriptionHe": "שייך ל-**4.4**, וזהו קובץ ההרצה (driver) של הפרק — המקבילה המדויקת של `L3.ts`, `L4.ts` ו-`L5.ts`: קורא שם קובץ משורת הפקודה, טוען אותו, מנתח, מריץ ומדפיס. הרצה טיפוסית היא על `test.l7` שבאותה תיקייה.\n\nשתי שורות הייבוא הראשונות מספרות את כל הסיפור: `parseL5` מ-`../L5` ו-`evalProgram` מ-**`./L7c-eval`**. כלומר השפה היא L5 ללא שינוי, והמפרש הוא **החוליה האחרונה בשרשרת** — הגרסה המורגסטרת עם לולאת המכונה הווירטואלית. חמשת המפרשים `L6-eval` … `L7c-eval` הם שלבי גזירה, וזה שנבחר לשימוש בפועל הוא הסופי שבהם.",
+ "annotations": [
+  {
+   "line": 1,
+   "noteHe": "שורות הייבוא שוות קריאה איטית, כי הן מגדירות מה בעצם רץ כאן. `parseL5` — **המנתח התחבירי של L5**, ללא שינוי מפרק 3. `evalProgram` — מ-`./L7c-eval`, החוליה **האחרונה** בשרשרת חמשת המפרשים. `isClosure` ו-`Value` — שוב מ-`../L5`. כלומר הקובץ מרכיב את שפת L5 עם מפרש L7c, וזו ההוכחה הפשוטה ביותר לטענה שחזרה בכל קובצי הפרק: **L6 ו-L7 אינן שפות, הן מימושים**. שימו לב גם למה **שאינו** כאן — אין שום קריאה לבודק הטיפוסים של פרק 3, בדיוק כמו ב-`L5.ts`. הצינור הוא `parse` ואז `eval`; מערכת הטיפוסים נלמדה כאלגוריתם ומעולם לא חוברה כשלב במהדר."
+  },
+  {
+   "line": 21,
+   "noteHe": "שתי פונקציות עזר, ובשתיהן פגמים מוכרים שהועתקו הנה. ⚠️ `stripComments` הוא ביטוי רגולרי פשוט שאינו יודע דבר על מחרוזות, ולכן `(define s \"a;b\")` ייקטע באמצע ויהפוך לשגיאת תחביר על קלט חוקי לגמרי — בדיוק אותו באג שכבר תועד ב-`L3-ast.ts` וב-`L4.ts`. ⚠️ `displayClosure` משרשרת את `c.body` ישירות לתוך תבנית מחרוזת, אבל `body` הוא **מערך של ביטויי AST**, ולכן הפלט יהיה `<Closure (x) [object Object]>`. הפתרון הנכון הוא לקרוא ל-`unparse`. זה כבר העותק השלישי של אותה תקלה: היא נולדה ב-`L3-value.ts`, תוקנה בעקיפין ב-`L3.ts` שכתב `displayClosure` משלו, חזרה ב-`L5.ts` — וכאן הועתקה שוב. **זו הדגמה מצוינת למחיר של תיקון אצל הקורא במקום במקור** — כל עותק חדש יורש את הבאג מחדש."
+  },
+  {
+   "line": 33,
+   "noteHe": "שתי השורות שמריצות הכול. `bind(parseL5(…), evalProgram)` הוא הצינור כולו — ניתוח תחבירי, ואם הצליח, הרצה; `bind` דואג לכך שכישלון בניתוח יעצור מיד ולא יגיע למפרש. `either` הוא הצרכן: הוא מפרק את ה-`Result` לשני מסלולים ומחייב את הקורא **לטפל בשניהם** — הצלחה מודפסת ל-`stdout`, כישלון ל-`stderr` עם קוד יציאה 1. השוו לתבנית של `topCont` ב-`L6-eval.ts`: שם ההמשכית הסופית הייתה פונקציית הזהות שרק מחזירה את הערך, וכאן, בקצה החיצוני ביותר של התוכנית, מוחלט סוף סוף **מה עושים** עם התשובה. זו נקודת ההפרדה הנקייה בין החישוב לבין תופעות הלוואי, ואותו רעיון בדיוק הופיע ב-`monad.ts` של 1.5 — לא לקרוא ל-`console.log` בתוך החישוב אלא להחזיר את מה שצריך להדפיס כנתון."
+  }
+ ]
+}

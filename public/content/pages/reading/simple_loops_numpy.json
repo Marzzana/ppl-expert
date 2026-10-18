@@ -1,0 +1,282 @@
+{
+ "id": "reading/simple_loops_numpy",
+ "kind": "reading",
+ "sourcePath": "practice_sessions/reading_material/simple_loops_numpy.md",
+ "titleEn": "Benchmarking Loops in Python",
+ "titleHe": "מדידת ביצועים (Benchmarking) של לולאות ב-Python",
+ "translated": true,
+ "sections": [
+  {
+   "id": "reading/simple_loops_numpy:0",
+   "depth": 1,
+   "headingEn": "Benchmarking Loops in Python",
+   "raw": "# Benchmarking Loops in Python\n",
+   "blocks": [],
+   "headingHe": "מדידת ביצועים (Benchmarking) של לולאות ב-Python"
+  },
+  {
+   "id": "reading/simple_loops_numpy:1",
+   "depth": 2,
+   "headingEn": "PPL 2020 - Week #1",
+   "raw": "## PPL 2020 - Week #1\n\n",
+   "blocks": [
+    {
+     "id": "reading/simple_loops_numpy:1:0",
+     "type": "prose",
+     "en": "This notebook demonstrates the performance advantage obtained through vectorization on a loop.\nWe compare a procedural implementation of a loop with mutation, a slightly better version using Python's list comprehensions, and a vastly superior vectorized version using Numpy's arrays and broadcast operations.\n\n",
+     "hash": "49f3b826ffddcd9c",
+     "he": "המחברת (notebook) הזו מדגימה את יתרון הביצועים שמתקבל מהפעלת וקטוריזציה (vectorization) על לולאה.\nנשווה בין מימוש פרוצדורלי של לולאה עם שינוי מצב (mutation), גרסה מעט טובה יותר שמשתמשת ב-list comprehensions של Python, וגרסה וקטורית עדיפה בהרבה שמשתמשת במערכים (arrays) של NumPy ובפעולות broadcast."
+    },
+    {
+     "id": "reading/simple_loops_numpy:1:1",
+     "type": "prose",
+     "en": "Our requirement is to compute the cube of all elements in a list of numbers of size $$n$$.\nWe first implement the Python version of the same function we reviewed in class:\n\n\n",
+     "hash": "ce4955989efd92a4",
+     "he": "הדרישה שלנו היא לחשב את החזקה השלישית (cube) של כל האיברים ברשימת מספרים בגודל $$n$$.\nתחילה נממש ב-Python את אותה פונקציה שסקרנו בכיתה:"
+    },
+    {
+     "id": "reading/simple_loops_numpy:1:2",
+     "type": "code",
+     "en": "```python\nn = 100\n\ndef cube(x):\n    return x * x * x\n```\n\n",
+     "hash": "4c0d8914fc467244",
+     "lang": "python",
+     "noteHe": "כאן מוגדרים שני דברים שישמשו אותנו לאורך כל המחברת: המשתנה `n = 100` קובע את מספר החזרות שנריץ בכל מדידת ביצועים, והפונקציה `cube` מקבלת מספר `x` ומחזירה את החזקה השלישית שלו (`x * x * x`). שימו לב ש-`cube` היא פונקציה טהורה (pure function) — היא לא משנה שום מצב חיצוני, עובדה שתהיה קריטית בהמשך כשנדבר על וקטוריזציה."
+    }
+   ],
+   "headingHe": "PPL 2020 - שבוע מס' 1"
+  },
+  {
+   "id": "reading/simple_loops_numpy:2",
+   "depth": 2,
+   "headingEn": "Procedural Loop",
+   "raw": "## Procedural Loop\n\n",
+   "blocks": [
+    {
+     "id": "reading/simple_loops_numpy:2:0",
+     "type": "code",
+     "en": "```python\ndef cubes_procedural(a):\n    res = list(a)  # Copy the list\n    for i in range(len(a)):\n        res[i] = cube(a[i])\n    return res\n```\n\n",
+     "hash": "45d5edc58d55a507",
+     "lang": "python",
+     "noteHe": "זהו המימוש הפרוצדורלי הקלאסי: השורה `res = list(a)` יוצרת עותק חדש של רשימת הקלט (כדי לא לשנות את הקלט המקורי — זו הקצאה של רשימת עזר). לאחר מכן הלולאה `for i in range(len(a))` עוברת על כל אינדקס `i`, ובכל צעד מבצעת שינוי מצב (mutation): הביטוי `res[i] = cube(a[i])` דורס את התא ה-`i` בעותק עם החזקה השלישית של האיבר המתאים בקלט. הסגנון הזה מבוסס על ניהול אינדקסים מפורש והשמות בתוך לולאה — בדיוק הסגנון שהפרדיגמה הפונקציונלית מנסה להימנע ממנו."
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:1",
+     "type": "prose",
+     "en": "The function first copies the input parameter, then fills it with the required values.\n\n",
+     "hash": "a36da79cad4bad20",
+     "he": "הפונקציה תחילה מעתיקה את פרמטר הקלט, ואחר כך ממלאת אותו בערכים הנדרשים."
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:2",
+     "type": "prose",
+     "en": "Let us test the function:\n\n",
+     "hash": "3bf2ce4dffbc2eab",
+     "he": "נבדוק את הפונקציה:"
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:3",
+     "type": "code",
+     "en": "```python\ns = list(range(10))\ncubes_procedural(s)  # ==> [0, 1, 8, 27, 64, 125, 216, 343, 512, 729]\n```\n\n",
+     "hash": "ca78ee7f1e44b106",
+     "lang": "python",
+     "noteHe": "בדיקת שפיות קצרה: `range(10)` מייצר את המספרים 0 עד 9, ו-`list(...)` הופך אותם לרשימה של ממש. הקריאה `cubes_procedural(s)` מחזירה רשימה חדשה שבה כל איבר הוא החזקה השלישית של האיבר המקורי — למשל 3 הופך ל-27 ו-9 הופך ל-729. הפונקציה אכן עובדת כמצופה."
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:4",
+     "type": "prose",
+     "en": "Let us now benchmark this function - using the IPython magic `%%timeit` command:\n\n",
+     "hash": "75e16f44565104c0",
+     "he": "כעת נמדוד את ביצועי הפונקציה — באמצעות פקודת ה-magic‏ `%%timeit` של IPython:"
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:5",
+     "type": "code",
+     "en": "```python\n%%timeit \nfor i in range(n):\n    cubes_procedural(range(i))\n```\n\n",
+     "hash": "8ed3e2d696567733",
+     "lang": "python",
+     "noteHe": "הפקודה `%%timeit` היא פקודת magic של IPython/Jupyter שמריצה את התא פעמים רבות ומדווחת את זמן הריצה הממוצע ואת סטיית התקן. גוף המדידה מריץ את `cubes_procedural` על קלטים בגדלים הולכים וגדלים: עבור כל `i` מ-0 עד `n-1` (כלומר עד 99) הפונקציה מופעלת על `range(i)` — רשימה באורך `i`. כך המדידה משקללת קלטים קטנים וגדולים יחד."
+    },
+    {
+     "id": "reading/simple_loops_numpy:2:6",
+     "type": "code",
+     "en": "```\n1.23 ms ± 51.7 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "1d76a9656b9423fe",
+     "noteHe": "זהו הפלט של `%%timeit`: הרצה אחת של כל התא (כל 100 הקריאות) לוקחת בממוצע כ-1.23 מילי-שניות, עם סטיית תקן של 51.7 מיקרו-שניות. הממוצע חושב על פני 7 סבבים של 1000 הרצות כל אחד. זהו קו הבסיס (baseline) שמולו נשווה את הגרסאות הבאות."
+    }
+   ],
+   "headingHe": "לולאה פרוצדורלית"
+  },
+  {
+   "id": "reading/simple_loops_numpy:3",
+   "depth": 2,
+   "headingEn": "Map",
+   "raw": "## Map\n\n",
+   "blocks": [
+    {
+     "id": "reading/simple_loops_numpy:3:0",
+     "type": "prose",
+     "en": "The procedure could be improved - both in terms of readability, style and performance by using Python's *map* function. Python's `map` function receives the same parameters as in TypeScript - a function and a list (or more generally an iterator) - and it returns an iterator.  (We will learn later that `map` is a *lazy* function, it does not compute the resulting list immediately, only when we ask to construct a list out of the iterator, we obtain the resulting list).\n\n",
+     "hash": "79e18e23afabd497",
+     "he": "אפשר לשפר את הפרוצדורה — הן מבחינת קריאוּת וסגנון והן מבחינת ביצועים — באמצעות הפונקציה *map* של Python. הפונקציה `map` ב-Python מקבלת את אותם פרמטרים כמו ב-TypeScript — פונקציה ורשימה (או באופן כללי יותר, איטרטור (iterator)) — ומחזירה איטרטור. (נלמד בהמשך ש-`map` היא פונקציה *עצלה* (lazy): היא אינה מחשבת את רשימת התוצאה מיד; רק כאשר נבקש לבנות רשימה מתוך האיטרטור, נקבל את רשימת התוצאה.)"
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:1",
+     "type": "code",
+     "en": "```python\nmap(cube, [1, 2, 3])  # ==> <map at 0x28a542e29b0>\n```\n\n",
+     "hash": "f57e85cd54fd426c",
+     "lang": "python",
+     "noteHe": "שימו לב לנקודה החשובה כאן: הקריאה `map(cube, [1, 2, 3])` לא מחזירה את `[1, 8, 27]` אלא אובייקט מסוג `map` (הפלט `<map at 0x28a542e29b0>` הוא רק ייצוג של האובייקט וכתובתו בזיכרון). זו בדיוק העצלות (lazy evaluation) שהוזכרה למעלה — שום חישוב על האיברים עדיין לא בוצע; קיבלנו איטרטור שיחשב את הערכים רק כשנדרוש אותם."
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:2",
+     "type": "prose",
+     "en": "To force the evaluation of the result, we copy the resulting lazy iterator into a list:\n\n",
+     "hash": "6cbafea479d5cbaa",
+     "he": "כדי לאלץ (force) את הערכת התוצאה, אנו מעתיקים את האיטרטור העצל שהתקבל לתוך רשימה:"
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:3",
+     "type": "code",
+     "en": "```python\nlist(map(cube, [1, 2, 3]))  # ==> [1, 8, 27]\n```\n\n",
+     "hash": "e3e4dd088e741049",
+     "lang": "python",
+     "noteHe": "עטיפת האיטרטור בקריאה `list(...)` צורכת את כל האיברים שלו ובכך מאלצת את החישוב בפועל: כעת `cube` באמת מופעלת על כל איבר, ומתקבלת הרשימה `[1, 8, 27]`."
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:4",
+     "type": "code",
+     "en": "```python\ndef cubes_map(a):\n    return list(map(cube, a))\n```\n\n",
+     "hash": "45e9446f6b1e3dbe",
+     "lang": "python",
+     "noteHe": "זו הגרסה הפונקציונלית של אותה משימה: שורה אחת במקום לולאה שלמה. `map(cube, a)` מייצר איטרטור עצל של החזקות השלישיות, ו-`list(...)` מאלץ את החישוב ומחזיר רשימה. אין כאן אינדקסים, אין השמות ואין שינוי מצב — הקוד קצר יותר, קריא יותר, וכפי שנראה מיד גם מהיר יותר."
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:5",
+     "type": "prose",
+     "en": "Let us benchmark the performance of `map` to compare it with the procedural loop:\n\n",
+     "hash": "8c44457221d20d4e",
+     "he": "נמדוד את הביצועים של `map` כדי להשוות אותה ללולאה הפרוצדורלית:"
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:6",
+     "type": "code",
+     "en": "```python\n%%timeit\nfor i in range(n):\n    cubes_map(range(i))\n```\n\n",
+     "hash": "588837445b3037ce",
+     "lang": "python",
+     "noteHe": "אותה מדידה בדיוק כמו קודם, רק שהפעם מופעלת `cubes_map` במקום `cubes_procedural`: עבור כל `i` מ-0 עד 99 מחושבות החזקות השלישיות של `range(i)`. שימוש באותם קלטים בדיוק מבטיח שההשוואה בין שתי הגרסאות תהיה הוגנת."
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:7",
+     "type": "code",
+     "en": "```\n579 µs ± 20.1 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "86e910e271cac228",
+     "noteHe": "התוצאה: כ-579 מיקרו-שניות בממוצע לכל הרצה של התא — פחות ממחצית מזמן הריצה של הגרסה הפרוצדורלית (כ-1.23 מילי-שניות). שיפור של יותר מפי 2 רק מהחלפת הלולאה המפורשת ב-`map`."
+    },
+    {
+     "id": "reading/simple_loops_numpy:3:8",
+     "type": "prose",
+     "en": "The `map` version reduces the time of the test from ~1.23ms to ~600 µs. This is mainly because `map` is implemented as a primitive function instead of interpreting the loop execution.\n\n",
+     "hash": "779a3f1784706eea",
+     "he": "גרסת ה-`map` מקצרת את זמן הבדיקה מכ-1.23 מילי-שניות לכ-600 מיקרו-שניות. הסיבה העיקרית היא ש-`map` ממומשת כפונקציה פרימיטיבית (בקוד מהיר של המימוש עצמו), במקום שהמפרש (interpreter) יפרש את ביצוע הלולאה שורה אחר שורה."
+    }
+   ],
+   "headingHe": "Map"
+  },
+  {
+   "id": "reading/simple_loops_numpy:4",
+   "depth": 2,
+   "headingEn": "Vectorization",
+   "raw": "## Vectorization\n\n",
+   "blocks": [
+    {
+     "id": "reading/simple_loops_numpy:4:0",
+     "type": "prose",
+     "en": "We can improve this more significantly by using *vectorizing* - supported in Python by the NumPy package.\nNumPy offers a highly optimized *array* data structure together with mechanisms to *broadcast* functions over arrays - that is, basically perform a `map` of a function elementwise on arrays of numbers.\n\n\n",
+     "hash": "c3360fc42b478153",
+     "he": "אפשר להשיג שיפור משמעותי עוד יותר באמצעות *וקטוריזציה* (vectorization) — הנתמכת ב-Python על ידי החבילה NumPy.\nNumPy מציעה מבנה נתונים של *מערך* (array) בעל אופטימיזציה גבוהה, יחד עם מנגנונים ל-*broadcast* של פונקציות על פני מערכים — כלומר, בעצם ביצוע `map` של פונקציה איבר-איבר על מערכים של מספרים."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:1",
+     "type": "code",
+     "en": "```python\nimport numpy as np\n\n# Use a NumPy Array instead of a list\na = np.arange(100)\na\n```\n\n",
+     "hash": "6545eb61837ceed6",
+     "lang": "python",
+     "noteHe": "כאן מייבאים את חבילת NumPy (בקיצור המקובל `np`) ויוצרים מערך NumPy במקום רשימת Python רגילה: `np.arange(100)` היא המקבילה של `range(100)`, אבל היא מחזירה `ndarray` — מבנה נתונים רציף בזיכרון וממוטב לחישובים מספריים — ולא רשימה. השורה האחרונה `a` פשוט מציגה את ערך המערך בפלט התא."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:2",
+     "type": "code",
+     "en": "```\narray([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,\n       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,\n       34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,\n       51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67,\n       68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,\n       85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99])\n```\n\n\n",
+     "hash": "f08b129a443e49fa",
+     "noteHe": "זהו הפלט של השורה `a`: מערך NumPy‏ (`array`) המכיל את המספרים 0 עד 99. שימו לב שהוא מודפס בתצוגה שונה מרשימת Python רגילה — עם הקידומת `array(...)` — מה שמזכיר לנו שמדובר בטיפוס נתונים אחר, לא ברשימה."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:3",
+     "type": "prose",
+     "en": "NumPy interprets the application of a function to an array as a map of the function elementwise.\nThis is called *broadcasting* a method to an array.\n\n\n",
+     "hash": "e3473f9dae360050",
+     "he": "NumPy מפרשת הפעלה (application) של פונקציה על מערך כ-`map` של הפונקציה איבר-איבר.\nפעולה זו נקראת *broadcasting* של מתודה על מערך."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:4",
+     "type": "code",
+     "en": "```python\ncube(a)\n```\n\n",
+     "hash": "ab04efea74b56203",
+     "lang": "python",
+     "noteHe": "זו הנקודה המרשימה: קוראים ל-`cube` — אותה פונקציה בדיוק שהוגדרה בתחילת המחברת עבור מספר בודד — עם מערך שלם כארגומנט. בזכות ה-broadcasting של NumPy, הביטוי `x * x * x` שבגוף הפונקציה מתפרש ככפל איבר-איבר של מערכים, ולכן הפונקציה מוחזרת על כל המערך בבת אחת, בלי לולאה ובלי `map` מפורש."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:5",
+     "type": "code",
+     "en": "```\narray([     0,      1,      8,     27,     64,    125,    216,    343,\n          512,    729,   1000,   1331,   1728,   2197,   2744,   3375,\n         4096,   4913,   5832,   6859,   8000,   9261,  10648,  12167,\n        13824,  15625,  17576,  19683,  21952,  24389,  27000,  29791,\n        32768,  35937,  39304,  42875,  46656,  50653,  54872,  59319,\n        64000,  68921,  74088,  79507,  85184,  91125,  97336, 103823,\n       110592, 117649, 125000, 132651, 140608, 148877, 157464, 166375,\n       175616, 185193, 195112, 205379, 216000, 226981, 238328, 250047,\n       262144, 274625, 287496, 300763, 314432, 328509, 343000, 357911,\n       373248, 389017, 405224, 421875, 438976, 456533, 474552, 493039,\n       512000, 531441, 551368, 571787, 592704, 614125, 636056, 658503,\n       681472, 704969, 729000, 753571, 778688, 804357, 830584, 857375,\n       884736, 912673, 941192, 970299])\n```\n\n",
+     "hash": "12836c819aac1fb3",
+     "noteHe": "התוצאה של `cube(a)`: מערך NumPy חדש שבו כל איבר הוא החזקה השלישית של האיבר המתאים ב-`a` — מ-0³=0 ועד 99³=970299. המערך המקורי `a` לא השתנה; התקבל מערך תוצאה חדש, בדומה לרוח הפונקציונלית של היעדר תופעות לוואי (side effects)."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:6",
+     "type": "code",
+     "en": "```python\n%%timeit \nfor i in range(n):\n    cube(np.arange(i))\n```\n\n",
+     "hash": "0bcfab2e84d1d749",
+     "lang": "python",
+     "noteHe": "אותה מדידת ביצועים כמו בשתי הגרסאות הקודמות, הפעם בגרסה הווקטורית: עבור כל `i` מ-0 עד 99 נוצר מערך NumPy באורך `i` באמצעות `np.arange(i)`, והפונקציה `cube` מופעלת עליו ישירות ב-broadcasting. כך נשמרת השוואה הוגנת מול `cubes_procedural` ו-`cubes_map` שנמדדו על אותם קלטים."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:7",
+     "type": "code",
+     "en": "```\n184 µs ± 16.7 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "f41e48cb44390010",
+     "noteHe": "התוצאה: כ-184 מיקרו-שניות בממוצע — לעומת כ-1.23 מילי-שניות בגרסה הפרוצדורלית וכ-579 מיקרו-שניות בגרסת ה-`map`. הגרסה הווקטורית מהירה כמעט פי 5 מקו הבסיס."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:8",
+     "type": "prose",
+     "en": "Vectorization improved performance by a factor of close to 5.\n\n",
+     "hash": "9827e1235594f15e",
+     "he": "הווקטוריזציה שיפרה את הביצועים פי כמעט 5."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:9",
+     "type": "prose",
+     "en": "The way vectorization works is that it exploits hardware parallelism: because all the work performed is trivially parallel, the interpreter is free to split the array into as many blocks as there are available cores in the CPU, and execute a subset of the work on each of the blocks in parallel.  There is no need to lock anything as the function that is applied (`cube`) is a pure function with no side effect, and the blocks are non-overlapping.\n\n",
+     "hash": "ed260912d7dbd2fb",
+     "he": "הדרך שבה וקטוריזציה עובדת היא ניצול מקביליות בחומרה: מכיוון שכל העבודה המבוצעת היא מקבילית באופן טריוויאלי, המפרש חופשי לפצל את המערך למספר בלוקים כמספר הליבות (cores) הזמינות במעבד, ולבצע חלק מהעבודה על כל אחד מהבלוקים במקביל. אין צורך לנעול (lock) שום דבר, משום שהפונקציה המופעלת (`cube`) היא פונקציה טהורה (pure function) ללא תופעות לוואי, והבלוקים אינם חופפים זה לזה."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:10",
+     "type": "prose",
+     "en": "The benefits of vectorization increase as the size of the arrays increase and the number of cores in the hardware increases.\nOn GPUs, one can exploit thousands of cores and obtain significant speedups when adopting this style of programming.\nThis is on the key ingredients that has recently enabled significant progress in Artificial Intelligence and Deep Learning.\n\n",
+     "hash": "2c646ca5f7e71d80",
+     "he": "היתרונות של וקטוריזציה גדלים ככל שגודל המערכים גדל וככל שמספר הליבות בחומרה גדל.\nעל גבי מעבדים גרפיים (GPU) אפשר לנצל אלפי ליבות ולהשיג האצות משמעותיות כשמאמצים סגנון תכנות זה.\nזהו אחד המרכיבים המרכזיים שאִפשרו לאחרונה התקדמות משמעותית בבינה מלאכותית (Artificial Intelligence) ובלמידה עמוקה (Deep Learning)."
+    },
+    {
+     "id": "reading/simple_loops_numpy:4:11",
+     "type": "prose",
+     "en": "From a programming language perspective - vectorization is made possible because the language encourages a declarative style which is based on the Functional Programming paradigm, and the usage of pure functions with no side effects.\n",
+     "hash": "cf52d48eb7fd4e45",
+     "he": "מנקודת המבט של שפות תכנות — הווקטוריזציה מתאפשרת משום שהשפה מעודדת סגנון הצהרתי (declarative) המבוסס על פרדיגמת התכנות הפונקציונלי (Functional Programming), ועל שימוש בפונקציות טהורות ללא תופעות לוואי."
+    }
+   ],
+   "headingHe": "וקטוריזציה (Vectorization)"
+  }
+ ]
+}

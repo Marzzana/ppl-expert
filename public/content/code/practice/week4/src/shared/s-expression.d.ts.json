@@ -1,0 +1,8 @@
+{
+ "id": "practice/week4/src/shared/s-expression.d.ts",
+ "repo": "practice",
+ "path": "week4/src/shared/s-expression.d.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/week4/src/shared/s-expression.d.ts",
+ "code": "declare module 's-expression' {\n    export type SexpString = String;\n    export type Token = string | SexpString;\n    export type CompoundSexp = Sexp[];\n    export type Sexp = Token | CompoundSexp;\n\n    /*\n        The types returned by the parser are:\n        string - for any token which is not a string,\n                 according to the tokenization rules of S-expressions.\n        SexpString - for tokens of the form \"...\"\n        Sexp[] - for S-expressions that contain sub-expressions\n                 (of the form \"(<s-expr1> ... <s-exprn>)\")\n    */\n    export default function parse(x: string): Sexp;\n}"
+}

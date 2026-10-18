@@ -1,15 +1,10 @@
 node_modules/
 dist/
 
-# ─── Course material — deliberately never committed ────────────────────────────
-# `sources/` is a clone of the course's own repositories, and everything the
-# pipeline writes under `public/` is derived from it: the lesson pages, the
-# figures, and verbatim interpreter source files. That material belongs to the
-# BGU course staff, not to this repo — it is fetched and generated locally by
-# `npm run setup && npm run pipeline:parse`. See README → "What is not in here".
+# The course's own repositories, cloned by `npm run setup`. Only needed to re-run
+# the content pipeline — the generated content in public/ is committed, so a plain
+# install never needs this.
 sources/
-public/content/
-public/resources/
 
 # Translation worksheets are scratch and are regenerated from the pipeline, but the
 # two authoring guides are real documentation — the README points at them, so they

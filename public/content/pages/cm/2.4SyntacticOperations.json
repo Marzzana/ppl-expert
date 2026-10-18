@@ -1,0 +1,1394 @@
+{
+ "id": "cm/2.4SyntacticOperations",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.4SyntacticOperations.md",
+ "titleEn": "Syntactic Operations and Syntactic Properties of Expressions",
+ "titleHe": "פעולות תחביריות ותכונות תחביריות של ביטויים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.4SyntacticOperations:0",
+   "depth": 1,
+   "headingEn": "Syntactic Operations and Syntactic Properties of Expressions",
+   "raw": "# Syntactic Operations and Syntactic Properties of Expressions\n\n",
+   "blocks": [],
+   "headingHe": "פעולות תחביריות ותכונות תחביריות של ביטויים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:1:0",
+     "type": "prose",
+     "en": "We covered in the previous lecture how to specify the syntax of a programming language and how to implement the parsing process which turns a stream of characters denoting a program into an Abstract Syntax Tree (AST) value which can be easily processed by a program such as an interpreter or a compiler.\n\n",
+     "hash": "0bd6cc41b9b34302",
+     "he": "בהרצאה הקודמת כיסינו כיצד להגדיר את התחביר של שפת תכנות וכיצד לממש את תהליך הניתוח התחבירי, שהופך זרם תווים המייצג תוכנית לערך של עץ תחביר מופשט (AST) שתוכנית כמו מפרש או מהדר יכולה לעבד בקלות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:1:1",
+     "type": "prose",
+     "en": "In this lecture, we demonstrate how syntactic properties of expressions can be computed on ASTs and how we can rewrite AST into different ASTs.  All of these operations on ASTs work according to the same \"recipe\" - which consists of following the **structural induction** principle.\n\n",
+     "hash": "e7e8c18c7a461fcd",
+     "he": "בהרצאה זו נדגים כיצד אפשר לחשב תכונות תחביריות של ביטויים על גבי ASTs, וכיצד נוכל לכתוב מחדש AST אחד ל-AST אחר. כל הפעולות האלה על ASTs עובדות לפי אותו \"מתכון\" — שמורכב מהליכה לפי עקרון ה**אינדוקציה המבנית (structural induction)**."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:2",
+   "depth": 2,
+   "headingEn": "L1 AST in TypeScript",
+   "raw": "## L1 AST in TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:2:0",
+     "type": "prose",
+     "en": "We present a first version of the TypeScript program which encodes the following BNF in a set of disjoint union types in TypeScript.\n\n",
+     "hash": "b0935b91b1dcc608",
+     "he": "נציג גרסה ראשונה של תוכנית TypeScript שמקודדת את ה-BNF הבא כקבוצת טיפוסי איחוד זר ב-TypeScript."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:1",
+     "type": "code",
+     "en": "```typescript\n<program> ::= (L1 <exp>+) // program(exps:List(exp))\n<exp> ::= <define-exp> | <cexp>\n<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n<cexp> ::= <num-exp> // num-exp(val:Number)\n       | <bool-exp>  // bool-exp(val:Boolean)\n       | <prim-op>   // prim-op(op:String)\n       | <var-ref>   // var-ref(var:String)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n<prim-op> ::= + | - | * | / | < | > | = | not\n<num-exp> ::= a number token\n<bool-exp> ::= #t | #f\n<var-ref> ::= an identifier token\n<var-decl> ::= an identifier token\n```\n\n",
+     "hash": "f21d1af113867144",
+     "lang": "typescript",
+     "noteHe": "המפרט המלא של שפת $$L1$$ — השפה הראשונה שנממש לה מפרש. זו גרסה מצומצמת של הטבלה מ-2.3: תוכנית היא `(L1 <exp>+)`, וביטוי הוא או `define` או `cexp`. שימו לב שב-$$L1$$ **אין עדיין** lambda, if או let — יש רק ערכים אטומיים, הפניות למשתנים והפעלת פרוצדורה (`app-exp`). זה מכוון: מתחילים מהמינימום ומרחיבים בהדרגה. שימו לב גם ש-`<prim-op>` הוא קטגוריה נפרדת מ-`<var-ref>` — האופרטורים הפרימיטיביים מזוהים כבר בשלב הניתוח."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:2",
+     "type": "prose",
+     "en": "The code corresponding to this is in __[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__.\nCompared to the simple __[L1/E-parser.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/E-parser.ts)__ we studied in the previous lecture,\nit implements exactly the same pattern:\n",
+     "hash": "784cfb6f4c5247e0",
+     "he": "הקוד המתאים לכך נמצא ב-__[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__.\nבהשוואה ל-__[L1/E-parser.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/E-parser.ts)__ הפשוט שלמדנו בהרצאה הקודמת, הוא מממש בדיוק את אותה תבנית:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:3",
+     "type": "list",
+     "en": "* definition of AST types as disjoint types, \n* and parsing the S-expression type as recursive traversal of the S-expression value and construction of the corresponding AST value.\n\n\n",
+     "hash": "1858d86211d95e38",
+     "he": "* הגדרת טיפוסי ה-AST כטיפוסים זרים,\n* וניתוח טיפוס ה-S-expression כמעבר רקורסיבי על ערך ה-S-expression ובניית ערך ה-AST המתאים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:4",
+     "type": "code",
+     "en": "```typescript\n// ===========================================================\n// AST Types\nimport { map, filter, reduce } from 'ramda';\n\nexport type Exp = DefineExp | CExp;\nexport type CExp = NumExp | BoolExp | PrimOp | VarRef | AppExp;\n\nexport type Program = {tag:\"Program\", exps: Exp[]};\n\nexport type DefineExp = {tag:\"DefineExp\", var: VarDecl, val: CExp};\nexport type NumExp = {tag:\"NumExp\", val:number};\nexport type BoolExp = {tag:\"BoolExp\", val:boolean};\nexport type PrimOp = {tag:\"PrimOp\", op:string};\nexport type VarRef = {tag:\"VarRef\", var:string};\nexport type VarDecl = {tag:\"VarDecl\", var:string};\nexport type AppExp = {tag:\"AppExp\", rator:CExp, rands: CExp[]};\n\nexport const makeProgram = (exps: Exp[]):Program => ({tag:\"Program\", exps: exps});\nexport const makeDefineExp = (v: VarDecl, val: CExp):DefineExp => ({tag:\"DefineExp\", var:v, val:val});\nexport const makeNumExp = (n: number):NumExp => ({tag:\"NumExp\", val:n});\nexport const makeBoolExp = (b: boolean):BoolExp => ({tag:\"BoolExp\", val:b});\nexport const makePrimOp = (op: string):PrimOp => ({tag:\"PrimOp\", op: op});\nexport const makeVarRef = (v: string):VarRef => ({tag:\"VarRef\", var:v});\nexport const makeVarDecl = (v: string):VarDecl => ({tag:\"VarDecl\", var:v});\nexport const makeAppExp = (rator:CExp, rands:CExp[]):AppExp => ({tag:\"AppExp\", rator: rator, rands: rands});\n\nexport const isProgram = (x:any): x is Program => x.tag === 'Program';\nexport const isDefineExp = (x:any): x is DefineExp => x.tag === 'DefineExp';\nexport const isNumExp = (x:any): x is NumExp => x.tag === 'NumExp';\nexport const isBoolExp = (x:any): x is BoolExp => x.tag === 'BoolExp';\nexport const isPrimOp = (x:any): x is PrimOp => x.tag === 'PrimOp';\nexport const isVarRef = (x:any): x is VarRef => x.tag === 'VarRef';\nexport const isVarDecl = (x:any): x is VarDecl => x.tag === 'VarDecl';\nexport const isAppExp = (x:any): x is AppExp => x.tag === 'AppExp';\n\nexport const isExp = (x:any): x is Exp => isDefineExp(x) || isCExp(x);\nexport const isCExp = (x:any): x is CExp => isNumExp(x) || isBoolExp(x) || isPrimOp(x) || isVarRef(x) || isAppExp(x);\n```\n\n",
+     "hash": "e78ddf5c988a9f62",
+     "lang": "typescript",
+     "noteHe": "**הקובץ `L1-ast.ts` המלא** — המתכון מ-2.3 מיושם על כל טיפוסי $$L1$$. הקוד מחולק לשלושה בלוקים שחוזרים על עצמם בכל קבצי ה-AST בקורס:\n1. **הגדרות טיפוס** — טיפוסי האיחוד (`Exp`, `CExp`) ואחריהם כל הטיפוסים המורכבים, כל אחד עם `tag` ייחודי ושדות לרכיביו.\n2. **בנאים** (`make…`) — כל אחד מקבל את רכיבי הטיפוס ומחזיר אובייקט עם התגית הנכונה.\n3. **פרדיקטי טיפוס** (`is…`) — לטיפוסים מורכבים: בדיקת `tag`; לטיפוסי איחוד (`isExp`, `isCExp`): שרשרת `||` של הפרדיקטים שמתחתיהם.\nשימו לב ש-`VarRef` ו-`VarDecl` הם טיפוסים **נפרדים** למרות שהמבנה שלהם זהה — ההבחנה בין הפניה להצהרה, כפי שראינו ב-2.3."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:5",
+     "type": "prose",
+     "en": "For each type, we use the same patterns:\n",
+     "hash": "f1adabc8380b7959",
+     "he": "לכל טיפוס אנו משתמשים באותן תבניות:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:6",
+     "type": "list",
+     "en": "* A constructor function named `make<Type>` and which takes as parameters each of the component values of the compound type.\n* A type predicate function named `is<Type>`.  Note the type annotation of this predicate: it takes an `any` parameter and returns a `x is T` type.  Such types are understood by the TypeScript type system and allow the type checker to conclude that a variable has the given type within a scope within a program that is \"guarded\" by such a predicate.  We will see many examples using this facility.\n\n",
+     "hash": "a3453eb8c88fd34e",
+     "he": "* פונקציית בנאי בשם `make<Type>` שמקבלת כפרמטרים כל אחד מערכי הרכיבים של הטיפוס המורכב.\n* פונקציית פרדיקט טיפוס בשם `is<Type>`. שימו לב להערת הטיפוס של הפרדיקט הזה: הוא מקבל פרמטר מטיפוס `any` ומחזיר טיפוס `x is T`. טיפוסים כאלה מובנים על ידי מערכת הטיפוסים של TypeScript, ומאפשרים לבודק הטיפוסים להסיק שלמשתנה יש את הטיפוס הנתון בתוך תחום בתוכנית ש\"נשמר\" (guarded) על ידי פרדיקט כזה. נראה דוגמאות רבות לשימוש במנגנון הזה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:7",
+     "type": "prose",
+     "en": "A disjoint union type construct has the following shape:\n\n",
+     "hash": "c1b1cd1d5a47dde4",
+     "he": "למבנה של טיפוס איחוד זר יש את הצורה הבאה:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:8",
+     "type": "code",
+     "en": "```typescript\ntype CExp = NumExp | BoolExp | PrimOp | VarRef | AppExp;\n```\n",
+     "hash": "c392ab25e485d01c",
+     "lang": "typescript",
+     "noteHe": "שורה אחת שמדגימה את הצורה הכללית: טיפוס האיחוד `CExp` הוא בדיוק אחד מחמשת הטיפוסים המנויים, מופרדים ב-`|`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:9",
+     "type": "prose",
+     "en": "which is a union of disjoint types.\nEach disjoint type is defined as a tagged map.  We use the convention of using the key \"tag\" to enforce the disjointness of these types.  Any other key could be used, but we use this one consistently to express our intention of defining disjoint types.\n\n",
+     "hash": "a0b200594bf1b07a",
+     "he": "שהוא איחוד של טיפוסים זרים.\nכל טיפוס זר מוגדר כמפה מתויגת. אנו משתמשים במוסכמה של שימוש במפתח \"tag\" כדי לאכוף את הזרות של הטיפוסים האלה. אפשר היה להשתמש בכל מפתח אחר, אבל אנו משתמשים בזה באופן עקבי כדי לבטא את כוונתנו להגדיר טיפוסים זרים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:10",
+     "type": "prose",
+     "en": "The type definition following the key \"tag\" is a singleton type - which contains a discriminative string value.\nFor example, the type expression:\n",
+     "hash": "71e798da46634017",
+     "he": "הגדרת הטיפוס שבאה אחרי המפתח \"tag\" היא טיפוס יחידון (singleton) — שמכיל ערך מחרוזת מבחין.\nלמשל, ביטוי הטיפוס:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:11",
+     "type": "code",
+     "en": "```typescript\ntag = \"NumExp\"\n```\n",
+     "hash": "82c98cd4997a48ca",
+     "lang": "typescript",
+     "noteHe": "טיפוס יחידון (singleton type): המחרוזת `\"NumExp\"` משמשת כאן כ**טיפוס** ולא כערך — כלומר, הטיפוס היחיד שערכו יכול להיות הוא בדיוק המחרוזת הזו. זה מה שמאפשר ל-TypeScript להבחין בין הטיפוסים המורכבים לפי התגית."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:12",
+     "type": "prose",
+     "en": "within these type definitions indicates that the key \"tag\" must have the unique value \"NumExp\" for the map to belong to the type NumExp.\n\n",
+     "hash": "fb6a8a0155e7bbc4",
+     "he": "בתוך הגדרות הטיפוס האלה מציין שלמפתח \"tag\" חייב להיות הערך הייחודי \"NumExp\" כדי שהמפה תשתייך לטיפוס NumExp."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:13",
+     "type": "prose",
+     "en": "There is a constructor function for each disjoint type, but none for the union type.  In this sense, we understand that the union type is a sort of abstract type over the disjoint types.\n\n",
+     "hash": "3604bae92856dee0",
+     "he": "יש פונקציית בנאי לכל טיפוס זר, אבל אין בנאי לטיפוס האיחוד. במובן הזה אנו מבינים שטיפוס האיחוד הוא מעין טיפוס מופשט מעל הטיפוסים הזרים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:2:14",
+     "type": "prose",
+     "en": "The type predicate for each disjoint type checks for the presence of the appropriate tag.\nThe type predicate for the union types is just a boolean-or of the type predicates of the types it covers.\n\n",
+     "hash": "e99905f7f14c8406",
+     "he": "פרדיקט הטיפוס של כל טיפוס זר בודק את נוכחות התגית המתאימה.\nפרדיקט הטיפוס של טיפוסי האיחוד הוא פשוט \"או\" בוליאני של פרדיקטי הטיפוס של הטיפוסים שהוא מכסה."
+    }
+   ],
+   "headingHe": "ה-AST של L1 ב-TypeScript"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:3",
+   "depth": 3,
+   "headingEn": "AST Types are Recursive Types",
+   "raw": "### AST Types are Recursive Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:3:0",
+     "type": "prose",
+     "en": "The AST types we have defined above are recursive.  Some of the disjoint types of the disjoint union are atomic, some are compound.  The one type that is recursive is CExp (C stands for constituent expression - a constituent is a component of a more complex structure).  CExp is defined as follows in the AST definition:\n\n",
+     "hash": "97ef77de0c8ade07",
+     "he": "טיפוסי ה-AST שהגדרנו לעיל הם רקורסיביים. חלק מהטיפוסים הזרים באיחוד הזר הם אטומיים, וחלקם מורכבים. הטיפוס האחד שהוא רקורסיבי הוא CExp (ה-C מייצג constituent expression — רכיב הוא חלק ממבנה מורכב יותר). CExp מוגדר כך בהגדרת ה-AST:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:3:1",
+     "type": "code",
+     "en": "```typescript\n<cexp> ::= <num-exp> // num-exp(val:Number)\n       | <bool-exp>  // bool-exp(val:Boolean)\n       | <prim-op>   // prim-op(op:String)\n       | <var-ref>   // var-ref(var:String)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n```\n\n",
+     "hash": "dce2992933329513",
+     "lang": "typescript",
+     "noteHe": "הגדרת `<cexp>` שוב — כדי להתמקד ברקורסיביות. ארבע השורות הראשונות הן מקרי בסיס (אטומיים), והשורה האחרונה `(<cexp> <cexp>*)` היא המקרה הרקורסיבי: `cexp` מוגדר במונחי `cexp`. זה בדיוק מה שהופך את השפה לאינסופית ואת ה-AST ל**עץ**."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:3:2",
+     "type": "prose",
+     "en": "The only compound expression here is AppExp - which is made up of CExp components.  The other types are atomic (NumExp, BoolExp, PrimOp, VarRef).\n\n",
+     "hash": "ec41105df7d2c715",
+     "he": "הביטוי המורכב היחיד כאן הוא AppExp — שמורכב מרכיבי CExp. שאר הטיפוסים אטומיים (NumExp, ‏BoolExp, ‏PrimOp, ‏VarRef)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:3:3",
+     "type": "prose",
+     "en": "This recursive definition is what makes the language `infinite`.  It also explain why AST are called `abstract syntax` **trees**.\n\n",
+     "hash": "02881c5ca7aadf7f",
+     "he": "ההגדרה הרקורסיבית הזו היא מה שהופך את השפה ל`אינסופית`. היא גם מסבירה למה ASTs נקראים **עצי** תחביר מופשט."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:3:4",
+     "type": "prose",
+     "en": "As usual - note that the corresponding TypeScript type definitions are based on a disjoint union to enable the recursive type definition - atomic types (`num-exp, bool-exp, prim-op` and `var-ref`) form the stopping case, the compound types are the recursive ones (in the case of $$L1$$, the only compound expression is `app-exp` below `CExp`, and `define-exp` is the only compound expression below `Exp`.\n\n",
+     "hash": "111560b9c87ccf12",
+     "he": "כרגיל — שימו לב שהגדרות הטיפוס המתאימות ב-TypeScript מבוססות על איחוד זר כדי לאפשר את הגדרת הטיפוס הרקורסיבית: הטיפוסים האטומיים (`num-exp, bool-exp, prim-op` ו-`var-ref`) מהווים את מקרה העצירה, והטיפוסים המורכבים הם הרקורסיביים (במקרה של $$L1$$, הביטוי המורכב היחיד הוא `app-exp` מתחת ל-CExp, ו-`define-exp` הוא הביטוי המורכב היחיד מתחת ל-Exp)."
+    }
+   ],
+   "headingHe": "טיפוסי AST הם טיפוסים רקורסיביים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:4",
+   "depth": 2,
+   "headingEn": "Parsing",
+   "raw": "## Parsing \n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:4:0",
+     "type": "prose",
+     "en": "The parser takes as input a string and returns an AST value which encodes the structure of values recognized in the string.\n\n",
+     "hash": "5ff481836f7b0828",
+     "he": "המנתח התחבירי מקבל כקלט מחרוזת ומחזיר ערך AST שמקודד את מבנה הערכים שזוהו במחרוזת."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:4:1",
+     "type": "prose",
+     "en": "Parsing is a complex topic which will be covered in much more detail in the Compilation course.\n\n",
+     "hash": "392925aa8644ffea",
+     "he": "ניתוח תחבירי הוא נושא מורכב שיכוסה בפירוט רב יותר בקורס קומפילציה."
+    }
+   ],
+   "headingHe": "ניתוח תחבירי (Parsing)"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:5",
+   "depth": 3,
+   "headingEn": "Using S-Expressions",
+   "raw": "### Using S-Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:5:0",
+     "type": "prose",
+     "en": "In this course, we take a \"shortcut\" approach to parsing, because the language we use is based on a general structure called the \n**S-Expression** (in short S-exp https://en.wikipedia.org/wiki/S-expression). The fact that Scheme and Lisp-like languages use S-exp as the basis for their syntax is part of a general approach towards simplicity and uniformity in these languages.\n\n",
+     "hash": "2b09e4889272fbbd",
+     "he": "בקורס הזה אנו נוקטים גישת \"קיצור דרך\" לניתוח תחבירי, כי השפה שבה אנו משתמשים מבוססת על מבנה כללי הנקרא **S-Expression** (בקיצור S-exp — https://en.wikipedia.org/wiki/S-expression). העובדה ש-Scheme ושפות דמויות-Lisp משתמשות ב-S-exp כבסיס לתחביר שלהן היא חלק מגישה כללית של פשטות ואחידות בשפות האלה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:1",
+     "type": "prose",
+     "en": "A s-exp is defined inductively as using the following BNF (we ignore some of the elements used in Lisp such as pairs for simplicity):\n",
+     "hash": "eaa2be2b80e991c2",
+     "he": "‏s-exp מוגדר אינדוקטיבית באמצעות ה-BNF הבא (אנו מתעלמים מחלק מהרכיבים המשמשים ב-Lisp, כמו זוגות, לשם הפשטות):"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:2",
+     "type": "code",
+     "en": "```typescript\n<S-exp> ::= <AtomicSexp> | <CompoundSexp>\n<AtomicSexp> ::= <number> | <boolean> | <string> | <symbol>\n<CompoundSexp> ::= '(' <S-exp>* ')\n```\n\n",
+     "hash": "5bc593e1d0682182",
+     "lang": "typescript",
+     "noteHe": "ההגדרה האינדוקטיבית של S-exp בשלוש שורות: אטומי או מורכב; אטומי הוא מספר/בוליאני/מחרוזת/סמל; מורכב הוא סוגריים עם אפס או יותר S-exps בתוכם. שימו לב שהסוגריים כאן מופיעים במרכאות `'('` — כלומר הם **טרמינלים** (תווים ממשיים), להבדיל מסוגריים ששימשו בדקדוק עצמו."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:3",
+     "type": "prose",
+     "en": "The definition is recursive, leading to deeply nested lists such as:\n",
+     "hash": "57e2ba8be6269f7c",
+     "he": "ההגדרה רקורסיבית, ומובילה לרשימות מקוננות עמוקות כמו:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:4",
+     "type": "code",
+     "en": "```scheme\n((1) ((2 \"a\") #t))\n```\n\n",
+     "hash": "8f058de410b5e10c",
+     "lang": "scheme",
+     "noteHe": "דוגמה ל-S-exp מקונן בעומק שלוש: הרשימה החיצונית מכילה שתי רשימות — `(1)` ו-`((2 \"a\") #t)` — והשנייה מכילה בעצמה רשימה. שימו לב שזהו **נתון** בלבד, לא תוכנית: אין כאן אופרטור בעמדה הראשונה. ה-S-exp אינו יודע אם מדובר בתוכנית או בנתונים — זו כבר פרשנות של המנתח."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:5",
+     "type": "prose",
+     "en": "In Scheme, S-exps are used both to encode programs and data.\n\n",
+     "hash": "189c7c3a68c06c8c",
+     "he": "ב-Scheme משתמשים ב-S-exps לקידוד תוכניות ונתונים כאחד."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:6",
+     "type": "prose",
+     "en": "To implement our Scheme parser in TypeScript, we rely on an existing Node parser for S-exp.\nMake sure you install it in your work folder with:\n",
+     "hash": "ddd28cec801f2527",
+     "he": "כדי לממש את מנתח ה-Scheme שלנו ב-TypeScript, אנו מסתמכים על מנתח Node קיים ל-S-exp.\nודאו שהתקנתם אותו בתיקיית העבודה שלכם באמצעות:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:7",
+     "type": "code",
+     "en": "```\n> npm install s-expression --save\n```\n\n",
+     "hash": "82641f231c19e77d",
+     "noteHe": "פקודת ההתקנה של ספריית מנתח ה-S-expression מ-npm (כפי שראינו ב-2.3)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:8",
+     "type": "prose",
+     "en": "The Sexp parser takes care of tokenization and handling the nested parentheses in order to construct a parallel structure of nested lists - we have mapped a string into a JavaScript S-exp.  Note that the code of the S-exp parsers is not very complex - you can read it all in the module we have downloaded with npm.  But at this stage, we just skip its complexity.\n\n",
+     "hash": "a927d18efd008285",
+     "he": "מנתח ה-Sexp מטפל בפירוק לאסימונים ובטיפול בסוגריים המקוננים כדי לבנות מבנה מקביל של רשימות מקוננות — מיפינו מחרוזת ל-S-exp של JavaScript. שימו לב שהקוד של מנתחי ה-S-exp אינו מורכב במיוחד — אפשר לקרוא אותו במלואו במודול שהורדנו עם npm. אבל בשלב זה, אנו פשוט מדלגים על המורכבות שלו."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:9",
+     "type": "prose",
+     "en": "The S-exp values we obtain as output of the S-exp parser are made up of nested lists of strings only (the only atomic values that appear are strings).\n\n\n",
+     "hash": "6c3a4a0efe648ed0",
+     "he": "ערכי ה-S-exp שאנו מקבלים כפלט ממנתח ה-S-exp מורכבים מרשימות מקוננות של מחרוזות בלבד (הערכים האטומיים היחידים שמופיעים הם מחרוזות)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:5:10",
+     "type": "code",
+     "en": "```typescript\nparseSexp(\"(+ 1 (* 2 3))\")\n// ->     [ '+', '1', [ '*', '2', '3' ] ]\n```\n\n\n\n\n",
+     "hash": "5eec801502f92e0e",
+     "lang": "typescript",
+     "noteHe": "דוגמה קונקרטית לפלט המנתח: המחרוזת `\"(+ 1 (* 2 3))\"` הופכת למערך מקונן של JavaScript. **הנקודה החשובה**: `'1'` היא מחרוזת, לא המספר 1! המנתח אינו מפרש את משמעות האסימונים — זה תפקידו של השלב הבא (`parseL1`), שיזהה שמדובר במחרוזת מספרית ויבנה `NumExp` עם הערך המספרי."
+    }
+   ],
+   "headingHe": "שימוש ב-S-Expressions"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:6",
+   "depth": 3,
+   "headingEn": "The S-Expression Type",
+   "raw": "### The S-Expression Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:6:0",
+     "type": "prose",
+     "en": "The S-expression parser we use from npm is written in JavaScript - it does not specify the type of the value it returns.\n\n",
+     "hash": "61b8f9e1b6c24da9",
+     "he": "מנתח ה-S-expression שאנו משתמשים בו מ-npm כתוב ב-JavaScript — הוא אינו מגדיר את הטיפוס של הערך שהוא מחזיר."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:1",
+     "type": "prose",
+     "en": "We analyzed the code, and inferred manually the precise type returned by this parser and added this type annotation, which we add as the \"contract\" that we expect from the library and which can be trusted by the TypeScript type checker.  This is achieved by adding a file with extension d.ts in our codebase __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__:\n\n",
+     "hash": "597e9e90a15cb37b",
+     "he": "ניתחנו את הקוד, הסקנו ידנית את הטיפוס המדויק שהמנתח הזה מחזיר, והוספנו את הערת הטיפוס הזו — שאנו מוסיפים כ\"חוזה\" שאנו מצפים לו מהספרייה ושבודק הטיפוסים של TypeScript יכול לסמוך עליו. זה מושג על ידי הוספת קובץ עם סיומת d.ts לבסיס הקוד שלנו — __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:2",
+     "type": "code",
+     "en": "```typescript\ndeclare module 's-expression' {\n    export type SexpString = String;\n    export type Token = string | SexpString;\n    export type CompoundSexp = Sexp[];\n    export type Sexp = Token | CompoundSexp;\n\n    /*\n        The types returned by the parser are:\n        string - for any token which is not a string,\n                 according to the tokenization rules of S-expressions.\n        SexpString - for tokens of the form \"...\"\n        Sexp[] - for S-expressions that contain sub-expressions\n                 (of the form \"(<s-expr1> ... <s-exprn>)\")\n    */\n    export default function parse(x: string): Sexp;\n}\n```\n\n",
+     "hash": "c2aceed41657ff85",
+     "lang": "typescript",
+     "noteHe": "קובץ הצהרת הטיפוסים (`.d.ts`) שמוסיף טיפוסים לספריית JavaScript שאין לה כאלה. שימו לב להגדרה הרקורסיבית: `Sexp = Token | CompoundSexp` כאשר `CompoundSexp = Sexp[]` — בדיוק המבנה האינדוקטיבי אטומי/מורכב. ההערה בקוד מסבירה את שלושת הערכים שהמנתח יכול להחזיר, וההבחנה החשובה היא בין `string` רגיל (סמל או מזהה) לבין `SexpString` עם S גדולה (מחרוזת ליטרלית שנכתבה במרכאות)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:3",
+     "type": "prose",
+     "en": "The S-expression parser interprets all atomic tokens according to Scheme's lexical rules.\nIn particular, it encodes tokens of type string, which are written as balanced double-quotes `\".....\"` in a specific TypeScript type called String (with capital-S, which is different from the usual string).  We call this token type a `SexpString` in our type definition.\n\n",
+     "hash": "1ea135f0c134f7c0",
+     "he": "מנתח ה-S-expression מפרש את כל האסימונים האטומיים לפי הכללים הלקסיקליים של Scheme.\nבפרט, הוא מקודד אסימונים מטיפוס מחרוזת, הנכתבים כמרכאות כפולות מאוזנות `\".....\"`, בטיפוס TypeScript ספציפי בשם String (עם S גדולה, שהוא שונה מ-string הרגיל). אנו קוראים לסוג האסימון הזה `SexpString` בהגדרת הטיפוס שלנו."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:4",
+     "type": "prose",
+     "en": "The structure of the `Sexp` type is the usual disjunction between Atomic tokens and Compound expressions.\nAtomic tokens form the base case of the inductive definition. \nCompound expressions are encoded as arrays of embedded expressions.\n\n",
+     "hash": "692d01ae2e2da257",
+     "he": "המבנה של הטיפוס `Sexp` הוא החלופה הרגילה בין אסימונים אטומיים לביטויים מורכבים.\nאסימונים אטומיים מהווים את מקרה הבסיס של ההגדרה האינדוקטיבית.\nביטויים מורכבים מקודדים כמערכים של ביטויים מוטמעים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:5",
+     "type": "prose",
+     "en": "We provide in __[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__ well-typed TypeScript parsers around the third-party S-expression parser written in JavaScript:\n\n\n",
+     "hash": "39a57bfff4b880d5",
+     "he": "ב-__[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__ אנו מספקים מנתחי TypeScript מטופסים היטב סביב מנתח ה-S-expression של הצד השלישי שכתוב ב-JavaScript:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:6:6",
+     "type": "code",
+     "en": "```typescript\n/// <reference path=\"s-expression.d.ts\" />\nimport p, { Sexp, SexpString, Token, CompoundSexp } from \"s-expression\";\nimport { makeFailure, makeOk, Result } from \"./result\";\nimport { isString, isArray, isError } from \"./type-predicates\";\nimport { allT } from \"./list\";\n\n// s-expression returns strings quoted as \"a\" as [String: 'a'] objects\n// to distinguish them from symbols - which are encoded as 'a'\n// These are constructed using the new String(\"a\") constructor\n// and can be distinguished from regular strings based on the constructor.\nexport const isSexpString = (x: any): x is SexpString =>\n    ! isString(x) && x.constructor && x.constructor.name === \"String\";\n\nexport const isSexp = (x: any): x is Sexp => isToken(x) || isCompoundSexp(x);\nexport const isToken = (x: any): x is Token => isString(x) || isSexpString(x);\nexport const isCompoundSexp = (x: any): x is CompoundSexp => isArray(x) && allT(isSexp, x);\n\nexport const parse = (x: string): Result<Sexp> => {\n    const parsed = p(x);\n    return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n}\n```\n\n",
+     "hash": "2039ef03cef76348",
+     "lang": "typescript",
+     "noteHe": "העטיפה המטופסת סביב הספרייה. הפונקציה המעניינת היא `isSexpString`: הספרייה מחזירה מחרוזות ליטרליות כאובייקטי `String` (שנוצרו עם `new String(\"a\")`) כדי להבדיל אותן מסמלים (שמוחזרים כמחרוזות רגילות) — ולכן הבדיקה היא \"אינו string רגיל **וגם** שם הבנאי שלו הוא String\". שאר הפרדיקטים ממשים את ההגדרה האינדוקטיבית ישירות, ו-`parse` עוטפת את הקריאה לספרייה במונאדת `Result`."
+    }
+   ],
+   "headingHe": "הטיפוס S-Expression"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:7",
+   "depth": 3,
+   "headingEn": "Token Types",
+   "raw": "### Token Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:7:0",
+     "type": "prose",
+     "en": "The relevant types of tokens must be recognized by analyzing a `Token` value to decide the type of literal value the token represents (boolean, number or string).\nWe use the following TypeScript type predicates (using the TypeScript type predicate notation `x is <T>`).\nThese definitions are provided in __[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__:\n\n\n",
+     "hash": "a244556027c38aae",
+     "he": "יש לזהות את סוגי האסימונים הרלוונטיים על ידי ניתוח ערך `Token` כדי להחליט איזה סוג ערך ליטרלי האסימון מייצג (בוליאני, מספר או מחרוזת).\nאנו משתמשים בפרדיקטי הטיפוס הבאים של TypeScript (בכתיב פרדיקט הטיפוס `x is <T>`).\nההגדרות האלה מסופקות ב-__[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:7:1",
+     "type": "code",
+     "en": "```typescript\n// ========================================================\n// Parsing utilities to distinguish types of tokens\n// ========================================================\n// Type utilities\nexport const isArray = Array.isArray;\nexport const isString = (x: any): x is string => typeof x === \"string\";\nexport const isNumber = (x: any): x is number => typeof x === \"number\";\nexport const isBoolean = (x: any): x is boolean => typeof x === \"boolean\";\nexport const isError = (x: any): x is Error => x instanceof Error;\n\n// A weird method to check that a string is a string encoding of a number\nexport const isNumericString = (x: string): boolean => JSON.stringify(+x) === x;\n\n// A predicate for a valid identifier\n// In Scheme, a valid identifier is a token that starts with an alphabetic letter (a-z or A-Z) followed by any number of letters or numbers.\n// As discussed in the Section on Lexical Rules - we use Regular Expressions (regexp) to recognize these.\nexport type Identifier = string;\nexport const isIdentifier = (x: any): x is Identifier =>\n    /[A-Za-z][A-Za-z0-9]*/i.test(x);\n```\n\n",
+     "hash": "13464f61c56b852a",
+     "lang": "typescript",
+     "noteHe": "פרדיקטי הטיפוס הבסיסיים — המימוש של הכללים הלקסיקליים. `isNumericString` משתמש בטריק: `+x` ממיר את המחרוזת למספר ו-`JSON.stringify` חזרה למחרוזת; אם התוצאה זהה למקור, המחרוזת אכן ייצגה מספר תקין (`\"1\"` ✓, ‏`\"1a\"` → `NaN` → `\"null\"` ✗). `isIdentifier` משתמש בביטוי רגולרי — אך שימו לב שהוא חסר עוגנים (`^`/`$`) ולכן סלחני מדי."
+    }
+   ],
+   "headingHe": "סוגי אסימונים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:8",
+   "depth": 3,
+   "headingEn": "Error Handling",
+   "raw": "### Error Handling\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:8:0",
+     "type": "prose",
+     "en": "The external s-expression parser library can fail when it faces an illegal combination of parentheses or ill-formed tokens.\nIn this case, it returns a value of type `Error`.  \nIn the rest of the course, we will use a functional approach to handle errors, based on the `Result<T>` monad.  \nTherefore, we wrap the call to the library parser in a function that adapts the `Error` protocol into a `Result<Sexp>`:\n\n",
+     "hash": "994c4fd16731597b",
+     "he": "ספריית מנתח ה-s-expression החיצונית עלולה להיכשל כשהיא נתקלת בשילוב לא-חוקי של סוגריים או באסימונים פגומים.\nבמקרה כזה היא מחזירה ערך מטיפוס `Error`.\nבהמשך הקורס נשתמש בגישה פונקציונלית לטיפול בשגיאות, המבוססת על המונאדה `Result<T>`.\nלכן אנו עוטפים את הקריאה למנתח הספרייה בפונקציה שמתאימה את פרוטוקול ה-`Error` ל-`Result<Sexp>`:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:1",
+     "type": "code",
+     "en": "```typescript\nexport const parse = (x: string): Result<Sexp> => {\n    const parsed = p(x);\n    return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n}\n```\n\n",
+     "hash": "aa7bb2fb157a67b6",
+     "lang": "typescript",
+     "noteHe": "העטיפה שממירה שגיאות ל-`Result`: קוראים לספרייה, ואם התוצאה `Error` — `makeFailure` עם ההודעה; אחרת `makeOk` עם התוצאה. מכאן והלאה כל הקוד עובד עם `Result<T>` ואינו צריך לזרוק חריגות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:2",
+     "type": "prose",
+     "en": "The rest of the parser is structured to return values of type `Result<T>`.\nGiven this pattern, we combine functions that return `Result<T>` using the `bind` operator. \nFor example, instead of writing:\n\n",
+     "hash": "2795e9022887d741",
+     "he": "שאר המנתח בנוי כך שיחזיר ערכים מטיפוס `Result<T>`.\nבהינתן התבנית הזו, אנו מרכיבים פונקציות שמחזירות `Result<T>` באמצעות האופרטור `bind`.\nלמשל, במקום לכתוב:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:3",
+     "type": "code",
+     "en": "```typescript\nconst parseL1 = (x: string): Program =>\n    parseL1Program(parse(x));\n```\n\n",
+     "hash": "385d517dc3d1e534",
+     "lang": "typescript",
+     "noteHe": "הרכבה \"נאיבית\" של שתי פונקציות — `parse` ואז `parseL1Program`. הבעיה: הקוד הזה מתעלם לגמרי מהאפשרות ש-`parse` ייכשל, ולכן הטיפוסים אינם מסתדרים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:4",
+     "type": "prose",
+     "en": "We write:\n\n",
+     "hash": "cea5aa9d24c4e0ab",
+     "he": "אנו כותבים:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:5",
+     "type": "code",
+     "en": "```typescript\n// combine Sexp parsing with L1 parsing using the bind operator\nconst parseL1 = (x: string): Result<Program> =>\n    bind(parse(x), parseL1Program);\n```\n\n",
+     "hash": "38f817b211063a68",
+     "lang": "typescript",
+     "noteHe": "אותה הרכבה עם `bind` — קצרה בדיוק כמו הגרסה הנאיבית, אבל מטפלת בשגיאות במלואן: אם `parse` נכשל, `bind` מחזיר את הכישלון בלי להריץ את `parseL1Program`. שימו לב לטיפוס ההחזרה `Result<Program>` במקום `Program`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:6",
+     "type": "prose",
+     "en": "The proper way to read a `bind` combination is:\n",
+     "hash": "63c7d463c0c9663a",
+     "he": "הדרך הנכונה לקרוא צירוף `bind` היא:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:7",
+     "type": "list",
+     "en": "* First invoke `parse(x)`\n* If the returned value is of type `Failure`, return this value without further processing.\n* Else, the value is of type `Ok<Sexp>`, then pass the wrapped `Sexp` value to the function `parseL1Program`\n\n",
+     "hash": "d74fdebbc284923f",
+     "he": "* תחילה הפעל את `parse(x)`\n* אם הערך המוחזר מטיפוס `Failure`, החזר את הערך הזה בלי עיבוד נוסף.\n* אחרת, הערך מטיפוס `Ok<Sexp>` — אז העבר את ערך ה-`Sexp` העטוף לפונקציה `parseL1Program`"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:8",
+     "type": "prose",
+     "en": "In a `bind` call, the composed functions appear in the order in which they are executed -- first `parse`, then `parseL1Program`.\nThis is in contrast with the traditional function composition notation `f(g(x))` where `g` is executed before `f` but appears after it.\n\n",
+     "hash": "7e016bf5f7ec53a0",
+     "he": "בקריאת `bind`, הפונקציות המורכבות מופיעות בסדר שבו הן מבוצעות — קודם `parse`, אחר כך `parseL1Program`.\nזאת בניגוד לכתיב הרכבת הפונקציות המסורתי `f(g(x))`, שבו `g` מבוצעת לפני `f` אך מופיעה אחריה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:9",
+     "type": "prose",
+     "en": "When using `Result<T>`, we avoid type problems that would occur because of errors.\nFor example, if `parse(x)` were to return an Error value, the composition would need to be organized as follows:\n\n",
+     "hash": "2270db8420c84afc",
+     "he": "כשמשתמשים ב-`Result<T>`, אנו נמנעים מבעיות טיפוס שהיו נגרמות בגלל שגיאות.\nלמשל, אילו `parse(x)` היה מחזיר ערך Error, ההרכבה הייתה צריכה להיות מאורגנת כך:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:10",
+     "type": "code",
+     "en": "```typescript\nconst parse = (x: string): Sexp | Error => ...;\nconst parseL1Program = (s: Sexp): Program | Error => ...;\n\nconst parseL1 = (x: string): Program => {\n    const s = parse(x);\n    return isError(s) ? s :\n           parseL1Program(s);\n```\n\n",
+     "hash": "13d7fbd93f330a68",
+     "lang": "typescript",
+     "noteHe": "הגרסה \"הידנית\" לטיפול בשגיאות, בלי מונאדה: כל פונקציה מחזירה `T | Error`, ולכן אחרי כל קריאה חייבים לבדוק `isError` במפורש ולהחזיר מוקדם. שימו לב איך שתי שורות של לוגיקה עסקית הפכו לחמש, וההרכבה בין שתי הפונקציות כבר לא נראית כמו הרכבה. (יש טעות דפוס במקור — חסר סוגר מסולסל סוגר.)"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:11",
+     "type": "prose",
+     "en": "If we read this code, error handling makes us lose the intent that `parseL1` is just a **composition** of two functions.\n\n",
+     "hash": "d470211b3499064b",
+     "he": "אם נקרא את הקוד הזה, הטיפול בשגיאות גורם לנו לאבד את הכוונה ש-`parseL1` היא בסך הכול **הרכבה** של שתי פונקציות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:8:12",
+     "type": "prose",
+     "en": "This intent is preserved with the `bind` version: `bind` is the **composition** operator for functions that return `Result<T>` values.\n\n",
+     "hash": "3d1b25b5b1985aad",
+     "he": "הכוונה הזו נשמרת בגרסת ה-`bind`: ‏`bind` הוא אופרטור ה**הרכבה** לפונקציות שמחזירות ערכי `Result<T>`."
+    }
+   ],
+   "headingHe": "טיפול בשגיאות"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:9",
+   "depth": 3,
+   "headingEn": "Type Guards",
+   "raw": "### Type Guards\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:9:0",
+     "type": "prose",
+     "en": "The general structure of the parser functions is to traverse an inductive data structure, and to switch according to the type of the parameter.  \nIn TypeScript, we use a switch code structure: to make it functional, we use chained ternary conditionals `e1 ? e2 : e3 ? e4 : ...` which is an expression (as opposed to `switch` or `if else if` which are statements).  We indent such chained ternary conditions in the code to express clearly that they implement a sequence of cases as in a switch.\n\n",
+     "hash": "57589fc32bba0888",
+     "he": "המבנה הכללי של פונקציות המנתח הוא לעבור על מבנה נתונים אינדוקטיבי ולהתפצל לפי טיפוס הפרמטר.\nב-TypeScript אנו משתמשים במבנה קוד של switch: כדי להפוך אותו לפונקציונלי, אנו משתמשים בשרשרת תנאים משולשים `e1 ? e2 : e3 ? e4 : ...` שהיא **ביטוי** (בניגוד ל-`switch` או ל-`if else if` שהם משפטים). אנו מזיחים תנאים משורשרים כאלה בקוד כדי לבטא בבירור שהם מממשים סדרת מקרים כמו ב-switch."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:9:1",
+     "type": "prose",
+     "en": "The type of the parameters are disjoint unions from the AST definitions.  The clauses of the switch are all type predicates.  We call such tests *guards*.  After a guard, the TypeScript type checker knows that the parameter has the requested type (because type predicates are defined with a return type of the form `x is T`) and takes it into account in the calls of the `then` part of the if statement (we call this part of the code the `guarded clause`).\n\n",
+     "hash": "4af29db0b1186c7b",
+     "he": "טיפוסי הפרמטרים הם איחודים זרים מהגדרות ה-AST. פסוקיות ה-switch הן כולן פרדיקטי טיפוס. אנו קוראים לבדיקות כאלה *שומרים (guards)*. אחרי שומר, בודק הטיפוסים של TypeScript יודע שלפרמטר יש את הטיפוס המבוקש (כי פרדיקטי טיפוס מוגדרים עם טיפוס החזרה מהצורה `x is T`) ולוקח זאת בחשבון בקריאות שבחלק ה-`then` של משפט ה-if (אנו קוראים לחלק הזה של הקוד `הפסוקית השמורה`)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:9:2",
+     "type": "prose",
+     "en": "For example, in `parseL1Program`, we receive a parameter of type `Sexp` and traverse it using the following switch pattern:\n",
+     "hash": "322aa9cc9f5b64e7",
+     "he": "למשל, ב-`parseL1Program` אנו מקבלים פרמטר מטיפוס `Sexp` ועוברים עליו באמצעות תבנית ה-switch הבאה:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:9:3",
+     "type": "code",
+     "en": "```typescript\n// <Program> -> (L1 <Exp>+)\nexport const parseL1Program = (sexp: Sexp): Result<Program> =>\n    sexp === \"\" || isEmpty(sexp) ? makeFailure(\"Unexpected empty program\") :\n    isToken(sexp) ? makeFailure(\"Program cannot be a single token\") :\n    isCompoundSexp(sexp) ? parseL1GoodProgram(first(sexp), rest(sexp)) :\n    sexp; // never\n```\n\n",
+     "hash": "03344ee30de76928",
+     "lang": "typescript",
+     "noteHe": "שרשרת השומרים בפעולה: שני מקרי שגיאה תחילה (תוכנית ריקה, תוכנית שהיא אסימון בודד), ואז המקרה התקין — `isCompoundSexp` — שמעביר את האיבר הראשון ואת השאר ל-`parseL1GoodProgram`. שימו לב לשורה האחרונה `sexp; // never`: ה-guards כיסו את **כל** הטיפוסים האפשריים של `Sexp`, ולכן TypeScript מסיק שהטיפוס כאן הוא `never` — הקוד הזה לעולם לא יורץ. זה טריק שימושי לוודא כיסוי מלא (exhaustiveness)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:9:4",
+     "type": "prose",
+     "en": "As usual, the structure of this function follows the structure of the type definition: an `Sexp` value can be either an atomic Token or a CompoundSexp.\nWe deal with specific error conditions by returning `makeFailure` values.\n\n",
+     "hash": "d20232a440c8a589",
+     "he": "כרגיל, מבנה הפונקציה הזו עוקב אחרי מבנה הגדרת הטיפוס: ערך `Sexp` יכול להיות או Token אטומי או CompoundSexp.\nאנו מטפלים בתנאי שגיאה ספציפיים על ידי החזרת ערכי `makeFailure`."
+    }
+   ],
+   "headingHe": "שומרי טיפוס (Type Guards)"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:10",
+   "depth": 3,
+   "headingEn": "Parsing Atomic Expressions",
+   "raw": "### Parsing Atomic Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:10:0",
+     "type": "prose",
+     "en": "In $$L1$$, atomic expressions can be either number, boolean or primitive operators.\nAll three are encoded in concrete syntax as different types of Tokens.\nAccordingly, the parser function that recognizes atomic expressions enumerates the possible types of tokens and constructs the appropriate AST values for each possible option.\n\n",
+     "hash": "ca9138fb2445a5ef",
+     "he": "ב-$$L1$$, ביטויים אטומיים יכולים להיות מספר, ערך בוליאני או אופרטורים פרימיטיביים.\nכל השלושה מקודדים בתחביר הקונקרטי כסוגים שונים של אסימונים.\nבהתאם לכך, פונקציית המנתח שמזהה ביטויים אטומיים מונה את הסוגים האפשריים של אסימונים ובונה את ערכי ה-AST המתאימים לכל אפשרות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:10:1",
+     "type": "code",
+     "en": "```typescript\n// Atomic -> number | boolean | primitiveOp\nexport const parseL1Atomic = (token: Token): Result<CExp> =>\n    token === \"#t\" ? makeOk(makeBoolExp(true)) :\n    token === \"#f\" ? makeOk(makeBoolExp(false)) :\n    isString(token) && isNumericString(token) ? makeOk(makeNumExp(+token)) :\n    isString(token) && isPrimitiveOp(token) ? makeOk(makePrimOp(token)) :\n    isIdentifier(token) ? makeOk(makeVarRef(token)) :\n    makeFailure(\"Invalid atomic token: \" + token);\n\nexport const isPrimitiveOp = (x: string): boolean =>\n    [\"+\", \"-\", \"*\", \"/\", \">\", \"<\", \"=\", \"not\"].includes(x)\n```\n\n\n",
+     "hash": "b6145afe03e65836",
+     "lang": "typescript",
+     "noteHe": "ניתוח אסימון אטומי — שרשרת בדיקות שממפה כל סוג אסימון לבנאי ה-AST המתאים: `#t`/`#f` → `BoolExp`; מחרוזת מספרית → `NumExp` (עם `+sexp` להמרה למספר); אופרטור מהרשימה → `PrimOp`; מזהה תקין → `VarRef`; וכל דבר אחר → שגיאה. `isPrimitiveOp` פשוט בודק חברות ברשימה קבועה של שמונת האופרטורים של $$L1$$. שימו לב לסדר: הבדיקה של פרימיטיב **חייבת** לבוא לפני זו של מזהה, אחרת `+` היה מזוהה כמשתנה רגיל."
+    }
+   ],
+   "headingHe": "ניתוח ביטויים אטומיים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:11",
+   "depth": 3,
+   "headingEn": "Parsing Compound Expressions",
+   "raw": "### Parsing Compound Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:11:0",
+     "type": "prose",
+     "en": "In the syntax of $$L1$$, we distinguish between:\n",
+     "hash": "7f9a18fee96ec6d2",
+     "he": "בתחביר של $$L1$$ אנו מבחינים בין:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:1",
+     "type": "list",
+     "en": "* compound expressions that can occur embedded within other expressions (and which we call *constituent expressions*, in short `CExp`) \n* and compound expressions that cannot be embedded within other expressions, but must occur at the toplevel of a program.  `define-exp` is the only such case in $L1$.\n\n",
+     "hash": "35a8732929bd04ba",
+     "he": "* ביטויים מורכבים שיכולים להופיע מוטמעים בתוך ביטויים אחרים (ואנו קוראים להם *ביטויי רכיב*, בקיצור `CExp`)\n* וביטויים מורכבים שאינם יכולים להיות מוטמעים בתוך ביטויים אחרים, אלא חייבים להופיע ברמה העליונה של תוכנית. `define-exp` הוא המקרה היחיד כזה ב-$L1$."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:2",
+     "type": "prose",
+     "en": "Accordingly, the parser must process compound expressions depending on the context:\n",
+     "hash": "783303941125174a",
+     "he": "בהתאם לכך, המנתח חייב לעבד ביטויים מורכבים בהתאם להקשר:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:3",
+     "type": "list",
+     "en": "* At the toplevel of a program, one can expect `define-exp` or `c-exp` expressions.\n* Within other contexts, one can only expect `c-exp` or atomic expressions.\n\n",
+     "hash": "84ce061d24799897",
+     "he": "* ברמה העליונה של תוכנית, אפשר לצפות לביטויי `define-exp` או `c-exp`.\n* בהקשרים אחרים, אפשר לצפות רק ל-`c-exp` או לביטויים אטומיים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:4",
+     "type": "prose",
+     "en": "Compound expressions in the concrete syntax of Scheme-like languages are all Sexp arrays, and they are recognized by checking the first element in the array.\nThis makes it easy to check what is the type of a compound Sexp given its concrete syntax.\n\n",
+     "hash": "48942d759fb081f3",
+     "he": "ביטויים מורכבים בתחביר הקונקרטי של שפות דמויות-Scheme הם כולם מערכי Sexp, והם מזוהים על ידי בדיקת האיבר הראשון במערך.\nזה מקל על בדיקת סוגו של Sexp מורכב בהינתן התחביר הקונקרטי שלו."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:5",
+     "type": "prose",
+     "en": "The logic of the traversal of compound expressions is captured in the following functions.\n\n\n",
+     "hash": "aa1ea38e24faec52",
+     "he": "הלוגיקה של המעבר על ביטויים מורכבים נלכדת בפונקציות הבאות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:6",
+     "type": "code",
+     "en": "```typescript\n// Exp -> <DefineExp> | <Cexp>\n// <Sexp> = <CompoundSexp> | <Token>\nexport const parseL1Exp = (sexp: Sexp): Result<Exp> =>\n    isEmpty(sexp) ? makeFailure(\"Exp cannot be an empty list\") :\n    isCompoundSexp(sexp) ? \n        isNonEmptyList<Sexp>(sexp) ? parseL1CompoundExp(first(sexp), rest(sexp)) :\n        makeFailure(`Exp cannot be a list of single token: ${sexp}`) :\n    isToken(sexp) ? parseL1Atomic(sexp) :\n    sexp;\n    \n// Compound -> DefineExp | CompoundCExp\nexport const parseL1CompoundExp = (op: Sexp, params: Sexp[]): Result<Exp> => \n    op === \"define\"? parseDefine(params) :\n    parseL1CompoundCExp(op, params);\n\n// CompoundCExp -> AppExp\nexport const parseL1CompoundCExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    parseAppExp(op, params);\n\n// CExp -> AtomicExp | CompondCExp\nexport const parseL1CExp = (sexp: Sexp): Result<CExp> =>\n    isCompoundSexp(sexp) ?\n        isNonEmptyList<Sexp>(sexp) ? parseL1CompoundCExp(first(sexp), rest(sexp)) :\n        makeFailure(`L1CExp cannot be an empty list`) :\n    isToken(sexp) ? parseL1Atomic(sexp) :\n    sexp;\n\n// AppExp -> ( <cexp>+ )\nexport const parseAppExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    bind(parseL1CExp(op), (rator: CExp) =>\n         mapv(mapResult(parseL1CExp, params), (rands: CExp[]) =>\n              makeAppExp(rator, rands)));\n```\n\n",
+     "hash": "a66e976ffb3c9c4a",
+     "lang": "typescript",
+     "noteHe": "ארבע פונקציות שיחד מרכיבות את מנתח הביטויים המורכבים. שימו לב לחלוקת התפקידים:\n- `parseL1Exp` — נקודת הכניסה ל**רמה העליונה**: מפצלת בין Sexp מורכב לאסימון.\n- `parseL1CompoundExp` — כאן ההבחנה החשובה: אם האיבר הראשון הוא המילה `\"define\"` → מנתחים כהגדרה; אחרת → ביטוי רכיב. זו בדיוק ההבחנה בין `Exp` ל-`CExp`.\n- `parseL1CExp` — הגרסה המקבילה ל**הקשר מוטמע**: אין כאן בכלל אפשרות ל-define. כך התחביר אוכף שהגדרות מופיעות רק ברמה העליונה.\n- `parseAppExp` — הכי מעניינת: `bind` מנתח את האופרטור, ואז `mapResult` מנתח את **כל** האופרנדים (זהו `map` שמתמודד עם `Result` — אם אופרנד אחד נכשל, הכול נכשל), ולבסוף `makeAppExp` בונה את הצומת. הקריאות ל-`parseL1CExp` בתוכה הן הרקורסיה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:11:7",
+     "type": "prose",
+     "en": "The complete code of the L1 parser is available in __[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__\nwith tests in __[test/L1/L1-ast.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L1/L1-ast.test.ts)__.\n\n",
+     "hash": "56874d67bf18a8c6",
+     "he": "הקוד המלא של מנתח L1 זמין ב-__[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__\nעם בדיקות ב-__[test/L1/L1-ast.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L1/L1-ast.test.ts)__."
+    }
+   ],
+   "headingHe": "ניתוח ביטויים מורכבים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:12",
+   "depth": 2,
+   "headingEn": "Scoping and Binding of Variables",
+   "raw": "## Scoping and Binding of Variables\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:12:0",
+     "type": "prose",
+     "en": "On the basis of the syntactic structure of program expressions, one can specify formally and precisely important properties of the program.  We start with an example of such syntactic properties called variable binding [see *Essentials of Programming Languages* 2nd ed, Friedman, Wand and Haynes, Section 1.3],\n\n",
+     "hash": "634388aefbfccab6",
+     "he": "על בסיס המבנה התחבירי של ביטויי תוכנית, אפשר להגדיר באופן פורמלי ומדויק תכונות חשובות של התוכנית. נתחיל בדוגמה לתכונות תחביריות כאלה הנקראת קשירת משתנים [ראו *Essentials of Programming Languages* מהדורה שנייה, Friedman, Wand and Haynes, סעיף 1.3],"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:1",
+     "type": "prose",
+     "en": "In Scheme as well as in JavaScript, Java and many other languages, variables can occur in two different ways in a program:\n",
+     "hash": "3e4fd3fdac82b2f3",
+     "he": "ב-Scheme, וכן ב-JavaScript, ב-Java ובשפות רבות אחרות, משתנים יכולים להופיע בתוכנית בשתי דרכים שונות:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:2",
+     "type": "list",
+     "en": "* As references\n* As declarations\n\n",
+     "hash": "26dc5d8339a0ac52",
+     "he": "* כהפניות (references)\n* כהצהרות (declarations)"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:3",
+     "type": "prose",
+     "en": "A *variable reference* uses a variable - and refers to its value.  For example, in the expression `(+ 1 x)`, `x` refers to a value that was previously attached to the variable.\n\n",
+     "hash": "155b25494ff1cec6",
+     "he": "*הפניה למשתנה (variable reference)* משתמשת במשתנה — ומפנה לערכו. למשל, בביטוי `(+ 1 x)`, ‏`x` מפנה לערך שקושר קודם לכן למשתנה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:4",
+     "type": "prose",
+     "en": "In contrast, a *variable declaration* defines a new variable as an abstraction (a name) for a value.\nFor example, in Scheme, in the expressions `(lambda (x) ...)` or `(let ((x ...)) ...)`, `x` is declared as a new variable.\nIn the `lambda` case, the value of `x` will be provided when the function is invoked; in the `let` case, the value of `x` is provided in the binding location of the let-expression.\n\n",
+     "hash": "a912d4dddbef2197",
+     "he": "לעומת זאת, *הצהרת משתנה (variable declaration)* מגדירה משתנה חדש כהפשטה (שם) עבור ערך.\nלמשל, ב-Scheme, בביטויים `(lambda (x) ...)` או `(let ((x ...)) ...)`, ‏`x` מוצהר כמשתנה חדש.\nבמקרה של `lambda`, ערכו של `x` יסופק כשהפונקציה תופעל; במקרה של `let`, ערכו של `x` מסופק במקום הקשירה של ביטוי ה-let."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:5",
+     "type": "prose",
+     "en": "Variable declarations usually have limited scope, so that the same variable may be reused in different places in the program.\nThis means that the name `x` in different locations of the program may refer to different variables.  In the case of `lambda` and `let`, the declared variables are visible only within the scope of the body of the expressions.\n\n",
+     "hash": "4cb76e94543362a5",
+     "he": "להצהרות משתנה יש בדרך כלל תחום הכרה מוגבל, כך שאפשר לעשות שימוש חוזר באותו משתנה במקומות שונים בתוכנית.\nזה אומר שהשם `x` במקומות שונים בתוכנית עשוי להתייחס למשתנים שונים. במקרה של `lambda` ו-`let`, המשתנים המוצהרים גלויים רק בתוך תחום ההכרה של גוף הביטויים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:6",
+     "type": "prose",
+     "en": "Programming languages come with rules which determine how variable references relate to variable declarations.  These are called **binding rules**.  In Scheme, these rules are **syntactic rules** - that is, the relation can be computed by analyzing the AST of the program without executing it.  Another way of saying this is that binding is a **static property** as opposed to a **dynamic property** which would depend on a specific execution of the program.\n\n",
+     "hash": "d1fecebed4edcc68",
+     "he": "שפות תכנות מגיעות עם כללים שקובעים כיצד הפניות למשתנים מתקשרות להצהרות משתנים. אלה נקראים **כללי קשירה (binding rules)**. ב-Scheme, הכללים האלה הם **כללים תחביריים** — כלומר, אפשר לחשב את היחס על ידי ניתוח ה-AST של התוכנית בלי להריץ אותה. דרך אחרת לומר זאת היא שקשירה היא **תכונה סטטית (static property)** להבדיל מ**תכונה דינמית (dynamic property)** שהייתה תלויה בריצה ספציפית של התוכנית."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:12:7",
+     "type": "prose",
+     "en": "Static properties are defined through structural induction - that is, they are defined for all possible types of expressions by going over the list of all possible expression types defined in the abstract syntax of the language.\n\n",
+     "hash": "283e78da6aa403e0",
+     "he": "תכונות סטטיות מוגדרות באמצעות אינדוקציה מבנית — כלומר, הן מוגדרות עבור כל סוגי הביטויים האפשריים, על ידי מעבר על רשימת כל סוגי הביטויים המוגדרים בתחביר המופשט של השפה."
+    }
+   ],
+   "headingHe": "תחומי הכרה וקשירת משתנים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:13",
+   "depth": 3,
+   "headingEn": "Binding Rules for Scheme",
+   "raw": "### Binding Rules for Scheme\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:13:0",
+     "type": "list",
+     "en": "* In an expression `(lambda (<variable>) <body>)` the occurrence of `<variable>` is a declaration that binds all occurrences of that variable in `<body>` unless some intervening declaration of the same variable occurs.\n\n* In an expression `(let ((<variable> <value>)) <body>)` the occurrence of `<variable>` is a declaration  that binds all occurrences of that variable in `<body>` unless some intervening declaration of the same variable occurs.\n\n",
+     "hash": "2cfb9e962ab0ff85",
+     "he": "* בביטוי `(lambda (<variable>) <body>)`, המופע של `<variable>` הוא הצהרה שקושרת את כל המופעים של אותו משתנה ב-`<body>`, אלא אם מופיעה ביניהם הצהרה נוספת של אותו משתנה.\n\n* בביטוי `(let ((<variable> <value>)) <body>)`, המופע של `<variable>` הוא הצהרה שקושרת את כל המופעים של אותו משתנה ב-`<body>`, אלא אם מופיעה ביניהם הצהרה נוספת של אותו משתנה."
+    }
+   ],
+   "headingHe": "כללי הקשירה של Scheme"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:14",
+   "depth": 3,
+   "headingEn": "Free and Bound Variables",
+   "raw": "### Free and Bound Variables\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:14:0",
+     "type": "prose",
+     "en": "A variable `x` occurs free in an expression `E` if and only if there is some use of `x` in `E` that is not bound by any declaration of `x` in `E`.\n\n",
+     "hash": "6a9d371e23b5654d",
+     "he": "משתנה `x` מופיע **חופשי** בביטוי `E` אם ורק אם יש שימוש כלשהו ב-`x` בתוך `E` שאינו קשור על ידי אף הצהרה של `x` בתוך `E`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:1",
+     "type": "prose",
+     "en": "A variable `x` occurs bound in an expression `E` if and only if there is some use of `x` in `E` that is bound by a declaration of `x` in `E`.\n\n",
+     "hash": "3fd61096f440bfea",
+     "he": "משתנה `x` מופיע **קשור** בביטוי `E` אם ורק אם יש שימוש כלשהו ב-`x` בתוך `E` שקשור על ידי הצהרה של `x` בתוך `E`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:2",
+     "type": "prose",
+     "en": "#### Examples\n\n",
+     "hash": "2ded3c9244151413",
+     "he": "#### דוגמאות"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:3",
+     "type": "code",
+     "en": "```scheme\n((lambda (x) x) y)\n```\n\n",
+     "hash": "e10f05a99d7ba1ce",
+     "lang": "scheme",
+     "noteHe": "הפעלת פונקציית הזהות על `y`. שני משתנים, שני מצבים שונים: `x` מוצהר בפרמטרים של ה-lambda ולכן המופע שלו בגוף **קשור**; `y` מופיע כארגומנט **מחוץ** ל-lambda, ואין שום הצהרה שקושרת אותו — ולכן הוא **חופשי**."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:4",
+     "type": "list",
+     "en": "* `x` occurs bound - since the 2nd occurrence of x in the body of the lambda is bound by the first occurrence in the formals of the lambda.\n* `y` occurs free.\n\n",
+     "hash": "08bee54e80218c41",
+     "he": "* `x` מופיע קשור — כי המופע השני של x בגוף ה-lambda קשור על ידי המופע הראשון ברשימת הפרמטרים של ה-lambda.\n* `y` מופיע חופשי."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:5",
+     "type": "code",
+     "en": "```scheme\n(lambda (y)\n  ((lambda (x) x) y))\n```\n\n",
+     "hash": "24e73c3efecb89da",
+     "lang": "scheme",
+     "noteHe": "אותו ביטוי בדיוק, אבל עטוף ב-lambda נוספת שמצהירה על `y`. עכשיו **אין** בביטוי הזה אף משתנה חופשי — ההצהרה החיצונית של `y` קושרת את המופע שהיה חופשי קודם. זה ממחיש שחופשי/קשור אינה תכונה של המשתנה לבדו אלא של **המשתנה ביחס לביטוי מסוים**."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:6",
+     "type": "list",
+     "en": "* The reference of `y` in the second line is now bound by the declaration of `y` in the first line.\n\n",
+     "hash": "413f89708ff907ec",
+     "he": "* ההפניה ל-`y` בשורה השנייה קשורה כעת על ידי ההצהרה של `y` בשורה הראשונה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:7",
+     "type": "prose",
+     "en": "The algorithm to determine whether a variable occurs free in an expression is encoded as the typical traversal of the AST,\nusing the same recipe as we used to compute the height of an expression (`Eheight`): this is a structural induction over the disjoint union types that define the Scheme AST:\n\n\n",
+     "hash": "6b29e25dce67a403",
+     "he": "האלגוריתם לקביעה האם משתנה מופיע חופשי בביטוי מקודד כמעבר הטיפוסי על ה-AST, לפי אותו מתכון שבו השתמשנו לחישוב גובה ביטוי (`Eheight`): זוהי אינדוקציה מבנית על טיפוסי האיחוד הזר שמגדירים את ה-AST של Scheme:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:8",
+     "type": "code",
+     "en": "```typescript\nexport const occursFree = (v: string, e: Program | Exp): boolean =>\n    isBoolExp(e) ? false :\n    isNumExp(e) ? false :\n    isStrExp(e) ? false :\n    isLitExp(e) ? false :\n    isVarRef(e) ? (v === e.var) :\n    isIfExp(e) ? occursFree(v, e.test) || occursFree(v, e.then) || occursFree(v, e.alt) :\n    isProcExp(e) ? ! includes(v, map((p) => p.var, e.args)) &&\n                   some((b) => occursFree(v, b), e.body) :\n    isPrimOp(e) ? false :\n    isAppExp(e) ? occursFree(v, e.rator) ||\n                  some((rand) => occursFree(v, rand), e.rands) :\n    isDefineExp(e) ? (v !== e.var.var) && occursFree(v, e.val) :\n    isLetExp(e) ? false : // TODO\n    isProgram(e) ? false : // TODO\n    e;\n```\n\n",
+     "hash": "912d234fe03a55dd",
+     "lang": "typescript",
+     "noteHe": "**האלגוריתם `occursFree` — קוד מבחן קלאסי.** אותה תבנית מעבר על AST, אבל שימו לב לשני הענפים המעניינים:\n- `isVarRef` — **מקרה הבסיס האמיתי**: מחזיר אמת אם זה בדיוק המשתנה שאנחנו מחפשים.\n- `isProcExp` — **הענף החכם**: `! includes(v, map(p => p.var, e.args))` בודק שהמשתנה **אינו** אחד מפרמטרי ה-lambda (אחרת הוא נקשר כאן ולכן אינו חופשי), **וגם** `some(...)` — שהוא מופיע חופשי באחד מביטויי הגוף. שני התנאים יחד מקודדים בדיוק את כלל הקשירה.\n- `isDefineExp` — דומה: המשתנה חופשי אם הוא אינו המשתנה המוגדר וגם מופיע חופשי בערך.\n- שאר הענפים: אטומיים מחזירים `false`, ומורכבים (`if`, `app`) מאחדים ב-`||` את התוצאות של תת-הביטויים.\nשימו לב לשני ה-`// TODO` — `LetExp` ו-`Program` לא מומשו בגרסה הזו (תרגיל טוב: נסו להשלים אותם)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:14:9",
+     "type": "prose",
+     "en": "The complete code is available in __[L3/freeVars.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/freeVars.ts)__\nwith tests in __[test/L3/freeVars.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/freeVars.test.ts)__.\n\n",
+     "hash": "8d17325b48f32ef7",
+     "he": "הקוד המלא זמין ב-__[L3/freeVars.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/freeVars.ts)__\nעם בדיקות ב-__[test/L3/freeVars.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/freeVars.test.ts)__."
+    }
+   ],
+   "headingHe": "משתנים חופשיים וקשורים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:15",
+   "depth": 3,
+   "headingEn": "Collecting Variable References from an Expression",
+   "raw": "### Collecting Variable References from an Expression\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:15:0",
+     "type": "prose",
+     "en": "An extension of this algorithm consists of collecting all the variables that are referenced in a given expression.\n\n\n",
+     "hash": "214fd7585d955fff",
+     "he": "הרחבה של האלגוריתם הזה היא איסוף כל המשתנים שמופנים אליהם בביטוי נתון."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:15:1",
+     "type": "code",
+     "en": "```typescript\nexport const referencedVars = (e: Parsed | Error): ReadonlyArray<VarRef> =>\n    isBoolExp(e) ? [] :\n    isNumExp(e) ? [] :\n    isStrExp(e) ? [] :\n    isLitExp(e) ? [] :\n    isPrimOp(e) ? [] :\n    isVarRef(e) ? [e] :\n    isIfExp(e) ? union(referencedVars(e.test), referencedVars(e.then), referencedVars(e.alt)) :\n    isAppExp(e) ? union(referencedVars(e.rator),\n                        reduce(union, [], map(referencedVars, e.rands))) :\n    isProcExp(e) ? reduce(union, [], map(referencedVars, e.body)) :\n    isDefineExp(e) ? referencedVars(e.val) :\n    isProgram(e) ? reduce(union, [], map(referencedVars, e.exps)) :\n    isLetExp(e) ? [] : // TODO\n    [];\n\n```\n\n",
+     "hash": "777f5a514a9eda9c",
+     "lang": "typescript",
+     "noteHe": "`referencedVars` — אותה תבנית מעבר, אבל מחזירה **רשימה** במקום ערך בוליאני. שימו לב להתאמות: מקרי הבסיס האטומיים מחזירים רשימה ריקה `[]`, `isVarRef` מחזיר רשימה עם המשתנה עצמו `[e]`, ובמקום `||` משתמשים ב-`union` (איחוד קבוצות, שמונע כפילויות). הניב `reduce(union, [], map(referencedVars, e.rands))` הוא הדרך לאחד רשימה של רשימות. הבדל חשוב מ-`occursFree`: כאן `isProcExp` **אינו** מסנן את הפרמטרים — הפונקציה אוספת את כל ההפניות, קשורות וחופשיות כאחד."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:15:2",
+     "type": "prose",
+     "en": "Note how the structure of this function, is again a traversal of the AST according to the type definition - this function \nhas a structure almost identical to any AST visitor.\n\n",
+     "hash": "1bafc89ff5a3cd00",
+     "he": "שימו לב איך מבנה הפונקציה הזו הוא שוב מעבר על ה-AST בהתאם להגדרת הטיפוס — לפונקציה הזו מבנה כמעט זהה לכל מבקר (visitor) של AST."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:15:3",
+     "type": "prose",
+     "en": "By combining `referencedVars` and `occursFree` we can obtain the list of variables that occur free within an expression.\n\n",
+     "hash": "8f7b6fe944cdd8c7",
+     "he": "על ידי שילוב של `referencedVars` ו-`occursFree` נוכל לקבל את רשימת המשתנים שמופיעים חופשיים בתוך ביטוי."
+    }
+   ],
+   "headingHe": "איסוף הפניות למשתנים מתוך ביטוי"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:16",
+   "depth": 2,
+   "headingEn": "Distinguishing Variable Declaration and Variable References in Abstract Syntax",
+   "raw": "## Distinguishing Variable Declaration and Variable References in Abstract Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:16:0",
+     "type": "prose",
+     "en": "Since we make a distinction between the two positions of variables, we can change the abstract syntax to represent variable declarations and variable references as two different data types.\n\n",
+     "hash": "0c7bdcefefe4813d",
+     "he": "מכיוון שאנו מבחינים בין שתי העמדות של משתנים, נוכל לשנות את התחביר המופשט כך שייצג הצהרות משתנה והפניות למשתנה כשני טיפוסי נתונים שונים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:16:1",
+     "type": "prose",
+     "en": "This is reflected in this updated BNF - where we define the category `<cexpLA>` for \"expression with lexical address\":\n\n",
+     "hash": "3a528238ea6fac02",
+     "he": "זה בא לידי ביטוי ב-BNF המעודכן הזה — שבו אנו מגדירים את הקטגוריה `<cexpLA>` עבור \"ביטוי עם כתובת לקסיקלית\":"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:16:2",
+     "type": "code",
+     "en": "```typescript\n;; <cexpLA> ::= <number>                           / num-exp(val:number)\n;;         |  <boolean>                            / bool-exp(val:boolean)\n;;         |  <string>                             / str-exp(val:string)\n;;         |  ( quote <sexp> )                     / literal-exp(val:sexp)\n;;         |  <var-ref>                            / var-ref(var:string)\n;;         |  ( lambda ( <var-decl>* ) <cexpLA>+ ) / proc-expLA(params:List(var-decl), body:List(cexp))\n;;         |  ( if <cexpLA> <cexpLA> <cexpLA> )    / if-expLA(test: cexpLA, then: cexpLA, else: cexpLA)\n;;         |  ( <cexpLA> <cexpLA>* )               / app-expLA(rator:cexpLA, rands:List(cexpLA))\n```\n\n",
+     "hash": "777b9f40137c6d85",
+     "lang": "typescript",
+     "noteHe": "גרסת ה-BNF עם הבחנה מפורשת בין הצהרה להפניה. השוו לטבלה המוכרת: ב-`lambda` הפרמטרים הם `<var-decl>*` (הצהרות), ואילו במקומות אחרים מופיע `<var-ref>` (הפניה) — אותו אסימון מזהה בתחביר הקונקרטי, אבל קטגוריה שונה לפי ההקשר. הסיומת `LA` בשמות הטיפוסים מציינת \"Lexical Address\" — זו גרסת ה-AST שנשתמש בה לחישוב כתובות לקסיקליות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:16:3",
+     "type": "prose",
+     "en": "To simplify - we ignore here define-exp and let-exp.\n\n",
+     "hash": "4ba6eecd0d5e6347",
+     "he": "לשם הפשטות — אנו מתעלמים כאן מ-define-exp ומ-let-exp."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:16:4",
+     "type": "prose",
+     "en": "The atomic expression types can be reused from the previous AST definition (number, boolean, string).\nLiteral expressions are also unchanged.\nWe distinguish between var-decl and var-ref as two distinct categories, which are both mapped in concrete syntax to identifiers. \nBut the appropriate category is selected based on the context of the identifier: in the paramater list of a lambda-expression, identifiers are interpreted as var-decl, elsewhere, as var-ref.\nCompound expressions have the same structure as in the original syntactic definition, but refer to the new type cexpLA instead of cexp.\n\n\n",
+     "hash": "c409b7fcac1239d1",
+     "he": "אפשר לעשות שימוש חוזר בסוגי הביטויים האטומיים מהגדרת ה-AST הקודמת (מספר, בוליאני, מחרוזת).\nגם ביטויים ליטרליים אינם משתנים.\nאנו מבחינים בין var-decl ל-var-ref כשתי קטגוריות נפרדות, ששתיהן ממופות בתחביר הקונקרטי למזהים.\nאבל הקטגוריה המתאימה נבחרת על סמך ההקשר של המזהה: ברשימת הפרמטרים של ביטוי lambda, מזהים מתפרשים כ-var-decl; במקומות אחרים, כ-var-ref.\nלביטויים מורכבים יש אותו מבנה כמו בהגדרה התחבירית המקורית, אבל הם מפנים לטיפוס החדש cexpLA במקום ל-cexp."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:16:5",
+     "type": "prose",
+     "en": "The corresponding parser / unparser and AST definitions are provided in\n__[L3/lexicalAddress.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/lexicalAddress.ts)__ \nwith tests in __[test/L3/lexicalAddress.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/lexicalAddress.test.ts)__.\n\n",
+     "hash": "9b8207007715e12e",
+     "he": "המנתח/מפרק וההגדרות המתאימות של ה-AST מסופקים ב-__[L3/lexicalAddress.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/lexicalAddress.ts)__\nעם בדיקות ב-__[test/L3/lexicalAddress.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/lexicalAddress.test.ts)__."
+    }
+   ],
+   "headingHe": "הבחנה בין הצהרת משתנה להפניה למשתנה בתחביר המופשט"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:17",
+   "depth": 2,
+   "headingEn": "Determining the Scope of Variable Declarations",
+   "raw": "## Determining the Scope of Variable Declarations \n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:17:0",
+     "type": "prose",
+     "en": "In the lexically scoped language we are used to, the same variable name can be used in different scopes to refer to different variables.  For example:\n\n",
+     "hash": "38eaa3ea05d1fc7b",
+     "he": "בשפה עם תחומי הכרה לקסיקליים שאנו רגילים אליה, אפשר להשתמש באותו שם משתנה בתחומים שונים כדי להתייחס למשתנים שונים. למשל:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:17:1",
+     "type": "code",
+     "en": "```scheme\n((lambda (x) (* x x))  ; 1\n ((lambda (x) (+ x x)) ; 2\n  2))\n```\n\n",
+     "hash": "cdc3de0a3471a83f",
+     "lang": "scheme",
+     "noteHe": "שתי lambdas שונות לגמרי, שתיהן משתמשות בשם `x` — אבל אלה **שני משתנים שונים**. ה-`x`-ים בשורה 1 קשורים ל-lambda של שורה 1, וה-`x`-ים בשורה 2 ל-lambda של שורה 2. ההערות `; 1` ו-`; 2` בקוד הן מספרי שורה לצורך ההסבר. שימו לב שהן אינן מקוננות זו בזו — זו הפעלה שבה ה-lambda השנייה מספקת את הארגומנט לראשונה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:17:2",
+     "type": "prose",
+     "en": "The variable references in line 1 refer to the declaration in the first lambda in line 1,\nand those in line 2, to the second lambda declaration in line 2.\n\n",
+     "hash": "40893b6708760749",
+     "he": "ההפניות למשתנה בשורה 1 מתייחסות להצהרה ב-lambda הראשונה בשורה 1,\nואלה שבשורה 2 — להצהרת ה-lambda השנייה בשורה 2."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:17:3",
+     "type": "code",
+     "en": "```scheme\n(lambda (x y)             ; 1 \n  ((lambda (x) (+ x y))   ; 2\n   (+ x x)) 1)            ; 3\n```\n\n",
+     "hash": "c6918218a0fa64e6",
+     "lang": "scheme",
+     "noteHe": "דוגמה מורכבת יותר, **עם קינון אמיתי**: ה-lambda של שורה 2 נמצאת בתוך זו של שורה 1. כאן שם המשתנה `x` מוצהר פעמיים — פעם בשורה 1 ופעם בשורה 2 — וה-lambda הפנימית **מסתירה** (shadow) את החיצונית. עקבו בעצמכם: ה-`x` בשורה 2 שייך לפנימית, ה-`y` בשורה 2 חייב לטפס לחיצונית, וה-`x`-ים בשורה 3 (שנמצאים **מחוץ** ל-lambda הפנימית) שייכים לחיצונית."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:17:4",
+     "type": "list",
+     "en": "* The variable reference x in line 2 refers to the declaration in line 2;\n* The variable reference y in line 2 refers to the declaration in line 1;\n* The variable reference x in line 3 refers to the declaration in line 1.\n\n",
+     "hash": "a2a099d7439f619b",
+     "he": "* ההפניה למשתנה x בשורה 2 מתייחסת להצהרה בשורה 2;\n* ההפניה למשתנה y בשורה 2 מתייחסת להצהרה בשורה 1;\n* ההפניה למשתנה x בשורה 3 מתייחסת להצהרה בשורה 1."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:17:5",
+     "type": "prose",
+     "en": "These relations between variable reference and variable declarations are static properties - they only depend on the syntactic structure of the expression.\n\n",
+     "hash": "8e88a2a75a333771",
+     "he": "היחסים האלה בין הפניה למשתנה להצהרות משתנה הם תכונות סטטיות — הם תלויים רק במבנה התחבירי של הביטוי."
+    }
+   ],
+   "headingHe": "קביעת תחום ההכרה של הצהרות משתנה"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:18",
+   "depth": 2,
+   "headingEn": "Lexical Address",
+   "raw": "## Lexical Address\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:18:0",
+     "type": "prose",
+     "en": "One way to disambiguate variable references is to replace them with their **lexical address**: the lexical address determines in an unambiguous manner the variable declaration to which a variable reference is bound.\n\n",
+     "hash": "241cffdd2487ff0f",
+     "he": "דרך אחת ליישב את העמימות בהפניות למשתנים היא להחליף אותן ב**כתובת הלקסיקלית (lexical address)** שלהן: הכתובת הלקסיקלית קובעת באופן חד-משמעי לאיזו הצהרת משתנה קשורה ההפניה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:1",
+     "type": "prose",
+     "en": "To define lexical address it helps to define the **contour** of a sub-expression within an embedding expression: \neach time a new declaration scoped is defined (using a lambda or let expression in our language), a new contour is defined.\nContours are embedded into each other.  Contours correspond to the scope of the declaration.\n\n",
+     "hash": "9d8e7c520652d575",
+     "he": "כדי להגדיר כתובת לקסיקלית, מועיל להגדיר את ה**קו-מתאר (contour)** של תת-ביטוי בתוך ביטוי עוטף:\nבכל פעם שמוגדר תחום הצהרות חדש (באמצעות ביטוי lambda או let בשפה שלנו), מוגדר קו-מתאר חדש.\nקווי מתאר מקוננים זה בתוך זה. קווי מתאר מתאימים לתחום ההכרה של ההצהרה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:2",
+     "type": "prose",
+     "en": "In the example above, there is a contour started at line 1 with the lambda declaration, and a second embedded contour in line 2.\n\n",
+     "hash": "db18ee4ba6746789",
+     "he": "בדוגמה לעיל, יש קו-מתאר שמתחיל בשורה 1 עם הצהרת ה-lambda, וקו-מתאר שני מקונן בשורה 2."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:3",
+     "type": "prose",
+     "en": "Variable references can refer to the declarations in the contours in which they appear - starting from the inner declaration, and looking outwards.\n\n",
+     "hash": "153b8bb3d57f5823",
+     "he": "הפניות למשתנים יכולות להתייחס להצהרות בקווי המתאר שבהם הן מופיעות — החל מההצהרה הפנימית, ומסתכלים החוצה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:4",
+     "type": "prose",
+     "en": "For example, in line 2, the x reference looks up to the declaration in the inner contour in line 2; \nthe y reference looks up to the external declaration in the outer contour in line 1.\n\n",
+     "hash": "354008e1e9a02c52",
+     "he": "למשל, בשורה 2, ההפניה ל-x מחפשת את ההצהרה בקו-המתאר הפנימי בשורה 2;\nההפניה ל-y מחפשת את ההצהרה החיצונית בקו-המתאר החיצוני בשורה 1."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:5",
+     "type": "prose",
+     "en": "To indicate these relations, we define a lexical address as a tuple: `[var : depth pos]` where:\n",
+     "hash": "a2a414de5bfc9054",
+     "he": "כדי לציין את היחסים האלה, אנו מגדירים כתובת לקסיקלית כשלשה: `[var : depth pos]` כאשר:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:6",
+     "type": "list",
+     "en": "* var is the name of the variable\n* depth is the number of contours that are crossed to reach the variable declaration\n* pos is the offset of the variable within the declaration.\n\n",
+     "hash": "a4e58fe50ed4a542",
+     "he": "* var הוא שם המשתנה\n* depth הוא מספר קווי המתאר שיש לחצות כדי להגיע להצהרת המשתנה\n* pos הוא ההיסט (offset) של המשתנה בתוך ההצהרה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:7",
+     "type": "prose",
+     "en": "For example, the lexical addresses annotations for the expressions above is:\n",
+     "hash": "eb345746047b8f32",
+     "he": "למשל, הסימון של הכתובות הלקסיקליות עבור הביטויים לעיל הוא:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:8",
+     "type": "code",
+     "en": "```scheme\n((lambda (x) (* [x : 0 0] [x : 0 0]))  ; 1\n ((lambda (x) (+ [x : 0 0] [x : 0 0])) ; 2\n  2))\n```\n\n",
+     "hash": "bf2e25c930157194",
+     "lang": "scheme",
+     "noteHe": "אותה דוגמה, כעת עם כתובות לקסיקליות. **כל** ההפניות מקבלות `[x : 0 0]` — depth 0 כי ההצהרה נמצאת בקו-המתאר הקרוב ביותר (לא חוצים אף lambda בדרך), ו-pos 0 כי `x` הוא הפרמטר הראשון (והיחיד). שימו לב שהכתובות זהות בשתי השורות אבל **מציינות משתנים שונים** — הכתובת היא יחסית למיקום ההפניה, וזה בדיוק היתרון שלה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:9",
+     "type": "prose",
+     "en": "The variable references in line 1 refer to the declaration in the first lambda in line 1,\nand those in line 2, to the second lambda declaration in line 2.\n\n",
+     "hash": "40893b6708760749",
+     "he": "ההפניות למשתנה בשורה 1 מתייחסות להצהרה ב-lambda הראשונה בשורה 1,\nואלה שבשורה 2 — להצהרת ה-lambda השנייה בשורה 2."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:10",
+     "type": "code",
+     "en": "```scheme\n(lambda (x y)                             ; 1 \n  ((lambda (x) (+ [x : 0 0] [y : 1 1]))   ; 2\n   (+ [x : 0 0] [x : 0 0])) 1)            ; 3\n```\n\n",
+     "hash": "194224bba9385e34",
+     "lang": "scheme",
+     "noteHe": "**הדוגמה המרכזית להבנת כתובות לקסיקליות.** שלוש כתובות שונות:\n- `[x : 0 0]` בשורה 2 — `x` נמצא בקו-המתאר הפנימי עצמו (depth 0), במקום 0.\n- `[y : 1 1]` בשורה 2 — `y` **אינו** בקו-המתאר הפנימי, אז חוצים אותו (depth **1**) ומוצאים אותו בפרמטרים של ה-lambda החיצונית `(x y)` במקום **1** (השני).\n- `[x : 0 0]` בשורה 3 — כאן אנחנו כבר **מחוץ** ל-lambda הפנימית, ולכן ה-lambda החיצונית היא הקרובה ביותר: depth 0, מקום 0.\nעצה למבחן: ספרו כמה `lambda` חוצים מההפניה כלפי חוץ עד למציאת השם — זה ה-depth; המקום ברשימת הפרמטרים הוא ה-pos."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:11",
+     "type": "prose",
+     "en": "Note that the variable references `+` and `*` in these examples are not bound to any declaration.\nThis is because they occur free in the expression.\n\n",
+     "hash": "9a2fc75d7abbe81c",
+     "he": "שימו לב שההפניות למשתנים `+` ו-`*` בדוגמאות האלה אינן קשורות לאף הצהרה.\nזאת משום שהן מופיעות חופשיות בביטוי."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:12",
+     "type": "prose",
+     "en": "In this case, we annotate them as `[var free]` as follows:\n\n",
+     "hash": "888d2ac441be92c4",
+     "he": "במקרה כזה, אנו מסמנים אותן כ-`[var free]` כך:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:13",
+     "type": "code",
+     "en": "```scheme\n((lambda (x) ([* free] [x : 0 0] [x : 0 0]))  ; 1\n ((lambda (x) ([+ free] [x : 0 0] [x : 0 0])) ; 2\n  2))\n```\n\n",
+     "hash": "ba740cfa609f5764",
+     "lang": "scheme",
+     "noteHe": "אותה דוגמה, כעת **מסומנת במלואה** — כולל האופרטורים. `[* free]` ו-`[+ free]` מסומנים כחופשיים, כי אין להם הצהרה בשום קו-מתאר בביטוי (הם מגיעים מהסביבה הגלובלית). זו תזכורת ששמות פונקציות הם משתנים לכל דבר."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:14",
+     "type": "prose",
+     "en": "The variable references in line 1 refer to the declaration in the first lambda in line 1,\nand those in line 2, to the second lambda declaration in line 2.\n\n",
+     "hash": "40893b6708760749",
+     "he": "ההפניות למשתנה בשורה 1 מתייחסות להצהרה ב-lambda הראשונה בשורה 1,\nואלה שבשורה 2 — להצהרת ה-lambda השנייה בשורה 2."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:18:15",
+     "type": "code",
+     "en": "```scheme\n(lambda (x y)                                    ; 1 \n  ((lambda (x) ([+ free] [x : 0 0] [y : 1 1]))   ; 2\n   ([+ free] [x : 0 0] [x : 0 0])) 1)            ; 3\n```\n\n",
+     "hash": "87e4ed17d2c548a2",
+     "lang": "scheme",
+     "noteHe": "הדוגמה המקוננת, מסומנת במלואה: שלוש הכתובות שניתחנו קודם, בתוספת שני ה-`[+ free]`. זהו הפלט המלא שהאלגוריתם בסעיף הבא אמור לייצר."
+    }
+   ],
+   "headingHe": "כתובת לקסיקלית (Lexical Address)"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:19",
+   "depth": 3,
+   "headingEn": "Computing the Lexical Address of Variable References",
+   "raw": "### Computing the Lexical Address of Variable References\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:19:0",
+     "type": "prose",
+     "en": "Since the relation between a variable reference and its corresponding variable declaration is unambiguous according to the syntax of the language, we can design an algorithm which computes the lexical address of all variable references in an expression.\n\n",
+     "hash": "b9ef70d7ad70a417",
+     "he": "מכיוון שהיחס בין הפניה למשתנה להצהרת המשתנה המתאימה לה הוא חד-משמעי לפי תחביר השפה, נוכל לתכנן אלגוריתם שמחשב את הכתובת הלקסיקלית של כל ההפניות למשתנים בביטוי."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:1",
+     "type": "prose",
+     "en": "In order to design this algorithm, we must consider how we perform the task of finding the declaration that matches a variable reference.  The best way to visualize this process is to observe the AST as a tree.  When we traverse the tree top-down,\nand reach a variable-reference node - we are in a leaf-position (because variable reference nodes have no constituent\nsub-expressions - they are leaves in the AST).  To locate the corresponding declaration, we must traverse the AST upwards from this variable reference leaf, until we find a proc-exp node.  When we find this node, we check the parameters list of the proc-exp and verify whether the variable name occurs in the parameters list.  If it does, this is the declaration that matches the variable reference.  We must also identify the position of the variable name within the parameters - this gives us a lexical address of `(<var> : 0 pos)`.  \n\n",
+     "hash": "3217d01d883a319e",
+     "he": "כדי לתכנן את האלגוריתם הזה, עלינו לשקול איך אנחנו מבצעים את המשימה של מציאת ההצהרה שמתאימה להפניה למשתנה. הדרך הטובה ביותר לדמיין את התהליך הזה היא להתבונן ב-AST כעץ. כשאנו עוברים על העץ מלמעלה למטה ומגיעים לצומת של הפניה למשתנה — אנחנו בעמדת עלה (כי לצמתים של הפניה למשתנה אין תת-ביטויים רכיביים — הם עלים ב-AST). כדי לאתר את ההצהרה המתאימה, עלינו לטפס על ה-AST כלפי מעלה מעלה ההפניה הזה, עד שנמצא צומת proc-exp. כשנמצא את הצומת הזה, נבדוק את רשימת הפרמטרים של ה-proc-exp ונוודא אם שם המשתנה מופיע ברשימת הפרמטרים. אם כן, זו ההצהרה שמתאימה להפניה. עלינו גם לזהות את המיקום של שם המשתנה בתוך הפרמטרים — זה נותן לנו כתובת לקסיקלית `(<var> : 0 pos)`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:2",
+     "type": "prose",
+     "en": "If the variable is not found in the parameters list, we continue climbing up the tree - but each time we cross a \"contour\" (that is, we cross a proc-exp node), we increase the \"depth\" parameter by one.\n\n",
+     "hash": "b932714dc4c5534d",
+     "he": "אם המשתנה אינו נמצא ברשימת הפרמטרים, אנו ממשיכים לטפס במעלה העץ — אבל בכל פעם שאנו חוצים \"קו-מתאר\" (כלומר חוצים צומת proc-exp), אנו מגדילים את פרמטר ה-\"depth\" באחד."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:3",
+     "type": "prose",
+     "en": "Another way to achieve this matching, if we need to compute the lexical address of all variable references is to traverse the AST top-down and keeping track, each time we traverse a contour (a proc-exp node) of the list of visible variable declarations.\n\n",
+     "hash": "78ed11a0b0fc359f",
+     "he": "דרך נוספת להשיג את ההתאמה הזו, אם אנחנו צריכים לחשב את הכתובת הלקסיקלית של כל ההפניות למשתנים, היא לעבור על ה-AST מלמעלה למטה ולעקוב, בכל פעם שאנו חוצים קו-מתאר (צומת proc-exp), אחרי רשימת הצהרות המשתנים הגלויות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:4",
+     "type": "prose",
+     "en": "For example, in the expression:\n\n",
+     "hash": "00733d7ee8802df4",
+     "he": "למשל, בביטוי:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:5",
+     "type": "code",
+     "en": "```scheme\n(lambda (x y)                                    ; 1 \n  ((lambda (x) ([+ free] [x : 0 0] [y : 1 1]))   ; 2\n   ([+ free] [x : 0 0] [x : 0 0])) 1)            ; 3\n```\n\n",
+     "hash": "87e4ed17d2c548a2",
+     "lang": "scheme",
+     "noteHe": "אותה דוגמה מקוננת — נעקוב עליה כעת צעד-אחר-צעד עם האלגוריתם מלמעלה למטה שמתואר בהמשך."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:6",
+     "type": "prose",
+     "en": "We start at the top of the AST, the list of visible variable declarations is empty '().\nWe then cross the node `(lambda (x y) ...)` - the list is now `( x y )`.\nAny match we may find now will be with depth 0.  So we actually maintain a list of lexical addresses:\n`( [x:0 0] [y:0 1] )`.\n\n",
+     "hash": "10dcf5f673a4c468",
+     "he": "אנו מתחילים בראש ה-AST, ורשימת הצהרות המשתנים הגלויות ריקה `'()`.\nלאחר מכן אנו חוצים את הצומת `(lambda (x y) ...)` — הרשימה היא כעת `( x y )`.\nכל התאמה שנמצא כעת תהיה בעומק 0. אז למעשה אנו מתחזקים רשימה של כתובות לקסיקליות:\n`( [x:0 0] [y:0 1] )`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:7",
+     "type": "prose",
+     "en": "We continue the traversal of the AST and reach the contour `(lambda (x) ...)` in line 2.\nWe now update the list of visible variable declarations to be `( [x:0 0] )` which has now priority,\nfollowed by `( [x:1 0] [y:1 1] )` - meaning, we incremented the depth of the visible variables - because in the scope\nof the new contour, to reach x and y from the outer declaration requires going \"up to depth 1\" instead of 0.\nThis means that when we cross a contour, the list of visible lexical addresses becomes \n`([x:0 0] [x:1 0] [y:1 1])`.  Note that this list is sorted by depth (0, then 1, ...).\nIn this example, the first `[x:0 0]` \"hides\" the previous declaration `[x:1 0]` - which is what is expected.\n\n",
+     "hash": "5042fd1af4d1b50f",
+     "he": "אנו ממשיכים במעבר על ה-AST ומגיעים לקו-המתאר `(lambda (x) ...)` בשורה 2.\nכעת אנו מעדכנים את רשימת הצהרות המשתנים הגלויות ל-`( [x:0 0] )` שיש לה כעת עדיפות,\nואחריה `( [x:1 0] [y:1 1] )` — כלומר, הגדלנו את העומק של המשתנים הגלויים, כי בתחום ההכרה של קו-המתאר החדש, כדי להגיע ל-x ול-y מההצהרה החיצונית נדרש לעלות \"עד עומק 1\" במקום 0.\nזה אומר שכשאנו חוצים קו-מתאר, רשימת הכתובות הלקסיקליות הגלויות הופכת ל-`([x:0 0] [x:1 0] [y:1 1])`. שימו לב שהרשימה ממוינת לפי עומק (0, אחר כך 1, ...).\nבדוגמה הזו, ה-`[x:0 0]` הראשון \"מסתיר\" את ההצהרה הקודמת `[x:1 0]` — וזה בדיוק מה שמצופה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:8",
+     "type": "prose",
+     "en": "Given this way of maintaining the list of visible lexical addresses for accessible variable declarations,\nwe can define the algorithm to retrieve the lexical address of a variable reference.  \nWe start with the definition of the types needed to encode lexical addresses:\n\n\n",
+     "hash": "ee003b09d614a905",
+     "he": "בהינתן הדרך הזו לתחזוק רשימת הכתובות הלקסיקליות הגלויות עבור הצהרות משתנים נגישות, נוכל להגדיר את האלגוריתם לאחזור הכתובת הלקסיקלית של הפניה למשתנה.\nנתחיל בהגדרת הטיפוסים הנחוצים לקידוד כתובות לקסיקליות:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:9",
+     "type": "code",
+     "en": "```typescript\n/*\nAST extension for lexical-address annotations\n<address> ::= <free-var> | <lexical-address>\n<free-var> ::= [<identifier> free]                       / free-var(var)\n<lexical-address> ::= [<identifier> : <number> <number>] / lexical-address(var:string, depth:Number, pos:Number]\n*/\nexport type LexAddress = FreeVar | LexicalAddress;\nexport const isLexAddress = (x: any): x is LexAddress => isFreeVar(x) || isLexicalAddress(x);\n\nexport type FreeVar = {\n    tag: \"FreeVar\";\n    var: string;\n};\nexport const isFreeVar = (x: any): x is FreeVar => (typeof(x) === 'object') && (x.tag === \"FreeVar\");\nexport const makeFreeVar = (v: string): FreeVar => ({tag: \"FreeVar\", var: v});\n\nexport type LexicalAddress = {\n    tag: \"LexicalAddress\";\n    var: string;\n    depth: number;\n    pos: number;\n};\nexport const isLexicalAddress = (x: any): x is LexicalAddress =>\n    (typeof(x) === \"object\") && (x.tag === \"LexicalAddress\");\nexport const makeLexicalAddress = (v: string, depth: number, pos: number): LexicalAddress =>\n    ({tag: \"LexicalAddress\", var: v, depth: depth, pos: pos});\nexport const makeDeeperLexicalAddress = (la: LexicalAddress): LexicalAddress =>\n    makeLexicalAddress(la.var, la.depth + 1, la.pos);\n\n```\n\n",
+     "hash": "31e8d748dc72ec5d",
+     "lang": "typescript",
+     "noteHe": "הגדרת הטיפוסים לכתובות לקסיקליות, לפי אותו מתכון מוכר: טיפוס איחוד `LexAddress` שהוא או `FreeVar` (משתנה חופשי — רק שם) או `LexicalAddress` (שם + depth + pos), וכל אחד עם בנאי ופרדיקט. הפונקציה המעניינת היא האחרונה: `makeDeeperLexicalAddress` מקבלת כתובת ומחזירה עותק שלה עם `depth + 1` — זה בדיוק מה שקורה כשחוצים קו-מתאר, וזה ממומש כיצירת ערך חדש ולא שינוי הקיים (immutability)."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:10",
+     "type": "prose",
+     "en": "The following procedure implements the algorithm to retrieve the lexical address of a variable reference:\n\n\n",
+     "hash": "f4bbc2841c7b8a4b",
+     "he": "הפרוצדורה הבאה מממשת את האלגוריתם לאחזור הכתובת הלקסיקלית של הפניה למשתנה:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:11",
+     "type": "code",
+     "en": "```typescript\n/*\nPurpose: get the closest enclosing lexical address given a variable name.\nSignature: getLexicalAddress(var, lexicalAddresses)\nPre-conditions: Lexical-addresses are sorted by depth\nExamples:\ngetLexicalAddress((var-ref b), [[lex-addr a 0 0], [lex-addr b 0 1]])\n=> [LexAddr b 0 1]\ngetLexicalAddress((var-ref c), [[lex-addr a 0 0], [lex-addr b 0 1]])\n=> [FreeVar c]\ngetLexicalAddress((var-ref a), [[lex-addr a 0 0], [lex-addr b 0 1], [lex-add a 1 1]])\n=> [LexAddr a 0 0]\n*/\nexport const getLexicalAddress = (v: VarRef, lexAddresses: LexAddress[]): LexAddress => {\n    const loop = (addresses: LexAddress[]): LexAddress =>\n        isEmpty(addresses) ? makeFreeVar(v.var) :\n        v.var === first(addresses).var ? first(addresses) :\n        loop(rest(addresses));\n    return loop(lexAddresses);\n}\n```\n\n",
+     "hash": "d7705dd4bdc85193",
+     "lang": "typescript",
+     "noteHe": "`getLexicalAddress` — חיפוש פשוט ברשימה, אבל עם תובנה חשובה: מכיוון שהרשימה **ממוינת לפי עומק** (זהו התנאי המקדים בחוזה), החיפוש הליניארי הראשון שמוצא התאמה הוא אוטומטית ההצהרה הפנימית ביותר — כך ההסתרה (shadowing) עובדת \"בחינם\". אם מגיעים לסוף הרשימה בלי התאמה, המשתנה חופשי. שימו לב לניב `loop` — פרוצדורה רקורסיבית פנימית שמדמה איטרציה, כפי שראינו ב-2.1."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:12",
+     "type": "prose",
+     "en": "Note how we mark the variable as occurring free when it is not found in any of the visible declarations.\n\n",
+     "hash": "3f45533a92e87caf",
+     "he": "שימו לב איך אנו מסמנים את המשתנה כמופיע חופשי כשהוא אינו נמצא באף אחת מההצהרות הגלויות."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:19:13",
+     "type": "prose",
+     "en": "Observe how we implement iteration by defining a local recursive procedure called loop and invoke it inside the main body of the procedure.\n\n",
+     "hash": "7a97497b4b9e6ef8",
+     "he": "שימו לב איך אנו מממשים איטרציה על ידי הגדרת פרוצדורה רקורסיבית מקומית בשם loop והפעלתה בתוך גוף הפרוצדורה הראשי."
+    }
+   ],
+   "headingHe": "חישוב הכתובת הלקסיקלית של הפניות למשתנים"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:20",
+   "depth": 3,
+   "headingEn": "Traversing the Whole AST",
+   "raw": "### Traversing the Whole AST\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:20:0",
+     "type": "prose",
+     "en": "The algorithm to compute the lexical address of all variable references is thus implemented as follows:\n\n\n",
+     "hash": "5dcf291c2da966ed",
+     "he": "האלגוריתם לחישוב הכתובת הלקסיקלית של כל ההפניות למשתנים ממומש אפוא כך:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:20:1",
+     "type": "code",
+     "en": "```typescript\n/*\nPurpose: Main function - map all variable reference expressions to their lexical address inside exp.\nSignature: addLexicalAddresses(exp)\nType: [ExpLA -> ExpLA]\nExample:\nunparseLA(addLexicalAddresses(parseLA(`\n    (lambda (a b c)\n      (if (eq? b c)\n          ((lambda (c)\n             (cons a c))\n           a)\n          b))`)))\n=>\n(lambda (a b c)\n  (if ((eq? free) (b : 0 1) (c : 0 2))\n*/\nexport const addLexicalAddresses = (exp: CExpLA): Result<CExpLA> => {\n    const visitProc = (proc: ProcExpLA, addresses: LexicalAddress[]): Result<ProcExpLA> => {\n        const newAddresses = crossContour(proc.params, addresses);\n        return mapv(mapResult(b => visit(b, newAddresses), proc.body), (bs: CExpLA[]) => \n                    makeProcExpLA(proc.params, bs));\n    };\n    const visit = (exp: CExpLA, addresses: LexicalAddress[]): Result<CExpLA> =>\n        isBoolExp(exp) ? makeOk(exp) :\n        isNumExp(exp) ? makeOk(exp) :\n        isStrExp(exp) ? makeOk(exp) :\n        isVarRef(exp) ? makeOk(getLexicalAddress(exp, addresses)) :\n        isFreeVar(exp) ? makeFailure(`unexpected LA ${exp}`) :\n        isLexicalAddress(exp) ? makeFailure(`unexpected LA ${exp}`) :\n        isLitExp(exp) ? makeOk(exp) :\n        isIfExpLA(exp) ? bind(visit(exp.test, addresses), (test: CExpLA) =>\n                              bind(visit(exp.then, addresses), (then: CExpLA) =>\n                                   mapv(visit(exp.alt, addresses), (alt: CExpLA) =>\n                                        makeIfExpLA(test, then, alt)))) :\n        isProcExpLA(exp) ? visitProc(exp, addresses) :\n        isAppExpLA(exp) ? bind(visit(exp.rator, addresses), (rator: CExpLA) =>\n                               mapv(mapResult(rand => visit(rand, addresses), exp.rands), (rands: CExpLA[]) =>\n                                    makeAppExpLA(rator, rands))) :\n        exp;\n    return visit(exp, []);\n};\n```\n\n",
+     "hash": "42dd25e2b34cdb9a",
+     "lang": "typescript",
+     "noteHe": "**האלגוריתם המלא.** שימו לב למבנה: שתי פונקציות פנימיות מקוננות, ובסוף `return visit(exp, [])` — מתחילים עם רשימת כתובות **ריקה**.\n- `visit` היא מעבר ה-AST הרגיל, אבל עם **פרמטר נוסף** `addresses` שנישא לאורך המעבר. זהו ההבדל המהותי מ-`occursFree`: כאן אנחנו צוברים הקשר בדרך למטה.\n- הענף `isVarRef` הוא הלב: קורא ל-`getLexicalAddress` עם רשימת הכתובות הנוכחית.\n- `visitProc` הוא המקום היחיד שבו הרשימה **משתנה**: `crossContour` מוסיף את הפרמטרים החדשים בעומק 0 ומעמיק את הקיימים ב-1, ואז הגוף נבדק עם הרשימה החדשה.\n- שני הענפים `isFreeVar`/`isLexicalAddress` מחזירים שגיאה — הם מגנים מפני הרצת האלגוריתם פעמיים על ביטוי שכבר סומן.\n- ענפי `if` ו-`app` משתמשים בשרשראות `bind`/`mapv` כי הכול עטוף ב-`Result`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:20:2",
+     "type": "prose",
+     "en": "The function is used as follows:\n\n",
+     "hash": "52089fc94ba8401a",
+     "he": "הפונקציה משמשת כך:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:20:3",
+     "type": "code",
+     "en": "```typescript\ndescribe('addLexicalAddress', () => {\n    it('works...', () => {\n        const f = (s: string): Result<Sexp> =>\n            bind(LA.parseLA(s), cexpla => \n                 mapv(LA.addLexicalAddresses(cexpla), cexpla => \n                      LA.unparseLA(cexpla)));\n\n        expect(f(\"(lambda (x) x)\")).toEqual(makeOk([\"lambda\", [\"x\"], [\"x\", \":\", \"0\", \"0\"]]));\n        \n        expect(f(\"(lambda (x) (lambda (y) (+ x y)))\")).toEqual(\n            makeOk([\"lambda\", [\"x\"], [\"lambda\", [\"y\"], [[\"+\", \"free\"], [\"x\", \":\", \"1\", \"0\"], [\"y\", \":\", \"0\", \"0\"]]]])\n        );\n        \n        expect(f(\"((lambda (x) (* x x)) ((lambda (x) (+ x x)) 2))\")).toEqual(\n            makeOk([[\"lambda\", [\"x\"], [[\"*\", \"free\"], [\"x\", \":\", \"0\", \"0\"], [\"x\", \":\", \"0\", \"0\"]]], \n                    [[\"lambda\", [\"x\"], [[\"+\", \"free\"], [\"x\", \":\", \"0\", \"0\"], [\"x\", \":\", \"0\", \"0\"]]], \"2\"]])\n        );\n    });\n});\n```\n\n",
+     "hash": "b99b11f4a9322018",
+     "lang": "typescript",
+     "noteHe": "בדיקות Jest שמדגימות את האלגוריתם על שלוש דוגמאות. העזר `f` משרשר: ניתוח → הוספת כתובות → פירוק חזרה למחרוזת. שווה לעקוב אחרי הבדיקה השנייה: ב-`(lambda (x) (lambda (y) (+ x y)))`, המשתנה `x` מקבל `[\"x\", \":\", \"1\", \"0\"]` — עומק **1** כי חוצים lambda אחת כדי להגיע אליו, ואילו `y` מקבל עומק 0. זו בדיוק הדוגמה הקנונית שכדאי לתרגל לפני מבחן."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:20:4",
+     "type": "prose",
+     "en": "The corresponding parser / unparser and AST definitions are provided in\n__[L3/lexicalAddress.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/lexicalAddress.ts)__ \nwith tests in __[test/L3/lexicalAddress.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/lexicalAddress.test.ts)__.\n\n",
+     "hash": "9b8207007715e12e",
+     "he": "המנתח/מפרק וההגדרות המתאימות של ה-AST מסופקים ב-__[L3/lexicalAddress.ts](https://github.com/bguppl/interpreters/blob/master/src/L3/lexicalAddress.ts)__\nעם בדיקות ב-__[test/L3/lexicalAddress.test.ts](https://github.com/bguppl/interpreters/blob/master/test/L3/lexicalAddress.test.ts)__."
+    }
+   ],
+   "headingHe": "מעבר על כל ה-AST"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:21",
+   "depth": 2,
+   "headingEn": "Rewriting ASTs",
+   "raw": "## Rewriting ASTs\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:21:0",
+     "type": "prose",
+     "en": "Recall that we introduced the let-expression in the previous lectures as a **syntactic abbreviation**.\nThis means that when we define the operational semantic of the language, we do not need to define a new computation rule\nfor this expression type, instead we indicate that this expression is equivalent to a combination of other syntactic\nconstructs that mean the same thing.\n\n",
+     "hash": "525386e3bfabb0cb",
+     "he": "היזכרו שהצגנו את ביטוי ה-let בהרצאות הקודמות כ**קיצור תחבירי (syntactic abbreviation)**.\nזה אומר שכשאנו מגדירים את הסמנטיקה האופרציונלית של השפה, איננו צריכים להגדיר כלל חישוב חדש לסוג הביטוי הזה; במקום זאת אנו מציינים שהביטוי שקול לצירוף של מבנים תחביריים אחרים שמשמעותם זהה."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:1",
+     "type": "prose",
+     "en": "In the case of `let` the syntactic transformation leading to a simpler equivalent construct is:\n\n",
+     "hash": "51ddf989c00dd3bc",
+     "he": "במקרה של `let`, ההמרה התחבירית שמובילה למבנה שקול ופשוט יותר היא:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:2",
+     "type": "code",
+     "en": "```scheme\n(let ((var1 val1) ...) body) => ((lambda (var1 ...) body) val1 ...)\n```\n\n",
+     "hash": "024e10360658e0b6",
+     "lang": "scheme",
+     "noteHe": "כלל הכתיבה-מחדש של `let`, בצורה תבניתית: שמות הקשירות הופכים לפרמטרים של lambda שגופה הוא גוף ה-let, וערכי האתחול הופכים לארגומנטים. שימו לב שהחץ `=>` כאן אינו קוד — הוא מציין \"נכתב מחדש כ-\"."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:3",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "למשל:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:4",
+     "type": "code",
+     "en": "```scheme\n(let ((x 1) (y 2))\n  (+ x y))\n  \n=>\n\n((lambda (x y) (+ x y))\n 1 2)\n```\n\n",
+     "hash": "c4625d2189cd6d84",
+     "lang": "scheme",
+     "noteHe": "הכלל על דוגמה קונקרטית: `(let ((x 1) (y 2)) (+ x y))` הופך ל-`((lambda (x y) (+ x y)) 1 2)`. שני הביטויים מוערכים ל-3, ושניהם מקיימים את אותה סמנטיקה — כולל העובדה שערכי האתחול (1 ו-2) מחושבים מחוץ לתחום ההכרה של `x` ו-`y`."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:5",
+     "type": "prose",
+     "en": "Such syntactic transformations are implemented by mapping AST values containing `let-expressions` to semantically equivalent AST values that only contain lambda applications.\n\n\n",
+     "hash": "897d83c46cf5fb3d",
+     "he": "המרות תחביריות כאלה ממומשות על ידי מיפוי ערכי AST שמכילים `let-expressions` לערכי AST שקולים סמנטית שמכילים רק הפעלות lambda."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:6",
+     "type": "code",
+     "en": "```typescript\n/*\nPurpose: rewrite a single LetExp as a lambda-application form\nSignature: rewriteLet(cexp)\nType: [LetExp => AppExp]\n*/\nconst rewriteLet = (e: LetExp): AppExp => {\n    const vars = map((b) => b.var, e.bindings);\n    const vals = map((b) => b.val, e.bindings);\n    return makeAppExp(\n            makeProcExp(vars, e.body),\n            vals);\n}\n```\n\n",
+     "hash": "88d611326c5007ef",
+     "lang": "typescript",
+     "noteHe": "`rewriteLet` — הכלל התחבירי ממומש בשלוש שורות קוד: `map` על הקשירות כדי לחלץ את השמות (`vars`), `map` נוסף כדי לחלץ את הערכים (`vals`), ואז בניית `AppExp` שהאופרטור שלו הוא `ProcExp` חדש (עם השמות והגוף) והאופרנדים הם הערכים. שימו לב שהפונקציה עובדת על **צומת יחיד** — היא אינה רקורסיבית."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:7",
+     "type": "prose",
+     "en": "This definition only applies on a single let-expression.\nTo perform the transformation at all levels within an arbitrary expression, we must visit the AST top-down and \napply the transformation whereever needed.  This is implemented in this function, which has the typical structural induction structure of traversing all possible AST values:\n\n\n",
+     "hash": "45eade086f0a20a3",
+     "he": "ההגדרה הזו חלה רק על ביטוי let יחיד.\nכדי לבצע את ההמרה בכל הרמות בתוך ביטוי שרירותי, עלינו לעבור על ה-AST מלמעלה למטה ולהפעיל את ההמרה בכל מקום שנדרש. זה ממומש בפונקציה הזו, שיש לה את מבנה האינדוקציה המבנית הטיפוסי של מעבר על כל ערכי ה-AST האפשריים:"
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:8",
+     "type": "code",
+     "en": "```typescript\n/*\nPurpose: rewrite all occurrences of let in an expression to lambda-applications.\nSignature: rewriteAllLet(exp)\nType: [Program | Exp -> Program | Exp]\n*/\nexport const rewriteAllLet = (exp: Program | Exp): Program | Exp =>\n    isExp(exp) ? rewriteAllLetExp(exp) :\n    isProgram(exp) ? makeProgram(map(rewriteAllLetExp, exp.exps)) :\n    exp; // never\n\nconst rewriteAllLetExp = (exp: Exp): Exp =>\n    isCExp(exp) ? rewriteAllLetCExp(exp) :\n    isDefineExp(exp) ? makeDefineExp(exp.var, rewriteAllLetCExp(exp.val)) :\n    exp; // never\n\nconst rewriteAllLetCExp = (exp: CExp): CExp =>\n    isAtomicExp(exp) ? exp :\n    isLitExp(exp) ? exp :\n    isIfExp(exp) ? makeIfExp(rewriteAllLetCExp(exp.test),\n                             rewriteAllLetCExp(exp.then),\n                             rewriteAllLetCExp(exp.alt)) :\n    isAppExp(exp) ? makeAppExp(rewriteAllLetCExp(exp.rator),\n                               map(rewriteAllLetCExp, exp.rands)) :\n    isProcExp(exp) ? makeProcExp(exp.args, map(rewriteAllLetCExp, exp.body)) :\n    isLetExp(exp) ? rewriteAllLetCExp(rewriteLet(exp)) :\n    exp; // never\n```\n\n",
+     "hash": "7d04b83321856507",
+     "lang": "typescript",
+     "noteHe": "`rewriteAllLet` — הפונקציה שמפעילה את הכתיבה-מחדש על **כל** ה-AST. שוב אותו מעבר מוכר, אבל שימו לב לשני דברים:\n- כל ענף בונה צומת **חדש** מאותו סוג, עם הילדים שנכתבו מחדש — זו טרנספורמציה, לא בדיקה (הטיפוס הוא `Exp -> Exp` ולא `Exp -> boolean`).\n- הענף המעניין הוא `isLetExp`: הוא קורא ל-`rewriteAllLetCExp(rewriteLet(exp))` — כלומר קודם ממיר את ה-let ל-lambda, ואז **ממשיך רקורסיבית על התוצאה**. זה חיוני כי גוף ה-let עשוי להכיל let-ים נוספים."
+    },
+    {
+     "id": "cm/2.4SyntacticOperations:21:9",
+     "type": "prose",
+     "en": "Observe how the same exact programming pattern is used as for the case of computing lexical addresses - in the form of a transformation function for nodes of type `LetExp` and a walker function which traverses a complete AST from root to leaves and applies a transformation to each node.\n\n",
+     "hash": "1f94d8483890304f",
+     "he": "שימו לב איך נעשה שימוש באותה תבנית תכנות בדיוק כמו במקרה של חישוב כתובות לקסיקליות — בצורת פונקציית המרה לצמתים מטיפוס `LetExp`, ופונקציית מטייל (walker) שעוברת על AST שלם מהשורש לעלים ומפעילה המרה על כל צומת."
+    }
+   ],
+   "headingHe": "כתיבה מחדש של ASTs"
+  },
+  {
+   "id": "cm/2.4SyntacticOperations:22",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.4SyntacticOperations:22:0",
+     "type": "list",
+     "en": "* Static properties of expressions can be computed by traversing the AST of the expression - independently of any execution / runtime information.\n* Syntactic properties of expressions and syntactic transformations are implemented using a systematic design pattern which consists of traversing the AST and testing each possible type in the AST data type.\n\n* We distinguish **variable declarations** and **variable references** in the syntax - declarations occur in procedure parameters and let binding - other variable expressions are references.\n* Variable declarations define a **scope** in which the variable is visible - this is the region of the program (a set of nodes within the AST) in which the variable declaration is visible.\n* Variable references are bound to a variable declaration according to **binding rules**.\n\n* A variable can **occur free in an expression** if it is not bound to any declaration.  Otherwise it **occurs bound**.\n\n* We define the **lexical address** of a bound variable reference in the form `[var : depth pos]` in a way that unambiguously describes to which variable declaration it is bound.  \n\n* We presented the algorithm to compute the lexical addresses of all variable references in an AST.\n\n* **Syntactic abbreviations** can be derived by implementing a rewrite mechanism which turns all occurrences of a specific syntactic construct into a semantically equivalent syntactic structure.  We illustrated this with the rewrite of the **let** expression into a **lambda application** construct.\n",
+     "hash": "714ef396b1365139",
+     "he": "* תכונות סטטיות של ביטויים ניתנות לחישוב על ידי מעבר על ה-AST של הביטוי — ללא תלות בשום מידע על ריצה / זמן-ריצה.\n* תכונות תחביריות של ביטויים והמרות תחביריות ממומשות באמצעות תבנית עיצוב שיטתית, שמורכבת ממעבר על ה-AST ובדיקת כל טיפוס אפשרי בטיפוס הנתונים של ה-AST.\n\n* אנו מבחינים בין **הצהרות משתנה** ל**הפניות למשתנה** בתחביר — הצהרות מופיעות בפרמטרים של פרוצדורות ובקשירות let; ביטויי משתנה אחרים הם הפניות.\n* הצהרות משתנה מגדירות **תחום הכרה (scope)** שבו המשתנה גלוי — זהו האזור בתוכנית (קבוצת צמתים בתוך ה-AST) שבו הצהרת המשתנה גלויה.\n* הפניות למשתנה קשורות להצהרת משתנה בהתאם ל**כללי קשירה (binding rules)**.\n\n* משתנה יכול **להופיע חופשי בביטוי** אם הוא אינו קשור לאף הצהרה. אחרת הוא **מופיע קשור**.\n\n* אנו מגדירים את ה**כתובת הלקסיקלית (lexical address)** של הפניה קשורה למשתנה בצורה `[var : depth pos]`, באופן שמתאר באופן חד-משמעי לאיזו הצהרת משתנה היא קשורה.\n\n* הצגנו את האלגוריתם לחישוב הכתובות הלקסיקליות של כל ההפניות למשתנים ב-AST.\n\n* **קיצורים תחביריים (syntactic abbreviations)** ניתנים לגזירה על ידי מימוש מנגנון כתיבה-מחדש שהופך את כל המופעים של מבנה תחבירי מסוים למבנה תחבירי שקול סמנטית. הדגמנו זאת עם הכתיבה-מחדש של ביטוי ה-**let** למבנה של **הפעלת lambda**."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "code-reading",
+   "questionHe": "חשבו את הכתובות הלקסיקליות של כל ההפניות למשתנים בביטוי הבא:\n```scheme\n(lambda (a b)\n  (lambda (c)\n    (+ a c b)))\n```",
+   "answerHe": "`[+ free]`, ‏`[a : 1 0]`, ‏`[c : 0 0]`, ‏`[b : 1 1]`.",
+   "explanationHe": "השיטה: לכל הפניה, ספרו כמה `lambda` חוצים כלפי חוץ עד שמוצאים את השם (= depth), ומהו מקומו ברשימת הפרמטרים של אותה lambda (= pos).\n`c` נמצא ב-lambda הפנימית עצמה → depth 0, מקום 0.\n`a` ו-`b` דורשים לחצות את ה-lambda הפנימית → depth 1; ברשימה `(a b)` המקומות הם 0 ו-1 בהתאמה.\n`+` אינו מוצהר בשום lambda → `free`."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "בביטוי `((lambda (x) x) y)`, מה נכון לגבי `x` ו-`y`?",
+   "options": [
+    "‏`x` מופיע קשור, `y` מופיע חופשי",
+    "שניהם מופיעים קשורים",
+    "שניהם מופיעים חופשיים",
+    "`x` מופיע חופשי, `y` מופיע קשור"
+   ],
+   "correct": 0,
+   "explanationHe": "המופע של `x` בגוף ה-lambda קשור על ידי ההצהרה ברשימת הפרמטרים של אותה lambda. לעומתו `y` מופיע כארגומנט **מחוץ** ל-lambda — אין שום הצהרה בביטוי שקושרת אותו, ולכן הוא חופשי. שימו לב: חופשי/קשור אינה תכונה של השם אלא של המופע ביחס לביטוי מסוים."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "הסבירו מדוע בפונקציה `occursFree`, הענף של `isProcExp` דורש **שני** תנאים המחוברים ב-`&&`. מה כל תנאי בודק ומה היה קורה בלעדיו?",
+   "answerHe": "הענף הוא: `! includes(v, map(p => p.var, e.args)) && some(b => occursFree(v, b), e.body)`.\n**התנאי הראשון** בודק שהמשתנה `v` **אינו** אחד מפרמטרי ה-lambda. אם הוא כן — הוא נקשר כאן, וכל מופע שלו בגוף הוא קשור ולא חופשי. בלי התנאי הזה, `occursFree(\"x\", (lambda (x) x))` היה מחזיר בטעות `true`.\n**התנאי השני** בודק שהמשתנה אכן מופיע חופשי באחד מביטויי הגוף. בלי התנאי הזה כל משתנה שאינו פרמטר היה נחשב חופשי, גם אם אינו מופיע בגוף כלל.",
+   "explanationHe": "שני התנאים יחד מקודדים בדיוק את כלל הקשירה של lambda: 'ההצהרה קושרת את כל המופעים בגוף, אלא אם מופיעה ביניהם הצהרה נוספת'. הבנת הענף הזה היא המפתח להבנת כל האלגוריתם."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "כתבו מחדש את הביטוי הבא ללא `let` (לפי כלל הכתיבה-מחדש):\n```scheme\n(let ((x 1))\n  (let ((y (+ x 1)))\n    (* x y)))\n```",
+   "answerHe": "```scheme\n((lambda (x)\n   ((lambda (y) (* x y))\n    (+ x 1)))\n 1)\n```",
+   "explanationHe": "מפעילים את הכלל פעמיים, מבחוץ פנימה. שימו לב לנקודה חשובה: `rewriteAllLet` **ממשיכה רקורסיבית** אחרי כל המרה, ולכן ה-let הפנימי מומר גם הוא. שימו לב גם ש-`(+ x 1)` נשאר **מחוץ** ל-lambda הפנימית — כלומר בתחום ההכרה של `x` החיצוני אבל לא של `y`, בדיוק כמו בסמנטיקה של `let`."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "מדוע קשירת משתנים ב-Scheme נחשבת תכונה **סטטית** ולא דינמית?",
+   "options": [
+    "כי המשתנים אינם משתנים במהלך הריצה",
+    "כי אפשר לקבוע לאיזו הצהרה קשורה כל הפניה על ידי ניתוח ה-AST בלבד, בלי להריץ את התוכנית",
+    "כי הקשירות נקבעות בזמן הקומפילציה על ידי המהדר",
+    "כי כל המשתנים ב-Scheme הם גלובליים"
+   ],
+   "correct": 1,
+   "explanationHe": "ההבחנה סטטי/דינמי היא בשאלה **מה נדרש כדי לקבוע את התכונה**: תכונה סטטית תלויה רק במבנה התחבירי של התוכנית, ולכן ניתנת לחישוב על ה-AST לפני כל ריצה — וזה בדיוק מה שהאלגוריתמים בפרק הזה עושים. תכונה דינמית (למשל ערכו של משתנה) תלויה בריצה מסוימת."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "תארו את המבנה המשותף לכל הפונקציות בפרק הזה (`occursFree`, `referencedVars`, `addLexicalAddresses`, `rewriteAllLet`). מהו 'המתכון' ובמה שונה `addLexicalAddresses` מהשאר?",
+   "answerHe": "**המתכון המשותף**: (1) הטיפוס הוא `[AST -> משהו]`; (2) הגוף הוא שרשרת תנאים עם פרדיקט טיפוס לכל סוג ביטוי ב-AST; (3) בכל ענף מפרקים את הצומת לרכיביו באמצעות פונקציות הגישה שלו; (4) קוראים לפונקציה **רקורסיבית** על כל תת-ביטוי; (5) מרכיבים את התוצאות בהתאם לסוג הפעולה (`||` לבוליאני, `union` לרשימות, בנאי `make…` לטרנספורמציה). זוהי **אינדוקציה מבנית** — מבנה הקוד עוקב אחר מבנה הטיפוס.\n**ההבדל ב-`addLexicalAddresses`**: היא נושאת **פרמטר צובר נוסף** (`addresses`) שמתעדכן בירידה במורד העץ — בכל חציית `ProcExp` נוספים הפרמטרים החדשים ומועמקים הקיימים. שאר הפונקציות אינן צריכות הקשר כזה.",
+   "explanationHe": "זו התובנה המרכזית של הפרק: ברגע שמכירים את המתכון, כל שאלה מסוג 'כתבו פונקציה שמחשבת X על AST' נפתרת באותו שלד. חשוב לזהות מתי נדרש פרמטר-הקשר נוסף (כמו סביבה או רשימת כתובות) — זה בדיוק מה שיחזור בפרק הבא עם המפרשים."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "בכתובת הלקסיקלית `[y : 1 1]` בביטוי `(lambda (x y) ((lambda (x) (+ x y)) ...))`, מה מציין כל אחד מהמספרים?",
+   "options": [
+    "המספר הראשון הוא מספר השורה והשני הוא העמודה",
+    "המספר הראשון (depth) הוא מספר קווי המתאר שחוצים כדי להגיע להצהרה; השני (pos) הוא מקומו של המשתנה ברשימת הפרמטרים של אותה הצהרה",
+    "המספר הראשון הוא מספר הפרמטרים והשני הוא מספר ההפניות",
+    "שני המספרים מציינים את מיקום המשתנה ב-AST"
+   ],
+   "correct": 1,
+   "explanationHe": "`depth = 1` כי כדי להגיע מ-`y` להצהרה שלו חוצים lambda אחת (הפנימית). `pos = 1` כי ברשימת הפרמטרים `(x y)` של ה-lambda החיצונית, `y` נמצא במקום 1 (באינדוקס מבוסס-0). שילוב שני המספרים מזהה את ההצהרה באופן חד-משמעי בלי להסתמך על השם."
+  }
+ ]
+}

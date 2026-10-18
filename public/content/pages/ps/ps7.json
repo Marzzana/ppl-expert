@@ -1,0 +1,1399 @@
+{
+ "id": "ps/ps7",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps7.md",
+ "titleEn": "ps7",
+ "titleHe": "הסקת טיפוסים באמצעות אילוצי טיפוס",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps7:0",
+   "depth": 0,
+   "headingEn": "",
+   "raw": "",
+   "blocks": [
+    {
+     "id": "ps/ps7:0:0",
+     "type": "prose",
+     "en": "﻿# Type inference using type constraints\n\n",
+     "hash": "dac7a6f11097a30f",
+     "he": "# הסקת טיפוסים באמצעות אילוצי טיפוס"
+    }
+   ]
+  },
+  {
+   "id": "ps/ps7:1",
+   "depth": 2,
+   "headingEn": "Question 1",
+   "raw": "## Question 1 \n",
+   "blocks": [],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "שאלה 1"
+  },
+  {
+   "id": "ps/ps7:2",
+   "depth": 3,
+   "headingEn": "Typing statement",
+   "raw": "### Typing statement\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:2:0",
+     "type": "prose",
+     "en": "A typing statement is a true/false formula that states a judgment about the type of a language expression, given a type environment.\n\n",
+     "hash": "eb630d12739e9b6b",
+     "he": "טענת טיפוס היא נוסחה של אמת/שקר שקובעת פסק דין לגבי הטיפוס של ביטוי בשפה, בהינתן סביבת טיפוסים."
+    },
+    {
+     "id": "ps/ps7:2:1",
+     "type": "prose",
+     "en": "It has the notation:  `Tenv ⊢ e:T`, which reads: under the type-environment Tenv, the expression e has type T.\n\n",
+     "hash": "7e19d688dbd7853b",
+     "he": "הסימון שלה הוא: `Tenv ⊢ e:T`, שנקרא: תחת סביבת-הטיפוסים Tenv, לביטוי e יש טיפוס T."
+    },
+    {
+     "id": "ps/ps7:2:2",
+     "type": "prose",
+     "en": "E.g.,  `{x:Number} ⊢ (+ 3 x):Number`  states that under the assumption that the type of x is Number, the type of (+ 3 x) is Number. For the typing statement below, note whether they are  **true or false:**\n\n",
+     "hash": "c3111f284ee0aeba",
+     "he": "לדוגמה, `{x:Number} ⊢ (+ 3 x):Number` קובעת שתחת ההנחה שהטיפוס של x הוא Number, הטיפוס של ‎(+ 3 x)‎ הוא Number. עבור טענות הטיפוס שלהלן, ציינו אם הן **אמת או שקר:**"
+    },
+    {
+     "id": "ps/ps7:2:3",
+     "type": "list",
+     "en": "* **{f:[Number->T1]} ⊢ (f 7): T1**\t\n* **{y:Number, f:[T1->T1]} ⊢ (f x):T1**\t\n* **{y:Number, f:[T1->T1]} ⊢ (f y):T1**\t\n* **{x:Number} ⊢ x: Boolean**\t\n* **{x:Boolean, y:Number} ⊢ x: Boolean**\n* **{f:[T1->T2], g:[T2->T3], x:T1} ⊢ (g (f x)):T3**\n\n",
+     "hash": "81586acd07db9659",
+     "he": "* **{f:[Number->T1]} ⊢ (f 7): T1**\t\n* **{y:Number, f:[T1->T1]} ⊢ (f x):T1**\t\n* **{y:Number, f:[T1->T1]} ⊢ (f y):T1**\t\n* **{x:Number} ⊢ x: Boolean**\t\n* **{x:Boolean, y:Number} ⊢ x: Boolean**\n* **{f:[T1->T2], g:[T2->T3], x:T1} ⊢ (g (f x)):T3**"
+    }
+   ],
+   "role": "question",
+   "questionId": 1,
+   "headingHe": "טענת טיפוס (Typing statement)"
+  },
+  {
+   "id": "ps/ps7:3",
+   "depth": 2,
+   "headingEn": "Question 2",
+   "raw": "## Question 2 \n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:3:0",
+     "type": "prose",
+     "en": "A typing-statement is based on assumptions in a given type-environment.\nThe less assumptions are involved, the stronger is the statement.\nIn order to end up with the strongest statement, we follow a simple heuristic rule: always pick a minimal type environment (or: always infer the strongest statement possible). For each row of statements below, **which statement is stronger?** left or right ?\n\n",
+     "hash": "951227c23adf3d5d",
+     "he": "טענת-טיפוס מבוססת על הנחות בסביבת-טיפוסים נתונה.\nכמה שפחות הנחות מעורבות, כך הטענה חזקה יותר.\nכדי להגיע לטענה החזקה ביותר, אנחנו פועלים לפי כלל אצבע פשוט: תמיד בוחרים סביבת טיפוסים מינימלית (או: תמיד מסיקים את הטענה החזקה ביותר האפשרית). עבור כל שורה של טענות שלהלן, **איזו טענה חזקה יותר?** שמאל או ימין?"
+    },
+    {
+     "id": "ps/ps7:3:1",
+     "type": "prose",
+     "en": "Note : assumptions in Tenv are an added part to the axioms we have.\n\n",
+     "hash": "52d906f5cc148388",
+     "he": "שימו לב: הנחות ב-Tenv הן חלק שמתווסף לאקסיומות שיש לנו."
+    },
+    {
+     "id": "ps/ps7:3:2",
+     "type": "table",
+     "en": "|Term 1                         | Term 2 \n|-------------------------------|-----------------------------|\n|{foo: [T1->T2]} ⊢ 5: Number|{} ⊢ 5: Number  \n|{x: Number} ⊢ (+ x 3): Number  |{y: Number,x: Number} ⊢ (+ x 3): Number\n|{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]| {y: Number} ⊢ (lambda (x)(+ x y)):[Number -> Number] <br> (Can we compare these two?)\n|{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]| {y:Number} ⊢ (lambda (z)(+ z 3)):[Number -> Number]\n|{f:[Number -> Number]} ⊢ ((lambda (f x) (f x))(lambda (x) (* x x)) 10): Number | {} ⊢ ((lambda (f x) (f x)) (lambda (x) (* x x)) 10): Number|\n\n",
+     "hash": "c852c3c33bf766fe",
+     "he": "|איבר 1                         | איבר 2 \n|-------------------------------|-----------------------------|\n|{foo: [T1->T2]} ⊢ 5: Number|{} ⊢ 5: Number  \n|{x: Number} ⊢ (+ x 3): Number  |{y: Number,x: Number} ⊢ (+ x 3): Number\n|{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]| {y: Number} ⊢ (lambda (x)(+ x y)):[Number -> Number] <br> (האם אפשר להשוות בין שתי אלה?)\n|{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]| {y:Number} ⊢ (lambda (z)(+ z 3)):[Number -> Number]\n|{f:[Number -> Number]} ⊢ ((lambda (f x) (f x))(lambda (x) (* x x)) 10): Number | {} ⊢ ((lambda (f x) (f x)) (lambda (x) (* x x)) 10): Number|"
+    },
+    {
+     "id": "ps/ps7:3:3",
+     "type": "prose",
+     "en": "Note: A typing statement has to be true in order to determine its strength.\n\n",
+     "hash": "02adc52d943b737c",
+     "he": "שימו לב: טענת טיפוס חייבת להיות אמת כדי שנוכל לקבוע את חוזקה."
+    }
+   ],
+   "role": "question",
+   "questionId": 2,
+   "headingHe": "שאלה 2"
+  },
+  {
+   "id": "ps/ps7:4",
+   "depth": 2,
+   "headingEn": "Definition (seen in class):",
+   "raw": "## Definition (seen in class):\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:4:0",
+     "type": "prose",
+     "en": "A **Type-substitution** is a mapping, s, from a finite set of type-variables to a finite set of type-expressions, such that for every type-variable T, s(T) does not include T.\nA type-binding is a pair  `<T,s(T)>`  such that  `T = s(T)`.\nType-Substitutions are written using set notation, for example :\n\n",
+     "hash": "15377b0e954fb74a",
+     "he": "**הצבת-טיפוס** (Type-substitution) היא מיפוי, s, מקבוצה סופית של משתני-טיפוס לקבוצה סופית של ביטויי-טיפוס, כך שעבור כל משתנה-טיפוס T, ‏s(T) אינו כולל את T.\nקשירת-טיפוס היא זוג `<T,s(T)>` כך ש-`T = s(T)`.\nהצבות-טיפוס נכתבות בסימון של קבוצות, לדוגמה:"
+    },
+    {
+     "id": "ps/ps7:4:1",
+     "type": "list",
+     "en": "* **{T1 = Number, T2 = [Number -> T3]}**.\n* **{T1 = Number, T2 = [[Number -> T3]->T2]}, is this legal?**\n* **{T1 = Number, T1 = Boolean}, and this one?**\n\n",
+     "hash": "a6ef946149380bfc",
+     "he": "* **{T1 = Number, T2 = [Number -> T3]}**.\n* **{T1 = Number, T2 = [[Number -> T3]->T2]}, האם זו חוקית?**\n* **{T1 = Number, T1 = Boolean}, וזו?**"
+    }
+   ],
+   "headingHe": "הגדרה (שנראתה בכיתה):"
+  },
+  {
+   "id": "ps/ps7:5",
+   "depth": 2,
+   "headingEn": "Definitions (seen in class):",
+   "raw": "## Definitions (seen in class):\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:5:0",
+     "type": "prose",
+     "en": "An application of a type-substitution s to a type-expression TE, denoted by TE ○ s, is a consistent replacement of type-variables T in TE by their mapped type-expressions s(T).\nFor example:\n\n",
+     "hash": "658ff88665312093",
+     "he": "הפעלה של הצבת-טיפוס s על ביטוי-טיפוס TE, המסומנת TE ○ s, היא החלפה עקבית של משתני-טיפוס T ב-TE בביטויי-הטיפוס שממופים אליהם, ‏s(T).\nלדוגמה:"
+    },
+    {
+     "id": "ps/ps7:5:1",
+     "type": "list",
+     "en": "* **[[T1->T2]->T2] ○ {T1=Boolean, T2=[T3->T3]} = [[Boolean->[T3->T3]] -> [T3->T3]]**\n* **[[T1->T2]->T2] ○ {T1=Boolean, T2=[T3->T3],T3=Number} = [[Boolean->[T3->T3]] -> [T3->T3]]**\n* **[[T1->T2]->[T2->T3]] ○ {T1=Boolean, T2=[T3->T3],T3=Number} = [[Boolean->[T3->T3]] -> [[T3->T3]->Number]]**\n\n",
+     "hash": "37be3d63f5895a0c",
+     "he": "* **[[T1->T2]->T2] ○ {T1=Boolean, T2=[T3->T3]} = [[Boolean->[T3->T3]] -> [T3->T3]]**\n* **[[T1->T2]->T2] ○ {T1=Boolean, T2=[T3->T3],T3=Number} = [[Boolean->[T3->T3]] -> [T3->T3]]**\n* **[[T1->T2]->[T2->T3]] ○ {T1=Boolean, T2=[T3->T3],T3=Number} = [[Boolean->[T3->T3]] -> [[T3->T3]->Number]]**"
+    }
+   ],
+   "headingHe": "הגדרות (שנראו בכיתה):"
+  },
+  {
+   "id": "ps/ps7:6",
+   "depth": 2,
+   "headingEn": "Question 3",
+   "raw": "## Question 3\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:6:0",
+     "type": "prose",
+     "en": "A unifier of type expressions **TE1**, **TE2** is a type substitution s such that **TE1 ○ s = TE2 ○ s** (the type expressions should not include common type variables).\nThe most general unifier (**MGU**), is a unifier such that any other unifier is an instance of it.\n\n",
+     "hash": "4d121f586afc23e8",
+     "he": "מאחד (unifier) של ביטויי טיפוס **TE1**, **TE2** הוא הצבת טיפוס s כך ש-**TE1 ○ s = TE2 ○ s** (ביטויי הטיפוס אינם צריכים לכלול משתני טיפוס משותפים).\nהמאחד הכללי ביותר (**MGU**) הוא מאחד שכל מאחד אחר הוא מופע שלו."
+    },
+    {
+     "id": "ps/ps7:6:1",
+     "type": "prose",
+     "en": "Recall the lecture's definition of \"instance of type expression\" :  **T'** is an instance of type expression **T**, if there is a type substitution **s** such that  `T o s = T'`.\n\n",
+     "hash": "311e58d27ce8cd3b",
+     "he": "היזכרו בהגדרה מההרצאה של \"מופע של ביטוי טיפוס\": **T'** הוא מופע של ביטוי טיפוס **T**, אם קיימת הצבת טיפוס **s** כך ש-`T o s = T'`."
+    },
+    {
+     "id": "ps/ps7:6:2",
+     "type": "prose",
+     "en": "In case of an instance of the MGU type substitution, it is any type substitution s such that for each type expression e in s, e is an instance of a type expression in our MGU.\nAll other unifiers are obtained from it by application of additional substitutions.\n\n",
+     "hash": "3d880fb6162077c8",
+     "he": "במקרה של מופע של הצבת הטיפוס MGU, זו כל הצבת טיפוס s כך שעבור כל ביטוי טיפוס e ב-s, ‏e הוא מופע של ביטוי טיפוס ב-MGU שלנו.\nכל המאחדים האחרים מתקבלים ממנו על ידי הפעלת הצבות נוספות."
+    },
+    {
+     "id": "ps/ps7:6:3",
+     "type": "prose",
+     "en": "**Find the MGU**  for the following pairs of type-environments:\n\n",
+     "hash": "69eae45f61c23cb8",
+     "he": "**מצאו את ה-MGU** עבור הזוגות הבאים של סביבות-טיפוסים:"
+    },
+    {
+     "id": "ps/ps7:6:4",
+     "type": "table",
+     "en": "|Type expressions\t            | MGU\n|-------------------------------|-----------------------------|\n|{x: T1}, {x: Number}\t            |{T1=Number}  (a non-MGU unifier: {T1=Number, T2=B})\n|{x: T1}, {x: T2}\t            |{T1=T2}  (a non-MGU unifier: {T1=Number, T2=Number})\n|{x: [T1*[T1->T2]->T2]},  {x: [Number * [T3->T4]->T4]}\t    |{T1=Number, T3=Number, T4=T2}\n|{x: [T1*[T1->T2]->Number]},   {x: [[T3->T4] * [T5->Number]->Number]}  |{T1=[T3->T4], T5=[T3->T4], T2=Number}\n|{x: [T1*[T1->T2]->Number]},   {x: [Number * [Symbol->T3]->Number]}    |No unifier\n\n",
+     "hash": "5b7c3ddcdc167229",
+     "he": "|ביטויי טיפוס\t            | MGU\n|-------------------------------|-----------------------------|\n|{x: T1}, {x: Number}\t            |{T1=Number}  (מאחד שאינו MGU: {T1=Number, T2=B})\n|{x: T1}, {x: T2}\t            |{T1=T2}  (מאחד שאינו MGU: {T1=Number, T2=Number})\n|{x: [T1*[T1->T2]->T2]},  {x: [Number * [T3->T4]->T4]}\t    |{T1=Number, T3=Number, T4=T2}\n|{x: [T1*[T1->T2]->Number]},   {x: [[T3->T4] * [T5->Number]->Number]}  |{T1=[T3->T4], T5=[T3->T4], T2=Number}\n|{x: [T1*[T1->T2]->Number]},   {x: [Number * [Symbol->T3]->Number]}    |אין מאחד",
+     "role": "solution",
+     "questionId": 3
+    }
+   ],
+   "role": "question",
+   "questionId": 3,
+   "headingHe": "שאלה 3"
+  },
+  {
+   "id": "ps/ps7:7",
+   "depth": 2,
+   "headingEn": "Type inference using type constraints",
+   "raw": "## Type inference using type constraints\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:7:0",
+     "type": "list",
+     "en": "-   Rename bound variables.\n-   Assign type variables to all sub-expressions.\n-   Construct type equations.\n-   Solve the equations.\n\n",
+     "hash": "c90c828e999cda9c",
+     "he": "-   שינוי שם של משתנים קשורים.\n-   הקצאת משתני טיפוס לכל תת-הביטויים.\n-   בניית משוואות טיפוס.\n-   פתרון המשוואות."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים באמצעות אילוצי טיפוס"
+  },
+  {
+   "id": "ps/ps7:8",
+   "depth": 3,
+   "headingEn": "Typing rules",
+   "raw": "### Typing rules\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:8:0",
+     "type": "list",
+     "en": "-   For primitive atomics / primitive procedures, construct type equations using their types.\n-   For procedure expressions  `(lambda (p1 ... pn) e1 ... em)`, construct:\n\t\t-   `T_{(lambda (p1 ... pn) e1 ... em)} = [T_{p1} * ... * T_{pn} -> T_{em}]`\n-   For application expressions  `(op a1 ... an)`  construct:\n\t\t-   `T_{op} = [T_{a1} * ... * T_{an} -> T_{(op a1 ... an)}]`\n\n",
+     "hash": "f9102994aea712d2",
+     "he": "-   עבור אטומים פרימיטיביים / פרוצדורות פרימיטיביות, בונים משוואות טיפוס באמצעות הטיפוסים שלהם.\n-   עבור ביטויי פרוצדורה `(lambda (p1 ... pn) e1 ... em)`, בונים:\n\t\t-   `T_{(lambda (p1 ... pn) e1 ... em)} = [T_{p1} * ... * T_{pn} -> T_{em}]`\n-   עבור ביטויי הפעלה `(op a1 ... an)` בונים:\n\t\t-   `T_{op} = [T_{a1} * ... * T_{an} -> T_{(op a1 ... an)}]`"
+    }
+   ],
+   "headingHe": "כללי טיפוס"
+  },
+  {
+   "id": "ps/ps7:9",
+   "depth": 2,
+   "headingEn": "Question 1",
+   "raw": "## Question 1\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:9:0",
+     "type": "prose",
+     "en": "Typing the expression  `((lambda (f1 x1) (f1 x1)) sqrt 4)`: =>  `((lambda ([f1 : Tf] [x1 : Tx]) : T2 (f1 x1)) sqrt 4)`\n\n",
+     "hash": "23ca59a6e6aeb0b4",
+     "he": "טיפוס הביטוי `((lambda (f1 x1) (f1 x1)) sqrt 4)`: => `((lambda ([f1 : Tf] [x1 : Tx]) : T2 (f1 x1)) sqrt 4)`"
+    },
+    {
+     "id": "ps/ps7:9:1",
+     "type": "prose",
+     "en": "Note: See how we added type anotations to the lambda's params, and return value.\n\n",
+     "hash": "faf6937ffb0d32df",
+     "he": "שימו לב: ראו איך הוספנו הערות טיפוס לפרמטרים של ה-lambda ולערך המוחזר."
+    },
+    {
+     "id": "ps/ps7:9:2",
+     "type": "prose",
+     "en": "**Stage I**: Rename bound variables.\n\n",
+     "hash": "dbcd7fdf8c80c560",
+     "he": "**שלב I**: שינוי שם של משתנים קשורים.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:3",
+     "type": "prose",
+     "en": "`((lambda (f1 x1) (f1 x1)) sqrt 4)`  turn to  `((lambda (f x) (f x)) sqrt 4)`\n\n",
+     "hash": "23ab3a64153795a0",
+     "he": "`((lambda (f1 x1) (f1 x1)) sqrt 4)` הופך ל-`((lambda (f x) (f x)) sqrt 4)`",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:4",
+     "type": "prose",
+     "en": "**Stage II**: Assign type variables for every sub expression:\n\n",
+     "hash": "9b61ea1af71333ca",
+     "he": "**שלב II**: הקצאת משתני טיפוס לכל תת-ביטוי:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:5",
+     "type": "table",
+     "en": "|Expression               \t    | Variable\n|-------------------------------|-----------------------------|\n((lambda (f x) (f x)) sqrt 4)\t|T0\n(lambda (f x) (f x))\t        |T1 \n(f x)\t                        |T2 \nf\t                            |Tf\nx\t                            |Tx\nsqrt\t                        |Tsqrt\n4\t                            |Tnum4\n\n\n",
+     "hash": "dba745f9ab45df3a",
+     "he": "|ביטוי               \t    | משתנה\n|-------------------------------|-----------------------------|\n((lambda (f x) (f x)) sqrt 4)\t|T0\n(lambda (f x) (f x))\t        |T1 \n(f x)\t                        |T2 \nf\t                            |Tf\nx\t                            |Tx\nsqrt\t                        |Tsqrt\n4\t                            |Tnum4",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:6",
+     "type": "prose",
+     "en": "**Stage III**: Construct type equations. \n\n",
+     "hash": "25c4b3193dfa95cd",
+     "he": "**שלב III**: בניית משוואות טיפוס.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:7",
+     "type": "prose",
+     "en": "The equations for the sub-expressions are:\n\n",
+     "hash": "732920f5081968d5",
+     "he": "המשוואות עבור תת-הביטויים הן:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:8",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\n((lambda (f x) (f x)) sqrt 4)   |T1 = [Tsqrt * Tnum4 -> T0]\n(lambda (f x) (f x))\t        |T1 = [Tf * Tx -> T2]\n(f x)\t                        |Tf = [Tx -> T2]\n\n\n",
+     "hash": "43545a63a7af25a5",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\n((lambda (f x) (f x)) sqrt 4)   |T1 = [Tsqrt * Tnum4 -> T0]\n(lambda (f x) (f x))\t        |T1 = [Tf * Tx -> T2]\n(f x)\t                        |Tf = [Tx -> T2]",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:9",
+     "type": "prose",
+     "en": "The equations for the primitives are:\n\n",
+     "hash": "55abbf77c7f2cccc",
+     "he": "המשוואות עבור הפרימיטיבים הן:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:10",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\nsqrt\t                        |Tsqrt = [Number -> Number]\n4                               |Tnum4 = Number\n\n",
+     "hash": "bb16b4a389f50c53",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\nsqrt\t                        |Tsqrt = [Number -> Number]\n4                               |Tnum4 = Number",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:11",
+     "type": "prose",
+     "en": "**Stage IV**: Solve the equations.\n\n",
+     "hash": "dc5c721c5d523473",
+     "he": "**שלב IV**: פתרון המשוואות.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:12",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n| 1. T1 = [Tsqrt * Tnum4 -> T0]\t| {}\n| 2. T1 = [Tf * Tx -> T2]\t    |\n| 3. Tf = [Tx -> T2]\t        |\n| 4. Tsqrt = [Number -> Number] |\t\n| 5. Tnum4 = Number             |\n\n\n",
+     "hash": "5b41c1c75ef7ed71",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n| 1. T1 = [Tsqrt * Tnum4 -> T0]\t| {}\n| 2. T1 = [Tf * Tx -> T2]\t    |\n| 3. Tf = [Tx -> T2]\t        |\n| 4. Tsqrt = [Number -> Number] |\t\n| 5. Tnum4 = Number             |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:13",
+     "type": "prose",
+     "en": "**Step 1:**\n\n",
+     "hash": "45cdcc57601a24a5",
+     "he": "**צעד 1:**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:14",
+     "type": "prose",
+     "en": "`(T1 = [Tsqrt * Tnum4-> T0]) ○ Substitution = (T1 = [Tsqrt * Tnum4-> T0])`  and is a type-sub.\n\n",
+     "hash": "9ee712914e41a164",
+     "he": "`(T1 = [Tsqrt * Tnum4-> T0]) ○ Substitution = (T1 = [Tsqrt * Tnum4-> T0])` וזו הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:15",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T1 = [Tsqrt * Tnum4-> T0])`.\n\n",
+     "hash": "233d9fb1b03ddd94",
+     "he": "`Substitution = Substitution ○ (T1 = [Tsqrt * Tnum4-> T0])`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:16",
+     "type": "table",
+     "en": "|Equation| Substitution\n| -------------------------------|-----------------------------|\n| 2. T1 = [Tf * Tx -> T2]\t     | {T1 := [Tsqrt * Tnum4 -> T0]}\n| 3. Tf = [Tx -> T2]             |\n| 4. Tsqrt = [Number -> Number]  |\t\n| 5. Tnum4 = Number              |\n\n",
+     "hash": "fc4c4c4c36b13922",
+     "he": "|משוואה| הצבה\n| -------------------------------|-----------------------------|\n| 2. T1 = [Tf * Tx -> T2]\t     | {T1 := [Tsqrt * Tnum4 -> T0]}\n| 3. Tf = [Tx -> T2]             |\n| 4. Tsqrt = [Number -> Number]  |\t\n| 5. Tnum4 = Number              |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:17",
+     "type": "prose",
+     "en": "**Step 2**:\n\n",
+     "hash": "33ce8d5ef33722f9",
+     "he": "**צעד 2**:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:18",
+     "type": "prose",
+     "en": "`T1 = [Tf * Tx -> T2] ○ Substitution = ([Tsqrt * Tnum4 -> T0] = [Tf * Tx -> T2])`\nThere is not type-sub since  both sides of the equation are composite **we split it into three** equations (6,7,8) and remove equation 2.\n\n",
+     "hash": "4cbfd35f513b87c4",
+     "he": "`T1 = [Tf * Tx -> T2] ○ Substitution = ([Tsqrt * Tnum4 -> T0] = [Tf * Tx -> T2])`\nאין כאן הצבת-טיפוס, מכיוון ששני צדי המשוואה מורכבים — **אנחנו מפצלים אותה לשלוש** משוואות (6,7,8) ומסירים את משוואה 2.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:19",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n| 3. Tf = [Tx -> T2]\t        | {T1 := [Tsqrt * Tnum4 -> T0]}\n| 4. Tsqrt = [Number -> Number]\t|\n| 5. Tnum4 = Number\t            |\n| 6. **Tf = Tsqrt**\t            |\n| 7. **Tx = Tnum4 (or Tnum4 = Tx)**\t|\n| 8. **T2 = T0**\t            |\n\n\n",
+     "hash": "4390824e7e723ded",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n| 3. Tf = [Tx -> T2]\t        | {T1 := [Tsqrt * Tnum4 -> T0]}\n| 4. Tsqrt = [Number -> Number]\t|\n| 5. Tnum4 = Number\t            |\n| 6. **Tf = Tsqrt**\t            |\n| 7. **Tx = Tnum4 (או Tnum4 = Tx)**\t|\n| 8. **T2 = T0**\t            |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:20",
+     "type": "prose",
+     "en": "**Step 3:**\n\n",
+     "hash": "c26ed6096c001a84",
+     "he": "**צעד 3:**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:21",
+     "type": "prose",
+     "en": "`(Tf = [Tx -> T2]) ○ Substitution = (Tf = [Tx -> T2])`.\n`Substitution = Substitution ○ (Tf = [Tx -> T2])`.\n\n",
+     "hash": "f6dc0db3d911d3e5",
+     "he": "`(Tf = [Tx -> T2]) ○ Substitution = (Tf = [Tx -> T2])`.\n`Substitution = Substitution ○ (Tf = [Tx -> T2])`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:22",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n| 4. Tsqrt = [Number -> Number]\t| {T1 := [Tsqrt * Tnum4 -> T0],  **Tf := [Tx -> T2]**}\n| 5. Tnum4 = Number\t            |\n| 6. Tf = Tsqrt\t                |\n| 7. Tx = Tnum4 (or Tnum4 = Tx)\t|\n| 8. T2 = T0                    |\n\n\n",
+     "hash": "563fc9e5e1e405eb",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n| 4. Tsqrt = [Number -> Number]\t| {T1 := [Tsqrt * Tnum4 -> T0],  **Tf := [Tx -> T2]**}\n| 5. Tnum4 = Number\t            |\n| 6. Tf = Tsqrt\t                |\n| 7. Tx = Tnum4 (או Tnum4 = Tx)\t|\n| 8. T2 = T0                    |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:23",
+     "type": "prose",
+     "en": "**Step 4**:\n\n",
+     "hash": "789555027fe1f79f",
+     "he": "**צעד 4**:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:24",
+     "type": "prose",
+     "en": "`(Tsqrt = [Number -> Number]) ○ Substitution = (Tsqrt = [Number -> Number])`.\n`Substitution = Substitution ○ (Tsqrt = [Number -> Number])`.\n\n",
+     "hash": "f3552244a8daf83b",
+     "he": "`(Tsqrt = [Number -> Number]) ○ Substitution = (Tsqrt = [Number -> Number])`.\n`Substitution = Substitution ○ (Tsqrt = [Number -> Number])`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:25",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|5. Tnum4 = Number\t            | { [T1 :=[**[Number -> Number]** * Tnum4->T0],<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], **Tsqrt := [Number -> Number]**}                                                    \n|6. Tf = Tsqrt                  |\n|7. Tx = Tnum4                  |\n|8. T2 = T0                     |\n\n\n",
+     "hash": "7d8110173f672e1a",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|5. Tnum4 = Number\t            | { [T1 :=[**[Number -> Number]** * Tnum4->T0],<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], **Tsqrt := [Number -> Number]**}                                                    \n|6. Tf = Tsqrt                  |\n|7. Tx = Tnum4                  |\n|8. T2 = T0                     |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:26",
+     "type": "prose",
+     "en": "**Step 5**:\n\n",
+     "hash": "738adefb9cd879fd",
+     "he": "**צעד 5**:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:27",
+     "type": "prose",
+     "en": "`(Tnum4 = Number) ○ Substitution = (Tnum4 = Number)`, is a type-sub.\n`Substitution = Substitution ○ (Tnum4 = Number)`.\n\n",
+     "hash": "206ab544bc786a05",
+     "he": "`(Tnum4 = Number) ○ Substitution = (Tnum4 = Number)`, וזו הצבת-טיפוס.\n`Substitution = Substitution ○ (Tnum4 = Number)`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:28",
+     "type": "table",
+     "en": "|Equation                       | Substitution\n|-----------------|-----------------------------|                             \n| 6. Tf = Tsqrt   | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * **Number**->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tnum4 := Number** &nbsp;&nbsp;&nbsp;}              \n| 7. Tx = Tnum4\t  |          \n| 8. T2 = T0      |\n\n",
+     "hash": "17ee9e10fd7dfc86",
+     "he": "|משוואה                       | הצבה\n|-----------------|-----------------------------|                             \n| 6. Tf = Tsqrt   | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * **Number**->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tnum4 := Number** &nbsp;&nbsp;&nbsp;}              \n| 7. Tx = Tnum4\t  |          \n| 8. T2 = T0      |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:29",
+     "type": "prose",
+     "en": "**Step 6**:\n\n",
+     "hash": "a1dcf43ee248306b",
+     "he": "**צעד 6**:",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:30",
+     "type": "prose",
+     "en": "`(Tf = Tsqrt) ○ Substitution = ([Tx -> T2] = [Number -> Number])`\nThere is no a sub-type.\nWe split the equation into two equations (9,10) and remove equation 6.\n\n\n",
+     "hash": "eef9d1eafc58cdbe",
+     "he": "`(Tf = Tsqrt) ○ Substitution = ([Tx -> T2] = [Number -> Number])`\nאין כאן הצבת-טיפוס.\nאנחנו מפצלים את המשוואה לשתי משוואות (9,10) ומסירים את משוואה 6.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:31",
+     "type": "table",
+     "en": "|Equation   | Substitution\n|------------------------------------------|-----------------------------|                                         \n|7. Tx = Tnum4                             | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number &nbsp;&nbsp;&nbsp;}   \n|8. T2 = T0                                |\n|9. **Tx = Number**                        |\n|10. **T2 = Number**                       |\n\n\n\n",
+     "hash": "07098e9e63ed2bdb",
+     "he": "|משוואה   | הצבה\n|------------------------------------------|-----------------------------|                                         \n|7. Tx = Tnum4                             | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Tx -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number &nbsp;&nbsp;&nbsp;}   \n|8. T2 = T0                                |\n|9. **Tx = Number**                        |\n|10. **T2 = Number**                       |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:32",
+     "type": "prose",
+     "en": "**Step 7:**\n\n",
+     "hash": "a0029b7db69f0099",
+     "he": "**צעד 7:**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:33",
+     "type": "prose",
+     "en": "`(Tx = Tnum4) ○ Substitution = ([Tx = Number])`, type-sub.\n`Substitution = Substitution ○ ([Tx = Number])`.\n\n",
+     "hash": "28a0414c7f47443d",
+     "he": "`(Tx = Tnum4) ○ Substitution = ([Tx = Number])`, הצבת-טיפוס.\n`Substitution = Substitution ○ ([Tx = Number])`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:34",
+     "type": "table",
+     "en": "|Equation   | Substitution\n|------------------------------------------|-----------------------------|                             \n|8. T2 = T0                                |  {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [**Number** -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Tx = Number**   &nbsp;&nbsp;&nbsp;}                  \n|9. Tx = Number                            |\n|10. T2 = Number                           |\n\n\n",
+     "hash": "8525dd0bf1697359",
+     "he": "|משוואה   | הצבה\n|------------------------------------------|-----------------------------|                             \n|8. T2 = T0                                |  {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [**Number** -> T2], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Tx = Number**   &nbsp;&nbsp;&nbsp;}                  \n|9. Tx = Number                            |\n|10. T2 = Number                           |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:35",
+     "type": "prose",
+     "en": "**Step 8:**\n\n",
+     "hash": "15c8794424b435e0",
+     "he": "**צעד 8:**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:36",
+     "type": "prose",
+     "en": "`(T2 = T0) ○ Substitution = (T2 = T0)`, type-sub.\n`Substitution = Substitution ○ (T2 = T0)`.\n\n",
+     "hash": "2bbd5c1a35f35cf3",
+     "he": "`(T2 = T0) ○ Substitution = (T2 = T0)`, הצבת-טיפוס.\n`Substitution = Substitution ○ (T2 = T0)`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:37",
+     "type": "table",
+     "en": "|Equation   | Substitution\n|------------------------------------------|-----------------------------|                             \n|9. Tx = Number   | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> **T0**], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **T2 := T0** <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}                  \n|10. T2 = Number    |\n\n\n",
+     "hash": "ae632e63b7799263",
+     "he": "|משוואה   | הצבה\n|------------------------------------------|-----------------------------|                             \n|9. Tx = Number   | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> **T0**], Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **T2 := T0** <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}                  \n|10. T2 = Number    |",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:38",
+     "type": "prose",
+     "en": "**Step 9:** \n`(Tx = Number) ○ Substitution = (Number = Number)` always true.\n\n\n",
+     "hash": "2215be90398a6a33",
+     "he": "**צעד 9:** \n`(Tx = Number) ○ Substitution = (Number = Number)` תמיד אמת.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:39",
+     "type": "table",
+     "en": "|Equation   | Substitution\n|------------------------------------------|-----------------------------|                             \n|10. T2 = Number | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number , <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  T2 := T0 &nbsp;&nbsp;&nbsp;&nbsp;}                  \n\n\n",
+     "hash": "8387d65424f14dbc",
+     "he": "|משוואה   | הצבה\n|------------------------------------------|-----------------------------|                             \n|10. T2 = Number | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->T0],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number , <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  T2 := T0 &nbsp;&nbsp;&nbsp;&nbsp;}",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:40",
+     "type": "prose",
+     "en": "**Step 10:**\n\n",
+     "hash": "01de0cd84737cad2",
+     "he": "**צעד 10:**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:41",
+     "type": "prose",
+     "en": "`(T2 = Number) ○ Substitution = (T0 = Number)`, type-sub.\n`Substitution = Substitution ○ (T0 = Number)`.\n\n",
+     "hash": "e8c57bc53ccbe8dd",
+     "he": "`(T2 = Number) ○ Substitution = (T0 = Number)`, הצבת-טיפוס.\n`Substitution = Substitution ○ (T0 = Number)`.",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:42",
+     "type": "table",
+     "en": "|Equation   | Substitution\n|------------------------------------------|-----------------------------|                             \n| | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->**Number**],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> **Number**], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number , <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  T2 := **Number** <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **T0 := Number**   &nbsp;&nbsp;&nbsp;&nbsp;}                  \n\n\n",
+     "hash": "4f3e69b12a27a95a",
+     "he": "|משוואה   | הצבה\n|------------------------------------------|-----------------------------|                             \n| | {  &nbsp;&nbsp;&nbsp; T1 :=[[Number -> Number] * Number->**Number**],\t <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tf := [Number-> **Number**], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tsqrt := [Number -> Number], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tnum4 := Number, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tx = Number , <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  T2 := **Number** <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **T0 := Number**   &nbsp;&nbsp;&nbsp;&nbsp;}",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:43",
+     "type": "prose",
+     "en": "The type inference succeeds since we have a type for T0, meaning that the expression is  **well typed**.\nSince there are no free variables, the inferred type of T0 is:  **Number.**\n\n",
+     "hash": "802b562bd3d829e7",
+     "he": "הסקת הטיפוסים מצליחה מכיוון שיש לנו טיפוס עבור T0, כלומר שהביטוי **מטופס היטב**.\nמכיוון שאין משתנים חופשיים, הטיפוס המוסק של T0 הוא: **Number.**",
+     "role": "solution",
+     "questionId": 4
+    },
+    {
+     "id": "ps/ps7:9:44",
+     "type": "prose",
+     "en": "**Note**: Our expression can be written now as  `((lambda ([f : (Number -> Number)] [x : Number]) : Number (f x)) sqrt 4)`\n\n",
+     "hash": "6ded91613aed2809",
+     "he": "**שימו לב**: את הביטוי שלנו אפשר לכתוב עכשיו כ-`((lambda ([f : (Number -> Number)] [x : Number]) : Number (f x)) sqrt 4)`",
+     "role": "solution",
+     "questionId": 4
+    }
+   ],
+   "role": "question",
+   "questionId": 4,
+   "headingHe": "שאלה 1"
+  },
+  {
+   "id": "ps/ps7:10",
+   "depth": 2,
+   "headingEn": "Question 2",
+   "raw": "## Question 2\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:10:0",
+     "type": "prose",
+     "en": "Extending the typing mechanism for if expressions: Recall the typing rule for if expressions shown in the typing system:\n\n",
+     "hash": "51859b78f9c86a71",
+     "he": "הרחבת מנגנון הטיפוס לביטויי if: היזכרו בכלל הטיפוס לביטויי if שהוצג במערכת הטיפוסים:"
+    },
+    {
+     "id": "ps/ps7:10:1",
+     "type": "code",
+     "en": "```\n### Typing rule of If experession :\nFor every: type environment _Tenv, \n           expressions _p, _c, _a,\n           and type expressions Boolean, _Tif:\nIf         _Tenv ⊢ _p:Boolean,\n           _Tenv ⊢ _c:_Tif,\n           _Tenv ⊢ _a:_Tif\nThen _Tenv ⊢ (if _p _c _a):_Tif\n```\n\n\n",
+     "hash": "aa8358fd5c99ca13",
+     "noteHe": "כלל הטיפוס של `if`, באותו פורמט אם-אז של כל הכללים. שימו לב לשני פרטים שהם כל התוכן של הכלל: (1) התנאי `_p` חייב להיות מטיפוס `Boolean` — טיפוס **קונקרטי** ולא משתנה, ולכן זהו אילוץ ממשי; (2) שני הענפים, `_c` (consequence) ו-`_a` (alternative), נושאים את **אותו** משתנה טיפוס `_Tif` — ולכן שני הענפים חייבים להיות מאותו טיפוס, וזה גם הטיפוס של ביטוי ה-if כולו. **הבחנה חשובה שכדאי לשנן**: זו הסיבה ש-`(if #t 1 #f)` נדחה למרות שהוא רץ בלי בעיה ומחזיר `1` — בודק הטיפוסים אינו יודע איזה ענף ייבחר בזמן ריצה, ולכן הוא מחייב ששניהם יסכימו. שימו לב גם ש-`Boolean` נמנה בכלל בין \"type expressions\" יחד עם `_Tif`, למרות שהוא טיפוס קבוע ולא משתנה — חוסר דיוק קטן בניסוח המקור."
+    },
+    {
+     "id": "ps/ps7:10:2",
+     "type": "prose",
+     "en": "#### Questions:\n\n",
+     "hash": "4c4562191a413b70",
+     "he": "#### שאלות:"
+    },
+    {
+     "id": "ps/ps7:10:3",
+     "type": "list",
+     "en": "-   If both consequence and alternative expressions had different types could we type the if expression?\n-   Do we need to add an equation for `_p`?\n\n\n",
+     "hash": "6b25d5e0584ca43c",
+     "he": "-   אם לביטוי ה-consequence ולביטוי ה-alternative היו טיפוסים שונים, האם היינו יכולים לטפס את ביטוי ה-if?\n-   האם אנחנו צריכים להוסיף משוואה עבור `_p`?"
+    },
+    {
+     "id": "ps/ps7:10:4",
+     "type": "prose",
+     "en": "First thing we notice from the rule is that the consequence expression (`_c`) and the alternative expression (`_a`) have the same type.\n\n",
+     "hash": "742f7bb5aa47fe00",
+     "he": "הדבר הראשון שאנחנו מבחינים בו מהכלל הוא שלביטוי ה-consequence (`_c`) ולביטוי ה-alternative (`_a`) יש אותו טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:5",
+     "type": "prose",
+     "en": "Given the first observation, the second thing we notice is that the type of the if expression is the type of the consequence expression.\n\n",
+     "hash": "57f858f67608b800",
+     "he": "בהינתן ההבחנה הראשונה, הדבר השני שאנחנו מבחינים בו הוא שהטיפוס של ביטוי ה-if הוא הטיפוס של ביטוי ה-consequence.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:6",
+     "type": "prose",
+     "en": "Given the two observations we can add the following equations:\n\n",
+     "hash": "7ca08b10768386a7",
+     "he": "בהינתן שתי ההבחנות אנחנו יכולים להוסיף את המשוואות הבאות:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:7",
+     "type": "code",
+     "en": "```\nExpression\t Equation\n(if _p _c _a)\tT_p = Boolean\n                T_c = T_a\n            \tTif = T_c\n```\n  \n",
+     "hash": "5d364e8657cc9afd",
+     "noteHe": "שלוש המשוואות שכל צומת `if` תורם — **כדאי לשנן אותן**, הן קצרות והן נבחנות. `T_p = Boolean` היא היחידה שמכניסה טיפוס קונקרטי, ולכן היא מקור מידע כמו פרימיטיב. `T_c = T_a` היא זו שכופה על שני הענפים להסכים. `Tif = T_c` נותנת את הטיפוס של הביטוי כולו. שימו לב שהמשוואה השלישית נכתבת מול `T_c` ולא מול `T_a` — שקול לגמרי בזכות השנייה, וזה מסביר את התשובה לשאלה השנייה שנשאלה למעלה: כן, צריך משוואה עבור `_p`, אחרת `(if 5 1 2)` היה עובר. השוו למספר המשוואות של צמתים אחרים: lambda תורם אחת, הפעלה תורמת אחת, ו-`if` תורם שלוש.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:8",
+     "type": "prose",
+     "en": "Example: type the expression `(if #t (+ 1 2) 3)`\n\n",
+     "hash": "fbcd3350299305bb",
+     "he": "דוגמה: טפסו את הביטוי `(if #t (+ 1 2) 3)`",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:9",
+     "type": "prose",
+     "en": "**Again**, look how we add type annotations.\n\n",
+     "hash": "601aa5f14d4b47d4",
+     "he": "**שוב**, ראו איך אנחנו מוסיפים הערות טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:10",
+     "type": "prose",
+     "en": "**Stage I**: Rename bound variables: No reference of variables so no renaming is needed.\n\n",
+     "hash": "7eeef9a30b91566b",
+     "he": "**שלב I**: שינוי שם של משתנים קשורים: אין כאן שום הפניה למשתנים, ולכן אין צורך בשינוי שם.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:11",
+     "type": "prose",
+     "en": "**Stage II**: Assign type variables for every sub expression:\n\n\n\n",
+     "hash": "9b61ea1af71333ca",
+     "he": "**שלב II**: הקצאת משתני טיפוס לכל תת-ביטוי:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:12",
+     "type": "table",
+     "en": "|Expression               \t    | Variable\n|-------------------------------|-----------------------------|\n|(if #t (+ 1 2) 3)\t            |T0\n|(+ 1 2)\t                    |T1\n|+\t                            |T+\n|#t\t                            |T#t\n|1\t                            |Tnum1\n|2\t                            |Tnum2\n|3\t                            |Tnum3\n\n\n\n",
+     "hash": "a9cafa34625125ce",
+     "he": "|ביטוי               \t    | משתנה\n|-------------------------------|-----------------------------|\n|(if #t (+ 1 2) 3)\t            |T0\n|(+ 1 2)\t                    |T1\n|+\t                            |T+\n|#t\t                            |T#t\n|1\t                            |Tnum1\n|2\t                            |Tnum2\n|3\t                            |Tnum3",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:13",
+     "type": "prose",
+     "en": "**Stage III**: Construct type equations. The equations for the sub-expressions are:\n\n\n",
+     "hash": "bd1587e1cdf391ec",
+     "he": "**שלב III**: בניית משוואות טיפוס. המשוואות עבור תת-הביטויים הן:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:14",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\n|(if #t (+ 1 2) 3)\t        |T#t = Boolean\n|\t\t\t\t|T1 = Tnum3\n|                               |T0 = T1\n|(+ 1 2)\t                    |T+ = [Tnum1 * Tnum2 -> T1]\n\n\n",
+     "hash": "e144bda784d33193",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\n|(if #t (+ 1 2) 3)\t        |T#t = Boolean\n|\t\t\t\t|T1 = Tnum3\n|                               |T0 = T1\n|(+ 1 2)\t                    |T+ = [Tnum1 * Tnum2 -> T1]",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:15",
+     "type": "prose",
+     "en": "The equations for the primitives are:\n\n",
+     "hash": "55abbf77c7f2cccc",
+     "he": "המשוואות עבור הפרימיטיבים הן:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:16",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\n|+\t                            |T+ = [Number * Number -> Number]\n|#t\t                            |T#t = Boolean\n|1\t                            |Tnum1 = Number\n|2\t                            |Tnum2 = Number\n|3\t                            |Tnum3 = Number\n\n\n",
+     "hash": "1f345d1d92d2ecb6",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\n|+\t                            |T+ = [Number * Number -> Number]\n|#t\t                            |T#t = Boolean\n|1\t                            |Tnum1 = Number\n|2\t                            |Tnum2 = Number\n|3\t                            |Tnum3 = Number",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:17",
+     "type": "prose",
+     "en": "**Stage IV** : Solve the equations:\n\n\n",
+     "hash": "2df973d68f294806",
+     "he": "**שלב IV**: פתרון המשוואות:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:18",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|1. T#t = Boolean\t        |{}\n|2. T1 = Tnum3\t                |\n|3. T0 = T1\t                    |\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\n\n\n",
+     "hash": "31cd47f02253d8cf",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|1. T#t = Boolean\t        |{}\n|2. T1 = Tnum3\t                |\n|3. T0 = T1\t                    |\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:19",
+     "type": "prose",
+     "en": "**Step 1:**\n\n",
+     "hash": "45cdcc57601a24a5",
+     "he": "**צעד 1:**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:20",
+     "type": "prose",
+     "en": "`(T#t = Boolean) ○ Substitution = (T#t = Boolean)`, type-sub.\n\n",
+     "hash": "68fb8bc536366592",
+     "he": "`(T#t = Boolean) ○ Substitution = (T#t = Boolean)`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:21",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T#t = Boolean)`.\n\n\n",
+     "hash": "a969a947a53234c0",
+     "he": "`Substitution = Substitution ○ (T#t = Boolean)`.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:22",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|2. T1 = Tnum3\t|   {&nbsp;&nbsp;&nbsp; **T#t = Boolean** &nbsp;&nbsp;&nbsp; }\n|3. T0 = T1\t                    |\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\n\n\n",
+     "hash": "6db2270a742bcc31",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|2. T1 = Tnum3\t|   {&nbsp;&nbsp;&nbsp; **T#t = Boolean** &nbsp;&nbsp;&nbsp; }\n|3. T0 = T1\t                    |\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:23",
+     "type": "prose",
+     "en": "**Step 2:**\n\n",
+     "hash": "61665123bf5bd88d",
+     "he": "**צעד 2:**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:24",
+     "type": "prose",
+     "en": "`(T1 = Tnum3) ○ Substitution = (T1 = Tnum3)`, type-sub.\n\n",
+     "hash": "e55d12f11f5a5134",
+     "he": "`(T1 = Tnum3) ○ Substitution = (T1 = Tnum3)`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:25",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T1 = Tnum3)`.\n\n\n",
+     "hash": "aa44e5a527e3ae31",
+     "he": "`Substitution = Substitution ○ (T1 = Tnum3)`.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:26",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|3. T0 = T1\t|   {T#t = Boolean, **T1 := Tnum3**}\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\n\n\n\n\n",
+     "hash": "4e019cb78be07d76",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|3. T0 = T1\t|   {T#t = Boolean, **T1 := Tnum3**}\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:27",
+     "type": "prose",
+     "en": "**Step 3:**\n\n",
+     "hash": "c26ed6096c001a84",
+     "he": "**צעד 3:**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:28",
+     "type": "prose",
+     "en": "`(T0 = T1) ○ Substitution = (T0 = Tnum3)`, type-sub.\n\n",
+     "hash": "de7c29a14a122199",
+     "he": "`(T0 = T1) ○ Substitution = (T0 = Tnum3)`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:29",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T0 = Tnum3)`.\n\n",
+     "hash": "f3eda47cd07b90f6",
+     "he": "`Substitution = Substitution ○ (T0 = Tnum3)`.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:30",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|   {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **T0 := Tnum3**  &nbsp;&nbsp;&nbsp; }\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\t\n\n\n",
+     "hash": "16919cc6c24eebdf",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|4. T+ = [Tnum1 * Tnum2 -> T1]\t|   {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **T0 := Tnum3**  &nbsp;&nbsp;&nbsp; }\n|5. T+ = [Number * Number -> Number] |\t\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:31",
+     "type": "prose",
+     "en": "**Step 4:**\n\n",
+     "hash": "065269eecc80cf7e",
+     "he": "**צעד 4:**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:32",
+     "type": "prose",
+     "en": "`(T+ = [Tnum1 * Tnum2 -> T1]) ○ Substitution = (T+ = [Tnum1 * Tnum2 -> Tnum3])`, type-sub.\n\n",
+     "hash": "23932363c2dd97e3",
+     "he": "`(T+ = [Tnum1 * Tnum2 -> T1]) ○ Substitution = (T+ = [Tnum1 * Tnum2 -> Tnum3])`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:33",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T+ = [Tnum1 * Tnum2 -> Tnum3])`.\n\n\n",
+     "hash": "5a97e82c44cb1117",
+     "he": "`Substitution = Substitution ○ (T+ = [Tnum1 * Tnum2 -> Tnum3])`.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:34",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|5. T+ = [Number * Number -> Number] |\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **T+ = [Tnum1 * Tnum2 -> Tnum3]** &nbsp;&nbsp;&nbsp; }\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\n\n\n",
+     "hash": "d5ebafb0d8200792",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|5. T+ = [Number * Number -> Number] |\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **T+ = [Tnum1 * Tnum2 -> Tnum3]** &nbsp;&nbsp;&nbsp; }\n|6. T#t = Boolean\t            |\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:35",
+     "type": "prose",
+     "en": "**Step 5:**\n\n",
+     "hash": "f148749e27f4aae8",
+     "he": "**צעד 5:**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:36",
+     "type": "prose",
+     "en": "`(T+ = [Number * Number -> Number]) ○ Substitution = ([Tnum1 * Tnum2 -> Tnum3] = [Number * Number -> Number])`\n\n",
+     "hash": "eabf0bc676f72f32",
+     "he": "`(T+ = [Number * Number -> Number]) ○ Substitution = ([Tnum1 * Tnum2 -> Tnum3] = [Number * Number -> Number])`",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:37",
+     "type": "prose",
+     "en": "There is not  a type-sub. \nWe split the equation to  `Tnum1 = Number, Tnum2 = Number and Tnum3 = Number`, \nand add them to the equations. Since they already exists,  **we only need to remove equation 5.**\n\n",
+     "hash": "262a9a3b681bfb88",
+     "he": "אין כאן הצבת-טיפוס.\nאנחנו מפצלים את המשוואה ל-`Tnum1 = Number, Tnum2 = Number ו-Tnum3 = Number`,\nומוסיפים אותן למשוואות. מכיוון שהן כבר קיימות, **אנחנו רק צריכים להסיר את משוואה 5.**",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:38",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|6. T#t = Boolean\t|\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ = [Tnum1 * Tnum2 -> Tnum3] &nbsp;&nbsp;&nbsp; }\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\t\n\n\n",
+     "hash": "75167c7f58b4a72b",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|6. T#t = Boolean\t|\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ = [Tnum1 * Tnum2 -> Tnum3] &nbsp;&nbsp;&nbsp; }\n|7. Tnum1 = Number              |\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:39",
+     "type": "prose",
+     "en": "**Step 6:** \n`(T#t = Boolean) ○ Substitution = (Boolean = Boolean)` always true.\n\n",
+     "hash": "0eeba4e5ecdfcd1c",
+     "he": "**צעד 6:** \n`(T#t = Boolean) ○ Substitution = (Boolean = Boolean)` תמיד אמת.",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:40",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|7. Tnum1 = Number              |\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ = [Tnum1 * Tnum2 -> Tnum3] &nbsp;&nbsp;&nbsp; }\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |\t\t\n\n",
+     "hash": "4d6fa09b8358119c",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|7. Tnum1 = Number              |\t {&nbsp;&nbsp;&nbsp; T#t = Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T1 := Tnum3,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := Tnum3,  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ = [Tnum1 * Tnum2 -> Tnum3] &nbsp;&nbsp;&nbsp; }\t\n|8. Tnum2 = Number              |\t\n|9. Tnum3 = Number              |",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:41",
+     "type": "prose",
+     "en": "Skipping the trivial steps, we get:\n\n",
+     "hash": "668079a808f6b612",
+     "he": "בדילוג על הצעדים הטריוויאליים, אנחנו מקבלים:",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:42",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n| | { &nbsp;&nbsp;&nbsp;  T#t := Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T1 := **Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := **Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum1 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum2 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum3 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ := [Number * Number -> Number]&nbsp;&nbsp;&nbsp; }\n\n\n",
+     "hash": "007d43d36de99d5d",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n| | { &nbsp;&nbsp;&nbsp;  T#t := Boolean,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T1 := **Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0 := **Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum1 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum2 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Tnum3 := Number**,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T+ := [Number * Number -> Number]&nbsp;&nbsp;&nbsp; }",
+     "role": "solution",
+     "questionId": 5
+    },
+    {
+     "id": "ps/ps7:10:43",
+     "type": "prose",
+     "en": "The type inference succeeds, meaning that the expression is  **well typed**.\nBecause there are no free variables, the inferred type of T0 is:  **Number**.\n\n",
+     "hash": "38ba4530ed4ccbc5",
+     "he": "הסקת הטיפוסים מצליחה, כלומר שהביטוי **מטופס היטב**.\nמכיוון שאין משתנים חופשיים, הטיפוס המוסק של T0 הוא: **Number**.",
+     "role": "solution",
+     "questionId": 5
+    }
+   ],
+   "role": "question",
+   "questionId": 5,
+   "headingHe": "שאלה 2"
+  },
+  {
+   "id": "ps/ps7:11",
+   "depth": 2,
+   "headingEn": "Question 3",
+   "raw": "## Question 3\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps7:11:0",
+     "type": "prose",
+     "en": "Typing the application `((lambda (f1 x1) (f1 x1)) 4 sqrt)`:\n\n",
+     "hash": "ed537b905095757a",
+     "he": "טיפוס ההפעלה `((lambda (f1 x1) (f1 x1)) 4 sqrt)`:"
+    },
+    {
+     "id": "ps/ps7:11:1",
+     "type": "prose",
+     "en": "**Stage I**: Rename bound variables.\n\n",
+     "hash": "dbcd7fdf8c80c560",
+     "he": "**שלב I**: שינוי שם של משתנים קשורים.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:2",
+     "type": "prose",
+     "en": "`((lambda (f1 x1) (f1 x1)) 4 sqrt)`  turns into  `((lambda (f x) (f x)) 4 sqrt)`\n\n",
+     "hash": "53c0abbdf15e5f2b",
+     "he": "`((lambda (f1 x1) (f1 x1)) 4 sqrt)` הופך ל-`((lambda (f x) (f x)) 4 sqrt)`",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:3",
+     "type": "prose",
+     "en": "**Stage II**: Assign type variables for every sub expression and primitives:\n\n",
+     "hash": "748d5a67e5592e6e",
+     "he": "**שלב II**: הקצאת משתני טיפוס לכל תת-ביטוי ולפרימיטיבים:",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:4",
+     "type": "table",
+     "en": "|Expression\t               | Variable\n|-------------------------------|------------|\n((lambda (f x) (f x)) 4 sqrt)   |T0\n(lambda (f x) (f x))\t        |T1\n(f x)\t                        |T2\nf\t                            |Tf\nx\t                            |Tx\n4\t                            |Tnum4\nsqrt\t                        |Tsqrt\n\n",
+     "hash": "aa9d8fbf97f9423e",
+     "he": "|ביטוי\t               | משתנה\n|-------------------------------|------------|\n((lambda (f x) (f x)) 4 sqrt)   |T0\n(lambda (f x) (f x))\t        |T1\n(f x)\t                        |T2\nf\t                            |Tf\nx\t                            |Tx\n4\t                            |Tnum4\nsqrt\t                        |Tsqrt",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:5",
+     "type": "prose",
+     "en": "**Stage III**: Construct type equations.\n\n",
+     "hash": "25c4b3193dfa95cd",
+     "he": "**שלב III**: בניית משוואות טיפוס.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:6",
+     "type": "prose",
+     "en": " The equations for the sub-expressions are:\n\n",
+     "hash": "732920f5081968d5",
+     "he": "המשוואות עבור תת-הביטויים הן:",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:7",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\n|((lambda (f x) (f x)) 4 sqrt)   |T1 = [Tnum4 * Tsqrt -> T0]\n|(lambda (f x) (f x))\t        |T1 = [Tf * Tx -> T2]\n|(f x)                     \t    |Tf = [Tx -> T2]\n\n",
+     "hash": "485c77332dbcc5ba",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\n|((lambda (f x) (f x)) 4 sqrt)   |T1 = [Tnum4 * Tsqrt -> T0]\n|(lambda (f x) (f x))\t        |T1 = [Tf * Tx -> T2]\n|(f x)                     \t    |Tf = [Tx -> T2]",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:8",
+     "type": "prose",
+     "en": "The equations for the primitives are:\n\n",
+     "hash": "55abbf77c7f2cccc",
+     "he": "המשוואות עבור הפרימיטיבים הן:",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:9",
+     "type": "table",
+     "en": "|Expression               \t    | Equation\n|-------------------------------|-----------------------------|\n|4\t                            |Tnum4 = Number\n|sqrt\t                        |Tsqrt = [Number -> Number]\n\n",
+     "hash": "9ea3b4821907d04b",
+     "he": "|ביטוי               \t    | משוואה\n|-------------------------------|-----------------------------|\n|4\t                            |Tnum4 = Number\n|sqrt\t                        |Tsqrt = [Number -> Number]",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:10",
+     "type": "prose",
+     "en": "**Stage IV**: Solve the equations.\n\n",
+     "hash": "dc5c721c5d523473",
+     "he": "**שלב IV**: פתרון המשוואות.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:11",
+     "type": "table",
+     "en": "|Equation                       | Substitution\n|-------------------------------|-----------------------------|\n|1. T1 = [Tnum4 * Tsqrt -> T0]\t|{}\n|2. T1 = [Tf * Tx -> T2]\t    |\n|3. Tf = [Tx -> T2]\t            |\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |\t\n\n",
+     "hash": "3629ca42a6b77a4e",
+     "he": "|משוואה                       | הצבה\n|-------------------------------|-----------------------------|\n|1. T1 = [Tnum4 * Tsqrt -> T0]\t|{}\n|2. T1 = [Tf * Tx -> T2]\t    |\n|3. Tf = [Tx -> T2]\t            |\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:12",
+     "type": "prose",
+     "en": "**Step 1:**  \n\n",
+     "hash": "45cdcc57601a24a5",
+     "he": "**צעד 1:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:13",
+     "type": "prose",
+     "en": "`(T1 = [Tnum4 * Tsqrt -> T0]) ○ Substitution = (T1 = [Tnum4 * Tsqrt -> T0])`, type-sub.  \n\n",
+     "hash": "4165d51d00e92601",
+     "he": "`(T1 = [Tnum4 * Tsqrt -> T0]) ○ Substitution = (T1 = [Tnum4 * Tsqrt -> T0])`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:14",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (T1 = [Tnum4 * Tsqrt -> T0]).`\n\n\n",
+     "hash": "fa3dfff1db576500",
+     "he": "`Substitution = Substitution ○ (T1 = [Tnum4 * Tsqrt -> T0]).`",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:15",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|2. T1 = [Tf * Tx -> T2]\t    |{ &nbsp;&nbsp;&nbsp; **T1 := [Tnum4 * Tsqrt -> T0]** &nbsp;&nbsp;&nbsp;}\n|3. Tf = [Tx -> T2]\t            |\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |\t\n\n",
+     "hash": "21a74e149a44d522",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|2. T1 = [Tf * Tx -> T2]\t    |{ &nbsp;&nbsp;&nbsp; **T1 := [Tnum4 * Tsqrt -> T0]** &nbsp;&nbsp;&nbsp;}\n|3. Tf = [Tx -> T2]\t            |\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:16",
+     "type": "prose",
+     "en": "**Step 2:**\n\n",
+     "hash": "61665123bf5bd88d",
+     "he": "**צעד 2:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:17",
+     "type": "prose",
+     "en": "`(T1 = [Tf * Tx -> T2]) ○ Substitution = ([Tf * Tx -> T2] = [Tnum4 * Tsqrt -> T0])`\n\n",
+     "hash": "a5dbfe41c20e3fcd",
+     "he": "`(T1 = [Tf * Tx -> T2]) ○ Substitution = ([Tf * Tx -> T2] = [Tnum4 * Tsqrt -> T0])`",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:18",
+     "type": "prose",
+     "en": "There is no type-sub. We split the equation to\n\n",
+     "hash": "287ae3c642736683",
+     "he": "אין כאן הצבת-טיפוס. אנחנו מפצלים את המשוואה ל-",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:19",
+     "type": "list",
+     "en": "* Tf = Tnum4, \n* Tx = Tsqrt, \n* T2 = T0\n\n",
+     "hash": "53b53954f7bdf213",
+     "he": "* Tf = Tnum4, \n* Tx = Tsqrt, \n* T2 = T0",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:20",
+     "type": "prose",
+     "en": "We add them to the equations (6,7,8) and remove equation 2.\n\n",
+     "hash": "852bc8d30956cc4c",
+     "he": "אנחנו מוסיפים אותן למשוואות (6,7,8) ומסירים את משוואה 2.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:21",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|3. Tf = [Tx -> T2]  \t        |{ &nbsp;&nbsp;&nbsp; T1 := [Tnum4 * Tsqrt -> T0] &nbsp;&nbsp;&nbsp;}\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |\t\n|6.  **Tf = Tnum4**\t            |\n|7.  **Tx = Tsqrt**\t            |\n|8.  **T2 = T0**\t            |\n\n\n",
+     "hash": "6ef151a3fea3eb16",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|3. Tf = [Tx -> T2]  \t        |{ &nbsp;&nbsp;&nbsp; T1 := [Tnum4 * Tsqrt -> T0] &nbsp;&nbsp;&nbsp;}\n|4. Tnum4 = Number\t            |\n|5. Tsqrt = [Number -> Number]  |\t\n|6.  **Tf = Tnum4**\t            |\n|7.  **Tx = Tsqrt**\t            |\n|8.  **T2 = T0**\t            |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:22",
+     "type": "prose",
+     "en": "**Step 3:**\n\n",
+     "hash": "c26ed6096c001a84",
+     "he": "**צעד 3:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:23",
+     "type": "prose",
+     "en": "`(Tf = [Tx -> T2]) ○ Substitution = (Tf = [Tx -> T2])` , type-sub.\n`Substitution = Substitution ○ (Tf = [Tx -> T2])`.\n\n",
+     "hash": "60d7f5045e7a2ca7",
+     "he": "`(Tf = [Tx -> T2]) ○ Substitution = (Tf = [Tx -> T2])` , הצבת-טיפוס.\n`Substitution = Substitution ○ (Tf = [Tx -> T2])`.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:24",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|4. Tnum4 = Number\t            |  { &nbsp;&nbsp;&nbsp; T1 := [Tnum4 * Tsqrt -> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tf = [Tx -> T2]** &nbsp;&nbsp;&nbsp;}\n|5. Tsqrt = [Number -> Number]  |\t\n|6.  Tf = Tnum4\t                |\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |\n\n\n",
+     "hash": "c8d55f7603905225",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|4. Tnum4 = Number\t            |  { &nbsp;&nbsp;&nbsp; T1 := [Tnum4 * Tsqrt -> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tf = [Tx -> T2]** &nbsp;&nbsp;&nbsp;}\n|5. Tsqrt = [Number -> Number]  |\t\n|6.  Tf = Tnum4\t                |\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:25",
+     "type": "prose",
+     "en": "**Step 4:** \n\n",
+     "hash": "065269eecc80cf7e",
+     "he": "**צעד 4:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:26",
+     "type": "prose",
+     "en": "`(Tnum4 = Number) ○ Substitution = (Tnum4 = Number)`, type-sub.\n\n",
+     "hash": "d7410390a37b39a8",
+     "he": "`(Tnum4 = Number) ○ Substitution = (Tnum4 = Number)`, הצבת-טיפוס.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:27",
+     "type": "prose",
+     "en": "`Substitution = Substitution ○ (Tnum4 = Number)`.\n\n",
+     "hash": "6cd1c5d50ff144fc",
+     "he": "`Substitution = Substitution ○ (Tnum4 = Number)`.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:28",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|5. Tsqrt = [Number -> Number]  |\t  { &nbsp;&nbsp;&nbsp; T1 :=[**Number** * Tsqrt -> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tf = [Tx -> T2], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Tnum4 = Number** &nbsp;&nbsp;&nbsp;}\n|6.  Tf = Tnum4\t                |\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |\n\n\n",
+     "hash": "dc04b4daf6f56b35",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|5. Tsqrt = [Number -> Number]  |\t  { &nbsp;&nbsp;&nbsp; T1 :=[**Number** * Tsqrt -> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tf = [Tx -> T2], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Tnum4 = Number** &nbsp;&nbsp;&nbsp;}\n|6.  Tf = Tnum4\t                |\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:29",
+     "type": "prose",
+     "en": "**Step 5:**\n\n",
+     "hash": "f148749e27f4aae8",
+     "he": "**צעד 5:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:30",
+     "type": "prose",
+     "en": "`(Tsqrt = [Number -> Number]) ○ Substitution = (Tsqrt = [Number -> Number])` , type-sub.\n`Substitution = Substitution ○ (Tsqrt = [Number -> Number])`.\n\n\n",
+     "hash": "f639cbbf97ad97c0",
+     "he": "`(Tsqrt = [Number -> Number]) ○ Substitution = (Tsqrt = [Number -> Number])` , הצבת-טיפוס.\n`Substitution = Substitution ○ (Tsqrt = [Number -> Number])`.",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:31",
+     "type": "table",
+     "en": "|Equation| Substitution\n|-------------------------------|-----------------------------|\n|6.  Tf = Tnum4\t                |  { &nbsp;&nbsp;&nbsp; T1 :=[Number * **[Number -> Number]**-> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tf = [Tx -> T2], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tnum4 = Number <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tsqrt := [Number->Number]** &nbsp;&nbsp;&nbsp;}\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |\n\n\n",
+     "hash": "6e2f4f97cce1cf00",
+     "he": "|משוואה| הצבה\n|-------------------------------|-----------------------------|\n|6.  Tf = Tnum4\t                |  { &nbsp;&nbsp;&nbsp; T1 :=[Number * **[Number -> Number]**-> T0], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Tf = [Tx -> T2], <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tnum4 = Number <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  **Tsqrt := [Number->Number]** &nbsp;&nbsp;&nbsp;}\n|7.  Tx = Tsqrt                 |\n|8.  T2 = T0\t                |",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:32",
+     "type": "prose",
+     "en": "**Step 6:**  \n\n",
+     "hash": "cd7e25d11d503615",
+     "he": "**צעד 6:**",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:33",
+     "type": "prose",
+     "en": "`(Tf = Tnum4) ○ Substitution = ([Tx -> T2] = Number)`  \n\n",
+     "hash": "4290e23e7e933fa1",
+     "he": "`(Tf = Tnum4) ○ Substitution = ([Tx -> T2] = Number)`",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:34",
+     "type": "prose",
+     "en": "We get the conflicting equation:\n\n",
+     "hash": "5b1689c2ff63f7dd",
+     "he": "אנחנו מקבלים את המשוואה הסותרת:",
+     "role": "solution",
+     "questionId": 6
+    },
+    {
+     "id": "ps/ps7:11:35",
+     "type": "prose",
+     "en": "`[Tx -> T2] = Number` and we can say that the expression is **not well typed.**\n\n\n",
+     "hash": "1140116b6d83d3ae",
+     "he": "`[Tx -> T2] = Number` ואנחנו יכולים לומר שהביטוי **אינו מטופס היטב.**",
+     "role": "solution",
+     "questionId": 6
+    }
+   ],
+   "role": "question",
+   "questionId": 6,
+   "headingHe": "שאלה 3"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "**שאלה 1 מהדף (נשארה ללא פתרון):** עבור כל אחת מטענות הטיפוס הבאות, קבעו אם היא **אמת או שקר**, ונמקו.\n\n1. `{f:[Number->T1]} ⊢ (f 7): T1`\n2. `{y:Number, f:[T1->T1]} ⊢ (f x):T1`\n3. `{y:Number, f:[T1->T1]} ⊢ (f y):T1`\n4. `{x:Number} ⊢ x: Boolean`\n5. `{x:Boolean, y:Number} ⊢ x: Boolean`\n6. `{f:[T1->T2], g:[T2->T3], x:T1} ⊢ (g (f x)):T3`",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n**1. אמת.** ‏`f` הוא `[Number->T1]`, והארגומנט `7` הוא `Number` — מתאים לטיפוס הפרמטר. לפי כלל ההפעלה, הטיפוס של ההפעלה הוא טיפוס ההחזרה, כלומר `T1`. שימו לב ש-`T1` נשאר משתנה חופשי, וזה תקין לחלוטין.\n\n**2. שקר.** הסיבה אינה בטיפוסים אלא בסביבה: המשתנה `x` **אינו מופיע ב-Tenv כלל** (יש שם רק `y` ו-`f`). בלי הנחה על הטיפוס של `x` אין שום דרך לגזור טיפוס ל-`(f x)`. **זו הטעות שקל ליפול בה** — לראות `f:[T1->T1]` ולהסיק אוטומטית `T1` בלי לבדוק שהארגומנט בכלל מוגדר. שימו לב ש-`y:Number` בסביבה הוא מסיח בלבד.\n\n**3. תלוי בקריאה — ובמבחן כדאי לכתוב את שתי הקריאות.** ‏`f` הוא `[T1->T1]`, ולכן כלל ההפעלה דורש שהארגומנט יהיה מטיפוס `T1`. אבל הסביבה קובעת `y:Number`, ולכן נדרש `T1 = Number`.\n- אם קוראים את `T1` כמשתנה **שאפשר להציב בו** (כלומר שואלים 'האם הטענה ספיקה?') — אז כן, עם ההצבה `{T1=Number}` הטענה נגזרת, ומתקבל `(f y):Number` שהוא אכן `T1`.\n- אם קוראים את `T1` כ**כמות כללית** ('לכל `T1`') — אז שקר, כי הטענה נכשלת עבור כל `T1` שאינו `Number`.\nהתשובה השלמה מציינת את התלות `T1 = Number`.\n\n**4. שקר.** הסביבה קובעת `x:Number`, והטענה מנסה לייחס ל-`x` את הטיפוס `Boolean`. אקסיומת המשתנה נותנת בדיוק את מה שרשום בסביבה, ו-`Number` ו-`Boolean` הם טיפוסים זרים — אין המרה מובלעת בשפה שלנו.\n\n**5. אמת.** ישירות מאקסיומת המשתנה: הסביבה קובעת `x:Boolean`, והטענה מייחסת ל-`x` בדיוק את זה. ‏`y:Number` הוא הנחה מיותרת שאינה פוגמת בנכונות (רק בחוזק — ראו שאלה q2).\n\n**6. אמת.** שרשרת של שני יישומים: `(f x)` — ‏`f` הוא `[T1->T2]` והארגומנט `x` הוא `T1`, ולכן התוצאה היא `T2`. אחר כך `(g (f x))` — ‏`g` הוא `[T2->T3]` והארגומנט שקיבל הוא `T2`, ולכן התוצאה `T3`. כל הטיפוסים משתלבים בשרשרת, וזו הרכבת פונקציות קלאסית.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הכרעה + נימוק לכל אחת מששת הטענות; (2) עבור טענה 2 — הזיהוי שהבעיה היא ש-`x` חסר מ-Tenv ולא אי-התאמת טיפוסים; (3) עבור טענה 3 — הזיהוי שנדרש `T1 = Number` וההבחנה בין 'ספיק' ל'נכון לכל T1'; (4) עבור טענות 4–5 — שימוש באקסיומת המשתנה, וההבחנה שהנחה מיותרת אינה הופכת טענה לשקרית; (5) עבור טענה 6 — מעקב אחרי שרשרת שני היישומים. **טעויות נפוצות**: להתעלם מכך שמשתנה חסר בסביבה, ולבלבל בין 'טענה שקרית' ל'טענה חלשה'."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "**שאלה 2 מהדף (נשארה ללא פתרון):** עבור כל שורה בטבלה, איזו טענה **חזקה יותר** — שמאל או ימין?\n\n1. `{foo: [T1->T2]} ⊢ 5: Number` מול `{} ⊢ 5: Number`\n2. `{x: Number} ⊢ (+ x 3): Number` מול `{y: Number, x: Number} ⊢ (+ x 3): Number`\n3. `{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]` מול `{y: Number} ⊢ (lambda (x)(+ x y)):[Number -> Number]`\n4. `{} ⊢ (lambda (x)(+ x 3)):[Number -> Number]` מול `{y:Number} ⊢ (lambda (z)(+ z 3)):[Number -> Number]`\n5. `{f:[Number -> Number]} ⊢ ((lambda (f x) (f x))(lambda (x) (* x x)) 10): Number` מול `{} ⊢ ((lambda (f x) (f x)) (lambda (x) (* x x)) 10): Number`",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** הכלל המנחה — שתי טענות **אמת** על **אותו ביטוי ואותו טיפוס** מושוות לפי הסביבה: מי שנשענת על פחות הנחות חזקה יותר.\n\n**1. ימין חזקה יותר.** שתיהן אמת (`5` הוא `Number` מהאקסיומה), אבל `{}` ריקה ו-`{foo: [T1->T2]}` נושאת הנחה שאין בה שום צורך — `foo` אינו מופיע בביטוי בכלל.\n\n**2. שמאל חזקה יותר.** שתיהן אמת, אבל `{x: Number}` הוא בדיוק המינימום הדרוש; ‏`y: Number` בימין הוא עומס מיותר.\n\n**3. אי אפשר להשוות** — וזו הנקודה של השורה הזו (הדף עצמו שואל 'האם אפשר להשוות בין שתי אלה?'). מדובר ב**שני ביטויים שונים**: `(+ x 3)` מול `(+ x y)`. יחס החוזק מוגדר רק בין טענות על אותו ביטוי. שימו לב גם שההנחה `y: Number` בימין **אינה** מיותרת: `y` הוא משתנה חופשי בגוף ה-lambda, ובלי ההנחה הטענה כלל לא הייתה נגזרת. כלומר לא רק שאי אפשר להשוות — גם אין כאן 'עומס מיותר' שאפשר להסיר.\n\n**4. שמאל חזקה יותר.** כאן שני הביטויים **כן** זהים: `(lambda (x)(+ x 3))` ו-`(lambda (z)(+ z 3))` נבדלים רק בשם המשתנה **הקשור**, ולכן הם שקולים עד כדי שינוי שם (alpha-renaming) — בדיוק ההבחנה מהמודל התחבירי. מכיוון שמדובר באותו ביטוי, מותר להשוות, ו-`{}` חזקה מ-`{y:Number}`. **השוו לשורה 3**: ההבדל היחיד הוא ש-`y` שם הוא משתנה **חופשי** בגוף ולכן חיוני, וכאן `y` אינו מופיע בגוף בכלל.\n\n**5. ימין חזקה יותר.** שתיהן אמת, ו-`{f:[Number -> Number]}` מיותרת לגמרי — ה-`f` שבביטוי הוא פרמטר של ה-lambda, ולכן הוא **משתנה קשור** שמסתיר (shadowing) את ה-`f` שבסביבה. הביטוי סגור: כל משתניו קשורים, ולכן הוא מטופס בסביבה הריקה. **זו שאלת מבחן אהובה** — נותנים סביבה שנראית רלוונטית ובודקים אם זיהיתם שהמשתנה בכלל אינו חופשי.\n\n**הכלל המסכם, בשני שלבים**: (א) ודאו ששתי הטענות אמת ושהן על אותו ביטוי (עד כדי שינוי שם של משתנים קשורים) — אחרת אין מה להשוות; (ב) מבין אלה, החזקה היא זו עם הסביבה המינימלית, כלומר זו שמכילה בדיוק את המשתנים **החופשיים** של הביטוי.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הכרעה לכל חמש השורות; (2) הכלל שפחות הנחות = חזק יותר, בתנאי ששתי הטענות אמת; (3) עבור שורה 3 — הזיהוי שאי אפשר להשוות כי הביטויים שונים, **וגם** שההנחה `y:Number` שם חיונית ולא מיותרת; (4) עבור שורה 4 — הזיהוי ששינוי שם של משתנה קשור אינו משנה את הביטוי, ולכן כן מותר להשוות; (5) עבור שורה 5 — הזיהוי שה-`f` בסביבה מוסתר (shadowed) על ידי הפרמטר של ה-lambda, ושהביטוי סגור. בונוס: הניסוח הכללי שהסביבה המינימלית היא בדיוק קבוצת המשתנים החופשיים של הביטוי."
+  }
+ ]
+}

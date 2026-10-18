@@ -1,0 +1,16 @@
+{
+ "id": "interpreters/src/async/test.async",
+ "repo": "interpreters",
+ "path": "src/async/test.async",
+ "lang": "text",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/async/test.async",
+ "code": "{\"a\":1,\"lastModified\":\"2019-05-26T10:56:01.970Z\"}",
+ "titleHe": "test.async — פלט של הרצה, לא קוד",
+ "descriptionHe": "שורה אחת, והיא כלל אינה קוד מקור: זהו **קובץ הנתונים ש-`rwu-promise.ts` מייצר בהרצה**, שנשמר בטעות במאגר. שורה 50 שם כותבת `{\"a\":1}`, ואחר כך `readUpdateWrite` קוראת אותו, מוסיפה שדה `lastModified` וכותבת בחזרה — וזה בדיוק מה שרואים כאן.\n\nחותמת הזמן שבו מסגירה מתי הורצה התוכנית לאחרונה. אין מה ללמוד מהתוכן, אבל שווה להביט בו פעם אחת אחרי קריאת `rwu-promise.ts`, כדי לראות את תוצאת השרשרת האסינכרונית בפועל.",
+ "annotations": [
+  {
+   "line": 1,
+   "noteHe": "פרט אחד כאן דווקא מלמד משהו. `rwu-promise.ts` כותבת `j.lastModified = new Date()` — כלומר **אובייקט `Date`** — אבל מה שנשמר בקובץ הוא **מחרוזת**, כי `format` הוא `JSON.stringify`, וזה ממיר תאריך למחרוזת ISO. לכן קריאה חוזרת של הקובץ ב-`JSON.parse` תחזיר מחרוזת ולא תאריך: **מסלול הלוך-חזור דרך JSON אינו שומר על טיפוסים.** אותה תכונה בדיוק תועדה בהערות של `shared/format.ts` — הוא גם מוחק פונקציות בשקט וזורק על מבנים מעגליים. שאלת מבחן קלאסית מ-1.2: מדוע `JSON.parse(JSON.stringify(x))` אינו העתקה נאמנה? התשובה כתובה בשורה הזאת."
+  }
+ ]
+}

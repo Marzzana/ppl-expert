@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/L1/L1.ts",
+ "repo": "interpreters",
+ "path": "src/L1/L1.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L1/L1.ts",
+ "code": "import { readFileSync } from \"fs\";\nimport { parseL1 } from \"./L1-ast\";\nimport { evalL1program } from \"./L1-eval\";\nimport { bind, either } from \"../shared/result\";\n\nconst filename = process.argv[2];\nif (!filename) {\n    console.error(\"Usage: L1 <filename>\");\n    process.exit(1);\n}\n\nlet source: string;\ntry {\n    source = readFileSync(filename, \"utf-8\");\n} catch (e) {\n    console.error(`Error reading file '${filename}': ${(e as Error).message}`);\n    process.exit(1);\n}\n\nconst result = bind(parseL1(source), evalL1program);\n\neither(\n    result,\n    (value) => console.log(JSON.stringify(value)),\n    (message) => {\n        console.error(`Error: ${message}`);\n        process.exit(1);\n    }\n);\n",
+ "titleHe": "נקודת הכניסה של L1 — קרא, נתח, הערך, הדפס",
+ "descriptionHe": "תוכנית ההרצה של `L1`: קוראת קובץ מהדיסק, מנתחת אותו, מריצה, ומדפיסה את התוצאה או את השגיאה. שלושים שורות, ורובן טיפול בקלט/פלט.\n\nשייך ל-**2.3–2.4**. הקובץ אינו מלמד דבר על שפות תכנות, אבל שווה מבט של דקה מסיבה אחת: **שורה 20 היא כל המפרש**. הצינור `bind(parseL1(source), evalL1program)` הוא הצורה שהקורס חוזר עליה בכל שפה מ-`L1` עד `L5` — ואפשר לראות בו בבירור את שני השלבים שהקורס מפריד ביניהם, ואת המונאדה שמחברת אותם.",
+ "annotations": [
+  {
+   "line": 6,
+   "noteHe": "שלושה-עשר השורות האלה הן **כל הקוד ה\"מלוכלך\" בפרויקט**: קריאת ארגומנטים משורת הפקודה, קריאת קובץ מהדיסק, `try`/`catch`, ו-`process.exit`. שימו לב שהן מרוכזות כאן ואינן מופיעות בשום מקום אחר — `L1-ast.ts` ו-`L1-eval.ts` הם פונקציונליים לחלוטין ואינם יודעים שקיים דבר כזה קובץ.\n\nזו אותה החלטה עיצובית שראינו ב-`box.ts` (כל שינוי המצב במקום אחד) וב-`parser.ts` (כל תרגום החריגות במקום אחד): **דוחפים את תופעות הלוואי לקצה המערכת, ומשאירים את הליבה טהורה.** התבנית נקראת \"ליבה פונקציונלית, מעטפת אימפרטיבית\", והיא מה שמאפשר לבדוק את המפרש בלי קובץ ובלי מערכת קבצים."
+  },
+  {
+   "line": 20,
+   "noteHe": "**השורה הזאת היא כל המפרש, ושווה להתעכב עליה.**\n\n‏`bind(parseL1(source), evalL1program)` — שני שלבים ומונאדה. ‏`parseL1` מקבלת מחרוזת ומחזירה `Result<Program>`; ‏`evalL1program` מקבלת `Program` ומחזירה `Result<Value>`. שתיהן **פונקציות אלכסוניות** במונחי 1.5 — עשויות להיכשל — ולכן אי אפשר להרכיב אותן ישירות, ו-`bind` הוא הדבק. אם הניתוח נכשל, ההערכה **כלל אינה רצה**, וההודעה המקורית מגיעה עד הסוף.\n\nוכדאי לראות בה גם את **הפרדת השלבים** שכל פרק 2 בנוי עליה: ניתוח תחבירי → תחביר מופשט → הערכה. שני שלבים, שני קבצים, ושום דליפה ביניהם — `evalL1program` לעולם אינה רואה מחרוזת, ו-`parseL1` לעולם אינה מחשבת ערך. **זו התבנית שתחזור בכל שפה עד `L5`**, שם יתווסף שלב שלישי באמצע (בדיקת טיפוסים), ובפרק 4 שלב של המרה ל-CPS.\n\nההדפסה למטה היא `either` — ה-`fold` של `Result` — עם מטפל להצלחה ומטפל לכישלון. שימו לב שאין כאן אף `if`: **המהדר מחייב לטפל בשני המקרים**, וזה בדיוק מה שהופך \"שגיאה כערך\" למועיל."
+  }
+ ]
+}

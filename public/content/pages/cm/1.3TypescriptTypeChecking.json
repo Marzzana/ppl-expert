@@ -1,0 +1,2123 @@
+{
+ "id": "cm/1.3TypescriptTypeChecking",
+ "kind": "lecture",
+ "sourcePath": "class_material/1.3TypescriptTypeChecking.md",
+ "titleEn": "Type Checking",
+ "titleHe": "בדיקת טיפוסים (Type Checking)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/1.3TypescriptTypeChecking:0",
+   "depth": 1,
+   "headingEn": "Type Checking",
+   "raw": "# Type Checking\n",
+   "blocks": [],
+   "headingHe": "בדיקת טיפוסים (Type Checking)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:1",
+   "depth": 3,
+   "headingEn": "PPL 2023",
+   "raw": "### PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:1:0",
+     "type": "prose",
+     "en": "This lecture introduces *type checking* and *type inference* with illustration in TypeScript.\n\n",
+     "hash": "89bb79d95da6d5f4",
+     "he": "הרצאה זו מציגה *בדיקת טיפוסים (type checking)* ו*הסקת טיפוסים (type inference)*, עם הדגמות ב-TypeScript."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:1:1",
+     "type": "list",
+     "en": "* Introduce *optional type declarations* as illustrated in TypeScript\n* Define the *type language* defined in TypeScript - complex type definitions, named types, implicit types, recursive types, generic types\n* Define *function types*\n* Define closures and their types\n* Define *type compatibility* and *type checking*:\n* Distinguish *structural typing* and *nominal typing*\n\n",
+     "hash": "8dacb57e37309670",
+     "he": "* נציג *הצהרות טיפוס אופציונליות (optional type declarations)* כפי שהן מודגמות ב-TypeScript\n* נגדיר את *שפת הטיפוסים (type language)* המוגדרת ב-TypeScript — הגדרות טיפוס מורכבות, טיפוסים בעלי שם, טיפוסים משתמעים, טיפוסים רקורסיביים וטיפוסים גנריים\n* נגדיר *טיפוסי פונקציה (function types)*\n* נגדיר סגורים (closures) ואת הטיפוסים שלהם\n* נגדיר *תאימות טיפוסים (type compatibility)* ו*בדיקת טיפוסים*:\n* נבחין בין *טיפוסיות מבנית (structural typing)* לבין *טיפוסיות נומינלית (nominal typing)*"
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:2",
+   "depth": 2,
+   "headingEn": "Why Types",
+   "raw": "## Why Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:0",
+     "type": "prose",
+     "en": "Adding types to a program has three key advantages:\n",
+     "hash": "6b97e41b6b7b0cfc",
+     "he": "להוספת טיפוסים לתוכנית יש שלושה יתרונות מרכזיים:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:1",
+     "type": "list",
+     "en": "* It allows the compiler to detect errors that would otherwise only be detected at runtime.\n  It is much better to detect errors as early as possible in the development cycle.\n* It serves as excellent documentation by reflecting the intention of the programmer.\n* More importantly, it helps the programmer **model** the solution she is designing.  A good typing system drives programs towards systematic models - both for data and for code.   \n\n",
+     "hash": "32d516232f812f96",
+     "he": "* היא מאפשרת למהדר (compiler) לגלות שגיאות שאחרת היו מתגלות רק בזמן ריצה.\n  עדיף בהרבה לגלות שגיאות מוקדם ככל האפשר במחזור הפיתוח.\n* היא משמשת תיעוד מצוין, כי היא משקפת את כוונת המתכנת.\n* וחשוב מכך — היא עוזרת למתכנתת **למדל (model)** את הפתרון שהיא מעצבת. מערכת טיפוסים טובה מכוונת תוכניות לעבר מודלים שיטתיים — הן עבור נתונים והן עבור קוד."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:2",
+     "type": "prose",
+     "en": "Adding types is sometimes \"annoying\" because it can make programs longer, and for complicated types or generic types - it can make simple programs complex.  For example, a function such as `x => x` (known as the identity function) has a complex type (because it can work on any possible types).  We will see further examples of this later.\n\n",
+     "hash": "45dc37041b6ccac2",
+     "he": "הוספת טיפוסים היא לפעמים \"מעצבנת\", כי היא עלולה להאריך תוכניות, ובמקרה של טיפוסים מסובכים או גנריים — היא עלולה להפוך תוכניות פשוטות למורכבות. לדוגמה, לפונקציה כמו `x => x` (המוכרת כפונקציית הזהות) יש טיפוס מורכב (כי היא יכולה לפעול על כל טיפוס אפשרי). נראה דוגמאות נוספות לכך בהמשך."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:3",
+     "type": "prose",
+     "en": "TypeScript alleviates these 2 problems by:\n",
+     "hash": "589fa1507b18d544",
+     "he": "TypeScript מקלה על שתי הבעיות האלה על ידי:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:4",
+     "type": "list",
+     "en": "* Making type annotations optional.\n* Making type annotations implicit (that is, where the type of expressions can be inferred from the code, it will be).\n\n",
+     "hash": "255d90bd409da3d6",
+     "he": "* הפיכת הערות הטיפוס (type annotations) לאופציונליות.\n* הפיכת הערות הטיפוס למשתמעות (כלומר, במקומות שבהם ניתן להסיק את טיפוס הביטויים מהקוד — הוא אכן יוסק)."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:2:5",
+     "type": "prose",
+     "en": "This approach is called **gradual typing**.  As a general strategy in programming languages, gradual typing allows programmers to trade-off prototyping and type safety.\n\n",
+     "hash": "446e832d212582ba",
+     "he": "גישה זו נקראת **טיפוס הדרגתי (gradual typing)**. כאסטרטגיה כללית בשפות תכנות, טיפוס הדרגתי מאפשר למתכנתים לאזן בין מהירות בניית אב-טיפוס (prototyping) לבין בטיחות טיפוסים (type safety)."
+    }
+   ],
+   "headingHe": "למה טיפוסים?"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:3",
+   "depth": 2,
+   "headingEn": "Runtime Errors Caused by Unexpected Values",
+   "raw": "## Runtime Errors Caused by Unexpected Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:0",
+     "type": "prose",
+     "en": "Consider the following type definition and the function operating over values in this type:\n\n",
+     "hash": "c444da3fe4105a66",
+     "he": "נתבונן בהגדרת הטיפוס הבאה ובפונקציה הפועלת על ערכים מטיפוס זה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:1",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\n\ntype Date = {\n\tyear: number;\n\tmonth: number;\n\tday: number;\n}\n\ntype Person = {\n\tbirthDate: Date;\n\tname: string;\n}\n\nconst computeAges = (persons) => map(p => 2023 - p.birthDate.year, persons);\n\nlet persons = [\n\t{ name: \"avi\", birthDate: { year: 1992, month: 7, day: 10 } },\n\t{ name: \"batia\", birthDate: { year: 1996, month: 3, day: 2 } }\n];\n\nconsole.log(computeAges(persons)); // ==> [ 31, 27 ]\n```\n\n",
+     "hash": "7c917ce230cced47",
+     "lang": "typescript",
+     "noteHe": "הקוד מגדיר שני טיפוסים בעזרת המילה השמורה `type`: הטיפוס `Date` הוא מפה (map) עם המפתחות `year`,‏ `month` ו-`day`, כולם מטיפוס `number`; והטיפוס `Person` הוא מפה עם מפתח `birthDate` מטיפוס `Date` ומפתח `name` מטיפוס `string`. הפונקציה `computeAges` מקבלת מערך של אנשים ומחשבת את גילו של כל אחד בעזרת `map` מספריית ramda: עבור כל `p` היא מחשבת `2023 - p.birthDate.year`. שימו לב שהפרמטר `persons` אינו מוער בטיפוס — נקודה שתהיה קריטית מיד. ההרצה על המערך `persons`, שבו לכל אדם יש `birthDate` תקין, מדפיסה `[31, 27]` כמצופה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:2",
+     "type": "prose",
+     "en": "Consider now what happens if we invoke `computeAges` on this value:\n\n",
+     "hash": "e00069ab47d83393",
+     "he": "נבחן כעת מה קורה אם נפעיל את `computeAges` על הערך הזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:3",
+     "type": "code",
+     "en": "```typescript\ncomputeAges([{ name: \"avi\" }, { name: \"batia\" }]);\n// ==> Uncaught TypeError: Cannot read properties of undefined (reading 'year')\n```\n\n",
+     "hash": "41334d4695f306fd",
+     "lang": "typescript",
+     "noteHe": "כאן קוראים ל-`computeAges` עם מערך אנשים שחסר בהם המפתח `birthDate`. בזמן ריצה, `p.birthDate` מוערך ל-`undefined`, והניסיון לגשת לתכונה `year` של `undefined` מפיל את התוכנית עם שגיאת `TypeError`. זו בדיוק סוג השגיאה שבדיקת טיפוסים סטטית נועדה למנוע."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:4",
+     "type": "prose",
+     "en": "We obtain a runtime error when we try to access a property of a map which is not provided in the actual value passed to the function.  \nIn other words, there is an incompatibility between the value passed to the function and the type of the value expected by the function.\n\n",
+     "hash": "9081159e61faf69b",
+     "he": "אנחנו מקבלים שגיאת זמן ריצה כשאנחנו מנסים לגשת לתכונה (property) של מפה, שאינה קיימת בערך שהועבר בפועל לפונקציה.\nבמילים אחרות, יש אי-תאימות בין הערך שהועבר לפונקציה לבין טיפוס הערך שהפונקציה מצפה לו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:5",
+     "type": "prose",
+     "en": "**Type annotations** are introduced in programming languages to enable **type checking**.\nType checking is a process that analyzes a program and verifies that such incompatibities between \nvariables or function parameters and the values to which they are bound at runtime are impossible\nfor all possible executions of the program.\n\n",
+     "hash": "191ffccd3d6fbc0b",
+     "he": "**הערות טיפוס (type annotations)** הוכנסו לשפות תכנות כדי לאפשר **בדיקת טיפוסים (type checking)**.\nבדיקת טיפוסים היא תהליך שמנתח תוכנית ומוודא שאי-תאימויות כאלה — בין משתנים או פרמטרים של פונקציות לבין הערכים שאליהם הם נקשרים בזמן ריצה — אינן אפשריות בכל ריצה אפשרית של התוכנית."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:6",
+     "type": "prose",
+     "en": "When type checking is performed at compilation, it detects errors that could otherwise occur later at runtime.\nThis is a much better situation - errors caught early are errors that are avoided.  Errors caught at \nruntime cause damage.\n\n",
+     "hash": "175fbab5dc3fa137",
+     "he": "כאשר בדיקת הטיפוסים מתבצעת בזמן קומפילציה, היא מגלה שגיאות שאחרת היו מתרחשות מאוחר יותר, בזמן ריצה.\nזהו מצב טוב בהרבה — שגיאות שנתפסות מוקדם הן שגיאות שנמנעות; שגיאות שנתפסות בזמן ריצה גורמות נזק."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:7",
+     "type": "prose",
+     "en": "Compilers that implement type checking provide an extremely powerful form of program verification.\nIf we change our function declaration as follows, with a type declaration for the parameter of the function\n`computeAges` as `persons: Person[]`, the compiler can verify that the invocation of the function can lead \nto a runtime type error, and apparently it is not the behavior intended by the programmer. In this case,\ncompilation fails and a helpful compilation error message is provided.\n\n",
+     "hash": "e251024fc28c09df",
+     "he": "מהדרים שמממשים בדיקת טיפוסים מספקים צורה עוצמתית ביותר של אימות תוכניות (program verification).\nאם נשנה את הגדרת הפונקציה כך שהפרמטר של `computeAges` יוער בהצהרת הטיפוס `persons: Person[]`, המהדר יכול לוודא שהקריאה לפונקציה עלולה להוביל לשגיאת טיפוס בזמן ריצה — וכנראה שאין זו ההתנהגות שאליה התכוון המתכנת. במקרה כזה הקומפילציה נכשלת, ומתקבלת הודעת שגיאת קומפילציה מועילה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:3:8",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\n\ntype Date = {\n\tyear: number;\n\tmonth: number;\n\tday: number;\n}\n\ntype Person = {\n\tbirthDate: Date;\n\tname: string;\n}\n\nconst computeAges = (persons: Person[]) => map(p => 2023 - p.birthDate.year, persons);\n\nlet persons = [\n\t{ name: \"avi\", birthDate: { year: 1992, month: 7, day: 10 } },\n\t{ name: \"batia\", birthDate: { year: 1996, month: 3, day: 2 } }\n];\n\nconsole.log(computeAges(persons)); // ==> [ 31, 27 ]\ncomputeAges([{ name: \"avi\" }, { name: \"batia\" }]);\n// --> Compile error: Property birthDate is missing in type {name: string} but required in type Person.\n```\n\n\n",
+     "hash": "5e5f293e5365bd56",
+     "lang": "typescript",
+     "noteHe": "זהו אותו קוד כמו קודם, בתוספת אחת מכרעת: הפרמטר של `computeAges` מוער כעת בטיפוס `Person[]` — מערך של ערכי `Person`. כעת המהדר יודע שכל איבר במערך חייב לכלול מפתח `birthDate`, ולכן הקריאה עם `[{ name: \"avi\" }, { name: \"batia\" }]` נכשלת כבר בזמן קומפילציה, עם הודעה שהתכונה `birthDate` חסרה בטיפוס `{name: string}` אך נדרשת בטיפוס `Person` — במקום להתרסק בזמן ריצה. הקריאה התקינה הראשונה עדיין עוברת ומדפיסה `[31, 27]`."
+    }
+   ],
+   "headingHe": "שגיאות זמן ריצה שנגרמות מערכים לא צפויים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:4",
+   "depth": 3,
+   "headingEn": "Why Would Anyone Give Up on Type Checking?",
+   "raw": "### Why Would Anyone Give Up on Type Checking?\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:0",
+     "type": "prose",
+     "en": "Given that type checking is such a powerful tool - why would any programmer want to give up this and use a programming language\nthat does not provide it?\n\n",
+     "hash": "0a41f3a1d58a39e3",
+     "he": "בהינתן שבדיקת טיפוסים היא כלי כה עוצמתי — מדוע שמתכנת כלשהו ירצה לוותר עליה ולהשתמש בשפת תכנות שאינה מספקת אותה?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:1",
+     "type": "prose",
+     "en": "The arguments usually advanced by proponents of languages without type checking are the following:\n",
+     "hash": "2bfe1bd5afc0357b",
+     "he": "הטיעונים שמעלים בדרך כלל התומכים בשפות ללא בדיקת טיפוסים הם הבאים:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:2",
+     "type": "list",
+     "en": "* **Conciseness**: Programs without type annotations are more concise.  \n  Conciseness is important because it leads to more readability and better understanding.\n  \n  For example, the function above with full types looks like:\n",
+     "hash": "5d6fa333d72e007a",
+     "he": "* **תמציתיות (conciseness)**: תוכניות ללא הערות טיפוס הן תמציתיות יותר.\n  התמציתיות חשובה כי היא מובילה לקריאוּת רבה יותר ולהבנה טובה יותר.\n\n  לדוגמה, הפונקציה שלמעלה עם טיפוסים מלאים נראית כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:3",
+     "type": "code",
+     "en": "```typescript\nconst computeAges: (person: Person[]) => number[] = (persons) =>\n    map(p => 2022 - p.birthDate.year, persons);\n```\n",
+     "hash": "f5fbe1ab9613db50",
+     "lang": "typescript",
+     "noteHe": "זו אותה פונקציית `computeAges`, הפעם עם הערת הטיפוס המלאה שלה: לפני סימן ההשמה מופיע טיפוס הפונקציה `(person: Person[]) => number[]` — פונקציה שמקבלת מערך של ערכי `Person` ומחזירה מערך של מספרים. הדוגמה ממחישה את טיעון התמציתיות: ההצהרה המלאה אכן מאריכה את הקוד ומכבידה מעט על הקריאה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:4",
+     "type": "prose",
+     "en": "  This argument is weak - because the additional type annotation is in fact a form of documentation\n  which clarifies the intention of the programmer.  In addition, in TypeScript, one can skip some of the types when they can be easily inferred\n  by the compiler - making this argument unacceptable altogether.\n  \n",
+     "hash": "e51fabd6fdf18977",
+     "he": "הטיעון הזה חלש — כי הערת הטיפוס הנוספת היא למעשה צורה של תיעוד, שמבהירה את כוונת המתכנת. בנוסף, ב-TypeScript אפשר לדלג על חלק מהטיפוסים כאשר המהדר יכול להסיק אותם בקלות — מה שהופך את הטיעון הזה לבלתי קביל כלל."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:5",
+     "type": "prose",
+     "en": "  For example, consider the untyped function:\n",
+     "hash": "541bc69a9c431138",
+     "he": "לדוגמה, נתבונן בפונקציה הלא-מטופסת:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:6",
+     "type": "code",
+     "en": "```typescript\nconst add = (x, y) => x + y;\n```\n",
+     "hash": "92d57caa8927c83f",
+     "lang": "typescript",
+     "noteHe": "הגדרה של פונקציית חיבור ללא שום הערת טיפוס: `x` ו-`y` יכולים לקבל כל ערך שהוא, והאופרטור `+` יופעל עליהם בזמן ריצה. כפי שנראה מיד — זה מתכון להפתעות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:7",
+     "type": "prose",
+     "en": "  In Javascript, the `+` operator works on a wide range of values (number, strings, arrays).  It often produces unexpected output for example: \n",
+     "hash": "e6e0a3f3147c7640",
+     "he": "ב-JavaScript, האופרטור `+` פועל על מגוון רחב של ערכים (מספרים, מחרוזות, מערכים). לעיתים קרובות הוא מפיק פלט בלתי צפוי, לדוגמה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:8",
+     "type": "code",
+     "en": "```typescript\n[1, 2] + [\"a\", \"b\"]; // ==> '1,2a,b'\n```\n",
+     "hash": "ca51ba1671f4c59a",
+     "lang": "typescript",
+     "noteHe": "חיבור שני מערכים באמצעות `+` אינו שגיאה ב-JavaScript: שני המערכים מומרים בשקט למחרוזות (`'1,2'` ו-`'a,b'`) ואז משורשרים זה לזה, והתוצאה היא המחרוזת המוזרה `'1,2a,b'`. זו דוגמה קלאסית להמרת טיפוסים מובלעת (type coercion) שמייצרת באג שקט במקום שגיאה מפורשת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:9",
+     "type": "prose",
+     "en": "  If a programmer declares that the intention of this function is to operate only over number, it clarifies the way the function can be tested and what it means for the function to be correct:\n",
+     "hash": "965b8decdf67cfba",
+     "he": "אם המתכנת מצהיר שכוונת הפונקציה היא לפעול על מספרים בלבד, ההצהרה מבהירה כיצד ניתן לבדוק את הפונקציה ומה פירוש הדבר שהפונקציה נכונה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:10",
+     "type": "code",
+     "en": "```typescript\nconst add: (x: number, y: number) => number = (x, y) => x + y;\n```\n",
+     "hash": "13434166a199bb64",
+     "lang": "typescript",
+     "noteHe": "אותה פונקציית `add`, הפעם עם חתימת טיפוס מלאה: `(x: number, y: number) => number`. כעת קריאה עם מערכים או מחרוזות תיכשל כבר בקומפילציה, והטיפוס מתעד במדויק את הכוונה — חיבור של מספרים בלבד."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:11",
+     "type": "list",
+     "en": "* **Untyped languages are easier to adjust to incremental changes.**\nFor example, consider a program that operates over values of type `Person` as described above.\nIf later, after the program has been put in production, we start introducing additional data for some persons - so that we add a new property `address`.  A program in an untyped language can be *patched* incrementally to support such values - by adding runtime checks for the presence of the additional property.  Such patching would require much more in-depth modifications in a statically type-checked language.\n\n* **Untyped languages encourage interactive programming.**\nWhen programmers interact with an interpreter, interactively, try a version of a function, then revise it, run tests, modify the structure of the values, revise the functions in fast experimentation cycles, with no compilation and direct interpretation - untyped languages allow faster experimentation.\nThe counter argument is once the programmer has completed the experimentation / prototyping phase, the second stage of *cleaning up* with type definition can only improve the quality of the program and its design.  Gradual typing is attractive because it supports both types of operations and transition from prototype to typed correct versions.\n\n",
+     "hash": "fa24aa0346dcce33",
+     "he": "* **שפות לא מטופסות קלות יותר להתאמה לשינויים הדרגתיים.**\nלדוגמה, נתבונן בתוכנית שפועלת על ערכים מטיפוס `Person` כפי שתואר לעיל.\nאם בהמשך, אחרי שהתוכנית כבר הועברה לסביבת ייצור (production), נתחיל להוסיף נתונים נוספים לחלק מהאנשים — כך שנוסיף תכונה חדשה `address` — תוכנית בשפה לא מטופסת אפשר *לטלוא (patch)* באופן הדרגתי כדי לתמוך בערכים כאלה, על ידי הוספת בדיקות זמן ריצה לנוכחות התכונה הנוספת. טלאי כזה היה דורש שינויים עמוקים בהרבה בשפה עם בדיקת טיפוסים סטטית.\n\n* **שפות לא מטופסות מעודדות תכנות אינטראקטיבי.**\nכאשר מתכנתים עובדים מול מפרש (interpreter) באופן אינטראקטיבי — מנסים גרסה של פונקציה, מתקנים אותה, מריצים בדיקות, משנים את מבנה הערכים ומעדכנים את הפונקציות במחזורי ניסוי מהירים, ללא קומפילציה ועם פירוש ישיר — שפות לא מטופסות מאפשרות ניסוי מהיר יותר.\nטיעון הנגד הוא שברגע שהמתכנת השלים את שלב הניסוי / בניית אב-הטיפוס, שלב שני של *ניקוי* עם הגדרות טיפוס יכול רק לשפר את איכות התוכנית ואת העיצוב שלה. טיפוס הדרגתי (gradual typing) אטרקטיבי משום שהוא תומך בשני אופני העבודה ובמעבר מאב-טיפוס לגרסאות מטופסות ונכונות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:4:12",
+     "type": "prose",
+     "en": "There are other arguments in favor of untyped languages which we will not develop further that are related \nto the type of polymorphism that is encouraged by each style.  In this course, we **strongly adopt the typed style of programming** (we have chosen our camp :-) ).\n\n",
+     "hash": "5086bbf3ffa52419",
+     "he": "קיימים טיעונים נוספים בעד שפות לא מטופסות, שלא נפתח כאן, הקשורים לסוג הפולימורפיזם שכל סגנון מעודד. בקורס זה אנחנו **מאמצים באופן נחרץ את סגנון התכנות המטופס** (בחרנו את המחנה שלנו :-) )."
+    }
+   ],
+   "headingHe": "למה שמישהו יוותר על בדיקת טיפוסים?"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:5",
+   "depth": 2,
+   "headingEn": "Types in TypeScript",
+   "raw": "## Types in TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:5:0",
+     "type": "prose",
+     "en": "TypeScript adds optional type declarations to JavaScript.\n\n",
+     "hash": "5318354eebf9bd4a",
+     "he": "‏TypeScript מוסיפה ל-JavaScript הצהרות טיפוס אופציונליות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:5:1",
+     "type": "prose",
+     "en": "The principles of this addition are:\n",
+     "hash": "7258e6975900752a",
+     "he": "העקרונות של תוספת זו הם:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:5:2",
+     "type": "list",
+     "en": "* Type declarations are optional.  If they are present, they are checked, otherwise no check is performed.\n  This means that regular JavaScript with no type annotations at all are valid TypeScript expressions.\n* The TypeScript compiler (`tsc`) performs two tasks:\n  * It translates a TypeScript program into a JavaScript program\n  * It checks that the program satisfies all the type declarations specified in the program.\n* Type annotations can be implicit and inferred by the TypeScript compiler. \n\n\n",
+     "hash": "a883bcb12d6f4c93",
+     "he": "* הצהרות טיפוס הן אופציונליות. אם הן קיימות — הן נבדקות; אחרת לא מתבצעת שום בדיקה.\n  משמעות הדבר היא שקוד JavaScript רגיל, ללא הערות טיפוס בכלל, הוא ביטוי TypeScript תקין.\n* מהדר ה-TypeScript‏ (`tsc`) מבצע שתי משימות:\n  * הוא מתרגם תוכנית TypeScript לתוכנית JavaScript\n  * הוא בודק שהתוכנית מקיימת את כל הצהרות הטיפוס שצוינו בה.\n* הערות טיפוס יכולות להיות משתמעות ולהיות מוסקות על ידי מהדר ה-TypeScript."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:5:3",
+     "type": "code",
+     "en": "```typescript\n// The following TypeScript expression\nlet add: (a: number, b: number) => number = (a, b) => a + b;\nadd(1, 2);\n\n// is translated by tsc into:\nlet add = (a, b) => a + b;\nadd(1, 2);\n```\n\n",
+     "hash": "1d2e0adbc214820a",
+     "lang": "typescript",
+     "noteHe": "הדוגמה ממחישה את תהליך הקומפילציה: בחלק הראשון `add` מוגדרת עם הערת טיפוס מלאה `(a: number, b: number) => number`. אחרי שהמהדר `tsc` בודק את הטיפוסים, הוא **מוחק** אותם ופולט JavaScript רגיל — בדיוק אותו קוד, בלי ההערות. כלומר, לטיפוסים אין שום קיום בזמן ריצה; הם חיים רק בשלב הקומפילציה."
+    }
+   ],
+   "headingHe": "טיפוסים ב-TypeScript"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:6",
+   "depth": 2,
+   "headingEn": "Type Annotations",
+   "raw": "## Type Annotations\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:6:0",
+     "type": "prose",
+     "en": "Type annotations are optional in TypeScript. They can occur in the following contexts:\n\n",
+     "hash": "8d1aadf5eff6cd6e",
+     "he": "הערות טיפוס הן אופציונליות ב-TypeScript. הן יכולות להופיע בהקשרים הבאים:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:6:1",
+     "type": "code",
+     "en": "```typescript\n// After variable declarations\nlet varName: <typeAnnotation>;  \n\n// As part of a function signature\n(param: <typeAnnotation>, ...) => ...\n\nfunction fname(param : <typeAnnotation>, ...): <typeAnnotation> { ... }\n```\n\n",
+     "hash": "1feabfc47b810be2",
+     "lang": "typescript",
+     "noteHe": "אלה המקומות שבהם מותר לכתוב הערת טיפוס: (1) אחרי הצהרת משתנה — `let varName: <typeAnnotation>`; (2) על פרמטרים בחתימת פונקציית חץ; (3) בפונקציה בעלת שם — גם על הפרמטרים וגם אחרי סוגריי הפרמטרים, עבור טיפוס הערך המוחזר. הסימון `<typeAnnotation>` הוא מציין-מקום לכל ביטוי בשפת הטיפוסים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:6:2",
+     "type": "prose",
+     "en": "Type annotation are written in a specific form - which is called the **type language**.\nThe type language is used to describe the expected type of variables, parameters or the value returned by functions.\n\n",
+     "hash": "963376bd14dc94dd",
+     "he": "הערות טיפוס נכתבות בצורה ייחודית — הנקראת **שפת הטיפוסים (type language)**.\nשפת הטיפוסים משמשת לתיאור הטיפוס הצפוי של משתנים, של פרמטרים או של הערך שמחזירות פונקציות."
+    }
+   ],
+   "headingHe": "הערות טיפוס (Type Annotations)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:7",
+   "depth": 3,
+   "headingEn": "Type Expression Denotation",
+   "raw": "### Type Expression Denotation\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:7:0",
+     "type": "prose",
+     "en": "In general, all type expressions in the type language are used to refer to a specific set of values.\nThe relation between a type expression and a set of values to which it corresponds is called **denotation**.\n(The denotation relation is in general the relation that exists between a *name* and the *object* to which the name refers.)\n\n",
+     "hash": "b2ca572ad5e89b77",
+     "he": "באופן כללי, כל ביטויי הטיפוס בשפת הטיפוסים משמשים כדי להתייחס לקבוצה מסוימת של ערכים.\nהיחס בין ביטוי טיפוס לבין קבוצת הערכים שהוא מתאים לה נקרא **דנוטציה (denotation)**.\n(יחס הדנוטציה הוא, באופן כללי, היחס שמתקיים בין *שם* לבין *העצם* שאליו השם מתייחס.)"
+    }
+   ],
+   "headingHe": "דנוטציה של ביטויי טיפוס (Denotation)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:8",
+   "depth": 3,
+   "headingEn": "Atomic Type Expressions",
+   "raw": "### Atomic Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:8:0",
+     "type": "prose",
+     "en": "The simplest type language expression refers to a primitive type - for example `number`, `boolean`, `string`.\n\n",
+     "hash": "46d668af012ebac7",
+     "he": "ביטוי הטיפוס הפשוט ביותר בשפת הטיפוסים מתייחס לטיפוס פרימיטיבי — למשל `number`,‏ `boolean`,‏ `string`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:8:1",
+     "type": "prose",
+     "en": "It is used as follows:\n\n\n",
+     "hash": "2b61a1cdecb228dd",
+     "he": "משתמשים בו כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:8:2",
+     "type": "code",
+     "en": "```typescript\nlet x: number = 2;\nlet a: string = \"a\";\nlet b: boolean = true;\nb; // ==> true\n```\n\n",
+     "hash": "723f23384e49df44",
+     "lang": "typescript",
+     "noteHe": "שלוש הצהרות משתנים עם הערות טיפוס אטומיות: `x` מטיפוס `number`,‏ `a` מטיפוס `string` ו-`b` מטיפוס `boolean`. השורה האחרונה מעריכה את `b` ומחזירה `true` — הערך שנקשר אליו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:8:3",
+     "type": "prose",
+     "en": "These atomic type expressions denote the primitive sets of values that are defined in JavaScript (set of all number values, set of all string values, set of a boolean values).\n\n",
+     "hash": "cece0909c2209cdd",
+     "he": "ביטויי הטיפוס האטומיים האלה מציינים (denote) את קבוצות הערכים הפרימיטיביות המוגדרות ב-JavaScript (קבוצת כל ערכי ה-number, קבוצת כל ערכי ה-string, קבוצת כל ערכי ה-boolean)."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:8:4",
+     "type": "prose",
+     "en": "More complex type language expressions are needed to describe types over compound values.  These compound type expressions are constructed recursively by combining smaller type expressions\n\n",
+     "hash": "7eea5b988f4bef51",
+     "he": "כדי לתאר טיפוסים של ערכים מורכבים, דרושים ביטויים מורכבים יותר בשפת הטיפוסים. ביטויי הטיפוס המורכבים האלה נבנים באופן רקורסיבי, על ידי שילוב של ביטויי טיפוס קטנים יותר."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס אטומיים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:9",
+   "depth": 3,
+   "headingEn": "Array Type Expressions",
+   "raw": "### Array Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:9:0",
+     "type": "prose",
+     "en": "To describe a homogeneous array, the following notation is used: `<typeAnnotation>[]`\n\n\n",
+     "hash": "7a4840a0b8e1b1bc",
+     "he": "כדי לתאר מערך הומוגני (homogeneous), משתמשים בסימון הבא: `<typeAnnotation>[]`"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:9:1",
+     "type": "code",
+     "en": "```typescript\nlet stringArr: string[] = [\"a\", \"b\", \"c\"];\nlet s: string = stringArr[0];\ns; // ==> 'a'\n```\n\n",
+     "hash": "df0e996382f3aa1d",
+     "lang": "typescript",
+     "noteHe": "‏`stringArr` מוצהר כמערך של מחרוזות — `string[]`. לכן שליפת האיבר הראשון `stringArr[0]` מחזירה ערך שהמהדר יודע שהוא `string`, ואפשר להשים אותו למשתנה `s` שמוער כ-`string`. הפלט הוא `'a'`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:9:2",
+     "type": "prose",
+     "en": "The following values are not compatible with this type annotation:\n\n\n",
+     "hash": "d9a6e1eec1a1943b",
+     "he": "הערכים הבאים אינם תואמים להערת טיפוס זו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:9:3",
+     "type": "code",
+     "en": "```typescript\nstringArr = ['a', 1]  // Item 1 has wrong type\nstringArr[0] = true;  // Item 0 has wrong type\n```\n\n",
+     "hash": "9a516ef79366dc97",
+     "lang": "typescript",
+     "noteHe": "שתי הפרות של הטיפוס `string[]`: בשורה הראשונה מנסים להשים מערך שמכיל גם מספר (`1`) — האיבר במקום 1 אינו מחרוזת; בשורה השנייה מנסים להשים ערך בוליאני `true` לתא של מערך מחרוזות. שתי השורות נכשלות בבדיקת הטיפוסים."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס של מערכים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:10",
+   "depth": 3,
+   "headingEn": "Map Type Expressions",
+   "raw": "### Map Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:0",
+     "type": "prose",
+     "en": "To describe map types, the following notation is used:\n\n",
+     "hash": "31f46d33efd2f97b",
+     "he": "כדי לתאר טיפוסי מפה (map types), משתמשים בסימון הבא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:1",
+     "type": "code",
+     "en": "```typescript\n{ <key>: <typeAnnotation>; ... }\n```\n\n\n",
+     "hash": "32b0e9f481a5135d",
+     "lang": "typescript",
+     "noteHe": "זו התבנית הכללית של ביטוי טיפוס מפה: בין סוגריים מסולסלים מופיעים זוגות `<key>: <typeAnnotation>`, מופרדים בנקודה-פסיק — לכל מפתח מציינים את טיפוס הערך שלו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:2",
+     "type": "code",
+     "en": "```typescript\nlet s: { name: string; cs: boolean; age: number } = {\n    name: \"avi\",\n    gender: \"m\",\n    cs: true,\n    age: 22\n};\ns; // ==> { name: 'avi', gender: 'm', cs: true, age: 22 }\n```\n\n",
+     "hash": "40f09914984a9c10",
+     "lang": "typescript",
+     "noteHe": "המשתנה `s` מוער בטיפוס מפה עם שלושה מפתחות: `name` מחרוזת, `cs` בוליאני ו-`age` מספר. הערך שנקשר אליו מכיל את כל שלושת המפתחות הנדרשים, עם הטיפוסים הנכונים — ובנוסף מפתח `gender` שאינו מוזכר בטיפוס. הרעיון המרכזי: כל המפתחות שבהערת הטיפוס חייבים להופיע בערך; על הדקויות של מפתחות עודפים בערך ליטרלי נעמוד מיד."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:3",
+     "type": "prose",
+     "en": "The expected meaning of the map type description is that **all the keys in the annotation must be present in the value with the described type.** \n\n",
+     "hash": "3643ac858864bbb8",
+     "he": "המשמעות הצפויה של תיאור טיפוס המפה היא ש**כל המפתחות שבהערת הטיפוס חייבים להופיע בערך, עם הטיפוס המתואר.**"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:4",
+     "type": "prose",
+     "en": "There could be more keys as illustrated in the assignment `s = s2` below - but all the keys that are specified in the type must be present. \n\n",
+     "hash": "77ff2f446ba7fe0f",
+     "he": "יכולים להיות מפתחות נוספים, כפי שממחישה ההשמה `s = s2` להלן — אבל כל המפתחות שצוינו בטיפוס חייבים להיות נוכחים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:5",
+     "type": "prose",
+     "en": "Note, however, that when we bind a variable to a **literal expression**, the TypeScript compiler demands that the type of the literal be **exactly** that of the variable - with no extension.  \n\n\n",
+     "hash": "b075505305b6604a",
+     "he": "שימו לב, עם זאת, שכאשר קושרים משתנה ל**ביטוי ליטרלי (literal expression)**, מהדר ה-TypeScript דורש שטיפוס הליטרל יהיה **בדיוק** זה של המשתנה — ללא שום הרחבה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:10:6",
+     "type": "code",
+     "en": "```typescript\nlet s: { name: string; cs: boolean; age: number } = {\n    name: \"avi\",\n    cs: true,\n    age: 22\n};\ns = { age: 22, name: \"avi\", cs: true }; // OK - The order of keys is not important\ns = { name: \"avi\", age: 22 }; // Error: missing key \"cs\"\ns = { name: \"avi\", age: \"22\", cs: true }; // Error: key \"age\" must be a string\ns = { name: \"avi\", age: 22, cs: true, gender: \"m\" }; // NOT OK for a literal because of additional key \"gender\"\nlet s2: { name: string; cs: boolean; age: number; gender: string } = {\n    name: \"avi\",\n    age: 22,\n    cs: true,\n    gender: \"m\"\n};\ns = s2; // OK even though s2 has more properties - it satisfies the requirements of s's type.\ns; // ==> { name: 'avi', age: 22, cs: true, gender: 'm' }\n```\n\n",
+     "hash": "7ed2a27da9435034",
+     "lang": "typescript",
+     "noteHe": "הדוגמה סוקרת אילו השמות ל-`s` חוקיות: ליטרל עם אותם מפתחות בסדר אחר — תקין (סדר המפתחות אינו חשוב); ליטרל שחסר בו המפתח `cs` — שגיאה (מפתח נדרש חסר); ליטרל שבו `age` הוא המחרוזת `\"22\"` — שגיאה, כי `age` חייב להיות `number` (שימו לב שההערה בקוד המקורי מנוסחת הפוך — הכוונה היא שהערך חייב להיות מספר); ליטרל עם מפתח נוסף `gender` — נדחה, כי על ליטרלים המהדר אוכף התאמה מדויקת ללא מפתחות עודפים. לעומת זאת, השמת ה**משתנה** `s2` — שהטיפוס שלו כולל גם `gender` — אל `s` תקינה, כי הוא מקיים את כל דרישות הטיפוס של `s`. זה ההבדל המרכזי: כלל ההתאמה המדויקת חל רק על ליטרלים; בין משתנים די בכך שטיפוס המקור הוא תת-טיפוס של טיפוס היעד."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס של מפות"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:11",
+   "depth": 2,
+   "headingEn": "Map Types Relationships",
+   "raw": "## Map Types Relationships\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:0",
+     "type": "prose",
+     "en": "The map type `{}` denotes all possible map values.\n\n",
+     "hash": "53aa6abceecc2936",
+     "he": "טיפוס המפה `{}` מציין את כל ערכי המפה האפשריים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:1",
+     "type": "prose",
+     "en": "The map type `{ a: string }` denotes all maps that have a key `a` with a `string` value - for example:\n\n",
+     "hash": "580c5ee8c8304b90",
+     "he": "טיפוס המפה `{ a: string }` מציין את כל המפות שיש להן מפתח `a` עם ערך `string` — לדוגמה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:2",
+     "type": "code",
+     "en": "```typescript\n{ a: \"x\" }\n{ a: \"y\", b: 1 }\n```\n\n",
+     "hash": "4c342c655293c1bb",
+     "lang": "typescript",
+     "noteHe": "שתי מפות ששייכות לטיפוס `{ a: string }`: בראשונה יש בדיוק את המפתח `a` עם מחרוזת; בשנייה יש בנוסף מפתח `b` — וזה תקין, כי הטיפוס דורש רק שהמפתח `a` יופיע עם ערך מחרוזת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:3",
+     "type": "prose",
+     "en": "and the following values are **not** part of this type:\n\n",
+     "hash": "ac73a5dc7b0d4f48",
+     "he": "והערכים הבאים **אינם** חלק מטיפוס זה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:4",
+     "type": "code",
+     "en": "```typescript\n{}\n{ b: 1 }\n{ a: 1 }\n```\n\n",
+     "hash": "1c9e1dcaea736bcd",
+     "lang": "typescript",
+     "noteHe": "שלוש מפות שאינן שייכות לטיפוס `{ a: string }`: המפה הריקה `{}` — אין בה `a` כלל; `{ b: 1 }` — גם בה אין `a`; ו-`{ a: 1 }` — יש בה `a`, אבל הערך שלו הוא מספר ולא מחרוזת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:5",
+     "type": "prose",
+     "en": "A map type `{ a: string, b: number }` denotes all maps that have a key `a` with a `string` value and a key `b` with a `number` value.\n\n",
+     "hash": "86ca876385b32d43",
+     "he": "טיפוס מפה `{ a: string, b: number }` מציין את כל המפות שיש להן מפתח `a` עם ערך `string` ומפתח `b` עם ערך `number`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:6",
+     "type": "prose",
+     "en": "We infer from this definition that the type `{ a: string, b: number }` is a strict **sub-type** of the type `{ a: string }`.\n\n",
+     "hash": "23cd4dce41f6d0eb",
+     "he": "אנחנו מסיקים מההגדרה הזו שהטיפוס `{ a: string, b: number }` הוא **תת-טיפוס (sub-type)** ממש של הטיפוס `{ a: string }`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:7",
+     "type": "prose",
+     "en": "What is the relation between the types?\n\n",
+     "hash": "fecbffaccb49cf14",
+     "he": "מה היחס בין הטיפוסים?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:8",
+     "type": "code",
+     "en": "```typescript\ntype mapAB = { a: string, b: number };\ntype mapAC = { a: string, c: boolean };\n```\n\n",
+     "hash": "ec7881e43e55432a",
+     "lang": "typescript",
+     "noteHe": "מגדירים שני טיפוסי מפה בעלי שם: `mapAB` דורש מפתח `a` מחרוזתי ומפתח `b` מספרי; `mapAC` דורש מפתח `a` מחרוזתי ומפתח `c` בוליאני. בהמשך נבחן את היחס ביניהם."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:9",
+     "type": "prose",
+     "en": "These two types are distinct:\n\n",
+     "hash": "87f89fbdb9c14237",
+     "he": "שני הטיפוסים האלה נבדלים זה מזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:10",
+     "type": "prose",
+     "en": "`{ a: \"x\", b: 2 }` is in `mapAB` and not in `mapAC`.\n`{ a: \"x\", c: true }` is in `mapAC` and not in `mapAB`.\n\n",
+     "hash": "c971bc224469a39d",
+     "he": "הערך `{ a: \"x\", b: 2 }` שייך ל-`mapAB` ולא ל-`mapAC`.\nהערך `{ a: \"x\", c: true }` שייך ל-`mapAC` ולא ל-`mapAB`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:11",
+     "type": "prose",
+     "en": "Yet - they have a non-empty overlap:\n\n",
+     "hash": "6c72076237825df3",
+     "he": "ובכל זאת — יש להם חפיפה לא ריקה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:12",
+     "type": "prose",
+     "en": "`{ a: \"x\", b: 2, c: true }` is both in `mapAB` and in `mapAC`.\n\n",
+     "hash": "e40a99be5db8ed69",
+     "he": "הערך `{ a: \"x\", b: 2, c: true }` שייך גם ל-`mapAB` וגם ל-`mapAC`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:13",
+     "type": "prose",
+     "en": "In general - the intersection of the types `mapAB` and `mapAC` is the type:\n\n",
+     "hash": "3f3e3b6c1350c07e",
+     "he": "באופן כללי — החיתוך של הטיפוסים `mapAB` ו-`mapAC` הוא הטיפוס:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:14",
+     "type": "code",
+     "en": "```typescript\ntype mapABC = { a: string, b: number, c: boolean };\n```\n\n",
+     "hash": "a972bdfd731c5617",
+     "lang": "typescript",
+     "noteHe": "‏`mapABC` מאחד את כל האילוצים של שני הטיפוסים: `a` מחרוזת, `b` מספר ו-`c` בוליאני. כל ערך ששייך אליו מקיים גם את דרישות `mapAB` וגם את דרישות `mapAC` — ולכן זהו בדיוק החיתוך שלהם."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:15",
+     "type": "prose",
+     "en": "The following types are disjoints:\n\n",
+     "hash": "622be9d5c62ff10f",
+     "he": "הטיפוסים הבאים זרים (disjoint) זה לזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:16",
+     "type": "code",
+     "en": "```typescript\ntype mapAS = { a: string };\ntype mapAN = { a: number };\n```\n\n",
+     "hash": "eb370e3d2d5eee83",
+     "lang": "typescript",
+     "noteHe": "שני הטיפוסים דורשים מפתח בשם `a`, אבל האחד דורש שערכו יהיה מחרוזת והשני — מספר. אף ערך אינו יכול לקיים את שתי הדרישות בו-זמנית, ולכן אין לשני הטיפוסים אף ערך משותף."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:17",
+     "type": "prose",
+     "en": "because the constraints on the value of the key `a` are incompatible.\n\n",
+     "hash": "ccebc3d37ccc00b3",
+     "he": "כי האילוצים על הערך של המפתח `a` אינם תואמים זה את זה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:18",
+     "type": "prose",
+     "en": "A good way to think about these relations is the following:\n",
+     "hash": "54ac7ca7300e3578",
+     "he": "דרך טובה לחשוב על היחסים האלה היא זו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:11:19",
+     "type": "list",
+     "en": "* Each `key: type` component of the map type specification is a constraint on the values that belong to the type.\n* The more constraints are specified in a type, the less values belong to the type.\n* If you join all the constraints in two map type specifications - you obtain a type specification which denotes the *intersection* of the types (as long as the constraints are compatible).\n\n",
+     "hash": "ee6330f404bb021d",
+     "he": "* כל רכיב `key: type` במפרט של טיפוס מפה הוא אילוץ (constraint) על הערכים ששייכים לטיפוס.\n* ככל שמצוינים בטיפוס יותר אילוצים — כך פחות ערכים שייכים לטיפוס.\n* אם מאחדים את כל האילוצים משני מפרטים של טיפוסי מפה — מקבלים מפרט טיפוס שמציין את *החיתוך* של הטיפוסים (כל עוד האילוצים תואמים זה לזה)."
+    }
+   ],
+   "headingHe": "יחסים בין טיפוסי מפות"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:12",
+   "depth": 3,
+   "headingEn": "Named Type Expressions",
+   "raw": "### Named Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:12:0",
+     "type": "prose",
+     "en": "Type expressions can be given names.  For example, a map type expression can be named using the `type` alias construct:\n\n",
+     "hash": "5d09eb9112c669b4",
+     "he": "אפשר לתת שמות לביטויי טיפוס. לדוגמה, אפשר לתת שם לביטוי טיפוס מפה באמצעות מנגנון כינוי הטיפוס `type`:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:12:1",
+     "type": "code",
+     "en": "```typescript\ntype <typeName> = {\n    <key>: <typeAnnotation>;\n    ...\n}\n```\n\n",
+     "hash": "b0edaa27f493fa48",
+     "lang": "typescript",
+     "noteHe": "זו התבנית הכללית להגדרת כינוי טיפוס (type alias): המילה השמורה `type`, אחריה השם שבחרנו, ואחרי סימן השוויון — ביטוי הטיפוס עצמו. מכאן והלאה אפשר להשתמש בשם בכל מקום שבו נדרשת הערת טיפוס."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:12:2",
+     "type": "code",
+     "en": "```typescript\ntype Student = {\n    name: string;\n    cs: boolean;\n    age: number;\n}\n\nlet s: Student = { name: \"avi\", cs: true, age: 22 };\ntype stringArray = string[];\ns; // ==> { name: 'avi', cs: true, age: 22 }\n```\n\n",
+     "hash": "3fdeac16c31e9cf4",
+     "lang": "typescript",
+     "noteHe": "מגדירים טיפוס בשם `Student` עבור מפה עם המפתחות `name`,‏ `cs` ו-`age`, ואז מערים את המשתנה `s` בטיפוס `Student` — קצר וקריא יותר מכתיבת ביטוי המפה המלא. השורה `type stringArray = string[]` מדגימה שאפשר לתת שם גם לטיפוס מערך. ההערכה של `s` מחזירה את ערך המפה שנקשר אליו."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס בעלי שם"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:13",
+   "depth": 3,
+   "headingEn": "Embedded Type Expressions",
+   "raw": "### Embedded Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:13:0",
+     "type": "prose",
+     "en": "A type expression can have arbitrary type expressions embedded recursively. For example:\n\n",
+     "hash": "03b338006d469e6b",
+     "he": "בתוך ביטוי טיפוס אפשר להטמיע, באופן רקורסיבי, ביטויי טיפוס שרירותיים. לדוגמה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:13:1",
+     "type": "code",
+     "en": "```typescript\ntype Course = {\n    courseName: string;\n    dept: string;\n    semester: number;\n    year: number;\n};\n\ntype RegisteredStudent = {\n    name: string;\n    cs: boolean;\n    age: number;\n    courses: Course[];\n};\n\n// This is a valid JSON value for the RegisteredStudent type\nlet rs: RegisteredStudent = {\n    name: \"avi\",\n    cs: true,\n    age: 12,\n    courses: [{ courseName: \"ppl\", dept: \"cs\", semester: 2, year: 2021 }]\n};\n\n// This is NOT a valid JSON value for the RegisteredStudent type:\nlet badRs: RegisteredStudent = {\n    name: \"avi\",\n    cs: true,\n    age: 12,\n    courses: [{ courseName: \"ppl\", dept: \"cs\", year: 2021 }] // badRs.courses[0] is missing key semester.\n};\n\nrs;\n// ==>\n// {\n//     name: \"avi\",\n//     cs: true,\n//     age: 12,\n//     courses: [{ courseName: \"ppl\", dept: \"cs\", semester: 2, year: 2021 }]\n// }\n```\n\n",
+     "hash": "bde7c9177e9e1344",
+     "lang": "typescript",
+     "noteHe": "הטיפוס `RegisteredStudent` מטמיע בתוכו את הטיפוס `Course`: המפתח `courses` הוא מערך של ערכי `Course` — כלומר `Course[]`. הערך `rs` תקין: יש בו את כל המפתחות הנדרשים, ובמערך `courses` נמצא אובייקט קורס מלא. לעומת זאת, `badRs` אינו תקין: באובייקט הקורס שבתוך `courses` חסר המפתח `semester` — והמהדר מזהה זאת גם בעומק הקינון. ההערכה של `rs` מחזירה את הערך במלואו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:13:2",
+     "type": "prose",
+     "en": "The TypeScript compiler (`tsc`) emits this error:\n\n",
+     "hash": "6534be549651cca5",
+     "he": "מהדר ה-TypeScript‏ (`tsc`) פולט את השגיאה הזו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:13:3",
+     "type": "code",
+     "en": "```\nProperty 'semester' is missing in type '{ courseName: string; dept: string; year: number; }' but required in type 'Course'.\n```\n\n",
+     "hash": "fffbf4d083ad2fd8",
+     "noteHe": "הודעת השגיאה מדגימה עד כמה הבדיקה מדויקת: המהדר מציין שהתכונה `semester` חסרה בטיפוס שהוסק לליטרל — `{ courseName: string; dept: string; year: number; }` — אך נדרשת בטיפוס `Course`. הבדיקה מוחלת רקורסיבית גם על ערכים מקוננים בתוך מערך."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס מוטמעים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:14",
+   "depth": 2,
+   "headingEn": "Implicit Type Annotations",
+   "raw": "## Implicit Type Annotations\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:14:0",
+     "type": "prose",
+     "en": "TypeScript can infer the type of variables based on their usage.  This is called an **implicit type annotation**. For example:\n\n",
+     "hash": "6020b63d7d37ea55",
+     "he": "‏TypeScript יכולה להסיק את הטיפוס של משתנים על סמך השימוש בהם. זה נקרא **הערת טיפוס משתמעת (implicit type annotation)**. לדוגמה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:14:1",
+     "type": "code",
+     "en": "```typescript\nlet a = 1;\na = 'nok'; // type error\n```\n\n",
+     "hash": "81cab04d5de7e8c7",
+     "lang": "typescript",
+     "noteHe": "המשתנה `a` מוגדר ללא הערת טיפוס, אבל מכיוון שהוא נקשר לערך `1`, המהדר מסיק שהטיפוס שלו הוא `number`. לכן הניסיון להשים בו את המחרוזת `'nok'` בשורה השנייה נכשל בבדיקת הטיפוסים — למרות שלא כתבנו טיפוס בשום מקום."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:14:2",
+     "type": "prose",
+     "en": "On the assignment line `a = 'nok'`, `tsc` emits this error:\n\n",
+     "hash": "d9211ccaddc34162",
+     "he": "בשורת ההשמה `a = 'nok'`,‏ `tsc` פולט את השגיאה הזו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:14:3",
+     "type": "code",
+     "en": "```\nType 'string' is not assignable to type 'number'.\n```\n\n",
+     "hash": "ebbbaf6411ff3e13",
+     "noteHe": "הודעת השגיאה: הטיפוס `string` אינו ניתן להשמה לטיפוס `number`. זו עדות לכך שהמהדר הסיק ש-`a` הוא מטיפוס `number` עוד לפני ההשמה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:14:4",
+     "type": "prose",
+     "en": "This means that `tsc` detected that the variable `a` is of type `number` based on its bound value `1`.\nFrom this point on, it checks that `a` keeps a `number` value.\n\n",
+     "hash": "c07c3ec3cef21b57",
+     "he": "פירוש הדבר ש-`tsc` זיהה שהמשתנה `a` הוא מטיפוס `number` על סמך הערך `1` שנקשר אליו.\nמנקודה זו ואילך, הוא בודק ש-`a` שומר על ערך מטיפוס `number`."
+    }
+   ],
+   "headingHe": "הערות טיפוס משתמעות"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:15",
+   "depth": 2,
+   "headingEn": "Type Queries",
+   "raw": "## Type Queries\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:0",
+     "type": "prose",
+     "en": "One can use the following notation to declare that a variable should have the type of another variable:\n\n\n",
+     "hash": "9a1c7f6963c6dd62",
+     "he": "אפשר להשתמש בסימון הבא כדי להצהיר שלמשתנה צריך להיות הטיפוס של משתנה אחר:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:1",
+     "type": "code",
+     "en": "```typescript\nlet p1 = { name: \"avi\", age: 22 };\nlet p2: typeof p1 = { name: \"nok\" };\n```\n\n",
+     "hash": "842ccea51e714f36",
+     "lang": "typescript",
+     "noteHe": "הטיפוס של `p1` לא הוצהר, אבל המהדר מסיק מהערך שלו את הטיפוס `{ name: string; age: number }`. ההערה `typeof p1` על `p2` אומרת: \"תן ל-`p2` את אותו הטיפוס של `p1`\". מכיוון שלערך שמושם ב-`p2` חסר המפתח `age` — מתקבלת שגיאת קומפילציה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:2",
+     "type": "prose",
+     "en": "In this case, `tsc` emits this error:\n\n",
+     "hash": "2121fc4f04cca73b",
+     "he": "במקרה הזה, `tsc` פולט את השגיאה הזו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:3",
+     "type": "code",
+     "en": "```\nProperty 'age' is missing in type '{ name: string; }' but required in type '{ name: string; age: number; }'.\n```\n\n",
+     "hash": "3d82ad038cd2927f",
+     "noteHe": "השגיאה מציינת שהתכונה `age` חסרה בטיפוס של הליטרל — `{ name: string; }` — אך נדרשת בטיפוס `{ name: string; age: number; }`, הטיפוס שהוסק עבור `p1` והועבר אל `p2` דרך שאילתת הטיפוס."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:4",
+     "type": "prose",
+     "en": "TypeScript detects that the type of `p1` is `{ name: string, age: number; }` on the basis of the value of `p1` - even though the type of `p1` was not declared - it was inferred from its value.\n\n",
+     "hash": "0c23be0babc70245",
+     "he": "‏TypeScript מזהה שהטיפוס של `p1` הוא `{ name: string, age: number; }` על סמך הערך של `p1` — למרות שהטיפוס של `p1` לא הוצהר, הוא הוסק מהערך שלו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:5",
+     "type": "prose",
+     "en": "The `typeof var` construct is called a **type query** in TypeScript.\n\n",
+     "hash": "3d4291046c77e183",
+     "he": "המבנה `typeof var` נקרא **שאילתת טיפוס (type query)** ב-TypeScript."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:6",
+     "type": "prose",
+     "en": "**NOTE**: \n\n",
+     "hash": "678328c8fbfd4e84",
+     "he": "**הערה**:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:7",
+     "type": "prose",
+     "en": "The `typeof p1` type query annotation is **different** from the `typeof` operator we discussed in the previous lecture - which is a primitive runtime operator in JavaScript.  \n\n",
+     "hash": "e23b08af0960242f",
+     "he": "שאילתת הטיפוס `typeof p1` היא **שונה** מהאופרטור `typeof` שדנו בו בהרצאה הקודמת — שהוא אופרטור זמן-ריצה פרימיטיבי של JavaScript."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:8",
+     "type": "prose",
+     "en": "The TypeScript `typeof` is a type annotation - it belongs to the Type Language - its value is a type annotation.\n\n",
+     "hash": "f24583eae3af8316",
+     "he": "ה-`typeof` של TypeScript הוא הערת טיפוס — הוא שייך לשפת הטיפוסים — הערך שלו הוא הערת טיפוס."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:9",
+     "type": "prose",
+     "en": "The JavaScript `typeof` is a runtime primitive operator. Its value is a string.\n\n\n",
+     "hash": "d3b895d032918d4a",
+     "he": "ה-`typeof` של JavaScript הוא אופרטור זמן-ריצה פרימיטיבי. הערך שלו הוא מחרוזת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:15:10",
+     "type": "code",
+     "en": "```typescript\n// JavaScript typeof\nconst p3 = 2;\ntypeof p3; // ==> 'number'\n```\n\n",
+     "hash": "2f7c62ab16444f73",
+     "lang": "typescript",
+     "noteHe": "כאן רואים את ה-`typeof` של JavaScript בפעולה: הוא מופעל בזמן ריצה על הערך של `p3` ומחזיר את המחרוזת `'number'`. לעומת זאת, ה-`typeof` שבהערת טיפוס (כמו `typeof p1` למעלה) מוערך בזמן קומפילציה, והתוצאה שלו היא ביטוי טיפוס — לא מחרוזת."
+    }
+   ],
+   "headingHe": "שאילתות טיפוס (Type Queries)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:16",
+   "depth": 2,
+   "headingEn": "Recursive Types",
+   "raw": "## Recursive Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:0",
+     "type": "prose",
+     "en": "Consider the case of defining a binary tree.  Using JSON, we would encode a binary tree as follows:\n\n",
+     "hash": "6d7126257977c524",
+     "he": "נבחן את המקרה של הגדרת עץ בינארי. באמצעות JSON, היינו מקודדים עץ בינארי כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:1",
+     "type": "code",
+     "en": "```typescript\nlet binTree = {\n    root: 1,\n    left: { root: 2 },\n    right: { root: 3 }\n};\nbinTree; // ==> { root: 1, left: { root: 2 }, right: { root: 3 } }\n```\n\n",
+     "hash": "b16372aac5457796",
+     "lang": "typescript",
+     "noteHe": "עץ בינארי מיוצג כמפה עם שורש `root` ושני תתי-עצים `left` ו-`right`, שכל אחד מהם הוא בעצמו מפה בעלת אותו מבנה. כאן העץ מכיל את הערך 1 בשורש, ואת 2 ו-3 בבנים — שהם עלים (אין להם `left` או `right`)."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:2",
+     "type": "prose",
+     "en": "The TypeScript type that corresponds to this value would be:\n",
+     "hash": "b5fbb0e7ba3c0858",
+     "he": "טיפוס ה-TypeScript שמתאים לערך הזה יהיה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:3",
+     "type": "code",
+     "en": "```typescript\n{\n    root: number;\n    left: ?;\n    right: ?;\n}\n```\n\n",
+     "hash": "3cb0f141c0d48e65",
+     "lang": "typescript",
+     "noteHe": "זו טיוטת הטיפוס: ברור ש-`root` הוא `number`, אבל מה נכתוב בתור הטיפוס של `left` ו-`right`? סימני השאלה מסמנים את החור שעלינו למלא — דרושה לנו דרך לומר \"אותו טיפוס שאנחנו מגדירים ממש עכשיו\"."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:4",
+     "type": "prose",
+     "en": "We would need to specify that the `left` and `right` keys expect to receive values of exactly the same type.\nThe only way to achieve such a declaration is to use a **recursive type declaration** -- which requires us to\ngive a name to the type:\n\n",
+     "hash": "9b65edfeeb1719de",
+     "he": "עלינו לציין שהמפתחות `left` ו-`right` מצפים לקבל ערכים בדיוק מאותו הטיפוס.\nהדרך היחידה להשיג הצהרה כזו היא להשתמש ב**הצהרת טיפוס רקורסיבית (recursive type declaration)** — שמחייבת אותנו לתת שם לטיפוס:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:5",
+     "type": "code",
+     "en": "```typescript\ntype BinTree = {\n    root: number;\n    left: BinTree;\n    right: BinTree;\n}\n```\n\n",
+     "hash": "6c7d8045bf2eeb4b",
+     "lang": "typescript",
+     "noteHe": "הטיפוס `BinTree` מתייחס לעצמו: המפתחות `left` ו-`right` הם בעצמם מטיפוס `BinTree`. ההפניה העצמית הזו אפשרית רק משום שלטיפוס יש שם — אי אפשר לכתוב טיפוס רקורסיבי אנונימי."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:6",
+     "type": "prose",
+     "en": "Let us try to create a value according to this type specification:\n\n",
+     "hash": "20b1dbb57398dfae",
+     "he": "ננסה ליצור ערך לפי מפרט הטיפוס הזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:7",
+     "type": "code",
+     "en": "```typescript\ntype BinTree = {\n    root: number;\n    left: BinTree;\n    right: BinTree;\n}\n\nlet bn: BinTree = {\n    // DOES NOT PASS TYPE CHECKING\n    root: 1,\n    left: { root: 2 },\n    right: { root: 3 }\n};\n```\n\n",
+     "hash": "2e7152b8b65bf032",
+     "lang": "typescript",
+     "noteHe": "הניסיון נכשל בבדיקת הטיפוסים: לפי ההגדרה, כל `BinTree` חייב לכלול `left` ו-`right` מטיפוס `BinTree` — כולל הבנים `{ root: 2 }` ו-`{ root: 3 }`, שאין להם. הרקורסיה שבהגדרה אינה יכולה \"לעצור\"."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:8",
+     "type": "prose",
+     "en": "Unfortunately, this value is not well typed - `tsc` returns this error:\n\n",
+     "hash": "784d992edacec2c9",
+     "he": "לרוע המזל, הערך הזה אינו מטופס היטב (well-typed) — ‏`tsc` מחזיר את השגיאה הזו:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:9",
+     "type": "code",
+     "en": "```\nType '{ root: number; }' is missing the following properties from type 'BinTree': left, right\n```\n\n",
+     "hash": "421f3cc486a815d1",
+     "noteHe": "השגיאה: בטיפוס `{ root: number; }` — שהוסק עבור הבנים — חסרות התכונות `left` ו-`right`, הנדרשות בטיפוס `BinTree`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:10",
+     "type": "prose",
+     "en": "That is - we are missing the keys `left` and `right` for the nodes with root 2 and 3.\nIn other words, we cannot stop the recursion - the value must keep unrolling to be a valid `BinTree`.\n\n",
+     "hash": "3a31827e66b4b859",
+     "he": "כלומר — חסרים לנו המפתחות `left` ו-`right` בצמתים עם השורשים 2 ו-3.\nבמילים אחרות, אי אפשר לעצור את הרקורסיה — הערך חייב להמשיך ולהתגלגל כדי להיות `BinTree` תקין."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:11",
+     "type": "prose",
+     "en": "There are multiple solutions to this problem.  One is to indicate that the properties `left` and `right` are **optional**. This is indicated using the `?` syntax as follows:\n\n\n",
+     "hash": "1e47f9536565def6",
+     "he": "יש לבעיה הזו כמה פתרונות. אחד מהם הוא לציין שהתכונות `left` ו-`right` הן **אופציונליות**. את זה מציינים באמצעות תחביר ה-`?` כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:12",
+     "type": "code",
+     "en": "```typescript\ntype BinTree = {\n    root: number;\n    left?: BinTree;\n    right?: BinTree;\n}\n\nlet bn: BinTree = {\n    root: 1,\n    left: { root: 2 },\n    right: { root: 3, right: { root: 4 } }\n};\n\nbn;\n// ==>\n// { root: 1,\n//   left: { root: 2 },\n//   right: { root: 3, right: { root: 4 } } }\n```\n\n",
+     "hash": "d81a6755a901c83c",
+     "lang": "typescript",
+     "noteHe": "הוספת `?` לשמות המפתחות — `left?` ו-`right?` — הופכת אותם לאופציונליים: מותר להשמיט אותם. כעת עלה כמו `{ root: 2 }` הוא `BinTree` תקין, והרקורסיה יכולה לעצור. שימו לב שהערך גם מדגים מבנה לא אחיד: לצומת עם השורש 3 יש רק בן ימני."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:13",
+     "type": "prose",
+     "en": "Other solutions rely on **type unions** which we will review later in the course.\n\n",
+     "hash": "32d98e18d8e3aa6d",
+     "he": "פתרונות אחרים מסתמכים על **איחודי טיפוסים (type unions)**, שנסקור בהמשך הקורס."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:14",
+     "type": "prose",
+     "en": "**NOTE**:\n\n",
+     "hash": "678328c8fbfd4e84",
+     "he": "**הערה**:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:15",
+     "type": "prose",
+     "en": "How different is the type annotation: `{ a?: string, b: number }` from: `{ a: any, b: number }`?\n\n",
+     "hash": "cce02e535cd870cd",
+     "he": "עד כמה שונה הערת הטיפוס `{ a?: string, b: number }` מההערה `{ a: any, b: number }`?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:16:16",
+     "type": "prose",
+     "en": "**Answer**: the difference is that `a: any` means that the property `a` can have any possible value;\nin contrast `a?: string` means that either `a` does not occur at all or if it occurs it must have a value of type `string`.\n\n",
+     "hash": "cd899cbcaae3c543",
+     "he": "**תשובה**: ההבדל הוא ש-`a: any` פירושו שהתכונה `a` יכולה לקבל כל ערך אפשרי;\nלעומת זאת `a?: string` פירושו שהתכונה `a` או שאינה מופיעה כלל, או שאם היא מופיעה — הערך שלה חייב להיות מטיפוס `string`."
+    }
+   ],
+   "headingHe": "טיפוסים רקורסיביים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:17",
+   "depth": 2,
+   "headingEn": "Generic Types",
+   "raw": "## Generic Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:17:0",
+     "type": "prose",
+     "en": "If we want to define a binary tree whose nodes can have any type - but where all the nodes in the tree must have the same type, we must introduce **type variables**.  \n\n",
+     "hash": "3371104025a78ede",
+     "he": "אם נרצה להגדיר עץ בינארי שהצמתים שלו יכולים להיות מכל טיפוס — אבל כל הצמתים בעץ חייבים להיות מאותו טיפוס — נצטרך להכניס **משתני טיפוס (type variables)**."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:17:1",
+     "type": "code",
+     "en": "```typescript\ntype BinTree<T> = {\n    root: T;\n    left?: BinTree<T>;\n    right?: BinTree<T>;\n}\n\nlet bn: BinTree<number> = {\n    root: 1,\n    left: { root: 2 },\n    right: { root: 3 }\n};\n\nbn; // ==> { root: 1, left: { root: 2 }, right: { root: 3 } }\n```\n\n",
+     "hash": "af568ed91e6f2716",
+     "lang": "typescript",
+     "noteHe": "‏`BinTree<T>` הוא טיפוס גנרי: `T` הוא משתנה טיפוס שמייצג את טיפוס הצמתים, וגם `left` ו-`right` הם `BinTree<T>` — כך שכל העץ חייב להיות מאותו טיפוס. בהצהרה `BinTree<number>` אנחנו מציבים (instantiate) את `T` להיות `number`, וכל הצמתים חייבים להכיל מספרים. הערך שנוצר זהה במבנהו לדוגמאות הקודמות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:17:2",
+     "type": "prose",
+     "en": "If we want to use a heterogeneous tree (a tree that can contain nodes of different types), we can use the special type called **`any`**:\n\n",
+     "hash": "a2fbdbed29ea20d5",
+     "he": "אם נרצה עץ הטרוגני (עץ שיכול להכיל צמתים מטיפוסים שונים), נוכל להשתמש בטיפוס המיוחד **`any`**:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:17:3",
+     "type": "code",
+     "en": "```typescript\nlet an: BinTree<any> = {\n    root: \"different\",\n    left: { root: 1, left: { root: false } }\n};\n\nan; // ==> { root: 'different', left: { root: 1, left: { root: false } } }\n```\n\n",
+     "hash": "adee40f329c80db9",
+     "lang": "typescript",
+     "noteHe": "בזכות ההצבה `BinTree<any>`, כל צומת יכול להכיל ערך מטיפוס אחר: השורש הוא מחרוזת, הבן השמאלי מספר, והנכד ערך בוליאני. `any` מבטל את האילוץ על טיפוס הצמתים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:17:4",
+     "type": "prose",
+     "en": "The `any` type is compatible with all values - it denotes the set of all possible values.\nEvery type that can be defined is actually a subset of the `any` type.\nIn itself, `any` is not useful - typing a variable as `any` does not indicate any constraint on the variable.\nBut when used as a type parameter in a complex type definition as above, `any` becomes useful.\n\n",
+     "hash": "ebc0970ff1dc1439",
+     "he": "הטיפוס `any` תואם לכל הערכים — הוא מציין את קבוצת כל הערכים האפשריים.\nכל טיפוס שאפשר להגדיר הוא למעשה תת-קבוצה של הטיפוס `any`.\nכשלעצמו, `any` אינו מועיל — טיפוס משתנה כ-`any` אינו מציין שום אילוץ על המשתנה.\nאבל כשמשתמשים בו כפרמטר טיפוס בהגדרת טיפוס מורכבת, כמו למעלה, `any` נעשה שימושי."
+    }
+   ],
+   "headingHe": "טיפוסים גנריים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:18",
+   "depth": 3,
+   "headingEn": "When Are Generic Types Useful?",
+   "raw": "### When Are Generic Types Useful?\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:0",
+     "type": "prose",
+     "en": "Generic types are compound type expressions with type variables.  Some of their components are thus left as unspecified types. When are such partially unspecified types useful?\n\n",
+     "hash": "eb37f8bc563381ca",
+     "he": "טיפוסים גנריים הם ביטויי טיפוס מורכבים עם משתני טיפוס. חלק מהרכיבים שלהם נשארים אפוא טיפוסים לא מפורטים. מתי טיפוסים כאלה, שאינם מפורטים במלואם, מועילים?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:1",
+     "type": "list",
+     "en": "* One reason to define a generic type is to enable writing generic functions that operate over all possible instantiations of the generic type in the same manner.  For example, given a `BinTree` value, one can define generic functions such as `treeNodesNumber` or `treeDepth` which compute meaningful values over the value in exactly the same way regardless of the type of the node.  There would be no reason to write specific functions for a `BinTreeOfString` and a `BinTreeOfNumber` because the same algorithm works on these values.\n\n\n",
+     "hash": "8600edab88ae823f",
+     "he": "* סיבה אחת להגדיר טיפוס גנרי היא לאפשר כתיבת פונקציות גנריות שפועלות באותו אופן על כל ההצבות (instantiations) האפשריות של הטיפוס הגנרי. לדוגמה, בהינתן ערך `BinTree`, אפשר להגדיר פונקציות גנריות כמו `treeNodesNumber` או `treeDepth`, שמחשבות ערכים משמעותיים על הערך בדיוק באותה דרך, ללא תלות בטיפוס הצומת. לא תהיה שום סיבה לכתוב פונקציות נפרדות עבור `BinTreeOfString` ועבור `BinTreeOfNumber`, כי אותו אלגוריתם עובד על הערכים האלה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:2",
+     "type": "code",
+     "en": "```typescript\nconst treeNodesNumber: <T>(t: BinTree<T>) => number = t => {\n    if (t === undefined) return 0;\n    else return 1 + treeNodesNumber(t.left) + treeNodesNumber(t.right);\n};\ntreeNodesNumber({ root: 1, left: { root: 2 }, right: { root: 3 } }); // ==> 3\n```\n\n",
+     "hash": "842dc4d2b27f18c2",
+     "lang": "typescript",
+     "noteHe": "‏`treeNodesNumber` היא פונקציה גנרית: הטיפוס שלה, `<T>(t: BinTree<T>) => number`, אומר \"לכל טיפוס `T`, קבל עץ של `T` והחזר מספר\". המימוש רקורסיבי: עץ ריק (`undefined` — מה שמתקבל כשניגשים ל-`left` או `right` שהושמטו) תורם 0; אחרת סופרים 1 עבור השורש ומוסיפים את ספירת הצמתים של שני תתי-העצים. הקריאה על עץ עם שלושה צמתים מחזירה 3. שימו לב שהאלגוריתם אינו נוגע כלל בערכי הצמתים — ולכן הוא עובד עבור כל `T`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:3",
+     "type": "code",
+     "en": "```typescript\nconst treeDepth: <T>(t: BinTree<T>) => number = t => {\n    if (t === undefined) return 0;\n    else return 1 + Math.max(treeDepth(t.left), treeDepth(t.right));\n};\n\ntreeDepth({\n    root: 1,\n    left: { root: 2, left: { root: 4 } },\n    right: { root: 3 }\n}); // ==> 3\n```\n\n",
+     "hash": "7b6072b64b87edba",
+     "lang": "typescript",
+     "noteHe": "‏`treeDepth` מחשבת את עומק העץ באותה תבנית רקורסיבית: עץ ריק — עומק 0; אחרת 1 ועוד המקסימום של עומקי שני תתי-העצים (באמצעות `Math.max`). בעץ שבדוגמה המסלול הארוך ביותר הוא מהשורש 1 אל 2 אל 4, ולכן העומק הוא 3."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:4",
+     "type": "list",
+     "en": "* Another reason to use generic types is when we need to define a set of value that is a combination between two types that are dependent of each other.  For example, consider the set of values which represent an array of values together with the minimum of the values that appear in the array.  Such data structure can be defined for any type `T` which denotes a set of values over which an order relation exists.  \n\n",
+     "hash": "24ac54af2e3f0756",
+     "he": "* סיבה נוספת להשתמש בטיפוסים גנריים היא כשעלינו להגדיר קבוצת ערכים שהיא שילוב של שני טיפוסים התלויים זה בזה. לדוגמה, נתבונן בקבוצת הערכים שמייצגים מערך של ערכים יחד עם המינימום של הערכים שמופיעים במערך. מבנה נתונים כזה אפשר להגדיר עבור כל טיפוס `T` שמציין קבוצת ערכים שמוגדר עליה יחס סדר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:5",
+     "type": "prose",
+     "en": "We can define it as generic type as follows:\n\n\n",
+     "hash": "844c424707bb42a8",
+     "he": "אפשר להגדיר אותו כטיפוס גנרי כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:6",
+     "type": "code",
+     "en": "```typescript\ntype ArrayMin<T> = {\n    min: T;\n    values: T[];\n}\n\nlet numberArrayMin: ArrayMin<number> = {\n    min: 2,\n    values: [6, 2, 4]\n};\n\nlet stringArrayMin: ArrayMin<string> = {\n    min: \"avi\",\n    values: [\"bibi\", \"charles\", \"avi\"]\n};\n\nstringArrayMin.min; // ==> 'avi'\n```\n\n",
+     "hash": "60a9504b9d7373e0",
+     "lang": "typescript",
+     "noteHe": "‏`ArrayMin<T>` כורך יחד מערך `values` מטיפוס `T[]` ואת האיבר המינימלי שלו `min` מטיפוס `T`. אותו מבנה בדיוק עובד עבור מספרים (`ArrayMin<number>`) ועבור מחרוזות (`ArrayMin<string>`, עם סדר מילוני) — הקשר בין שני הרכיבים אינו תלוי בטיפוס הקונקרטי. הביטוי האחרון שולף את `min` של מערך המחרוזות ומחזיר `'avi'`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:7",
+     "type": "prose",
+     "en": "The relation between the two components of these values is the same - regardless of the actual type (number, string) of the components.\n\n",
+     "hash": "04fe0de95571bd7d",
+     "he": "היחס בין שני הרכיבים של הערכים האלה זהה — ללא תלות בטיפוס הממשי (מספר, מחרוזת) של הרכיבים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:18:8",
+     "type": "prose",
+     "en": "Naturally, the two motivations for using generic types combine well together - generic algorithms work well over dependent components.\n\n",
+     "hash": "616e9b8ae60773ef",
+     "he": "באופן טבעי, שתי המוטיבציות לשימוש בטיפוסים גנריים משתלבות היטב זו עם זו — אלגוריתמים גנריים עובדים היטב על רכיבים תלויים."
+    }
+   ],
+   "headingHe": "מתי טיפוסים גנריים מועילים?"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:19",
+   "depth": 3,
+   "headingEn": "Generic Types Relationships",
+   "raw": "### Generic Types Relationships\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:0",
+     "type": "prose",
+     "en": "What is the type relationship (inclusion, disjointness) between `BinTree<T>` and `BinTree<number>`?\n\n",
+     "hash": "3e5dbda63c51fdbb",
+     "he": "מה יחס הטיפוסים (הכלה, זרוּת) בין `BinTree<T>` לבין `BinTree<number>`?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:1",
+     "type": "prose",
+     "en": "We first need to realize that the type expression `BinTree<T>` cannot be used as the type of a variable if it is not in the scope of a type variable.  That is, the expression:\n\n",
+     "hash": "a2200ebac187cb55",
+     "he": "ראשית עלינו להבין שביטוי הטיפוס `BinTree<T>` אינו יכול לשמש כטיפוס של משתנה אם הוא אינו נמצא בתחום ההכרה של משתנה טיפוס. כלומר, הביטוי:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:2",
+     "type": "code",
+     "en": "```typescript\nlet b : BinTree<T> = ...;\n```\n\n",
+     "hash": "3c826abccee3a2c0",
+     "lang": "typescript",
+     "noteHe": "השורה הזו אינה חוקית: `T` אינו מוגדר בהקשר הזה — `BinTree<T>` עם משתנה טיפוס חופשי אינו יכול לשמש כטיפוס של משתנה רגיל."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:3",
+     "type": "prose",
+     "en": "is not possible - because `BinTree<T>` cannot be in itself the type of a variable.  \nA generic type can only appear in the context of a generic function (like in the example `treeDepth` and `treeNodesNumber` above) or in the context of a larger generic type.\n\n",
+     "hash": "f03d93644ce91de0",
+     "he": "אינו אפשרי — כי `BinTree<T>` אינו יכול להיות כשלעצמו טיפוס של משתנה.\nטיפוס גנרי יכול להופיע רק בהקשר של פונקציה גנרית (כמו בדוגמאות `treeDepth` ו-`treeNodesNumber` למעלה) או בהקשר של טיפוס גנרי גדול יותר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:4",
+     "type": "prose",
+     "en": "When the tree variable is instantiated to a concrete (non-generic) type, then the type can be used as any other type:\n\n",
+     "hash": "6936831d2e60621f",
+     "he": "כאשר משתנה הטיפוס של העץ מוצב לטיפוס קונקרטי (לא גנרי), אפשר להשתמש בטיפוס ככל טיפוס אחר:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:5",
+     "type": "code",
+     "en": "```typescript\nlet st : BinTree<string> = { root: \"avi\", left: { root: \"bibi\" } };\n```\n\n",
+     "hash": "2f5500c681e2f531",
+     "lang": "typescript",
+     "noteHe": "כאן `T` הוצב ל-`string`, ולכן `BinTree<string>` הוא טיפוס קונקרטי לכל דבר: העץ מכיל את המחרוזות `\"avi\"` ו-`\"bibi\"`, וההצהרה עוברת את בדיקת הטיפוסים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:6",
+     "type": "prose",
+     "en": "The relation between a generic type such as `BinTree<T>` and a type such as `BinTree<string>` is called **instantiation**.\n\n",
+     "hash": "6b7dafa2d4c7a50d",
+     "he": "היחס בין טיפוס גנרי כמו `BinTree<T>` לבין טיפוס כמו `BinTree<string>` נקרא **הצבה (instantiation)**."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:7",
+     "type": "prose",
+     "en": "Now, what is the relation between `BinTree<string>` and `BinTree<number>`?\nThese two concrete types are instances of the same generic type.\nAny value in `BinTree<string>` has a property `root` of type `string`.\nAny value in `BinTree<number>` has a property `root` of type `number`.\nWe infer that these two types are **disjoint**.\n\n",
+     "hash": "02784e9cd44023b1",
+     "he": "כעת, מה היחס בין `BinTree<string>` לבין `BinTree<number>`?\nשני הטיפוסים הקונקרטיים האלה הם הצבות של אותו טיפוס גנרי.\nלכל ערך ב-`BinTree<string>` יש תכונה `root` מטיפוס `string`.\nלכל ערך ב-`BinTree<number>` יש תכונה `root` מטיפוס `number`.\nאנחנו מסיקים ששני הטיפוסים האלה **זרים (disjoint)**."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:8",
+     "type": "prose",
+     "en": "Note that while these two types are disjoint, we still can write generic functions that operate of values of either type using the same code.\n\n",
+     "hash": "9d1b052a96e28504",
+     "he": "שימו לב שאף ששני הטיפוסים האלה זרים, אנחנו עדיין יכולים לכתוב פונקציות גנריות שפועלות על ערכים משני הטיפוסים באמצעות אותו קוד."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:9",
+     "type": "prose",
+     "en": "If a type `S` is a subtype of a type `T`, then what is the relation between the types `BinTree<S>` and `BinTree<T>`? For example, consider `T = { name: string }` and `S = { name: string, age: number }`.\n\n",
+     "hash": "140d23e284717da4",
+     "he": "אם טיפוס `S` הוא תת-טיפוס של טיפוס `T`, מה היחס בין הטיפוסים `BinTree<S>` ו-`BinTree<T>`? לדוגמה, נבחן `T = { name: string }` ו-`S = { name: string, age: number }`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:10",
+     "type": "prose",
+     "en": "To answer this question, we can read the definition of `BinTree<T>` as a set of constraints a value must meet to belong to the type this type expression denotes:\n\n",
+     "hash": "fd5252b6aca10312",
+     "he": "כדי לענות על השאלה, אפשר לקרוא את ההגדרה של `BinTree<T>` כקבוצת אילוצים שערך חייב לקיים כדי להשתייך לטיפוס שביטוי הטיפוס הזה מציין:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:11",
+     "type": "list",
+     "en": "* The value must be a map value\n* A property `root` must be present and have a value of type `T` - which means that it must have a property `name` of type `string`.\n* A property `left` can either be absent or present and of type `BinTree<T>`\n* A property `right` can either be absent or present and of type `BinTree<T>`.\n\n",
+     "hash": "1d2c952b2df3ed70",
+     "he": "* הערך חייב להיות ערך מפה\n* התכונה `root` חייבת להופיע, ולערך שלה להיות מטיפוס `T` — כלומר חייבת להיות לו תכונה `name` מטיפוס `string`.\n* התכונה `left` יכולה להיעדר, או להופיע ולהיות מטיפוס `BinTree<T>`\n* התכונה `right` יכולה להיעדר, או להופיע ולהיות מטיפוס `BinTree<T>`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:12",
+     "type": "prose",
+     "en": "Knowing that any value of type `S` is also a value of type `T` (by definition of subtyping), we can infer that any value in `BinTree<S>` meets all the constraints to also belong to `BinTree<T>`.\n\n",
+     "hash": "e012e9a6c5bb28bd",
+     "he": "בידיעה שכל ערך מטיפוס `S` הוא גם ערך מטיפוס `T` (לפי הגדרת תת-הטיפוס), אפשר להסיק שכל ערך ב-`BinTree<S>` מקיים את כל האילוצים הנדרשים כדי להשתייך גם ל-`BinTree<T>`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:19:13",
+     "type": "prose",
+     "en": "In general, if `S` is a subtype of `T`, then `BinTree<S>` is a subtype of `BinTree<T>`.\n\n",
+     "hash": "c7960f9ce7e32e4e",
+     "he": "באופן כללי, אם `S` הוא תת-טיפוס של `T`, אז `BinTree<S>` הוא תת-טיפוס של `BinTree<T>`."
+    }
+   ],
+   "headingHe": "יחסים בין טיפוסים גנריים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:20",
+   "depth": 2,
+   "headingEn": "Function Types",
+   "raw": "## Function Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:0",
+     "type": "prose",
+     "en": "One can type functions in TypeScript.  Let us introduce function types step by step:\n\n",
+     "hash": "d2e39161233883f1",
+     "he": "ב-TypeScript אפשר להצמיד טיפוסים גם לפונקציות. נציג את טיפוסי הפונקציה צעד אחר צעד:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:1",
+     "type": "prose",
+     "en": "An untyped function in JavaScript has the following form:\n\n",
+     "hash": "5f2c24466e3494c7",
+     "he": "לפונקציה לא-מטופסת ב-JavaScript יש את הצורה הבאה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:2",
+     "type": "code",
+     "en": "```typescript\n// Named function\nfunction add(x, y) {\n    return x + y;\n}\n\n// Anonymous function\nconst myAdd = function (x, y) {\n    return x + y;\n};\n\n// Using the fat arrow notation:\nconst myFatAdd = (x, y) => x + y;\n\nconsole.log(myFatAdd(2, 3)); // ==> 5\n```\n\n",
+     "hash": "09fb3fc89d6f6036",
+     "lang": "typescript",
+     "noteHe": "שלוש דרכים שקולות להגדיר את אותה פונקציית חיבור ללא טיפוסים: פונקציה בעלת שם עם המילה `function`; פונקציה אנונימית שמושמת למשתנה `myAdd`; ופונקציית חץ (\"fat arrow\") בשם `myFatAdd`. הקריאה `myFatAdd(2, 3)` מדפיסה 5."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:3",
+     "type": "prose",
+     "en": "We can first specify the types of the parameters and the return type, in a way similar to the way it would be done in Java. This applies both to named functions and to anonymous functions.\n\n\n",
+     "hash": "e47450f0ca1217cc",
+     "he": "תחילה, אפשר לציין את טיפוסי הפרמטרים ואת טיפוס הערך המוחזר, באופן דומה לאיך שהדבר נעשה ב-Java. זה חל גם על פונקציות בעלות שם וגם על פונקציות אנונימיות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:4",
+     "type": "code",
+     "en": "```typescript\n// Named function\nfunction add(x: number, y: number): number {\n    return x + y;\n}\n\n// Anonymous function\nconst myAdd = function (x: number, y: number): number {\n    return x + y;\n};\n\n// Using the fat arrow notation:\nconst myFatAdd = (x: number, y: number): number => x + y;\n\nconsole.log(myFatAdd(2, 3)); // ==> 5\n```\n\n",
+     "hash": "79add8cc9f7b2ddd",
+     "lang": "typescript",
+     "noteHe": "אותן שלוש צורות הגדרה, הפעם עם הערות טיפוס: על כל פרמטר (`x: number, y: number`) ואחרי סוגריי הפרמטרים — טיפוס הערך המוחזר `: number`. הסגנון מזכיר את Java: הטיפוסים צמודים להגדרת הפונקציה עצמה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:5",
+     "type": "prose",
+     "en": "Let us now write the full type of the function out of the function value:\n\n",
+     "hash": "a456966bac05796d",
+     "he": "נכתוב כעת את הטיפוס המלא של הפונקציה, בנפרד מערך הפונקציה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:6",
+     "type": "code",
+     "en": "```typescript\nlet myAdd: (x: number, y: number) => number = function (x, y) {\n    return x + y;\n};\n\nlet myFatAdd: (x: number, y: number) => number = (x, y) => x + y;\n\nconsole.log(myFatAdd(3, 4)); // ==> 7\n```\n\n",
+     "hash": "95a2aedeea553bda",
+     "lang": "typescript",
+     "noteHe": "כאן הטיפוס המלא `(x: number, y: number) => number` נכתב כהערת טיפוס על המשתנה (בין שם המשתנה לסימן ההשמה), ואילו ערך הפונקציה עצמו נכתב בלי טיפוסים — המהדר מסיק אותם מההערה. זו הפרדה בין *הטיפוס של הפונקציה* לבין *ערך הפונקציה*. הקריאה `myFatAdd(3, 4)` מדפיסה 7."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:7",
+     "type": "prose",
+     "en": "The type expression:\n\n",
+     "hash": "9107e17850535494",
+     "he": "ביטוי הטיפוס:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:8",
+     "type": "code",
+     "en": "```typescript\n(x: number, y: number) => number\n```\n\n",
+     "hash": "a841dac3d8803017",
+     "lang": "typescript",
+     "noteHe": "זהו טיפוס פונקציה העומד בפני עצמו: הוא מתאר כל פונקציה שמקבלת שני מספרים ומחזירה מספר — לא פונקציה מסוימת אחת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:9",
+     "type": "prose",
+     "en": "is a **function type**.  The values that this type denotes are functions that map a pair of numbers to a number - in other words, functions whose domain is within $$Number \\times Number$$ and whose range is within $$Number$$. (Remember that types denote a set of values.)\n\n",
+     "hash": "2adcf81b8f120341",
+     "he": "הוא **טיפוס פונקציה (function type)**. הערכים שהטיפוס הזה מציין הם פונקציות שממפות זוג מספרים למספר — במילים אחרות, פונקציות שהתחום (domain) שלהן מוכל ב-$$Number \\times Number$$ והטווח (range) שלהן מוכל ב-$$Number$$. (זכרו שטיפוסים מציינים קבוצה של ערכים.)"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:10",
+     "type": "prose",
+     "en": "This notation is called the **function signature** - it combines the information on the type of the parameters, their name and the type of the returned value.\n\n",
+     "hash": "e78aca238d5dd043",
+     "he": "הסימון הזה נקרא **חתימת הפונקציה (function signature)** — הוא משלב את המידע על טיפוסי הפרמטרים, שמותיהם וטיפוס הערך המוחזר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:11",
+     "type": "prose",
+     "en": "Parameter names are just to help with readability. \nWe could have instead written:\n\n",
+     "hash": "16eda8ea9b0f3446",
+     "he": "שמות הפרמטרים נועדו רק לסייע לקריאוּת.\nיכולנו לכתוב במקום זאת:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:12",
+     "type": "code",
+     "en": "```typescript\nlet myAdd: (baseValue: number, increment: number) => number = function (x: number, y: number): number {\n    return x + y;\n};\n\n```\n\n",
+     "hash": "6b7a4af1b00202eb",
+     "lang": "typescript",
+     "noteHe": "בהערת הטיפוס שמות הפרמטרים הם `baseValue` ו-`increment`, ואילו בערך הפונקציה עצמו הם `x` ו-`y` — וזה תקין לחלוטין: בהשוואת טיפוסי פונקציה נבדקים רק הטיפוסים והסדר שלהם, לא השמות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:13",
+     "type": "prose",
+     "en": "As long as the parameter types align, it's considered a valid type for the function, regardless of the names you give the parameters in the function type.\n\n",
+     "hash": "4a4a3959409b5990",
+     "he": "כל עוד טיפוסי הפרמטרים מתיישרים זה עם זה, הטיפוס נחשב תקין עבור הפונקציה — ללא קשר לשמות שנותנים לפרמטרים בטיפוס הפונקציה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:20:14",
+     "type": "prose",
+     "en": "The second part of the function type is the return type. We make it clear which is the return type by using a fat arrow (`=>`) between the parameters and the return type. This is a required part of the function type, so if the function doesn’t return a value (which means this is a function that just has a side-effect - no return value), we use the special type **`void`** instead of leaving it off.\n\n",
+     "hash": "ecc890c5fafdd6c6",
+     "he": "החלק השני של טיפוס הפונקציה הוא טיפוס הערך המוחזר. אנחנו מבהירים מהו טיפוס הערך המוחזר באמצעות חץ שמן (`=>`) בין הפרמטרים לבין טיפוס הערך המוחזר. זהו חלק נדרש של טיפוס הפונקציה, ולכן אם הפונקציה אינה מחזירה ערך (כלומר פונקציה שיש לה רק תופעת לוואי — ללא ערך מוחזר), משתמשים בטיפוס המיוחד **`void`** במקום להשמיט אותו."
+    }
+   ],
+   "headingHe": "טיפוסי פונקציה (Function Types)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:21",
+   "depth": 2,
+   "headingEn": "Closures and their Type",
+   "raw": "## Closures and their Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:0",
+     "type": "prose",
+     "en": "Consider the following function definition:\n\n",
+     "hash": "141bde8023b18ac6",
+     "he": "נתבונן בהגדרת הפונקציה הבאה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:1",
+     "type": "code",
+     "en": "```typescript\nlet z = 10;\nlet add: (x: number, y: number) => number = (x, y) => x + y + z;\nadd(1, 2); // ==> 13\n```\n\n",
+     "hash": "2af6163d40a12d52",
+     "lang": "typescript",
+     "noteHe": "גוף הפונקציה `add` משתמש בשלושה שמות: הפרמטרים `x` ו-`y`, וגם המשתנה `z` שהוגדר **מחוץ** לפונקציה. בקריאה `add(1, 2)` מחושב `1 + 2 + 10` והתוצאה היא 13. שימו לב שהחתימה `(x: number, y: number) => number` אינה מזכירה את `z` כלל."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:2",
+     "type": "prose",
+     "en": "The definition of `add` refers to the variable `z`, which is defined outside the body of the function.\nWhen this happens, we say that the function **captures** the variable `z` - and the value of the function `add` is called a **closure**.  This is because the function *closes the captured variables* together with the function definition.\n\n",
+     "hash": "8f59a836e0ee406c",
+     "he": "ההגדרה של `add` מתייחסת למשתנה `z`, שמוגדר מחוץ לגוף הפונקציה.\nכשזה קורה, אנחנו אומרים שהפונקציה **לוכדת (captures)** את המשתנה `z` — וערך הפונקציה `add` נקרא **סגור (closure)**. זאת משום שהפונקציה *סוגרת את המשתנים הנלכדים* יחד עם הגדרת הפונקציה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:3",
+     "type": "prose",
+     "en": "The body of the function depends on the variable `z` - yet, the signature of the function does not indicate this dependency.\n\n",
+     "hash": "c6155f0c1b3527e0",
+     "he": "גוף הפונקציה תלוי במשתנה `z` — ובכל זאת, חתימת הפונקציה אינה מציינת את התלות הזו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:4",
+     "type": "prose",
+     "en": "Consider the following example that indicates why this capture mechanism is part of the definition of the closure:\n\n\n",
+     "hash": "39c72fa6d84cdebf",
+     "he": "נתבונן בדוגמה הבאה, שמבהירה מדוע מנגנון הלכידה הזה הוא חלק מהגדרת הסגור:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:5",
+     "type": "code",
+     "en": "```typescript\nlet adder = function (inc) {\n    return x => x + inc;\n};\n\nlet a5 = adder(5);\nlet a2 = adder(2);\n\nconsole.log(a5(10)); // ==> 15\nconsole.log(a2(10)); // ==> 12\nadder(10)(3); // ==> 13\n```\n\n",
+     "hash": "fa5bd50232950929",
+     "lang": "typescript",
+     "noteHe": "‏`adder` היא פונקציה שמחזירה פונקציה: בהינתן `inc`, היא מחזירה את הפונקציה `x => x + inc`. כל קריאה ל-`adder` יוצרת סגור חדש שלוכד ערך אחר של `inc`:‏ `a5` מוסיפה 5 ולכן `a5(10)` מדפיסה 15; `a2` מוסיפה 2 ולכן `a2(10)` מדפיסה 12. אפשר גם לקרוא ישירות `adder(10)(3)` — קודם נוצר סגור שמוסיף 10, ואז הוא מופעל על 3 ומחזיר 13."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:6",
+     "type": "prose",
+     "en": "Let us analyze the defintion of the function `adder` - and refactor it step by step using types.\n\n",
+     "hash": "7c99f36a973da188",
+     "he": "ננתח את ההגדרה של הפונקציה `adder` — ונשכתב אותה צעד אחר צעד באמצעות טיפוסים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:7",
+     "type": "prose",
+     "en": "`adder` is a function that accepts one parameter `inc`. What should be the type of `inc`?\n\n",
+     "hash": "92510cf6f07dee68",
+     "he": "‏`adder` היא פונקציה שמקבלת פרמטר אחד, `inc`. מה צריך להיות הטיפוס של `inc`?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:8",
+     "type": "prose",
+     "en": "We look at where `inc` is used in the body of the function `adder` and find the expression `x + inc`. \nThis expression appies to numbers - we conclude that `z` should be a `number`.\n\n",
+     "hash": "e4a8b263a7be2943",
+     "he": "נבדוק היכן `inc` משמש בגוף הפונקציה `adder`, ונמצא את הביטוי `x + inc`.\nהביטוי הזה חל על מספרים — ומכאן נסיק שהטיפוס של `inc` צריך להיות `number`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:9",
+     "type": "prose",
+     "en": "The signature of the function `adder` should therefore look like:\n\n",
+     "hash": "5c5815e05f97de89",
+     "he": "חתימת הפונקציה `adder` צריכה אפוא להיראות כך:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:10",
+     "type": "code",
+     "en": "```typescript\n(inc: number) => ?\n```\n\n",
+     "hash": "5e6e17747a34fe5e",
+     "lang": "typescript",
+     "noteHe": "זו חתימה חלקית: כבר ידוע שהפרמטר `inc` הוא `number`, אבל טרם קבענו את טיפוס הערך המוחזר — סימן השאלה מסמן את מה שנותר לברר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:11",
+     "type": "prose",
+     "en": "What is the type of the value returned by `adder`?\n\n",
+     "hash": "4ae450e6113bd0a6",
+     "he": "מה הטיפוס של הערך שמחזירה `adder`?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:12",
+     "type": "prose",
+     "en": "We analyze the body of `adder` to identify the returned expression:\n\n",
+     "hash": "e29a3832e06324f9",
+     "he": "ננתח את גוף `adder` כדי לזהות את הביטוי המוחזר:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:13",
+     "type": "code",
+     "en": "```typescript\nfunction (inc) {\n    return x => x + inc;\n}\n```\n\n",
+     "hash": "b18aefaf522aa4d0",
+     "lang": "typescript",
+     "noteHe": "גוף הפונקציה מכיל משפט `return` יחיד, שמחזיר את הביטוי `x => x + inc` — פונקציה אנונימית."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:14",
+     "type": "prose",
+     "en": "The returned value is `x => x + inc`.\nThis expression is a function - which receives `x` as a parameter and return `x + inc` as a parameter.\n\n",
+     "hash": "77c6072370b2f2b1",
+     "he": "הערך המוחזר הוא `x => x + inc`.\nהביטוי הזה הוא פונקציה — שמקבלת את `x` כפרמטר ומחזירה את הערך `x + inc`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:15",
+     "type": "prose",
+     "en": "The type of this returned function is thus:\n\n",
+     "hash": "11f99e59a83bd07d",
+     "he": "הטיפוס של הפונקציה המוחזרת הזו הוא אפוא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:16",
+     "type": "code",
+     "en": "```typescript\n(x: number) => number\n```\n\n",
+     "hash": "b9ddb9bdf1d8af63",
+     "lang": "typescript",
+     "noteHe": "הפונקציה המוחזרת מקבלת מספר `x` ומחזירה מספר (`x + inc` — סכום של שני מספרים), ולכן הטיפוס שלה הוא `(x: number) => number`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:17",
+     "type": "prose",
+     "en": "Putting parameter and return value together, we obtain the type of the function `adder` as this expression:\n\n",
+     "hash": "72051c74658fc66f",
+     "he": "בהרכבת הפרמטר והערך המוחזר יחד, אנחנו מקבלים את הטיפוס של הפונקציה `adder` כביטוי הזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:18",
+     "type": "code",
+     "en": "```typescript\n(inc: number) => ((x: number) => number)\n```\n\n",
+     "hash": "09684dc6a5f6385d",
+     "lang": "typescript",
+     "noteHe": "זהו טיפוס של פונקציה שמחזירה פונקציה: מקבלים `inc` מטיפוס `number` ומחזירים פונקציה מטיפוס `(x: number) => number`. הסוגריים סביב הטיפוס המוחזר נועדו לקריאוּת בלבד."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:19",
+     "type": "prose",
+     "en": "And adding all the types in the definition of `adder` we obtain:\n\n",
+     "hash": "bac2afb2641d59a1",
+     "he": "ואם נוסיף את כל הטיפוסים בהגדרה של `adder`, נקבל:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:20",
+     "type": "code",
+     "en": "```typescript\nlet adder: (inc: number) => (x: number) => number = function (inc: number) {\n    return (x: number): number => x + inc;\n};\n```\n\n",
+     "hash": "046dfaf524cac449",
+     "lang": "typescript",
+     "noteHe": "ההגדרה המלאה והמטופסת: הערת הטיפוס על המשתנה `adder` היא `(inc: number) => (x: number) => number`, ובגוף הפונקציה גם הפרמטר `inc`, גם הפרמטר `x` וגם הערך המוחזר מוערים בטיפוסיהם. שכבות הטיפוס מתאימות בדיוק לניתוח שביצענו שלב אחר שלב."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:21",
+     "type": "prose",
+     "en": "Now consider the **capturing of the parameter `z`** when the function `adder` is invoked - in the expression:\n\n",
+     "hash": "166b5e171550073f",
+     "he": "נבחן כעת את **לכידת הפרמטר `inc`** כאשר הפונקציה `adder` מופעלת — בביטוי:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:22",
+     "type": "code",
+     "en": "```typescript\nlet add5 = adder(5);\n```\n\n",
+     "hash": "2d7895c312348111",
+     "lang": "typescript",
+     "noteHe": "קוראים ל-`adder` עם הארגומנט 5. הערך המוחזר — הסגור שמוסיף 5 — נקשר למשתנה `add5`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:23",
+     "type": "prose",
+     "en": "The type of `add5` is `(x: number) => number`.  `adder(5)` returns a function of one parameter.\nWhen it is invoked, this function adds 5 to its parameter.\n\n",
+     "hash": "0e7d1e36e02d3e50",
+     "he": "הטיפוס של `add5` הוא `(x: number) => number`.‏ `adder(5)` מחזירה פונקציה של פרמטר אחד.\nכשמפעילים אותה, הפונקציה הזו מוסיפה 5 לפרמטר שלה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:24",
+     "type": "prose",
+     "en": "How does it know to add 5 specifically?\n\n",
+     "hash": "f99b7888ee70f47c",
+     "he": "איך היא יודעת להוסיף דווקא 5?"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:25",
+     "type": "prose",
+     "en": "This is because when the return function is computed, it **captures** the current value of the parameter `inc`.\nThis happens in the computation of this expression:\n\n",
+     "hash": "1684b1039e40410d",
+     "he": "זה קורה משום שכאשר ערך הפונקציה המוחזרת מחושב, הוא **לוכד** את הערך הנוכחי של הפרמטר `inc`.\nזה מתרחש בחישוב הביטוי הזה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:26",
+     "type": "code",
+     "en": "```\nCompute adder(5)\nStep 1: Bind parameter inc to 5\nStep 2: Compute the value (x => x + inc) // This is when variable inc is captured\n```\n\n",
+     "hash": "e979e3e358cd52e5",
+     "noteHe": "תיאור שלבי החישוב של `adder(5)`: בשלב 1 הפרמטר `inc` נקשר לערך 5; בשלב 2 מחושב ערך הפונקציה `x => x + inc` — וזה בדיוק הרגע שבו המשתנה `inc` נלכד בתוך הסגור, עם הערך 5."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:27",
+     "type": "prose",
+     "en": "The key point is that when the value of the function is computed, `inc` is bound to the value 5.\nLater, when the value `add5` is used, `inc` is not bound anymore to any value - because the scope of its definition has been exited.\n\n\n",
+     "hash": "6b925899a16e2515",
+     "he": "הנקודה המרכזית היא שכאשר ערך הפונקציה מחושב, `inc` קשור לערך 5.\nמאוחר יותר, כשמשתמשים בערך `add5`,‏ `inc` כבר אינו קשור לשום ערך — כי תחום ההכרה של הגדרתו כבר ננטש."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:21:28",
+     "type": "code",
+     "en": "```typescript\nlet add5 = adder(5);\nconsole.log(add5(2)); // add5 uses the value of inc which was captured when the closure was created\n// ==> 7\nconsole.log(inc); // We confirm that inc is undefined\n// ==> Uncaught ReferenceError: inc is not defined\n```\n\n",
+     "hash": "bc5cacb7161ee931",
+     "lang": "typescript",
+     "noteHe": "ההדגמה מסכמת את הרעיון: `add5(2)` מדפיסה 7 — הסגור משתמש בערך 5 של `inc`, שנלכד בעת יצירתו, למרות שהקריאה ל-`adder` הסתיימה מזמן. לעומת זאת, ניסיון לגשת ל-`inc` ישירות מבחוץ נכשל עם `ReferenceError` — השם `inc` אינו קיים בתחום ההכרה החיצוני; הוא חי רק בתוך הסגור."
+    }
+   ],
+   "headingHe": "סגורים (Closures) והטיפוס שלהם"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:22",
+   "depth": 3,
+   "headingEn": "Type of Closures",
+   "raw": "### Type of Closures\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:22:0",
+     "type": "prose",
+     "en": "If we look back at the type of the closures returned when we compute `adder(5)` - we obtain:\n\n",
+     "hash": "dd765f0a9fc3f215",
+     "he": "אם נביט שוב בטיפוס של הסגור שמוחזר כשאנחנו מחשבים את `adder(5)` — נקבל:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:22:1",
+     "type": "code",
+     "en": "```typescript\n(x: number) => number\n```\n\n",
+     "hash": "b9ddb9bdf1d8af63",
+     "lang": "typescript",
+     "noteHe": "זה הטיפוס של הסגור: פונקציה ממספר למספר. אין בו שום זכר למשתנה הנלכד `inc`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:22:2",
+     "type": "prose",
+     "en": "In words - it means that the value of `adder(5)` is a function which receives a number `x` and returns a number.\n\n",
+     "hash": "4625625135979acd",
+     "he": "במילים — פירוש הדבר שהערך של `adder(5)` הוא פונקציה שמקבלת מספר `x` ומחזירה מספר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:22:3",
+     "type": "prose",
+     "en": "Note that the closure does not indicate that it depends on another variable (`inc`) - because this is not part of the signature of the closure - it is an **internal** aspect of the closure.\n\n",
+     "hash": "f44fb283adb693fa",
+     "he": "שימו לב שהסגור אינו מציין שהוא תלוי במשתנה נוסף (`inc`) — כי זה אינו חלק מחתימת הסגור — זהו היבט **פנימי** של הסגור."
+    }
+   ],
+   "headingHe": "הטיפוס של סגורים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:23",
+   "depth": 2,
+   "headingEn": "Type Compatibility",
+   "raw": "## Type Compatibility \n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:0",
+     "type": "prose",
+     "en": "As part of the type checking performed by the TypeScript compiler, one must determine whether **two type expressions are compatible**.  This compatibility checking occurs in the following context for example:\n\n",
+     "hash": "5c8ca72131ba5390",
+     "he": "כחלק מבדיקת הטיפוסים שמבצע מהדר ה-TypeScript, יש לקבוע האם **שני ביטויי טיפוס תואמים (compatible)**. בדיקת התאימות הזו מתרחשת, למשל, בהקשר הבא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:1",
+     "type": "list",
+     "en": "* Assume we know the type of a variable `a` to be a type expression `<type_a>`\n* We now compile the following expression: \n",
+     "hash": "cb4e05cf70d2d18d",
+     "he": "* נניח שאנחנו יודעים שהטיפוס של משתנה `a` הוא ביטוי טיפוס `<type_a>`\n* כעת אנחנו מקמפלים את הביטוי הבא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:2",
+     "type": "code",
+     "en": "```typescript\nlet b : <type_b> = a; ...\n```\n",
+     "hash": "1d844e60b380bc4c",
+     "lang": "typescript",
+     "noteHe": "משתנה חדש `b`, המוער בטיפוס `<type_b>`, נקשר לערך של `a`. כדי לאשר את השורה, המהדר חייב לוודא שהטיפוס של `a` תואם לטיפוס המוצהר של `b`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:3",
+     "type": "prose",
+     "en": "At this point, the TypeScript compiler must determine whether `<type_a>` and `<type_b>` are compatible.\n\n",
+     "hash": "6c73fbc8c3478dce",
+     "he": "בנקודה זו, מהדר ה-TypeScript חייב לקבוע האם `<type_a>` ו-`<type_b>` תואמים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:4",
+     "type": "list",
+     "en": "* Similarly, assume we know the type of a function `f` to be `(x: <type_x>) => <type_y>`.\n* We now compile the following expression:\n",
+     "hash": "7ee5fc2bd6f578b3",
+     "he": "* באופן דומה, נניח שאנחנו יודעים שהטיפוס של פונקציה `f` הוא `(x: <type_x>) => <type_y>`.\n* כעת אנחנו מקמפלים את הביטוי הבא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:5",
+     "type": "code",
+     "en": "```typescript\nlet z : <type_z> = v;\nf(z);\n```\n",
+     "hash": "5c6d46d00f2f2f51",
+     "lang": "typescript",
+     "noteHe": "המשתנה `z`, מטיפוס `<type_z>`, מועבר כארגומנט לפונקציה `f`. גם כאן נדרשת בדיקת תאימות — בין טיפוס הארגומנט בפועל לבין טיפוס הפרמטר הפורמלי."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:23:6",
+     "type": "prose",
+     "en": "At this point, the TypeScript compiler must determine whether `<type_x>` (the type of the formal parameter of function `f`) and `<type_z>` (the type of the actual variable passed as an argument to function `f`) are compatible.\n\n",
+     "hash": "c0a4ce91ed9282ab",
+     "he": "בנקודה זו, מהדר ה-TypeScript חייב לקבוע האם `<type_x>` (הטיפוס של הפרמטר הפורמלי של הפונקציה `f`) ו-`<type_z>` (הטיפוס של המשתנה שהועבר בפועל כארגומנט לפונקציה `f`) תואמים."
+    }
+   ],
+   "headingHe": "תאימות טיפוסים (Type Compatibility)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:24",
+   "depth": 3,
+   "headingEn": "Type Compatibility is NOT Symmetric: Subtyping",
+   "raw": "### Type Compatibility is NOT Symmetric: Subtyping\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:24:0",
+     "type": "prose",
+     "en": "Type compatibility is not symmetric - `T1` is compatible with `T2` means we can substitute a value of type `T2` with a value of type `T1` and still obtain valid expressions. The reverse may not be true.\n\n",
+     "hash": "5c9754d8445d65ac",
+     "he": "תאימות טיפוסים אינה סימטרית — \"`T1` תואם ל-`T2`\" פירושו שאפשר להחליף ערך מטיפוס `T2` בערך מטיפוס `T1` ועדיין לקבל ביטויים תקינים. ההפך אינו בהכרח נכון."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:24:1",
+     "type": "prose",
+     "en": "In general, think of type expressions as expressing **constraints** on the values that belong to the type.\nWhen a type expression `T1` expresses **more constraints** than `T2`, then it means the type expression `T1` denotes **less values** than `T2`.  It also means all the values in `T1` meet the constraints specified by `T2`.\n\n",
+     "hash": "8cc3c96c01952df5",
+     "he": "באופן כללי, חשבו על ביטויי טיפוס כמבטאים **אילוצים** על הערכים ששייכים לטיפוס.\nכאשר ביטוי טיפוס `T1` מבטא **יותר אילוצים** מאשר `T2`, פירוש הדבר שביטוי הטיפוס `T1` מציין **פחות ערכים** מאשר `T2`. פירוש הדבר גם שכל הערכים ב-`T1` מקיימים את האילוצים שמפרט `T2`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:24:2",
+     "type": "prose",
+     "en": "To remember this - we say that **`T1` is a subtype of `T2`** - all the values in `T1` satisfy the constraints of `T2`.\nWhen this is the case, it is safe to replace variables of type `T2` with values or variables of type `T1` - in short, it is safe to perform `let t2 = t1`.\n\n",
+     "hash": "dcb326f1f5c20455",
+     "he": "כדי לזכור זאת — אומרים ש**`T1` הוא תת-טיפוס של `T2`** — כל הערכים ב-`T1` מקיימים את האילוצים של `T2`.\nכשזה המצב, בטוח להחליף משתנים מטיפוס `T2` בערכים או במשתנים מטיפוס `T1` — בקצרה, בטוח לבצע `let t2 = t1`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:24:3",
+     "type": "prose",
+     "en": "To remember the rule - remember: **`let t = s` is possible when `s < t`** - meaning we can bind with `let` (or pass as a parameter) a value or variable of type s to a variable of type t when s is a subtype of t.\nIn this short form, s stands for source, t for target.\n\n",
+     "hash": "1207a8d685c06687",
+     "he": "כדי לזכור את הכלל — זכרו: **`let t = s` אפשרי כאשר `s < t`** — כלומר אפשר לקשור באמצעות `let` (או להעביר כפרמטר) ערך או משתנה מטיפוס s למשתנה מטיפוס t כאשר s הוא תת-טיפוס של t.\nבכתיב המקוצר הזה, s מייצג את המקור (source) ו-t את היעד (target)."
+    }
+   ],
+   "headingHe": "תאימות טיפוסים אינה סימטרית: תת-טיפוסים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:25",
+   "depth": 3,
+   "headingEn": "Compatibility Rules",
+   "raw": "### Compatibility Rules\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:25:0",
+     "type": "prose",
+     "en": "We will revisit the rules of type compatibility in Chapter 3.\n\n",
+     "hash": "8d1811a0522ce72b",
+     "he": "נשוב לכללי תאימות הטיפוסים בפרק 3."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:25:1",
+     "type": "prose",
+     "en": "For now, consider the following practical aspects of type compatibility in TypeScript:\n\n",
+     "hash": "92293dcc8a0625b0",
+     "he": "לעת עתה, שימו לב להיבטים המעשיים הבאים של תאימות טיפוסים ב-TypeScript:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:25:2",
+     "type": "list",
+     "en": "* Primitive type expressions are compatible when they are the same (that is, `number` is compatible with `number` but not with `boolean` and not with `string`).  \n* Primitive type expressions are not compatible with any compound type expressions.  For example `number` is not compatible with `number[]` or with `{ x:number }`.\n* Arrays are only compatible with arrays, maps with maps, functions with functions.\n* Two array expressions `T1[]` and `T2[]` are compatible when `T1` and `T2` are compatible.\n\n",
+     "hash": "75ccae9146c5bdea",
+     "he": "* ביטויי טיפוס פרימיטיביים תואמים כאשר הם זהים (כלומר, `number` תואם ל-`number` אבל לא ל-`boolean` ולא ל-`string`).\n* ביטויי טיפוס פרימיטיביים אינם תואמים לשום ביטוי טיפוס מורכב. לדוגמה, `number` אינו תואם ל-`number[]` או ל-`{ x:number }`.\n* מערכים תואמים רק למערכים, מפות למפות, ופונקציות לפונקציות.\n* שני ביטויי מערך `T1[]` ו-`T2[]` תואמים כאשר `T1` ו-`T2` תואמים."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:25:3",
+     "type": "prose",
+     "en": "The rules for maps and functions are a bit more complex: \n\n",
+     "hash": "a3cf3e6db27d5dd3",
+     "he": "הכללים עבור מפות ופונקציות מורכבים מעט יותר:"
+    }
+   ],
+   "headingHe": "כללי תאימות"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:26",
+   "depth": 3,
+   "headingEn": "Map Type Compatibility: Structural Typing",
+   "raw": "### Map Type Compatibility: Structural Typing\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:0",
+     "type": "prose",
+     "en": "**Reference**: [https://www.typescriptlang.org/docs/handbook/type-compatibility.html](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)\n\n",
+     "hash": "841cb54428fd4a6d",
+     "he": "**מקור**: [https://www.typescriptlang.org/docs/handbook/type-compatibility.html](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:1",
+     "type": "prose",
+     "en": "The basic rule of TypeScript for Map compatibility is:\n**`x` is compatible with `y` if `y` has at least the same members as `x`.**\n\n",
+     "hash": "e52ab439bc141dca",
+     "he": "כלל הבסיס של TypeScript לתאימות מפות הוא:\n**`x` תואם ל-`y` אם ל-`y` יש לפחות את אותם איברים (members) כמו ל-`x`.**"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:2",
+     "type": "prose",
+     "en": "For example:\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:3",
+     "type": "code",
+     "en": "```typescript\ntype Named = {\n    name: string;\n}\n\nlet x: Named;\n\n// y's inferred type is { name: string; location: string; }\nlet y = { name: \"Alice\", location: \"Seattle\" };\n\nx = y;\n```\n\n",
+     "hash": "3cc3c369881b4832",
+     "lang": "typescript",
+     "noteHe": "המשתנה `x` מוער בטיפוס `Named` — מפה עם מפתח `name` מחרוזתי. עבור `y` לא הוצהר טיפוס, והמהדר מסיק מהערך את הטיפוס `{ name: string; location: string; }`. ההשמה `x = y` תקינה: ל-`y` יש את כל מה ש-`Named` דורש (מפתח `name` מחרוזתי) — והמפתח הנוסף `location` אינו מפריע."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:4",
+     "type": "prose",
+     "en": "The type expression inferred for `y` is `{ name: string, location: string }`.\nIt has more constraints than `Named`.\n\n",
+     "hash": "7c96ed1843eebdd7",
+     "he": "ביטוי הטיפוס שהוסק עבור `y` הוא `{ name: string, location: string }`.\nיש בו יותר אילוצים מאשר ב-`Named`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:5",
+     "type": "prose",
+     "en": "In TypeScript, these two types are compatible - that is the type of `y` is a subtype of the `Named` type.\n\n",
+     "hash": "4d9faa692217b16e",
+     "he": "ב-TypeScript שני הטיפוסים האלה תואמים — כלומר הטיפוס של `y` הוא תת-טיפוס של הטיפוס `Named`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:6",
+     "type": "prose",
+     "en": "To check whether `y` is compatible with the type of `x`, the compiler checks each property of `x` to find a corresponding compatible property in `y`. In this case, `y` must have a member called `name` that is a `string`. It does, so the assignment is allowed.\n\n",
+     "hash": "0ab9d70070c8c726",
+     "he": "כדי לבדוק האם `y` תואם לטיפוס של `x`, המהדר בודק כל תכונה של `x` ומחפש תכונה מקבילה ותואמת ב-`y`. במקרה הזה, ל-`y` חייב להיות איבר בשם `name` שהוא `string`. יש לו — ולכן ההשמה מותרת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:7",
+     "type": "prose",
+     "en": "The same rule for checking the compatibility of the assignment is used when checking function call arguments:\n",
+     "hash": "253b4c5f5228c887",
+     "he": "אותו כלל לבדיקת תאימות ההשמה משמש גם בבדיקת ארגומנטים בקריאה לפונקציה:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:8",
+     "type": "code",
+     "en": "```typescript\nfunction greet(n: Named) {\n    console.log(\"Hello, \" + n.name);\n}\ngreet(y); // OK\n```\n\n",
+     "hash": "31893a9c835a0ecf",
+     "lang": "typescript",
+     "noteHe": "‏`greet` מצפה לפרמטר מטיפוס `Named`. הקריאה `greet(y)` תקינה מאותה סיבה שההשמה הייתה תקינה: הטיפוס שהוסק עבור `y` מכיל את כל האיברים ש-`Named` דורש. העברת ארגומנט לפונקציה נבדקת בדיוק כמו השמה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:9",
+     "type": "prose",
+     "en": "Note that `y` has an extra `location` property, but this does not create an error. \nOnly members of the target type (`Named` in this case) are considered when checking for compatibility.\n\n",
+     "hash": "23d0f109b6f0c45c",
+     "he": "שימו לב של-`y` יש תכונה נוספת `location`, אבל זה אינו יוצר שגיאה.\nרק האיברים של טיפוס היעד (`Named` במקרה הזה) נלקחים בחשבון בבדיקת התאימות."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:10",
+     "type": "prose",
+     "en": "This comparison process proceeds recursively, exploring the type of each member and sub-member.\n\n",
+     "hash": "9e429eac5009081c",
+     "he": "תהליך ההשוואה הזה ממשיך רקורסיבית, ובוחן את הטיפוס של כל איבר ותת-איבר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:11",
+     "type": "prose",
+     "en": "This method of checking type compatibility is called **structural typing**.\nStructural typing is a way of relating types based solely on their members. \nThis is in contrast with **nominal typing** which we know from Java and C++. \n\n",
+     "hash": "5fc202491b6d3e38",
+     "he": "שיטה זו לבדיקת תאימות טיפוסים נקראת **טיפוסיות מבנית (structural typing)**.\nטיפוסיות מבנית היא דרך לקשור בין טיפוסים על סמך האיברים שלהם בלבד.\nזאת בניגוד ל**טיפוסיות נומינלית (nominal typing)**, שאנחנו מכירים מ-Java ומ-C++‎."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:12",
+     "type": "prose",
+     "en": "Consider the following code:\n\n",
+     "hash": "282165c979a79e0c",
+     "he": "נתבונן בקוד הבא:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:13",
+     "type": "code",
+     "en": "```typescript\ntype Named = {\n    name: string;\n}\n\ntype Person = {\n    name: string;\n    age: number;\n}\n```\n\n",
+     "hash": "2ac39c6647d43f45",
+     "lang": "typescript",
+     "noteHe": "שני טיפוסים מוגדרים בנפרד, בלי שום הצהרה על קשר ביניהם: `Named` דורש רק `name`, ו-`Person` דורש `name` וגם `age`. שימו לב שאיש לא כתב ש-`Person` \"יורש\" את `Named` או \"מממש\" אותו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:14",
+     "type": "prose",
+     "en": "Under structural typing, `Person` is a subtype of `Named` - even though this is not declared by the programmer; this subtyping relation is inferred by the compiler.\n\n",
+     "hash": "9d8beae728d7c8c8",
+     "he": "תחת טיפוסיות מבנית, `Person` הוא תת-טיפוס של `Named` — אף שהמתכנת לא הצהיר על כך; יחס תת-הטיפוס הזה מוסק על ידי המהדר."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:15",
+     "type": "code",
+     "en": "```typescript\nfunction greeter(n: Named): string {\n    return \"Hello \" + n.name;\n}\n\nlet p: Person = { name: \"John\", age: 26 };\ngreeter(p); // OK because of structural typing: p declared as a subtype (Person) of Named\n```\n\n",
+     "hash": "46c5c387b4c55d4d",
+     "lang": "typescript",
+     "noteHe": "‏`greeter` מצפה ל-`Named`, ואנחנו מעבירים לה את `p` מטיפוס `Person`. הקריאה תקינה בזכות הטיפוסיות המבנית: ל-`Person` יש את כל האיברים ש-`Named` דורש, ולכן הוא תת-טיפוס שלו — בלי שאיש הצהיר על היחס הזה במפורש."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:26:16",
+     "type": "prose",
+     "en": "In **nominally-typed languages** like Java, the equivalent code would be an error because the Person type does not explicitly describe itself as being a subtype or an implementor of the Named type - the programmer does not define explicitly relations between the types.\n\n",
+     "hash": "65af36de6b26f964",
+     "he": "ב**שפות עם טיפוסיות נומינלית**, כמו Java, הקוד המקביל היה שגיאה, כי הטיפוס Person אינו מתאר את עצמו במפורש כתת-טיפוס או כמממש של הטיפוס Named — המתכנת אינו מגדיר במפורש יחסים בין הטיפוסים."
+    }
+   ],
+   "headingHe": "תאימות טיפוסי מפה: טיפוסיות מבנית (Structural Typing)"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:27",
+   "depth": 3,
+   "headingEn": "Function Types Compatibility: Comparing the Types of Functions",
+   "raw": "### Function Types Compatibility: Comparing the Types of Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:0",
+     "type": "prose",
+     "en": "(This is taken from [https://www.typescriptlang.org/docs/handbook/type-compatibility.html](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)):\n\n",
+     "hash": "8a6c391157adc597",
+     "he": "(הקטע לקוח מתוך [https://www.typescriptlang.org/docs/handbook/type-compatibility.html](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)):"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:1",
+     "type": "prose",
+     "en": "While comparing primitive types and object types is relatively straightforward, the question of what kinds of functions should be considered compatible is a bit more involved. Let’s start with a basic example of two functions that differ only in their parameter lists:\n\n",
+     "hash": "fa125d07b89d42e2",
+     "he": "בעוד שהשוואת טיפוסים פרימיטיביים וטיפוסי אובייקט היא יחסית פשוטה, השאלה אילו סוגי פונקציות ראוי להחשיב כתואמים מורכבת יותר. נתחיל בדוגמה בסיסית של שתי פונקציות שנבדלות רק ברשימות הפרמטרים שלהן:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:2",
+     "type": "code",
+     "en": "```typescript\nlet x = (a: number, t: string) => 0;\nlet y = (b: number, s: string) => 0;\n\ny = x; // OK\n```\n\n",
+     "hash": "545199fe58defdc5",
+     "lang": "typescript",
+     "noteHe": "שתי הפונקציות זהות בטיפוסיהן — שתיהן מקבלות `number` ו-`string` ומחזירות `number` — ונבדלות רק בשמות הפרמטרים (`a`,‏ `t` לעומת `b`,‏ `s`). ההשמה `y = x` תקינה: שמות הפרמטרים אינם חלק מהטיפוס."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:3",
+     "type": "prose",
+     "en": "#### Comparing Parameters Types\n\n",
+     "hash": "5be89f2268fbb3e8",
+     "he": "#### השוואת טיפוסי הפרמטרים"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:4",
+     "type": "prose",
+     "en": "To check if x is assignable to y, we first look at the parameter list. Each parameter in `x` must have a corresponding parameter in `y` with a compatible type. Note that the names of the parameters are not considered, only their types. In this case, every parameter of `x` has a corresponding parameter with identical type in `y`, so the assignment is allowed.\n\n",
+     "hash": "278dadc520ae483a",
+     "he": "כדי לבדוק האם `x` ניתן להשמה ל-`y`, מסתכלים תחילה על רשימת הפרמטרים. לכל פרמטר של `x` חייב להיות פרמטר מקביל ב-`y` עם טיפוס תואם. שימו לב ששמות הפרמטרים אינם נלקחים בחשבון — רק הטיפוסים שלהם. במקרה הזה, לכל פרמטר של `x` יש פרמטר מקביל עם טיפוס זהה ב-`y`, ולכן ההשמה מותרת."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:5",
+     "type": "prose",
+     "en": "We ignore here the complexity introduced by optional arguments and differing number of arguments - we will simplify by stating that two function parameter lists are compatible if they have the same length.  The comparison of the type of each parameter, however, is surprising.\n\n",
+     "hash": "36379896b28eac4e",
+     "he": "אנחנו מתעלמים כאן מהמורכבות שמכניסים ארגומנטים אופציונליים ומספר שונה של ארגומנטים — נפשט ונאמר ששתי רשימות פרמטרים של פונקציות תואמות אם יש להן אותו אורך. ההשוואה של הטיפוס של כל פרמטר, לעומת זאת, מפתיעה."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:6",
+     "type": "prose",
+     "en": "#### Comparing Return Types\n\n",
+     "hash": "076e433c584f4e31",
+     "he": "#### השוואת טיפוסי הערך המוחזר"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:7",
+     "type": "prose",
+     "en": "Let’s look at how return types are treated, using two functions that differ only by their return type:\n\n",
+     "hash": "6a76e0bc1d806f1b",
+     "he": "נבחן כיצד מטופלים טיפוסי הערך המוחזר, באמצעות שתי פונקציות שנבדלות רק בטיפוס הערך המוחזר שלהן:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:8",
+     "type": "code",
+     "en": "```typescript\nlet x = () => ({ name: \"Alice\" });\nlet y = () => ({ name: \"Alice\", location: \"Seattle\" });\n\nx = y; // OK\ny = x; // Error because x() lacks a location property\n```\n\n",
+     "hash": "23099dc79beefee0",
+     "lang": "typescript",
+     "noteHe": "‏`x` מחזירה `{ name: string }` ו-`y` מחזירה `{ name: string; location: string }` — טיפוס ההחזרה של `y` הוא תת-טיפוס של זה של `x`. לכן `x = y` תקין: מי שקורא ל-`x` מצפה לקבל אובייקט עם `name`, ו-`y` מספקת זאת (ואף יותר). לעומת זאת, `y = x` נכשל — מי שקורא ל-`y` רשאי לגשת ל-`location`, אבל התוצאה של `x()` אינה מכילה תכונה כזו."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:9",
+     "type": "prose",
+     "en": "The type system enforces that: **the source function’s return type be a subtype of the target type’s return type.**\nt = s\ns.r < t.r\n\n",
+     "hash": "42959feff10b9268",
+     "he": "מערכת הטיפוסים אוכפת ש**טיפוס הערך המוחזר של פונקציית המקור יהיה תת-טיפוס של טיפוס הערך המוחזר של טיפוס היעד.**\nt = s\ns.r < t.r"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:10",
+     "type": "prose",
+     "en": "That is - when checking `f1: (x: T1) => U1` with `f2: (x: T2) => U2` - `f1` is a subtype of `f2` (meaning `f2 = f1` is ok) we verify that `U1` is a subtype of `U2`,\n**but we check the reverse relation** for the parameters, that is, `T2` is a subtype of `T1`.\n\n",
+     "hash": "df1f497e1dd81d71",
+     "he": "כלומר — כשבודקים את `f1: (x: T1) => U1` מול `f2: (x: T2) => U2` — כדי ש-`f1` יהיה תת-טיפוס של `f2` (כלומר, ש-`f2 = f1` יהיה תקין) מוודאים ש-`U1` הוא תת-טיפוס של `U2`,\n**אבל בודקים את היחס ההפוך** עבור הפרמטרים — כלומר, ש-`T2` הוא תת-טיפוס של `T1`."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:11",
+     "type": "prose",
+     "en": "The behavior of parameters and return values for function types when considering subtypes is well explained (with examples) in this post: \n[https://www.stephanboyer.com/post/132/what-are-covariance-and-contravariance](https://www.stephanboyer.com/post/132/what-are-covariance-and-contravariance).\n\n",
+     "hash": "fa88959973627b6b",
+     "he": "ההתנהגות של פרמטרים ושל ערכים מוחזרים בטיפוסי פונקציה בהקשר של תת-טיפוסים מוסברת היטב (עם דוגמאות) בפוסט הזה:\n[https://www.stephanboyer.com/post/132/what-are-covariance-and-contravariance](https://www.stephanboyer.com/post/132/what-are-covariance-and-contravariance)."
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:27:12",
+     "type": "prose",
+     "en": "In short, we say that function (as a type constructor) is *contra-variant on parameters and covariant on return type*.\n\n",
+     "hash": "83387e482f72a021",
+     "he": "בקצרה, אומרים שפונקציה (כבנאי טיפוסים) היא *קונטרה-ווריאנטית (contra-variant) בפרמטרים וקו-ווריאנטית (covariant) בטיפוס הערך המוחזר*."
+    }
+   ],
+   "headingHe": "תאימות טיפוסי פונקציה: השוואת טיפוסים של פונקציות"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:28",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [],
+   "headingHe": "סיכום"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:29",
+   "depth": 3,
+   "headingEn": "Types",
+   "raw": "### Types\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:29:0",
+     "type": "list",
+     "en": "* **Types are useful** in programming languages:\n  * they allow the verification of type correctness at compile time instead of failing at runtime \n  * they are a reliable form of documentation of programs.\n* **Types in TypeScript are optional**.  The TypeScript compiler checks the types that are provided by the programmer and compiles the code to untyped JavaScript.\n* TypeScript type annotations are added in the following places in TypeScript expressions:\n",
+     "hash": "34d806d028fcdcf0",
+     "he": "* **טיפוסים מועילים** בשפות תכנות:\n  * הם מאפשרים אימות של נכונות הטיפוסים בזמן קומפילציה, במקום כישלון בזמן ריצה\n  * הם צורת תיעוד אמינה של תוכניות.\n* **טיפוסים ב-TypeScript הם אופציונליים**. מהדר ה-TypeScript בודק את הטיפוסים שהמתכנת סיפק, ומקמפל את הקוד ל-JavaScript לא מטופס.\n* הערות טיפוס של TypeScript נוספות במקומות הבאים בביטויי TypeScript:"
+    },
+    {
+     "id": "cm/1.3TypescriptTypeChecking:29:1",
+     "type": "code",
+     "en": "```typescript\nlet varName: <typeAnnotation>;  // After variable declarations\nfunction fname(param : <typeAnnotation>, ...) : <typeAnnotation> { ... } // As part of a function signature\n```\n\n",
+     "hash": "b5a1acaed6787487",
+     "lang": "typescript",
+     "noteHe": "תזכורת לשני המקומות שבהם כותבים הערות טיפוס: אחרי הצהרת משתנה, ובחתימת פונקציה — על הפרמטרים ועל הערך המוחזר."
+    }
+   ],
+   "headingHe": "טיפוסים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:30",
+   "depth": 3,
+   "headingEn": "Type Language",
+   "raw": "### Type Language\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:30:0",
+     "type": "list",
+     "en": "* TypeScript provides a **type language** to write type annotations.\n* **Primitive type expressions** are `number`, `boolean` and `string`\n* **Array type expressions** are of the form `T[]` where `T` can be any type expression.\n* **Map type expressions** are of the form `{ key: T, ...}` where `T` can be any type expression.\n* **Map type expressions can be given a name** in the form: `type <name> = <map-type-expression>`\n* **Type expressions can be embedded** into each other to specify the type of complex values like JSON types.\n* **Types can be implicit** and inferred by the TypeScript compiler in some cases.\n* **Recursive types** such as trees can be defined using **optional properties** in named map types.\n* **Generic types** can be defined using **type variables** in type expressions.  \n\n",
+     "hash": "b3cc97778cb6dfdd",
+     "he": "* ‏TypeScript מספקת **שפת טיפוסים (type language)** לכתיבת הערות טיפוס.\n* **ביטויי טיפוס פרימיטיביים** הם `number`,‏ `boolean` ו-`string`\n* **ביטויי טיפוס מערך** הם מהצורה `T[]`, כאשר `T` יכול להיות כל ביטוי טיפוס.\n* **ביטויי טיפוס מפה** הם מהצורה `{ key: T, ...}`, כאשר `T` יכול להיות כל ביטוי טיפוס.\n* **לביטויי טיפוס מפה אפשר לתת שם** בצורה: `type <name> = <map-type-expression>`\n* **ביטויי טיפוס אפשר להטמיע** זה בתוך זה, כדי לציין את הטיפוס של ערכים מורכבים כמו טיפוסי JSON.\n* **טיפוסים יכולים להיות משתמעים**, ולהיות מוסקים על ידי מהדר ה-TypeScript במקרים מסוימים.\n* **טיפוסים רקורסיביים**, כמו עצים, אפשר להגדיר באמצעות **תכונות אופציונליות** בטיפוסי מפה בעלי שם.\n* **טיפוסים גנריים** אפשר להגדיר באמצעות **משתני טיפוס** בביטויי טיפוס."
+    }
+   ],
+   "headingHe": "שפת הטיפוסים"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:31",
+   "depth": 3,
+   "headingEn": "Function Types",
+   "raw": "### Function Types\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:31:0",
+     "type": "list",
+     "en": "* **Function types** specify the type of expected parameters and the return types. They are of the form `(x: T,...) => T`.  This is called the **function signature**.\n* **Closures** may capture variable bindings - but these do not appear in their type - only the parameters and return values do.\n\n",
+     "hash": "d65c981f5a2f62bb",
+     "he": "* **טיפוסי פונקציה** מציינים את טיפוסי הפרמטרים הצפויים ואת טיפוסי הערך המוחזר. הם מהצורה `(x: T,...) => T`. זה נקרא **חתימת הפונקציה (function signature)**.\n* **סגורים** עשויים ללכוד קשירות של משתנים — אבל אלה אינן מופיעות בטיפוס שלהם; רק הפרמטרים והערכים המוחזרים מופיעים בו."
+    }
+   ],
+   "headingHe": "טיפוסי פונקציה"
+  },
+  {
+   "id": "cm/1.3TypescriptTypeChecking:32",
+   "depth": 3,
+   "headingEn": "Type Compatibility",
+   "raw": "### Type Compatibility\n",
+   "blocks": [
+    {
+     "id": "cm/1.3TypescriptTypeChecking:32:0",
+     "type": "list",
+     "en": "* A **source type expression $$T_2$$ is compatible with a target type expression $$T_1$$** when a variable declared with annotation $$T_1$$ can be bound to a value or variable of type $$T_2$$ (either through `let` or parameter passing to a function or assignment).\nThis ensures that operations performed on the source value will be safe at runtime (for example, accessing a key in a map is an\noperation that is safe if the map types are compatible).\n* **Primitive types** are compatible when they are equal.\n* **Array types** are compatible when the element types are compatible.\n* **Map types** `x` and `y` are compatible when `y` has at least the same members as `x`.\n* **Map types** are checked **structurally** and **not nominally** in contrast to Java.\n* **Function types** are compatible when:\n  * The names of the parameters are ignored in the comparison.\n  * `(x: T1) => U1` is compatible with `(y: T2) => U2` if `T2 is compatible with T1` and `U1 is compatible with U2` (note the reversing for parameters).\n",
+     "hash": "f9ef26753299c5e3",
+     "he": "* **ביטוי טיפוס מקור $$T_2$$ תואם לביטוי טיפוס יעד $$T_1$$** כאשר משתנה שהוצהר עם ההערה $$T_1$$ יכול להיקשר לערך או למשתנה מטיפוס $$T_2$$ (בין באמצעות `let`, בין בהעברת פרמטר לפונקציה ובין בהשמה).\nזה מבטיח שפעולות שיבוצעו על ערך המקור יהיו בטוחות בזמן ריצה (לדוגמה, גישה למפתח במפה היא פעולה בטוחה אם טיפוסי המפה תואמים).\n* **טיפוסים פרימיטיביים** תואמים כאשר הם שווים.\n* **טיפוסי מערך** תואמים כאשר טיפוסי האיברים תואמים.\n* **טיפוסי מפה** `x` ו-`y` תואמים כאשר ל-`y` יש לפחות את אותם איברים כמו ל-`x`.\n* **טיפוסי מפה** נבדקים **מבנית** ו**לא נומינלית** — בניגוד ל-Java.\n* **טיפוסי פונקציה** תואמים כאשר:\n  * שמות הפרמטרים אינם נלקחים בחשבון בהשוואה.\n  * ‏`(x: T1) => U1` תואם ל-`(y: T2) => U2` אם `T2 תואם ל-T1` וגם `U1 תואם ל-U2` (שימו לב להיפוך עבור הפרמטרים)."
+    }
+   ],
+   "headingHe": "תאימות טיפוסים"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהי המשמעות של **טיפוס הדרגתי (gradual typing)** ב-TypeScript?",
+   "options": [
+    "כל משתנה חייב לקבל הערת טיפוס, אבל מותר להוסיף את ההערות בהדרגה לאורך הפרויקט",
+    "הערות הטיפוס אופציונליות: במקומות שבהם הן קיימות (או ניתנות להסקה) — הן נבדקות; במקומות אחרים לא מתבצעת בדיקה",
+    "המהדר בודק את הטיפוסים בהדרגה, בזמן ריצה, ככל שהקוד מתבצע",
+    "רק טיפוסים פרימיטיביים נבדקים; טיפוסים מורכבים אינם נבדקים"
+   ],
+   "correct": 1,
+   "explanationHe": "טיפוס הדרגתי פירושו שהצהרות הטיפוס אופציונליות: קוד JavaScript רגיל ללא הערות הוא TypeScript תקין, וכשההערות קיימות (או מוסקות על ידי המהדר) — הן נבדקות בזמן קומפילציה. כך אפשר לאזן בין מהירות בניית אב-טיפוס לבין בטיחות טיפוסים. המסיחים שגויים: אין חובה להעיר כל משתנה, הבדיקה מתבצעת בקומפילציה ולא בזמן ריצה, והיא חלה גם על טיפוסים מורכבים."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "מה יקרה בקומפילציה של הקוד הבא, ולמה?\n```typescript\nlet a = 1;\na = 'nok';\n```",
+   "answerHe": "שגיאת קומפילציה: `Type 'string' is not assignable to type 'number'`.",
+   "explanationHe": "למרות שלא נכתבה שום הערת טיפוס, המהדר מסיק (הערת טיפוס משתמעת) שהטיפוס של `a` הוא `number` על סמך הערך `1` שנקשר אליו. מאותו רגע הוא אוכף ש-`a` יישאר `number`, ולכן ההשמה של המחרוזת `'nok'` נדחית בזמן קומפילציה."
+  },
+  {
+   "id": "ex3",
+   "type": "mcq",
+   "questionHe": "נתונים הטיפוסים `T1 = { a: string, b: number }` ו-`T2 = { a: string }`. איזו טענה נכונה?",
+   "options": [
+    "‏`T2` הוא תת-טיפוס של `T1`, כי יש בו פחות מפתחות",
+    "‏`T1` הוא תת-טיפוס של `T2`, כי כל ערך שמקיים את האילוצים של `T1` מקיים גם את האילוצים של `T2`",
+    "הטיפוסים זרים (disjoint), כי הם אינם זהים",
+    "הטיפוסים שקולים, כי המפתח `a` משותף לשניהם"
+   ],
+   "correct": 1,
+   "explanationHe": "כל רכיב `key: type` הוא אילוץ. ב-`T1` יש יותר אילוצים, ולכן הוא מציין פחות ערכים — וכל ערך ששייך ל-`T1` (יש בו `a` מחרוזתי ו-`b` מספרי) מקיים בהכרח גם את דרישות `T2`. לכן `T1` הוא תת-טיפוס ממש של `T2`. כיוון ההכלה הפוך לאינטואיציה של \"יותר מפתחות = טיפוס גדול יותר\" — יותר אילוצים פירושם קבוצת ערכים קטנה יותר. הטיפוסים בוודאי אינם זרים ואינם שקולים."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nlet adder = function (inc) {\n    return x => x + inc;\n};\n\nlet a5 = adder(5);\nlet a2 = adder(2);\n\nconsole.log(a5(10));\nconsole.log(a2(10));\nconsole.log(adder(10)(3));\n```",
+   "answerHe": "‏15, אחר כך 12, ואחר כך 13.",
+   "explanationHe": "כל קריאה ל-`adder` יוצרת סגור (closure) חדש שלוכד את הערך הנוכחי של `inc`:‏ `a5` לכד את הערך 5, ולכן `a5(10)` מחזירה 15; `a2` לכד את הערך 2, ולכן `a2(10)` מחזירה 12; `adder(10)(3)` יוצר סגור שלוכד 10 ומפעיל אותו מיד על 3, ומקבל 13. הנקודה המרכזית: הלכידה מתרחשת ברגע חישוב ערך הפונקציה המוחזרת, וכל סגור נושא עמו קשירה נפרדת של `inc`."
+  },
+  {
+   "id": "ex5",
+   "type": "open",
+   "questionHe": "הסבירו את ההבדל בין **טיפוסיות מבנית (structural typing)** לבין **טיפוסיות נומינלית (nominal typing)**, וציינו כיצד ההבדל בא לידי ביטוי בין TypeScript לבין Java. הדגימו בעזרת הטיפוסים `Named = { name: string }` ו-`Person = { name: string, age: number }`.",
+   "answerHe": "בטיפוסיות מבנית, היחס בין טיפוסים נקבע אך ורק על סמך האיברים (members) שלהם: טיפוס `x` תואם לטיפוס `y` אם ל-`y` יש לפחות את אותם האיברים כמו ל-`x`. לכן ב-TypeScript‏ `Person` הוא תת-טיפוס של `Named` באופן אוטומטי — יש בו איבר `name` מחרוזתי (ועוד `age`) — והמהדר מסיק את היחס בלי שהמתכנת הצהיר עליו; אפשר להעביר ערך `Person` לפונקציה שמצפה ל-`Named`. בטיפוסיות נומינלית, כמו ב-Java וב-C++, היחס בין טיפוסים נקבע לפי הצהרות מפורשות של המתכנת (`extends`,‏ `implements`): אם המחלקה Person לא הוצהרה במפורש כיורשת או כמממשת של Named — הקוד המקביל ייכשל בקומפילציה, גם אם המבנה של שני הטיפוסים זהה לחלוטין.",
+   "explanationHe": "נקודות מפתח שחייבות להופיע: (1) מבני = השוואה לפי איברים בלבד; (2) נומינלי = לפי שמות והצהרות יחס מפורשות; (3) ב-TypeScript יחס תת-הטיפוס מוסק אוטומטית על ידי המהדר; (4) בדוגמה — `Person` תת-טיפוס של `Named` ב-TypeScript אך לא ב-Java ללא הצהרה מפורשת."
+  },
+  {
+   "id": "ex6",
+   "type": "mcq",
+   "questionHe": "נתונות שתי פונקציות:\n```typescript\nlet x = () => ({ name: \"Alice\" });\nlet y = () => ({ name: \"Alice\", location: \"Seattle\" });\n```\nאילו מההשמות הבאות תקינות?",
+   "options": [
+    "גם `x = y` וגם `y = x` תקינות",
+    "‏`x = y` תקינה, `y = x` שגיאה",
+    "‏`y = x` תקינה, `x = y` שגיאה",
+    "שתיהן שגיאות, כי טיפוסי ההחזרה שונים"
+   ],
+   "correct": 1,
+   "explanationHe": "כלל התאימות לפונקציות: טיפוס הערך המוחזר של פונקציית ה**מקור** חייב להיות תת-טיפוס של טיפוס הערך המוחזר של ה**יעד** (קו-ווריאנטיות בערך המוחזר). `y` מחזירה `{ name, location }`, שהוא תת-טיפוס של `{ name }` — לכן `x = y` תקינה: כל מי שמשתמש ב-`x` מצפה ל-`name` בלבד ויקבל אותו. לעומת זאת `y = x` שגיאה — משתמש ב-`y` רשאי לגשת ל-`location`, אבל התוצאה של `x()` אינה מכילה אותו."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "מה ההבדל בין הערת הטיפוס `{ a?: string, b: number }` לבין `{ a: any, b: number }`? תנו דוגמה לערך שתקין רק לפי אחת מהן.",
+   "answerHe": "‏`a?: string` פירושו שהתכונה `a` אופציונלית: היא רשאית לא להופיע כלל, אבל אם היא מופיעה — ערכה חייב להיות `string`. לעומת זאת, `a: any` פירושו שהתכונה `a` חייבת להופיע, אבל ערכה יכול להיות כל ערך שהוא. דוגמאות: הערך `{ b: 1 }` תקין לפי `{ a?: string, b: number }` (‏`a` הושמט) אך אינו תקין לפי `{ a: any, b: number }` (‏`a` חסר). לעומת זאת, הערך `{ a: 42, b: 1 }` תקין לפי `{ a: any, b: number }` אך אינו תקין לפי `{ a?: string, b: number }` — כי `a` מופיע עם ערך שאינו מחרוזת.",
+   "explanationHe": "נקודות מפתח: `?` = היתר להיעדרות אך אכיפת הטיפוס בנוכחות; `any` = חובת נוכחות אך ללא אילוץ על הערך. שתי הדוגמאות ההפוכות מוכיחות שאף אחת מההערות אינה מכלילה את השנייה."
+  },
+  {
+   "id": "ex8",
+   "type": "code-reading",
+   "questionHe": "מדוע הקוד הבא נכשל בבדיקת הטיפוסים, וכיצד מתקנים את הגדרת הטיפוס?\n```typescript\ntype BinTree = {\n    root: number;\n    left: BinTree;\n    right: BinTree;\n}\n\nlet bn: BinTree = {\n    root: 1,\n    left: { root: 2 },\n    right: { root: 3 }\n};\n```",
+   "answerHe": "הקוד נכשל כי לפי ההגדרה כל `BinTree` חייב להכיל `left` ו-`right` מטיפוס `BinTree` — כולל העלים `{ root: 2 }` ו-`{ root: 3 }`, שאין להם. הרקורסיה בטיפוס אינה יכולה לעצור, ו-`tsc` מדווח: `Type '{ root: number; }' is missing the following properties from type 'BinTree': left, right`. התיקון: להפוך את התכונות לאופציונליות עם `?` —\n```typescript\ntype BinTree = {\n    root: number;\n    left?: BinTree;\n    right?: BinTree;\n}\n```\nכעת עלה יכול להשמיט את `left` ו-`right`, והרקורסיה נעצרת. (פתרון חלופי: איחוד טיפוסים, שנלמד בהמשך.)",
+   "explanationHe": "השאלה בודקת הבנה של טיפוסים רקורסיביים ושל בעיית עצירת הרקורסיה: בלי `?` אין שום ערך סופי (סופִי בגודלו) ששייך לטיפוס, כי כל צומת מחויב בשני בנים. `left?: BinTree` פירושו — או שהתכונה נעדרת, או שהיא `BinTree` תקין."
+  }
+ ]
+}

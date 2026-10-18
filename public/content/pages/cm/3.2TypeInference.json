@@ -1,0 +1,1720 @@
+{
+ "id": "cm/3.2TypeInference",
+ "kind": "lecture",
+ "sourcePath": "class_material/3.2TypeInference.md",
+ "titleEn": "Type Inference",
+ "titleHe": "הסקת טיפוסים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/3.2TypeInference:0",
+   "depth": 1,
+   "headingEn": "Type Inference",
+   "raw": "# Type Inference\n",
+   "blocks": [],
+   "headingHe": "הסקת טיפוסים"
+  },
+  {
+   "id": "cm/3.2TypeInference:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:1:0",
+     "type": "prose",
+     "en": "After having described the process of **type checking**, we now address a more ambitious task in type analysis: **type inference**.  \nIn this task, we not only verify that a program is safe, we also allow the programmer to leave some (or even all)\nthe type annotations empty - and attempt to guess their value from the structure of the program.\n\n",
+     "hash": "97ddf49cc4f4bace",
+     "he": "לאחר שתיארנו את תהליך **בדיקת הטיפוסים** (type checking), אנחנו פונים כעת למשימה שאפתנית יותר בניתוח טיפוסים: **הסקת טיפוסים** (type inference).\nבמשימה הזו אנחנו לא רק מוודאים שהתוכנית בטוחה — אנחנו גם מאפשרים למתכנת להשאיר חלק מהערות הטיפוס (או אפילו את כולן)\nריקות, ומנסים לנחש את ערכן מתוך המבנה של התוכנית."
+    },
+    {
+     "id": "cm/3.2TypeInference:1:1",
+     "type": "prose",
+     "en": "If we can infer such a consistent set of type annotations for the program, we conclude that the program is type safe and provide the annotations.\nOtherwise, we point to the inconsistency.\n\n",
+     "hash": "fc54c2db27fc8f3c",
+     "he": "אם אנחנו מצליחים להסיק קבוצה עקבית כזו של הערות טיפוס עבור התוכנית, אנחנו מסיקים שהתוכנית בטוחה מבחינת טיפוסים ומספקים את ההערות.\nאחרת, אנחנו מצביעים על אי-העקביות."
+    },
+    {
+     "id": "cm/3.2TypeInference:1:2",
+     "type": "prose",
+     "en": "To enable this process, we consider all the type annotations in the $$L5$$ language as **optional**.\nThis process is similar to the strategy adopted in TypeScript which we reviewed in Chapter 1 (*gradual typing*).\n\n",
+     "hash": "549bf1838842e7ce",
+     "he": "כדי לאפשר את התהליך הזה, אנחנו רואים את כל הערות הטיפוס בשפה $$L5$$ כ**אופציונליות**.\nהתהליך הזה דומה לאסטרטגיה שננקטת ב-TypeScript, שסקרנו בפרק 1 (*טיפוס הדרגתי* — gradual typing)."
+    },
+    {
+     "id": "cm/3.2TypeInference:1:3",
+     "type": "prose",
+     "en": "We first investigate how we can perform the process of type inference manually, and then present an algorithm\nwhich automates this process, relying on a critical operation on substitutions called **unification**.\nThe operation of unification is a fundamental tool in the semantics of programming languages, and we will further expand its use in Chapter 5 (on Logic Programming).\n\n\n",
+     "hash": "03ec9686f9ae67ce",
+     "he": "תחילה נחקור איך אפשר לבצע את תהליך הסקת הטיפוסים באופן ידני, ואחר כך נציג אלגוריתם\nשמבצע את התהליך הזה אוטומטית, תוך הסתמכות על פעולה קריטית על הצבות שנקראת **אוניפיקציה** (unification).\nפעולת האוניפיקציה היא כלי יסודי בסמנטיקה של שפות תכנות, ונרחיב את השימוש בה בפרק 5 (על תכנות לוגי)."
+    }
+   ],
+   "headingHe": "‏PPL 2023"
+  },
+  {
+   "id": "cm/3.2TypeInference:2",
+   "depth": 2,
+   "headingEn": "Type Inference using Type Equations",
+   "raw": "## Type Inference using Type Equations\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:2:0",
+     "type": "prose",
+     "en": "The algorithm we present extends the type checker method by introducing type equations which are constructed for every sub-expression of the expression to be typed.\nA solution to the equations assigns types to every sub-expression. The type checking/inference procedure turns into a type equation solver.\n\n",
+     "hash": "2513a70b5f0b7642",
+     "he": "האלגוריתם שנציג מרחיב את שיטת בודק הטיפוסים על ידי הצגת משוואות טיפוס (type equations), שנבנות עבור כל תת-ביטוי של הביטוי שיש לטפס.\nפתרון של המשוואות מקצה טיפוסים לכל תת-ביטוי. הפרוצדורה של בדיקת/הסקת הטיפוסים הופכת לפותר משוואות טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:2:1",
+     "type": "prose",
+     "en": "Let us first present informally how we would proceed manually to infer the type of some programs.\n\n",
+     "hash": "e768793aaa225fd4",
+     "he": "נציג תחילה באופן לא פורמלי איך היינו מתקדמים ידנית כדי להסיק את הטיפוס של כמה תוכניות."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים באמצעות משוואות טיפוס"
+  },
+  {
+   "id": "cm/3.2TypeInference:3",
+   "depth": 3,
+   "headingEn": "Type Inference: Example 1",
+   "raw": "### Type Inference: Example 1\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:3:0",
+     "type": "prose",
+     "en": "Let us consider an example: we want to type the following expression:\n\n",
+     "hash": "ecec01395821648f",
+     "he": "נתבונן בדוגמה: אנחנו רוצים לטפס את הביטוי הבא:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:1",
+     "type": "code",
+     "en": "```scheme\n((lambda (x) \n   (+ x 3))\n 5)\n```\n\n",
+     "hash": "fa0ebc1210b39e7b",
+     "lang": "scheme",
+     "noteHe": "הביטוי שילווה את כל הדוגמה הראשונה — הפעלה של פרוצדורה אנונימית על הארגומנט `5`. שימו לב למה **אין** כאן: אף הערת טיפוס. אין `[x : number]` ואין טיפוס החזרה, ובכל זאת ברור לנו כבני אדם שהתשובה היא `8` ושהטיפוס הוא `number`. השאלה של השיעור הזה היא איך להגיע למסקנה הזו **אלגוריתמית**, מתוך המבנה של הביטוי בלבד. השוו לשיעור 3.1: שם המתכנת סיפק את כל ההערות ובודק הטיפוסים רק אימת אותן; כאן אנחנו צריכים גם למצוא אותן. שימו לב שהביטוי מכיל שלושה צמתים מורכבים — ההפעלה החיצונית, ה-lambda, וההפעלה `(+ x 3)` — ולכל אחד מהם יהיה משתנה טיפוס משלו."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:2",
+     "type": "prose",
+     "en": "We consider this equation as an AST where all variable declarations have optional type annotations which are not provided.\nThat is, we view this expression as if it had been provided as follows in the $$L5$$ syntax with full type annotations:\n\n",
+     "hash": "e76c1e20e075184f",
+     "he": "אנחנו רואים את המשוואה הזו כ-AST שבו לכל הצהרות המשתנים יש הערות טיפוס אופציונליות שלא סופקו.\nכלומר, אנחנו מתבוננים בביטוי הזה כאילו הוא ניתן לנו כך בתחביר של $$L5$$ עם הערות טיפוס מלאות:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:3",
+     "type": "code",
+     "en": "```scheme\n((lambda ([x : Tx]) : T1\n   (+ x 3))\n 5)\n```\n\n",
+     "hash": "ef3ebecd45b1ea86",
+     "lang": "scheme",
+     "noteHe": "אותו ביטוי בדיוק, אבל עכשיו עם הערות טיפוס — ובהן **משתני טיפוס** במקום טיפוסים ממשיים. `[x : Tx]` אומר \"ל-`x` יש טיפוס כלשהו שנקרא לו `Tx`, ואיננו יודעים עדיין מהו\", ו-`: T1` אחרי רשימת הפרמטרים הוא טיפוס ההחזרה. **זהו הצעד המושגי המרכזי של השיעור**: במקום לומר \"אין כאן הערות טיפוס\", אנחנו אומרים \"יש כאן הערות טיפוס, אבל ערכן לא ידוע\" — וכך המשימה הופכת מ\"לנחש\" ל\"לפתור משוואות\". שימו לב למוסכמת השמות: `Tx` על שם המשתנה `x`, `T1` לטיפוס ההחזרה; בהמשך יתווספו `Tapp`, `Tproc` ו-`T+`. השמות עצמם שרירותיים לחלוטין — מה שחשוב הוא ששני מקומות שחייבים לקבל אותו טיפוס יקבלו את **אותו משתנה**."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:4",
+     "type": "prose",
+     "en": "In this notation, type variables are used to indicate our *lack of knowledge* of the actual types.\nOur objective is to infer the value of the type variables `Tx` and `T1`.\n\n",
+     "hash": "99f3e73db09c136e",
+     "he": "בסימון הזה, משתני טיפוס משמשים כדי לציין את *חוסר הידיעה* שלנו לגבי הטיפוסים בפועל.\nהמטרה שלנו היא להסיק את ערכם של משתני הטיפוס `Tx` ו-`T1`."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:5",
+     "type": "prose",
+     "en": "In addition, we also want to type check the whole expression and verify that every node in the AST can be assigned a consistent type.  \nTherefore, we also introduce type variables for the nodes in the expression:\n",
+     "hash": "c58723453120e155",
+     "he": "בנוסף, אנחנו גם רוצים לבדוק את הטיפוסים של הביטוי כולו ולוודא שאפשר להקצות טיפוס עקבי לכל צומת ב-AST.\nלכן, אנחנו מציגים משתני טיפוס גם עבור הצמתים שבביטוי:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:6",
+     "type": "list",
+     "en": "* `Tapp` for the overall application expression\n* `Tproc` for the lambda expression\n* `T+` for the + application expression\n\n\n",
+     "hash": "46f441e9ad15cb41",
+     "he": "* ‏`Tapp` עבור ביטוי ההפעלה הכולל\n* ‏`Tproc` עבור ביטוי ה-lambda\n* ‏`T+` עבור ביטוי ההפעלה של +"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:7",
+     "type": "prose",
+     "en": "Given these 5 type variables: `Tx, T1, Tapp, Tproc` and `T+`, we derive type constraints (equations) by inspecting the syntactic type of each expression and applying typing rules to each node:\n\n",
+     "hash": "31244f2e21535681",
+     "he": "בהינתן חמשת משתני הטיפוס האלה: `Tx, T1, Tapp, Tproc` ו-`T+`, אנחנו גוזרים אילוצי טיפוס (משוואות) על ידי בחינת הטיפוס התחבירי של כל ביטוי והפעלת כללי טיפוס על כל צומת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:8",
+     "type": "code",
+     "en": "```typescript\nTproc = [Tx -> T1] // By the procedure-typing rule #1\nT1 = T+  // By the procedure-typing rule - the return type of the procedure is that of the last exp in the body #2\n```\n\n",
+     "hash": "1d1a0bfb921584a0",
+     "lang": "typescript",
+     "noteHe": "שתי המשוואות הראשונות, שנגזרות מצומת ה-lambda. הראשונה, `Tproc = [Tx -> T1]`, אומרת שהטיפוס של הפרוצדורה הוא טיפוס פונקציה מ-`Tx` ל-`T1` — כלומר, גם אם איננו יודעים מה `Tx` ומה `T1`, אנחנו כן יודעים את **הצורה** של `Tproc`. השנייה, `T1 = T+`, אומרת שטיפוס ההחזרה שווה לטיפוס הביטוי האחרון בגוף. שימו לב שאלה **משוואות** ולא השמות: אף אחד מהאגפים אינו בהכרח \"ידוע\", ואנחנו רק רושמים מה חייב להתקיים. שימו לב גם לסימני `#1` ו-`#2` בהערות — הדף יחזור אליהם בפסקה הבאה כדי להסביר מאיזה חלק של כלל הפרוצדורה כל אחד נגזר. **כדאי לשנן**: כל צומת lambda תורם בדיוק שתי משוואות."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:9",
+     "type": "prose",
+     "en": "These two constraints are derived from the **procedure-typing rule** which we introduced in the previous lecture:\n",
+     "hash": "2fff61630d4b366f",
+     "he": "שני האילוצים האלה נגזרים מ**כלל הטיפוס של פרוצדורה** שהצגנו בהרצאה הקודמת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:10",
+     "type": "code",
+     "en": "```typescript\nTyping rule Procedure :\nFor every: type environment _Tenv,\n           variables _x1, ..., _xn, n >= 0 (the parameters of the procedure)\n           expressions _e1, ..., _em, m >= 1, (the body of the procedure)\n           type expressions _S1, ...,_Sn, _U1, ...,_Um :\n\nProcedure with parameters (n > 0):\n    If   _Tenv o {_x1:_S1, ..., _xn:_Sn } |- _ei:_Ui for all i = 1..m ,\n    Then _Tenv |- (lambda (_x1 ... _xn ) _e1 ... _em) : [_S1 * ... * _Sn -> _Um]\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _ei:_Ui for all i=1..m,\n    Then _Tenv |- (lambda () _e1 ... _em) : [Empty -> _Um]\n```\n\n",
+     "hash": "b3c9bcb511c1f218",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של פרוצדורה, ישירות מ-3.1 — כדאי לרענן אותו לפני שממשיכים. הפורמט הוא **אם-אז**: החלק שאחרי `If` הוא ההנחות, והחלק שאחרי `Then` הוא המסקנה. הסימן `|-` נקרא \"גוזר\" (turnstile), ו-`_Tenv |- _e : _T` נקרא \"בסביבת הטיפוסים `_Tenv`, הביטוי `_e` הוא מטיפוס `_T`\". הסימן `o` הוא הרחבה של סביבת טיפוסים: `_Tenv o {_x1:_S1, …}` היא הסביבה `_Tenv` עם קשירות נוספות לפרמטרים. קראו את הכלל כך: אם בסביבה שהורחבה בפרמטרים כל ביטויי הגוף מקבלים טיפוסים `_U1…_Um`, אז ל-lambda כולה יש הטיפוס `[_S1 * … * _Sn -> _Um]`. **שימו לב לשני פרטים שהם בדיוק מקור שתי המשוואות**: (1) הצורה `[params -> return]`; (2) טיפוס ההחזרה הוא `_Um` — הטיפוס של הביטוי **האחרון** בגוף, לא של הראשון. שימו לב שהמקרה `n = 0` (בלי פרמטרים) מקבל טיפוס `[Empty -> _Um]`, ולא `[-> _Um]` — הסימן `Empty` הוא חלק מהתחביר."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:11",
+     "type": "prose",
+     "en": "In our case, we consider the procedure `(lambda ([x : Tx] : T1 (+ x 3))`  and we have named the type of the application \n`(+ x 3)` `T+`.\n\n",
+     "hash": "598dc33b1d9b71e5",
+     "he": "במקרה שלנו, אנחנו מתבוננים בפרוצדורה `(lambda ([x : Tx] : T1 (+ x 3))` וקראנו לטיפוס של ההפעלה\n`(+ x 3)` בשם `T+`."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:12",
+     "type": "prose",
+     "en": "The procedure typing rule mandates that:\n",
+     "hash": "cd2c4a3d6df5c173",
+     "he": "כלל הטיפוס של פרוצדורה מחייב ש:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:13",
+     "type": "list",
+     "en": "* The type of the procedure be of the form `[T1 * ... * Tn -> T]` where `Ti` are the types of the formal parameters and `T` the return type.\n* The type of all the expressions in the body be checked\n* The return type of the procedure be the same as the type of the last expression in the body.\n\n",
+     "hash": "332fa9b893cb39a6",
+     "he": "* הטיפוס של הפרוצדורה יהיה מהצורה `[T1 * ... * Tn -> T]`, כאשר `Ti` הם הטיפוסים של הפרמטרים הפורמליים ו-`T` הוא טיפוס ההחזרה.\n* הטיפוסים של כל הביטויים בגוף ייבדקו\n* טיפוס ההחזרה של הפרוצדורה יהיה זהה לטיפוס של הביטוי האחרון בגוף."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:14",
+     "type": "prose",
+     "en": "In general, we derive 2 constraints from each procedure node in the AST:\n",
+     "hash": "ac3490dea2620ca7",
+     "he": "באופן כללי, אנחנו גוזרים 2 אילוצים מכל צומת פרוצדורה ב-AST:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:15",
+     "type": "list",
+     "en": "* One for the type of the procedure as a whole (#1 above)\n* One for the return type of the procedure (#2 above)\n\n",
+     "hash": "51ced11ae9f6d9c0",
+     "he": "* אחד עבור הטיפוס של הפרוצדורה כשלמות (‏#1 למעלה)\n* אחד עבור טיפוס ההחזרה של הפרוצדורה (‏#2 למעלה)"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:16",
+     "type": "prose",
+     "en": "Observe that we did not explicitly take into account the Tenv extension specified in the rule when we derived type equations.\nInstead, we assigned a type variable to the variable declaration (`Tx` for the variable `x` in our case) - and in the continuation of the analysis, \nwe assume that all occurrences of `x` have type `Tx`.  \n\n",
+     "hash": "fdc7ec355d11cacb",
+     "he": "שימו לב שלא לקחנו בחשבון במפורש את ההרחבה של Tenv שמצוינת בכלל כשגזרנו את משוואות הטיפוס.\nבמקום זאת, הקצינו משתנה טיפוס להצהרת המשתנה (`Tx` עבור המשתנה `x` במקרה שלנו) — ובהמשך הניתוח,\nאנחנו מניחים שלכל המופעים של `x` יש טיפוס `Tx`."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:17",
+     "type": "prose",
+     "en": "This assumption relies on the implicit assumption that all the bound variables in the program have been renamed to distinct names to avoid confusion.\n\n",
+     "hash": "2a321171e1ca8c06",
+     "he": "ההנחה הזו נשענת על ההנחה המשתמעת שכל המשתנים הקשורים בתוכנית שונו לשמות שונים זה מזה כדי למנוע בלבול."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:18",
+     "type": "prose",
+     "en": "We then consider the application expression and derive two more constraints:\n\n",
+     "hash": "a35a875ac3ee63f3",
+     "he": "לאחר מכן אנחנו מתבוננים בביטוי ההפעלה וגוזרים שני אילוצים נוספים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:19",
+     "type": "code",
+     "en": "```typescript\nTapp = T1   // By the application-typing rule - T1 is the return type of the procedure\nTx = Number // By the application-typing rule - the arguments have the type of the formal parameters\n```\n\n",
+     "hash": "412b36cd9c3c9cea",
+     "lang": "typescript",
+     "noteHe": "שתי המשוואות מצומת ההפעלה החיצוני. `Tapp = T1` — הטיפוס של ההפעלה כולה שווה לטיפוס ההחזרה של הפרוצדורה שמופעלת. `Tx = Number` — הטיפוס של הפרמטר הפורמלי חייב להתאים לטיפוס של הארגומנט בפועל, וכאן הארגומנט הוא `5`, שהוא `Number`. **שימו לב שזו המשוואה הראשונה שבה מופיע טיפוס קונקרטי** ולא רק משתנים; היא \"העוגן\" שממנו יזלוג מידע לכל השאר. עקבו: `Tx = Number` יחד עם `Tproc = [Tx -> T1]` כבר נותנים `Tproc = [Number -> T1]`. שימו לב שהאילוץ נגזר מכיוון הארגומנט אל הפרמטר — אבל המשוואה סימטרית, ולכן היא עובדת גם כשהטיפוס הידוע הוא דווקא של הפרמטר. זה בדיוק ההבדל מבודק טיפוסים, שבו הכיוון תמיד מהעלים כלפי מעלה."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:20",
+     "type": "prose",
+     "en": "We derive these constraints from the **application typing rule**:\n\n",
+     "hash": "8d8e26363f18040a",
+     "he": "אנחנו גוזרים את האילוצים האלה מ**כלל הטיפוס של הפעלה**:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:21",
+     "type": "code",
+     "en": "```typescript\nTyping rule Application :\nFor every: type environment _Tenv,\n           expressions _f, _e1, ..., _en, n >= 0 , and\n           type expressions _S1, ..., _Sn, _S:\n\nProcedure with parameters (n > 0):\n    If   _Tenv |- _f : [_S1 * ... * _Sn -> _S],\n         _Tenv |- _e1 : _S1, ..., _Tenv |- _en : _Sn\n    Then _Tenv |- (_f _e1 ... _en) : _S\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _f : [Empty -> _S]\n    Then _Tenv |- (_f) : _S\n```\n\n",
+     "hash": "a2efaa0589ca7245",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של הפעלה, גם הוא מ-3.1. קראו אותו כך: אם `_f` הוא מטיפוס פונקציה `[_S1 * … * _Sn -> _S]`, **וגם** כל ארגומנט `_ei` הוא מהטיפוס `_Si` המתאים לו, אז ההפעלה `(_f _e1 … _en)` היא מטיפוס `_S`. שימו לב לשלוש נקודות: (1) הכלל דורש שהאופרטור יהיה מטיפוס פונקציה — אם `_f` הוא `Number`, אין התאמה והבדיקה נכשלת; (2) ההתאמה בין ארגומנטים לפרמטרים היא **אחד לאחד ולפי הסדר**, ולכן גם מספר הארגומנטים נבדק; (3) הטיפוס של ההפעלה הוא טיפוס ההחזרה `_S` בלבד — טיפוסי הארגומנטים \"נצרכים\" ואינם מופיעים בתוצאה. שימו לב שבהסקת טיפוסים אנחנו לא **בודקים** את התנאים האלה אלא **רושמים** אותם כמשוואות, ומשאירים לפותר להחליט אם קיים פתרון."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:22",
+     "type": "prose",
+     "en": "In our case, we apply a procedure of type `Tproc = [Tx -> T1]` to the parameter `5` of type `Number`.\nThe rule mandates that:\n\n",
+     "hash": "a5e9afd7038db4c0",
+     "he": "במקרה שלנו, אנחנו מפעילים פרוצדורה מטיפוס `Tproc = [Tx -> T1]` על הפרמטר `5` מטיפוס `Number`.\nהכלל מחייב ש:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:23",
+     "type": "list",
+     "en": "* The type of the application be the same type as the return type of the procedure `(f e1 ...) = S`\n* The type of the arguments be the same as the type of the formal parameters (`ei = Si`)\n\n",
+     "hash": "1d6dc7cbfc115580",
+     "he": "* הטיפוס של ההפעלה יהיה זהה לטיפוס ההחזרה של הפרוצדורה (`(f e1 ...) = S`)\n* הטיפוס של הארגומנטים יהיה זהה לטיפוס של הפרמטרים הפורמליים (`ei = Si`)"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:24",
+     "type": "prose",
+     "en": "In general, typing an application expression creates `n+1` equations - one for each formal parameter `ei` and one for the type of the whole application.\n\n",
+     "hash": "e9543aaace23c460",
+     "he": "באופן כללי, טיפוס של ביטוי הפעלה יוצר `n+1` משוואות — אחת עבור כל פרמטר פורמלי `ei`, ואחת עבור הטיפוס של ההפעלה כולה."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:25",
+     "type": "prose",
+     "en": "Finally, we consider the primitive application expression `(+ x 3)` and derive three constraints:\n\n",
+     "hash": "33ae45d166192a25",
+     "he": "לבסוף, אנחנו מתבוננים בביטוי ההפעלה של הפרימיטיב `(+ x 3)` וגוזרים שלושה אילוצים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:26",
+     "type": "code",
+     "en": "```typescript\nT+ = Number         // By the primitive-application rule for +: (Number * Number -> Number)\nTx = Number\ntypeof(3) = Number\n```\n\n",
+     "hash": "ef05fad59fc2d87f",
+     "lang": "typescript",
+     "noteHe": "שלוש המשוואות מהפעלת הפרימיטיב `(+ x 3)`, וכאן נכנס המידע החשוב באמת. מכיוון שהטיפוס של `+` ידוע מראש להיות `[Number * Number -> Number]`, כל שלושת החלקים נקבעים בבת אחת: טיפוס ההחזרה `T+ = Number`, האופרנד הראשון `Tx = Number`, והאופרנד השני `typeof(3) = Number`. שימו לב שהמשוואה השלישית היא **בדיקה** ולא הסקה — היא כבר ידועה כנכונה; אילו הייתה כתובה שם מחרוזת, היינו מקבלים `String = Number` וסתירה. שימו לב ש-`Tx = Number` מופיע כאן **שוב**, אחרי שכבר נגזר מכלל ההפעלה — משוואות כפולות הן תופעה נורמלית ובלתי מזיקה. **זו הנקודה שכדאי לשנן**: צמתים של פרימיטיבים הם מקור המידע העיקרי בהסקת טיפוסים, כי הם היחידים שמכניסים טיפוסים קונקרטיים למערכת; בלעדיהם היו לנו רק משוואות בין משתנים, ולא היה מה להסיק."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:27",
+     "type": "prose",
+     "en": "In general, we derive `n+1` type equations for every primitive application analysis: one for each of the `n` parameters\n(our primitives so far have either 1 or 2 parameters) and one for the return type of the primitive application.\n\n",
+     "hash": "a3e446fdbfa0a31d",
+     "he": "באופן כללי, אנחנו גוזרים `n+1` משוואות טיפוס עבור כל ניתוח של הפעלת פרימיטיב: אחת עבור כל אחד מ-`n` הפרמטרים\n(לפרימיטיבים שלנו עד כה יש פרמטר אחד או שניים) ואחת עבור טיפוס ההחזרה של הפעלת הפרימיטיב."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:28",
+     "type": "prose",
+     "en": "Observe how primitive expressions produce extremely rich constraints - they are supremely informative.\nThis is because primitives in our language are strongly typed - they expect a single type for their parameter\nand produce a single type.  \n\n",
+     "hash": "d61689b2f4cb9300",
+     "he": "שימו לב איך ביטויי פרימיטיבים מייצרים אילוצים עשירים במיוחד — הם אינפורמטיביים ביותר.\nזאת מכיוון שהפרימיטיבים בשפה שלנו הם בעלי טיפוסים חזקים — הם מצפים לטיפוס יחיד עבור הפרמטר שלהם\nומייצרים טיפוס יחיד."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:29",
+     "type": "prose",
+     "en": "Primitives in JavaScript are much less informative, because they accept variables of many types and can return many types as well.\n\n\n",
+     "hash": "c76c4dcc91259acc",
+     "he": "פרימיטיבים ב-JavaScript אינפורמטיביים הרבה פחות, מכיוון שהם מקבלים משתנים מטיפוסים רבים ויכולים גם להחזיר טיפוסים רבים."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:30",
+     "type": "prose",
+     "en": "We then solve this system of equations by systematic inspection and susbstitution across all equations when we find the value of a type variable.\n\n",
+     "hash": "03150ef7b43d07a5",
+     "he": "לאחר מכן אנחנו פותרים את מערכת המשוואות הזו על ידי בחינה שיטתית והצבה בכל המשוואות בכל פעם שאנחנו מוצאים את הערך של משתנה טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:3:31",
+     "type": "list",
+     "en": "* By substituting `T+`, we find that `T1=Number`\n* By substituting `Tx` and `T1`, we find that `Tproc = [Number -> Number]`\n* By substituting `T1`, we find that `Tapp = Number`\n\n",
+     "hash": "9ed85cf0612d4e3b",
+     "he": "* על ידי הצבת `T+`, אנחנו מוצאים ש-`T1=Number`\n* על ידי הצבת `Tx` ו-`T1`, אנחנו מוצאים ש-`Tproc = [Number -> Number]`\n* על ידי הצבת `T1`, אנחנו מוצאים ש-`Tapp = Number`"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:32",
+     "type": "prose",
+     "en": "We have thus derived the type of the overall expression.  \nIn addition, we have inferred the type of the variables `Tx` and `T1` and can thus provide a fully annotated version of the program:\n\n",
+     "hash": "0818838656f0af01",
+     "he": "כך גזרנו את הטיפוס של הביטוי כולו.\nבנוסף, הסקנו את הטיפוס של המשתנים `Tx` ו-`T1`, ולכן אנחנו יכולים לספק גרסה מוערת במלואה של התוכנית:"
+    },
+    {
+     "id": "cm/3.2TypeInference:3:33",
+     "type": "code",
+     "en": "```scheme\n((lambda ([x : Number]) : Number\n   (+ x 3))\n 5)\n```\n\n\n",
+     "hash": "527a232042cc2a66",
+     "lang": "scheme",
+     "noteHe": "התוצר הסופי של הסקת הטיפוסים: אותה תוכנית בדיוק שהתחלנו ממנה, אבל עם כל הערות הטיפוס מלאות. השוו לשלושת הגרסאות בדף — הביטוי המקורי בלי הערות, הגרסה עם משתני טיפוס, והגרסה הזו עם `Number` במקומם. **שימו לב לשני התוצרים של התהליך**, כי זו נקודה שנבחנת: (1) הסקנו את הטיפוסים החסרים והחזרנו אותם למתכנת; (2) תוך כדי כך גם **הוכחנו** שהתוכנית בטוחה מבחינת טיפוסים, כי מצאנו פתרון עקבי למערכת. אילו המערכת הייתה חסרת פתרון — למשל אם היינו כותבים `(+ x #t)` — היינו מקבלים סתירה כמו `Number = Boolean`, וזו הייתה שגיאת הטיפוסים. כלומר הסקת טיפוסים **כוללת** בתוכה בדיקת טיפוסים ואינה תחליף לה."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים: דוגמה 1"
+  },
+  {
+   "id": "cm/3.2TypeInference:4",
+   "depth": 3,
+   "headingEn": "Type Inference: Example 2",
+   "raw": "### Type Inference: Example 2\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:4:0",
+     "type": "prose",
+     "en": "Let us type the following expression - which computes the derivative of the function `g` with resolution `gx`:\n\n",
+     "hash": "c6eeed42649473f6",
+     "he": "בואו נטפס את הביטוי הבא — שמחשב את הנגזרת של הפונקציה `g` ברזולוציה `gx`:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:1",
+     "type": "code",
+     "en": "```scheme\n(lambda (g dx)\n  (lambda (x)\n    (/ (- (g (+ x dx)) (g x))\n       dx)))\n```\n\n",
+     "hash": "f9145098c12753a3",
+     "lang": "scheme",
+     "noteHe": "דוגמה מעניינת בהרבה מהראשונה. הביטוי מחשב **נגזרת נומרית**: הנוסחה `(g(x+dx) - g(x)) / dx` היא בדיוק הגדרת הנגזרת עם `dx` סופי במקום גבול. שימו לב למבנה — `lambda` שמחזירה `lambda`: החיצונית מקבלת פונקציה `g` ורזולוציה `dx`, והפנימית מקבלת נקודה `x` ומחזירה את הנגזרת בה. זהו **מפעל של פונקציות**, וגם דוגמה ל-currying. שלוש נקודות שיהפכו את הסקת הטיפוסים כאן למאתגרת: (1) `g` הוא פרמטר שנקרא כפונקציה (`(g x)`), ולכן נצטרך להסיק שהטיפוס שלו הוא טיפוס פונקציה; (2) הערך המוחזר של הביטוי החיצוני הוא פונקציה, ולכן הטיפוס שלו יהיה מקונן — טיפוס בתוך טיפוס; (3) יש כאן שבעה צמתים מורכבים, ולכן הרבה יותר משוואות. שימו לב לשגיאת דפוס בטקסט למעלה: הפרמטר נקרא `dx` בקוד אבל `gx` בהסבר. **הערה על השם**: לפונקציה הזו קוראים בספרות `deriv` והיא דוגמה קלאסית מ-SICP."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:2",
+     "type": "prose",
+     "en": "We consider this equation as an AST where all variable declarations have optional type annotations which are not provided.\nWe view this expression as if it had been provided as follows:\n\n",
+     "hash": "7f6b557dc1dfa6db",
+     "he": "אנחנו רואים את המשוואה הזו כ-AST שבו לכל הצהרות המשתנים יש הערות טיפוס אופציונליות שלא סופקו.\nאנחנו מתבוננים בביטוי הזה כאילו הוא ניתן לנו כך:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:3",
+     "type": "code",
+     "en": "```scheme\n(lambda ([g : Tg] [dx : Tdx]) : T1\n  (lambda ([x : Tx]) : T2\n    (/ (- (g (+ x dx)) (g x))\n       dx)))\n```\n\n",
+     "hash": "3f282b751347b349",
+     "lang": "scheme",
+     "noteHe": "אותה תוכנית עם משתני טיפוס בכל הצהרה. שימו לב שיש כאן **שתי** רמות של lambda ולכן שתי מערכות הערות: החיצונית `([g : Tg] [dx : Tdx]) : T1`, והפנימית `([x : Tx]) : T2`. שימו לב היטב ל-`T1`: הוא טיפוס ההחזרה של ה-lambda החיצונית, וכיוון שהיא מחזירה פונקציה — `T1` יתברר כטיפוס פונקציה שלם ולא כטיפוס אטומי. זו הנקודה שהכי מבלבלת בדוגמה הזו. שימו לב גם ש-`Tg` הוא הטיפוס של **פרמטר** שיתברר כפונקציה: אנחנו לא יודעים מראש ש-`g` היא פונקציה, אבל השימוש `(g x)` בגוף יאלץ זאת דרך כלל ההפעלה. חמשת המשתנים כאן הם רק אלה שמגיעים מהצהרות; בפסקה הבאה יתווספו עוד שבעה עבור הצמתים."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:4",
+     "type": "prose",
+     "en": "Our objective is to infer the value of the type variables `Tg, Tdx, T1, Tx` and `T2`.\n\n",
+     "hash": "4592a1e9744bb04c",
+     "he": "המטרה שלנו היא להסיק את הערך של משתני הטיפוס `Tg, Tdx, T1, Tx` ו-`T2`."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:5",
+     "type": "prose",
+     "en": "In addition, we also want to type check the whole expression and verify that every node in the AST can be assigned a consistent type.  Therefore, we also introduce type variables for the nodes in the expression:\n",
+     "hash": "f701a68e22c49b8a",
+     "he": "בנוסף, אנחנו גם רוצים לבדוק את הטיפוסים של הביטוי כולו ולוודא שאפשר להקצות טיפוס עקבי לכל צומת ב-AST. לכן, אנחנו מציגים משתני טיפוס גם עבור הצמתים שבביטוי:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:6",
+     "type": "list",
+     "en": "* `Tproc1` for the whole lambda expression\n* `Tproc2` for the lambda expression in 2nd line\n* `Tdiv` for the `/` application expression\n* `T-` for the `-` application\n* `Tg1` for the first `g` application\n* `T+` for the `+` application\n* `Tg2` for the second `g` application\n\n\n",
+     "hash": "9fba8576efb03719",
+     "he": "* ‏`Tproc1` עבור ביטוי ה-lambda כולו\n* ‏`Tproc2` עבור ביטוי ה-lambda בשורה השנייה\n* ‏`Tdiv` עבור ביטוי ההפעלה של `/`\n* ‏`T-` עבור ההפעלה של `-`\n* ‏`Tg1` עבור ההפעלה הראשונה של `g`\n* ‏`T+` עבור ההפעלה של `+`\n* ‏`Tg2` עבור ההפעלה השנייה של `g`"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:7",
+     "type": "prose",
+     "en": "Given these 12 type variables: `Tg, Tdx, T1, Tx, T2` and `Tproc1, Tproc2, Tdiv, T-, Tg1, T+, Tg2`, we derive type constraints (equations)\nby inspecting the syntactic type of each expression and applying typing rules to each node:\n\n",
+     "hash": "b729bceadabfaf2c",
+     "he": "בהינתן 12 משתני הטיפוס האלה: `Tg, Tdx, T1, Tx, T2` ו-`Tproc1, Tproc2, Tdiv, T-, Tg1, T+, Tg2`, אנחנו גוזרים אילוצי טיפוס (משוואות)\nעל ידי בחינת הטיפוס התחבירי של כל ביטוי והפעלת כללי טיפוס על כל צומת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:8",
+     "type": "code",
+     "en": "```typescript\nTproc1 = [Tg * Tdx -> T1]   // By the procedure-typing rule\nT1 = Tproc2                 // By the procedure-typing rule: \n                            // the type of the last exp in body is the return type of the proc\n\nTproc2 = [Tx -> T2] // By the procedure-typing rule \nT2 = Tdiv           // By the procedure-typing rule: type of body\n\nTdiv = Number  // By the primitive application typing rule for /\nT- = Number\nTdx = Number\n\nT- = Number    // By the primitive application typing rule for -\nTg1 = Number\nTg2 = Number\n\nTg = [T+ -> Tg1]  // By the application typing rule on application g1\nT+ = T+\n\nT+ = Number     // By the primitive application typing rule for +\nTx = Number\nTdx = Number\n\nTg = [Tx -> Tg2]  // By the application typing rule on application g2\nTx = Tx\n```\n\n",
+     "hash": "b02f5e608d71eb64",
+     "lang": "typescript",
+     "noteHe": "כל מערכת המשוואות של הדוגמה, מקובצת לפי הצומת שממנו נגזרה — עברו עליה קבוצה-קבוצה עם הביטוי המקורי לצידכם. **שתי הקבוצות הראשונות** מגיעות משתי ה-lambda-ות, שתי משוואות כל אחת בדיוק כפי שנאמר קודם: הצורה של הטיפוס ושוויון טיפוס ההחזרה לגוף. שימו לב ל-`T1 = Tproc2` — כאן רואים במפורש שטיפוס ההחזרה של הפונקציה החיצונית הוא **פונקציה** בעצמה. **הקבוצה השלישית** היא הפעלת `/`: שלוש משוואות, כולן `Number`, כי הטיפוס של `/` ידוע. **הרביעית** היא הפעלת `-`, שוב שלוש משוואות `Number`. שימו לב ש-`T- = Number` מופיע פעמיים — פעם כטיפוס ההחזרה של `-` ופעם כאופרנד של `/` — וזה תקין לגמרי. **הקבוצה החמישית** היא המעניינת: `Tg = [T+ -> Tg1]` נגזרת מהפעלת `g` על `(+ x dx)` לפי כלל ההפעלה, וזו הנקודה שבה השפה \"מגלה\" ש-`g` היא פונקציה. **הקבוצה השישית** היא הפעלת `+`, ושוב שלוש משוואות `Number`. **השביעית** היא ההפעלה השנייה `(g x)`, שנותנת `Tg = [Tx -> Tg2]`. שימו לב לשתי המשוואות המוזרות `T+ = T+` ו-`Tx = Tx`: הן טאוטולוגיות חסרות תוכן, והן נוצרו מכיוון שגזרנו את המשוואות **מכנית** לפי הכלל (שדורש שטיפוס הארגומנט ישווה לטיפוס הפרמטר), ובמקרה הזה שני הצדדים כבר נשאו את אותו שם. אלגוריתם אמיתי פשוט משמיט אותן. **הנקודה הקריטית שכדאי לשנן**: `Tg` מופיע בשתי משוואות שונות — `[T+ -> Tg1]` ו-`[Tx -> Tg2]` — ולכן שתי הצורות חייבות להתלכד; זו בדיוק העבודה שהאוניפיקציה תעשה בהמשך השיעור."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:9",
+     "type": "prose",
+     "en": "We then solve this system of equations by systematic inspection and susbstitution across all equations when we find the value of a type variable.\n\n",
+     "hash": "03150ef7b43d07a5",
+     "he": "לאחר מכן אנחנו פותרים את מערכת המשוואות הזו על ידי בחינה שיטתית והצבה בכל המשוואות בכל פעם שאנחנו מוצאים את הערך של משתנה טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:10",
+     "type": "prose",
+     "en": "By substituting `Tg2` and `Tx` with their values, we find:\n\n",
+     "hash": "ab6bab04c54b0c3d",
+     "he": "על ידי הצבת `Tg2` ו-`Tx` בערכיהם, אנחנו מוצאים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:11",
+     "type": "code",
+     "en": "```typescript\nTg = [Number -> Number]\n```\n\n",
+     "hash": "5dd9cc984da573ac",
+     "lang": "typescript",
+     "noteHe": "הצעד הראשון בפתרון. לקחנו את `Tg = [Tx -> Tg2]`, והצבנו בה את שני הערכים שכבר ידועים: `Tx = Number` (מהפעלת `+`) ו-`Tg2 = Number` (מהפעלת `-`). התוצאה: `Tg = [Number -> Number]`. שימו לב מה הרגע קרה — **הסקנו שהפרמטר `g` חייב להיות פונקציה מ-`Number` ל-`Number`**, למרות שאיש לא הצהיר על כך, ורק מפני שהיא נקראת עם ארגומנט שנוסף לו `dx` והתוצאה שלה מוחסרת. זהו כוחה של הסקת טיפוסים בתמצית. שימו לב גם שאותו ערך עצמו יוצא מהמשוואה השנייה `Tg = [T+ -> Tg1]`, כי גם `T+` וגם `Tg1` הם `Number` — שתי הדרכים מסכימות, וזו הבדיקה שהתוכנית עקבית."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:12",
+     "type": "prose",
+     "en": "By substituting `Tdiv` - we get `T2 = Number`, then `Tproc2 = [Number -> Number]`, then `T1 = [Number -> Number]`\nand eventually:\n\n",
+     "hash": "e6443845611009bd",
+     "he": "על ידי הצבת `Tdiv` — אנחנו מקבלים `T2 = Number`, אחר כך `Tproc2 = [Number -> Number]`, אחר כך `T1 = [Number -> Number]`\nולבסוף:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:13",
+     "type": "code",
+     "en": "```typescript\nTproc1 = [[Number -> Number] * Number -> [Number -> Number]]\n```\n\n",
+     "hash": "aba9950874f9e6a2",
+     "lang": "typescript",
+     "noteHe": "התוצאה הסופית, וכדאי לפרק אותה לאט כי הקינון של הסוגריים המרובעים מבלבל. הטיפוס החיצוני הוא `[ ... * ... -> ... ]` — שני פרמטרים וטיפוס החזרה. הפרמטר הראשון הוא `[Number -> Number]` — כלומר **פונקציה**, זהו `Tg`. הפרמטר השני הוא `Number` — זהו `Tdx`. וטיפוס ההחזרה הוא `[Number -> Number]` — פונקציה נוספת, זהו `T1`. **טיפ לקריאת טיפוסים מקוננים**: מצאו קודם את החץ החיצוני ביותר — הוא זה שאינו נמצא בתוך שום זוג סוגריים מרובעים פנימי — וכל מה שלפניו הם הפרמטרים. **שאלת מבחן קלאסית**: לתת ביטוי כזה ולבקש את הטיפוס, או להפך — לתת טיפוס מקונן ולבקש ביטוי שהטיפוס שלו הוא זה. שימו לב שטיפוס מסדר גבוה כזה, שמקבל פונקציה ומחזיר פונקציה, נגזר כאן **כולו אוטומטית** מהמבנה, בלי הערה אחת של המתכנת."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:14",
+     "type": "prose",
+     "en": "This is the expected type for the derivative function, which given a numeric function and a resolution, returns a new numeric function.\n\n",
+     "hash": "674616ce0932f8be",
+     "he": "זהו הטיפוס המצופה עבור פונקציית הנגזרת, שבהינתן פונקציה נומרית ורזולוציה, מחזירה פונקציה נומרית חדשה."
+    },
+    {
+     "id": "cm/3.2TypeInference:4:15",
+     "type": "prose",
+     "en": "In addition, we can provide the fully annotated version of the program:\n\n",
+     "hash": "0b4c6193aa660016",
+     "he": "בנוסף, אנחנו יכולים לספק את הגרסה המוערת במלואה של התוכנית:"
+    },
+    {
+     "id": "cm/3.2TypeInference:4:16",
+     "type": "code",
+     "en": "```scheme\n(lambda ([g : [Number -> Number] [dx : Number]) : [Number -> Number]\n  (lambda ([x : Number]) : Number\n    (/ (- (g (+ x dx)) (g x))\n       dx)))\n```\n\n",
+     "hash": "17dda89d349ba47d",
+     "lang": "scheme",
+     "noteHe": "התוכנית המוערת במלואה. עברו על ההערות: `g` הוא `[Number -> Number]`, `dx` הוא `Number`, טיפוס ההחזרה של החיצונית הוא `[Number -> Number]`, ובפנימית `x` הוא `Number` וטיפוס ההחזרה `Number`. שימו לב שכל ההערות האלה **נגזרו** ולא הוצהרו — זהו התוצר של התהליך. **שימו לב לשגיאת סוגריים במקור**: כתוב `([g : [Number -> Number] [dx : Number])` — חסר סוגר מרובע אחרי ה-`Number` הפנימי; הצורה התקינה היא `([g : [Number -> Number]] [dx : Number])`. זו טעות דפוס בלבד, אבל אם תעתיקו את הקוד הזה לבודק טיפוסים הוא ייכשל, וכדאי להתרגל לספור סוגריים בטיפוסים מקוננים — במבחן זו טעות שמורידה נקודות."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים: דוגמה 2"
+  },
+  {
+   "id": "cm/3.2TypeInference:5",
+   "depth": 3,
+   "headingEn": "Type Inference: Example 3",
+   "raw": "### Type Inference: Example 3\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:5:0",
+     "type": "prose",
+     "en": "Let us type this expression:\n\n",
+     "hash": "fa4bfa1acc68eb07",
+     "he": "בואו נטפס את הביטוי הזה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:1",
+     "type": "code",
+     "en": "```scheme\n(let ((x 1)) \n  (lambda (f y)\n    (f (+ x y)))\n```\n\n",
+     "hash": "28cec4dcbe0cbcc7",
+     "lang": "scheme",
+     "noteHe": "הדוגמה השלישית, ובה שני חידושים: ביטוי `let` (ולכן כלל טיפוס חדש), ופרמטר `f` שהוא פונקציה שהתוצאה שלה **לא נצרכת** על ידי שום פרימיטיב. שימו לב לנקודה השנייה — היא כל העניין של הדוגמה: `(f (+ x y))` הוא הביטוי האחרון בגוף, ולכן הטיפוס שלו הוא טיפוס ההחזרה, אבל שום דבר בתוכנית אינו מכריח אותו להיות `Number` או כל טיפוס קונקרטי אחר. לכן משתנה טיפוס אחד **יישאר לא פתור** בסוף, וזו התוצאה החשובה של הדוגמה. שימו לב לשגיאת סוגריים במקור: חסר סוגר עגול סוגר בסוף הביטוי — יש שלושה סוגרים פותחים ל-`let` וחסר אחד בסגירה."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:2",
+     "type": "prose",
+     "en": "We consider this equation as an AST where all variable declarations have optional type annotations which are not provided.\nWe view this expression as if it had been provided as follows:\n\n",
+     "hash": "7f6b557dc1dfa6db",
+     "he": "אנחנו רואים את המשוואה הזו כ-AST שבו לכל הצהרות המשתנים יש הערות טיפוס אופציונליות שלא סופקו.\nאנחנו מתבוננים בביטוי הזה כאילו הוא ניתן לנו כך:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:3",
+     "type": "code",
+     "en": "```scheme\n(let (([x : Tx] 1)) \n  (lambda ([f : Tf] [y : Ty]) : Tres\n    (f (+ x y)))\n```\n\n",
+     "hash": "6978bda9acdb2386",
+     "lang": "scheme",
+     "noteHe": "אותו ביטוי עם משתני טיפוס. שימו לב לתחביר של הערת טיפוס בתוך `let`: הקשירה נכתבת `([x : Tx] 1)` — הצהרת המשתנה עם ההערה בסוגריים מרובעים, ואחריה ביטוי הערך. שימו לב ש-`Tres` הוא טיפוס ההחזרה של ה-lambda; בהמשך יתווספו משתנים לצמתים עצמם. שימו לב גם ש-`Tf` יתברר כטיפוס פונקציה — בדיוק כמו `Tg` בדוגמה הקודמת — כי `f` נקראת כפונקציה בגוף."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:4",
+     "type": "prose",
+     "en": "Our objective is to infer the value of the type variables `Tx, Tf, Ty` and `Tproc`.\nIn addition, we also want to type check the whole expression and verify that every node in the AST can be assigned a consistent type.  \nTherefore, we also introduce type variables for the nodes in the expression:\n",
+     "hash": "65851f799c873418",
+     "he": "המטרה שלנו היא להסיק את הערך של משתני הטיפוס `Tx, Tf, Ty` ו-`Tproc`.\nבנוסף, אנחנו גם רוצים לבדוק את הטיפוסים של הביטוי כולו ולוודא שאפשר להקצות טיפוס עקבי לכל צומת ב-AST.\nלכן, אנחנו מציגים משתני טיפוס גם עבור הצמתים שבביטוי:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:5",
+     "type": "list",
+     "en": "* `Tlet` for the whole let expression\n* `Tproc` for the lambda expression\n* `Tapp` for the f-application expression\n* `T+` for the +-application expression\n\n",
+     "hash": "f515109b8699eb97",
+     "he": "* ‏`Tlet` עבור ביטוי ה-let כולו\n* ‏`Tproc` עבור ביטוי ה-lambda\n* ‏`Tapp` עבור ביטוי ההפעלה של f\n* ‏`T+` עבור ביטוי ההפעלה של +"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:6",
+     "type": "prose",
+     "en": "Given these 8 type variables: `Tx, Tf, Ty, Tres, Tlet, Tproc, Tapp, T+`, we derive type constraints (equations) by inspecting the syntactic type \nof each expression and applying typing rules to each node:\n\n",
+     "hash": "4df8afcb2c228cb1",
+     "he": "בהינתן 8 משתני הטיפוס האלה: `Tx, Tf, Ty, Tres, Tlet, Tproc, Tapp, T+`, אנחנו גוזרים אילוצי טיפוס (משוואות) על ידי בחינת הטיפוס התחבירי\nשל כל ביטוי והפעלת כללי טיפוס על כל צומת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:7",
+     "type": "code",
+     "en": "```typescript\nTx = Number   // By the let-typing rule - binding of the variable x to a number\nTlet = Tproc  // By the let-typing rule - the type of the let-exp is that of the last exp in body.\n```\n\n",
+     "hash": "f3fbb0a9a2ed5d50",
+     "lang": "typescript",
+     "noteHe": "שתי המשוואות מצומת ה-`let`. `Tx = Number` — הטיפוס של המשתנה הקשור שווה לטיפוס ביטוי הערך שלו, וכאן הערך הוא `1`. `Tlet = Tproc` — הטיפוס של ביטוי ה-`let` כולו שווה לטיפוס הביטוי האחרון בגוף, וכאן הגוף הוא ה-lambda. שימו לב לדמיון המבני לכלל הפרוצדורה: גם שם קיבלנו משוואה אחת על הקשירות ואחת על הגוף. **שימו לב שההערה בקוד מדויקת בניסוחה** — \"the type of the let-exp is that of the last exp in body\" — ולכן אם היו בגוף כמה ביטויים, רק האחרון היה קובע."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:8",
+     "type": "prose",
+     "en": "We use here the let-typing rule, which combines the type constraints of procedure definition and application:\n\n",
+     "hash": "a8c433948c991b35",
+     "he": "אנחנו משתמשים כאן בכלל הטיפוס של let, שמשלב את אילוצי הטיפוס של הגדרת פרוצדורה ושל הפעלה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:9",
+     "type": "code",
+     "en": "```typescript\nTyping rule Let :\nFor every: type environment _Tenv,\n           n >= 0 and m > 0,\n           variables _x1, ..., _xn, (the variables of the bindings in the let-exp)\n           expressions _e1, ..., _en, (the values of the bindings in the let-exp)\n           expressions _b1, ..., _bm, (the body of the let-exp)\n           type expressions _S1, ...,_Sn, _U1, ...,_Um :\n\nIf   _Tenv o {_x1 : _S1, ..., _xn : _Sn } |- _bi : _Ui for all i = 1..m\n     _Tenv |- _ei : _Si for all i = 1..n\nThen _Tenv |- (let ((_x1 _e) ... (_xn _en)) _b1 ... _bm) : _Um\n```\n\n",
+     "hash": "d7376e8922500e38",
+     "lang": "typescript",
+     "noteHe": "כלל הטיפוס של `let`, באותו פורמט אם-אז. קראו אותו כך: אם בסביבה שהורחבה בקשירות (`_x1:_S1, …`) כל ביטויי הגוף מקבלים טיפוסים `_Ui`, **וגם** כל ביטוי ערך `_ei` מקבל את הטיפוס `_Si` של המשתנה שאליו הוא נקשר, אז ל-`let` כולו יש הטיפוס `_Um` — טיפוס הביטוי האחרון בגוף. **הפרט החשוב ביותר**: שימו לב שהתנאי השני, `_Tenv |- _ei : _Si`, מוערך ב-`_Tenv` **בלי** ההרחבה — כלומר ביטויי הערך נבדקים בסביבה החיצונית. זו בדיוק הסמנטיקה של `let` שראינו ב-ps3, שבה `(let ((a 1) (b (* a 3))) …)` נכשל כי `b` אינו רואה את `a`; כאן זה מתבטא ברמת הטיפוסים. **השוו לכלל הפרוצדורה**: הדמיון אינו מקרי — `let` הוא סוכר תחבירי ל-lambda שמופעלת מיד, ולכן הכלל שלו הוא בדיוק שילוב של כלל הפרוצדורה וכלל ההפעלה, כפי שנאמר בפסקה שמעל. **שאלת מבחן קלאסית**: לגזור את כלל ה-`let` מתוך שני הכללים האחרים."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:10",
+     "type": "prose",
+     "en": "In general, applying the let-typing rule yields n+1 constraints, one for each binding in the `let`, and one for the type of the body being equal to the type of the whole let-expression. \n\n",
+     "hash": "19a963a6c97d15d5",
+     "he": "באופן כללי, הפעלת כלל הטיפוס של let מניבה n+1 אילוצים: אחד עבור כל קשירה ב-`let`, ואחד עבור כך שהטיפוס של הגוף שווה לטיפוס של ביטוי ה-let כולו."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:11",
+     "type": "code",
+     "en": "```typescript\nTres = Tapp               // By the procedure-typing rule\nTproc = [Tf * Ty -> Tapp] // By the procedure typing rule\n\nTf = [T+ -> Tapp]         // By the application typing rule\n\nTx = Number   // By the primitive-application + rule\nTy = Number   // By the primitive-application + rule\nT+ = Number   // By the primitive-application + rule\n```\n\n",
+     "hash": "01f99f73831a3542",
+     "lang": "typescript",
+     "noteHe": "שאר המשוואות, לפי צומת. **מה-lambda**: `Tres = Tapp` (טיפוס ההחזרה שווה לגוף) ו-`Tproc = [Tf * Ty -> Tapp]` (הצורה) — שימו לב שהמשוואה השנייה כבר משתמשת ב-`Tapp` ולא ב-`Tres`, כלומר ההצבה הראשונה בוצעה בשקט. **מהפעלת `f`**: `Tf = [T+ -> Tapp]` — כאן מתגלה ש-`f` היא פונקציה, שמקבלת את הטיפוס של `(+ x y)` ומחזירה את הטיפוס של ההפעלה. **מהפעלת `+`**: שלוש משוואות `Number` — `Tx`, `Ty` ו-`T+`. שימו לב ש-`Tx = Number` מופיע כאן שוב אחרי שכבר נגזר מה-`let`, ושתי הגזירות מסכימות — סימן טוב. **הנקודה שממנה נובעת כל הדוגמה**: עברו על כל שש המשוואות וחפשו אחת שקובעת את `Tapp`. אין כזו. `Tapp` מופיע רק באגפים שמאלה או ימינה של משוואות שמקשרות אותו למשתנים אחרים, ואף פרימיטיב אינו \"נוגע\" בו — ולכן הוא יישאר חופשי."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:12",
+     "type": "prose",
+     "en": "We then solve this system of equations by systematic inspection and susbstitution across all equations when we find the value of a type variable.\n\n",
+     "hash": "03150ef7b43d07a5",
+     "he": "לאחר מכן אנחנו פותרים את מערכת המשוואות הזו על ידי בחינה שיטתית והצבה בכל המשוואות בכל פעם שאנחנו מוצאים את הערך של משתנה טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:13",
+     "type": "prose",
+     "en": "By substituting `T+` with its value, we find:\n",
+     "hash": "6b1edf7bcfc8bc60",
+     "he": "על ידי הצבת `T+` בערכו, אנחנו מוצאים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:14",
+     "type": "code",
+     "en": "```typescript\nTf = [Number -> Tapp]\n```\n\n",
+     "hash": "2e74f373742a3509",
+     "lang": "typescript",
+     "noteHe": "הצבנו `T+ = Number` בתוך `Tf = [T+ -> Tapp]` וקיבלנו `Tf = [Number -> Tapp]`. שימו לב לחצי הכוס הריקה: הפרמטר של `f` נקבע — הוא `Number`, כי הארגומנט שמועבר אליו הוא תוצאה של `+` — אבל **טיפוס ההחזרה שלה נשאר `Tapp`**, משתנה. הסיבה פשוטה: התוצאה של `(f …)` מוחזרת ישר החוצה ואינה נצרכת על ידי שום פרימיטיב, ולכן שום דבר בתוכנית אינו מגלה מהי."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:15",
+     "type": "prose",
+     "en": "Then, by substituting `Tf` and `Ty` by their value:\n",
+     "hash": "2bba59c19608ae8b",
+     "he": "אחר כך, על ידי הצבת `Tf` ו-`Ty` בערכיהם:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:16",
+     "type": "code",
+     "en": "```typescript\nTproc = [[Number -> Tapp] * Number -> Tapp]\n```\n\n",
+     "hash": "ad280e799a6c7734",
+     "lang": "typescript",
+     "noteHe": "הטיפוס של ה-lambda, ובו `Tapp` מופיע **פעמיים**: פעם כטיפוס ההחזרה של הפרמטר `f`, ופעם כטיפוס ההחזרה של הפרוצדורה כולה. זו אינה שאריות שלא הצלחנו לפתור אלא **תוצאה משמעותית**: היא אומרת ש\"מה ש-`f` מחזירה הוא בדיוק מה שהפונקציה שלי מחזירה\", ולא משנה מה זה. פונקציה שהטיפוס שלה מכיל משתנה חופשי היא **פולימורפית** (polymorphic) — היא תעבוד עבור כל בחירה של `Tapp`. שימו לב שזהו בדיוק מה ש-TypeScript היה כותב כ-`<T>(f: (n: number) => T, y: number) => T`, ומה ש-Haskell היה כותב כ-`(Int -> a) -> Int -> a`. **הערה חשובה על מה שהקורס שלנו כן ולא עושה**: מערכת ההסקה שלנו מגיעה עד כאן ומשאירה את המשתנה חופשי, אבל היא **אינה** מכלילה אותו לטיפוס פולימורפי אמיתי שאפשר להשתמש בו בכמה טיפוסים שונים באותה תוכנית (מה שנקרא let-polymorphism ב-Hindley-Milner). זו הגבלה שכדאי להכיר ולציין אם נשאלים."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:17",
+     "type": "prose",
+     "en": "We eventually infer that `Tlet = [[Number -> Tapp] * Number -> Tapp]`.\n\n",
+     "hash": "45872ec70c538a62",
+     "he": "בסופו של דבר אנחנו מסיקים ש-`Tlet = [[Number -> Tapp] * Number -> Tapp]`."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:18",
+     "type": "prose",
+     "en": "We also have inferred the type of all the variables which appear in the annotations and can fill the annotations as follows:\n\n",
+     "hash": "fa37fa5d566cdd70",
+     "he": "הסקנו גם את הטיפוס של כל המשתנים שמופיעים בהערות, ולכן אנחנו יכולים למלא את ההערות כך:"
+    },
+    {
+     "id": "cm/3.2TypeInference:5:19",
+     "type": "code",
+     "en": "```scheme\n(let (([x : number] 1)) \n  (lambda ([f : [Number -> Tapp]] [y : Number]) : Tapp\n    (f (+ x y)))\n```\n\n",
+     "hash": "144a7ead7af873fa",
+     "lang": "scheme",
+     "noteHe": "התוכנית עם ההערות שהוסקו — ושימו לב שלא כולן קונקרטיות. `x` הוא `number`, `y` הוא `Number`, אבל `f` הוא `[Number -> Tapp]` וטיפוס ההחזרה הוא `Tapp` — **משתנה טיפוס נשאר בתוצאה הסופית**. זו אינה כשל של האלגוריתם אלא התשובה הנכונה: התוכנית תקינה עבור כל בחירה של `Tapp`. השוו לדוגמאות 1 ו-2, שבהן כל המשתנים נפתרו לטיפוסים קונקרטיים — ההבדל הוא שכאן שום פרימיטיב אינו נוגע בתוצאה של `f`. שימו לב לחוסר עקביות באיות במקור: `[x : number]` ב-n קטנה, בעוד שבכל שאר הדף כתוב `Number` ב-N גדולה; וגם כאן חסר סוגר עגול בסוף, כמו בגרסה המקורית."
+    },
+    {
+     "id": "cm/3.2TypeInference:5:20",
+     "type": "prose",
+     "en": "We observe that the resulting type for `Tlet` includes type variables.  \nThis is because this expression is polymorphic - we can compute this program for any type `Tapp` and ensure that no typing error will be met.\n\n",
+     "hash": "1ff5bc3fc06c714b",
+     "he": "אנחנו מבחינים שהטיפוס שהתקבל עבור `Tlet` כולל משתני טיפוס.\nזאת מכיוון שהביטוי הזה הוא פולימורפי — אנחנו יכולים לחשב את התוכנית הזו עבור כל טיפוס `Tapp` ולהבטיח שלא תתרחש שגיאת טיפוס."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים: דוגמה 3"
+  },
+  {
+   "id": "cm/3.2TypeInference:6",
+   "depth": 3,
+   "headingEn": "Type Inference: Example 4",
+   "raw": "### Type Inference: Example 4\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:6:0",
+     "type": "prose",
+     "en": "We want to type the procedure `(lambda (f x) (f x x))` using type equations.\n\n",
+     "hash": "4f27ea71f8152f2a",
+     "he": "אנחנו רוצים לטפס את הפרוצדורה `(lambda (f x) (f x x))` באמצעות משוואות טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:1",
+     "type": "prose",
+     "en": "We consider this equation as an AST where all variable declarations have optional type annotations which are not provided.\nWe view this expression as if it had been provided as follows:\n\n",
+     "hash": "7f6b557dc1dfa6db",
+     "he": "אנחנו רואים את המשוואה הזו כ-AST שבו לכל הצהרות המשתנים יש הערות טיפוס אופציונליות שלא סופקו.\nאנחנו מתבוננים בביטוי הזה כאילו הוא ניתן לנו כך:"
+    },
+    {
+     "id": "cm/3.2TypeInference:6:2",
+     "type": "code",
+     "en": "```scheme\n(lambda ([f : Tf] [x : Tx]) : Tres (f x x))\n```\n\n",
+     "hash": "4c694db16d79f451",
+     "lang": "scheme",
+     "noteHe": "הביטוי עם משתני טיפוס, בשורה אחת. שימו לב לפרט הקטן שהוא כל העניין: `(f x x)` מפעיל את `f` על **אותו** משתנה `x` פעמיים. לכן שני הפרמטרים של `f` יקבלו את אותו משתנה טיפוס `Tx` — לא שני משתנים שונים. זה מה שיוליד את הטיפוס המשותף בשני מקומות בתוצאה, ובגללו הדוגמה מעניינת."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:3",
+     "type": "prose",
+     "en": "Our objective is to infer the value of the type variables `Tf` and `Tx`.\nIn addition, we also want to type check the whole expression and verify that every node in the AST can be assigned a consistent type. \nTherefore, we also introduce type variables for the application node `(f x x)` (`Tapp`) and for the overall procedure `(lambda (f x) (f x x))` (`Tproc`).\n\n",
+     "hash": "a0d0aacb4a945a53",
+     "he": "המטרה שלנו היא להסיק את הערך של משתני הטיפוס `Tf` ו-`Tx`.\nבנוסף, אנחנו גם רוצים לבדוק את הטיפוסים של הביטוי כולו ולוודא שאפשר להקצות טיפוס עקבי לכל צומת ב-AST.\nלכן, אנחנו מציגים משתני טיפוס גם עבור צומת ההפעלה `(f x x)` (‏`Tapp`) ועבור הפרוצדורה כולה `(lambda (f x) (f x x))` (‏`Tproc`)."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:4",
+     "type": "prose",
+     "en": "Given these 4 type variables: `Tf, Tx, Tapp, Tproc`, we derive type constraints (equations) by inspecting the syntactic type of each expression and applying typing rules to each node:\n\n",
+     "hash": "f1462d7136dc4e29",
+     "he": "בהינתן ארבעת משתני הטיפוס האלה: `Tf, Tx, Tapp, Tproc`, אנחנו גוזרים אילוצי טיפוס (משוואות) על ידי בחינת הטיפוס התחבירי של כל ביטוי והפעלת כללי טיפוס על כל צומת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:6:5",
+     "type": "code",
+     "en": "```typescript\nTf = [Tx * Tx -> Tapp]     // By the application typing rule\nTproc = [Tf * Tx -> Tres]  // By the procedure typing rule\nTres = Tapp                // By the procedure typing rule\n```\n\n",
+     "hash": "ba31eee3bc7e59d4",
+     "lang": "typescript",
+     "noteHe": "שלוש משוואות בלבד, ואין באף אחת מהן טיפוס קונקרטי — אין כאן שום פרימיטיב. `Tf = [Tx * Tx -> Tapp]` מכלל ההפעלה: `f` מופעל על שני ארגומנטים ששניהם `Tx`, והתוצאה היא `Tapp`. `Tproc = [Tf * Tx -> Tres]` מכלל הפרוצדורה (הצורה), ו-`Tres = Tapp` מכלל הפרוצדורה (טיפוס ההחזרה שווה לגוף). שימו לב ש-`Tx` מופיע **פעמיים** במשוואה הראשונה — זו ההשלכה הישירה של `(f x x)`. **הנקודה החשובה**: מכיוון שאין פרימיטיבים, אין שום \"עוגן\" שיכניס `Number` או טיפוס קונקרטי אחר למערכת, ולכן הפתרון יישאר במשתנים. השוו לדוגמה 1, שבה `(+ x 3)` קבע מיד ש-`Tx = Number`."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:6",
+     "type": "prose",
+     "en": "Crucially, the same variables appear in the two equations.  Our objective is to find a solution which assigns\na value to the variables to make the whole system consistent.  Alternatively, if there is a problem in the type \nof the expressions, we must detect the conflict.\n\n",
+     "hash": "933f1747ca3fd9ad",
+     "he": "באופן קריטי, אותם משתנים מופיעים בשתי המשוואות. המטרה שלנו היא למצוא פתרון שמקצה\nערך למשתנים כך שהמערכת כולה תהיה עקבית. לחלופין, אם יש בעיה בטיפוס\nשל הביטויים, עלינו לזהות את הסתירה."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:7",
+     "type": "prose",
+     "en": "Our solution consists of inspecting each equation, and to try to make the two sides of the equation equal by applying \nconsistent substitution on both sides (this approach is quite similar to the way we solve algebraic equations).\n\n",
+     "hash": "cedee7fb6be7721f",
+     "he": "הפתרון שלנו מורכב מבחינה של כל משוואה, ומניסיון להשוות את שני אגפי המשוואה על ידי הפעלת\nהצבה עקבית על שני האגפים (הגישה הזו דומה מאוד לדרך שבה אנחנו פותרים משוואות אלגבריות)."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:8",
+     "type": "prose",
+     "en": "In our case, the solution is provided by replacing `Tf` by its value in the right-hand side of the second equation, yielding:\n\n",
+     "hash": "351f19e605e85afa",
+     "he": "במקרה שלנו, הפתרון מתקבל על ידי החלפת `Tf` בערכו באגף הימני של המשוואה השנייה, ומניב:"
+    },
+    {
+     "id": "cm/3.2TypeInference:6:9",
+     "type": "code",
+     "en": "```typescript\nTproc = [[Tx * Tx -> Tapp] * Tx -> Tapp].\n```\n\n",
+     "hash": "252cd405ee9c1b46",
+     "lang": "typescript",
+     "noteHe": "התוצאה. הצבנו את `Tf = [Tx * Tx -> Tapp]` לתוך `Tproc = [Tf * Tx -> Tres]` (ואת `Tres = Tapp`) וקיבלנו טיפוס מקונן. פרקו אותו: החץ החיצוני מפריד בין שני פרמטרים — `[Tx * Tx -> Tapp]` (זהו `f`) ו-`Tx` (זהו `x`) — לבין טיפוס ההחזרה `Tapp`. שימו לב ש-`Tx` מופיע **שלוש** פעמים ו-`Tapp` **פעמיים**, וכל המופעים חייבים לקבל את אותו ערך. זהו טיפוס פולימורפי: לא הצלחנו לקבוע מהו `Tx`, אבל כן קבענו את כל **הקשרים** ביניהם — וזה כל מה שנדרש כדי להבטיח בטיחות טיפוסים. שימו לב לנקודה בסוף השורה בקוד: היא חלק מהמשפט בטקסט המקורי ולא חלק מהטיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:10",
+     "type": "prose",
+     "en": "In addition, we have inferred the required types for all variables in the expression, and can produce the fully annotated version:\n\n",
+     "hash": "fd015c3e7bf81ca9",
+     "he": "בנוסף, הסקנו את הטיפוסים הנדרשים עבור כל המשתנים בביטוי, ואנחנו יכולים לייצר את הגרסה המוערת במלואה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:6:11",
+     "type": "code",
+     "en": "```scheme\n(lambda ([f : [Tx * Tx -> Tapp]] [x : Tx]) : [[Tx * Tx -> Tapp] * Tx -> Tapp]\n  (f x x))\n```\n\n",
+     "hash": "f277e1d976e149ce",
+     "lang": "scheme",
+     "noteHe": "התוכנית המוערת. **שימו לב לשגיאה במקור** — הערת טיפוס ההחזרה של ה-lambda כתובה כ-`[[Tx * Tx -> Tapp] * Tx -> Tapp]`, אבל זהו הטיפוס של `Tproc`, כלומר של הפרוצדורה **כולה**, ולא של הערך שהיא מחזירה. טיפוס ההחזרה הנכון הוא `Tapp` (שהרי `Tres = Tapp`), והצורה הנכונה של השורה היא `(lambda ([f : [Tx * Tx -> Tapp]] [x : Tx]) : Tapp`. **הבחנה שכדאי לשמור**: ההערה שאחרי הנקודתיים בשורת ה-lambda היא תמיד טיפוס **ההחזרה**, לא טיפוס הפרוצדורה; קל להתבלבל, וזו בדיוק טעות שנקודות יורדות עליה במבחן. השוו לדוגמאות הקודמות בדף, שבהן ההערה אחרי הנקודתיים היא באמת טיפוס ההחזרה בלבד."
+    },
+    {
+     "id": "cm/3.2TypeInference:6:12",
+     "type": "prose",
+     "en": "We observe that the resulting expression still contains type variables (`Tx` and `Tapp`).\nThis is ok - it means the procedure we have typed is *polymorphic* - it can work on any type pairs `(Tx, Tapp)` and still be executed without leading to a typing error.\n\n",
+     "hash": "64e0ff725e74f3e2",
+     "he": "אנחנו מבחינים שהביטוי שהתקבל עדיין מכיל משתני טיפוס (`Tx` ו-`Tapp`).\nזה בסדר — זה אומר שהפרוצדורה שטיפסנו היא *פולימורפית*: היא יכולה לעבוד על כל זוג טיפוסים `(Tx, Tapp)` ובכל זאת להתבצע בלי להוביל לשגיאת טיפוס."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים: דוגמה 4"
+  },
+  {
+   "id": "cm/3.2TypeInference:7",
+   "depth": 3,
+   "headingEn": "Type Inference: Example 5",
+   "raw": "### Type Inference: Example 5\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:7:0",
+     "type": "prose",
+     "en": "Let us now consider a case where type inference fails:\n\n",
+     "hash": "53e181f2b0467da8",
+     "he": "בואו נתבונן כעת במקרה שבו הסקת הטיפוסים נכשלת:"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:1",
+     "type": "code",
+     "en": "```scheme\n(lambda (x) (x x))\n```\n\n",
+     "hash": "9661cc80e7708b01",
+     "lang": "scheme",
+     "noteHe": "‏`(lambda (x) (x x))` — הביטוי המפורסם ביותר בתורת הטיפוסים, וכדאי להכיר אותו בשם. פונקציה שמפעילה את הפרמטר שלה **על עצמו**. שימו לב שמבחינה תחבירית אין כאן שום פסול, ואפילו מבחינת הרצה: ב-Scheme לא-מטופסת הביטוי הזה תקין לחלוטין, וזה בדיוק מה שמאפשר את קומבינטור `Ω = ((lambda (x) (x x)) (lambda (x) (x x)))` שרץ לנצח, ואת קומבינטור Y שראינו בהקשר של רקורסיה. **הנקודה של הדוגמה**: מערכת טיפוסים תקינה מוכרחה לדחות את הביטוי הזה, ולכן היא בהכרח דוחה גם תוכניות שהיו רצות בסדר. זו הדגמה קונקרטית לכך שבדיקת טיפוסים היא **שמרנית** — היא פוסלת יותר ממה שבאמת שגוי, וזה מחיר בלתי נמנע (נובע מאי-כריעות). ההבחנה הזו הוצגה ב-3.1 והיא שאלת מבחן שכיחה."
+    },
+    {
+     "id": "cm/3.2TypeInference:7:2",
+     "type": "prose",
+     "en": "The annotated AST is:\n\n",
+     "hash": "90a639ea9af878ea",
+     "he": "ה-AST המוער הוא:"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:3",
+     "type": "code",
+     "en": "```scheme\n(lambda ([x : Tx]) : T1 (x x))\n```\n\n",
+     "hash": "1988985c62a2733f",
+     "lang": "scheme",
+     "noteHe": "אותו ביטוי עם שני משתני טיפוס בלבד: `Tx` לפרמטר ו-`T1` לטיפוס ההחזרה. שימו לב שכאן, בשונה מדוגמה 4, יש רק **משתנה אחד** לשני התפקידים של `x` — הוא גם האופרטור וגם האופרנד באותה הפעלה. זה בדיוק המקור לבעיה שתתגלה מיד."
+    },
+    {
+     "id": "cm/3.2TypeInference:7:4",
+     "type": "prose",
+     "en": "The additional type variables are:\n\n",
+     "hash": "2d7adfa954bf4e10",
+     "he": "משתני הטיפוס הנוספים הם:"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:5",
+     "type": "list",
+     "en": "* `Tproc` for the whole lambda expression\n* `Tapp` for the application expression `(x x)`\n\n",
+     "hash": "c309332f4ac7df6d",
+     "he": "* ‏`Tproc` עבור ביטוי ה-lambda כולו\n* ‏`Tapp` עבור ביטוי ההפעלה `(x x)`"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:6",
+     "type": "prose",
+     "en": "We derive type equations:\n\n",
+     "hash": "16db1758e19dc959",
+     "he": "אנחנו גוזרים משוואות טיפוס:"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:7",
+     "type": "code",
+     "en": "```typescript\nTproc = [Tx -> T1]   // By the procedure-typing rule (shape of the procedure type)\nT1 = Tapp            // By the procedure typing rule (type of the last exp in the body)\n\nTx = [Tx -> Tapp]    // By the application-typing rule on (x x) (type of rator)\nTx = Tx              // By the application-typing rule on (x x) (type of rand)\n```\n\n",
+     "hash": "32670d5e12ed8372",
+     "lang": "typescript",
+     "noteHe": "ארבע המשוואות. שתי הראשונות שגרתיות — הצורה של הפרוצדורה וטיפוס ההחזרה. **השלישית היא הבעייתית**: `Tx = [Tx -> Tapp]`. עקבו מאיפה היא באה: בהפעלה `(x x)`, ה-`x` השמאלי הוא האופרטור, ולכן כלל ההפעלה דורש שהטיפוס שלו יהיה טיפוס פונקציה מטיפוס האופרנד לטיפוס התוצאה; אבל האופרנד הוא **גם** `x`, ולכן טיפוס הפרמטר הוא `Tx` עצמו. הרביעית, `Tx = Tx`, היא הטאוטולוגיה המכנית שראינו גם קודם. שימו לב שאין כאן שום סתירה מהסוג המובן מאליו — לא קיבלנו `Number = Boolean`; שני האגפים במשוואה השלישית הם ביטויי טיפוס תקינים לגמרי. **הכשל הוא מסוג אחר**: משתנה שמופיע בתוך עצמו. הפסקה הבאה מסבירה בדיוק למה זה בלתי אפשרי."
+    },
+    {
+     "id": "cm/3.2TypeInference:7:8",
+     "type": "prose",
+     "en": "There is no solution to this system of equations - because we cannot solve the constraint:\n\n",
+     "hash": "708770f770d83eba",
+     "he": "אין פתרון למערכת המשוואות הזו — מכיוון שאיננו יכולים לפתור את האילוץ:"
+    },
+    {
+     "id": "cm/3.2TypeInference:7:9",
+     "type": "code",
+     "en": "```typescript\nTx = [Tx -> Tapp]\n```\n\n\n",
+     "hash": "49666063db4b396e",
+     "lang": "typescript",
+     "noteHe": "האילוץ הבלתי פתיר, ושווה להבין למה בדיוק. `Tx` מופיע **בתוך** הביטוי שאמור להיות שווה לו. נסו להציב: אם `Tx = [Tx -> Tapp]`, אז נציב שוב את `Tx` בתוך עצמו ונקבל `Tx = [[Tx -> Tapp] -> Tapp]`, ואז `[[[Tx -> Tapp] -> Tapp] -> Tapp]`, וכן הלאה לנצח. אין ביטוי טיפוס **סופי** שמקיים את המשוואה. **זה נקרא בדיקת ההיקרות (occurs check)**, והוא אחד משני מקורות הכשל היחידים באוניפיקציה — כדאי לשנן את שניהם: (1) התנגשות בין שני טיפוסים קונקרטיים שונים, למשל `Number = Boolean`; (2) משתנה שמופיע בתוך הביטוי שהוא מאוחד איתו, כמו כאן. השוו לאלגברה: `x = x + 1` אינו סתירה של סימנים אלא פשוט אין לו פתרון. **שאלת מבחן קלאסית**: לתת ביטוי ולשאול אם הסקת הטיפוסים מצליחה, ואם לא — לזהות איזה משני סוגי הכשל התרחש. שימו לב שאלגוריתם האוניפיקציה שנראה בהמשך השיעור מבצע את הבדיקה הזו במפורש."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים: דוגמה 5"
+  },
+  {
+   "id": "cm/3.2TypeInference:8",
+   "depth": 2,
+   "headingEn": "Type Inference Algorithm using Type Equations",
+   "raw": "## Type Inference Algorithm using Type Equations\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:8:0",
+     "type": "prose",
+     "en": "Let us now present the algorithm which performs type inference by constructing and solving type equations. \n\n",
+     "hash": "3cdbd039c559320a",
+     "he": "בואו נציג כעת את האלגוריתם שמבצע הסקת טיפוסים על ידי בנייה ופתרון של משוואות טיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:8:1",
+     "type": "prose",
+     "en": "Type equation solvers use the unification algorithm for unifying type expressions and producing a consistent\nsubstitution of type variables which makes all equations equal.\n\n",
+     "hash": "8722833e13de7c1d",
+     "he": "פותרי משוואות טיפוס משתמשים באלגוריתם האוניפיקציה כדי לאחד ביטויי טיפוס ולייצר הצבה עקבית\nשל משתני טיפוס שהופכת את כל המשוואות לשוות."
+    },
+    {
+     "id": "cm/3.2TypeInference:8:2",
+     "type": "prose",
+     "en": "The method has four stages:\n",
+     "hash": "07932ed8f7dde4f8",
+     "he": "לשיטה יש ארבעה שלבים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:8:3",
+     "type": "list",
+     "en": "1. Rename bound variables in `e`.\n2. Assign type variables to all sub-expressions.\n3. Construct type equations.\n4. Solve the equations.\n\n\n\n",
+     "hash": "2cea070e915410c0",
+     "he": "1. שינוי שם של המשתנים הקשורים ב-`e`.\n2. הקצאת משתני טיפוס לכל תת-הביטויים.\n3. בניית משוואות טיפוס.\n4. פתרון המשוואות."
+    }
+   ],
+   "headingHe": "אלגוריתם הסקת טיפוסים באמצעות משוואות טיפוס"
+  },
+  {
+   "id": "cm/3.2TypeInference:9",
+   "depth": 3,
+   "headingEn": "Type Substitutions and Unifiers",
+   "raw": "### Type Substitutions and Unifiers\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:9:0",
+     "type": "prose",
+     "en": "In order to describe the process of type equations more formal, we introduce the definition of type substitutions and unifiers.\nThe notions of substitutions and renaming we will use are identical to those we introduced when describing the operational semantics of the language.  \nThe notion of unifier builds on those.\n\n",
+     "hash": "7bdd7070a0404ed0",
+     "he": "כדי לתאר את תהליך משוואות הטיפוס באופן פורמלי יותר, אנחנו מציגים את ההגדרה של הצבות טיפוס ושל מאחדים (unifiers).\nמושגי ההצבה ושינוי השם שנשתמש בהם זהים לאלה שהצגנו כשתיארנו את הסמנטיקה התפעולית של השפה.\nמושג המאחד נבנה מעליהם."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:1",
+     "type": "prose",
+     "en": "#### Definition: Type Substitution\n\n",
+     "hash": "4acb5ec7119f6331",
+     "he": "#### הגדרה: הצבת טיפוס (Type Substitution)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:2",
+     "type": "prose",
+     "en": "A type-substitution `s` is a mapping from a finite set of type variables to a finite set of type expressions, \nsuch that `s(T)` does not include `T`. A type-binding is a pair `T; s(T)`.\n\n",
+     "hash": "8ec171cdc43f3279",
+     "he": "הצבת-טיפוס `s` היא מיפוי מקבוצה סופית של משתני טיפוס לקבוצה סופית של ביטויי טיפוס,\nכך ש-`s(T)` אינו כולל את `T`. קשירת-טיפוס היא זוג `T; s(T)`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:3",
+     "type": "prose",
+     "en": "Substitutions are written using set notions: `{T1=Number, T2=[[Number->T3]->T3]}`.\n\n",
+     "hash": "90554ef0377b814f",
+     "he": "הצבות נכתבות בסימון של קבוצות: `{T1=Number, T2=[[Number->T3]->T3]}`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:4",
+     "type": "prose",
+     "en": "`{T1=Number, T2=[[Number->T3]->T2]}` is an illegal substitution because `T2` occurs in `s(T2)`.\n\n\n",
+     "hash": "3596df277d83d512",
+     "he": "‏`{T1=Number, T2=[[Number->T3]->T2]}` היא הצבה **לא חוקית**, מכיוון ש-`T2` מופיע ב-`s(T2)`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:5",
+     "type": "prose",
+     "en": "#### Definition: Substitution Application \n\n",
+     "hash": "8dccdee344fe493e",
+     "he": "#### הגדרה: הפעלת הצבה (Substitution Application)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:6",
+     "type": "prose",
+     "en": "The application of a type-substitution `s` to a type expression `T`, denoted `T o s` (or just `Ts`), \nconsistently replaces all occurrences of type variables `Ti` in `T` by their mapped type expressions `s(Ti)`. \nThe replacement is simultaneous.\n\n",
+     "hash": "abfecf24f280db6e",
+     "he": "ההפעלה של הצבת-טיפוס `s` על ביטוי טיפוס `T`, המסומנת `T o s` (או פשוט `Ts`),\nמחליפה באופן עקבי את כל המופעים של משתני הטיפוס `Ti` ב-`T` בביטויי הטיפוס שממופים אליהם, `s(Ti)`.\nההחלפה היא סימולטנית."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:7",
+     "type": "prose",
+     "en": "Example:\n\n",
+     "hash": "872887e563e75957",
+     "he": "דוגמה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:8",
+     "type": "prose",
+     "en": "`[[T1->T2]->T2] o {T1=Boolean, T2=[T3->T3]} = [[Boolean->[T3->T3]] -> [T3->T3]]`\n\n\n",
+     "hash": "81bba2b298db22a6",
+     "he": "`[[T1->T2]->T2] o {T1=Boolean, T2=[T3->T3]} = [[Boolean->[T3->T3]] -> [T3->T3]]`"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:9",
+     "type": "prose",
+     "en": "#### Definition: Type Instance, More General Relation\n\n",
+     "hash": "d7d82d5eb49739d0",
+     "he": "#### הגדרה: מופע טיפוס, יחס הכלליות (Type Instance, More General Relation)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:10",
+     "type": "prose",
+     "en": "We say that a type expression `T'` is an instance of a type expression `T`, if there is a type substitution `s` such that\n`T o s = T'`. \n\n",
+     "hash": "84c9ebcd239cef04",
+     "he": "אנחנו אומרים שביטוי טיפוס `T'` הוא מופע (instance) של ביטוי טיפוס `T`, אם קיימת הצבת טיפוס `s` כך ש-\n`T o s = T'`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:11",
+     "type": "prose",
+     "en": "`T` is more general than `T'`, if `T'` is an instance of `T`. \n\n",
+     "hash": "5d295e12e07b5f1d",
+     "he": "‏`T` כללי יותר מ-`T'`, אם `T'` הוא מופע של `T`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:12",
+     "type": "prose",
+     "en": "The following type expressions are instances of `[T -> T]`:\n",
+     "hash": "a936d7f796b5dc70",
+     "he": "ביטויי הטיפוס הבאים הם מופעים של `[T -> T]`:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:13",
+     "type": "code",
+     "en": "```typescript\n[Number -> Number] = [T->T] o {T = Number}\n[Symbol -> Symbol] = [T->T] o {T = Symbol}\n[[Number->Number] -> [Number->Number]] = [T->T] o {T = [Number->Number]}\n[[Number->T1] -> [Number->T1]] = [T->T] o {T = [Number->T1]}\n```\n\n",
+     "hash": "a570e6ae5c1cab9e",
+     "lang": "typescript",
+     "noteHe": "ארבעה מופעים של אותו טיפוס כללי `[T -> T]` — פונקציה שמחזירה את אותו טיפוס שהיא מקבלת. שימו לב לתבנית: כל שורה מציגה מופע קונקרטי **בשוויון** לצד ההצבה שמייצרת אותו. השורה הראשונה מציבה `T = Number`, השנייה `T = Symbol`, השלישית `T = [Number->Number]` — כלומר גם **טיפוס פונקציה** הוא בחירה לגיטימית עבור `T`, וזו נקודה שקל לפספס. השורה הרביעית היא המעניינת: `T = [Number->T1]` מכילה בעצמה משתנה טיפוס, ולכן התוצאה `[[Number->T1] -> [Number->T1]]` היא מופע **וגם** נשארת כללית. **הרעיון שכדאי לשנן**: הצבה תמיד מקטינה או משמרת כלליות, ולעולם אינה מגדילה אותה. לכן היחס \"כללי יותר\" מסדר את ביטויי הטיפוס בסדר חלקי, שבראשו טיפוס עם משתנים בלבד ובתחתיתו טיפוסים קונקרטיים לגמרי. זה הבסיס למושג \"המאחד הכללי ביותר\" שיופיע בהמשך."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:14",
+     "type": "prose",
+     "en": "#### Definition: Combination (composition) of Type Substitutions\n\n",
+     "hash": "65695dd12bc42ccc",
+     "he": "#### הגדרה: שילוב (הרכבה) של הצבות טיפוס — Combination (composition) of Type Substitutions"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:15",
+     "type": "prose",
+     "en": "The combination of type-substitutions `s` and `s'`, denoted `s o s'`, is an operation that results in a type-substitution, or fails.\n\n",
+     "hash": "d7f2b8174c12e73e",
+     "he": "השילוב של הצבות-טיפוס `s` ו-`s'`, המסומן `s o s'`, הוא פעולה שתוצאתה הצבת-טיפוס, או שהיא נכשלת."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:16",
+     "type": "prose",
+     "en": "It is defined by:\n\n",
+     "hash": "06dc8bab1e7b6b0b",
+     "he": "היא מוגדרת כך:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:17",
+     "type": "list",
+     "en": "1. `s'` is applied to the type-expressions of `s`, i.e., for every variable `T'` for which `s'(T')` is defined, occurrences of `T'` in type expressions in `s` are replaced by `s'(T')`.\n3. A variable `T'` in `s'`, for which `s(T)` is defined, is removed from the domain of `s'`, i.e., `s'(T)` is not defined on it anymore.\n4. The modified `s'` is added to `s`.\n5. Identity bindings, i.e., `s(T) = T`, are removed.\n6. If for some variable, `(s o s')(T)` includes `T`, the combination fails. \n\n",
+     "hash": "4271d8e10e3775b4",
+     "he": "1. ‏`s'` מופעלת על ביטויי הטיפוס של `s`, כלומר, עבור כל משתנה `T'` שעבורו `s'(T')` מוגדרת, המופעים של `T'` בביטויי הטיפוס שב-`s` מוחלפים ב-`s'(T')`.\n3. משתנה `T'` ב-`s'`, שעבורו `s(T)` מוגדרת, מוסר מתחום ההגדרה של `s'`, כלומר, ‏`s'(T)` אינה מוגדרת עליו יותר.\n4. ה-`s'` המשונה מתווספת ל-`s`.\n5. קשירות זהות, כלומר `s(T) = T`, מוסרות.\n6. אם עבור משתנה כלשהו, `(s o s')(T)` כולל את `T`, השילוב נכשל."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:18",
+     "type": "prose",
+     "en": "For example,\n\n",
+     "hash": "74d2d951a827ab7f",
+     "he": "לדוגמה,"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:19",
+     "type": "code",
+     "en": "```typescript\n{T1=Number, T2=[[Number->T3] -> T3]} o {T3=Boolean, T1=[T2->T2]} =\n{T1 = Number, T2 = [[Number->Boolean]->Boolean], T3=Boolean}\n```\n\n",
+     "hash": "5f9cdfb558f511ad",
+     "lang": "typescript",
+     "noteHe": "דוגמה לשילוב הצבות, ושווה לעקוב אחריה צעד-צעד לפי חמשת הכללים שמעליה — זה בדיוק סוג התרגיל שנשאל במבחן. נסמן `s = {T1=Number, T2=[[Number->T3] -> T3]}` ו-`s' = {T3=Boolean, T1=[T2->T2]}`. **שלב 1** — מפעילים את `s'` על הביטויים של `s`: ב-`T1=Number` אין מה להחליף; ב-`T2=[[Number->T3]->T3]` מחליפים `T3` ב-`Boolean` ומקבלים `[[Number->Boolean]->Boolean]`. **שלב 2** — משתנה ב-`s'` שכבר מוגדר ב-`s` נזרק: `T1` מופיע בשתיהן, ולכן `T1=[T2->T2]` **נמחק** מ-`s'`; `T3=Boolean` נשאר. **שלב 3** — מאחדים, והתוצאה היא שלוש הקשירות שבשורה השנייה. **הנקודה הקריטית שכדאי לשנן**: הפעולה **אינה סימטרית** — `s o s'` שונה מ-`s' o s`; ההצבה השמאלית \"מנצחת\" כשיש התנגשות, ולכן `T1` נשאר `Number` ולא הופך ל-`[T2->T2]`. **טעות נפוצה**: להתייחס לשילוב כאיחוד קבוצות. שימו לב גם לפרט טכני בטקסט שמעל: מספור הרשימה הוא 1, 3, 4, 5, 6 — הסעיף 2 חסר במקור הקורס, וזו טעות מספור בלבד ולא צעד שנשמט."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:20",
+     "type": "prose",
+     "en": "#### Definition: Renaming of Type Variables\n\n",
+     "hash": "6b1d156d292fee8a",
+     "he": "#### הגדרה: שינוי שם של משתני טיפוס (Renaming of Type Variables)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:21",
+     "type": "prose",
+     "en": "Renaming is the operation of consistent renaming of type variables within a type expression, by new type symbols, that do not occur in the type expression.\n\n",
+     "hash": "962b8ac162b29b34",
+     "he": "שינוי שם הוא הפעולה של שינוי שם עקבי של משתני טיפוס בתוך ביטוי טיפוס, לסמלי טיפוס חדשים שאינם מופיעים בביטוי הטיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:22",
+     "type": "prose",
+     "en": "Renamed type expressions are equivalent:\n\n",
+     "hash": "9d6fb6bed3a3d27b",
+     "he": "ביטויי טיפוס ששמם שונה הם שקולים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:23",
+     "type": "code",
+     "en": "```typescript\n[[T1 -> T2]*T1 -> T2] ~ [[S1 -> T2] * S1 -> T2]\n[[T1 -> T2]*T1 -> T2] ~ [[S1 -> S2] * S1 -> S2]\n```\n\n",
+     "hash": "5bb9b1d42467fc89",
+     "lang": "typescript",
+     "noteHe": "שתי דוגמאות לשינוי שם חוקי, כשהסימן `~` פירושו \"שקול\". בשורה הראשונה שינינו רק את `T1` ל-`S1` והשארנו את `T2`; בשנייה שינינו את שניהם ל-`S1` ו-`S2`. שתי התוצאות שקולות למקור מכיוון ש**מבנה הקשרים** נשמר: בשלוש הצורות, המשתנה שמופיע כפרמטר של הפונקציה הפנימית הוא בדיוק זה שמופיע גם כפרמטר השני של החיצונית, וטיפוס ההחזרה של הפנימית הוא בדיוק זה של החיצונית. **הרעיון שכדאי לתפוס**: השמות של משתני הטיפוס הם שרירותיים לגמרי — רק **מי שווה למי** חשוב. זו בדיוק אותה הבחנה שראינו במודל ההצבה ב-2.6 לגבי שינוי שם של משתנים קשורים (alpha-renaming). שינוי שם יידרש באלגוריתם כדי להימנע מהתנגשות שמות בין משוואות שונות."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:24",
+     "type": "prose",
+     "en": "The variables in the substituting expressions should be new. For example, the following renamings of \n`[[T1->T2]*T1 -> T2]` are illegal:\n\n",
+     "hash": "068367cdf22e2a0d",
+     "he": "המשתנים בביטויים המחליפים צריכים להיות חדשים. לדוגמה, שינויי השם הבאים של\n`[[T1->T2]*T1 -> T2]` אינם חוקיים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:25",
+     "type": "code",
+     "en": "```typescript\n[[T1 -> T2] * S2 -> T2]   // T1 is not consistently replaced - T1 and S2 are not kept together\n[[T2 -> T2] * T2 -> T2]   // T2 is reused to replace T1\n```\n\n\n",
+     "hash": "effc4e8a76ef79b4",
+     "lang": "typescript",
+     "noteHe": "שני שינויי שם **פסולים**, וכל אחד מהם מדגים כשל אחר — כדאי להבחין ביניהם. בשורה הראשונה, `[[T1 -> T2] * S2 -> T2]`, ההחלפה **אינה עקבית**: המופע הראשון של `T1` נשאר `T1` והמופע השני הפך ל-`S2`, ולכן נשבר הקשר \"שני המקומות האלה נושאים את אותו טיפוס\". בשורה השנייה, `[[T2 -> T2] * T2 -> T2]`, השם החדש **אינו חדש**: החלפנו את `T1` ב-`T2`, שכבר תפוס בביטוי, ולכן שני משתנים שהיו נפרדים התמזגו לאחד — הביטוי שהתקבל מגביל יותר מהמקור. **הכלל הכפול שכדאי לשנן**: שינוי שם חייב להיות (1) עקבי — כל המופעים של אותו משתנה מוחלפים באותו שם, ו-(2) טרי — השם החדש לא מופיע בביטוי. **טעות נפוצה** היא לזכור רק את התנאי הראשון. שימו לב שההערות בקוד מנסחות בדיוק את שני הכשלים האלה."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:26",
+     "type": "prose",
+     "en": "#### Definition: Unification of Type Expressions\n\n",
+     "hash": "f2d9e13786b292e4",
+     "he": "#### הגדרה: אוניפיקציה של ביטויי טיפוס (Unification of Type Expressions)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:27",
+     "type": "prose",
+     "en": "Unification is an operation that makes type expressions identical by application of a type substitution to both expressions.\nWhen such a subtitution can be found, it is called a **unifier** of the two type expressions.\n\n",
+     "hash": "fc04237576f82cba",
+     "he": "אוניפיקציה היא פעולה שהופכת ביטויי טיפוס לזהים על ידי הפעלת הצבת טיפוס על שני הביטויים.\nכאשר אפשר למצוא הצבה כזו, היא נקראת **מאחד** (unifier) של שני ביטויי הטיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:28",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:29",
+     "type": "code",
+     "en": "```typescript\n[S * [Number -> S] -> S]   o {S=Pair(T1), T2=[Number->S], T3=Pair(T1)} =\n[Pair(T1) * T2 -> T3]      o {S=Pair(T1), T2=[Number->S], T3=Pair(T1)} =\n\n[Pair(T1)*[Number->Pair(T1)]->Pair(T1)]\n```\n\n",
+     "hash": "75337c64cf786b65",
+     "lang": "typescript",
+     "noteHe": "ההמחשה של מה שאוניפיקציה עושה: **שני** ביטויי טיפוס שונים, אותה הצבה, ואותה תוצאה. הביטוי הראשון הוא `[S * [Number -> S] -> S]` והשני הוא `[Pair(T1) * T2 -> T3]` — במבט ראשון הם לא דומים כלל. אבל אחרי הפעלת ההצבה `{S=Pair(T1), T2=[Number->S], T3=Pair(T1)}` שניהם נהפכים ל-`[Pair(T1)*[Number->Pair(T1)]->Pair(T1)]`. **זו בדיוק ההגדרה של מאחד**: לא \"פתרון\" במובן שמצאנו ערכים אמיתיים, אלא הצבה שמכריחה שני ביטויים להתלכד. שימו לב לתפקיד של `Pair(T1)`: הוא נשאר עם משתנה בתוכו, ולכן התוצאה עדיין כללית — אוניפיקציה אינה מחייבת להגיע לטיפוס קונקרטי לגמרי, רק להתאמה. **הערה על דיוק הכתיב במקור**: בהצבה שכאן, הערך של `T2` הוא `[Number->S]` — כלומר הוא מזכיר את `S`, שגם היא בתחום ההצבה. הצבה \"מסודרת\" (אידמפוטנטית) לא הייתה עושה זאת אלא כותבת מיד `T2=[Number->Pair(T1)]`; המימוש בקורס מבצע את ההרכבה כך שהתוצאה יוצאת נכונה, אבל כדאי לדעת שהכתיב כאן קצת מקוצר."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:30",
+     "type": "prose",
+     "en": "Therefore, `{S=Pair(T1), T2=[Number->S], T3=Pair(T1)}` is a **unifier** for these type expressions.\n\n",
+     "hash": "38955b990cc0df8a",
+     "he": "לפיכך, `{S=Pair(T1), T2=[Number->S], T3=Pair(T1)}` הוא **מאחד** (unifier) עבור ביטויי הטיפוס האלה."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:31",
+     "type": "prose",
+     "en": "#### Definition: Unifier of Type Expressions\n\n",
+     "hash": "1b11f55d646e0904",
+     "he": "#### הגדרה: מאחד של ביטויי טיפוס (Unifier of Type Expressions)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:32",
+     "type": "prose",
+     "en": "A unifier of type expressions `T1; T2` is a type substitution `s` such that `T1 o s = T2 o s`.\n\n",
+     "hash": "d2b03425f9a6fac5",
+     "he": "מאחד של ביטויי טיפוס `T1; T2` הוא הצבת טיפוס `s` כך ש-`T1 o s = T2 o s`."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:33",
+     "type": "prose",
+     "en": "The type expressions should not include common type variables! (Apply renaming, if needed.)\n\n",
+     "hash": "9e8d0aaf6c392d0b",
+     "he": "ביטויי הטיפוס אינם צריכים לכלול משתני טיפוס משותפים! (הפעילו שינוי שם, אם צריך.)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:34",
+     "type": "prose",
+     "en": "#### Example: Unification of Type Expressions\n\n",
+     "hash": "be71c6b72c4a99a5",
+     "he": "#### דוגמה: אוניפיקציה של ביטויי טיפוס"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:35",
+     "type": "prose",
+     "en": "Consider the type expressions:\n\n",
+     "hash": "2e3bb129e4e2144d",
+     "he": "התבוננו בביטויי הטיפוס:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:36",
+     "type": "code",
+     "en": "```typescript\n[S * [Number -> S1] -> S] and\n[Pair(T1) * [T1 -> T1] -> T2]\n\nare unifiable by:\n\n{S = Pair(Number), T1 = Number, S1 = Number, T2 = Pair(Number)}\n```\n\n\n",
+     "hash": "c3d8577d1a203f92",
+     "lang": "typescript",
+     "noteHe": "זוג ביטויים שכן **ניתן** לאחד, וכדאי לאמת זאת בעצמכם. השוו את שני הביטויים מקום-מקום: המקום הראשון נותן `S = Pair(T1)`; המקום השני משווה `[Number -> S1]` ל-`[T1 -> T1]`, ולכן `T1 = Number` וגם `S1 = T1 = Number`; המקום השלישי נותן `S = T2`. מכיוון ש-`T1 = Number`, יוצא ש-`S = Pair(Number)` ולכן גם `T2 = Pair(Number)` — וזו בדיוק ההצבה שבשורה האחרונה. שימו לב שהיא ממלאת את כל ארבעת המשתנים ולא נותרת שום דרגת חופש. **שימו לב לפרט שממנו נובע כל ההבדל מהדוגמה הבאה**: הפרמטר בביטוי הראשון הוא `S1` ולא `S`. השוו את שתי הדוגמאות שורה מול שורה — הן נבדלות בתו אחד בלבד, ואותו תו הוא שקובע אם קיים מאחד."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:37",
+     "type": "code",
+     "en": "```typescript\n[S * [Number -> S] -> S] and\n[Pair(T1) * [T1 -> T1] -> T2]\n\nare not unifiable - because we would need to resolve (find a substitution which leads to the equality):\n\nS = Pair(T1) and\nS = T2 and\n[Number -> S] = [T1 -> T1]\n\nhence S = T1\n\nwhich is not compatible with T1 = Pair(T1)\n```\n\n",
+     "hash": "20b6978ae9614fc5",
+     "lang": "typescript",
+     "noteHe": "אותו זוג, אבל עם `S` במקום `S1` — ועכשיו **אין** מאחד. עקבו אחרי שלוש המשוואות שהדף רושם: מהמקום הראשון `S = Pair(T1)`; מהמקום השלישי `S = T2`; ומהמקום השני, השוואת `[Number -> S]` ל-`[T1 -> T1]`, נובע גם `Number = T1` וגם `S = T1`. ועכשיו הסתירה: מצד אחד `S = T1`, ומצד שני `S = Pair(T1)` — ולכן `T1 = Pair(T1)`, כלומר `T1` חייב להכיל את עצמו. **זהו שוב כשל בדיקת ההיקרות** (occurs check), בדיוק כמו ב-`(lambda (x) (x x))` בדוגמה 5, ולא התנגשות בין שני טיפוסים קונקרטיים. שימו לב לאיזה שינוי זעיר הביא לכך: בגרסה הקודמת הפרמטר היה `S1` — משתנה **עצמאי** — ולכן היה חופשי להיות `Number`; כאן הוא `S`, שכבר קשור להיות `Pair(T1)`, ומכאן הכל מתמוטט. **המסקנה שכדאי לזכור**: כשמופיע אותו משתנה בשני מקומות בביטוי טיפוס, זו הגבלה אמיתית וחזקה, ולא סתם בחירת שם."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:38",
+     "type": "prose",
+     "en": "#### Definition: Most General Unifier (mgu)\n\n",
+     "hash": "8b87cfa57a0bfed2",
+     "he": "#### הגדרה: המאחד הכללי ביותר (Most General Unifier — mgu)"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:39",
+     "type": "prose",
+     "en": "Unifiable type expressions can be unified by **multiple unifiers**. \n\n",
+     "hash": "03d65624ee69588a",
+     "he": "ביטויי טיפוס שניתן לאחד יכולים להיות מאוחדים על ידי **מאחדים רבים**."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:40",
+     "type": "prose",
+     "en": "For example, the type expressions `[S * S -> S]` and `[Pair(T1) * T2 -> T2]` are unifiable by the unifiers:\n\n",
+     "hash": "b684d4ce9d0c9c7f",
+     "he": "לדוגמה, ביטויי הטיפוס `[S * S -> S]` ו-`[Pair(T1) * T2 -> T2]` ניתנים לאיחוד על ידי המאחדים:"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:41",
+     "type": "list",
+     "en": "1. `{S=Pair(T1), T2=Pair(T1)}`\n2. `{S=Pair(Number), T2=Pair(Number)}`\n3. `{S=Pair(Boolean), T2=Pair(Boolean)}`, etc\n\n",
+     "hash": "e7bf23b7f76b5e5b",
+     "he": "1. `{S=Pair(T1), T2=Pair(T1)}`\n2. `{S=Pair(Number), T2=Pair(Number)}`\n3. `{S=Pair(Boolean), T2=Pair(Boolean)}`, וכן הלאה"
+    },
+    {
+     "id": "cm/3.2TypeInference:9:42",
+     "type": "prose",
+     "en": "The first unifier is the most general unifier (mgu), since it substitutes only the necessary type variables,\nwithout making additional assumptions about the replaced terms. All other unifiers are obtained from it by application of additional substitutions.\nThe most general unifier is unique, up to consistent renaming. It is called the **most general unifier (mgu)** of the two type expressions.\n\n",
+     "hash": "ab5bd2791a07205c",
+     "he": "המאחד הראשון הוא המאחד הכללי ביותר (mgu), מכיוון שהוא מציב רק את משתני הטיפוס ההכרחיים,\nבלי להניח הנחות נוספות על האיברים שהוחלפו. כל המאחדים האחרים מתקבלים ממנו על ידי הפעלת הצבות נוספות.\nהמאחד הכללי ביותר הוא יחיד, עד כדי שינוי שם עקבי. הוא נקרא **המאחד הכללי ביותר (mgu)** של שני ביטויי הטיפוס."
+    },
+    {
+     "id": "cm/3.2TypeInference:9:43",
+     "type": "prose",
+     "en": "We will use in the type inference algorithm the function **unify(TE1, TE2)** which returns the mgu of `TE1` and `TE2` \nif it can be found and false otherwise (indicating the two expressions cannot be unified).\n\n\n",
+     "hash": "3b3fcbe900e08730",
+     "he": "באלגוריתם הסקת הטיפוסים נשתמש בפונקציה **unify(TE1, TE2)**, שמחזירה את ה-mgu של `TE1` ו-`TE2`\nאם אפשר למצוא אותו, ו-false אחרת (מה שמציין ששני הביטויים אינם ניתנים לאיחוד)."
+    }
+   ],
+   "headingHe": "הצבות טיפוס ומאחדים (Unifiers)"
+  },
+  {
+   "id": "cm/3.2TypeInference:10",
+   "depth": 3,
+   "headingEn": "Type Inference With Equations Step by Step",
+   "raw": "### Type Inference With Equations Step by Step\n\n",
+   "blocks": [
+    {
+     "id": "cm/3.2TypeInference:10:0",
+     "type": "prose",
+     "en": "With the unification tool at our disposal, let us run the full details of the type inference algorithm step by step:\n\n",
+     "hash": "62251a3bc0f24ac3",
+     "he": "עם כלי האוניפיקציה שברשותנו, בואו נריץ את כל פרטי אלגוריתם הסקת הטיפוסים צעד אחר צעד:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:1",
+     "type": "prose",
+     "en": "We want to type the following expression:\n\n",
+     "hash": "59485e3fc456b1ab",
+     "he": "אנחנו רוצים לטפס את הביטוי הבא:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:2",
+     "type": "code",
+     "en": "```scheme\n(lambda (f g)\n  (lambda (x)\n    (f (+ x (g 3)))))\n```\n\n",
+     "hash": "c81c38fac8059b86",
+     "lang": "scheme",
+     "noteHe": "הביטוי שילווה את ההרצה המלאה של האלגוריתם — הסעיף הזה הוא **הליבה של השיעור** וכדאי לעבור עליו עם דף ועיפרון. שימו לב למבנה: שתי רמות של lambda, ובגוף הפנימי הפעלה מקוננת בשלוש רמות — `f` על תוצאת `+`, ש-`+` מופעל על `x` ועל תוצאת `(g 3)`. שימו לב לשני הפרמטרים `f` ו-`g`, ששניהם ייתגלו כפונקציות אבל מסיבות שונות: `g` מופעל על `3` ותוצאתו נכנסת ל-`+`, ולכן הטיפוס שלו ייקבע לגמרי; `f` מופעל על תוצאת `+` אבל התוצאה שלו זורמת ישר החוצה, ולכן טיפוס ההחזרה שלו יישאר משתנה. **צפו מראש לתוצאה**: `[[Number -> Tf1] * [Number -> Number] -> [Number -> Tf1]]`, ובדקו בסוף הסעיף אם ניחשתם נכון."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:3",
+     "type": "prose",
+     "en": "We consider it with its type annotations:\n\n",
+     "hash": "789d167b69c59f1b",
+     "he": "אנחנו מתבוננים בו עם הערות הטיפוס שלו:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:4",
+     "type": "code",
+     "en": "```scheme\n(lambda ([f : Tf] [g : Tg]) : T1\n  (lambda ([x : Tx]) : T2\n    (f (+ x (g 3)))))\n```\n\n",
+     "hash": "238784419cb84f3c",
+     "lang": "scheme",
+     "noteHe": "אותו ביטוי עם משתני טיפוס בכל הצהרה — `Tf`, `Tg`, `T1` בחיצונית, ו-`Tx`, `T2` בפנימית. שימו לב שאלה רק חמישה מתוך עשרת המשתנים שיידרשו: השלב הבא של האלגוריתם יקצה משתנה לכל **תת-ביטוי** ולא רק להצהרות. שימו לב גם למוסכמת המספור שתשתנה מיד: כאן `T1` הוא טיפוס ההחזרה של החיצונית, אבל בטבלה שבשלב II `T0` יסמן את הפרוצדורה כולה ו-`T1` את ה-lambda הפנימית — כלומר אותו שם `T1` מקבל שני תפקידים שונים בין שני הייצוגים. **טעות נפוצה** היא להתבלבל בין השניים; שימו לב ששני התפקידים בעצם מתלכדים, שהרי טיפוס ההחזרה של החיצונית הוא בדיוק הטיפוס של ה-lambda הפנימית."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:5",
+     "type": "prose",
+     "en": "#### Stage I: Renaming : \n\n",
+     "hash": "21243ee0f8634d9a",
+     "he": "#### שלב I: שינוי שם (Renaming):"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:6",
+     "type": "prose",
+     "en": "None needed because all declared variables already have distinct names.\n\n\n",
+     "hash": "a19e8af8c393a1f2",
+     "he": "אין צורך, מכיוון שלכל המשתנים המוצהרים כבר יש שמות שונים זה מזה."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:7",
+     "type": "prose",
+     "en": "#### Stage II: Assign type variables: Every sub expression is assigned a type variable\n\n",
+     "hash": "d7777db9f07a7bc0",
+     "he": "#### שלב II: הקצאת משתני טיפוס: לכל תת-ביטוי מוקצה משתנה טיפוס"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:8",
+     "type": "code",
+     "en": "```scheme\nExpression                                    Variable\n(lambda (f g) (lambda (x) (f (+ x (g 3)))))   T0\n(lambda (x) (f (+ x (g 3))))                  T1\n(f (+ x (g 3)))                               T2\nf                                             Tf\n(+ x (g 3))                                   T3\n+                                             T+\nx                                             Tx\n(g 3)                                         T4\ng                                             Tg\n3                                             Tnum3\n```\n\n\n",
+     "hash": "556e6ba02ffb543d",
+     "lang": "scheme",
+     "noteHe": "הטבלה של שלב II — לכל אחד מעשרת תת-הביטויים מוקצה משתנה טיפוס. שימו לב **מהו** תת-ביטוי לצורך העניין: לא רק הצמתים המורכבים אלא **גם העלים** — `f`, `x`, `g`, `+` ואפילו הקבוע `3` מקבלים משתנה משלהם (`Tnum3`). זו נקודה חשובה: האלגוריתם אינו \"יודע\" מראש ש-`3` הוא `Number`; הוא מקצה לו משתנה, ובשלב הבא ייווצר האילוץ `Tnum3 = Number`. אותו דבר לגבי `+`: הוא מקבל את המשתנה `T+`, ובשלב III יתקבל `T+ = [Number * Number -> Number]`. **הסדר בטבלה הוא מלמעלה למטה לפי עומק** — `T0` לביטוי כולו, ואחריו הקינון פנימה. שימו לב שאותו משתנה מוקצה **פעם אחת לכל תת-ביטוי תחבירי**, ולכן `x` מופיע פעם אחת בטבלה למרות שהוא נכתב בקוד פעם אחת בהצהרה ופעם אחת בשימוש. **טיפ למבחן**: כשמבקשים \"הקצו משתני טיפוס\", ספרו את כל צמתי ה-AST כולל העלים — פספוס של עלה מוביל למשוואות חסרות."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:9",
+     "type": "prose",
+     "en": "#### Stage III: Construct type equations\n\n",
+     "hash": "da1d49813fd45fc1",
+     "he": "#### שלב III: בניית משוואות טיפוס"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:10",
+     "type": "prose",
+     "en": "The typing rules of algorithm Type-derivation turn into type equations: The rules are:\n\n",
+     "hash": "35cd8b5368ed30bb",
+     "he": "כללי הטיפוס של אלגוריתם Type-derivation הופכים למשוואות טיפוס. הכללים הם:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:11",
+     "type": "list",
+     "en": "1. Number, Boolean, Symbol, Primitive-procedures: Construct equations using their types. \n\n",
+     "hash": "0465775a883c1850",
+     "he": "1. מספר, בוליאני, סמל, פרוצדורות-פרימיטיביות: בונים משוואות באמצעות הטיפוסים שלהם."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:12",
+     "type": "prose",
+     "en": "For example, for the number 3: Tnum3 = Number and for the binary primitive procedure +: T+ = [Number * Number -> Number].\n\n",
+     "hash": "a6f5d90ad992e666",
+     "he": "לדוגמה, עבור המספר 3: `Tnum3 = Number`, ועבור הפרוצדורה הפרימיטיבית הבינארית +: `T+ = [Number * Number -> Number]`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:13",
+     "type": "list",
+     "en": "2. Procedure (Lambda expressions): \n\n",
+     "hash": "3ea8d6cf21c3a453",
+     "he": "2. פרוצדורה (ביטויי Lambda):"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:14",
+     "type": "prose",
+     "en": "The type inference rule is:\n\n",
+     "hash": "262dc1e3a4473f14",
+     "he": "כלל הסקת הטיפוסים הוא:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:15",
+     "type": "code",
+     "en": "```typescript\nFor every: type environment _Tenv,\n           variables _x1, ..., _xn, n >= 0\n           expressions _e1, ..., _em, m >= 1, and\n           type expressions _S1, ...,_Sn, _U1, ...,_Um :\nProcedure with parameters (n > 0):\n    If   _Tenv o {_x1:_S1, ..., _xn:_Sn } |- _ei : _Ui for all i = 1..m ,\n    Then _Tenv |- (lambda (_x1 ... _xn ) _e1 ... _em) : [_S1 * ... *_Sn -> _Um]\n\nParameter-less Procedure (n = 0):\n    If   _Tenv |- _ei : _Ui for all i=1..m,\n    Then _Tenv |- (lambda ( ) _e1 ... _em) : [Empty -> _Um]\n```\n\n",
+     "hash": "1043a46fd418012b",
+     "lang": "typescript",
+     "noteHe": "כלל הפרוצדורה שוב, זהה למה שראינו בסעיף 3 — הוא מובא כאן כדי להראות ממנו את **מעבר** לניסוח כמשוואה בבלוק הבא. שימו לב שהכלל מנוסח כטענת גזירה (`|-`) עם סביבת טיפוסים, ואילו האלגוריתם צריך משוואה פשוטה בין ביטויי טיפוס — וזה בדיוק התרגום שהדף עושה כאן. שימו לב גם שהכלל מטפל בנפרד במקרה `n = 0` עם `Empty`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:16",
+     "type": "prose",
+     "en": "Extracting the type restriction on the involved sub-expressions yields:\n\n",
+     "hash": "807fb2390797a14e",
+     "he": "חילוץ ההגבלה על הטיפוסים של תת-הביטויים המשתתפים מניב:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:17",
+     "type": "code",
+     "en": "```typescript\nFor (lambda (v1 ...vn) e1 ... em) with n > 0, construct the equation:\n\nT(lambda(v1...vn) e1...em) = [Tv1 * ... * Tvn -> Tem].\n\nFor (lambda ( ) e1 ... em), construct the equation:\n\nT(lambda() e1...em) = [Empty -> Tem].\n```\n\n",
+     "hash": "0986afbdddf374d8",
+     "lang": "typescript",
+     "noteHe": "התרגום של כלל הפרוצדורה למשוואה — **זו הצורה שתשתמשו בה בפועל**, וכדאי לשנן אותה. הסימון `T(...)` פירושו \"משתנה הטיפוס שהוקצה לביטוי הזה\". קראו את המשוואה: משתנה הטיפוס של ה-lambda שווה לטיפוס הפונקציה שבנוי ממשתני הטיפוס של הפרמטרים ומ-`Tem` — משתנה הטיפוס של הביטוי **האחרון** בגוף. שימו לב מה נעלם בתרגום: אין יותר סביבת טיפוסים ואין `|-`. במקומם, ההנחה שכל מופע של `v1` נושא את `Tv1` — וזה מה שההנחה על שינוי שם מבטיחה. שימו לב שהמשוואה **אחת** ולא שתיים: מכיוון שטיפוס ההחזרה נכתב ישירות כ-`Tem`, המשוואה `T1 = T+` שראינו בגזירה הידנית בסעיף 3 מוטמעת כאן מראש. **הפרט הקטן שכדאי לזכור**: המקרה של אפס פרמטרים נותן `[Empty -> Tem]` ולא `[ -> Tem]`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:18",
+     "type": "list",
+     "en": "3. Application: The type-inference rule is:\n\n",
+     "hash": "1982fe1928f7a09b",
+     "he": "3. הפעלה (Application): כלל הסקת הטיפוסים הוא:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:19",
+     "type": "code",
+     "en": "```typescript\nFor every: type environment _Tenv,\n           expressions _f, _e1, ..., _en, n >= 0 , and\n           type expressions _S1, ..., _Sn, _S:\nProcedure with parameters (n > 0):\n    If   _Tenv |- _f : [_S1 * ... * _Sn -> _S],\n         _Tenv |- _e1 : _S1, ..., _Tenv |- _en : _Sn\n    Then _Tenv |- (_f _e1 ... _en) : _S\n\nParameter-less Procedure (n = 0):\n    If _Tenv |- _f:[Empty -> _S]\n    Then _Tenv |- (_f):_S\n```\n\n",
+     "hash": "de36fc3092f443c5",
+     "lang": "typescript",
+     "noteHe": "כלל ההפעלה, שוב בצורתו המקורית מ-3.1, לקראת התרגום למשוואה בבלוק הבא. שימו לב לאסימטריה בין שני חלקי הכלל: החלק הראשון (`n > 0`) דורש התאמה בין `n` ארגומנטים ל-`n` פרמטרים, ואילו החלק השני (`n = 0`) בודק רק שהאופרטור הוא מטיפוס `[Empty -> _S]`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:20",
+     "type": "prose",
+     "en": "Extracting the type restriction on the involved sub-expressions yields:\n\n",
+     "hash": "807fb2390797a14e",
+     "he": "חילוץ ההגבלה על הטיפוסים של תת-הביטויים המשתתפים מניב:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:21",
+     "type": "code",
+     "en": "```typescript\nFor (f e1 ... en) with n > 0, construct the equation:\nTf = [Te1 * ... * Ten -> T].\n\nFor (f) construct the equation:\nTf = [Empty -> T(f)].\n```\n\n",
+     "hash": "eade5656443bd86f",
+     "lang": "typescript",
+     "noteHe": "התרגום של כלל ההפעלה למשוואה — **גם אותה כדאי לשנן**, והיא זו שמפתיעה בהתחלה. שימו לב שהמשוואה היא על `Tf`, כלומר על **האופרטור**, ולא על ההפעלה: `Tf = [Te1 * ... * Ten -> T]`. במקום לכתוב `n+1` משוואות נפרדות (אחת לכל ארגומנט ואחת לתוצאה) כפי שעשינו בגזירה הידנית בסעיף 3, האלגוריתם כותב משוואה **אחת** שכל האילוצים האלה מוטמעים בה — האוניפיקציה תפרק אותה מקום-מקום ותייצר את אותם אילוצים בעצמה. זה בדיוק היתרון של הניסוח כמשוואות: פחות רישום ידני, והפירוק נעשה אוטומטית. **טעות נפוצה** היא לכתוב `T(f e1…en) = [Te1 * … -> …]` — לא: הטיפוס הפונקציונלי שייך ל-`f`, וההפעלה עצמה מקבלת רק את `T`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:22",
+     "type": "prose",
+     "en": "**Note**: Observe that the inference rules for Procedure and Application require type inference for all internal expressions, \neven though the final inferred type does not depend on their type. Why?\n\n",
+     "hash": "ade7a867ab0cd319",
+     "he": "**שימו לב**: הבחינו שכללי ההסקה עבור פרוצדורה והפעלה דורשים הסקת טיפוסים עבור כל הביטויים הפנימיים,\nגם כאשר הטיפוס המוסק הסופי אינו תלוי בטיפוס שלהם. מדוע?"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:23",
+     "type": "prose",
+     "en": "In the type-equations approach this requirement is achieved by constructing type equations for all sub-expressions, as described below.\nThe algorithm constructs equations for the primitive sub-expressions and for all composite sub-expressions. \n\n",
+     "hash": "d0ebb422644bf693",
+     "he": "בגישת משוואות הטיפוס הדרישה הזו מושגת על ידי בניית משוואות טיפוס עבור כל תת-הביטויים, כפי שמתואר להלן.\nהאלגוריתם בונה משוואות עבור תת-הביטויים הפרימיטיביים ועבור כל תת-הביטויים המורכבים."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:24",
+     "type": "prose",
+     "en": "In our example:\n\n",
+     "hash": "ff904b2828953bba",
+     "he": "בדוגמה שלנו:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:25",
+     "type": "prose",
+     "en": "The equations for the primitive sub-expressions are:\n\n",
+     "hash": "5ce532ab870d88a8",
+     "he": "המשוואות עבור תת-הביטויים הפרימיטיביים הן:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:26",
+     "type": "code",
+     "en": "```scheme\nExpression       Equation\n===============================================\n3                Tnum3 = Number\n+                T+ = Number * Number -> Number\n```\n\n",
+     "hash": "7b3d5cfb7590595a",
+     "lang": "scheme",
+     "noteHe": "שתי המשוואות \"העוגן\" של הדוגמה — היחידות שמכניסות טיפוס קונקרטי למערכת. `Tnum3 = Number` מהקבוע `3`, ו-`T+ = Number * Number -> Number` מהפרימיטיב `+`. שימו לב שכל שאר המשוואות (בטבלה הבאה) הן בין משתנים בלבד, ולכן **כל** המידע הקונקרטי שיוסק בסופו של דבר זורם משתי השורות האלה. שימו לב שהטיפוס של `+` נכתב כאן בלי הסוגריים המרובעים החיצוניים — `Number * Number -> Number` במקום `[Number * Number -> Number]` — חוסר עקביות בכתיב מול שאר הדף, בלי משמעות מעשית. שימו לב גם שהמשתנים `Tf`, `Tg`, `Tx` **אינם** מקבלים משוואה בשלב הזה: הם פרמטרים, וטיפוסם יוסק רק מהשימוש בהם."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:27",
+     "type": "prose",
+     "en": "The equations for composite sub-expressions are:\n\n",
+     "hash": "06f668ac3c153285",
+     "he": "המשוואות עבור תת-הביטויים המורכבים הן:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:28",
+     "type": "code",
+     "en": "```scheme\nExpression                                    Equation\n==================================================================\n(lambda (f g) (lambda (x) (f (+ x (g 3)))))   T0 = [Tf * Tg -> T1]\n(lambda (x) (f (+ x (g 3))))                  T1 = [Tx -> T2]\n(f (+ x (g 3)))                               Tf = [T3 -> T2]\n(+ x (g 3))                                   T+ = [Tx * T4 -> T3]\n(g 3)                                         Tg = [Tnum3 -> T4]\n```\n\n",
+     "hash": "bd179c065ca4e0cd",
+     "lang": "scheme",
+     "noteHe": "חמש המשוואות של הצמתים המורכבים — **הטבלה הזו היא התוצר של שלב III וכדאי להתאמן על בנייתה**. עברו שורה-שורה וזהו איזה כלל הפעיל כל אחת: השורות 1–2 הן שתי ה-lambda-ות, ולכן כלל הפרוצדורה — משתנה ה-lambda שווה ל-`[פרמטרים -> גוף]`; השורות 3–5 הן שלוש ההפעלות, ולכן כלל ההפעלה — ושימו לב שבכולן המשוואה היא על **האופרטור**: `Tf = [T3 -> T2]`, `T+ = [Tx * T4 -> T3]`, `Tg = [Tnum3 -> T4]`. **הנקודה שכדאי לראות**: מכיוון שהמשוואות נכתבות על האופרטור, המשתנים שנקבעים כאן הם בדיוק `Tf` ו-`Tg` — הפרמטרים שאיננו יודעים מה טיפוסם — וכך התוכנית \"מספרת\" לנו שהם פונקציות. שימו לב שכל אחד מעשרת משתני הטיפוס מהטבלה של שלב II מופיע לפחות פעם אחת בין שתי הטבלאות, וזה בדיוק מה שהפסקה על \"כל תת-הביטויים\" דרשה. **שימו לב לשרשרת ההסקה שתפעל בשלב IV**: `T+` ידוע, ולכן מ-`T+ = [Tx * T4 -> T3]` נקבל `Tx = Number`, `T4 = Number`, `T3 = Number`; משם `Tg = [Number -> Number]` ו-`Tf = [Number -> T2]`. נסו לסיים לבד לפני שתמשיכו."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:29",
+     "type": "prose",
+     "en": "#### Stage IV: Solving the Equations\n\n",
+     "hash": "6e122fad6a21b1c5",
+     "he": "#### שלב IV: פתרון המשוואות"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:30",
+     "type": "prose",
+     "en": "The equations are solved by gradually producing type-substitutions for all type variables. \nFor an expression `e`, the algorithm infers a type `t` if the final type-substitution maps its variable `Te` to `t`. \nIf an expression has an infered type then all of its sub-expressions have types as well. \nIf the procedure fails (output is FAIL) then either there is a type error or the constructed type equations are too weak. \n\n",
+     "hash": "3d534eaf7dc1232b",
+     "he": "המשוואות נפתרות על ידי ייצור הדרגתי של הצבות-טיפוס עבור כל משתני הטיפוס.\nעבור ביטוי `e`, האלגוריתם מסיק טיפוס `t` אם הצבת-הטיפוס הסופית ממפה את המשתנה שלו `Te` ל-`t`.\nאם לביטוי יש טיפוס מוסק, אז גם לכל תת-הביטויים שלו יש טיפוסים.\nאם הפרוצדורה נכשלת (הפלט הוא FAIL), אז או שיש שגיאת טיפוס, או שמשוואות הטיפוס שנבנו חלשות מדי."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:31",
+     "type": "prose",
+     "en": "Circular type-substitution cause failure. \n\n",
+     "hash": "2f449b6536926d65",
+     "he": "הצבות-טיפוס מעגליות גורמות לכשל."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:32",
+     "type": "prose",
+     "en": "The solution is processed by considering the equations one by one.\n\n",
+     "hash": "9cf5347908d512ce",
+     "he": "הפתרון מעובד על ידי התייחסות למשוואות אחת-אחת."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:33",
+     "type": "prose",
+     "en": "The equation solving process is described by this algorithm:\n\n",
+     "hash": "572fffb792025a4f",
+     "he": "תהליך פתרון המשוואות מתואר על ידי האלגוריתם הזה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:34",
+     "type": "code",
+     "en": "```typescript\nInput:  A set of type equations.\nOutput: A type substitution of FAIL.\n\nInitialization:\n  substitution := { }\n  Order the set of input equations in any sequential order.\n  equation := te1 = te2, the first equation.\n\nLoop:\n  1. Apply the current substitution to the equation: \n     equation := <te1 o substitution = te2 o substitution>\n  \n  2. If [te1 o substitution] and [te2 o substitution] are atomic types:\n        if [te1 o substitution] != [te2 o substitution]: \n            substitution := FAIL\n        otherwise: \n            Do nothing.\n  \n  3. Without loss of generality:\n     If [te1 o substitution] = T, i.e., a type variable, and [te1 o substitution] != [te2 o substitution]:\n         substitution := substitution o {T = [te2 o substitution]}. \n         That is, apply the equation to substitution, and add the equation to the substitution. \n         If the application fails (circular mapping), substitution := FAIL.\n  \n  4. if [te1 o substitution] and [te2 o substitution] are composite types:\n         if they have the same type constructor: \n             Split [te1 o substitution] and [te2 o substitution] into component type expressions, \n             Create equations for corresponding components, and \n             Add the new equations to the pool of equations.\n         if they have different type constructors: substitution := FAIL\n\n  5. Without loss of generality:\n     if [te1 o substitution] is an atomic type and [te2 o substitution] is a composite type: \n         substitution := FAIL\n\n  6. if there is a next equation: equation := next(equation)\n\nuntil substitution = FAIL or\n      there is no next equation.\n      \nReturn: Substitution\n```\n\n",
+     "hash": "8b38a2c62f1bcab4",
+     "lang": "typescript",
+     "noteHe": "**זהו האלגוריתם המרכזי של השיעור** — פותר משוואות הטיפוס, שהוא בעצם אלגוריתם האוניפיקציה. עברו על חמשת המקרים בגוף הלולאה, כי הם ממלאים את כל האפשרויות ובמבחן תתבקשו לזהות איזה מהם חל. **האתחול**: ההצבה מתחילה ריקה, והמשוואות מסודרות בסדר שרירותי — שימו לב ש\"any sequential order\" הוא הבטחה משמעותית: התוצאה (ה-mgu) אינה תלויה בסדר, רק הדרך אליה. **צעד 1** הוא הצעד שמניע את כל התהליך: לפני שנוגעים במשוואה, מפעילים עליה את ההצבה שנצברה עד כה — כך זורם המידע ממשוואה למשוואה. **מקרה 2** — שני הצדדים אטומיים: אם הם שונים (`Number` מול `Boolean`) זה `FAIL`, ואם זהים אין מה לעשות. **מקרה 3** — צד אחד הוא משתנה טיפוס: מרכיבים את המשוואה לתוך ההצבה, וכאן בדיוק נבדקת המעגליות (`circular mapping`) שמייצרת `FAIL`; זהו המקרה השכיח ביותר. **מקרה 4** — שני הצדדים מורכבים: אם בנאי הטיפוס זהה (למשל שניהם טיפוסי פרוצדורה), **מפרקים** לרכיבים ומוסיפים משוואה לכל זוג רכיבים מתאימים; אם הבנאים שונים — `FAIL`. **מקרה 5** — אטומי מול מורכב: תמיד `FAIL`. שימו לב לביטוי `Without loss of generality` במקרים 3 ו-5: פירושו שהמקרה חל גם כשהצדדים הפוכים, ואין צורך לכתוב אותו פעמיים. **שימו לב לשלושת המקורות ל-FAIL וכדאי לשנן אותם**: התנגשות אטומים (2), מעגליות (3), בנאים שונים או אטומי-מול-מורכב (4 ו-5). שימו לב לשגיאת דפוס בשורת הפלט: `A type substitution of FAIL` — צריך להיות `or FAIL`."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:35",
+     "type": "prose",
+     "en": "This algorithm computes the unifier of all the equations into a single consistent type substitution.\n\n",
+     "hash": "7362a3c459f7a7ea",
+     "he": "האלגוריתם הזה מחשב את המאחד של כל המשוואות לתוך הצבת-טיפוס עקבית אחת."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:36",
+     "type": "prose",
+     "en": "In other words, each time we process an equation `[Te1 = Te2]`, we **make the two sides equal** by finding their unifier \nand then apply the resulting unifier to the remaining equations and continue the process.\nThe constraints flow from equation to equation because we re-use the same substitution across equations and,\nthus, propagate information from one equation to the next.\n\n",
+     "hash": "1da6acb546890b63",
+     "he": "במילים אחרות, בכל פעם שאנחנו מעבדים משוואה `[Te1 = Te2]`, אנחנו **הופכים את שני הצדדים לשווים** על ידי מציאת המאחד שלהם,\nואז מפעילים את המאחד שהתקבל על שאר המשוואות וממשיכים בתהליך.\nהאילוצים זורמים ממשוואה למשוואה מכיוון שאנחנו עושים שימוש חוזר באותה הצבה לרוחב כל המשוואות, ולכן\nמפיצים מידע ממשוואה אחת לבאה אחריה."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:37",
+     "type": "prose",
+     "en": "Let us continue our example applying this algorithm to solve the equations:\n\n",
+     "hash": "3781106a6854d4ce",
+     "he": "בואו נמשיך את הדוגמה שלנו ונפעיל את האלגוריתם הזה כדי לפתור את המשוואות:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:38",
+     "type": "code",
+     "en": "```typescript\nEquations                 substitution\n=========================================\n1. T0 = [Tf * Tg -> T1]   {}\n2: T1 = [Tx -> T2]\n3: Tf = [T3 -> T2]\n4: T+ = [Tx * T4 -> T3]\n5: Tg = [Tnum3 -> T4]\n6: Tnum3 = Number\n7: T+ = Number * Number -> Number\n```\n\n",
+     "hash": "1029f0fe8a1a7a9f",
+     "lang": "typescript",
+     "noteHe": "מצב ההתחלה של המעקב: שבע המשוואות ממוספרות בעמודה השמאלית, וההצבה בעמודה הימנית ריקה (`{}`). שבע המשוואות הן חמש מטבלת הצמתים המורכבים ושתיים מטבלת הפרימיטיבים. **כך תיראה כל טבלה בהמשך** — המשוואות שנותרו מימין למספרן, וההצבה שנצברה עד כה בעמודה השנייה; בכל צעד משוואה אחת נעלמת מהרשימה ונבלעת בהצבה. שימו לב שהסדר כאן הוא בדיוק סדר הכתיבה, אבל כאמור כל סדר אחר היה מוביל לאותה תוצאה סופית. **טיפ לתרגול**: כסו את הטבלאות הבאות ונסו לבצע את הצעדים בעצמכם — זהו בדיוק פורמט השאלה במבחן."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:39",
+     "type": "prose",
+     "en": "Equation 1 is processed by the case 3 of the algorithm - since one of its sides is a type variable (`T0`). \n\n",
+     "hash": "e9f6923c7e8422b9",
+     "he": "משוואה 1 מעובדת לפי מקרה 3 של האלגוריתם — מכיוון שאחד מצדדיה הוא משתנה טיפוס (`T0`)."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:40",
+     "type": "code",
+     "en": "```typescript\nEquations                     substitution\n2: T1 = [Tx -> T2]            {T0 = [Tf * Tg -> T1]}\n3: Tf = [T3 -> T2]\n4: T+ = [Tx * T4 -> T3]\n5: Tg = [Tnum3 -> T4]\n6: Tnum3 = Number\n7: T+ = Number * Number -> Number\n```\n\n",
+     "hash": "48dc4e7c42b840dc",
+     "lang": "typescript",
+     "noteHe": "אחרי הצעד הראשון. משוואה 1 נעלמה מהרשימה, וההצבה מכילה כעת קשירה אחת: `{T0 = [Tf * Tg -> T1]}`. שימו לב שהמעבר היה טריוויאלי — ההצבה הייתה ריקה, ולכן צעד 1 של האלגוריתם (הפעלת ההצבה על המשוואה) לא שינה דבר, ומקרה 3 פשוט העביר את המשוואה כמו שהיא לתוך ההצבה. שימו לב שאף אחד מהמשתנים באגף הימני (`Tf`, `Tg`, `T1`) לא נפתר — ההצבה רק **רשמה** את הקשר. הצעדים הבאים יהיו מעניינים יותר, כי בהם ההצבה כבר תשפיע."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:41",
+     "type": "prose",
+     "en": "In the second iteration, we process the second equation, and again apply case 3 of the algorithm:\n\n",
+     "hash": "5ebf9ce99426a26b",
+     "he": "באיטרציה השנייה, אנחנו מעבדים את המשוואה השנייה, ושוב מפעילים את מקרה 3 של האלגוריתם:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:42",
+     "type": "code",
+     "en": "```typescript\nEquations                     substitution\n3: Tf = [T3 -> T2]            {T0 = [Tf * Tg -> [Tx -> T2], \n4: T+ = [Tx * T4 -> T3]        T1 = [Tx -> T2]}\n5: Tg = [Tnum3 -> T4]\n6: Tnum3 = Number\n7: T+ = Number * Number -> Number\n```\n",
+     "hash": "34c70cbd8bc1d986",
+     "lang": "typescript",
+     "noteHe": "הצעד השני, וכאן רואים לראשונה את **ההרכבה** בפעולה. משוואה 2 היא `T1 = [Tx -> T2]`, ומקרה 3 מוסיף אותה להצבה — אבל שימו לב מה קרה גם ל-`T0` שהיה שם קודם: הוא היה `[Tf * Tg -> T1]` וכעת הוא `[Tf * Tg -> [Tx -> T2]]`, כלומר ה-`T1` שבתוכו **הוחלף** בערכו החדש. זהו בדיוק שלב 1 בהגדרת שילוב ההצבות שראינו בסעיף 9 — מפעילים את ההצבה החדשה על הביטויים של הקיימת. **זו הנקודה שממנה נובע כל כוחו של האלגוריתם**: ההצבה נשמרת תמיד \"מעודכנת\", ולכן כל מידע חדש מתפשט אחורה לכל מה שנצבר. שימו לב לשגיאת סוגריים במקור: כתוב `{T0 = [Tf * Tg -> [Tx -> T2],` — חסר סוגר מרובע לפני הפסיק."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:43",
+     "type": "prose",
+     "en": "Note how the substitution composition resulted in the transformation of the \n`T1` argument by its value in the right hand side of `T0` in the substitution.\n\n",
+     "hash": "c7ae7bbed3bface5",
+     "he": "שימו לב איך הרכבת ההצבות הובילה לשינוי של\nהארגומנט `T1` בערכו באגף הימני של `T0` בהצבה."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:44",
+     "type": "prose",
+     "en": "Same case 3 for the third equation:\n\n",
+     "hash": "0f37094d96c0fcb0",
+     "he": "אותו מקרה 3 עבור המשוואה השלישית:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:45",
+     "type": "code",
+     "en": "```typescript\nEquations                     substitution\n4: T+ = [Tx * T4 -> T3]       {T0 = [[T3 -> T2] * Tg -> [Tx -> T2]], \n5: Tg = [Tnum3 -> T4]          T1 = [Tx -> T2], Tf = [T3 -> T2]}\n6: Tnum3 = Number\n7: T+ = Number * Number -> Number\n```\n\n",
+     "hash": "72bb9313ec523996",
+     "lang": "typescript",
+     "noteHe": "הצעד השלישי, ושוב אותה תבנית. משוואה 3 היא `Tf = [T3 -> T2]`, והיא נכנסת להצבה — **וגם** מתפשטת אחורה: ה-`Tf` שהיה בתוך `T0` הוחלף, כך ש-`T0` הוא כעת `[[T3 -> T2] * Tg -> [Tx -> T2]]`. עקבו אחרי `T0` בכל הטבלאות — הוא הולך ומתמלא, וזהו למעשה מחוון ההתקדמות של האלגוריתם. שימו לב שההצבה מכילה כעת שלוש קשירות, ושכל אחת מהן עדיין מכילה משתנים — הטיפוסים הקונקרטיים ייכנסו רק בשתי המשוואות האחרונות."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:46",
+     "type": "prose",
+     "en": "Again case 3 for the 4th equation:\n\n",
+     "hash": "f0f50226961314e0",
+     "he": "שוב מקרה 3 עבור המשוואה הרביעית:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:47",
+     "type": "code",
+     "en": "```typescript\nEquations                     substitution\n5: Tg = [Tnum3 -> T4]         {T0 = [[T3 -> T2] * Tg -> [Tx -> T2]], \n                               T1 = [Tx -> T2], Tf = [T3 -> T2],\n6: Tnum3 = Number              T+ = [Tx * T4 -> T3]}\n7: T+ = Number * Number -> Number\n```\n\n",
+     "hash": "450a0e123be942a8",
+     "lang": "typescript",
+     "noteHe": "הצעד הרביעי. משוואה 4 היא `T+ = [Tx * T4 -> T3]`, והיא נכנסת להצבה — אבל שימו לב שהפעם `T0` **לא השתנה**, כי `T+` אינו מופיע בתוכו. זו תזכורת שההרכבה משפיעה רק על קשירות שמכילות את המשתנה החדש. שימו לב שההצבה כוללת כעת קשירה עבור `T+`, למרות שאנחנו כבר \"יודעים\" מהמשוואה השביעית שהטיפוס של `+` הוא `[Number * Number -> Number]` — האלגוריתם עדיין לא הגיע לשם, והוא מטפל במשוואות לפי הסדר. **זו נקודה מלמדת**: קשירה מוקדמת יכולה להיות \"פחות מפוענחת\" ממה שאפשר, וההרכבה עם המשוואה 7 בהמשך היא שתשלים את התמונה."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:48",
+     "type": "prose",
+     "en": "One more case 3 for the 5th equation:\n\n",
+     "hash": "e812cd0bd5ac91f2",
+     "he": "עוד מקרה 3 עבור המשוואה החמישית:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:49",
+     "type": "code",
+     "en": "```typescript\nEquations                          substitution\n6: Tnum3 = Number                  {T0 = [[T3 -> T2] * [Tnum3 -> T4] -> [Tx -> T2]],\n7: T+ = Number * Number -> Number   T1 = [Tx -> T2], Tf = [T3 -> T2],\n                                    T+ = [Tx * T4 -> T3],\n                                    Tg = [Tnum3 -> T4]}\n```\n\n",
+     "hash": "15bb4b8b5215c27e",
+     "lang": "typescript",
+     "noteHe": "הצעד החמישי. משוואה 5 היא `Tg = [Tnum3 -> T4]`, ושוב שני דברים קורים: הקשירה נוספת להצבה, ו-`Tg` שבתוך `T0` מוחלף — כך ש-`T0` הוא כעת `[[T3 -> T2] * [Tnum3 -> T4] -> [Tx -> T2]]`. שימו לב שכל חמש הקשירות בהצבה עדיין מכילות משתנים בלבד: אף טיפוס קונקרטי לא נכנס עדיין. נשארו שתי המשוואות שמכניסות את `Number`, והן שיהפכו את התמונה — שימו לב לכמה מהר."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:50",
+     "type": "prose",
+     "en": "Equation 6:\n\n",
+     "hash": "ac3b5e53504318b8",
+     "he": "משוואה 6:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:51",
+     "type": "code",
+     "en": "```typescript\nEquations                          substitution\n7: T+ = Number * Number -> Number  {T0 = [[T3 -> T2] * [Number -> T4] -> [Tx -> T2]],\n                                    T1 = [Tx -> T2], Tf = [T3 -> T2],\n                                    T+ = [Tx * T4 -> T3],\n                                    Tg = [Number -> T4],\n                                    Tnum3 = Number }\n```                                    \n\n",
+     "hash": "e5ba53fd0ef8720c",
+     "lang": "typescript",
+     "noteHe": "הצעד השישי, וכאן נכנס לראשונה טיפוס **קונקרטי**. משוואה 6 היא `Tnum3 = Number`, ושימו לב לתפוצה: `Tnum3` הופיע גם בתוך `Tg` וגם בתוך `T0`, ולכן שניהם מתעדכנים — `Tg` הופך ל-`[Number -> T4]` ו-`T0` נהפך ל-`[[T3 -> T2] * [Number -> T4] -> [Tx -> T2]]`. עקבו אחרי המילה `Number` בטבלאות הבאות ותראו אותה מתפשטת. **הנקודה הפדגוגית**: פיסת מידע יחידה על קבוע קטן `3` בפינה של התוכנית מטפסת דרך שרשרת ההצבות עד לטיפוס של הפונקציה כולה. זהו בדיוק מה שהופך הסקת טיפוסים לאפשרית."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:52",
+     "type": "prose",
+     "en": "When processing Equation 7, we must solve:\n\n",
+     "hash": "eb10ef538d2b226d",
+     "he": "כשאנחנו מעבדים את משוואה 7, עלינו לפתור:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:53",
+     "type": "code",
+     "en": "```typescript\n[Tx * T4 -> T3] = [Number * Number -> Number]\n```\n\n",
+     "hash": "dd379eeae1b78ef4",
+     "lang": "typescript",
+     "noteHe": "המשוואה שנוצרה אחרי צעד 1 של האלגוריתם. המשוואה המקורית מספר 7 היא `T+ = Number * Number -> Number`, אבל **לפני** שנוגעים בה מפעילים עליה את ההצבה — ומכיוון שההצבה כבר מכילה `T+ = [Tx * T4 -> T3]`, האגף השמאלי הופך לביטוי הזה. וכך המשוואה שצריך לפתור באמת היא בין שני ביטויים **מורכבים** משני הצדדים — ולא בין משתנה לביטוי. שימו לב שזה המקרה הראשון בכל המעקב שאינו מקרה 3, ולכן נדרש טיפול אחר: פירוק לרכיבים, כפי שמוסבר בפסקה הבאה."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:54",
+     "type": "prose",
+     "en": "This is case 4 of the algorithm - we split the two sides of the equation into components -\nbecause they have the same type constructor (`proc-te`) and yield the new equations:\n\n",
+     "hash": "8c893213ae19bf44",
+     "he": "זהו מקרה 4 של האלגוריתם — אנחנו מפצלים את שני צדי המשוואה לרכיבים,\nמכיוון שיש להם אותו בנאי טיפוס (`proc-te`), ומקבלים את המשוואות החדשות:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:55",
+     "type": "code",
+     "en": "```typescript\nTx = Number\nT4 = Number\nT3 = Number\n```\n\n",
+     "hash": "05db456e76b465ae",
+     "lang": "typescript",
+     "noteHe": "שלוש המשוואות שנוצרו מהפירוק — **זו ההמחשה של מקרה 4 וכדאי לזכור אותה**. השווינו `[Tx * T4 -> T3]` ל-`[Number * Number -> Number]`, ומכיוון שלשניהם אותו בנאי טיפוס (טיפוס פרוצדורה עם שני פרמטרים), אפשר להשוות **רכיב מול רכיב**: הפרמטר הראשון נותן `Tx = Number`, השני `T4 = Number`, וטיפוס ההחזרה `T3 = Number`. שימו לב שהמשוואות החדשות **מתווספות לבריכת המשוואות** ויעובדו בהמשך הלולאה — האלגוריתם אינו פותר אותן מיד. שימו לב גם למה שהיה קורה אם הבנאים היו שונים: אילו האגף האחד היה טיפוס פרוצדורה והשני `Pair`, או אילו מספר הפרמטרים היה שונה, התוצאה הייתה `FAIL` מיד. **הבחנה עדינה שכדאי לשים לב אליה**: מספר הפרמטרים הוא חלק מבנאי הטיפוס, ולכן `[Number -> Number]` ו-`[Number * Number -> Number]` אינם ניתנים לאיחוד — וזה בדיוק המנגנון שתופס קריאה עם מספר ארגומנטים שגוי."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:56",
+     "type": "prose",
+     "en": "We eventually output the following substitution:\n\n",
+     "hash": "b32985f4fb9667b1",
+     "he": "בסופו של דבר אנחנו מוציאים את ההצבה הבאה:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:57",
+     "type": "code",
+     "en": "```typescript\n{T0 = [[Number -> T2] * [Number -> Number] -> [Number -> T2]],\n T1 = [Number -> T2], \n Tf = [Number -> T2],\n T+ = [Number * Number -> Number],\n Tg = [Number -> Number],\n Tnum3 = Number,\n Tx = Number\n T4 = Number\n T3 = Number}\n```\n\n",
+     "hash": "ff6a294cda0e1cc6",
+     "lang": "typescript",
+     "noteHe": "ההצבה הסופית — התוצר של האלגוריתם, תשע קשירות. השורה החשובה היא הראשונה: `T0 = [[Number -> T2] * [Number -> Number] -> [Number -> T2]]`, כלומר הטיפוס של הביטוי כולו. פרקו אותה: הפרמטר הראשון (`f`) הוא `[Number -> T2]`, הפרמטר השני (`g`) הוא `[Number -> Number]`, וטיפוס ההחזרה הוא `[Number -> T2]`. **שימו לב לאסימטריה המלמדת בין `f` ל-`g`**: `Tg` נקבע לגמרי כי הארגומנט שלו הוא `3` (מספר) והתוצאה שלו נכנסת ל-`+` (שדורש מספר); `Tf` נקבע רק חלקית — הפרמטר שלו הוא `Number` כי מקבל את תוצאת `+`, אבל טיפוס ההחזרה נשאר `T2` כי הוא זורם ישר החוצה ואף פרימיטיב אינו נוגע בו. זו בדיוק אותה תופעה מדוגמה 3, וכאן היא נגזרה אלגוריתמית במלואה. שימו לב ש-`T2` מופיע בהצבה **פעמיים** (ב-`T0` וב-`Tf` וב-`T1`) — כל המופעים חייבים לקבל אותו ערך, וזה מה שמבטיח שהתוכנית עקבית לכל בחירה של `T2`. שימו לב לחוסר עקביות בפיסוק במקור: שלוש הקשירות האחרונות מופרדות בלי פסיקים."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:58",
+     "type": "prose",
+     "en": "On the basis of this substitution, we can return the fully annotated expression:\n\n",
+     "hash": "41ff8ed23aaf6e94",
+     "he": "על בסיס ההצבה הזו, אנחנו יכולים להחזיר את הביטוי המוער במלואו:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:59",
+     "type": "code",
+     "en": "```scheme\n(lambda ([f : Tf] [g : Tg]) : T1\n  (lambda ([x : Tx]) : T2\n    (f (+ x (g 3)))))\n```\n\n",
+     "hash": "238784419cb84f3c",
+     "lang": "scheme",
+     "noteHe": "נקודת המוצא — הביטוי עם משתני הטיפוס, זהה למה שראינו בתחילת הסעיף. הוא מובא כאן שוב כדי להעמיד אותו זה מול זה עם הגרסה המוערת בבלוק הבא. עברו ביניהם והחליפו כל משתנה בערכו מההצבה: `Tf`, `Tg`, `T1`, `Tx` — ורק `T2` יישאר."
+    },
+    {
+     "id": "cm/3.2TypeInference:10:60",
+     "type": "prose",
+     "en": "becomes:\n\n",
+     "hash": "c0b07e26c9f21c03",
+     "he": "הופך ל:"
+    },
+    {
+     "id": "cm/3.2TypeInference:10:61",
+     "type": "code",
+     "en": "```scheme\n(lambda ([f : [Number -> T2] [g : [Number -> Number]]) : [Number -> T2]\n  (lambda ([x : Number]) : T2\n    (f (+ x (g 3)))))\n``` \n\n\n",
+     "hash": "181d88d7be8c046b",
+     "lang": "scheme",
+     "noteHe": "התוצר הסופי של כל האלגוריתם, סוף סוף עם הערות טיפוס מלאות. השוו לבלוק הקודם: `Tf` הפך ל-`[Number -> T2]`, `Tg` ל-`[Number -> Number]`, `T1` ל-`[Number -> T2]`, `Tx` ל-`Number`, ו-`T2` **נשאר** — כי הוא באמת פולימורפי. **שימו לב לשגיאת סוגריים במקור** בשורה הראשונה: כתוב `([f : [Number -> T2] [g : [Number -> Number]])` — חסר סוגר מרובע שסוגר את ההצהרה של `f`; הצורה התקינה היא `([f : [Number -> T2]] [g : [Number -> Number]])`. זו אותה טעות שראינו בסוף דוגמה 2, וכדאי להתרגל לספור סוגריים בהערות טיפוס מקוננות. **סיכום המסלול שעברנו בסעיף**: ביטוי בלי הערות → הקצאת משתנה לכל תת-ביטוי (שלב II) → שבע משוואות (שלב III) → מעקב של תשעה צעדי אוניפיקציה (שלב IV) → הצבה סופית → תוכנית מוערת. **זה בדיוק הפורמט של שאלת המבחן הגדולה על הפרק הזה**, ושווה לחזור עליו מקצה לקצה עם ביטוי אחר."
+    }
+   ],
+   "headingHe": "הסקת טיפוסים עם משוואות, צעד אחר צעד"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "על איזה מהביטויים הבאים **תיכשל** הסקת הטיפוסים?",
+   "options": [
+    "‏`(lambda (x) (+ x 1))`",
+    "‏`(lambda (f x) (f (f x)))`",
+    "‏`(lambda (x) (x x))`",
+    "‏`(lambda (f) (f 1))`"
+   ],
+   "correct": 2,
+   "explanationHe": "**התשובה הנכונה היא `(lambda (x) (x x))`**. כלל ההפעלה על `(x x)` דורש שהאופרטור יהיה טיפוס פונקציה מטיפוס האופרנד לטיפוס התוצאה — אבל האופרנד הוא `x` עצמו, ולכן מתקבל `Tx = [Tx -> Tapp]`. אין ביטוי טיפוס **סופי** שמקיים זאת: כל הצבה של `Tx` בתוך עצמו מייצרת ביטוי ארוך יותר לנצח. זהו כשל **בדיקת ההיקרות** (occurs check).\n\nלמה שאר האפשרויות מצליחות:\n- `(lambda (x) (+ x 1))` — הפרימיטיב `+` קובע מיד `Tx = Number` והטיפוס הוא `[Number -> Number]`. אין כאן שום קושי.\n- `(lambda (f x) (f (f x)))` — מתקבל `Tf = [Tx -> T1]` מההפעלה הפנימית ו-`Tf = [T1 -> T2]` מהחיצונית; האוניפיקציה מפרקת אותן ומקבלת `Tx = T1 = T2`, ולכן `Tf = [T -> T]` והטיפוס הכולל הוא `[[T -> T] * T -> T]` — **פולימורפי, אבל תקין**. חשוב לא לבלבל בין 'נשארו משתני טיפוס' לבין 'נכשל'.\n- `(lambda (f) (f 1))` — מתקבל `Tf = [Number -> T]` והטיפוס הוא `[[Number -> T] -> T]`, גם הוא פולימורפי ותקין.\n\n**המסקנה שכדאי לשנן**: השארת משתני טיפוס בתוצאה היא הצלחה (פולימורפיזם), ולא כשל. כשל מתרחש רק בהתנגשות בין טיפוסים קונקרטיים או בהיקרות."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "מהו הטיפוס שיוסק לביטוי הבא? הראו את משוואות הטיפוס בדרך.\n```scheme\n(lambda (f)\n  (lambda (x)\n    (f (f x))))\n```",
+   "answerHe": "הטיפוס הוא **`[[T -> T] -> [T -> T]]`** (עד כדי שינוי שם של `T`).",
+   "explanationHe": "**גזירת המשוואות.** נסמן: `T0` לביטוי כולו, `Tf` ו-`Tx` לפרמטרים, `T1` ל-lambda הפנימית, `T2` לגוף `(f (f x))`, ו-`T3` להפעלה הפנימית `(f x)`.\n\n1. מכלל הפרוצדורה החיצונית: `T0 = [Tf -> T1]`\n2. מכלל הפרוצדורה הפנימית: `T1 = [Tx -> T2]`\n3. מכלל ההפעלה על `(f x)`: `Tf = [Tx -> T3]`\n4. מכלל ההפעלה על `(f (f x))`: `Tf = [T3 -> T2]`\n\n**הפתרון.** משוואות 3 ו-4 נותנות שתי צורות ל-`Tf`, ולכן צריך לאחד: `[Tx -> T3] = [T3 -> T2]`. שני הצדדים הם טיפוסי פרוצדורה עם אותו בנאי, ולכן מפרקים רכיב-מול-רכיב (מקרה 4 באלגוריתם): `Tx = T3` וגם `T3 = T2`.\n\nמכאן `Tx = T3 = T2` — נסמן את שלושתם `T`. לכן:\n- `Tf = [T -> T]`\n- `T1 = [T -> T]`\n- `T0 = [[T -> T] -> [T -> T]]`\n\n**הנקודות שחייבות להופיע בתשובה**: (1) ארבע המשוואות; (2) הזיהוי ש-`Tf` מקבל שתי צורות ולכן נדרשת אוניפיקציה; (3) הפירוק שמוביל ל-`Tx = T3 = T2`; (4) הטיפוס הסופי, עם ההערה שהוא **פולימורפי** — הפונקציה עובדת לכל `T`.\n\n**האינטואיציה**: זהו הקומבינטור 'הפעל פעמיים'. כדי שאפשר יהיה להפעיל `f` על התוצאה של `f`, הקלט והפלט של `f` חייבים להיות מאותו טיפוס — וזה בדיוק מה שהאוניפיקציה גילתה."
+  },
+  {
+   "id": "ex3",
+   "type": "open",
+   "questionHe": "מהם **שני** המקרים שבהם אלגוריתם האוניפיקציה מחזיר FAIL? תנו דוגמה קונקרטית לכל אחד, והסבירו מדוע מערכת טיפוסים חייבת לדחות גם תוכניות שהיו רצות בלי שגיאה.",
+   "answerHe": "**שני מקורות הכשל:**\n\n**1. התנגשות בין טיפוסים לא-מתאימים.** זהו מקרה 2 באלגוריתם (שני טיפוסים אטומיים שונים), וגם מקרים 4 ו-5 (בנאי טיפוס שונה, או אטומי מול מורכב).\nדוגמה: `(+ 1 #t)` מייצר את המשוואה `Boolean = Number` — סתירה מיידית. דוגמה נוספת: העברת מספר ארגומנטים שגוי, `((lambda (x) x) 1 2)`, מייצרת `[Tx -> T] = [Number * Number -> T']` — אותו בנאי אבל מספר פרמטרים שונה, ולכן FAIL.\n\n**2. בדיקת ההיקרות (occurs check).** משתנה טיפוס שמופיע **בתוך** הביטוי שהוא מאוחד איתו. זהו מקרה 3 באלגוריתם (`circular mapping`).\nדוגמה: `(lambda (x) (x x))` מייצר `Tx = [Tx -> Tapp]`. אין פתרון סופי, כי כל הצבה מייצרת ביטוי ארוך יותר: `[[Tx -> Tapp] -> Tapp]`, ואז `[[[Tx -> Tapp] -> Tapp] -> Tapp]`, וכן הלאה.\n\n**מדוע נדחות תוכניות תקינות?** `(lambda (x) (x x))` הוא ביטוי חוקי לחלוטין ב-Scheme לא-מטופסת, וניתן להריץ אותו. הוא אף הכרחי לבניית קומבינטור Y ולרקורסיה בלי `letrec`. ובכל זאת מערכת הטיפוסים דוחה אותו.\n\nהסיבה עקרונית: השאלה 'האם תוכנית זו תתרסק בזמן ריצה' היא **בלתי כריעה** (ניתן לרדוקציה לבעיית העצירה). לכן כל בודק טיפוסים שמסתיים תמיד חייב לבחור בין שתי אפשרויות: להיות **לא נאות** (sound) ולאשר תוכניות שיתרסקו, או להיות **שמרני** ולדחות גם תוכניות שהיו רצות בסדר. השפה שלנו — כמו Haskell, ML ו-TypeScript — בוחרת בשמרנות: מוטב לדחות תוכנית תקינה מלאשר תוכנית שגויה.\n\nבמילים אחרות, מערכת הטיפוסים מקיימת 'אם עבר בדיקה — לא יהיו שגיאות טיפוס בזמן ריצה', אבל **לא** את הכיוון ההפוך.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) שני סוגי הכשל בשמותיהם — התנגשות טיפוסים והיקרות (occurs check); (2) דוגמה קונקרטית לכל אחד, למשל `(+ 1 #t)` ו-`(lambda (x) (x x))`; (3) הקישור למקרים 2–5 באלגוריתם; (4) ההסבר שבדיקת טיפוסים היא שמרנית מפני שהבעיה בלתי כריעה; (5) הניסוח החד-כיווני — 'עבר בדיקה ⇒ בטוח', ולא ההפך. בונוס: להזכיר שמספר הפרמטרים הוא חלק מבנאי הטיפוס, ולכן קריאה עם מספר ארגומנטים שגוי נתפסת כהתנגשות בנאים."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "מהו **המאחד הכללי ביותר** (mgu) של שני ביטויי הטיפוס `[S * S -> S]` ו-`[Pair(T1) * T2 -> T2]`?",
+   "options": [
+    "‏`{S=Pair(T1), T2=Pair(T1)}`",
+    "‏`{S=Pair(Number), T2=Pair(Number)}`",
+    "‏`{S=T2, T1=Number}`",
+    "אין להם מאחד"
+   ],
+   "correct": 0,
+   "explanationHe": "**התשובה הנכונה היא `{S=Pair(T1), T2=Pair(T1)}`**. משווים מקום-מקום: המקום הראשון נותן `S = Pair(T1)`; המקום השני נותן `S = T2`; המקום השלישי נותן שוב `S = T2`. מכאן `T2 = Pair(T1)`, וזו ההצבה המבוקשת — היא מציבה **רק** את מה שהכרחי ומשאירה את `T1` חופשי.\n\nלמה השאר שגויים:\n- `{S=Pair(Number), T2=Pair(Number)}` — זהו **מאחד תקין**, אבל **לא הכללי ביותר**: הוא מוסיף הנחה מיותרת ש-`T1 = Number`. אפשר לקבל אותו מהתשובה הנכונה על ידי הצבה נוספת `{T1=Number}` — וזו בדיוק ההגדרה של 'פחות כללי'.\n- `{S=T2, T1=Number}` — אינו מאחד בכלל: אחרי ההצבה האגף הראשון הוא `[T2 * T2 -> T2]` והשני `[Pair(Number) * T2 -> T2]`, ושני הביטויים אינם זהים.\n- 'אין להם מאחד' — שגוי, כפי שהראינו. שימו לב שהיה **כן** נכון אילו במקום `Pair(T1)` היה כתוב `Pair(S)`, שאז היינו מקבלים `S = Pair(S)` — כשל היקרות.\n\n**הכלל שכדאי לשנן**: ה-mgu הוא ההצבה המינימלית שמאחדת; כל מאחד אחר מתקבל ממנה על ידי הצבה נוספת. הוא יחיד עד כדי שינוי שם עקבי."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "עבור כל אחד מזוגות ביטויי הטיפוס הבאים, קבעו אם ניתן לאחד אותם, ואם כן — תנו את ה-mgu.\n```typescript\n// זוג א'\n[T1 -> T2]  ו-  [T2 -> Number]\n\n// זוג ב'\n[T1 -> T1]  ו-  [Number -> Boolean]\n\n// זוג ג'\n[T1 * T2 -> T1]  ו-  [Number -> Number]\n```",
+   "answerHe": "**זוג א' — ניתן לאיחוד.** ה-mgu הוא `{T1 = Number, T2 = Number}`.\n\n**זוג ב' — לא ניתן לאיחוד** (התנגשות טיפוסים).\n\n**זוג ג' — לא ניתן לאיחוד** (בנאי טיפוס שונה — מספר פרמטרים שונה).",
+   "explanationHe": "**זוג א'.** שני הצדדים הם טיפוסי פרוצדורה עם פרמטר אחד, ולכן מפרקים לרכיבים: מהפרמטר `T1 = T2`, ומטיפוס ההחזרה `T2 = Number`. הרכבת השתיים נותנת `{T1 = Number, T2 = Number}`. שימו לב שהמשוואה הראשונה לבדה נותנת רק `{T1 = T2}`, והמידע הקונקרטי מגיע מהשנייה ומתפשט אחורה — בדיוק מנגנון ההרכבה מהאלגוריתם.\n\n**זוג ב'.** הפירוק נותן `T1 = Number` מהפרמטר ו-`T1 = Boolean` מטיפוס ההחזרה. אחרי הצבת הראשונה, המשוואה השנייה הופכת ל-`Number = Boolean` — שני טיפוסים אטומיים שונים, כלומר **מקרה 2** באלגוריתם, ולכן FAIL. הלקח: אותו משתנה בשני מקומות הוא הגבלה אמיתית; אילו הביטוי היה `[T1 -> T2]` הוא כן היה מתאחד.\n\n**זוג ג'.** לאגף הראשון **שני** פרמטרים ולאגף השני **אחד**. מספר הפרמטרים הוא חלק מזהות בנאי הטיפוס, ולכן זהו **מקרה 4** באלגוריתם עם בנאים שונים — FAIL, בלי צורך להשוות אף רכיב. זה בדיוק המנגנון שתופס קריאה לפונקציה עם מספר ארגומנטים שגוי.\n\n**נקודות שחייבות להופיע**: לכל זוג — ההכרעה, הפירוק לרכיבים, וזיהוי איזה מקרה באלגוריתם חל (2 להתנגשות אטומים, 4 לבנאים שונים)."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הריצו את אלגוריתם הסקת הטיפוסים במלואו — ארבעת השלבים — על הביטוי `(lambda (x) (+ x x))`. הראו את הקצאת משתני הטיפוס, את המשוואות, ואת מעקב הפתרון.",
+   "answerHe": "**שלב I — שינוי שם.** אין צורך; יש משתנה מוצהר אחד בלבד.\n\n**שלב II — הקצאת משתני טיפוס** לכל תת-ביטוי:\n```\nExpression            Variable\n(lambda (x) (+ x x))  T0\n(+ x x)               T1\n+                     T+\nx                     Tx\n```\nשימו לב שגם העלים `+` ו-`x` מקבלים משתנה.\n\n**שלב III — בניית המשוואות:**\n```\n1. T0 = [Tx -> T1]                    // כלל הפרוצדורה\n2. T+ = [Tx * Tx -> T1]               // כלל ההפעלה (על האופרטור!)\n3. T+ = [Number * Number -> Number]   // הטיפוס הידוע של הפרימיטיב +\n```\nשימו לב ש-`Tx` מופיע **פעמיים** במשוואה 2, כי `x` הוא שני האופרנדים.\n\n**שלב IV — פתרון:**\n- *צעד 1* (משוואה 1, מקרה 3 — צד אחד משתנה): ההצבה הופכת ל-`{T0 = [Tx -> T1]}`.\n- *צעד 2* (משוואה 2, מקרה 3): ההצבה הופכת ל-`{T0 = [Tx -> T1], T+ = [Tx * Tx -> T1]}`. שימו לב ש-`T0` לא השתנה, כי `T+` אינו מופיע בו.\n- *צעד 3* (משוואה 3): קודם מפעילים את ההצבה על המשוואה, ומקבלים `[Tx * Tx -> T1] = [Number * Number -> Number]`. שני הצדדים מורכבים עם אותו בנאי, ולכן **מקרה 4** — מפרקים לשלוש משוואות חדשות: `Tx = Number`, `Tx = Number`, `T1 = Number`.\n- *צעדים 4–6*: עיבוד המשוואות החדשות (מקרה 3, והשנייה כבר טריוויאלית לאחר ההצבה). ההצבה מתפשטת אחורה לתוך `T0` ו-`T+`.\n\n**ההצבה הסופית:**\n```\n{T0 = [Number -> Number],\n T+ = [Number * Number -> Number],\n Tx = Number,\n T1 = Number}\n```\n\n**התוכנית המוערת:** `(lambda ([x : Number]) : Number (+ x x))`, והטיפוס המוסק לביטוי כולו הוא **`[Number -> Number]`**.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ציון שלב I ולמה אינו נדרש; (2) הקצאת משתנה לכל תת-ביטוי **כולל העלים** `+` ו-`x` — פספוס עלה הוא הטעות הנפוצה כאן; (3) שלוש המשוואות, כשהמשוואה של ההפעלה נכתבת על **האופרטור** `T+` ולא על ההפעלה; (4) שימוש באותו `Tx` בשני המקומות; (5) מעקב פתרון שמזהה נכון את מקרה 3 מול מקרה 4, ובפרט את הפירוק של משוואה 3 לרכיבים; (6) ההצבה הסופית והטיפוס `[Number -> Number]`. בונוס: לציין שסדר עיבוד אחר של המשוואות היה מוביל לאותה הצבה סופית."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "האלגוריתם קובע שאפשר לסדר את משוואות הקלט 'בכל סדר סדרתי'. מה הדבר אומר על התוצאה?",
+   "options": [
+    "התוצאה תלויה בסדר, ולכן יש להעדיף סדר שמתחיל בפרימיטיבים",
+    "סדרים שונים יובילו לאותה הצבה סופית, אבל דרך מעקב שונה",
+    "סדרים שונים יכולים להוביל לכך שאחד יצליח והשני ייכשל",
+    "הסדר משפיע רק על מספר משתני הטיפוס שיישארו בתוצאה"
+   ],
+   "correct": 1,
+   "explanationHe": "**התשובה הנכונה: אותה הצבה סופית, מעקב שונה.** האוניפיקציה מחשבת את המאחד **הכללי ביותר**, וה-mgu הוא יחיד עד כדי שינוי שם עקבי — ולכן הוא אינו תלוי בסדר. מה שכן משתנה הוא הדרך: קשירות ביניים בהצבה ייראו אחרת, ומשוואה שבסדר אחד נפתרת במקרה 3 עשויה בסדר אחר להגיע כבר 'מפוענחת' ולהיפתר במקרה 4 או להיות טריוויאלית.\n\nלמה השאר שגויים:\n- 'התוצאה תלויה בסדר' — שגוי; זו בדיוק ההבטחה שהמילים `in any sequential order` נותנות. (נכון שהתחלה בפרימיטיבים עשויה להיות יעילה יותר, אבל זה שיקול ביצועים ולא נכונות.)\n- 'אחד יצליח והשני ייכשל' — שגוי, וזו הטעות המושגית החמורה: אם קיים פתרון למערכת, האלגוריתם ימצא אותו מכל סדר; אם אין — הוא ייכשל מכל סדר. סתירה אינה נעלמת בזכות סדר נוח.\n- 'משפיע על מספר המשתנים שיישארו' — שגוי; דרגות החופש בתוצאה נקבעות על ידי מערכת המשוואות עצמה, לא על ידי סדר עיבודה.\n\n**הרעיון שכדאי לשנן**: המערכת מגדירה את הפתרון, האלגוריתם רק מוצא אותו."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "מה ההבדל בין **בדיקת טיפוסים** (3.1) לבין **הסקת טיפוסים** (3.2)? התייחסו לקלט, לפלט, ולשאלה מי מהשניים 'חזק' יותר.",
+   "answerHe": "**בדיקת טיפוסים (type checking).** הקלט הוא תוכנית עם הערות טיפוס **מלאות**. הפלט בוליאני במהותו: 'התוכנית מטופסת היטב' או 'שגיאת טיפוס'. המנגנון הוא מעבר על ה-AST מהעלים כלפי מעלה, כשבכל צומת מחשבים את הטיפוס מטיפוסי הבנים ובודקים התאמה מול כלל הטיפוס. הזרימה חד-כיוונית.\n\n**הסקת טיפוסים (type inference).** הקלט הוא תוכנית שבה הערות הטיפוס **אופציונליות** — ואפשר שלא יהיו כלל. הפלט עשיר יותר: או הצבת טיפוסים שממלאת את כל ההערות החסרות, או FAIL. המנגנון: מקצים משתנה טיפוס לכל תת-ביטוי, גוזרים משוואות מכללי הטיפוס, ופותרים אותן באוניפיקציה. הזרימה **דו-כיוונית** — מידע יכול לזרום מהשימוש בפונקציה אל טיפוס הפרמטר שלה, ולא רק להפך.\n\n**מי חזק יותר?** הסקת טיפוסים **כוללת** בתוכה בדיקת טיפוסים. אם מריצים אותה על תוכנית מוערת במלואה, כל 'הערה' היא פשוט משוואה נוספת עם טיפוס קונקרטי, והמערכת תהיה חסרת פתרון בדיוק כאשר הבדיקה הייתה נכשלת. במובן הזה בדיקת טיפוסים היא מקרה פרטי.\n\n**מה ההסקה קונה לנו:** (1) המתכנת אינו חייב לכתוב הערות; (2) התוצאה יכולה להיות **פולימורפית** — משתני טיפוס שנשארים בתוצאה מלמדים שהתוכנית תקינה לכל בחירה שלהם, מידע שבדיקה לעולם לא תפיק.\n\n**מה משותף לשניהם:** אותם כללי טיפוס בדיוק, ואותה שמרנות — שתי הגישות ידחו את `(lambda (x) (x x))` למרות שהוא רץ בלי שגיאה.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הקלט של כל אחד — הערות מלאות מול אופציונליות; (2) הפלט — הכרעה בוליאנית מול הצבת טיפוסים; (3) המנגנון — מעבר מלמטה למעלה מול בניית משוואות ואוניפיקציה; (4) הקביעה שההסקה כוללת את הבדיקה כמקרה פרטי, עם ההסבר שהערה מפורשת שקולה למשוואה עם טיפוס קונקרטי; (5) הרווח של פולימורפיזם; (6) ההבחנה שכללי הטיפוס והשמרנות משותפים לשתיהן. בונוס: להזכיר את הזרימה הדו-כיוונית של המידע בהסקה, ואת הקשר ל-gradual typing ב-TypeScript."
+  }
+ ]
+}

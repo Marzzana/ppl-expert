@@ -1,0 +1,284 @@
+{
+ "classMaterial": [
+  {
+   "titleEn": "Introduction",
+   "entries": [
+    {
+     "pageId": "cm/chap1",
+     "titleEn": "1. Introduction"
+    }
+   ]
+  },
+  {
+   "titleEn": "Functional Programming: Expressions, Values, Types using TypeScript",
+   "entries": [
+    {
+     "pageId": "cm/1.1TypescriptDatatypes",
+     "titleEn": "2. Semantics of Programming Languages and Types"
+    },
+    {
+     "pageId": "cm/1.2TypescriptJSON",
+     "titleEn": "3. TypeScript: Complex Data Types, JSON, FP Processing of JSON"
+    },
+    {
+     "pageId": "cm/1.3TypescriptTypeChecking",
+     "titleEn": "4. Type Checking"
+    },
+    {
+     "pageId": "cm/1.4TypesAndOperations",
+     "titleEn": "5. Data Types and Operations on Data"
+    },
+    {
+     "pageId": "cm/1.5Monad",
+     "titleEn": "6. Composition and Monads"
+    }
+   ]
+  },
+  {
+   "titleEn": "Defining a Programming Language Bottom-up: Elements of Programming",
+   "entries": [
+    {
+     "pageId": "cm/2.1Scheme-bottom-up",
+     "titleEn": "1. Elements of Programming - Defining Scheme Bottom-up"
+    },
+    {
+     "pageId": "cm/2.2Higher-Order-Functions-Let",
+     "titleEn": "2.Higher-order Functions in Scheme and Local Variables"
+    }
+   ]
+  },
+  {
+   "titleEn": "Syntax",
+   "entries": [
+    {
+     "pageId": "cm/2.3Syntax",
+     "titleEn": "3.Syntax of Programming Languages: BNF, Abstract Syntax Tree"
+    },
+    {
+     "pageId": "cm/2.4SyntacticOperations",
+     "titleEn": "4.Syntactic Operations: L1 Parsing, Type Guards, Scoping, Lexical Addresses, Syntactic Rewrites"
+    }
+   ]
+  },
+  {
+   "titleEn": "Operational Semantics: Substitution-based Interpreter",
+   "entries": [
+    {
+     "pageId": "cm/2.5OperationalSemantics",
+     "titleEn": "5. Operational Semantics: L1 evaluation, environment"
+    },
+    {
+     "pageId": "cm/2.6SubstitutionModel",
+     "titleEn": "6. Substitution Model: L2 (ProcExp, IfExp), Closures, L3 (SExp), Error Processing, Applicative Order vs. Normal Order evaluation"
+    }
+   ]
+  },
+  {
+   "titleEn": "Operational Semantics: Environment-based Interpreter",
+   "entries": [
+    {
+     "pageId": "cm/2.7EnvironmentModel",
+     "titleEn": "7. Environment Model, L4 evaluation, let evaluation, visual notation of environments, using closures, closure-based compound data structures"
+    },
+    {
+     "pageId": "cm/2.8RecursionMutation",
+     "titleEn": "8. Recursion and Mutation"
+    }
+   ]
+  },
+  {
+   "titleEn": "Chapter 3: Type Checking and Type Inference",
+   "entries": [
+    {
+     "pageId": "cm/3.1TypeChecking",
+     "titleEn": "1. Type Checking with Full Type Annotations"
+    },
+    {
+     "pageId": "cm/3.2TypeInference",
+     "titleEn": "2. Type Inference"
+    },
+    {
+     "pageId": "cm/3.3TypeInferenceSystem",
+     "titleEn": "3. Type Inference System"
+    }
+   ]
+  },
+  {
+   "titleEn": "Chapter 4: Control Structures",
+   "entries": [
+    {
+     "pageId": "cm/4.1AsyncProgramming",
+     "titleEn": "Asynchronous Programming, Promises and Generators"
+    },
+    {
+     "pageId": "cm/4.2CPS",
+     "titleEn": "Continuation Passing Style"
+    },
+    {
+     "pageId": "cm/4.3Generators",
+     "titleEn": "Lazy Lists and Generators in Scheme"
+    },
+    {
+     "pageId": "cm/4.4RecursionToIteration",
+     "titleEn": "From Recursion to Iteration in TypeScript through CPS"
+    }
+   ]
+  },
+  {
+   "titleEn": "Chapter 5: Logic Programming",
+   "entries": [
+    {
+     "pageId": "cm/5.1RelationalLogicProgramming",
+     "titleEn": "Relational Logic Programming"
+    },
+    {
+     "pageId": "cm/5.2LogicProgramming",
+     "titleEn": "Logic Programming"
+    },
+    {
+     "pageId": "cm/5.3LPInterpreter",
+     "titleEn": "Logic Programming Interpreter in Scheme"
+    }
+   ]
+  }
+ ],
+ "practiceSessions": [
+  {
+   "pageId": "reading/programming_paradigms_fp_ts",
+   "titleEn": "Programming Paradigms & Functional Programming with TypeScript"
+  },
+  {
+   "pageId": "reading/simple_loops_numpy",
+   "titleEn": "Simple Loops with NumPy"
+  },
+  {
+   "pageId": "reading/vectorizing_loops",
+   "titleEn": "Loop with Accumulator and Vectorization"
+  },
+  {
+   "pageId": "ps/ps1",
+   "titleEn": "PS #1: TypeScript: Complex Data Types, JSON, Map, Filter, Reduce"
+  },
+  {
+   "pageId": "ps/ps1_sol",
+   "titleEn": "Solution"
+  },
+  {
+   "pageId": "ps/ps2",
+   "titleEn": "PS #2: TypeScript: Type Checking"
+  },
+  {
+   "pageId": "ps/ps3",
+   "titleEn": "PS #3: Scheme Intro"
+  },
+  {
+   "pageId": "ps/ps4",
+   "titleEn": "PS #4: Concrete and Abstract Syntax"
+  },
+  {
+   "pageId": "ps/ps5",
+   "titleEn": "PS #5: Operational Semantics"
+  },
+  {
+   "pageId": "ps/ps6",
+   "titleEn": "PS #6: Environment Model"
+  },
+  {
+   "pageId": "ps/ps7",
+   "titleEn": "PS #7: Type inference using type constraints"
+  },
+  {
+   "pageId": "ps/ps8",
+   "titleEn": "PS #8: Type Inference System"
+  },
+  {
+   "pageId": "ps/ps9",
+   "titleEn": "PS #9: Asynchronous Programming in TypeScript"
+  },
+  {
+   "pageId": "ps/ps10",
+   "titleEn": "PS #10: Lazy-Lists and Continuation Passing Style (CPS)"
+  },
+  {
+   "pageId": "ps/ps11",
+   "titleEn": "PS #11: Logic Programming, Part 1"
+  },
+  {
+   "pageId": "ps/ps12",
+   "titleEn": "PS #12: Logic Programming, Part 2"
+  }
+ ],
+ "codeGroups": [
+  {
+   "titleEn": "Type Checking (Code and Tests)",
+   "files": [
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/TExp.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-ast.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-env.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-value.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-eval.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/evalPrimitive.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/TEnv.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-typecheck.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/L5/L5-eval.test.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/L5/L5-typecheck.test.ts"
+   ]
+  },
+  {
+   "titleEn": "Type Inference with Type Equations",
+   "files": [
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-substitution-adt.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-type-equations.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/L5/L5-substitution-adt.test.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/L5/L5-type-equations.test.ts"
+   ]
+  },
+  {
+   "titleEn": "Type Inference with Type Var Unification (Optimized Type Equations)",
+   "files": [
+    "https://github.com/bguppl/interpreters/blob/master/src/L5/L5-typeinference.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/L5/L5-typeinference.test.ts"
+   ]
+  },
+  {
+   "titleEn": "Code",
+   "files": [
+    "https://github.com/bguppl/interpreters/blob/master/src/async/coroutine1.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/async/coroutine1.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/async/lzl.rkt"
+   ]
+  },
+  {
+   "titleEn": "Deriving an iterative interpreter for L5 using CPS and Registerization",
+   "files": [
+    "https://github.com/bguppl/interpreters/blob/master/src/cps/sum.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/cps/L6-eval.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/cps/L6-eval.test.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/cps/L7a-eval.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/cps/L7b-eval.ts",
+    "https://github.com/bguppl/interpreters/blob/master/src/cps/L7c-eval.ts",
+    "https://github.com/bguppl/interpreters/blob/master/test/cps/L7.test.ts"
+   ]
+  },
+  {
+   "titleEn": "Code",
+   "files": [
+    "https://github.com/bguppl/interpreters/tree/master/src/logic",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/LP-ast.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/LP-ast-tests.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/LP-rename.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/substitution-ADT.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/substitution-ADT-tests.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/lazy-tree-ADT.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/lazy-tree-ADT-tests.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/auxiliary.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/utils.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/unify.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/term-equation-adt.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/unify-tests.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/answer-query.rkt",
+    "https://github.com/bguppl/interpreters/blob/master/src/logic/answer-query-test.rkt"
+   ]
+  }
+ ]
+}

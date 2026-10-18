@@ -4,25 +4,41 @@
 
 **פלטפורמת לימוד בעברית לקורס "עקרונות שפות תכנות" (PPL) באוניברסיטת בן־גוריון**
 
-A Hebrew study platform for Ben-Gurion University's *Principles of Programming Languages* course —
-a content pipeline that turns the official English course site into a translated, annotated,
-progress-tracked reader app.
+The complete BGU *Principles of Programming Languages* course — translated to Hebrew, reorganised
+into one study path, with progress tracking, exercises, and a Hebrew walkthrough on every block of
+code.
 
-Built end-to-end with [Claude Code](https://claude.com/claude-code).
+Runs locally in your browser. No account, no server, no API key.
 
 </div>
 
 ---
 
-> ### ⚠️ No course material ships in this repository
->
-> This repo contains **the engine, not the course**: the reader app, the content pipeline, and the
-> authoring guides. Every lesson page, figure and interpreter source file is fetched from the
-> course's own public repositories at setup time and generated into `public/content/`, which is
-> gitignored. Nothing that belongs to the course staff is committed here.
-> See [What is *not* in here](#what-is-not-in-here).
+## התקנה
 
-## Why this exists
+דרוש [Node.js](https://nodejs.org/) בגרסה 20.11 ומעלה.
+
+```bash
+git clone https://github.com/Marzzana/ppl-expert.git
+cd ppl-expert
+npm install
+npm run dev
+```
+
+פותחים את http://localhost:5199 — וזהו. **כל הקורס כבר מתורגם ונמצא בתוך ה-repo**; אין שלב נוסף,
+אין מה להוריד, ואין צורך בחיבור לאינטרנט אחרי ההתקנה.
+
+ההתקדמות נשמרת בדפדפן (localStorage). בסרגל הצד יש כפתורי **גיבוי/שחזור** לייצוא וייבוא שלה כקובץ,
+אז מעבר למחשב אחר לא מאבד כלום.
+
+> [!IMPORTANT]
+> **זו אינה פלטפורמה רשמית של הקורס.** התרגום, ההסברים, התרגילים ותשובות המודל נכתבו על ידי סטודנט
+> (בעזרת Claude), ולא נבדקו או אושרו על ידי סגל הקורס. במקרה של סתירה — **אתר הקורס הוא הקובע**.
+> תשובות מודל לשאלות שאין להן פתרון רשמי מסומנות ככאלה בתוך האפליקציה.
+
+---
+
+## What this is
 
 The official course site ([bguppl.github.io/interpreters](https://bguppl.github.io/interpreters/))
 is thorough and good, and also hard to *study* from: very long English pages, no notion of where you
@@ -35,17 +51,15 @@ code block explained and every lecture ending in exercises.
 
 The design constraint that shaped everything: **English technical vocabulary must survive.** You sit
 the exam in English and read code in English, so terms stay visible (`סְגוֹר (Closure)` on first use),
-code is never translated, and every section can be flipped back to the original.
-
-## What it does
+code is never translated, and every section can be flipped back to the original English.
 
 | | |
 |---|---|
 | 📖 **Full Hebrew translation** | Every page of the course, section by section, with a per-section "show original" toggle. |
 | 🧭 **One interleaved learning path** | Lectures and practice sessions merged into the order you should study them, instead of two separate lists. |
-| ✅ **Progress tracking** | Per section, per page and per course, stored in `localStorage`, with export/import so it survives a new browser. |
+| ✅ **Progress tracking** | Per section, per page and per course, with export/import so it survives a new browser or machine. |
 | ✏️ **Exercises everywhere** | Exam-oriented questions at the end of every lecture; practice-session questions become solve-then-reveal checkpoints. Missed items collect into a review screen. |
-| 💬 **Annotated code** | Every code block in every lesson carries a Hebrew walkthrough, and the course's source files are browsable with syntax highlighting and line-anchored notes. |
+| 💬 **Annotated code** | Every code block in every lesson carries a Hebrew walkthrough, and the course's own source files are browsable with syntax highlighting and line-anchored notes. |
 | 🤖 **Ask Claude** | One click copies the current section — English, Hebrew and code — as a ready-made prompt to paste into claude.ai. |
 | ↔️ **Real RTL** | Hebrew prose right-to-left, code and math left-to-right, bidi-isolated so identifiers never scramble mid-sentence. |
 
@@ -53,49 +67,38 @@ code is never translated, and every section can be flipped back to the original.
 ![PPL Expert](docs/screenshot-home.png)
 -->
 
-### What a fresh clone actually gives you
+### What's in the box
 
-**The pipeline does not translate anything.** It builds the English scaffolding and leaves every
-Hebrew slot empty. Out of the box, after the two setup commands, you get:
+- **41 pages** — 5 chapters of lectures, 12 practice sessions, reading material — across **688 sections**, all translated
+- **1,250** Hebrew notes on code blocks · **214** authored exercises · a **589**-term glossary keeping terminology identical across the whole course
+- **125** of the course's source files browsable, **87** of them fully annotated (**432** line-anchored notes)
+- Chapters 1–5, lectures *and* practice sessions: TypeScript and FP · Scheme syntax & semantics · type checking and inference · CPS, generators and async · logic programming and the LP interpreter
 
-- **41 pages** — 5 chapters of lectures, 12 practice sessions, reading material — across **688 sections**
-- **125** course source files, browsable with syntax highlighting
-- every section, code block and source file ready to be annotated — and **no Hebrew at all**
+## What's inside
 
-Filling those slots *is* the project. For scale: the copy I study from holds **7,454** Hebrew-authored
-fields — 1,250 notes on code blocks, 214 exercises, 432 line-anchored annotations across 87 source
-files, and a 589-term glossary that keeps the terminology identical across all of it. That took many
-long sessions with Claude Code, and it is derived from the course material, which is why it is not
-in this repo. See [What is *not* in here](#what-is-not-in-here).
-
-## Setup
-
-Requires **Node 20.11+** and **git**.
-
-```bash
-git clone https://github.com/Marzzana/ppl-expert.git
-cd ppl-expert
-npm install
-
-npm run setup            # clone the course repos into sources/
-npm run pipeline:parse   # sources/ -> public/content/*.json
-
-npm run dev              # http://localhost:5199
+```
+src/
+  pages/       Home (learning path) · Lesson · CodeView · Review
+  components/  Sidebar · Markdown · CodeBlock · Exercises · AskClaude
+  lib/         content loading · progress store · markdown+KaTeX · shiki · anchors
+pipeline/      parse · worksheets · apply · code-worksheets · code-apply · verify · audit
+public/content/  the generated course: pages, code, glossary, learning path
+work/          GUIDE.md · GUIDE-CODE.md — the authoring briefs
 ```
 
-`npm run setup` clones three public repositories into `sources/` (gitignored):
+Stack: React 18 + TypeScript + Vite, `marked` + KaTeX for rendering, `shiki` for highlighting, and
+`HashRouter` so `npm run build` produces a `dist/` you can host on any static server. No backend —
+progress lives in `localStorage`.
 
-| → `sources/` | repository | what it provides |
-|---|---|---|
-| `site` | [`bguppl/interpreters`](https://github.com/bguppl/interpreters) (`gh-pages`) | the lesson pages and figures |
-| `interpreters` | [`bguppl/interpreters`](https://github.com/bguppl/interpreters) (`master`) | the TypeScript / Scheme interpreter sources |
-| `practice` | [`bguppl/practice`](https://github.com/bguppl/practice) | practice-session sources |
+## Rebuilding the content (optional)
 
-After `pipeline:parse` you have **the complete course in English**, fully navigable, with every
-Hebrew slot empty — the app works, it just isn't translated yet. Filling those slots is the
-translation workflow below. `npm run build` produces a static `dist/` you can host anywhere.
+You do not need this to study — `public/content/` is committed and ready. It matters only if the
+course site changes, or if you want to translate something yourself.
 
-## The pipeline
+```bash
+npm run setup            # clone the course repos into sources/
+npm run pipeline:parse   # sources/ -> public/content/*.json
+```
 
 Sources are never edited, and generated content is never hand-edited. Everything flows one way:
 
@@ -108,7 +111,7 @@ sources/  --parse-->  public/content/*.json  --worksheets-->  work/*.md
 | command | what it does |
 |---|---|
 | `npm run setup` | clone the course repos into `sources/` (idempotent — existing clones are left alone) |
-| `npm run pipeline:parse` | `sources/` → `public/content/` JSON. **Idempotent**: re-running preserves existing translations by matching each block on its source hash, so the course can be re-pulled without losing work |
+| `npm run pipeline:parse` | `sources/` → `public/content/` JSON. **Idempotent**: re-running preserves every existing translation by matching each block on its source hash, so the course can be re-pulled without losing work |
 | `npm run pipeline:worksheets` | export fill-in-the-blank translation worksheets to `work/` |
 | `npm run pipeline:apply -- <pageId>` | merge a filled worksheet back into the page JSON, with validation |
 | `npm run pipeline:code-worksheets -- <filter>` / `:code-apply` | the same loop, for annotating the course's source files |
@@ -127,26 +130,11 @@ Two different guarantees, deliberately kept separate:
 Authoring conventions — translation style, how to write a code note, what must never be touched — are
 in [`work/GUIDE.md`](work/GUIDE.md) (pages) and [`work/GUIDE-CODE.md`](work/GUIDE-CODE.md) (source files).
 
-## What's in here
-
-```
-src/
-  pages/       Home (learning path) · Lesson · CodeView · Review
-  components/  Sidebar · Markdown · CodeBlock · Exercises · AskClaude
-  lib/         content loading · progress store · markdown+KaTeX · shiki · anchors
-pipeline/      parse · worksheets · apply · code-worksheets · code-apply · verify · audit
-work/          GUIDE.md · GUIDE-CODE.md   (the worksheets themselves are gitignored)
-```
-
-Stack: React 18 + TypeScript + Vite, `marked` + KaTeX for rendering, `shiki` for highlighting, and
-`HashRouter` so the build can be served as a flat static site. No backend — progress lives in
-`localStorage`.
-
 ## How this was built with Claude Code
 
 I built this with [Claude Code](https://claude.com/claude-code) across a handful of long sessions —
-**247 commits**. I wrote essentially none of the code by hand; my job was deciding what the thing
-should be, and catching Claude when it was confidently wrong.
+**247 commits**, and roughly 7,500 authored Hebrew fields. I wrote essentially none of the code by
+hand; my job was deciding what the thing should be, and catching Claude when it was confidently wrong.
 
 What I took away from doing it:
 
@@ -178,26 +166,21 @@ including in-page table-of-contents links that blanked the entire page under `Ha
 permanently broken images pointing at GitHub's retired math-rendering proxy. `pipeline:audit` is that
 sweep, made repeatable.
 
-## What is *not* in here
+## Credits
 
-| not committed | why |
-|---|---|
-| `sources/` | the course's own repositories — cloned on demand by `npm run setup` |
-| `public/content/` | the generated layer: lesson text, exercises, and **verbatim interpreter source files** from the course repos |
-| `public/resources/` | figures from the course site |
-| `work/*.md` worksheets | English course text sitting next to its Hebrew translation |
-| exams, assignments, solutions | never lived in this repo at all |
+The course — its lesson pages, its interpreters, its practice sessions — is the work of
+**Michael Elhadad** and the BGU PPL course staff, published at
+[`bguppl/interpreters`](https://github.com/bguppl/interpreters) and
+[`bguppl/practice`](https://github.com/bguppl/practice) under the MIT License. The course's source
+files are included here byte-for-byte unmodified, with the Hebrew commentary stored alongside them
+rather than inside them.
 
-The Hebrew translation is derived from the course material and is not mine to redistribute, so it stays
-out of the repo along with the English it came from. What is here is the machinery that produces it;
-the content itself is generated locally, on your machine, from the course's own public repositories.
+Full attribution and the upstream license text: [`NOTICE.md`](NOTICE.md).
 
-If you study PPL at BGU and want a translated copy rather than a toolchain: clone this, run the two
-setup commands, and fill the worksheets yourself — `work/GUIDE.md` is the exact brief I gave Claude.
+This is an unofficial study aid. It is not written, reviewed or endorsed by the course staff — if it
+disagrees with the course, the course is right.
 
 ## License
 
-[MIT](LICENSE) — covering **the code in this repository**: the app and the pipeline.
-
-It does not and cannot cover the course material that the pipeline consumes, which belongs to the BGU
-PPL course staff and is not distributed here. Nothing in this repo grants any right to that material.
+[MIT](LICENSE) for the app, the pipeline and the Hebrew layer written on top of the course.
+The underlying course material is MIT too — see [`NOTICE.md`](NOTICE.md).

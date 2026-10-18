@@ -1,0 +1,124 @@
+{
+ "items": [
+  {
+   "pageId": "cm/chap1"
+  },
+  {
+   "pageId": "cm/1.1TypescriptDatatypes"
+  },
+  {
+   "pageId": "cm/1.2TypescriptJSON"
+  },
+  {
+   "pageId": "reading/programming_paradigms_fp_ts"
+  },
+  {
+   "pageId": "reading/simple_loops_numpy"
+  },
+  {
+   "pageId": "reading/vectorizing_loops"
+  },
+  {
+   "pageId": "ps/ps1"
+  },
+  {
+   "pageId": "ps/ps1_sol"
+  },
+  {
+   "pageId": "cm/1.3TypescriptTypeChecking"
+  },
+  {
+   "pageId": "ps/ps2"
+  },
+  {
+   "pageId": "cm/1.4TypesAndOperations"
+  },
+  {
+   "pageId": "cm/1.5Monad"
+  },
+  {
+   "pageId": "cm/2.1Scheme-bottom-up"
+  },
+  {
+   "pageId": "cm/2.2Higher-Order-Functions-Let"
+  },
+  {
+   "pageId": "ps/ps3"
+  },
+  {
+   "pageId": "cm/2.3Syntax"
+  },
+  {
+   "pageId": "cm/2.4SyntacticOperations"
+  },
+  {
+   "pageId": "ps/ps4"
+  },
+  {
+   "pageId": "cm/2.5OperationalSemantics"
+  },
+  {
+   "pageId": "cm/2.6SubstitutionModel"
+  },
+  {
+   "pageId": "ps/ps5"
+  },
+  {
+   "pageId": "cm/2.7EnvironmentModel"
+  },
+  {
+   "pageId": "cm/2.8RecursionMutation"
+  },
+  {
+   "pageId": "ps/ps6"
+  },
+  {
+   "pageId": "cm/3.1TypeChecking"
+  },
+  {
+   "pageId": "cm/3.2TypeInference"
+  },
+  {
+   "pageId": "ps/ps7"
+  },
+  {
+   "pageId": "cm/3.3TypeInferenceSystem"
+  },
+  {
+   "pageId": "ps/ps8"
+  },
+  {
+   "pageId": "cm/4.1AsyncProgramming"
+  },
+  {
+   "pageId": "ps/ps9"
+  },
+  {
+   "pageId": "cm/4.2CPS"
+  },
+  {
+   "pageId": "cm/4.3Generators"
+  },
+  {
+   "pageId": "ps/ps10"
+  },
+  {
+   "pageId": "cm/4.4RecursionToIteration"
+  },
+  {
+   "pageId": "cm/5.1RelationalLogicProgramming"
+  },
+  {
+   "pageId": "cm/5.2LogicProgramming"
+  },
+  {
+   "pageId": "ps/ps11"
+  },
+  {
+   "pageId": "cm/5.3LPInterpreter"
+  },
+  {
+   "pageId": "ps/ps12"
+  }
+ ]
+}

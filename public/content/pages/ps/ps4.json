@@ -1,0 +1,1069 @@
+{
+ "id": "ps/ps4",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps4.md",
+ "titleEn": "Concrete and Abstract Syntax",
+ "titleHe": "תחביר קונקרטי ותחביר מופשט",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps4:0",
+   "depth": 1,
+   "headingEn": "Concrete and Abstract Syntax",
+   "raw": "# Concrete and Abstract Syntax\n\n",
+   "blocks": [],
+   "headingHe": "תחביר קונקרטי ותחביר מופשט"
+  },
+  {
+   "id": "ps/ps4:1",
+   "depth": 2,
+   "headingEn": "Practical Session - Week 4 PPL@BGU",
+   "raw": "## Practical Session - Week 4 PPL@BGU\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:1:0",
+     "type": "prose",
+     "en": "In this session, we review:\n",
+     "hash": "2423ea961b15ef5e",
+     "he": "בתרגול הזה נסקור:"
+    },
+    {
+     "id": "ps/ps4:1:1",
+     "type": "list",
+     "en": "* Syntax: Concrete vs Abstract\n* Parsing S-Exp (Symbol Expressions) into Scheme expressions (add syntactic description for cond expressions)\n* Rewriting ASTs to derive one syntactic construct into another (if into cond)\n* Parsing a stream of Tokens into S-Exp\n\n",
+     "hash": "cf6b3a62ac8950de",
+     "he": "* תחביר: קונקרטי מול מופשט\n* ניתוח תחבירי (parsing) של S-Exp (ביטויי סמלים) לביטויי Scheme (הוספת תיאור תחבירי לביטויי cond)\n* שכתוב של עצי AST כדי לגזור מבנה תחבירי אחד מתוך אחר (if לתוך cond)\n* ניתוח תחבירי של זרם אסימונים (Tokens) ל-S-Exp"
+    }
+   ],
+   "headingHe": "תרגול — שבוע 4, PPL@BGU"
+  },
+  {
+   "id": "ps/ps4:2",
+   "depth": 2,
+   "headingEn": "Syntax: Concrete vs Abstract",
+   "raw": "## Syntax: Concrete vs Abstract\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:2:0",
+     "type": "prose",
+     "en": "Programming languages have two aspects of syntax: concrete and abstract. While the concrete syntax is part of the definition of the language, the abstract syntax is part of the definition of a particular implementation of a language (interpreter or compiler).\n\n",
+     "hash": "0cb8177e57808bb1",
+     "he": "לשפות תכנות יש שני היבטים של תחביר: קונקרטי ומופשט. בעוד שהתחביר הקונקרטי הוא חלק מההגדרה של השפה, התחביר המופשט הוא חלק מההגדרה של מימוש מסוים של שפה (מפרש או מהדר)."
+    },
+    {
+     "id": "ps/ps4:2:1",
+     "type": "prose",
+     "en": "**Concrete Syntax**\n\n",
+     "hash": "6a9070e352223183",
+     "he": "**תחביר קונקרטי (Concrete Syntax)**"
+    },
+    {
+     "id": "ps/ps4:2:2",
+     "type": "prose",
+     "en": "The concrete syntax a programming language consists of a set of rules that determine how programs look like to the programmer. That is, it is intended to be read by humans. The rules are specified formally using a Backus-Naur Form (BNF) and include language keywords, delimiters, parentheses, etc.\n\n",
+     "hash": "3acbad52deecc5c6",
+     "he": "התחביר הקונקרטי של שפת תכנות מורכב מאוסף כללים שקובעים איך התוכניות **נראות** למתכנת. כלומר, הוא נועד לקריאה על ידי בני אדם. הכללים מוגדרים באופן פורמלי באמצעות צורת Backus-Naur (BNF) וכוללים מילות מפתח של השפה, מפרידים, סוגריים וכדומה."
+    },
+    {
+     "id": "ps/ps4:2:3",
+     "type": "prose",
+     "en": "The formal specification includes two types of rules:\n\n",
+     "hash": "9562d85a0ba9e64b",
+     "he": "המפרט הפורמלי כולל שני סוגים של כללים:"
+    },
+    {
+     "id": "ps/ps4:2:4",
+     "type": "list",
+     "en": "* Lexical rules: determine how to tokenize sequences of characters into significant language tokens. The program which performs this operation is called scanner.\n* Syntactic rules: determine how to combine tokens into hierarchical structures which form language expressions. This work is done by a parser.\n\n",
+     "hash": "f0a04b0da0627bee",
+     "he": "* כללים לקסיקליים (Lexical rules): קובעים איך לפרק רצפי תווים לאסימונים (tokens) משמעותיים של השפה. התוכנית שמבצעת את הפעולה הזו נקראת סורק (scanner).\n* כללים תחביריים (Syntactic rules): קובעים איך לצרף אסימונים למבנים היררכיים שמרכיבים ביטויים בשפה. את העבודה הזו מבצע מנתח תחבירי (parser)."
+    },
+    {
+     "id": "ps/ps4:2:5",
+     "type": "prose",
+     "en": "**Abstract Syntax**\n\n",
+     "hash": "f7786a1f46efe81b",
+     "he": "**תחביר מופשט (Abstract Syntax)**"
+    },
+    {
+     "id": "ps/ps4:2:6",
+     "type": "prose",
+     "en": "The abstract syntax of a programming language defines how programs look like to the interpreter or compiler. Abstract syntax defines a data type. The values of this data type are called abstract syntax trees (AST). These values are used to represent expressions so that they can be easily processed by meta-programs (interpreter or compiler).\n\n",
+     "hash": "a82e2a98e298703a",
+     "he": "התחביר המופשט של שפת תכנות מגדיר איך התוכניות נראות למפרש או למהדר. תחביר מופשט מגדיר טיפוס נתונים. הערכים של טיפוס הנתונים הזה נקראים עצי תחביר מופשט (abstract syntax trees, AST). הערכים האלה משמשים לייצוג ביטויים כך שיהיה קל לעבד אותם באמצעות מטא-תוכניות (מפרש או מהדר)."
+    },
+    {
+     "id": "ps/ps4:2:7",
+     "type": "prose",
+     "en": "Abstract syntax defines:\n\n",
+     "hash": "f763aafd9e802d26",
+     "he": "תחביר מופשט מגדיר:"
+    },
+    {
+     "id": "ps/ps4:2:8",
+     "type": "list",
+     "en": "* Alternative kinds for expression categories (e.g., kinds of if-expressions),\n* The components of composite elements (as well as the role, the category, and cardinality of each component).\n\n",
+     "hash": "0c6fb7c6c630c643",
+     "he": "* סוגים חלופיים לקטגוריות של ביטויים (למשל, סוגים של ביטויי if),\n* הרכיבים של איברים מורכבים (וכן התפקיד, הקטגוריה והריבוי (cardinality) של כל רכיב)."
+    }
+   ],
+   "headingHe": "תחביר: קונקרטי מול מופשט"
+  },
+  {
+   "id": "ps/ps4:3",
+   "depth": 2,
+   "headingEn": "Formal definition",
+   "raw": "## Formal definition\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:3:0",
+     "type": "prose",
+     "en": "To define formally the syntax of Scheme, we adopt the notation below. This notation combines both the concrete syntax syntactic rules as BNF notation and for each rule, the corresponding abstract syntax type.\n\n",
+     "hash": "26c5ff096c1f25bc",
+     "he": "כדי להגדיר באופן פורמלי את התחביר של Scheme, אנחנו מאמצים את הסימון שלהלן. הסימון הזה משלב גם את הכללים התחביריים של התחביר הקונקרטי בסימון BNF, וגם — לכל כלל — את טיפוס התחביר המופשט המתאים."
+    },
+    {
+     "id": "ps/ps4:3:1",
+     "type": "code",
+     "en": "```scheme\n;; <program> ::= (L1 <exp>+) // program(exps:List(exp))\n;; <exp> ::= <define-exp> | <cexp>\n;; <define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)\n;; <cexp> ::= <num-exp> // num-exp(val:Number)\n;;        | <bool-exp>  // bool-exp(val:Boolean)\n;;        | <prim-op>   // prim-op(op:string)\n;;        | <var-ref>   // var-ref(var:string)\n;;        | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n;; <prim-op> ::= + | - | * | / | < | > | = | not\n;; <num-exp> ::= a number token\n;; <bool-exp> ::= #t | #f\n;; <var-ref> ::= an identifier token\n;; <var-decl> ::= an identifier token // var-decl(var:string)\n```\n\n",
+     "hash": "63f41f215c68e5f5",
+     "lang": "scheme",
+     "noteHe": "זהו המסמך המרכזי של כל הקורס — הגדרת השפה L1, ושווה להשקיע בו זמן. שימו לב לפורמט הכפול: **משמאל ל-`//`** נמצא כלל BNF של התחביר הקונקרטי, ו**מימין ל-`//`** נמצא הבנאי המתאים בתחביר המופשט. למשל השורה `<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)` אומרת: מבחינה קונקרטית זו רשימה שמתחילה במילה `define`; מבחינה מופשטת זו רשומה עם שני שדות בשמות `var` ו-`val`. הסימנים ב-BNF: `::=` הוא \"מוגדר כ-\", `|` הוא בחירה בין חלופות, `+` הוא \"אחד או יותר\", ו-`*` הוא \"אפס או יותר\". שימו לב להבחנה בין `<exp>` ל-`<cexp>`: ‏`exp` יכול להיות גם `define`, ואילו `cexp` (מלשון *closed* expression) הוא ביטוי שאפשר להעריך לערך — ולכן רק `cexp` מותר כארגומנט להפעלה. זו הסיבה שאי אפשר לכתוב `(+ 1 (define x 2))`. שימו לב גם ל-`<var-decl>` מול `<var-ref>`: שניהם \"אסימון מזהה\" באותה מידה בתחביר הקונקרטי, אבל בתחביר המופשט הם **שני טיפוסים שונים** — הצהרה על משתנה מול שימוש בו. **כדאי לשנן**: זו ההבחנה שתיבדק שוב ושוב, וההגדרה הזו תורחב ל-L2, L3 ו-L5 בשיעורים הבאים."
+    },
+    {
+     "id": "ps/ps4:3:2",
+     "type": "prose",
+     "en": "The following diagram illustrates the steps through which a program is processed until it is evaluated by an interpreter. We focus in this session on Scanning and Parsing.\n\n\n",
+     "hash": "dd51d9f80941a2c5",
+     "he": "הדיאגרמה הבאה ממחישה את השלבים שדרכם תוכנית מעובדת עד שהיא מוערכת על ידי מפרש. בתרגול הזה נתמקד בסריקה (Scanning) ובניתוח התחבירי (Parsing)."
+    },
+    {
+     "id": "ps/ps4:3:3",
+     "type": "image",
+     "en": "![eval_process](./resources/ps4/eval_process.jpg)\n\n\n",
+     "hash": "7ce8f6977f0b7918"
+    }
+   ],
+   "headingHe": "הגדרה פורמלית"
+  },
+  {
+   "id": "ps/ps4:4",
+   "depth": 1,
+   "headingEn": "Parsing a program string into S-Exp",
+   "raw": "# Parsing a program string into S-Exp\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:4:0",
+     "type": "prose",
+     "en": "Since Scheme is a language that is based on a general structure called the S-Expression (in short [S-exp](https://en.wikipedia.org/wiki/S-expression)), we will take a \"shortcut\" approach to transform our program as string to significant hierarchical structures.\nThis work will be done by an existing Node parser for S-Exp. Make sure you install it in your parser folder by running the command `npm install s-expression --save`.\n\n",
+     "hash": "0f3dd1815828637c",
+     "he": "מכיוון ש-Scheme היא שפה שמבוססת על מבנה כללי שנקרא ביטוי-S (בקיצור [S-exp](https://en.wikipedia.org/wiki/S-expression)), ננקוט גישת \"קיצור דרך\" כדי להפוך את התוכנית שלנו ממחרוזת למבנים היררכיים משמעותיים.\nאת העבודה הזו יבצע מנתח תחבירי קיים של Node עבור S-Exp. ודאו שהתקנתם אותו בתיקיית ה-parser שלכם על ידי הרצת הפקודה `npm install s-expression --save`."
+    },
+    {
+     "id": "ps/ps4:4:1",
+     "type": "prose",
+     "en": "Because the function \"s-expression\" exposes can return an error for incorrect inputs (such as `\"(+ 1\"`), we wrap s-expression's function in a function that returns a `Result<Sexp>` (more on `Result<T>` later).\n\n",
+     "hash": "f0599b8bcf25b0a3",
+     "he": "מכיוון שהפונקציה ש-\"s-expression\" חושפת יכולה להחזיר שגיאה עבור קלטים שגויים (כמו `\"(+ 1\"`), אנחנו עוטפים את הפונקציה של s-expression בפונקציה שמחזירה `Result<Sexp>` (על `Result<T>` בהמשך)."
+    },
+    {
+     "id": "ps/ps4:4:2",
+     "type": "prose",
+     "en": "For example\n\n",
+     "hash": "f85c1f8a053beb8c",
+     "he": "לדוגמה"
+    },
+    {
+     "id": "ps/ps4:4:3",
+     "type": "code",
+     "en": "```typescript\nimport { parse as parseSexp } from \"../shared/parser\";\n \nparseSexp(\"1\"); // { tag: 'Ok', value: '1' }\nparseSexp(\"(1 2)\"); // { tag: 'Ok', value: [ '1', '2' ] }\nparseSexp(\"(+ 1 (* 2 3))\"); // { tag: 'Ok', value: [ '+', '1', [ '*', '2', '3' ] ] }\nparseSexp(\"(define x 5)\"); // { tag: 'Ok', value: [ 'define', 'x', '5' ] }\n```\n\n",
+     "hash": "0816d4bde19e20f0",
+     "lang": "typescript",
+     "noteHe": "ארבע דוגמאות לפלט של `parseSexp` — השלב הראשון בלבד, לפני שנוגעים ב-AST. שימו לב לשלוש נקודות. ראשית, כל תוצאה עטופה ב-`{ tag: 'Ok', value: ... }` — זהו טיפוס `Result`, שמאפשר להחזיר גם כישלון בלי לזרוק חריגה; נראה אותו מיד בהמשך. שנית, המספרים חוזרים כ**מחרוזות**: `'1'` ולא `1` — ה-S-Exp parser רק מפרק סוגריים ורווחים, הוא אינו יודע מה זה מספר. ההמרה למספר תקרה רק בשלב הבא. שלישית, המבנה שמתקבל הוא **מערכים מקוננים** של מחרוזות: `\"(+ 1 (* 2 3))\"` הופך ל-`['+', '1', ['*', '2', '3']]`, שבו הקינון של המערכים משקף בדיוק את קינון הסוגריים. שימו לב שאין כאן שום סמנטיקה: `['define', 'x', '5']` היא בסך הכול רשימה בת שלושה איברים, ו-`'define'` הוא מחרוזת ככל מחרוזת אחרת. ההכרה בכך ש-`define` היא מילת מפתח קורית רק במנתח התחבירי של L1."
+    },
+    {
+     "id": "ps/ps4:4:4",
+     "type": "prose",
+     "en": "Therefore, the scanner in our course is not implemented by us, but by this ready-to-import Node module. This is possible since the language's concrete syntax is fairly simple, and thus S-Exps provide a sound basis.\n\n",
+     "hash": "b277198e71a31b17",
+     "he": "לכן, הסורק (scanner) בקורס שלנו אינו ממומש על ידינו, אלא על ידי מודול Node מוכן לייבוא. זה אפשרי מכיוון שהתחביר הקונקרטי של השפה פשוט למדי, ולכן S-Exps מספקים בסיס נאות."
+    },
+    {
+     "id": "ps/ps4:4:5",
+     "type": "prose",
+     "en": "The BNF of S-Exps is the following:\n\n",
+     "hash": "3dff6d92f9633fe9",
+     "he": "ה-BNF של S-Exps הוא כדלהלן:"
+    },
+    {
+     "id": "ps/ps4:4:6",
+     "type": "code",
+     "en": "```scheme\n;; <S-exp> ::= <AtomicSexp> | <CompoundSexp>              // Sexp\n;; <AtomicSexp> ::= <number> | <boolean> | <string>       // Token\n;; <CompoundSexp> ::= '(' <S-exp>* ')                     // CompoundSexp\n```\n\n",
+     "hash": "2190c4290165a4b4",
+     "lang": "scheme",
+     "noteHe": "שימו לב כמה קטן ה-BNF הזה — שלוש שורות בסך הכול, לעומת עשר של L1. וזו בדיוק הנקודה: S-Exp הוא תחביר **כללי** שאינו יודע דבר על מילות מפתח, על `define` או על `if`; הוא מכיר רק אטומים וסוגריים. אטום (`<AtomicSexp>`) הוא מספר, בוליאני או מחרוזת — ובפועל כולם חוזרים כטוקן טקסטואלי; מבנה מורכב (`<CompoundSexp>`) הוא סוגריים שבתוכם אפס או יותר S-Exps, ולכן ההגדרה רקורסיבית והקינון יכול להיות בכל עומק. זהו כל היתרון של תחביר לישפ-י: אותו מנתח תחבירי גנרי אחד עובד לכל שפה שבנויה מסוגריים, ומה שנשאר לנו לכתוב הוא רק המעבר מ-S-Exp ל-AST. שימו לב לשגיאת דפוס במקור: בשורה השלישית חסר גרש סוגר אחרי הסוגר הימני — צריך להיות `')'` ולא `')`."
+    },
+    {
+     "id": "ps/ps4:4:7",
+     "type": "prose",
+     "en": "The TypeScript type definition returned by the S-Exp parser was presented in lectures:\n\n",
+     "hash": "3c923bc5240f1672",
+     "he": "הגדרת הטיפוס ב-TypeScript שמוחזרת על ידי המנתח התחבירי של S-Exp הוצגה בהרצאות:"
+    },
+    {
+     "id": "ps/ps4:4:8",
+     "type": "code",
+     "en": "```typescript\ndeclare module 's-expression' {\n    export type SexpString = String;\n    export type Token = string | SexpString;\n    export type CompoundSexp = Sexp[];\n    export type Sexp = Token | CompoundSexp;\n \n    /*\n        The types returned by the parser are:\n        string - for any token which is not a string,\n                 according to the tokenization rules of S-expressions.\n        SexpString - for tokens of the form \"...\"\n        Sexp[] - for S-expressions that contain sub-expressions\n                 (of the form \"(<s-expr1> ... <s-exprn>)\")\n    */\n    export default function parse(x: string): Sexp;\n}\n```\n\n\n",
+     "hash": "4bed926161a2c0c9",
+     "lang": "typescript",
+     "noteHe": "זהו קובץ הצהרת טיפוסים (`declare module`) — הוא מתאר ל-TypeScript מה החתימה של מודול JavaScript חיצוני שאין לו טיפוסים משלו. עקבו אחרי ההגדרות: `Sexp` הוא איחוד של `Token` ו-`CompoundSexp`, בדיוק כמו שורת ה-BNF למעלה; `CompoundSexp = Sexp[]` הוא מערך של S-Exps, וזו ההגדרה הרקורסיבית; ו-`Token = string | SexpString`. הפרט המבלבל ביותר כאן: `SexpString = String` עם **S גדולה** — זהו טיפוס העטיפה (wrapper) של JavaScript, שהוא **שונה** מ-`string` הפרימיטיבי. הספרייה משתמשת בהבחנה הזו כדי לסמן מחרוזות מצוטטות: הקלט `\"hello\"` (עם מרכאות) חוזר כ-`String` object, ואילו `hello` בלי מרכאות חוזר כ-`string` רגיל. זו תחבולה מכוערת אבל היא הדרך היחידה להבחין ביניהם בלי טיפוס ייעודי, ובקוד המנתח התחבירי תראו בדיקות `instanceof String` בגללה. **טעות נפוצה**: לחשוב ש-`String` ו-`string` הם אותו דבר ב-TypeScript — הם אינם, וכאן זה קריטי."
+    }
+   ],
+   "headingHe": "ניתוח תחבירי של מחרוזת תוכנית ל-S-Exp"
+  },
+  {
+   "id": "ps/ps4:5",
+   "depth": 2,
+   "headingEn": "Parsing S-Exp into ASTs",
+   "raw": "## Parsing S-Exp into ASTs\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:5:0",
+     "type": "prose",
+     "en": "We implement a parser in TypeScript that takes the output of the S-Exp parser and transforms it into ASTs of our language, as defined in the BNF above.\nFor example:\n\n",
+     "hash": "4bb646e9be51fd09",
+     "he": "אנחנו מממשים מנתח תחבירי ב-TypeScript שמקבל את הפלט של המנתח התחבירי של S-Exp והופך אותו לעצי AST של השפה שלנו, כפי שהוגדרה ב-BNF למעלה.\nלדוגמה:"
+    },
+    {
+     "id": "ps/ps4:5:1",
+     "type": "code",
+     "en": "```typescript\nbind(parseSexp(\"1\"), parseL1Exp);\n// Output: \n{ tag: 'Ok', value: { tag: 'NumExp', val: 1 } }\n```\n\n",
+     "hash": "9adbf23cb9524ece",
+     "lang": "typescript",
+     "noteHe": "הדוגמה הפשוטה ביותר של הצינור המלא. `bind` הוא האופרטור של מונאדת ה-`Result`: הוא מריץ את `parseSexp(\"1\")`, ואם התוצאה `Ok` — מעביר את הערך שבתוכה ל-`parseL1Exp`; אם היא `Failure` — מדלג ומעביר את השגיאה הלאה. כך נמנעים מבדיקת `if (isOk(...))` אחרי כל שלב. שימו לב מה השתנה בין השלבים: `parseSexp` החזירה את המחרוזת `'1'`, ואילו `parseL1Exp` מחזירה `{ tag: 'NumExp', val: 1 }` — **מספר** אמיתי, לא מחרוזת. זהו בדיוק המעבר מתחביר קונקרטי לתחביר מופשט: ה-`tag` מציין את סוג הביטוי, וה-`val` נושא את הערך בטיפוס הנכון. **הערה על מוסכמות**: כל צומת AST בקורס הוא רשומה עם שדה `tag` — זהו איחוד מפורק (discriminated union), והוא מה שמאפשר לכתוב `switch (exp.tag)` במפרש."
+    },
+    {
+     "id": "ps/ps4:5:2",
+     "type": "code",
+     "en": "```typescript\nbind(parseSexp(\"#t\"), parseL1Exp);\n// Output:\n{ tag: 'Ok', value: { tag: 'BoolExp', val: true } }\n```\n\n",
+     "hash": "8fc50b345b4c9d14",
+     "lang": "typescript",
+     "noteHe": "אותו דבר לבוליאני. המחרוזת `\"#t\"` הופכת ל-`{ tag: 'BoolExp', val: true }` — שימו לב ש-`val` הוא `true` של JavaScript, ולא המחרוזת `'#t'`. גם כאן המנתח התחבירי מבצע המרה מהייצוג הטקסטואלי לערך בטיפוס המתאים. הכתיב `#t`/`#f` שייך לתחביר הקונקרטי של Scheme בלבד; ברגע שאנחנו ב-AST, השפה שבה אנחנו מדברים היא TypeScript."
+    },
+    {
+     "id": "ps/ps4:5:3",
+     "type": "code",
+     "en": "```typescript\nbind(parseSexp(\"(define x 1)\"), parseL1Exp);\n// Output:\n{ tag: 'Ok',\n  value: { tag: 'DefineExp',\n           var: { tag: 'VarDecl', var: 'x' },\n           val: { tag: 'NumExp', val: 1 } } }\n```\n\n",
+     "hash": "8bef4d1d5404fca7",
+     "lang": "typescript",
+     "noteHe": "הדוגמה הראשונה עם צומת מורכב. השוו לשורת ה-BNF: `<define-exp> ::= (define <var-decl> <cexp>) // def-exp(var:var-decl, val:cexp)` — וזה בדיוק מה שקיבלנו: `tag: 'DefineExp'` עם שני שדות, `var` ו-`val`. שימו לב לשני דברים חשובים. ראשית, המילה `define` **נעלמה** מה-AST: היא הייתה נחוצה רק כדי לזהות איזה סוג ביטוי זה, וברגע שה-`tag` נקבע היא מיותרת. שנית, `x` לא הפך למחרוזת פשוטה אלא לצומת משלו: `{ tag: 'VarDecl', var: 'x' }`. למה לטרוח? כי `VarDecl` (הצהרה) ו-`VarRef` (שימוש) הם דברים שונים סמנטית, ולתת לכל אחד צומת משלו מאפשר למפרש ולבודק הטיפוסים להבחין ביניהם בלי לנחש מההקשר. **שאלת מבחן קלאסית**: לתת קוד Scheme ולבקש לצייר או לכתוב את ה-AST שלו — תרגלו את זה עם הדוגמאות כאן."
+    },
+    {
+     "id": "ps/ps4:5:4",
+     "type": "code",
+     "en": "```typescript\nbind(parseSexp(\"(> x 1)\"), parseL1Exp);\n// Output:\n{ tag: 'Ok',\n  value: { tag: 'AppExp',\n           rator: { tag: 'PrimOp', op: '>' },\n           rands: [ { tag: 'VarRef', var: 'x' }, { tag: 'NumExp', val: 1 } ] } }\n```\n\n",
+     "hash": "6ea6df61e847117e",
+     "lang": "typescript",
+     "noteHe": "ביטוי הפעלה (application). `(> x 1)` הופך ל-`AppExp` עם שני שדות: `rator` — האופרטור, כאן `{ tag: 'PrimOp', op: '>' }`; ו-`rands` — **מערך** של האופרנדים, כאן `VarRef` עבור `x` ו-`NumExp` עבור `1`. השמות `rator` ו-`rands` הם קיצורים מקובלים של *operator* ו-*operands*, וכדאי להתרגל אליהם — הם חוזרים בכל קוד המפרש בקורס. שימו לב ש-`x` הפך ל-`VarRef` (שימוש במשתנה) ולא ל-`VarDecl`, בניגוד לדוגמה הקודמת — המנתח התחבירי מחליט לפי ההקשר התחבירי. שימו לב גם ש-`rands` הוא מערך ולא שני שדות נפרדים, כי ה-BNF אומר `(<cexp> <cexp>*)` — מספר האופרנדים אינו קבוע. **גוטצ'ה**: `>` הוא `PrimOp` ולא `VarRef`, כי הוא מופיע ברשימת `<prim-op>` ב-BNF; אילו הייתה כאן פונקציה שהמשתמש הגדיר, `rator` היה `VarRef`."
+    },
+    {
+     "id": "ps/ps4:5:5",
+     "type": "code",
+     "en": "```typescript\n// More examples - write the JSON values you expect to be returned by the parser:\nbind(parseSexp(\"(> (+ x x) (* x x))\"), parseL1Exp);\n \nbind(parseSexp(\"(L1 (define x 1) (> (+ x 1) (* x x)))\"), parseL1Exp);\n```\n\n",
+     "hash": "9fdb8f42a78a8228",
+     "lang": "typescript",
+     "noteHe": "שתי דוגמאות שנשארות **פתוחות בכוונה** — ההערה בקוד מבקשת מכם לכתוב בעצמכם את ערכי ה-JSON הצפויים. נסו לפני שתמשיכו (יש תשובת מודל בתרגילים בסוף הדף). לדוגמה הראשונה, `(> (+ x x) (* x x))`: שימו לב שכאן ה-`rands` של ה-`AppExp` החיצוני הם בעצמם `AppExp`-ים — כלומר קינון, וזו הנקודה של התרגיל. לדוגמה השנייה, `(L1 (define x 1) ...)`: שימו לב שהיא מתחילה ב-`L1` ולכן היא **תוכנית** (`Program`) ולא ביטוי — לפי שורת ה-BNF `<program> ::= (L1 <exp>+) // program(exps:List(exp))`. ושימו לב שרק בתוך תוכנית מותר ש-`define` יופיע."
+    },
+    {
+     "id": "ps/ps4:5:6",
+     "type": "list",
+     "en": "* Notice how parsing S-Exps into ASTs removes details from the concrete syntax.\n* The result ASTs are data values that can be easily processed by the interpreter.\n* Parsing into AST is a step performed for all programming languages. This online tool helps you explore the ASTs of many languages: [astexplorer.net](https://astexplorer.net). Note how these ASTs are often complex, because these languages (JavaScript, SQL etc) have a more complex syntax than Scheme.\n\n\n",
+     "hash": "168e502a36860cc3",
+     "he": "* שימו לב איך הניתוח התחבירי של S-Exps לעצי AST מסיר פרטים מהתחביר הקונקרטי.\n* עצי ה-AST שמתקבלים הם ערכי נתונים שקל למפרש לעבד.\n* ניתוח תחבירי ל-AST הוא שלב שמתבצע בכל שפות התכנות. הכלי המקוון הזה עוזר לכם לחקור את עצי ה-AST של שפות רבות: [astexplorer.net](https://astexplorer.net). שימו לב שעצי ה-AST האלה מורכבים לעיתים קרובות, מכיוון שלשפות האלה (JavaScript, ‏SQL וכדומה) יש תחביר מסובך יותר מזה של Scheme."
+    }
+   ],
+   "headingHe": "ניתוח תחבירי של S-Exp לעצי AST"
+  },
+  {
+   "id": "ps/ps4:6",
+   "depth": 2,
+   "headingEn": "Implementing ASTs in TypeScript for Scheme",
+   "raw": "## Implementing ASTs in TypeScript for Scheme\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:6:0",
+     "type": "prose",
+     "en": "ASTs are types that follow the Disjoint Union Types pattern. We implement such types in TypeScript using tagged maps and unions. Similarly, in Java, we would implement ASTs by defining a new class. This class would includes a constructor and all relevant procedures and would allow us to conveniently manipulate data values of the type we introduced.\n\n",
+     "hash": "454f5b3ddd83bd79",
+     "he": "עצי AST הם טיפוסים שעוקבים אחרי התבנית של טיפוסי איחוד זר (Disjoint Union Types). אנחנו מממשים טיפוסים כאלה ב-TypeScript באמצעות מפות מתויגות (tagged maps) ואיחודים. באופן דומה, ב-Java היינו מממשים עצי AST על ידי הגדרת מחלקה חדשה. המחלקה הזו הייתה כוללת בנאי ואת כל הפרוצדורות הרלוונטיות, והייתה מאפשרת לנו לתפעל בנוחות ערכי נתונים מהטיפוס שהצגנו."
+    },
+    {
+     "id": "ps/ps4:6:1",
+     "type": "prose",
+     "en": "In TypeScript, we can introduce Disjoint Union data types according to the following recipe:\n\n",
+     "hash": "4aa31b741160da6d",
+     "he": "ב-TypeScript, אנחנו יכולים להציג טיפוסי נתונים מסוג איחוד זר לפי המתכון הבא:"
+    },
+    {
+     "id": "ps/ps4:6:2",
+     "type": "list",
+     "en": "* A constructor function named make and which takes as parameters each of the component values of the compound type\n* A type predicate function named is.\n\n",
+     "hash": "471427a34292a5a1",
+     "he": "* פונקציית בנאי בשם make, שמקבלת כפרמטרים כל אחד מערכי הרכיבים של הטיפוס המורכב\n* פונקציית פרדיקט טיפוס בשם is."
+    },
+    {
+     "id": "ps/ps4:6:3",
+     "type": "prose",
+     "en": "**For example:**\n",
+     "hash": "51e921ad734b719a",
+     "he": "**לדוגמה:**"
+    },
+    {
+     "id": "ps/ps4:6:4",
+     "type": "code",
+     "en": "```typescript\nexport type NumExp = {tag:\"NumExp\", val:number}; // The Num-Expression type\nexport const makeNumExp = (n: number):NumExp => ({tag:\"NumExp\", val:n}); // The value constructor for Num-Expression\nexport const isNumExp = (x:any): x is NumExp => x.tag === 'NumExp'; // The type predicate function of Num-Expression\n```\n\n",
+     "hash": "374f2d0634b5faa0",
+     "lang": "typescript",
+     "noteHe": "שלוש השורות שמגדירות טיפוס AST אחד — **התבנית שחוזרת עשרות פעמים** בקוד הקורס, כדאי להכיר אותה בעל פה. שורה 1: הטיפוס עצמו, רשומה עם שדה `tag` שערכו הוא הטיפוס המילולי `\"NumExp\"` (ולא `string` כללי!) ושדה `val`. שורה 2: **הבנאי** `makeNumExp`, שמקבל מספר ומחזיר את הרשומה. שימו לב לסוגריים סביב גוף החץ — `=> ({...})` — בלעדיהם TypeScript היה מפרש את המסולסלים כגוף פונקציה ולא כאובייקט; זו **טעות נפוצה** שקשה לאתר. שורה 3: **פרדיקט הטיפוס** `isNumExp`, שהחזרה שלו מוצהרת כ-`x is NumExp` ולא כ-`boolean`. ההצהרה הזו היא לא סתם תיעוד — היא אומרת לבודק הטיפוסים שאם הפונקציה החזירה אמת, אז בתוך אותו בלוק `x` הוא ודאי `NumExp`, וזה מה שמאפשר לגשת ל-`x.val` בבטחה. הרעיון של תמיד לגשת דרך `make…`/`is…` ולא לבנות את הרשומה ידנית הוא מה שהופך את הטיפוס ל**מופשט** — אם מחר נשנה את הייצוג הפנימי, רק שלוש השורות האלה ישתנו."
+    },
+    {
+     "id": "ps/ps4:6:5",
+     "type": "prose",
+     "en": "**Remarks:**\n\n",
+     "hash": "54e424c269f6ef23",
+     "he": "**הערות:**"
+    },
+    {
+     "id": "ps/ps4:6:6",
+     "type": "list",
+     "en": "* Notice the keyword export which allows the type/function to be imported into other modules where it is needed (by using the keyword import) such as the interpreter.\n* Notice as well the type expression x is NumExp which is Boolean. This type expression implies that the function isNumExp is actually a type predicate. Due to these kinds of type expressions that yield type predicates the type checker can do precise inference. As an example:\n\n",
+     "hash": "f05469a59879121c",
+     "he": "* שימו לב למילת המפתח export, שמאפשרת לייבא את הטיפוס/הפונקציה למודולים אחרים שבהם הם נדרשים (באמצעות מילת המפתח import) — כמו למשל המפרש.\n* שימו לב גם לביטוי הטיפוס x is NumExp, שהוא בוליאני. ביטוי הטיפוס הזה מרמז שהפונקציה isNumExp היא למעשה פרדיקט טיפוס. הודות לביטויי טיפוס מהסוג הזה, שמניבים פרדיקטי טיפוס, בודק הטיפוסים יכול לבצע הסקה מדויקת. לדוגמה:"
+    },
+    {
+     "id": "ps/ps4:6:7",
+     "type": "code",
+     "en": "```typescript\ndescribe(\"L1 Parsing\", () => {\n  it(\"parses AppExps correctly\", () => {\n    const result = bind(parseSexp(\"(> 1 2)\"), parseL1CExp);\n    if (isOkT(isAppExp)(result)) {\n      // With the type predicate isAppExp, the type checker infers\n      // that in this scope \"result.value\" is exactly of type AppExp\n      // so it is safe to access properties that only exist on AppExp\n      expect(result.value.rator).to.deep.equal(makePrimOp(\">\"));\n    }\n  });\n});\n```\n\n",
+     "hash": "6902377917e2af2b",
+     "lang": "typescript",
+     "noteHe": "בדיקת יחידה (unit test) בסגנון Mocha/Chai — `describe` מקבץ בדיקות ו-`it` מגדיר בדיקה בודדת. אבל העניין כאן אינו הבדיקה עצמה אלא **צמצום הטיפוס** (narrowing). `result` הוא מטיפוס `Result<CExp>` — כלומר או שגיאה, או אחד מחמישה סוגי ביטוי אפשריים — ולכן אי אפשר לגשת ל-`result.value.rator`, כי ל-`NumExp` אין שדה כזה ובודק הטיפוסים יתלונן. השורה `if (isOkT(isAppExp)(result))` פותרת את זה: `isOkT` מקבל פרדיקט על התוכן ומחזיר פרדיקט על ה-`Result` כולו, ולכן **בתוך הבלוק** בודק הטיפוסים יודע ש-`result` הוא `Ok<AppExp>` והגישה ל-`.rator` בטוחה. שימו לב ל-`to.deep.equal` ולא `to.equal`: השוואה עמוקה של מבנים, בדיוק כמו `equal?` מול `eq?` שראינו ב-ps3. שימו לב גם שאין `else` — אם הניתוח התחבירי נכשל, הבדיקה פשוט לא בודקת כלום ותעבור בשקט; זו חולשה אמיתית בבדיקה הזו."
+    },
+    {
+     "id": "ps/ps4:6:8",
+     "type": "prose",
+     "en": "The type of `result` at line 3 is the type of the return value of `parseL1CExp` which is `Result<NumExp | BoolExp | PrimOp | VarRef | AppExp>`. However, because `isAppExp` is a type predicate with return type `x is AppExp`, the type checker infers that `result.value` inside the scope of line 8 is exactly of the type `AppExp` and not the disjunction type `NumExp | BoolExp | PrimOp | VarRef | AppExp`.\n\n\n",
+     "hash": "dd670a4ed0dd3e7c",
+     "he": "הטיפוס של `result` בשורה 3 הוא הטיפוס של הערך המוחזר של `parseL1CExp`, כלומר `Result<NumExp | BoolExp | PrimOp | VarRef | AppExp>`. אולם, מכיוון ש-`isAppExp` הוא פרדיקט טיפוס עם טיפוס מוחזר `x is AppExp`, בודק הטיפוסים מסיק ש-`result.value` בתוך התחום של שורה 8 הוא בדיוק מהטיפוס `AppExp`, ולא מטיפוס הפירוק `NumExp | BoolExp | PrimOp | VarRef | AppExp`."
+    },
+    {
+     "id": "ps/ps4:6:9",
+     "type": "prose",
+     "en": "A disjoint union type construct has the following shape: `type CExp = NumExp | BoolExp | PrimOp | VarRef | AppExp;` which is a union of disjoint types. Each disjoint type is defined as a tagged map. We use the convention of using the key \"tag\" to enforce the disjointness of these types. Any other key could be used, but we use this one consistently to express our intention of defining disjoint types. There is a constructor function for each disjoint type, but none for the union type. In this sense, we understand that the union type is a sort of abstract type over the disjoint types.\n\n\n",
+     "hash": "c70069fbf4fc8fbd",
+     "he": "למבנה של טיפוס איחוד זר יש את הצורה הבאה: `type CExp = NumExp | BoolExp | PrimOp | VarRef | AppExp;` — שהוא איחוד של טיפוסים זרים. כל טיפוס זר מוגדר כמפה מתויגת. אנחנו נוקטים במוסכמה של שימוש במפתח \"tag\" כדי לאכוף את הזרוּת של הטיפוסים האלה. אפשר היה להשתמש בכל מפתח אחר, אבל אנחנו משתמשים במפתח הזה באופן עקבי כדי לבטא את כוונתנו להגדיר טיפוסים זרים. יש פונקציית בנאי לכל טיפוס זר, אך אין בנאי לטיפוס האיחוד. במובן הזה, אנחנו מבינים שטיפוס האיחוד הוא מעין טיפוס מופשט מעל הטיפוסים הזרים."
+    },
+    {
+     "id": "ps/ps4:6:10",
+     "type": "prose",
+     "en": "C-Exp (short for constituent expression – expression classes that can be part of a bigger one), has the following BNF:\n\n",
+     "hash": "4499af74660663bb",
+     "he": "‏C-Exp (קיצור של constituent expression — מחלקות של ביטויים שיכולים להיות חלק מביטוי גדול יותר), הוא בעל ה-BNF הבא:"
+    },
+    {
+     "id": "ps/ps4:6:11",
+     "type": "code",
+     "en": "```typescript\n<cexp> ::= <num-exp> // num-exp(val:Number)\n       | <bool-exp>  // bool-exp(val:Boolean)\n       | <prim-op>   // prim-op(op:string)\n       | <var-ref>   // var-ref(var:string)\n       | (<cexp> <cexp>*) // app-exp(rator:cexp, rands:List(cexp))\n```\n\n",
+     "hash": "0206200813951627",
+     "lang": "typescript",
+     "noteHe": "זהו קטע מה-BNF המלא שראינו בתחילת הדף, מבודד כאן כדי להתמקד ב-`cexp`. ארבע החלופות הראשונות אטומיות (מספר, בוליאני, אופרטור פרימיטיבי, הפניה למשתנה), והחמישית `(<cexp> <cexp>*)` היא ההפעלה — וזו החלופה **הרקורסיבית**, שבזכותה אפשר לקנן ביטויים בכל עומק. שימו לב למה ש**אינו** מופיע ברשימה: `define`. זו לא השמטה מקרית אלא החלטה תכנונית, והשאלה בפסקה הבאה עוסקת בדיוק בה. שימו לב גם שכל חלופה מגיעה עם הבנאי שלה מימין ל-`//` — וזה בדיוק האיחוד הזר `type CExp = NumExp | BoolExp | PrimOp | VarRef | AppExp` שהוגדר בפסקה הקודמת. ה-BNF והטיפוס ב-TypeScript הם שתי צורות ביטוי של אותו דבר."
+    },
+    {
+     "id": "ps/ps4:6:12",
+     "type": "prose",
+     "en": "**Question**: why are `define` expressions not considered constituent?\n\n",
+     "hash": "42b0ef7f5d77e65a",
+     "he": "**שאלה**: מדוע ביטויי `define` אינם נחשבים constituent?"
+    },
+    {
+     "id": "ps/ps4:6:13",
+     "type": "prose",
+     "en": "**Answer**: if they were constituent, they would appear in the `cexp` BNF, which means that they may be nested, but we disallow nesting of `define` expressions in our course. Define can only appear at the top level of programs.\n\n\n",
+     "hash": "cd26cd6ac966849c",
+     "he": "**תשובה**: אילו הם היו constituent, הם היו מופיעים ב-BNF של `cexp` — כלומר היה אפשר לקנן אותם, אבל אנחנו אוסרים על קינון של ביטויי `define` בקורס שלנו. ‏define יכול להופיע רק ברמה העליונה של תוכניות."
+    },
+    {
+     "id": "ps/ps4:6:14",
+     "type": "prose",
+     "en": "A union type is abstract - which means it has no constructor (there are no values of type Exp - Exp is the union of concrete types). It still has a type predicate - which simply tests that a value belongs to one of the disjoint types:\n\n",
+     "hash": "b076366249757620",
+     "he": "טיפוס איחוד הוא מופשט — כלומר אין לו בנאי (אין ערכים מטיפוס Exp; ‏Exp הוא האיחוד של טיפוסים קונקרטיים). עדיין יש לו פרדיקט טיפוס — שפשוט בודק שערך שייך לאחד מהטיפוסים הזרים:"
+    },
+    {
+     "id": "ps/ps4:6:15",
+     "type": "code",
+     "en": "```typescript\nexport const isExp = (x: any): x is Exp => isDefineExp(x) || isCExp(x);\nexport const isCExp = (x: any): x is CExp => isNumExp(x) || isBoolExp(x) || isPrimOp(x) ||\nisVarRef(x) || isAppExp(x);\n```\n\n\n",
+     "hash": "695d6273d392e8d6",
+     "lang": "typescript",
+     "noteHe": "כך נראה פרדיקט של טיפוס איחוד: לא בדיקה של `tag` יחיד, אלא **או** (`||`) בין הפרדיקטים של כל המרכיבים. `isCExp` בודק את חמשת הטיפוסים הקונקרטיים, ו-`isExp` מוגדר מעליו כ-`isDefineExp(x) || isCExp(x)` — בדיוק כמו שורת ה-BNF `<exp> ::= <define-exp> | <cexp>`. שימו לב שאין כאן `makeExp` ואין `makeCExp`: לטיפוס מופשט אין בנאי, כי כל ערך קונקרטי נבנה על ידי הבנאי הספציפי שלו. הסדר של הפרדיקטים ב-`||` אינו משנה לנכונות (הטיפוסים זרים, לכל היותר אחד יחזיר אמת), אבל הוא כן משנה לביצועים אם טיפוס מסוים נפוץ יותר. **כדאי לשים לב**: אילו היינו מוסיפים סוג ביטוי חדש לשפה — וזה בדיוק מה שיקרה ב-L2 עם `if` ו-`lambda` — היינו צריכים לעדכן גם את הטיפוס `CExp` וגם את `isCExp` כאן."
+    }
+   ],
+   "headingHe": "מימוש עצי AST ב-TypeScript עבור Scheme"
+  },
+  {
+   "id": "ps/ps4:7",
+   "depth": 2,
+   "headingEn": "Implementing the Parser",
+   "raw": "## Implementing the Parser\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:7:0",
+     "type": "prose",
+     "en": "The following set of functions implement the parser.\n Parsing (which includes using the \"shortcut\" scanner) a program starts by a call to the function `parseL1` by giving it our program as string. For example, by calling `parseL1(\"(L1 (define x 5) (+ x 6))\")`. Note that there are a few helpful functions we have omitted here, such as `isEmpty,isArray,isString`.\n\n",
+     "hash": "c8e800947757a12e",
+     "he": "אוסף הפונקציות הבא מממש את המנתח התחבירי.\nניתוח תחבירי של תוכנית (שכולל שימוש בסורק ה\"קיצור דרך\") מתחיל בקריאה לפונקציה `parseL1` תוך העברת התוכנית שלנו כמחרוזת. לדוגמה, על ידי קריאה ל-`parseL1(\"(L1 (define x 5) (+ x 6))\")`. שימו לב שיש כמה פונקציות עזר שהשמטנו כאן, כמו `isEmpty,isArray,isString`."
+    },
+    {
+     "id": "ps/ps4:7:1",
+     "type": "code",
+     "en": "```typescript\nimport { Sexp, Token } from \"s-expression\";\nimport { parse as parseSexp, isToken, isCompoundSexp } from \"../shared/parser\";\nimport { all, find } from 'ramda';\nimport { format } from '../shared/format';\n\n// combine Sexp parsing with the L1 parsing\nexport const parseL1 = (x: string): Result<Program> =>\n    bind(parseSexp(x), parseL1Program);\n\n// L1 concrete syntax\n// <Program> -> (L1 <Exp>+)\n// <Exp> -> <DefineExp> | <CExp>\n// <DefineExp> -> (define <varDecl> <CExp>)\n// <CExp> -> <AtomicExp> | <AppExp>\n// <AtomicExp> -> <number> | <boolean> | <primOp>\n// <AppExp> -> (<CExp>+)\n\n// <Program> -> (L1 <Exp>+)\nexport const parseL1Program = (sexp: Sexp): Result<Program> =>\n    sexp === \"\" || isEmpty(sexp) ? makeFailure(\"Unexpected empty program\") :\n    isToken(sexp) ? makeFailure(`Program cannot be a single token: ${sexp}`) :\n    isCompoundSexp(sexp) ? \n        isNonEmptyList<Sexp>(sexp) ? parseL1GoodProgram(first(sexp), rest(sexp)) : \n        makeFailure(`Program cannot be a list of a single token: ${sexp}`) :\n    sexp;\n\nconst parseL1GoodProgram = (keyword: Sexp, body: Sexp[]): Result<Program> =>\n    keyword === \"L1\" && !isEmpty(body) ? mapv(mapResult(parseL1Exp, body), (exps: Exp[]) => \n                                              makeProgram(exps)) :\n    makeFailure(`Program must be of the form (L1 <exp>+): ${format(keyword)}`);\n\n// Exp -> <DefineExp> | <Cexp>\n// <Sexp> = <CompoundSexp> | <Token>\nexport const parseL1Exp = (sexp: Sexp): Result<Exp> =>\n    isEmpty(sexp) ? makeFailure(\"Exp cannot be an empty list\") :\n    isCompoundSexp(sexp) ? \n        isNonEmptyList<Sexp>(sexp) ? parseL1CompoundExp(first(sexp), rest(sexp)) :\n        makeFailure(`Exp cannot be a list of single token: ${sexp}`) :\n    isToken(sexp) ? parseL1Atomic(sexp) :\n    sexp;\n    \n// Compound -> DefineExp | CompoundCExp\nexport const parseL1CompoundExp = (op: Sexp, params: Sexp[]): Result<Exp> => \n    op === \"define\"? parseDefine(params) :\n    parseL1CompoundCExp(op, params);\n\n// CompoundCExp -> AppExp\nexport const parseL1CompoundCExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    parseAppExp(op, params);\n\n// DefineExp -> (define <varDecl> <CExp>)\nexport const parseDefine = (params: List<Sexp>): Result<DefineExp> =>\n    isNonEmptyList<Sexp>(params) ?\n        isEmpty(rest(params)) ? makeFailure(`define missing 1 arguments: ${format(params)}`) :\n        (params.length > 2) ? makeFailure(`define has too many arguments: ${format(params)}`) :\n        parseGoodDefine(first(params), second(params)) :\n    makeFailure(`define missing 2 arguments: ${format(params)}`);\n\nconst parseGoodDefine = (variable: Sexp, val: Sexp): Result<DefineExp> =>\n    ! isIdentifier(variable) ? makeFailure(`First arg of define must be an identifier: ${format(variable)}`) :\n    mapv(parseL1CExp(val), (value: CExp) => \n         makeDefineExp(makeVarDecl(variable), value));\n\n// CExp -> AtomicExp | CompondCExp\nexport const parseL1CExp = (sexp: Sexp): Result<CExp> =>\n    isCompoundSexp(sexp) ?\n        isNonEmptyList<Sexp>(sexp) ? parseL1CompoundCExp(first(sexp), rest(sexp)) :\n        makeFailure(`L1CExp cannot be an empty list`) :\n    isToken(sexp) ? parseL1Atomic(sexp) :\n    sexp;\n\n// Atomic -> number | boolean | primitiveOp\nexport const parseL1Atomic = (token: Token): Result<CExp> =>\n    token === \"#t\" ? makeOk(makeBoolExp(true)) :\n    token === \"#f\" ? makeOk(makeBoolExp(false)) :\n    isString(token) && isNumericString(token) ? makeOk(makeNumExp(+token)) :\n    isString(token) && isPrimitiveOp(token) ? makeOk(makePrimOp(token)) :\n    isString(token) ? makeOk(makeVarRef(token)) :\n    makeFailure(`Invalid atomic token: ${token}`);\n\nexport const isPrimitiveOp = (x: string): boolean =>\n    [\"+\", \"-\", \"*\", \"/\", \">\", \"<\", \"=\", \"not\"].includes(x)\n\n// AppExp -> ( <cexp>+ )\nexport const parseAppExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    bind(parseL1CExp(op), (rator: CExp) =>\n         mapv(mapResult(parseL1CExp, params), (rands: CExp[]) =>\n              makeAppExp(rator, rands)));\n```\n\n",
+     "hash": "c64d451624521028",
+     "lang": "typescript",
+     "noteHe": "זהו הקוד המרכזי של התרגול — המנתח התחבירי המלא של L1, ושווה לעבור עליו לאט. **הרעיון הכללי**: לכל שורה ב-BNF יש פונקציית ניתוח תחבירי אחת, והקוד בנוי כך שאפשר לקרוא אותו לצד ה-BNF שמופיע כהערות בראש הקובץ. **נקודת הכניסה**: `parseL1` מקבלת מחרוזת ומחברת את שני השלבים עם `bind` — קודם `parseSexp` (הסורק), ואחר כך `parseL1Program`. **תבנית הכתיבה**: כל הפונקציות כתובות כשרשרת של אופרטורים תלת-מקומיים `תנאי ? תוצאה : ...` — זהו סגנון \"טבלת החלטות\" שמחליף `if/else if` מקונן, והוא ביטוי יחיד ולכן מתאים לפונקציית חץ ללא `return`. **הזרימה**: `parseL1Program` בודקת שהקלט אינו ריק ואינו טוקן בודד, ואז מעבירה ל-`parseL1GoodProgram`, שדורשת שהאיבר הראשון יהיה בדיוק המחרוזת `\"L1\"` — כאן מתגלה שמילת המפתח היא רק אסימון שמושווים אליו. `mapResult` מנתחת רשימה שלמה ומחזירה `Failure` אם **אחד** מהאיברים נכשל, ו-`mapv` היא כמו `bind` אבל לפונקציה שמחזירה ערך רגיל ולא `Result`. **ההחלטה המרכזית** יושבת ב-`parseL1CompoundExp`: אם האיבר הראשון הוא `\"define\"` — זהו `DefineExp`; אחרת — זהו `AppExp`. שתי שורות, וזה כל ההבדל. `parseDefine` בודקת שיש בדיוק שני ארגומנטים ומחזירה הודעות שגיאה שונות לחסר ולעודף. **`parseL1Atomic` היא הפונקציה שכדאי לשנן**: היא מכריעה מה כל אסימון הוא, לפי סדר: `#t`/`#f` → בוליאני, מחרוזת ספרתית → `NumExp` (שימו לב ל-`+token` — הדרך המקוצרת להמיר מחרוזת למספר), אחד משמונת האופרטורים ב-`isPrimitiveOp` → `PrimOp`, וכל דבר אחר → `VarRef`. **הסדר קריטי**: אילו הבדיקה של `VarRef` הייתה מוקדמת יותר, `+` היה הופך למשתנה במקום לפרימיטיב. לבסוף `parseAppExp` מנתחת רקורסיבית את האופרטור ואת כל האופרנדים ומרכיבה `AppExp`. שימו לב לענף `sexp` הבודד בסוף כמה פונקציות — זהו טריק להשקטת בודק הטיפוסים במקרה שאינו אמור לקרות, לא לוגיקה אמיתית."
+    }
+   ],
+   "headingHe": "מימוש המנתח התחבירי"
+  },
+  {
+   "id": "ps/ps4:8",
+   "depth": 2,
+   "headingEn": "Using the Result Type for Error Processing",
+   "raw": "## Using the Result Type for Error Processing\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:8:0",
+     "type": "prose",
+     "en": " The parser can result either a \"good value\" or an error when the input string does not belong to the language specified by the concrete syntax. To ease error handling, we use the `Result<T>` monad introduced in Assignment 1. A result is a disjoint union between an OK type `Ok<T>` and the Failure type which is returned in case of errors.\n\n",
+     "hash": "2b9bdc168c116afa",
+     "he": "המנתח התחבירי יכול להחזיר או \"ערך טוב\" או שגיאה, כאשר מחרוזת הקלט אינה שייכת לשפה שהוגדרה על ידי התחביר הקונקרטי. כדי להקל על הטיפול בשגיאות, אנחנו משתמשים במונאדת `Result<T>` שהוצגה במטלה 1. תוצאה (result) היא איחוד זר בין טיפוס תקין `Ok<T>` לבין טיפוס הכישלון Failure, שמוחזר במקרה של שגיאות."
+    },
+    {
+     "id": "ps/ps4:8:1",
+     "type": "prose",
+     "en": "The benefit of using Result systematically in the code is that it allows us to write code mainly as the \"happy path\" – only write what happens when there are no errors. When functions return Result values, they can be composed using the `bind` operator - for example:\n\n",
+     "hash": "3d379e26e6bb2d69",
+     "he": "היתרון בשימוש שיטתי ב-Result בקוד הוא שהוא מאפשר לנו לכתוב את הקוד בעיקר כ\"מסלול המאושר\" (happy path) — לכתוב רק מה שקורה כשאין שגיאות. כאשר פונקציות מחזירות ערכי Result, אפשר להרכיב אותן באמצעות האופרטור `bind` — לדוגמה:"
+    },
+    {
+     "id": "ps/ps4:8:2",
+     "type": "code",
+     "en": "```typescript\nbind(mapResult(parseL1Exp, body),\n     (exps: Exp[]) => makeOk(makeProgram(exps)))\n```\n\n",
+     "hash": "ba9d62528b54b552",
+     "lang": "typescript",
+     "noteHe": "שתי שורות שלקוחות מתוך `parseL1GoodProgram` שראינו קודם. קראו אותן כך: \"נתח תחבירית את כל הביטויים ב-`body`; **אם** כולם הצליחו, קח את המערך `exps` שהתקבל ובנה ממנו `Program`\". שימו לב מה **לא** כתוב כאן: אין `if` שבודק אם `mapResult` נכשלה, ואין טיפול בשגיאה. `bind` מטפל בכך בעצמו — אם התוצאה היא `Failure`, הפונקציה השנייה כלל לא נקראת והכישלון עובר הלאה כמו שהוא. שימו לב גם שהפונקציה השנייה מקבלת `exps: Exp[]` — מערך רגיל, לא `Result` — כי היא נקראת רק כשהכול הצליח. השוו לשורה הבאה בדף, שמראה איך היה נראה אותו קוד בלי טיפול בשגיאות."
+    },
+    {
+     "id": "ps/ps4:8:3",
+     "type": "prose",
+     "en": "Without error handling, this code would be written as a simple composition:\n\n",
+     "hash": "0545fb217202696a",
+     "he": "ללא טיפול בשגיאות, הקוד הזה היה נכתב כהרכבה פשוטה:"
+    },
+    {
+     "id": "ps/ps4:8:4",
+     "type": "code",
+     "en": "```typescript\n// Types: body: Sexp[];\n//        parseL1Exp: Sexp => Exp\n//        makeProgram: Exp[] => Program\nmakeProgram(map(parseL1Exp, body))\n```\n\n",
+     "hash": "c2d6f992753d6653",
+     "lang": "typescript",
+     "noteHe": "כך היה נראה אותו קוד בעולם ללא שגיאות — הרכבה פשוטה של `map` ו-`makeProgram`, שורה אחת קריאה לגמרי. ההערות בקוד נותנות את הטיפוסים בעולם הזה: `parseL1Exp: Sexp => Exp`, בלי שום `Result`. השוו לשתי השורות עם `bind` שמעליו — התוכן הלוגי זהה, וכל התוספת נועדה אך ורק כדי שכישלון יוכל לזרום החוצה. הנקודה הפדגוגית: המונאדה אינה משנה **מה** הקוד עושה, אלא רק **מוסיפה נתיב** לכישלון בלי לפזר בדיקות `if` בכל שורה. שימו לב ש-`map` הרגיל היה מחזיר כאן `Result<Exp>[]` — מערך של תוצאות — ולא `Result<Exp[]>`, וזה בדיוק ההבדל שבגללו נדרשת `mapResult` ולא `map`."
+    },
+    {
+     "id": "ps/ps4:8:5",
+     "type": "prose",
+     "en": "In this call, `parseL1Exp` can return either an Exp or a Failure for each element - hence it would be unsafe to write this simple composition. For simple functions, we test for errors and return a Failure value or else return an ok value - for example:\n\n",
+     "hash": "e7208dd00fb913cb",
+     "he": "בקריאה הזו, `parseL1Exp` יכולה להחזיר עבור כל איבר או Exp או Failure — ולכן לא היה בטוח לכתוב את ההרכבה הפשוטה הזו. עבור פונקציות פשוטות, אנחנו בודקים אם יש שגיאות ומחזירים ערך Failure, ואחרת מחזירים ערך תקין — לדוגמה:"
+    },
+    {
+     "id": "ps/ps4:8:6",
+     "type": "code",
+     "en": "```typescript\n// Atomic -> number | boolean | primitiveOp\nexport const parseL1Atomic = (token: Token): Result<CExp> =>\n    token === \"#t\" ? makeOk(makeBoolExp(true)) :\n    ...\n    makeFailure(\"Invalid atomic token: \" + token);\n```\n\n",
+     "hash": "c607148f584c0ab6",
+     "lang": "typescript",
+     "noteHe": "קטע מקוצר (שימו לב ל-`...` שמחליף את אמצע הפונקציה) מתוך `parseL1Atomic` שראינו במלואה קודם. הנקודה כאן היא **התבנית הבסיסית ביותר** של Result: כל ענף מוצלח עוטף את ערכו ב-`makeOk`, והענף האחרון — ברירת המחדל, כשאף בדיקה לא התאימה — מחזיר `makeFailure` עם הודעה מפורטת שכוללת את האסימון הבעייתי. זו פונקציה \"עלה\" (leaf): היא אינה קוראת לפונקציות אחרות שמחזירות `Result`, ולכן אין בה `bind` כלל. כאן **יוצרים** את ערך ה-Result; ב-`bind` רק **מעבירים** אותו הלאה."
+    },
+    {
+     "id": "ps/ps4:8:7",
+     "type": "prose",
+     "en": "To compose functions that return a Result, we use the following Result-helper functions:\n\n",
+     "hash": "ed4a65d6e01142c7",
+     "he": "כדי להרכיב פונקציות שמחזירות Result, אנחנו משתמשים בפונקציות העזר הבאות של Result:"
+    },
+    {
+     "id": "ps/ps4:8:8",
+     "type": "list",
+     "en": "* `bind`\n* `mapResult`\n\n",
+     "hash": "9b039c1d039111db",
+     "he": "* `bind`\n* `mapResult`"
+    },
+    {
+     "id": "ps/ps4:8:9",
+     "type": "code",
+     "en": "```typescript\n// Instead of f2(f1(x)) - we write:\nbind( <f1 returns a Result<T>>, \n      (y: T) => <f2 receives the result of f1 if it is ok> );\n```\n\n",
+     "hash": "0b8f04d5948f6b3d",
+     "lang": "typescript",
+     "noteHe": "תבנית סכמטית ולא קוד רץ — הסוגריים המשולשים הם מציין מקום. ההודעה המרכזית היא בשורת ההערה הראשונה: **במקום** `f2(f1(x))` אנחנו כותבים `bind(f1(x), f2)`. שימו לב לשני ההבדלים. ראשית, **סדר הקריאה בטקסט מתהפך**: ב-`f2(f1(x))` הפונקציה שרצה ראשונה נכתבת פנימה ונקראת אחרונה, ואילו ב-`bind` היא נכתבת ראשונה — קוראים אותה משמאל לימין בסדר הביצוע. שנית, הפרמטר `y` של הפונקציה השנייה הוא מטיפוס `T` ולא `Result<T>` — הערך כבר \"נפרק\" מהעטיפה. זו הנקודה שהופכת את `bind` לנוח: הפונקציה השנייה נכתבת כאילו שגיאות לא קיימות."
+    },
+    {
+     "id": "ps/ps4:8:10",
+     "type": "prose",
+     "en": "bind is used to chain calls of functions that return Result.\n\n",
+     "hash": "d8b200d930e65823",
+     "he": "‏bind משמש לשרשור קריאות של פונקציות שמחזירות Result."
+    },
+    {
+     "id": "ps/ps4:8:11",
+     "type": "list",
+     "en": "* Note that the order in which the functions appear in a bind is the order in which the functions are executed (`f1` then `f2`) - and not as in `f2(f1(x))` where the order is reversed (`f2` then `f1`).\n* The second function in the chain receives a `T` parameter and not a `Result<T>` parameter - because it is only invoked when the call to `f1(x)` succeeds. When the call to `f1(x)` fails, `f2` is not invoked.\n\n",
+     "hash": "fac9ba0474e9977b",
+     "he": "* שימו לב שהסדר שבו הפונקציות מופיעות בתוך bind הוא הסדר שבו הפונקציות מבוצעות (`f1` ואז `f2`) — ולא כמו ב-`f2(f1(x))`, שבו הסדר הפוך (`f2` ואז `f1`).\n* הפונקציה השנייה בשרשרת מקבלת פרמטר מטיפוס `T` ולא מטיפוס `Result<T>` — מכיוון שהיא מופעלת רק כאשר הקריאה ל-`f1(x)` מצליחה. כאשר הקריאה ל-`f1(x)` נכשלת, ‏`f2` אינה מופעלת."
+    },
+    {
+     "id": "ps/ps4:8:12",
+     "type": "prose",
+     "en": "`mapResult` is used to apply a function that returns a `Result<T>` to an array of `T` values (`T[]`):\n\n",
+     "hash": "1930accf35be330c",
+     "he": "‏`mapResult` משמש להפעלת פונקציה שמחזירה `Result<T>` על מערך של ערכי `T` (‏`T[]`):"
+    },
+    {
+     "id": "ps/ps4:8:13",
+     "type": "code",
+     "en": "```typescript\nmapResult(f:(x: T1) => Result<T2>, arr: T1[]) => Result<T2[]>\n```\n\n",
+     "hash": "f5a770d4f695bbf6",
+     "lang": "typescript",
+     "noteHe": "החתימה של `mapResult`, וכל העניין נמצא בטיפוס המוחזר. אילו היינו משתמשים ב-`map` הרגיל עם פונקציה `T1 => Result<T2>`, היינו מקבלים `Result<T2>[]` — מערך שבו כל איבר עטוף בנפרד, וכדי לדעת אם הכול הצליח היינו צריכים לעבור עליו ולבדוק. `mapResult` **הופכת את הסדר**: היא מחזירה `Result<T2[]>` — עטיפה אחת סביב מערך שלם. כלומר או שהכול הצליח ומקבלים את המערך המלא, או שמשהו נכשל ומקבלים כישלון יחיד. **כדאי לשנן את ההבדל הזה** — `Result<T[]>` מול `Result<T>[]` — הוא נראה טיפוגרפי אבל הוא ההבדל בין קוד שאפשר להמשיך איתו לקוד שדורש ניקוי ידני, והוא חוזר בכל מקום שבו מנתחים רשימת ביטויים."
+    },
+    {
+     "id": "ps/ps4:8:14",
+     "type": "prose",
+     "en": "It is used exactly like the traditional `map` function, but if `f` fails on any one of the items in `arr`, then the function fails and returns the first Failure value - else it returns a `Result<T2[]>` (and not an array of Result values).\n\n\n\n",
+     "hash": "4928e0dd9b3f99d2",
+     "he": "משתמשים בה בדיוק כמו בפונקציית `map` המסורתית, אבל אם `f` נכשלת על אחד מהאיברים ב-`arr`, אז הפונקציה נכשלת ומחזירה את ערך ה-Failure הראשון — ואחרת היא מחזירה `Result<T2[]>` (ולא מערך של ערכי Result)."
+    }
+   ],
+   "headingHe": "שימוש בטיפוס Result לטיפול בשגיאות"
+  },
+  {
+   "id": "ps/ps4:9",
+   "depth": 2,
+   "headingEn": "Supporting `if` expressions",
+   "raw": "## Supporting `if` expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:9:0",
+     "type": "prose",
+     "en": "Recall that `if` expressions have the form `(if <test> <then> <else>)`. We would like our parser to support these expressions.\n\n",
+     "hash": "2c9a706dfdc7a130",
+     "he": "היזכרו שלביטויי `if` יש את הצורה `(if <test> <then> <else>)`. נרצה שהמנתח התחבירי שלנו יתמוך בביטויים האלה."
+    }
+   ],
+   "headingHe": "תמיכה בביטויי `if`"
+  },
+  {
+   "id": "ps/ps4:10",
+   "depth": 2,
+   "headingEn": "Adding if to the concrete and abstract syntax",
+   "raw": "## Adding if to the concrete and abstract syntax\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:10:0",
+     "type": "prose",
+     "en": "In order to add if in the concrete and abstract syntax, we must modify the syntactic rules we presented earlier as a BNF notation.\n\n",
+     "hash": "dd8530b794103b3c",
+     "he": "כדי להוסיף את if לתחביר הקונקרטי ולתחביר המופשט, עלינו לשנות את הכללים התחביריים שהצגנו קודם בסימון BNF."
+    },
+    {
+     "id": "ps/ps4:10:1",
+     "type": "prose",
+     "en": "**Note:** Our modification of the concrete will determine how a if expression will look like to the programmer. This requires placing punctuation. Our modification of the abstract syntax will determine how the parser will transform if expressions into ASTs. The modified concrete and abstract syntax follows:\n\n",
+     "hash": "7e24fa45d3c929d1",
+     "he": "**שימו לב:** השינוי שלנו בתחביר הקונקרטי יקבע איך ביטוי if ייראה למתכנת. זה מחייב הצבת סימני פיסוק. השינוי שלנו בתחביר המופשט יקבע איך המנתח התחבירי יהפוך ביטויי if לעצי AST. התחביר הקונקרטי והמופשט המעודכנים מופיעים להלן:"
+    },
+    {
+     "id": "ps/ps4:10:2",
+     "type": "code",
+     "en": "```typescript\n<cexp> ::= <num-exp>               // num-exp(val:Number)\n       | <bool-exp>                // bool-exp(val:Boolean)\n       | <prim-op>                 // prim-op(op:string)\n       | <var-ref>                 // var-ref(var:string)\n       | (if <cexp> <cexp> <cexp>) // if-exp(test:cexp, then:cexp, else:cexp)\n       | (<cexp> <cexp>*)          // app-exp(rator:cexp, rands:List(cexp))\n```\n\n",
+     "hash": "72f5c16106d9eaf6",
+     "lang": "typescript",
+     "noteHe": "ה-BNF המעודכן — השוו לגרסה הקודמת ותראו ששורה **אחת** נוספה: `(if <cexp> <cexp> <cexp>) // if-exp(test:cexp, then:cexp, else:cexp)`. שימו לב שהיא נוספה **לפני** שורת ההפעלה, וזה לא מקרי: מבחינה תחבירית `(if a b c)` נראה בדיוק כמו הפעלה של פונקציה בשם `if` על שלושה ארגומנטים, ולכן המנתח התחבירי חייב לבדוק את `if` ראשון. שימו לב גם ששלושת הרכיבים הם `cexp` — כלומר גם התנאי, גם ענף ה-then וגם ענף ה-else יכולים להיות ביטויים מקוננים כלשהם, כולל `if` נוסף. **שאלה שכדאי לעצור עליה**: למה `if` צריך להיות ב-BNF בכלל, ולא סתם פונקציה פרימיטיבית כמו `+`? כי הפעלת פונקציה מעריכה את **כל** האופרנדים לפני הקריאה, ואילו `if` חייב להעריך רק ענף אחד — זו בדיוק ההגדרה של צורה מיוחדת (special form) שראינו ב-ps3. שימו לב לפער בשמות שיבלבל אתכם בקוד: ב-BNF הרכיב השלישי נקרא `else`, אבל בטיפוס TypeScript הוא ייקרא `alt` (מלשון alternative), כי `else` היא מילה שמורה ב-JavaScript."
+    }
+   ],
+   "headingHe": "הוספת if לתחביר הקונקרטי ולתחביר המופשט"
+  },
+  {
+   "id": "ps/ps4:11",
+   "depth": 2,
+   "headingEn": "Modifying the parser to support *if* expressions",
+   "raw": "## Modifying the parser to support *if* expressions\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:11:0",
+     "type": "prose",
+     "en": "**Step-1**: We add a new type definition for if ASTs\n\n",
+     "hash": "1da340d64b348e26",
+     "he": "**שלב 1**: אנחנו מוסיפים הגדרת טיפוס חדשה עבור עצי AST של if"
+    },
+    {
+     "id": "ps/ps4:11:1",
+     "type": "code",
+     "en": "```typescript\n// Type definitions\nexport type IfExp = { tag: \"IfExp\"; test:CExp; then: CExp; alt: CExp; };\n// Value constructors\nexport const makeIfExp = (test: CExp, then: CExp, alt: CExp): IfExp =>\n    ({ tag: \"IfExp\", test: test, then: then, alt: alt }); \n// Type predicates:\nexport const isIfExp = (x: any): x is IfExp => x.tag === \"IfExp\";\n```\n\n",
+     "hash": "cb4ec0c3e1e68024",
+     "lang": "typescript",
+     "noteHe": "בדיוק אותה תבנית של שלוש שורות שראינו ב-`NumExp` — טיפוס, בנאי, פרדיקט — רק שהפעם לרשומה יש שלושה שדות במקום אחד, וכולם מטיפוס `CExp`. שימו לב לשם `alt` בשדה השלישי במקום `else`: ‏`else` היא מילה שמורה ב-JavaScript ולא ניתן להשתמש בה כשם, ולכן המוסכמה היא `alt` (alternative). **זכרו את הפער הזה** — ב-BNF כתוב `else` ובקוד `alt`, וקל להתבלבל בשאלת מבחן. שימו לב גם ש-`then`, למרבה המזל, כן מותר. הפרדיקט `isIfExp` זהה במבנהו לכל שאר הפרדיקטים — בדיקת `tag` יחידה. העובדה שהוספת סוג ביטוי חדש דורשת בדיוק את שלוש השורות האלה, ולא יותר, היא היתרון של תבנית האיחוד הזר."
+    },
+    {
+     "id": "ps/ps4:11:2",
+     "type": "prose",
+     "en": "**Step-2**: Update the cexp disjoint union type\n\n",
+     "hash": "10f16da1d5e303b0",
+     "he": "**שלב 2**: עדכון טיפוס האיחוד הזר cexp"
+    },
+    {
+     "id": "ps/ps4:11:3",
+     "type": "code",
+     "en": "```typescript\nexport type CExp = NumExp | BoolExp | PrimOp | VarRef | IfExp | AppExp;\nexport const isCExp = (x: any): x is CExp => isNumExp(x) || isBoolExp(x) || isPrimOp(x) ||\n    isVarRef(x) || isIfExp(x) ||  isAppExp(x);\n```\n\n",
+     "hash": "0fe11f1897137ccf",
+     "lang": "typescript",
+     "noteHe": "שתי הנקודות שבהן `IfExp` \"נרשם\" כאזרח מן המניין בשפה: פעם אחת בטיפוס `CExp` עצמו, ופעם שנייה בפרדיקט `isCExp`. שימו לב שחייבים לעדכן את **שניהם** — לשכוח את השני היא טעות שקטה במיוחד, כי הקוד יתקמפל בסדר גמור אבל `isCExp` יחזיר `false` על ביטויי if ותקבלו שגיאת ניתוח תחבירי מוזרה. השוו לגרסה הקודמת של שתי השורות האלה בסעיף 6 — ההבדל היחיד הוא `IfExp` שנוסף בשני המקומות. **תבנית שכדאי לזכור**: כל הוספת סוג ביטוי לשפה היא שלושה שלבים — הגדרת הטיפוס, עדכון האיחוד, עדכון המנתח התחבירי — וזה בדיוק המבנה של הסעיף הזה."
+    },
+    {
+     "id": "ps/ps4:11:4",
+     "type": "prose",
+     "en": "**Step-3**: Modify the relevant functions\n\n",
+     "hash": "09f565a5bf2e0a82",
+     "he": "**שלב 3**: שינוי הפונקציות הרלוונטיות"
+    },
+    {
+     "id": "ps/ps4:11:5",
+     "type": "code",
+     "en": "```typescript\n// CompoundCExp -> IfExp | AppExp\nexport const parseL1CompoundCExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    op === \"if\" ? parseIfExp(params) :\n    parseAppExp(op, params);\n \n// IfExp -> (if <CExp> <CExp> <CExp>)\nexport const parseIfExp = (params: Sexp[]): Result<IfExp> =>\n    params.length !== 3 ? makeFailure(\"Incorrect number of expressions in if\") :\n    bind(mapResult(parseL1CExp, params),\n         (cexps: CExp[]) => makeOk(makeIfExp(cexps[0], cexps[1], cexps[2])));\n```\n\n",
+     "hash": "0af994af8e3b6be5",
+     "lang": "typescript",
+     "noteHe": "השינוי במנתח התחבירי, והוא קטן להפליא. `parseL1CompoundCExp` קיבלה שורה אחת בלבד: `op === \"if\" ? parseIfExp(params) :` — כלומר \"אם האיבר הראשון הוא המילה if, זהו ביטוי if; אחרת, המשך כרגיל להפעלה\". שימו לב ש-**הסדר קריטי**: אילו השורה הייתה אחרי `parseAppExp`, לעולם לא היינו מגיעים אליה, ו-`(if a b c)` היה מנותח כהפעלה של משתנה בשם `if`. השוו לאותה תבנית ב-`parseL1CompoundExp` שבודקת `op === \"define\"`. `parseIfExp` עצמה: קודם בדיקת אריות — בדיוק שלושה ארגומנטים, אחרת `Failure` (כאן נתפסות שגיאות כמו `(if a b)` בלי ענף else, ש-Racket דווקא מתירה אבל השפה שלנו לא); ואז `mapResult` מנתחת את שלושתם, ו-`makeIfExp` מרכיבה את הצומת מ-`cexps[0]`, `cexps[1]` ו-`cexps[2]`. **טעות נפוצה במטלות**: לשכוח את בדיקת האורך ולגשת ל-`cexps[2]` שאינו קיים."
+    },
+    {
+     "id": "ps/ps4:11:6",
+     "type": "prose",
+     "en": "**Example:**\n\n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "ps/ps4:11:7",
+     "type": "code",
+     "en": "```typescript\n// Scanning and reading (ie string -> S-Exp)\nparseSexp(\"(if (= x 5) #t (* x x))\");\n// Output:\n{ tag: 'Ok', value: [ 'if', [ '=', 'x', '5' ], '#t', [ '*', 'x', 'x' ] ] }\n```\n\n",
+     "hash": "e36ffd97041eed65",
+     "lang": "typescript",
+     "noteHe": "שלב הסריקה בלבד. `\"(if (= x 5) #t (* x x))\"` הופך למערך מקונן בן ארבעה איברים: `'if'`, ואז שלושת הרכיבים. שימו לב ש-`'if'` הוא כאן סתם **מחרוזת**, בדיוק כמו `'x'` — הסורק אינו יודע שזו מילת מפתח, ואינו יודע שהמערך הזה מייצג תנאי. שימו לב גם ש-`'5'` הוא מחרוזת ולא מספר, וש-`'#t'` הוא מחרוזת ולא בוליאני. כל המשמעות תיווצר רק בשלב הבא. השוו לפלט של אותה מחרוזת אחרי `parseL1Exp` בבלוק הבא — זה ההבדל בין תחביר קונקרטי למופשט בתמונה אחת."
+    },
+    {
+     "id": "ps/ps4:11:8",
+     "type": "code",
+     "en": "```typescript\n// Parsing into AST:\nconst myIfExp = bind(parseSexp(\"(if (= x 5) #t (* x x))\"), parseL1Exp);\nconsole.log(JSON.stringify(myIfExp, null, 2))\n// Output:\n{\n  \"tag\": \"Ok\",\n  \"value\": {\n    \"tag\": \"IfExp\",\n    \"test\": {\n      \"tag\": \"AppExp\",\n      \"rator\": {\n        \"tag\": \"PrimOp\",\n        \"op\": \"=\"\n      },\n      \"rands\": [\n        {\n          \"tag\": \"VarRef\",\n          \"var\": \"x\"\n        },\n        {\n          \"tag\": \"NumExp\",\n          \"val\": 5\n        }\n      ]\n    },\n    \"then\": {\n      \"tag\": \"BoolExp\",\n      \"val\": true\n    },\n    \"alt\": {\n      \"tag\": \"AppExp\",\n      \"rator\": {\n        \"tag\": \"PrimOp\",\n        \"op\": \"*\"\n      },\n      \"rands\": [\n        {\n          \"tag\": \"VarRef\",\n          \"var\": \"x\"\n        },\n        {\n          \"tag\": \"VarRef\",\n          \"var\": \"x\"\n        }\n      ]\n    }\n  }\n}\n```\n\n\n",
+     "hash": "065c53068e528ecd",
+     "lang": "typescript",
+     "noteHe": "ה-AST המלא של אותו ביטוי if, מודפס עם `JSON.stringify(…, null, 2)` כדי לקבל הזחה קריאה. עקבו על המבנה: `IfExp` בשורש, עם שלושת השדות `test`, `then` ו-`alt` — ושימו לב שוב שהשדה נקרא `alt` ולא `else`. ה-`test` הוא `AppExp` של הפרימיטיב `=` על `VarRef(x)` ועל `NumExp(5)`. ה-`then` הוא `BoolExp` עם `val: true` — שימו לב שהמחרוזת `'#t'` הפכה לבוליאני אמיתי. ה-`alt` הוא `AppExp` של `*` על `x` ועל `x`, ושימו לב ש-`x` מופיע פעמיים כשני צמתים **נפרדים** מטיפוס `VarRef` — אין כאן שיתוף. **תרגיל שכדאי לעשות**: כסו את הפלט, קחו ביטוי Scheme אחר, וכתבו את ה-AST שלו ביד; זו שאלת מבחן שכיחה. שימו לב שהעץ עמוק פי כמה מהמחרוזת המקורית — זה המחיר של ייצוג שקל למכונה לעבד, וזו בדיוק הסיבה שאנחנו לא כותבים תוכניות ישירות ב-AST."
+    }
+   ],
+   "headingHe": "שינוי המנתח התחבירי כדי לתמוך בביטויי *if*"
+  },
+  {
+   "id": "ps/ps4:12",
+   "depth": 2,
+   "headingEn": "Supporting `cond` expressions",
+   "raw": "## Supporting `cond` expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:12:0",
+     "type": "list",
+     "en": "* We want our parser to support cond expressions.\n* A cond expression is of the form `(<cond> (<cond-clause> ...))`\n* Where each is either of the form `(<test> <then>)` or `(else <then>)`\n\n",
+     "hash": "eac05dbcb9c49501",
+     "he": "* אנחנו רוצים שהמנתח התחבירי שלנו יתמוך בביטויי cond.\n* ביטוי cond הוא בעל הצורה `(<cond> (<cond-clause> ...))`\n* כאשר כל אחד הוא או בעל הצורה `(<test> <then>)` או `(else <then>)`"
+    },
+    {
+     "id": "ps/ps4:12:1",
+     "type": "prose",
+     "en": "**For example:**\n\n",
+     "hash": "51e921ad734b719a",
+     "he": "**לדוגמה:**"
+    },
+    {
+     "id": "ps/ps4:12:2",
+     "type": "code",
+     "en": "```typescript\n(define fib (lambda (n)\n               (cond ((= n 0) 0)\n                     ((= n 1) 1)\n                     (else (+ (fib (- n 1)) \n                              (fib (- n 2)))))))\n```\n\n",
+     "hash": "8433a6e583ea1eec",
+     "lang": "typescript",
+     "noteHe": "פיבונאצ'י ב-`cond` — הדוגמה שממחישה למה `cond` שימושי. במקום שני `if` מקוננים, מקבלים שלושה תנאים ברשימה שטוחה, אחד מתחת לשני. עברו על המבנה: אחרי המילה `cond` באות **סעיפים** (clauses), שכל אחד מהם עטוף בסוגריים משלו — `((= n 0) 0)` פירושו \"אם `n` שווה 0, החזר 0\". שימו לב לסוגריים הכפולים בתחילת כל סעיף: הזוג החיצוני הוא הסעיף, והפנימי הוא ביטוי התנאי. **טעות נפוצה** היא לשכוח את אחד מהם. הסעיף האחרון מתחיל ב-`else` והוא ברירת המחדל — כאן הקריאה הרקורסיבית הכפולה של פיבונאצ'י. שימו לב ש-`cond` הוא **סוכר תחבירי**: `(cond (a b) (c d) (else e))` שקול לחלוטין ל-`(if a b (if c d e))`, וזה בדיוק מה שנעשה בסעיף השכתוב בהמשך הדף."
+    },
+    {
+     "id": "ps/ps4:12:3",
+     "type": "prose",
+     "en": "Pay attention! `cond` is a \"special form\": it is a compound expression which is not evaluated like regular (application) compound expressions.\n\n\n",
+     "hash": "bc98b7112d60f892",
+     "he": "שימו לב! ‏`cond` הוא \"צורה מיוחדת\" (special form): זהו ביטוי מורכב שאינו מוערך כמו ביטויים מורכבים רגילים (של הפעלה)."
+    }
+   ],
+   "headingHe": "תמיכה בביטויי `cond`"
+  },
+  {
+   "id": "ps/ps4:13",
+   "depth": 2,
+   "headingEn": "Computation Rule for `(cond (cond-clause …))`",
+   "raw": "## Computation Rule for `(cond (cond-clause …))`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:13:0",
+     "type": "list",
+     "en": "1. Compute the expression in the first\n2. If the value is not `#f`, compute the expression\n3. Otherwise, continue with the next expression\n4. If all expressions evaluate to `#f`, return the value of the last expression (the \"else clause\").\n\n\n",
+     "hash": "34776d6d086ac63a",
+     "he": "1. חשבו את הביטוי הראשון\n2. אם הערך אינו `#f`, חשבו את הביטוי\n3. אחרת, המשיכו לביטוי הבא\n4. אם כל הביטויים מוערכים ל-`#f`, החזירו את הערך של הביטוי האחרון (סעיף ה-\"else\")."
+    }
+   ],
+   "headingHe": "כלל החישוב עבור `(cond (cond-clause …))`"
+  },
+  {
+   "id": "ps/ps4:14",
+   "depth": 2,
+   "headingEn": "Adding cond in the concrete and abstract syntax",
+   "raw": "## Adding cond in the concrete and abstract syntax\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:14:0",
+     "type": "code",
+     "en": "```typescript\n<cexp> ::= <num-exp>                // num-exp(val:Number)\n       | <bool-exp>                 // bool-exp(val:Boolean)\n       | <prim-op>                  // prim-op(op:string)\n       | <var-ref>                  // var-ref(var:string)\n       | (if <cexp> <cexp> <cexp>)  // if-exp(test:cexp, then:cexp, else:cexp)\n       | (cond <cond-clauses>*)     // cond-exp(cond-clauses:List(cond-clause))\n       | (<cexp> <cexp>*)           // app-exp(rator:cexp, rands:List(cexp))\n<cond-clause> ::= (<cexp> <cexp>+)  // cond-clause(test:cexp, then:List(cexp))\n                  |  (else <cexp>+ )\n```\n\n\n",
+     "hash": "f68a07eb1f7b5d0a",
+     "lang": "typescript",
+     "noteHe": "ה-BNF עם `cond`, ושוב הוא נוסף **לפני** שורת ההפעלה מאותה סיבה. שימו לב שהפעם נוספה גם קטגוריה תחבירית **חדשה לגמרי**: `<cond-clause>`, שאינה `cexp` — סעיף אינו ביטוי שאפשר להעריך בפני עצמו, הוא רק חלק מ-`cond`. זו הפעם הראשונה בדף שאנחנו מוסיפים קטגוריה ולא רק חלופה. שימו לב לריבוי: `(cond <cond-clauses>*)` מרשה **אפס** סעיפים או יותר, ואילו כל סעיף `(<cexp> <cexp>+)` דורש תנאי ואחריו **לפחות ביטוי אחד** בגוף. שימו לב גם שהגוף הוא רשימה (`then:List(cexp)`) ולא ביטוי יחיד, בניגוד ל-`if` — בדיוק כמו גוף של `lambda`, מותר רצף של ביטויים ורק האחרון הוא הערך. **גוטצ'ה שכדאי לשים לב אליה כבר עכשיו**: החלופה `(else <cexp>+)` מופיעה ב-BNF כאילו `else` מטופל במיוחד, אבל בקוד המנתח התחבירי שנראה מיד `else` אינו מטופל כלל — הוא מנותח כ-`VarRef` רגיל בשם `else`. חוסר ההתאמה הזה בין המפרט למימוש הוא נושא לשאלה בהמשך הדף."
+    }
+   ],
+   "headingHe": "הוספת cond לתחביר הקונקרטי ולתחביר המופשט"
+  },
+  {
+   "id": "ps/ps4:15",
+   "depth": 2,
+   "headingEn": "Modifying the parser to support cond expressions",
+   "raw": "## Modifying the parser to support cond expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:15:0",
+     "type": "prose",
+     "en": "**Step-1**: We add a new type definition for cond ASTs\n\n",
+     "hash": "f3699e480877a64b",
+     "he": "**שלב 1**: אנחנו מוסיפים הגדרת טיפוס חדשה עבור עצי AST של cond"
+    },
+    {
+     "id": "ps/ps4:15:1",
+     "type": "code",
+     "en": "```typescript\n// Type definitions\nexport type CondClause = { tag: \"CondClause\", test: CExp, then: CExp[]; }\nexport type CondExp = { tag: \"CondExp\", condclauses: CondClause[]; }\n// Value constructors\nexport const makeCondClause = (test: CExp, then: CExp[]) : CondClause =>\n    ({ tag: \"CondClause\", test: test, then: then });\nexport const makeCondExp = (condclauses: CondClause[]) : CondExp =>\n    ({ tag: \"CondExp\", condclauses: condclauses });\n// Type predicates:\nexport const isCondClause = (x:any): x is CondClause => x.tag === \"CondClause\";\nexport const isCondExp = (x:any): x is CondExp => x.tag === \"CondExp\";\n```\n\n",
+     "hash": "c24c05f69111e64b",
+     "lang": "typescript",
+     "noteHe": "הפעם צריך **שני** טיפוסים, לא אחד — וזה ההבדל העיקרי מ-`if`. `CondClause` הוא סעיף בודד: תנאי `test` וגוף `then` שהוא **מערך** של `CExp` (כי מותר רצף ביטויים בגוף). `CondExp` הוא הביטוי כולו, ומכיל מערך של סעיפים. שימו לב לקינון: מערך של רשומות שכל אחת מכילה מערך. לכל אחד מהטיפוסים יש בנאי ופרדיקט משלו — שש שורות במקום שלוש. שימו לב ש-`CondClause` אינו חלק מהאיחוד `CExp` ולעולם לא יהיה: הוא אינו ביטוי שאפשר להעריך לבדו, בדיוק כמו ש-`VarDecl` אינו `CExp`. **שימו לב לפרט שיכשיל אתכם בקוד**: השדה כאן נקרא `condclauses` באות c קטנה, אבל בפלט ה-JSON בהמשך הדף הוא מופיע כ-`condClauses` באות C גדולה — אי-התאמה במקור הקורס. השם הנכון הוא זה שמופיע בהגדרת הטיפוס."
+    },
+    {
+     "id": "ps/ps4:15:2",
+     "type": "prose",
+     "en": "**Step-2**: Update the cexp disjoint union type\n\n",
+     "hash": "10f16da1d5e303b0",
+     "he": "**שלב 2**: עדכון טיפוס האיחוד הזר cexp"
+    },
+    {
+     "id": "ps/ps4:15:3",
+     "type": "code",
+     "en": "```typescript\nexport type CExp = NumExp | BoolExp | PrimOp | VarRef | IfExp | CondExp | AppExp;\nexport const isCExp = (x: any): x is CExp => isNumExp(x) || isBoolExp(x) || isPrimOp(x) ||\n    isVarRef(x) || isIfExp(x) || isCondExp(x) || isAppExp(x);\n```\n\n",
+     "hash": "13a805546748a6fd",
+     "lang": "typescript",
+     "noteHe": "בדיוק אותו שלב שביצענו עבור `IfExp`, רק עם `CondExp`: הוספה לטיפוס האיחוד ולפרדיקט `isCExp`. שימו לב ש-`CondClause` **אינו** מופיע כאן — רק `CondExp`. הסיבה, כאמור: סעיף אינו ביטוי בר-הערכה, ולכן אין לו מקום באיחוד של `CExp`. אם הוספתם אותו בטעות, בודק הטיפוסים היה מתיר לכם לכתוב סעיף במקום שבו נדרש ביטוי — וזה בדיוק סוג השגיאה שהטיפוסים אמורים למנוע."
+    },
+    {
+     "id": "ps/ps4:15:4",
+     "type": "prose",
+     "en": "**Step-3**: Modify the relevant functions\n\n",
+     "hash": "09f565a5bf2e0a82",
+     "he": "**שלב 3**: שינוי הפונקציות הרלוונטיות"
+    },
+    {
+     "id": "ps/ps4:15:5",
+     "type": "code",
+     "en": "```typescript\n// CompoundCExp -> IfExp | CondExp | AppExp\nexport const parseL1CompoundCExp = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    op === \"if\" ? parseIf(params) :\n    op === \"cond\" ? parseCond(params) :\n    parseAppExp(op, params);\n \n// CondExp -> (cond (<CExp> <CExp>+)+)\nexport const parseCondExp = (params: Sexp[]): Result<CondExp> => {\n    if (!allT(isCompoundSexp, params)) {\n        return makeFailure(\"Invalid cond clauses\");\n    } else {\n        const clausesResult = mapResult((clause: Sexp[]) =>\n            safe2((test: CExp, then: CExp[]) => makeOk(makeCondClause(test, then)))\n                 (parseL1CExp(first(clause)), mapResult(parseL1CExp, rest(clause))), params);\n        return bind(clausesResult, (clauses: CondClause[]) => makeOk(makeCondExp(clauses)));\n    }\n}\n```\n\n",
+     "hash": "52c6561b0faf1130",
+     "lang": "typescript",
+     "noteHe": "הניתוח התחבירי של `cond`, והקוד הצפוף ביותר בדף. `parseL1CompoundCExp` קיבלה שורה נוספת — `op === \"cond\" ? parseCond(params) :` — כך שכעת שלושה מקרים: `if`, ‏`cond`, וברירת המחדל `AppExp`. `parseCondExp` כתובה בסגנון שונה משאר המנתח התחבירי: עם מסולסלים ו-`return` במקום שרשרת תלת-מקומית. `allT(isCompoundSexp, params)` מוודאת שכל הסעיפים הם רשימות — כלומר ש-`(cond 5)` ייפסל. הלב הוא `mapResult` על הסעיפים, שלכל סעיף מפעילה `safe2`: זו פונקציית עזר שמקבלת פונקציה דו-מקומית ומריצה אותה על **שני** ערכי `Result` — מצליחה רק אם שניהם `Ok`, ואחרת מחזירה את הכישלון הראשון. שני ה-Results כאן הם `parseL1CExp(first(clause))` — התנאי, ו-`mapResult(parseL1CExp, rest(clause))` — הגוף כמערך. לבסוף `bind` עוטף את כל הסעיפים ל-`CondExp` יחיד. **שתי שגיאות אמיתיות במקור הקורס שכדאי לדעת עליהן**: (1) השורות הראשונות קוראות ל-`parseIf` ול-`parseCond`, אבל הפונקציות שהוגדרו בפועל נקראות `parseIfExp` ו-`parseCondExp` — הקוד כפי שהוא לא היה מתקמפל. (2) `else` אינו מטופל כלל: אין שום בדיקה עבורו, ולכן הוא ייפול לענף האחרון של `parseL1Atomic` ויהפוך ל-`VarRef` בשם `else` — כפי שנראה בפלט מיד בהמשך."
+    },
+    {
+     "id": "ps/ps4:15:6",
+     "type": "prose",
+     "en": "**Example:**\n\n",
+     "hash": "7cfe1b9c27bbfaa8",
+     "he": "**דוגמה:**"
+    },
+    {
+     "id": "ps/ps4:15:7",
+     "type": "code",
+     "en": "```typescript\n// Scanning and reading (ie string -> S-Exp)\nparseSexp(\"(cond (1 1) (else 3))\");\n// Output:\n{ tag: 'Ok', value: [ 'cond', [ '1', '1' ], [ 'else', '3' ] ] }\n```\n\n",
+     "hash": "3654ad2a3238ffed",
+     "lang": "typescript",
+     "noteHe": "שלב הסריקה של `(cond (1 1) (else 3))`. התוצאה היא מערך בן שלושה איברים: המחרוזת `'cond'`, ואז שני מערכים — סעיף אחד לכל אחד. שימו לב ש-`'else'` הוא כאן סתם מחרוזת, בדיוק כמו `'cond'`, וששניהם אינם שונים בשום צורה מ-`'1'` מבחינת הסורק. הביטוי `(1 1)` הוא סעיף מוזר בכוונה — התנאי הוא המספר `1`, שאינו `#f` ולכן נחשב אמת, כך שהסעיף הזה תמיד יתפוס. השוו לפלט של השלב הבא כדי לראות מה קורה ל-`else`."
+    },
+    {
+     "id": "ps/ps4:15:8",
+     "type": "code",
+     "en": "```typescript\nconst myCondExp = bind(parseSexp(\"(cond (1 1) (else 3))\"), parseL1Exp);\nconsole.log(JSON.stringify(myCondExp, null, 2))\n \n// Output:\n{\n  \"tag\": \"Ok\",\n  \"value\": {\n    \"tag\": \"CondExp\",\n    \"condClauses\": [\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"NumExp\",\n          \"val\": 1\n        },\n        \"then\": [\n          {\n            \"tag\": \"NumExp\",\n            \"val\": 1\n          }\n        ]\n      },\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"VarRef\",\n          \"var\": \"else\"\n        },\n        \"then\": [\n          {\n            \"tag\": \"NumExp\",\n            \"val\": 3\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n\n",
+     "hash": "cdc596158f4d7988",
+     "lang": "typescript",
+     "noteHe": "ה-AST של `cond` — ושימו לב היטב לסעיף השני. `CondExp` מכיל מערך `condClauses` בן שני `CondClause`-ים. הראשון תקין: `test` הוא `NumExp(1)` ו-`then` הוא **מערך** בן איבר אחד, `NumExp(1)`. אבל בשני, ה-`test` הוא `{ \"tag\": \"VarRef\", \"var\": \"else\" }` — כלומר המנתח התחבירי לא זיהה את `else` כמילת מפתח והפך אותו ל**הפניה למשתנה** בשם `else`. זו התנהגות שגויה: כשהמפרש ינסה להעריך את הביטוי הזה, הוא יחפש קשירה ל-`else` בסביבה ולא ימצא — שגיאת \"משתנה לא מוגדר\". הסעיף הבא בדף דן בדיוק בבעיה הזו ובדרכים לתקן אותה. שימו לב גם ששדה המערך מופיע כאן כ-`condClauses` ב-C גדולה, בעוד שהגדרת הטיפוס למעלה כתבה `condclauses` — אי-התאמה במקור הקורס. שימו לב לתכונה מבנית שכן נכונה: `then` הוא תמיד מערך, גם כשיש בו ביטוי אחד בלבד."
+    }
+   ],
+   "headingHe": "שינוי המנתח התחבירי כדי לתמוך בביטויי cond"
+  },
+  {
+   "id": "ps/ps4:16",
+   "depth": 2,
+   "headingEn": "Remarks:",
+   "raw": "## Remarks:\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:16:0",
+     "type": "list",
+     "en": "1. Note how the parser referred to `else` as a VarRef. This would raise an error when the interpreter processes the AST, as it will look for the value bound to `else`.\n2. The \"else-clause\" should only occur as last clause in a cond expression. One way to enforce this is to change the syntax from:\n\n",
+     "hash": "d963736727cb249e",
+     "he": "1. שימו לב איך המנתח התחבירי התייחס ל-`else` כאל VarRef. זה היה מעורר שגיאה כשהמפרש יעבד את ה-AST, מכיוון שהוא יחפש את הערך הקשור ל-`else`.\n2. \"סעיף ה-else\" צריך להופיע רק כסעיף האחרון בביטוי cond. דרך אחת לאכוף זאת היא לשנות את התחביר מ:"
+    },
+    {
+     "id": "ps/ps4:16:1",
+     "type": "code",
+     "en": "```typescript\n;; ( cond <cond-clause>* )                 / cond-exp(cond-clauses:List(cond-clause))\n```\n\n",
+     "hash": "7f18fa3da1358d9a",
+     "lang": "typescript",
+     "noteHe": "שורת ה-BNF **הנוכחית** של `cond`, זו שאנחנו רוצים לשנות: `<cond-clause>*` — אפס סעיפים או יותר, כולם שווי מעמד. שימו לב לבעיה שהיא לא מבטאת: אין שום דרך בכתיב הזה לומר ש-`else` מיוחד, ושאם הוא מופיע — הוא חייב להיות אחרון. השוו לשורה שאחריה."
+    },
+    {
+     "id": "ps/ps4:16:2",
+     "type": "prose",
+     "en": "to: \n\n",
+     "hash": "55708cb7df70bc7b",
+     "he": "ל:"
+    },
+    {
+     "id": "ps/ps4:16:3",
+     "type": "code",
+     "en": "```typescript\n;; ( cond <cond-clause>* <else-clause>? )  / cond-exp(cond-clauses:List(cond-clause))\n```\n\n",
+     "hash": "0f1c7389846059bb",
+     "lang": "typescript",
+     "noteHe": "השורה **המתוקנת**: `( cond <cond-clause>* <else-clause>? )` — אפס סעיפים רגילים או יותר, ואחריהם סעיף else **אופציונלי אחד** (הסימן `?` פירושו אפס או אחד). המיקום בשורה הוא מה שאוכף שה-else יבוא אחרון, והסימן `?` אוכף שיהיה לכל היותר אחד. שימו לב שהתחביר **המופשט** מימין ל-`/` לא השתנה — עדיין `cond-clauses:List(cond-clause)` — וזו בדיוק השאלה הפתוחה שנשאלת בפסקה הבאה: האם צריך לשנות גם אותו, או שאפשר לתרגם סעיף else לסעיף רגיל עם תנאי `#t`? שימו לב גם ששורות ה-BNF כאן משתמשות ב-`/` במקום ב-`//` שראינו בכל שאר הדף — חוסר עקביות במקור, לא הבדל משמעותי."
+    },
+    {
+     "id": "ps/ps4:16:4",
+     "type": "prose",
+     "en": "This means that cexps can now include the token 'else`, which should be addressed by the parser. The question is: what is the corresponding AST that the parser should generate?\n\n",
+     "hash": "29dd7133952238c0",
+     "he": "המשמעות היא ש-cexps יכולים כעת לכלול את האסימון 'else`, ועל המנתח התחבירי לטפל בכך. השאלה היא: מהו ה-AST המתאים שהמנתח התחבירי צריך לייצר?"
+    },
+    {
+     "id": "ps/ps4:16:5",
+     "type": "list",
+     "en": "1. We could leave abstract syntax as `List(cond-clauses)`, and parse an else-clause to #t.\n2. Or, we could change the abstract syntax to `cond-clauses:List(cond-clause), else-clause: else-clause` and leave handling else-clause to the interpreter.\n\n",
+     "hash": "f125f830cbd1a25a",
+     "he": "1. אנחנו יכולים להשאיר את התחביר המופשט כ-`List(cond-clauses)`, ולנתח סעיף else ל-#t.\n2. לחלופין, אנחנו יכולים לשנות את התחביר המופשט ל-`cond-clauses:List(cond-clause), else-clause: else-clause` ולהשאיר את הטיפול בסעיף ה-else למפרש."
+    },
+    {
+     "id": "ps/ps4:16:6",
+     "type": "prose",
+     "en": "The first option is preferable as it keeps the interpreter more simple.\n\n\n",
+     "hash": "e1304d03d235bbbd",
+     "he": "האפשרות הראשונה עדיפה, מכיוון שהיא שומרת על מפרש פשוט יותר."
+    }
+   ],
+   "headingHe": "הערות:"
+  },
+  {
+   "id": "ps/ps4:17",
+   "depth": 2,
+   "headingEn": "Rewriting If-exp ASTs into Cond-exp ASTs",
+   "raw": "## Rewriting If-exp ASTs into Cond-exp ASTs\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:17:0",
+     "type": "prose",
+     "en": "If we consider the evaluation rule of if-exp ASTs and that of cond-exp ASTs, we observe that they could be reduced to equivalent forms. We could either rewrite if-exp into cond-exp or vice-versa.\n\n",
+     "hash": "ac3c7ec45e60b6ca",
+     "he": "אם נתבונן בכלל ההערכה של עצי AST מסוג if-exp ובזה של עצי AST מסוג cond-exp, נבחין שאפשר לצמצם אותם לצורות שקולות. אנחנו יכולים או לשכתב if-exp לתוך cond-exp או להפך."
+    },
+    {
+     "id": "ps/ps4:17:1",
+     "type": "prose",
+     "en": "When we apply such syntactic reduction (one form into another), we reduce the complexity of the operational semantics - since we only need to provide one evaluation rule for the two syntactic forms.\n\n",
+     "hash": "054c3daadc4db890",
+     "he": "כשאנחנו מיישמים צמצום תחבירי כזה (צורה אחת לתוך אחרת), אנחנו מפחיתים את המורכבות של הסמנטיקה התפעולית — מכיוון שאנחנו צריכים לספק רק כלל הערכה אחד עבור שתי הצורות התחביריות."
+    },
+    {
+     "id": "ps/ps4:17:2",
+     "type": "prose",
+     "en": "Let us illustrate how we map ASTs that contain if-exps into semantically equivalent ASTs that contain only cond-exp.\n\n",
+     "hash": "f4ecebc1c2357ab0",
+     "he": "הבה נמחיש איך אנחנו ממפים עצי AST שמכילים if-exps לעצי AST שקולים סמנטית שמכילים רק cond-exp."
+    },
+    {
+     "id": "ps/ps4:17:3",
+     "type": "prose",
+     "en": "The basic rewriting step is to convert:\n\n",
+     "hash": "59d20328ef85f037",
+     "he": "צעד השכתוב הבסיסי הוא להמיר את:"
+    },
+    {
+     "id": "ps/ps4:17:4",
+     "type": "code",
+     "en": "```typescript\n(if <test> <then> <else>)\n```\n\n",
+     "hash": "e0575634ac179899",
+     "lang": "typescript",
+     "noteHe": "הצורה **המקורית** — תבנית ולא קוד רץ. שלושה רכיבים: תנאי, ענף אמת, ענף שקר. השוו לצורה שאליה נמיר אותה בבלוק הבא."
+    },
+    {
+     "id": "ps/ps4:17:5",
+     "type": "prose",
+     "en": "into: \n\n",
+     "hash": "6dc03ab1be24cc83",
+     "he": "לתוך:"
+    },
+    {
+     "id": "ps/ps4:17:6",
+     "type": "code",
+     "en": "```typescript\n(cond (<test> <then>)\n      (else <else>))\n```\n\n",
+     "hash": "a4bb04dba56a8af8",
+     "lang": "typescript",
+     "noteHe": "הצורה **היעד**: `cond` עם שני סעיפים — הראשון נושא את התנאי המקורי ואת ענף האמת, והשני הוא `else` עם ענף השקר. שכנעו את עצמכם שזה שקול: לפי כלל החישוב של `cond`, אם התנאי אינו `#f` מוערך `<then>`, ואחרת עוברים לסעיף ה-else ומוערך `<else>` — בדיוק ההתנהגות של `if`. שימו לב שגם כאן רק ענף אחד מוערך, ולכן השקילות שלמה ולא רק \"מחזירים את אותו ערך\". שימו לב שבקוד עצמו (הבלוק הבא) המימוש לא ישתמש ב-`else` אלא ב-`#t` — פתרון נקי יותר, שכפי שראינו נמנע מהבעיה של `else` שהופך ל-`VarRef`."
+    },
+    {
+     "id": "ps/ps4:17:7",
+     "type": "code",
+     "en": "```typescript\n// Rewrite a single if expression as a semantically equivalent\n// cond-exp form\nconst rewriteIf = (exp: IfExp): CondExp =>\n    makeCondExp([\n        makeCondClause(exp.test, [exp.then]),\n        makeCondClause(makeBoolExp(true), [exp.alt])\n    ]);\n```\n\n",
+     "hash": "5056b6b6cb33db01",
+     "lang": "typescript",
+     "noteHe": "המימוש של צעד השכתוב הבודד, ארבע שורות בסך הכול. `rewriteIf` מקבלת `IfExp` ומחזירה `CondExp` — שימו לב שהחתימה מדויקת: **לא** `CExp` כללי, כי אנחנו יודעים בדיוק מה נכנס ומה יוצא. הבנייה: `makeCondExp` על מערך בן שני סעיפים. הסעיף הראשון — `makeCondClause(exp.test, [exp.then])`, כלומר התנאי המקורי והגוף עטוף בסוגריים מרובעים כי `then` הוא מערך. הסעיף השני — `makeCondClause(makeBoolExp(true), [exp.alt])`: **התנאי הוא `#t` קבוע**, ולא `VarRef(\"else\")`. זו בחירה מכוונת ומוצלחת: `#t` תמיד אמת, ולכן הסעיף הזה תמיד ייתפס אם הגענו אליו, וכך מקבלים בדיוק את התנהגות ה-else בלי להזדקק למילת מפתח מיוחדת בכלל. זו בדיוק \"אפשרות 1\" שהומלצה בסעיף הקודם. שימו לב שהפונקציה **אינה רקורסיבית** — היא מטפלת בצומת אחד בלבד, ומשאירה את שלושת תת-הביטויים כפי שהם; הטיפול בקינון מגיע ב-`rewriteAllIf` בהמשך."
+    },
+    {
+     "id": "ps/ps4:17:8",
+     "type": "prose",
+     "en": "Example:\n\n",
+     "hash": "872887e563e75957",
+     "he": "דוגמה:"
+    },
+    {
+     "id": "ps/ps4:17:9",
+     "type": "code",
+     "en": "```typescript\nlet myIfExp = bind(parseSexp(\"(if 1 2 3)\"), parseL1Exp);\nif (isOkT(isIfExp)(myIfExp)) {\n    console.log(JSON.stringify(bind(myIfExp, exp => makeOk(rewriteIf(exp))), null, 2));\n}\n \n// Output:\n{\n  \"tag\": \"Ok\",\n  \"value\": {\n    \"tag\": \"CondExp\",\n    \"condClauses\": [\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"NumExp\",\n          \"val\": 1\n        },\n        \"then\": [\n          {\n            \"tag\": \"NumExp\",\n            \"val\": 2\n          }\n        ]\n      },\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"BoolExp\",\n          \"val\": true\n        },\n        \"then\": [\n          {\n            \"tag\": \"NumExp\",\n            \"val\": 3\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n",
+     "hash": "d8df889a93c309b6",
+     "lang": "typescript",
+     "noteHe": "‏`(if 1 2 3)` אחרי השכתוב. שימו לב שוב לתבנית `isOkT(isIfExp)` שמצמצמת את הטיפוס לפני הגישה. בפלט: `CondExp` עם שני סעיפים — הראשון `test: NumExp(1)`, `then: [NumExp(2)]`; והשני `test: BoolExp(true)`, `then: [NumExp(3)]`. השוו לביטוי המקורי: `1` היה התנאי, `2` ענף האמת, `3` ענף השקר — והנה `3` יושב תחת תנאי `#t` קבוע. שימו לב שכל ה-`then`-ים הם מערכים בני איבר אחד, כי כך מוגדר `CondClause`. תרגילו את עצמכם לקרוא את הפלט הזה מהר — ייצוגי JSON של עצי AST הם שאלת מבחן שכיחה, ובהתחלה הם נראים מפחידים רק בגלל האורך."
+    },
+    {
+     "id": "ps/ps4:17:10",
+     "type": "prose",
+     "en": "We then need to make sure we transform all if-exp nodes in an AST wherever they occur. So we must rewrite all `if` expressions wherever the language permits their appearance.\n\n",
+     "hash": "d690e950f5717c1f",
+     "he": "לאחר מכן עלינו לוודא שאנחנו מבצעים את ההמרה על כל צמתי if-exp ב-AST בכל מקום שבו הם מופיעים. לכן עלינו לשכתב את כל ביטויי ה-`if` בכל מקום שהשפה מתירה את הופעתם."
+    },
+    {
+     "id": "ps/ps4:17:11",
+     "type": "code",
+     "en": "```typescript\nconst rewriteAllIf = (e: CExp): CExp =>\n    isBoolExp(e) ? e :\n    isNumExp(e) ? e :\n    isPrimOp(e) ? e :\n    isVarRef(e) ? e :\n    isVarDecl(e) ? e :\n    isIfExp(e) ?  rewriteIf(makeIfExp(rewriteAllIf(e.test),\n                                      rewriteAllIf(e.then),\n                                      rewriteAllIf(e.alt))) :\n    isCondExp(e) ? makeCondExp(\n        map(clause => makeCondClause(rewriteAllIf(clause.test),\n                                     map(rewriteAllIf, clause.then)),\n            e.condClauses)) :\n    isAppExp(e) ? makeAppExp(rewriteAllIf(e.rator), map(rewriteAllIf, e.rands)) :\n    e;\n```\n\n",
+     "hash": "35a3c51080516655",
+     "lang": "typescript",
+     "noteHe": "‏`rewriteAllIf` — **התבנית החשובה ביותר בסעיף הזה**: מעבר רקורסיבי על AST שלם. שימו לב למבנה — ענף אחד לכל סוג צומת באיחוד הזר, בדיוק כמו שנכתוב מפרש ובודק טיפוסים בשיעורים הבאים. חמשת הענפים הראשונים הם **מקרי הבסיס**: `BoolExp`, `NumExp`, `PrimOp`, `VarRef`, `VarDecl` — עלים שאין בהם תת-ביטויים, ולכן מוחזרים כמו שהם (`e`). הענף של `IfExp` הוא הלב: שימו לב שהוא **קודם** משכתב רקורסיבית את שלושת הרכיבים, מרכיב מהם `IfExp` חדש, ורק אז מפעיל עליו `rewriteIf`. הסדר הזה קריטי — אילו היינו קוראים ל-`rewriteIf` תחילה, ה-`if`-ים המקוננים בתוך `test`/`then`/`alt` היו נשארים ללא שכתוב. `CondExp` מטופל אף הוא רקורסיבית (למקרה שיש `if` בתוך סעיף), וכך גם `AppExp` — שם `map(rewriteAllIf, e.rands)` מטפל בכל האופרנדים. שימו לב שהפונקציה **בונה עץ חדש** ואינה משנה את הקיים — אין `e.test = ...` בשום מקום; זו גישה פונקציונלית טהורה, ויתרונה שאפשר להשוות בין הגרסה לפני ואחרי. הענף האחרון `e:` הוא ברירת מחדל להשקטת בודק הטיפוסים. **שימו לב לפרט שיפיל אתכם**: כאן נכתב `e.condClauses` ב-C גדולה, ואילו הגדרת הטיפוס בסעיף 15 כתבה `condclauses` — אחת מהשתיים שגויה במקור הקורס."
+    },
+    {
+     "id": "ps/ps4:17:12",
+     "type": "prose",
+     "en": "Example:\n\n",
+     "hash": "872887e563e75957",
+     "he": "דוגמה:"
+    },
+    {
+     "id": "ps/ps4:17:13",
+     "type": "code",
+     "en": "```typescript\nconst rewrittenIf = bind(\n  bind(parseSexp(\"(if (= 3 2) 5 (if (= 3 3) 12 27))\"), parseL1CExp),\n  exp => makeOk(rewriteAllIf(exp))\n);\nconsole.log(JSON.stringify(rewrittenResult, null, 2));\n \n// Output:\n{\n  \"tag\": \"Ok\",\n  \"value\": {\n    \"tag\": \"CondExp\",\n    \"condClauses\": [\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"AppExp\",\n          \"rator\": {\n            \"tag\": \"PrimOp\",\n            \"op\": \"=\"\n          },\n          \"rands\": [\n            {\n              \"tag\": \"NumExp\",\n              \"val\": 3\n            },\n            {\n              \"tag\": \"NumExp\",\n              \"val\": 2\n            }\n          ]\n        },\n        \"then\": [\n          {\n            \"tag\": \"NumExp\",\n            \"val\": 5\n          }\n        ]\n      },\n      {\n        \"tag\": \"CondClause\",\n        \"test\": {\n          \"tag\": \"BoolExp\",\n          \"val\": true\n        },\n        \"then\": [\n          {\n            \"tag\": \"CondExp\",\n            \"condClauses\": [\n              {\n                \"tag\": \"CondClause\",\n                \"test\": {\n                  \"tag\": \"AppExp\",\n                  \"rator\": {\n                    \"tag\": \"PrimOp\",\n                    \"op\": \"=\"\n                  },\n                  \"rands\": [\n                    {\n                      \"tag\": \"NumExp\",\n                      \"val\": 3\n                    },\n                    {\n                      \"tag\": \"NumExp\",\n                      \"val\": 3\n                    }\n                  ]\n                },\n                \"then\": [\n                  {\n                    \"tag\": \"NumExp\",\n                    \"val\": 12\n                  }\n                ]\n              },\n              {\n                \"tag\": \"CondClause\",\n                \"test\": {\n                  \"tag\": \"BoolExp\",\n                  \"val\": true\n                },\n                \"then\": [\n                  {\n                    \"tag\": \"NumExp\",\n                    \"val\": 27\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n\n",
+     "hash": "471cea61bbaf510e",
+     "lang": "typescript",
+     "noteHe": "הדוגמה המסכמת: `(if (= 3 2) 5 (if (= 3 3) 12 27))` — ‏`if` בתוך `if`. הפלט מוכיח ש-`rewriteAllIf` אכן ירדה לעומק: ה-`CondExp` החיצוני מכיל שני סעיפים, ובסעיף השני (זה עם `test: BoolExp(true)`) ה-`then` אינו מספר אלא **`CondExp` שלם נוסף** — התוצאה של שכתוב ה-`if` הפנימי. עקבו על ההתאמה: `(= 3 2)` → תנאי ראשון; `5` → ה-`then` שלו; ה-`if` הפנימי → תחת `#t`; ובתוכו `(= 3 3)` → `12`, ו-`#t` → `27`. ספרו את הרמות: שני `CondExp`, ארבעה `CondClause`, ואף `IfExp` אחד לא נותר — וזו בדיוק המטרה. שימו לב לשגיאה במקור: הקוד משים את התוצאה במשתנה `rewrittenIf`, אבל שורת ה-`console.log` מדפיסה משתנה בשם `rewrittenResult` שאינו מוגדר בשום מקום. **תרגיל שכדאי לעשות לפני מבחן**: קחו ביטוי `if` מקונן משלכם וכתבו את ה-`cond` המשוכתב ביד."
+    }
+   ],
+   "headingHe": "שכתוב עצי AST של If-exp לעצי AST של Cond-exp"
+  },
+  {
+   "id": "ps/ps4:18",
+   "depth": 2,
+   "headingEn": "Parsing a string into S-Exp",
+   "raw": "## Parsing a string into S-Exp\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps4:18:0",
+     "type": "prose",
+     "en": "We note that the method `parseSexp` we used as a shortcut that translates a string into an S-Exp can be easily implemented. It combines both actions of a **scanner** (which transforms a string into a stream of tokens) and a **reader** (which transforms a stream of tokens into S-Exp).\n\n",
+     "hash": "3b3a45f3d7bb2ac9",
+     "he": "נציין שאת המתודה `parseSexp`, שבה השתמשנו כקיצור דרך לתרגום מחרוזת ל-S-Exp, קל לממש. היא משלבת את שתי הפעולות של **סורק** (scanner — שהופך מחרוזת לזרם של אסימונים) ושל **קורא** (reader — שהופך זרם של אסימונים ל-S-Exp)."
+    },
+    {
+     "id": "ps/ps4:18:1",
+     "type": "prose",
+     "en": "Provided here is a (Python) pseudocode of a possible implementation of such a method:\n\n",
+     "hash": "3b79c6247629cd23",
+     "he": "להלן פסאודו-קוד (ב-Python) של מימוש אפשרי של מתודה כזו:"
+    },
+    {
+     "id": "ps/ps4:18:2",
+     "type": "code",
+     "en": "```python\ndef parse_sexp(string):\n    \"\"\"\n    >>> parse_sexp(\"(+ 5 (+ 3 5))\")\n    [['+', '5', ['+', '3', '5']]]\n    \n    \"\"\"\n    sexp = [[]]\n    word = ''\n    in_str = False\n    for char in string:\n        if char is '(' and not in_str:\n            sexp.append([])\n        elif char is ')' and not in_str:\n            if word:\n                sexp[-1].append(word)\n                word = ''\n            temp = sexp.pop()\n            sexp[-1].append(temp)\n        elif char in (' ', '\\n', '\\t') and not in_str:\n            if word:\n                sexp[-1].append(word)\n                word = ''\n        elif char is '\\\"':\n            in_str = not in_str\n        else:\n            word += char\n    return sexp[0]\n```\n\n",
+     "hash": "40a28e16e81a85f7",
+     "lang": "python",
+     "noteHe": "הסורק והקורא במימוש אחד — פחות מעשרים שורות Python, וכדאי לעקוב אחריהן כדי להבין שאין כאן קסם. **הרעיון**: `sexp` הוא **מחסנית** של רשימות; `sexp[-1]` הוא תמיד הרשימה שאנחנו בונים כרגע, ו-`word` צובר את התווים של האסימון הנוכחי. עברו על ארבעת המקרים בלולאה: `(` — דוחפים רשימה ריקה חדשה למחסנית, כלומר \"נכנסים\" רמה פנימה; `)` — סוגרים את המילה הנוכחית אם יש, מוציאים (`pop`) את הרשימה העליונה ומצרפים אותה כאיבר לרשימה שמתחתיה, כלומר \"יוצאים\" רמה החוצה; רווח/שורה חדשה/טאב — מסיימים את האסימון הנוכחי ומצרפים אותו; מרכאות — הופכים את הדגל `in_str`, כדי שרווחים וסוגריים **בתוך** מחרוזת לא יטופלו כמפרידים; וכל תו אחר — מצטרף ל-`word`. בסוף מחזירים את `sexp[0]`. שימו לב שמחסנית מחליפה כאן רקורסיה מפורשת — זו תבנית סטנדרטית לניתוח התחבירי מבנים מקוננים, והיא מדגישה שהמבנה שאנחנו קוראים הוגדר רקורסיבית ב-BNF. **הערה על הקוד עצמו**: השימוש ב-`is` להשוואת מחרוזות (`char is '('`) הוא באג ב-Python — `is` בודק זהות אובייקטים ולא שוויון ערכים, והנכון הוא `==`. הקוד \"עובד\" בפועל רק בגלל אופטימיזציית מטמון של תווים בודדים ב-CPython, ו-Python מודרנית אף תזהיר על כך. זו הסיבה שהדף מכנה את זה פסאודו-קוד."
+    },
+    {
+     "id": "ps/ps4:18:3",
+     "type": "prose",
+     "en": "Notice the use of the methods `append (push)` and `pop` which emphasize the recursive nature of the task, which is logical since S-Expressions are formally defined using a BNF.\n\n",
+     "hash": "fc0044f43f317a13",
+     "he": "שימו לב לשימוש במתודות `append (push)` ו-`pop`, שמדגישות את האופי הרקורסיבי של המשימה — וזה הגיוני, מכיוון שביטויי-S מוגדרים באופן פורמלי באמצעות BNF."
+    },
+    {
+     "id": "ps/ps4:18:4",
+     "type": "prose",
+     "en": "You can find more information about S-expressions [here](https://en.wikipedia.org/wiki/S-expression).\n",
+     "hash": "3eb1144279374c3d",
+     "he": "תוכלו למצוא מידע נוסף על ביטויי-S [כאן](https://en.wikipedia.org/wiki/S-expression)."
+    }
+   ],
+   "headingHe": "ניתוח תחבירי של מחרוזת ל-S-Exp"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "**תרגיל שנשאר פתוח בדף** (בסעיף \"ניתוח תחבירי של S-Exp לעצי AST\", תחת ההערה `// More examples - write the JSON values you expect to be returned by the parser`):\n\nכתבו את ערך ה-JSON שיוחזר עבור\n```typescript\nbind(parseSexp(\"(> (+ x x) (* x x))\"), parseL1Exp);\n```",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n```json\n{\n  \"tag\": \"Ok\",\n  \"value\": {\n    \"tag\": \"AppExp\",\n    \"rator\": { \"tag\": \"PrimOp\", \"op\": \">\" },\n    \"rands\": [\n      {\n        \"tag\": \"AppExp\",\n        \"rator\": { \"tag\": \"PrimOp\", \"op\": \"+\" },\n        \"rands\": [\n          { \"tag\": \"VarRef\", \"var\": \"x\" },\n          { \"tag\": \"VarRef\", \"var\": \"x\" }\n        ]\n      },\n      {\n        \"tag\": \"AppExp\",\n        \"rator\": { \"tag\": \"PrimOp\", \"op\": \"*\" },\n        \"rands\": [\n          { \"tag\": \"VarRef\", \"var\": \"x\" },\n          { \"tag\": \"VarRef\", \"var\": \"x\" }\n        ]\n      }\n    ]\n  }\n}\n```\n\n**איך מגיעים לזה, שלב אחר שלב:**\n1. `parseSexp` מחזירה `['>', ['+','x','x'], ['*','x','x']]` — מערך מקונן של מחרוזות בלבד.\n2. ‏`parseL1Exp` רואה רשימה מורכבת. האיבר הראשון אינו `\"define\"`, ולכן זהו `AppExp`.\n3. האופרטור `>` נמצא ברשימת `isPrimitiveOp` (`+ - * / > < = not`), ולכן הוא `PrimOp` ולא `VarRef`.\n4. שני האופרנדים הם בעצמם רשימות מורכבות, ולכן כל אחד מהם מפורק רקורסיבית לאותה תבנית ומניב `AppExp` משלו.\n5. ‏`x` אינו `#t`/`#f`, אינו מחרוזת ספרתית ואינו פרימיטיב — ולכן הוא נופל לענף האחרון ומקבל `VarRef`.\n\n**נקודות שקל לטעות בהן:** ‏`x` מופיע ארבע פעמים כארבעה צמתי `VarRef` **נפרדים** (אין שיתוף); `rands` הוא תמיד מערך, גם כשיש בו שני איברים בדיוק; והתוצאה כולה עטופה ב-`{tag:'Ok', value:…}` כי הטיפוס המוחזר הוא `Result`.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) `AppExp` בשורש עם `rator` שהוא `PrimOp(\">\")`; (2) שני `AppExp` מקוננים ב-`rands`; (3) `PrimOp` — ולא `VarRef` — עבור `+`, `*` ו-`>`, עם הנימוק שהם ברשימת הפרימיטיבים; (4) `VarRef` עבור `x`; (5) העטיפה ב-`Ok`. טעות נפוצה: לכתוב `VarRef` עבור האופרטורים, או לשכוח שה-`rands` הם מערך."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "**המשך אותו תרגיל פתוח:** מה יוחזר עבור\n```typescript\nbind(parseSexp(\"(L1 (define x 1) (> (+ x 1) (* x x)))\"), parseL1Exp);\n```\nשימו לב היטב לאיזו פונקציה קוראים כאן. עקבו אחרי הקוד של המנתח התחבירי, ואל תסתפקו במה ש\"אמור\" לצאת.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** יש כאן פער בין הכוונה לבין מה שהקוד באמת עושה, ושתי התשובות שוות לימוד.\n\n**מה שהיה אמור לצאת** (אילו היו קוראים ל-`parseL1Program`): ‏`Program` שה-`exps` שלו הוא מערך בן שני איברים — `DefineExp` עבור `(define x 1)`, ו-`AppExp` עבור ההשוואה:\n```json\n{ \"tag\": \"Ok\",\n  \"value\": { \"tag\": \"Program\",\n    \"exps\": [\n      { \"tag\": \"DefineExp\",\n        \"var\": { \"tag\": \"VarDecl\", \"var\": \"x\" },\n        \"val\": { \"tag\": \"NumExp\", \"val\": 1 } },\n      { \"tag\": \"AppExp\",\n        \"rator\": { \"tag\": \"PrimOp\", \"op\": \">\" },\n        \"rands\": [ ... שני AppExp כמו בתרגיל הקודם ... ] } ] } }\n```\n\n**מה שהקוד כפי שנכתב באמת מייצר:** הקריאה היא ל-`parseL1Exp`, לא ל-`parseL1Program` — ו-`parseL1Exp` אינה מכירה את מילת המפתח `L1` כלל. עקבו:\n1. `parseL1Exp` רואה רשימה מורכבת ומעבירה ל-`parseL1CompoundExp(\"L1\", [...])`.\n2. שם נבדק רק `op === \"define\"`. ‏`\"L1\"` אינו `define`, ולכן ההמשך הוא `parseAppExp`.\n3. ‏`parseAppExp` מפרקת את `\"L1\"` דרך `parseL1Atomic` — לא בוליאני, לא מספר, לא פרימיטיב — ולכן **`VarRef(\"L1\")`**.\n4. גרוע מכך: האופרנדים מפורקים דרך `parseL1CExp`, שקוראת ל-`parseL1Compound**C**Exp` — וזו **אינה** בודקת `define` בכלל. לכן `(define x 1)` הופך ל-`AppExp` שה-`rator` שלו הוא `VarRef(\"define\")` וה-`rands` שלו הם `VarRef(\"x\")` ו-`NumExp(1)`.\n\nהתוצאה היא `AppExp` חסר משמעות, ולא `Program`. הקריאה הנכונה היא `bind(parseSexp(...), parseL1Program)`.\n\n**הלקח:** ההגבלה \"אין `define` מקונן\" אינה נאכפת על ידי שגיאה מפורשת אלא על ידי **מבנה הפונקציות**: רק `parseL1CompoundExp` (שנקראת מרמת ה-`Exp`) מזהה `define`, ואילו `parseL1CompoundCExp` (שנקראת מרמת ה-`CExp`) אינה מזהה. זה בדיוק ההבדל בין `<exp>` ל-`<cexp>` ב-BNF, מתורגם לקוד.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) הזיהוי שהקריאה היא ל-`parseL1Exp` ולא ל-`parseL1Program`, ולכן `L1` אינו מזוהה כמילת מפתח והופך ל-`VarRef`; (2) המעקב אחרי `parseL1CompoundExp` מול `parseL1CompoundCExp` וההבנה שרק הראשונה בודקת `define`; (3) הצגת ה-AST הנכון שהיה מתקבל עם `parseL1Program` — `Program` עם `DefineExp` ו-`AppExp`; (4) הקישור להבחנה `<exp>` מול `<cexp>` ב-BNF. תשובה שנותנת רק את ה-`Program` הצפוי, בלי לשים לב לשם הפונקציה, מפספסת את עיקר התרגיל."
+  },
+  {
+   "id": "q3",
+   "type": "open",
+   "questionHe": "**שאלה שהדף מעלה ומשאיר ללא מימוש** (בסעיף \"הערות\"): הדף קובע שסעיף ה-`else` צריך להופיע רק אחרון, ושהאפשרות המועדפת היא לנתח אותו כתנאי `#t` במקום להוסיף שדה נפרד ל-AST. ממשו את `parseCondExp` כך שתטפל ב-`else` נכון, והסבירו למה האפשרות הזו מפשטת את המפרש.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n```typescript\n// CondExp -> (cond <cond-clause>* <else-clause>?)\n// <cond-clause> ::= (<CExp> <CExp>+)\n// <else-clause> ::= (else <CExp>+)\nconst parseCondClause = (clause: Sexp[], isLast: boolean): Result<CondClause> =>\n    first(clause) === \"else\"\n        ? isLast\n            ? mapv(mapResult(parseL1CExp, rest(clause)),\n                   (then: CExp[]) => makeCondClause(makeBoolExp(true), then))\n            : makeFailure(\"else clause must be last in a cond expression\")\n        : safe2((test: CExp, then: CExp[]) => makeOk(makeCondClause(test, then)))\n               (parseL1CExp(first(clause)), mapResult(parseL1CExp, rest(clause)));\n\nexport const parseCondExp = (params: Sexp[]): Result<CondExp> =>\n    !allT(isCompoundSexp, params) ? makeFailure(\"Invalid cond clauses\") :\n    mapv(mapResult((clause: Sexp[], i: number) =>\n                       parseCondClause(clause, i === params.length - 1),\n                   params),\n         (clauses: CondClause[]) => makeCondExp(clauses));\n```\n\n**שלוש הנקודות של המימוש:**\n1. **זיהוי מפורש של `else`** — משווים את האיבר הראשון של הסעיף למחרוזת `\"else\"` **לפני** שקוראים ל-`parseL1CExp`. בלי הבדיקה הזו `else` נופל לענף האחרון של `parseL1Atomic` והופך ל-`VarRef(\"else\")`, וזה הבאג שהדף מדגים.\n2. **אכיפת המיקום** — הפרמטר `isLast` מוודא שסעיף `else` שאינו אחרון מניב `Failure`. זה מה ששורת ה-BNF `<cond-clause>* <else-clause>?` מבטאת.\n3. **התרגום ל-`#t`** — במקום שדה `else` נפרד ב-AST, בונים `CondClause` רגיל עם `test: makeBoolExp(true)`. מבחינת ה-AST זהו סעיף ככל סעיף אחר.\n\n**למה זה מפשט את המפרש:** אילו היינו בוחרים באפשרות השנייה — שדה `elseClause` נפרד בטיפוס `CondExp` — המפרש היה נדרש לשני מסלולי קוד: לולאה על הסעיפים הרגילים, **ובנוסף** טיפול מיוחד בשדה ה-else אחרי שכולם נכשלו, כולל טיפול במקרה שאין else כלל (השדה אופציונלי). עם תרגום ל-`#t`, המפרש מריץ לולאה **אחת** שעוברת על הסעיפים לפי הסדר ומחזירה את הגוף של הראשון שתנאיו אינו `#f` — ומכיוון ש-`#t` לעולם אינו `#f`, הסעיף האחרון פשוט תמיד תופס. אין מקרה קצה, אין ענף נוסף.\n\nזו דוגמה מייצגת לעיקרון: **להעביר סיבוכיות מהמפרש למנתח התחבירי**. אותו עיקרון בדיוק עומד מאחורי `rewriteIf` באותו דף, שמחסל את `IfExp` לגמרי כדי שהמפרש יצטרך כלל הערכה אחד במקום שניים.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) בדיקה מפורשת של `first(clause) === \"else\"` לפני הניתוח הרגיל, עם ההסבר שאחרת מתקבל `VarRef(\"else\")`; (2) אכיפה שה-`else` הוא אחרון, בקישור לשורת ה-BNF `<cond-clause>* <else-clause>?`; (3) הבנייה עם `makeBoolExp(true)` כתנאי; (4) הנימוק המרכזי — המפרש מקבל לולאה אחידה אחת ולא מקרה קצה נוסף; (5) בונוס: הקישור לעיקרון הכללי של העברת סיבוכיות מהמפרש למנתח התחבירי, כמו ב-`rewriteIf`."
+  }
+ ]
+}

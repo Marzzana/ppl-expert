@@ -1,0 +1,1142 @@
+{
+ "id": "cm/1.2TypescriptJSON",
+ "kind": "lecture",
+ "sourcePath": "class_material/1.2TypescriptJSON.md",
+ "titleEn": "TypeScript: Complex Data Types, JSON, FP processing of JSON",
+ "titleHe": "TypeScript: טיפוסי נתונים מורכבים, JSON ועיבוד פונקציונלי של JSON",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/1.2TypescriptJSON:0",
+   "depth": 1,
+   "headingEn": "TypeScript: Complex Data Types, JSON, FP processing of JSON",
+   "raw": "# TypeScript: Complex Data Types, JSON, FP processing of JSON\n",
+   "blocks": [],
+   "headingHe": "TypeScript: טיפוסי נתונים מורכבים, JSON ועיבוד פונקציונלי של JSON"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:1",
+   "depth": 3,
+   "headingEn": "PPL 2023",
+   "raw": "### PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:1:0",
+     "type": "prose",
+     "en": "On the basis of the distinction atomic types / compound types, we can define more complex data types - that embed recursively\nmaps and arrays.  We introduce **Javascript Object Notation (JSON)** which has become a common language to exchange complex data values across systems \n(for example, between a client and a server or to store values in databases).  \n\n",
+     "hash": "8d53496a5c00554b",
+     "he": "על בסיס ההבחנה בין טיפוסים אטומיים לטיפוסים מורכבים, נוכל להגדיר טיפוסי נתונים מורכבים עוד יותר — כאלה שמשבצים בתוכם מפות (maps) ומערכים (arrays) באופן רקורסיבי. נציג את **Javascript Object Notation (JSON)**, שהפך לשפה מקובלת להחלפת ערכי נתונים מורכבים בין מערכות (למשל, בין לקוח לשרת, או לצורך אחסון ערכים במסדי נתונים)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:1:1",
+     "type": "prose",
+     "en": "We present the different types of JSON values and finally, we describe how **higher-order functional patterns** make processing of JSON values convenient and expressive.\n\n",
+     "hash": "6297e0e6b7ff8f82",
+     "he": "נציג את הטיפוסים השונים של ערכי JSON, ולבסוף נתאר כיצד **תבניות פונקציונליות מסדר גבוה** (higher-order functional patterns) הופכות את העיבוד של ערכי JSON לנוח ולאקספרסיבי."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:2",
+   "depth": 2,
+   "headingEn": "Literal Expressions in Programming Languages",
+   "raw": "## Literal Expressions in Programming Languages\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:2:0",
+     "type": "prose",
+     "en": "In general, programming languages provide ways to specify values as part of expressions. \n**Literal expressions** are the syntactic representation of values that appear as part of expressions.\n\n",
+     "hash": "5e369555c50b85af",
+     "he": "באופן כללי, שפות תכנות מספקות דרכים לציין ערכים כחלק מביטויים. **ביטויים ליטרליים** (Literal expressions) הם הייצוג התחבירי של ערכים המופיעים כחלק מביטויים."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:1",
+     "type": "prose",
+     "en": "For example, consider the expression:\n",
+     "hash": "b323c6198ba60874",
+     "he": "לדוגמה, התבוננו בביטוי הבא:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:2",
+     "type": "code",
+     "en": "```typescript\nlet v = 42;\n    (v > 0) ? \"ok\" : \"nok\";\n```\n\n",
+     "hash": "3e850ae37e2be7ff",
+     "lang": "typescript",
+     "noteHe": "הקוד קושר את המשתנה `v` לערך `42`, ואז מעריך ביטוי תנאי (האופרטור הטרנרי `? :`): אם `v > 0` מתקיים — הערך המוחזר הוא המחרוזת `\"ok\"`, אחרת `\"nok\"`. הדוגמה מופיעה כאן כדי להראות ביטוי מורכב שמכיל בתוכו כמה ביטויים ליטרליים: `42`, `0`, `\"ok\"` ו-`\"nok\"` — כל אחד מהם הוא ייצוג טקסטואלי של ערך פרימיטיבי בתוך הקוד."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:3",
+     "type": "prose",
+     "en": "In this compound expression, the sub-expressions `42`, `0`, `\"ok\"` and `\"nok\"` are all syntactic representations of \nprimitive values.  These expressions are string encodings of values each according to the rules of the \nsyntax of the language and to the type of the value (number, string, boolean).\n\n",
+     "hash": "49ec7283b609384f",
+     "he": "בביטוי מורכב זה, תת-הביטויים `42`, `0`, `\"ok\"` ו-`\"nok\"` הם כולם ייצוגים תחביריים של ערכים פרימיטיביים. ביטויים אלה הם קידודים של ערכים כמחרוזות — כל אחד לפי כללי התחביר של השפה ולפי טיפוס הערך (number, string, boolean)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:4",
+     "type": "prose",
+     "en": "Distinguish between **literal expressions** and the **values** they represent:\n",
+     "hash": "2550f4dbf9171e3b",
+     "he": "יש להבחין בין **ביטויים ליטרליים** לבין ה**ערכים** שהם מייצגים:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:5",
+     "type": "list",
+     "en": "* **Literal expressions** are part of the syntax of a programming language; they are evaluated.\n* **Values** are the result of the evaluation; they are part of the semantics of the language.\n\n",
+     "hash": "c2a78e5e910e052b",
+     "he": "* **ביטויים ליטרליים** הם חלק מהתחביר (syntax) של שפת התכנות; הם עוברים הערכה (evaluation).\n* **ערכים** הם תוצאת ההערכה; הם חלק מהסמנטיקה (semantics) של השפה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:6",
+     "type": "prose",
+     "en": "All programming languages provide syntax to write literal expressions for **atomic values**.\n\n",
+     "hash": "7c06a66713edd9c5",
+     "he": "כל שפות התכנות מספקות תחביר לכתיבת ביטויים ליטרליים עבור **ערכים אטומיים**."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:7",
+     "type": "prose",
+     "en": "For compound values, languages like Java and C++ provide no or very limited ways to specify literal expressions.\nFor example, in Java to bind a list to its value, the following syntax must be used:\n\n",
+     "hash": "dff530fd682b8a1b",
+     "he": "לעומת זאת, עבור ערכים מורכבים, שפות כמו Java ו-C++ מספקות דרכים מוגבלות מאוד (או לא מספקות כלל) לכתיבת ביטויים ליטרליים. לדוגמה, ב-Java, כדי לקשור משתנה לרשימה יש להשתמש בתחביר הבא:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:8",
+     "type": "code",
+     "en": "```java\nArrayList<String> names = new ArrayList<String>(Arrays.asList(\"avi\", \"bob\", \"chloe\"));\n```\n\n",
+     "hash": "a348791cc82e5531",
+     "lang": "java",
+     "noteHe": "כך נראית יצירת רשימה ב-Java: אי אפשר פשוט לכתוב את הרשימה כליטרל. חייבים לקרוא לבנאי (constructor) עם `new ArrayList<String>(...)`, ובתוכו לקרוא לפונקציית העזר `Arrays.asList(...)` שממירה את הערכים לרשימה. הנקודה שהדוגמה ממחישה: ב-Java יצירת ערך מורכב דורשת קריאות מפורשות לבנאים ולמתודות, ולא כתיבה ישירה של הערך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:9",
+     "type": "prose",
+     "en": "In contrast, in JavaScript, one would write directly a compound array values as:\n",
+     "hash": "58ea481765aa14cd",
+     "he": "לעומת זאת, ב-JavaScript ניתן לכתוב ערך מערך מורכב באופן ישיר כך:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:10",
+     "type": "code",
+     "en": "```typescript\nlet names = [\"avi\", \"bob\", \"chloe\"];\n```\n\n",
+     "hash": "292f768495ba6982",
+     "lang": "typescript",
+     "noteHe": "ב-JavaScript אותה רשימה נכתבת ישירות כביטוי ליטרלי של מערך — סוגריים מרובעים עם האיברים בפנים. אין צורך בבנאי, במתודות עזר או בהצהרת טיפוס. זו בדיוק התמציתיות שהשוואה זו באה להדגיש מול הגרסה של Java שלמעלה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:2:11",
+     "type": "prose",
+     "en": "The key difference is that the Java expression is an invocation of constructor methods, while in JavaScript compound values can be written directly.  This difference becomes more significant as we consider even more complex value types.\n\n",
+     "hash": "a9b2d75f9f07e9f1",
+     "he": "ההבדל המרכזי הוא שהביטוי ב-Java הוא הפעלה של מתודות בנאי (constructor), בעוד שב-JavaScript ניתן לכתוב ערכים מורכבים באופן ישיר. הבדל זה נעשה משמעותי עוד יותר ככל שנעבור לטיפוסי ערכים מורכבים יותר."
+    }
+   ],
+   "headingHe": "ביטויים ליטרליים (Literal Expressions) בשפות תכנות"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:3",
+   "depth": 2,
+   "headingEn": "Complex Data Values in JavaScript",
+   "raw": "## Complex Data Values in JavaScript\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:3:0",
+     "type": "prose",
+     "en": "By combining arrays and maps, one can construct expressive data structures in JavaScript.\nFor example, we can encode values such as:\n\n\n",
+     "hash": "a4132ee9e13310dc",
+     "he": "על ידי שילוב של מערכים ומפות, ניתן לבנות ב-JavaScript מבני נתונים אקספרסיביים. לדוגמה, נוכל לקודד ערכים כגון:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:1",
+     "type": "code",
+     "en": "```typescript\nlet person1 = {name:\"avi\", age:25},\n    person2 = {name:\"beate\", age:23},\n    csDept = { name:\"CS\", faculty:\"Natural Sciences\"},\n    course = { name:\"PPL\", dept:csDept, students:[person1, person2]}\n  course\n// ==>\n//      { name: 'PPL',\n//        dept: { name: 'CS', faculty: 'Natural Sciences' },\n//        students: [ { name: 'avi', age: 25 }, { name: 'beate', age: 23 } ] }\n```\n\n",
+     "hash": "a07cfdba90c4edd2",
+     "lang": "typescript",
+     "noteHe": "כאן בונים ערך מורכב \"חתיכה-חתיכה\": `person1` ו-`person2` הן מפות (אובייקטים) עם המפתחות `name` ו-`age`; `csDept` היא מפה שמתארת מחלקה; ו-`course` היא מפה שמשלבת את כולן — המפתח `dept` מקבל כערך את המפה `csDept`, והמפתח `students` מקבל **מערך** שאיבריו הם המפות `person1` ו-`person2`. שימו לב לקינון הרקורסיבי: מפה שמכילה מפה ומערך של מפות. השורה `course` לבדה גורמת ל-REPL להדפיס את הערך המלא, וההערות שאחרי `// ==>` מציגות את הפלט: כל המבנה המקונן מוצג כערך אחד."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:2",
+     "type": "prose",
+     "en": "We can also write this value directly, without building it \"piece by piece\" as a compound literal value expression.\n\n\n",
+     "hash": "e7dee406eb96783a",
+     "he": "אפשר גם לכתוב את הערך הזה ישירות, בלי לבנות אותו \"חתיכה-חתיכה\", כביטוי ליטרלי של ערך מורכב."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:3",
+     "type": "code",
+     "en": "```typescript\nlet ppl = { \n  name: 'PPL',\n  dept: { name: 'CS', faculty: 'Natural Sciences' },\n  students: [ { name: 'avi', age: 25 }, { name: 'beate', age: 23 } ] };\n    ppl.students[0].name;\n// =>     'avi'\n```\n",
+     "hash": "08580bb4a77276c2",
+     "lang": "typescript",
+     "noteHe": "הפעם כל המבנה המקונן נכתב כביטוי ליטרלי אחד: המפה החיצונית מכילה בתוכה ישירות את המפה של המחלקה ואת מערך הסטודנטים — בלי משתני ביניים. השורה `ppl.students[0].name` מדגימה שרשור של פונקציות גישה (accessors): `ppl.students` שולף את המערך, `[0]` שולף את האיבר הראשון בו (המפה של avi), ו-`.name` שולף מתוכה את הערך `'avi'`. כך \"מפרקים\" ערך מקונן צעד אחר צעד בביטוי אחד."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:4",
+     "type": "prose",
+     "en": "In contrast, in Java, we would have to construct this complex value by invoking `new` on each sub-component, then consruct the value bottom up until the toplevel expression.  We would also need to define classes to describe the type of each subexpression - `Person`, `Dept`, `Course`.\n\n",
+     "hash": "739a0590bd2eecc9",
+     "he": "לעומת זאת, ב-Java היינו צריכים לבנות את הערך המורכב הזה על ידי הפעלת `new` על כל תת-רכיב, ואז להרכיב את הערך מלמטה למעלה עד לביטוי העליון. בנוסף, היינו צריכים להגדיר מחלקות שמתארות את הטיפוס של כל תת-ביטוי — `Person`, `Dept`, `Course`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:5",
+     "type": "code",
+     "en": "```java\nclass Person { private String name; private int age; ...}\nclass Dept { private String name; private String faculty; ...}\nclass Course { private String name; private Dept dept; private ArrayList<Person> students; ...\n    public void addStudent(Persont p) { students.add(p); }\n\n    public static void main(String[] args) {\n        Person person1 = new Person(\"avi\", 25);\n        Person person2 = new Person(\"beate\", 23);\n        Dept csDept = new Dept(\"cs\", \"Natural Sciences\");\n        Course ppl = new Course(\"ppl\", csDept);\n        ppl.addStudent(person1);\n        ppl.addStudent(person2);\n    }\n}\n```\n\n",
+     "hash": "f604d64081627802",
+     "lang": "java",
+     "noteHe": "זו המקבילה ב-Java לאותו ערך בדיוק, והיא ממחישה כמה \"מטען\" נדרש: קודם מגדירים שלוש מחלקות — `Person`, `Dept`, `Course` — רק כדי לתאר את הטיפוסים של תת-הרכיבים, כולל שדות פרטיים ומתודות (שלוש הנקודות `...` מסמנות בנאים ומתודות גישה שהושמטו). אחר כך, בתוך `main`, בונים את הערך מלמטה למעלה: `new Person(...)` לכל סטודנט, `new Dept(...)` למחלקה, `new Course(...)` לקורס, ולבסוף מוסיפים את הסטודנטים אחד-אחד עם `addStudent`. השוו את כל זה לשורות הספורות של הליטרל ב-JavaScript — זה בדיוק הפער שהדוגמה מדגימה. (אגב, `Persont` בחתימת `addStudent` היא שגיאת הקלדה במקור — הכוונה ל-`Person`.)"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:6",
+     "type": "prose",
+     "en": "The JavaScript handling of complex literal values is more concise.\nConciseness is important because it *encourages the programmer* to use the facility.\n\n",
+     "hash": "eaa9f4502435e954",
+     "he": "הטיפול של JavaScript בערכים ליטרליים מורכבים תמציתי יותר. תמציתיות חשובה משום שהיא *מעודדת את המתכנת* להשתמש במנגנון."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:3:7",
+     "type": "prose",
+     "en": "But the main difference is that complex data structures can be defined without having to define each unit as a new type - they come with less \"baggage\".  The key benefit of the easy manipulation of complex values is that different processes can exchange complex values without sharing code.  In JavaScript, this is enabled by the JSON interface.\n\n",
+     "hash": "e06f83ef6fdad50a",
+     "he": "אבל ההבדל העיקרי הוא שניתן להגדיר מבני נתונים מורכבים בלי להגדיר כל יחידה כטיפוס חדש — הם מגיעים עם פחות \"מטען\". היתרון המרכזי של מניפולציה קלה על ערכים מורכבים הוא שתהליכים שונים יכולים להחליף ביניהם ערכים מורכבים בלי לשתף קוד. ב-JavaScript, זה מתאפשר באמצעות ממשק ה-JSON."
+    }
+   ],
+   "headingHe": "ערכי נתונים מורכבים ב-JavaScript"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:4",
+   "depth": 2,
+   "headingEn": "The JSON Interface",
+   "raw": "## The JSON Interface\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:4:0",
+     "type": "prose",
+     "en": "JSON stands for Java Script Object Notation.\nIt is a standard way to serialize JavaScript compound values into strings and vice-versa, parse JSON strings into compound JavaScript values.\n\n",
+     "hash": "9935cb31c4ef9970",
+     "he": "JSON הוא ראשי תיבות של Java Script Object Notation. זוהי דרך סטנדרטית לבצע סריאליזציה (serialization) של ערכים מורכבים ב-JavaScript למחרוזות, ולהפך — לבצע ניתוח תחבירי (parsing) של מחרוזות JSON חזרה לערכים מורכבים של JavaScript."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:1",
+     "type": "prose",
+     "en": "The key difference between the way we described the encoding of compound literal expressions above and JSON is that:\n",
+     "hash": "dbad27b20f325561",
+     "he": "ההבדל המרכזי בין הדרך שבה תיארנו למעלה את הקידוד של ביטויים ליטרליים מורכבים לבין JSON הוא:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:2",
+     "type": "list",
+     "en": "* Compound literal expressions are part of the syntax of the JavaScript language.  A compound literal expression is a sub-expression of a JavaScript program - which when it is evaluated yields a compound value.  Compound literal expressions are read by the parser of the programming language when a program is loaded, interpreted or compiled.\n* JSON is a runtime mechanism which permits a process to read and write compound values (from files or from sockets).\n\n",
+     "hash": "ff245feef464579d",
+     "he": "* ביטויים ליטרליים מורכבים הם חלק מהתחביר של שפת JavaScript. ביטוי ליטרלי מורכב הוא תת-ביטוי של תוכנית JavaScript — שכאשר הוא מוערך, הוא מניב ערך מורכב. ביטויים ליטרליים מורכבים נקראים על ידי המנתח התחבירי (parser) של שפת התכנות בזמן שהתוכנית נטענת, מפורשת או מקומפלת.\n* JSON הוא מנגנון של זמן ריצה (runtime), המאפשר לתהליך לקרוא ולכתוב ערכים מורכבים (מקבצים או מ-sockets)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:3",
+     "type": "prose",
+     "en": "JSON plays a central role in all data exchange in client-server communication, and serialization of values in databases.\nJSON is supported in a wide range of programming languages - not only in JavaScript. There are JSON libraries in Java, C++, Python etc.  \nJSON plays a role similar to XML in enabling data exchange across heterogeneous processes.\n\n",
+     "hash": "971036c0eb54978a",
+     "he": "ל-JSON תפקיד מרכזי בכל החלפת נתונים בתקשורת לקוח-שרת, ובסריאליזציה של ערכים במסדי נתונים. JSON נתמך במגוון רחב של שפות תכנות — לא רק ב-JavaScript. קיימות ספריות JSON ב-Java, ‏C++, ‏Python ועוד. JSON ממלא תפקיד דומה לזה של XML במתן אפשרות להחלפת נתונים בין תהליכים הטרוגניים."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:4",
+     "type": "prose",
+     "en": "The key parts of JSON are the `stringify()` and `parse()` methods which form the JSON interface.\n\n\n",
+     "hash": "5be1d941fbdbc54b",
+     "he": "החלקים המרכזיים של JSON הם המתודות `stringify()` ו-`parse()`, שמרכיבות יחד את ממשק ה-JSON."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:5",
+     "type": "code",
+     "en": "```typescript\nlet person1 = { name : \"Yosi\", age : 31, city : \"Beer Sheva\" },\n    person1JSON = JSON.stringify(person1);\n  console.log(person1JSON)\n  console.log(`person1JSON is of type ${typeof person1JSON}`)\n// =>\n//     {\"name\":\"Yosi\",\"age\":31,\"city\":\"Beer Sheva\"}\n//     person1JSON is of type string\n```\n\n",
+     "hash": "14190dd89c6664a3",
+     "lang": "typescript",
+     "noteHe": "הדגמה של כיוון אחד בממשק: `JSON.stringify(person1)` מקבל ערך מורכב (מפה) ומחזיר **מחרוזת** שמקודדת אותו בתחביר JSON. שימו לב לפלט: המפתחות מוקפים במרכאות כפולות (`\"name\"`) — כנדרש בתחביר JSON — והרווחים נעלמו. הבדיקה `typeof person1JSON` מאשרת שהתוצאה היא באמת מטיפוס `string` ולא אובייקט; זו כל המהות של סריאליזציה — הפיכת ערך שחי בזיכרון למחרוזת שאפשר לשלוח או לשמור."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:4:6",
+     "type": "code",
+     "en": "```typescript\nlet person2 = JSON.parse(person1JSON)\n  console.log(person2)\n  console.log(`person2 is of type ${typeof person2}`)\n// =>\n//     { name: 'Yosi', age: 31, city: 'Beer Sheva' }\n//     person2 is of type object\n```\n\n",
+     "hash": "99388bf1eafdffec",
+     "lang": "typescript",
+     "noteHe": "הכיוון ההפוך: `JSON.parse(person1JSON)` מקבל את המחרוזת שיצרנו קודם ומנתח אותה חזרה לערך מורכב חי. הבדיקה `typeof person2` מחזירה `object` — כלומר קיבלנו שוב מפה של JavaScript שאפשר לגשת לשדותיה, ולא מחרוזת. יחד, שתי הדוגמאות מראות ש-`stringify` ו-`parse` הן פעולות הפוכות זו לזו: ערך ← מחרוזת ← ערך."
+    }
+   ],
+   "headingHe": "ממשק ה-JSON"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:5",
+   "depth": 3,
+   "headingEn": "JSON Syntax",
+   "raw": "### JSON Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:5:0",
+     "type": "prose",
+     "en": "The JSON syntax (which means the way complex values are serialized into strings) is a bit more \"strict\" than the syntax in JavaScript maps: all keys must be written with double quotes so that you need to write `{ \"a\":1 }` and not `{ a:1 }`.\n\n",
+     "hash": "17458e38cb6ff7ee",
+     "he": "תחביר ה-JSON (כלומר, הדרך שבה ערכים מורכבים עוברים סריאליזציה למחרוזות) הוא מעט \"קפדני\" יותר מהתחביר של מפות ב-JavaScript: כל המפתחות חייבים להיכתב עם מרכאות כפולות, כך שצריך לכתוב `{ \"a\":1 }` ולא `{ a:1 }`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:1",
+     "type": "prose",
+     "en": "The JSON notation supports values of the following data types:\n",
+     "hash": "e55e732f07af9869",
+     "he": "כתיב ה-JSON תומך בערכים מטיפוסי הנתונים הבאים:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:2",
+     "type": "list",
+     "en": "* string\n* number\n* boolean\n* null\n* maps whose key values are JSON objects (recursively)\n* array of JSON values (recursively)\n\n",
+     "hash": "83ee02c7ee6a6d0a",
+     "he": "* string (מחרוזת)\n* number (מספר)\n* boolean (ערך בוליאני)\n* null\n* מפות שהערכים של מפתחותיהן הם אובייקטי JSON (באופן רקורסיבי)\n* מערך של ערכי JSON (באופן רקורסיבי)"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:3",
+     "type": "prose",
+     "en": "In JavaScript, values can be all of the above, plus any other valid JavaScript expression, including:\n",
+     "hash": "36ddc1d7149acb9f",
+     "he": "ב-JavaScript, ערכים יכולים להיות כל אלה שלמעלה, ובנוסף כל ביטוי JavaScript תקין אחר, כולל:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:4",
+     "type": "list",
+     "en": "* functions\n* undefined\n\n",
+     "hash": "043a0f77a1214a4b",
+     "he": "* פונקציות\n* undefined"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:5",
+     "type": "prose",
+     "en": "The JSON interface defines the following two methods:\n",
+     "hash": "73cf0457fa04f12d",
+     "he": "ממשק ה-JSON מגדיר את שתי המתודות הבאות:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:6",
+     "type": "list",
+     "en": "* `JSON.stringify(o)` maps a value to a string.\n* `JSON.parse(s)` maps a string (written according to the JSON syntax) to a value.\n\n",
+     "hash": "60180b34b903b3bf",
+     "he": "* `JSON.stringify(o)` ממפה ערך למחרוזת.\n* `JSON.parse(s)` ממפה מחרוזת (הכתובה לפי תחביר ה-JSON) לערך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:7",
+     "type": "prose",
+     "en": "`JSON.stringify()` and `JSON.parse()` also work on atomic values:\n\n\n",
+     "hash": "28a56221aef70da5",
+     "he": "`JSON.stringify()` ו-`JSON.parse()` פועלים גם על ערכים אטומיים:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:5:8",
+     "type": "code",
+     "en": "```typescript\nconsole.log(typeof(JSON.parse('2')))\nconsole.log(typeof(JSON.parse('true')))\nconsole.log(typeof(JSON.parse('\"abc\"')))\n// =>\n// number\n// boolean\n// string\n```\n\n",
+     "hash": "d13c84f74d8151e2",
+     "lang": "typescript",
+     "noteHe": "כאן רואים ש-`JSON.parse` עובד גם על ערכים אטומיים, לא רק על מפות ומערכים: המחרוזת `'2'` מנותחת למספר, `'true'` לערך בוליאני, ו-`'\"abc\"'` למחרוזת. שימו לב לניואנס בשורה השלישית: הקלט הוא המחרוזת בת חמישה תווים `\"abc\"` (כולל המרכאות הכפולות עצמן) — כי בתחביר JSON מחרוזת חייבת להיות עטופה במרכאות כפולות. `typeof` על כל תוצאה מאשר את טיפוס הערך שהתקבל."
+    }
+   ],
+   "headingHe": "תחביר JSON"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:6",
+   "depth": 2,
+   "headingEn": "Complex Compound Data",
+   "raw": "## Complex Compound Data\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:6:0",
+     "type": "prose",
+     "en": "We have described compound data as data combined using two *container* types - arrays and maps.\n\n",
+     "hash": "c20d22dd621e3b73",
+     "he": "תיארנו נתונים מורכבים כנתונים המורכבים באמצעות שני טיפוסי *מכולה* (container) — מערכים ומפות."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:1",
+     "type": "prose",
+     "en": "These two container types can be **combined in a recursive manner** - so that arrays can contain other arrays or maps,\nand maps can contain other maps or arrays recursively.\n\n",
+     "hash": "89334f5890bac8ef",
+     "he": "ניתן **לשלב את שני טיפוסי המכולה הללו באופן רקורסיבי** — כך שמערכים יכולים להכיל מערכים אחרים או מפות, ומפות יכולות להכיל מפות אחרות או מערכים, באופן רקורסיבי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:2",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:3",
+     "type": "code",
+     "en": "```typescript\nlet dept = {\"deptName\":\"accounting\",\n            \"employees\": [\n                    { \"firstName\":\"John\", \"lastName\":\"Doe\" },\n                    { \"firstName\":\"Anna\", \"lastName\":\"Smith\" },\n                    { \"firstName\":\"Peter\", \"lastName\":\"Jones\" }\n                ]};\n```\n",
+     "hash": "38c926eefacfad20",
+     "lang": "typescript",
+     "noteHe": "`dept` הוא דוגמה לקינון רקורסיבי בן שלוש רמות: הרמה החיצונית היא מפה עם שני מפתחות — `deptName` שערכו מחרוזת, ו-`employees` שערכו **מערך**; כל איבר במערך הוא בעצמו **מפה** עם המפתחות `firstName` ו-`lastName`. שימו לב שכאן המפתחות נכתבו במרכאות כפולות — כתיב שתקין גם ב-JavaScript וגם תואם לתחביר JSON הקפדני."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:4",
+     "type": "prose",
+     "en": "The `dept` value is a map which has a key `employees` with a value which is an embedded array whose items are nested maps.\n\n",
+     "hash": "540905bd2e66d0ea",
+     "he": "הערך `dept` הוא מפה שיש בה מפתח `employees`, שערכו הוא מערך משובץ שאיבריו הם מפות מקוננות."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:5",
+     "type": "prose",
+     "en": "To take apart the components of this value, the getters can be combined:\n\n",
+     "hash": "c8a59433b093db76",
+     "he": "כדי לפרק את הרכיבים של ערך זה, אפשר לשרשר את פונקציות הגישה (getters):"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:6",
+     "type": "code",
+     "en": "```typescript\ndept.employees[0].firstName\n// =>     'John'\n```\n",
+     "hash": "e199e111ee0c72ed",
+     "lang": "typescript",
+     "noteHe": "שרשור פונקציות גישה בכתיב נקודה: `dept.employees` מחזיר את המערך, `[0]` את המפה הראשונה בו, ו-`.firstName` את הערך `'John'` מתוכה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:7",
+     "type": "code",
+     "en": "```typescript\ndept[\"employees\"][0][\"lastName\"]\n// =>     'Doe'\n```\n\n",
+     "hash": "2044c4efbfceadb7",
+     "lang": "typescript",
+     "noteHe": "אותה גישה בדיוק, אבל בכתיב סוגריים מרובעים: `dept[\"employees\"]` שקול ל-`dept.employees`, כשהמפתח ניתן כמחרוזת. שני הכתיבים חליפיים לגישה למפתחות של מפה; כתיב הסוגריים הכרחי כשהמפתח מחושב בזמן ריצה או אינו מזהה חוקי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:8",
+     "type": "prose",
+     "en": "Similarly, arrays can contain nested arrays or maps.\n\n",
+     "hash": "928629868618bcac",
+     "he": "באופן דומה, מערכים יכולים להכיל מערכים מקוננים או מפות."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:9",
+     "type": "prose",
+     "en": "**JavaScript Arrays are heterogeneous** - they can contain items of different types.\n\n\n",
+     "hash": "6483fcb22efd9ddd",
+     "he": "**מערכים ב-JavaScript הם הטרוגניים** — הם יכולים להכיל איברים מטיפוסים שונים."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:6:10",
+     "type": "code",
+     "en": "```typescript\nlet heteroArr = [1, true, \"a\"],\n    nestedArr = [1, [2, 3], {a:1, b:2}]\n  console.log(\"heteroArr contains items of the following types: \")\n  heteroArr.forEach(x => console.log(typeof x))\n  console.log(\"nestedArr contains items of the following types: \")\n  nestedArr.forEach(x => console.log(typeof x))\n// =>\n//    heteroArr contains items of the following types: \n//    number\n//    boolean\n//    string\n//    nestedArr contains items of the following types: \n//    number\n//    object\n//    object\n```\n\n",
+     "hash": "2c5c4233b64db582",
+     "lang": "typescript",
+     "noteHe": "הדגמת ההטרוגניות: `heteroArr` מכיל בו-זמנית מספר, ערך בוליאני ומחרוזת — שלושה טיפוסים שונים במערך אחד, דבר שאינו אפשרי במערכים של Java. ‏`nestedArr` מדגים קינון: איבריו הם מספר, מערך פנימי ומפה. הקריאה `heteroArr.forEach(x => console.log(typeof x))` מפעילה את הפונקציה על כל איבר ומדפיסה את טיפוסו — הצצה ראשונה למתודה מסדר גבוה. שימו לב לנקודה חשובה בפלט: גם המערך `[2, 3]` וגם המפה `{a:1, b:2}` מדווחים כ-`object` — ב-JavaScript, ‏`typeof` על מערך מחזיר `object` ואינו מבחין בין מערכים למפות."
+    }
+   ],
+   "headingHe": "נתונים מורכבים מקוננים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:7",
+   "depth": 2,
+   "headingEn": "Map and Array Mutators",
+   "raw": "## Map and Array Mutators\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:7:0",
+     "type": "prose",
+     "en": "In JavaScript, compound values are **mutable**.  This means that, in addition to accessing parts of a compound value, JavaScript allows us:\n",
+     "hash": "88ee0ae2cf678412",
+     "he": "ב-JavaScript, ערכים מורכבים הם **ברי-שינוי (mutable)**. משמעות הדבר היא שבנוסף לגישה לחלקים של ערך מורכב, JavaScript מאפשרת לנו:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:1",
+     "type": "list",
+     "en": "* to change the value of components of a larger compound value and \n* to remove components of larger compound values.\n\n",
+     "hash": "52d84bc9dfe78532",
+     "he": "* לשנות את הערך של רכיבים בתוך ערך מורכב גדול יותר, וכן\n* להסיר רכיבים מתוך ערכים מורכבים גדולים יותר."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:2",
+     "type": "prose",
+     "en": "The fact that variables and the basic data types in JavaScript are mutable makes *real* functional programming difficult - since FP requires variables and compound data structures to be immutable.  There are libraries, though, that enable the definition of immutable data structures and their efficient manipulation - such as https://facebook.github.io/immutable-js/.\n\n\n",
+     "hash": "03391284e23f79f7",
+     "he": "העובדה שמשתנים וטיפוסי הנתונים הבסיסיים ב-JavaScript ניתנים לשינוי מקשה על תכנות פונקציונלי (Functional Programming) *אמיתי* — שכן תכנות פונקציונלי דורש שמשתנים ומבני נתונים מורכבים יהיו בלתי-ניתנים לשינוי (immutable). עם זאת, קיימות ספריות המאפשרות הגדרה של מבני נתונים בלתי-ניתנים לשינוי ומניפולציה יעילה שלהם — כגון https://facebook.github.io/immutable-js/."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:3",
+     "type": "code",
+     "en": "```typescript\ndept\n// =>\n//    { deptName: 'accounting',\n//      employees: \n//       [ { firstName: 'John', lastName: 'Doe' },\n//         { firstName: 'Anna', lastName: 'Smith' },\n//         { firstName: 'Peter', lastName: 'Jones' } ] }\n```\n",
+     "hash": "6ff13e8d0a81b233",
+     "lang": "typescript",
+     "noteHe": "זהו מצב ההתחלה: מדפיסים את `dept` כפי שהוגדר קודם, לפני כל שינוי, כדי שנוכל להשוות אליו אחרי הפעלת פעולות השינוי בהמשך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:4",
+     "type": "code",
+     "en": "```typescript\ndept.deptName = 'programming'\n```\n\n",
+     "hash": "512ce7ff8f314fbd",
+     "lang": "typescript",
+     "noteHe": "השמה לתוך רכיב של ערך מורכב: הצבת ערך חדש במפתח `deptName` **משנה את המפה הקיימת במקום** (in place) — לא נוצר עותק חדש. זוהי פעולת שינוי מצב (mutation)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:5",
+     "type": "code",
+     "en": "```typescript\ndelete(dept.employees[0].lastName)\n```\n\n",
+     "hash": "805a15cf69610480",
+     "lang": "typescript",
+     "noteHe": "האופרטור `delete` מסיר לגמרי את המפתח `lastName` (ואת ערכו) מהמפה של העובד הראשון. זה שונה מהשמה של `undefined` — המפתח עצמו נעלם מהמפה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:6",
+     "type": "code",
+     "en": "```typescript\ndept\n// =>\n//    { deptName: 'programming',\n//      employees: \n//       [ { firstName: 'John' },\n//         { firstName: 'Anna', lastName: 'Smith' },\n//         { firstName: 'Peter', lastName: 'Jones' } ] }\n```\n\n",
+     "hash": "ab246ffdd4729d54",
+     "lang": "typescript",
+     "noteHe": "הדפסה חוזרת של `dept` מראה ששתי הפעולות אכן שינו את הערך המקורי עצמו: `deptName` הפך ל-`'programming'`, והמפה של העובד הראשון כבר אינה מכילה את המפתח `lastName` — נותר בה רק `firstName: 'John'`. זו ההוכחה שערכים מורכבים ב-JavaScript הם ברי-שינוי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:7:7",
+     "type": "code",
+     "en": "```typescript\nlet mutableArr = [0, 1, 2]\n  mutableArr[0] = 1\n  mutableArr\n// =>     [ 1, 1, 2 ]\n```\n\n",
+     "hash": "a28cc21cc9b85bbb",
+     "lang": "typescript",
+     "noteHe": "גם מערכים ברי-שינוי: ההשמה `mutableArr[0] = 1` מחליפה את האיבר במיקום 0 מ-`0` ל-`1`, והמערך המקורי עצמו משתנה ל-`[1, 1, 2]`."
+    }
+   ],
+   "headingHe": "פונקציות שינוי (Mutators) של מפות ומערכים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:8",
+   "depth": 2,
+   "headingEn": "Array Primitive Mutators",
+   "raw": "## Array Primitive Mutators\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:8:0",
+     "type": "prose",
+     "en": "JavaScript Arrays have many built-in primitives that allow mutation or copy of array values.\nIt is sometimes difficult to keep track of which operations modify the array (mutators) and which operations\ncreate new array values.\n\n",
+     "hash": "a801c784762ee001",
+     "he": "למערכים ב-JavaScript יש פרימיטיבים מובנים רבים המאפשרים שינוי (mutation) או העתקה של ערכי מערך. לעיתים קשה לעקוב אחרי אילו פעולות משנות את המערך (פונקציות שינוי — mutators) ואילו פעולות יוצרות ערכי מערך חדשים."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:1",
+     "type": "prose",
+     "en": "For example, `sort()` and `reverse()` are mutators:\n\n\n",
+     "hash": "098d8a6ca9ffc50c",
+     "he": "לדוגמה, `sort()` ו-`reverse()` הן פונקציות שינוי:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:2",
+     "type": "code",
+     "en": "```typescript\nlet a1 = [1,5,3,2,4]\n    console.log(a1.sort())\n    console.log(a1)\n// =>\n//    [ 1, 2, 3, 4, 5 ]\n//    [ 1, 2, 3, 4, 5 ]\n```\n\n",
+     "hash": "53588ea6263310f0",
+     "lang": "typescript",
+     "noteHe": "הבדיקה כאן מכוונת: מדפיסים גם את הערך ש-`sort()` מחזיר וגם את `a1` עצמו אחרי הקריאה. שתי ההדפסות זהות — `[1, 2, 3, 4, 5]` — כלומר `sort()` לא רק החזירה מערך ממוין, היא **מיינה את `a1` עצמו במקום**. זו הדרך לזהות פונקציית שינוי: המערך המקורי כבר אינו `[1,5,3,2,4]`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:3",
+     "type": "prose",
+     "en": "As you see above, after the `sort()` method is invoked on an array, the array is modified in place.\n`sort()` is a mutator.  Similarly, `reverse()` is a mutator:\n\n",
+     "hash": "400268c90c3c67ec",
+     "he": "כפי שרואים למעלה, אחרי שהמתודה `sort()` מופעלת על מערך, המערך משתנה במקום (in place). ‏`sort()` היא פונקציית שינוי. באופן דומה, גם `reverse()` היא פונקציית שינוי:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:4",
+     "type": "code",
+     "en": "```typescript\nlet a2 = [1,2,3,4]\n    console.log(a2.reverse())\n    console.log(a2)\n// =>\n//  [ 4, 3, 2, 1 ]\n//  [ 4, 3, 2, 1 ]\n```\n\n",
+     "hash": "400d8744b2cf3aa1",
+     "lang": "typescript",
+     "noteHe": "אותה תבנית בדיקה כמו עם `sort()`: ‏`reverse()` מחזירה את המערך הפוך, אבל ההדפסה השנייה של `a2` מראה שגם המערך המקורי התהפך — `reverse()` שינתה אותו במקום."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:5",
+     "type": "prose",
+     "en": "The methods `push()` and `pop()` are also mutators:\n\n",
+     "hash": "d5c5d775c4467740",
+     "he": "גם המתודות `push()` ו-`pop()` הן פונקציות שינוי:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:6",
+     "type": "code",
+     "en": "```typescript\na1.pop()\n// =>    5\na1\n// =>   [ 1, 2, 3, 4 ]\na1.push(5)\n// => 5\na1\n// =>     [ 1, 2, 3, 4, 5 ]\n```\n\n",
+     "hash": "2c267367dfe7d325",
+     "lang": "typescript",
+     "noteHe": "`pop()` מסירה את האיבר האחרון מהמערך ומחזירה אותו (כאן `5`), ואכן `a1` מתקצר ל-`[1, 2, 3, 4]`. ‏`push(5)` מוסיפה איבר לסוף המערך ומחזירה את **האורך החדש** של המערך (5) — שימו לב שכאן זה במקרה אותו מספר כמו האיבר שהוספנו, מה שעלול לבלבל. אחרי ה-`push`, ‏`a1` חזר להיות `[1, 2, 3, 4, 5]`. שתי המתודות פועלות על **סוף** המערך ומשנות אותו במקום."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:7",
+     "type": "prose",
+     "en": "The methods `shift()` and `unshift()` are similar to `pop()` and `push()` but operate on the beginning of the array (while push and pop operate on the end of the array). They are also mutators:\n\n\n",
+     "hash": "3c044fd7bf02a015",
+     "he": "המתודות `shift()` ו-`unshift()` דומות ל-`pop()` ו-`push()`, אבל פועלות על **תחילת** המערך (בעוד ש-push ו-pop פועלות על סוף המערך). גם הן פונקציות שינוי:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:8",
+     "type": "code",
+     "en": "```typescript\na1.shift()\n// => 1\na1\n// =>  [ 2, 3, 4, 5 ]\na1.unshift(1)\n// =>  5\na1\n// =>    [ 1, 2, 3, 4, 5 ]\n```\n\n",
+     "hash": "7c3977238c47d955",
+     "lang": "typescript",
+     "noteHe": "`shift()` מסירה את האיבר **הראשון** ומחזירה אותו (`1`), כך ש-`a1` הופך ל-`[2, 3, 4, 5]`. ‏`unshift(1)` מוסיפה איבר לתחילת המערך ומחזירה את האורך החדש (5), ו-`a1` חוזר ל-`[1, 2, 3, 4, 5]`. אלו בדיוק המקבילות של `pop()` ו-`push()` בקצה השני של המערך, וגם הן משנות אותו במקום."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:9",
+     "type": "prose",
+     "en": "In contrast, the `concat()` method returns a copy of the original arrays and does not modifiy its arguments:\n\n",
+     "hash": "a577c0f1ee37ec73",
+     "he": "לעומת זאת, המתודה `concat()` מחזירה עותק של המערכים המקוריים ואינה משנה את הארגומנטים שלה:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:8:10",
+     "type": "code",
+     "en": "```typescript\na1.concat(a2)\n// =>     [ 1, 2, 3, 4, 5, 4, 3, 2, 1 ]\na1\n// =>    [ 1, 2, 3, 4, 5 ]\na2\n// =>    [ 4, 3, 2, 1 ]\n```\n\n",
+     "hash": "ae757c712c1c757e",
+     "lang": "typescript",
+     "noteHe": "`concat()` היא הדוגמה הנגדית: היא מחזירה **מערך חדש** שמכיל את איברי `a1` ואחריהם את איברי `a2`, אבל ההדפסות שאחריה מראות ש-`a1` ו-`a2` נותרו ללא שינוי. זו פעולה \"פונקציונלית\" באופייה — יוצרת ערך חדש במקום לשנות את הקיימים — בניגוד לפונקציות השינוי שראינו קודם."
+    }
+   ],
+   "headingHe": "פונקציות שינוי פרימיטיביות של מערכים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:9",
+   "depth": 2,
+   "headingEn": "Useful Array Methods",
+   "raw": "## Useful Array Methods\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:9:0",
+     "type": "prose",
+     "en": "The following methods are included in the Array interface:\n",
+     "hash": "ceac69c6af8b5796",
+     "he": "המתודות הבאות כלולות בממשק ה-Array:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:9:1",
+     "type": "list",
+     "en": "* `length`: returns the number of elements in the array\n* `includes(x)`: returns true if x is an element in the array, false otherwise\n* `indexOf(x)`: returns the index of x within the array, -1 if x is not in the array\n* `join(delimiter)`: returns a string with all the items of the array serialized with delimiter between them.\n* `slice(start, end)`: returns a shallow copy of a sub-sequence from the array.\n* `splice(index)`: splits the array at the index position, and returns the suffix of the array after index (mutator).\n\n\n",
+     "hash": "95cadaeae8c335fd",
+     "he": "* `length`: מחזירה את מספר האיברים במערך\n* `includes(x)`: מחזירה true אם x הוא איבר במערך, אחרת false\n* `indexOf(x)`: מחזירה את האינדקס של x בתוך המערך, או ‎-1 אם x אינו במערך\n* `join(delimiter)`: מחזירה מחרוזת שבה כל איברי המערך מסודרים בזה אחר זה עם התו המפריד (delimiter) ביניהם.\n* `slice(start, end)`: מחזירה עותק רדוד (shallow copy) של תת-רצף מהמערך.\n* `splice(index)`: מפצלת את המערך במיקום index, ומחזירה את הסיפא של המערך שאחרי index (פונקציית שינוי)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:9:2",
+     "type": "code",
+     "en": "```typescript\nlet am = [1,2,3,4,5,6]\n    console.log(`am has ${am.length} items`)\n    console.log(`am.includes(2) is ${am.includes(2)}`)\n    console.log(`am.indexOf(2) is ${am.indexOf(2)}`)\n    console.log(`am.join() is ${am.join()}`)\n    console.log(`am.slice(2,4) is ${am.slice(2,4)}`)\n    console.log(`am.splice(2) is ${am.splice(2)}`)\n    console.log(`am is [${am}] after splice(2)`)\n```\n",
+     "hash": "6e2375f6897518fd",
+     "lang": "typescript",
+     "noteHe": "הדגמה חיה של כל המתודות מהרשימה על המערך `am = [1,2,3,4,5,6]`. שימו לב לתחביר ה-template strings — מחרוזות בגרש הפוך (backtick) שבתוכן `${...}` משבץ ערך מחושב. נקודות שכדאי לשים לב אליהן: `indexOf(2)` מחזירה 1 כי אינדקסים מתחילים מ-0; `slice(2,4)` מחזירה את האיברים באינדקסים 2 עד 3 (הגבול העליון **לא כלול**) בלי לשנות את המערך; ואילו `splice(2)` היא פונקציית שינוי — היא גוזרת את כל האיברים מאינדקס 2 והלאה, מחזירה אותם, ומשאירה ב-`am` רק את `[1,2]`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:9:3",
+     "type": "code",
+     "en": "```\n    am has 6 items\n    am.includes(2) is true\n    am.indexOf(2) is 1\n    am.join() is 1,2,3,4,5,6\n    am.slice(2,4) is 3,4\n    am.splice(2) is 3,4,5,6\n    am is [1,2] after splice(2)\n```    \n\n",
+     "hash": "9be7e6c1b18871f6",
+     "noteHe": "זהו הפלט של הקוד שלמעלה. ההבחנה החשובה נמצאת בשתי השורות האחרונות: `slice(2,4)` החזירה `3,4` בלי לפגוע במערך, אבל אחרי `splice(2)` המערך `am` עצמו התכווץ ל-`[1,2]` — כלומר `splice` שינתה את המערך במקום, בעוד ש-`slice` רק העתיקה ממנו."
+    }
+   ],
+   "headingHe": "מתודות שימושיות של מערכים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:10",
+   "depth": 2,
+   "headingEn": "Higher Order Methods on Arrays and JSON",
+   "raw": "## Higher Order Methods on Arrays and JSON\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:10:0",
+     "type": "prose",
+     "en": "The Array interface includes higher order methods - that is, methods which receive a function as an argument.\nThese methods are extremely versatile:\n",
+     "hash": "131c82c51024e282",
+     "he": "ממשק ה-Array כולל מתודות מסדר גבוה — כלומר, מתודות שמקבלות פונקציה כארגומנט. מתודות אלה רב-שימושיות ביותר:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:1",
+     "type": "list",
+     "en": "* `a.sort((a,b) => a > b)`: sort the elements with the comparator passed as a parameter (mutator).\n* `a.map(x => x*x)`: return a new array of the same length as `a` [f(x) for x in a]\n* `a.filter(pred)`: return a new array with all elements `x` in `a` that satisfy `pred(x)`\n* `a.find(pred)`: return the first element `x` of `a` which satisfies `pred(x)` (similar to `filter` but returns only one item)\n* `a.findIndex(pred)`: same as `find`, but returns the position of the first item `x` in `a` which satisfies `pred(x)`\n* `a.every(pred)`: return `true` if all elements in `a` satisfy `pred`\n* `a.some(pred)`: return `true` if at least one element in `a` satisfies `pred`\n* `a.forEach(f)`: applies the function `f` on all elements of `a` - useful only when `f` has side effects. \n* `a.reduce((acc, item) => transformer, init)`: transforms the array by applying the same transformer function on each item in `a` and accumulating the successive results of the transformer.\n\n",
+     "hash": "808749ca32da5b68",
+     "he": "* `a.sort((a,b) => a > b)`: ממיינת את האיברים לפי פונקציית ההשוואה (comparator) המועברת כפרמטר (פונקציית שינוי).\n* `a.map(x => x*x)`: מחזירה מערך חדש באותו אורך של `a` — ‏[f(x) for x in a]\n* `a.filter(pred)`: מחזירה מערך חדש עם כל האיברים `x` ב-`a` שמקיימים את `pred(x)`\n* `a.find(pred)`: מחזירה את האיבר הראשון `x` ב-`a` שמקיים את `pred(x)` (דומה ל-`filter` אך מחזירה איבר אחד בלבד)\n* `a.findIndex(pred)`: כמו `find`, אך מחזירה את המיקום של האיבר הראשון `x` ב-`a` שמקיים את `pred(x)`\n* `a.every(pred)`: מחזירה `true` אם כל האיברים ב-`a` מקיימים את `pred`\n* `a.some(pred)`: מחזירה `true` אם לפחות איבר אחד ב-`a` מקיים את `pred`\n* `a.forEach(f)`: מפעילה את הפונקציה `f` על כל איברי `a` — שימושית רק כאשר ל-`f` יש תופעות לוואי (side effects).\n* `a.reduce((acc, item) => transformer, init)`: ממירה את המערך על ידי הפעלת אותה פונקציית המרה (transformer) על כל איבר ב-`a` וצבירת התוצאות העוקבות של פונקציית ההמרה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:2",
+     "type": "prose",
+     "en": "Of these many methods, the most important are:\n",
+     "hash": "903935243a97f0ba",
+     "he": "מבין כל המתודות הרבות הללו, החשובות ביותר הן:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:3",
+     "type": "list",
+     "en": "* `map`\n* `filter`\n* `reduce`\n\n",
+     "hash": "1229c3836b19da67",
+     "he": "* `map`\n* `filter`\n* `reduce`"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:4",
+     "type": "prose",
+     "en": "The importance of these functions is that they allow us to manipulate complex values as a whole, instead of writing code\nthat iterates (loops) over each item.  This gives a declarative flavor to the code that manipulates JSON values - similar\nto SQL over relational data.\n\n",
+     "hash": "46372e0f391c2eb6",
+     "he": "החשיבות של פונקציות אלה היא בכך שהן מאפשרות לנו לבצע מניפולציה על ערכים מורכבים **כמכלול**, במקום לכתוב קוד שעובר בלולאה על כל איבר. זה מעניק אופי דקלרטיבי (declarative) לקוד שמעבד ערכי JSON — בדומה ל-SQL על נתונים רלציוניים."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:5",
+     "type": "prose",
+     "en": "Consider the following example JSON value:\n\n",
+     "hash": "ec0051868429ba72",
+     "he": "התבוננו בערך ה-JSON הבא לדוגמה:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:6",
+     "type": "code",
+     "en": "```typescript\nconst people = [\n  {\n    name: 'Avi',\n    age: 23,\n    gender: 'm',\n    cs: true\n  },\n  {\n    name: 'Ben',\n    age: 25,\n    gender: 'm',\n    cs: false,\n  },\n   {\n    name: 'Gila',\n    age: 24,\n    gender: 'f',\n    cs: true,\n  },\n   {\n    name: 'Dalia',\n    age: 27,\n    gender: 'f',\n    cs: false,\n  },\n];\n```\n",
+     "hash": "f79ff924aacd5115",
+     "lang": "typescript",
+     "noteHe": "זהו ערך הדוגמה שילווה את כל ההמשך: `people` הוא מערך של ארבע מפות, כשכל מפה מתארת אדם עם השדות `name` (מחרוזת), `age` (מספר), `gender` (מחרוזת `'m'` או `'f'`) ו-`cs` (ערך בוליאני — האם האדם סטודנט למדעי המחשב). המבנה הזה מזכיר טבלה במסד נתונים רלציוני: כל מפה היא \"שורה\" וכל מפתח הוא \"עמודה\" — וזה בדיוק מה שיאפשר בהמשך שאילתות בסגנון SQL באמצעות `map`, ‏`filter` ו-`reduce`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:7",
+     "type": "prose",
+     "en": "We can use `filter()` with appropriate predicates to perform operations similar to a `select` in SQL: \n\n\n",
+     "hash": "ca0d9d06dd9f87c6",
+     "he": "אפשר להשתמש ב-`filter()` עם פרדיקטים (predicates) מתאימים כדי לבצע פעולות הדומות ל-`select` ב-SQL:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:8",
+     "type": "code",
+     "en": "```typescript\n// Select the people who are CS students\npeople.filter(p => p.cs)\n// =>\n//    [ { name: 'Avi', age: 23, gender: 'm', cs: true },\n//      { name: 'Gila', age: 24, gender: 'f', cs: true } ]\n\n// Select people by gender\npeople.filter(p => p.gender == 'f')\n// =>\n//    [ { name: 'Gila', age: 24, gender: 'f', cs: true },\n//      { name: 'Dalia', age: 27, gender: 'f', cs: false } ]\n```\n\n\n",
+     "hash": "88b2cf41fa6512af",
+     "lang": "typescript",
+     "noteHe": "שתי \"שאילתות\" עם `filter`: בכל קריאה מועבר פרדיקט — פונקציה שמקבלת איבר ומחזירה ערך בוליאני. הקריאה הראשונה, `people.filter(p => p.cs)`, מחזירה מערך חדש שמכיל רק את האנשים שאצלם `cs` הוא `true` (השדה הבוליאני עצמו משמש כפרדיקט). השנייה מסננת לפי התנאי `p.gender == 'f'`. בשני המקרים המערך `people` המקורי אינו משתנה — `filter` תמיד מחזירה מערך חדש. זו המקבילה של `SELECT ... WHERE` ב-SQL."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:9",
+     "type": "prose",
+     "en": "`map` can be used to compute transformations of the input items.\nFor example, assume we want to compute the year of birth of each person, we can compute:\n\n\n",
+     "hash": "892738f6a8ca7e7c",
+     "he": "ב-`map` אפשר להשתמש כדי לחשב טרנספורמציות של איברי הקלט. לדוגמה, נניח שברצוננו לחשב את שנת הלידה של כל אדם — נוכל לחשב:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:10",
+     "type": "code",
+     "en": "```typescript\npeople.map(p => 2021 - p.age)\n// =>    [ 1998, 1996, 1997, 1994 ]\n```\n\n",
+     "hash": "70a2654336a799fe",
+     "lang": "typescript",
+     "noteHe": "`map` מפעילה את הפונקציה `p => 2021 - p.age` על כל אחד מארבעת האנשים ומחזירה מערך חדש של התוצאות — שנות הלידה. שימו לב שהמערך המוחזר הוא באותו אורך כמו המקור, אבל איבריו מטיפוס אחר לגמרי: מספרים במקום מפות."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:11",
+     "type": "prose",
+     "en": "If we want to modify the maps of each person, we can use mutation:\n\n",
+     "hash": "e1e3d51efd7ea364",
+     "he": "אם ברצוננו לשנות את המפות של כל אדם, נוכל להשתמש בשינוי מצב (mutation):"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:12",
+     "type": "code",
+     "en": "```typescript\n// When a fat-array function body contains more than one expression - we must put the body in {} and use \"return\"\n// When the body has only one expression, we can skip both (x => x*x)\npeople.map(p => {p.birthYear = 2021-p.age; return p})\n// =>\n//  [ { name: 'Avi', age: 23, gender: 'm', cs: true, birthYear: 1998 },\n//    { name: 'Ben', age: 25, gender: 'm', cs: false, birthYear: 1996 },\n//    { name: 'Gila', age: 24, gender: 'f', cs: true, birthYear: 1997 },\n//    { name: 'Dalia', age: 27, gender: 'f', cs: false, birthYear: 1994 } ]\n```\n\n",
+     "hash": "0366486579fb41b5",
+     "lang": "typescript",
+     "noteHe": "כאן הפונקציה שמועברת ל-`map` עושה שני דברים: מוסיפה לכל מפה מפתח חדש `birthYear` (השמה — כלומר mutation על האובייקט המקורי!), ואז מחזירה את המפה עם `return p`. ההערות בקוד מסבירות כלל תחביר של פונקציות חץ (fat-arrow): כשגוף הפונקציה מכיל יותר מביטוי אחד, חייבים לעטוף אותו בסוגריים מסולסלים `{}` ולכתוב `return` מפורש; כשגוף הפונקציה הוא ביטוי יחיד (כמו `x => x*x`), אפשר לוותר על שניהם והערך מוחזר אוטומטית. ה\"gotcha\": בניגוד ל-`map` \"נקי\", הפונקציה כאן בעלת תופעת לוואי — היא משנה את האובייקטים המקוריים בתוך `people`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:13",
+     "type": "prose",
+     "en": "As we can see, the application of a function with mutation through `map` modified the original JSON objec\n\n",
+     "hash": "753bd5d5081a0991",
+     "he": "כפי שאפשר לראות, הפעלת פונקציה עם שינוי מצב באמצעות `map` שינתה את אובייקט ה-JSON המקורי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:14",
+     "type": "code",
+     "en": "```typescript\npeople\n// =>\n//    [ { name: 'Avi', age: 23, gender: 'm', cs: true, birthYear: 1998 },\n//      { name: 'Ben', age: 25, gender: 'm', cs: false, birthYear: 1996 },\n//      { name: 'Gila', age: 24, gender: 'f', cs: true, birthYear: 1997 },\n//      { name: 'Dalia', age: 27, gender: 'f', cs: false, birthYear: 1994 } ]\n```\n\n",
+     "hash": "e1df585d14d6c47a",
+     "lang": "typescript",
+     "noteHe": "הדפסת `people` אחרי הקריאה הקודמת מוכיחה את הנקודה: השדה `birthYear` נשאר בכל אחת מהמפות. אף על פי ש-`map` מחזירה מערך חדש, הפונקציה שהעברנו שינתה את **האובייקטים המקוריים** שאליהם המערך מצביע — תזכורת לכך שב-JavaScript קל בטעות לערבב מניפולציה פונקציונלית עם תופעות לוואי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:10:15",
+     "type": "prose",
+     "en": "`map()` and `filter()` return an array based on the original array.\n\n",
+     "hash": "8c8a903702ab44a5",
+     "he": "`map()` ו-`filter()` מחזירות מערך המבוסס על המערך המקורי."
+    }
+   ],
+   "headingHe": "מתודות מסדר גבוה על מערכים ו-JSON"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:11",
+   "depth": 2,
+   "headingEn": "Reduce",
+   "raw": "## Reduce\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:11:0",
+     "type": "prose",
+     "en": "The `reduce()` method transforms the array into a single value through iterative application through each item.\nIt applies a function against an accumulator and each value of the array (from left-to-right) to reduce it to a single value.\n\n",
+     "hash": "a71ba7ea68b0e6ff",
+     "he": "המתודה `reduce()` ממירה את המערך לערך יחיד באמצעות הפעלה איטרטיבית על כל איבר. היא מפעילה פונקציה על צוֹבֵר (accumulator) ועל כל ערך במערך (משמאל לימין), כדי לצמצם אותו לערך יחיד."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:1",
+     "type": "prose",
+     "en": "`reduce()` is often called `fold()` or `accumulate()` in other FP languages. \n\n",
+     "hash": "16a99aa41c4a0a16",
+     "he": "בשפות פונקציונליות אחרות, `reduce()` נקראת לעיתים קרובות `fold()` או `accumulate()`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:2",
+     "type": "prose",
+     "en": "It iterates over a list, applying a function to an accumulated value and the next item in the list, until the iteration is complete and the accumulated value gets returned. \n\n",
+     "hash": "2e572c966666591c",
+     "he": "היא עוברת על הרשימה איבר-איבר, ומפעילה פונקציה על הערך הנצבר ועל האיבר הבא ברשימה, עד שהמעבר מסתיים והערך הנצבר מוחזר."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:3",
+     "type": "prose",
+     "en": "`reduce()` takes a reducer function and an initial value, and returns the accumulated value.\nThe reducer function receives two arguments: the current accumulator and the current item.\n\n",
+     "hash": "2c5df31c2fb8f86c",
+     "he": "`reduce()` מקבלת פונקציית צבירה (reducer) וערך התחלתי, ומחזירה את הערך הנצבר. פונקציית הצבירה מקבלת שני ארגומנטים: הצובר הנוכחי והאיבר הנוכחי."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:4",
+     "type": "code",
+     "en": "```typescript\narray.reduce(\n  reducer: (accumulator: any, current: any) => any,\n  initialValue: any\n) => accumulator: any\n```\n\n",
+     "hash": "e8289df0cd1bcbce",
+     "lang": "typescript",
+     "noteHe": "זו לא קריאה אמיתית אלא תיאור סכמטי של **החתימה** של `reduce`: הפרמטר הראשון הוא פונקציית ה-reducer, שמקבלת את הצובר הנוכחי (`accumulator`) ואת האיבר הנוכחי (`current`) ומחזירה צובר חדש; הפרמטר השני `initialValue` הוא הערך ההתחלתי של הצובר; והערך המוחזר של כל הקריאה הוא הצובר הסופי. ההערות `any` מציינות שכל הטיפוסים גמישים — הצובר אינו חייב להיות מאותו טיפוס כמו איברי המערך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:5",
+     "type": "prose",
+     "en": "This is useful for any type of aggregation which would be similar to a `group by` statement in SQL over the array.\n\n",
+     "hash": "6533d79c05528b8e",
+     "he": "זה שימושי לכל סוג של אגרגציה (צבירה) — בדומה למשפט `group by` ב-SQL — על המערך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:6",
+     "type": "code",
+     "en": "```typescript\n// Sum of all elements in the array\n[2,4,6].reduce((acc, n) => acc + n, 0);\n// => 12\n```\n\n",
+     "hash": "a634741fd33945c9",
+     "lang": "typescript",
+     "noteHe": "הדוגמה הקלאסית ל-`reduce`: סכימת כל איברי המערך. פונקציית הצבירה `(acc, n) => acc + n` מוסיפה כל איבר לצובר, והערך ההתחלתי הוא `0`. חישוב הריצה: ‏0+2=2, אחר כך 2+4=6, ולבסוף 6+6=12 — והתוצאה הסופית היא `12`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:7",
+     "type": "prose",
+     "en": "For each element in the array, the reducer is called and passed the accumulator and the current value. \nThe reducer’s job is to “fold” the current value into the accumulated value. \nThe reducer returns the new accumulated value, and reduce() moves on to the next value in the array. \nThe reducer needs an initial value to start with, so the initial value is passed as a parameter to `reduce()`.\n\n",
+     "hash": "539f30184b8e5d7b",
+     "he": "עבור כל איבר במערך נקראת פונקציית הצבירה, ומועברים אליה הצובר והערך הנוכחי. תפקידה של פונקציית הצבירה הוא \"לקפל\" (fold) את הערך הנוכחי לתוך הערך הנצבר. פונקציית הצבירה מחזירה את הערך הנצבר החדש, ו-`reduce()` ממשיכה לערך הבא במערך. פונקציית הצבירה זקוקה לערך התחלתי להתחיל ממנו, ולכן הערך ההתחלתי מועבר כפרמטר ל-`reduce()`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:8",
+     "type": "prose",
+     "en": "**NOTE**: In general, it makes sense that the initial value should be a neutral element for the accumulator function.\n\n",
+     "hash": "fa2a15b13d10a9a9",
+     "he": "**הערה**: באופן כללי, הגיוני שהערך ההתחלתי יהיה איבר נייטרלי (איבר יחידה) ביחס לפונקציית הצבירה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:9",
+     "type": "prose",
+     "en": "In the case of our sum, the first time the reducer is called, acc starts with 0 - the value we passed to `reduce()` as the second parameter. \n\n",
+     "hash": "42e636ab6fddc332",
+     "he": "במקרה של הסכום שלנו, בפעם הראשונה שפונקציית הצבירה נקראת, `acc` מתחיל ב-0 — הערך שהעברנו ל-`reduce()` כפרמטר השני."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:10",
+     "type": "prose",
+     "en": "The reducer returns 0 + 2 (2 was the first element in the array), which is 2. \n\n",
+     "hash": "d853709350270dbd",
+     "he": "פונקציית הצבירה מחזירה 0 + 2 (2 היה האיבר הראשון במערך), כלומר 2."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:11",
+     "type": "prose",
+     "en": "For the next call, acc = 2, n = 4 and the reducer returns the result of 2 + 4 (6). \n\n",
+     "hash": "cb6d58eaa11bbde4",
+     "he": "בקריאה הבאה, ‏acc = 2, ‏n = 4, ופונקציית הצבירה מחזירה את התוצאה של 2 + 4 (כלומר 6)."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:12",
+     "type": "prose",
+     "en": "In the last iteration, acc = 6, n = 6, and the reducer returns 12. \n\n",
+     "hash": "3e316e4827322fc6",
+     "he": "באיטרציה האחרונה, ‏acc = 6, ‏n = 6, ופונקציית הצבירה מחזירה 12."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:13",
+     "type": "prose",
+     "en": "Since the iteration is finished, .reduce() returns the final accumulated value, 12.\n\n",
+     "hash": "7777e728dbd0abc0",
+     "he": "מכיוון שהאיטרציה הסתיימה, ‏`reduce()`‎ מחזירה את הערך הנצבר הסופי — 12."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:14",
+     "type": "prose",
+     "en": "In this case, we passed in an anonymous reducing function, but we can abstract it and give it a name:\n\n\n",
+     "hash": "99ae633c50cf31cd",
+     "he": "במקרה זה העברנו פונקציית צבירה אנונימית, אבל אפשר להפשיט אותה ולתת לה שם:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:15",
+     "type": "code",
+     "en": "```typescript\nconst sumReducer = (acc, n) => acc + n;\n[2,4,6].reduce(sumReducer, 0);\n// => 12\n```\n",
+     "hash": "f68f30b21fe97c14",
+     "lang": "typescript",
+     "noteHe": "אותו חישוב בדיוק כמו קודם, אבל הפעם פונקציית הצבירה קיבלה שם — `sumReducer` — במקום להיות פונקציה אנונימית בתוך הקריאה. מכיוון שפונקציות הן אזרחיות ממדרגה ראשונה (first-class citizens) ב-JavaScript, אפשר לקשור אותן למשתנה ולהעביר את השם. התוצאה זהה: `12`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:16",
+     "type": "prose",
+     "en": "If we want to trace the behavior of the reducer, we can add calls to log:\n\n\n",
+     "hash": "a522fe2479c44675",
+     "he": "אם ברצוננו לעקוב אחרי ההתנהגות של פונקציית הצבירה, נוכל להוסיף קריאות להדפסה (log):"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:17",
+     "type": "code",
+     "en": "```typescript\nconst tracingSumReducer = (acc, n) => { console.log(`Reduce ${acc} + ${n}`); return acc+n; }\n[2, 4, 6].reduce(tracingSumReducer, 0);\n// =>\n//  Reduce 0 + 2\n//  Reduce 2 + 4\n//  Reduce 6 + 6\n//  12\n```\n\n",
+     "hash": "56517bababa27e8b",
+     "lang": "typescript",
+     "noteHe": "גרסה \"מתחקרת\" של פונקציית הצבירה: לפני שהיא מחזירה `acc+n`, היא מדפיסה את הערכים הנוכחיים. מכיוון שהגוף מכיל שני משפטים, הוא עטוף ב-`{}` עם `return` מפורש. הפלט חושף בדיוק את שלוש הקריאות שתיארנו קודם — ‏`Reduce 0 + 2`, ‏`Reduce 2 + 4`, ‏`Reduce 6 + 6` — והשורה האחרונה `12` היא הערך הסופי שהקריאה כולה מחזירה. זו טכניקה שימושית להבנת ריצה של `reduce` בכל מקרה מסובך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:18",
+     "type": "prose",
+     "en": "Reduce can map to values of different types than those present in the array on which it iterates:\n\n\n",
+     "hash": "9dcbc752c3d482ee",
+     "he": "‏`reduce` יכולה למפות לערכים מטיפוסים שונים מאלה שנמצאים במערך שעליו היא עוברת:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:19",
+     "type": "code",
+     "en": "```typescript\n// Sum age of all persons in the people array\npeople.reduce((acc, p) => acc + p.age, 0)\n// =>    99\n```\n\n",
+     "hash": "284450e17d59c266",
+     "lang": "typescript",
+     "noteHe": "כאן איברי המערך הם **מפות** (אנשים), אבל הצובר הוא **מספר**: פונקציית הצבירה שולפת מכל אדם את `p.age` ומוסיפה לצובר. הסכום: ‏23 + 25 + 24 + 27 = 99. זו ההדגמה לכך שטיפוס הצובר אינו חייב להיות זהה לטיפוס איברי המערך."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:20",
+     "type": "prose",
+     "en": "And reduce can return compound values as well:\n\n\n",
+     "hash": "f1796faa7aecd522",
+     "he": "ו-`reduce` יכולה גם להחזיר ערכים מורכבים:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:11:21",
+     "type": "code",
+     "en": "```typescript\n// Count number of men and women\npeople.reduce(\n    (counter, p) => {\n        p.gender == 'm' ? counter.men++ : counter.women++;\n        return counter;\n    }, {men:0, women:0})\n// =>     { men: 2, women: 2 }\n```\n\n",
+     "hash": "3116a72e0fa8a4b5",
+     "lang": "typescript",
+     "noteHe": "כאן הצובר הוא ערך **מורכב** — המפה `{men:0, women:0}` שמשמשת כזוג מונים. עבור כל אדם, הביטוי התנאי `p.gender == 'm' ? counter.men++ : counter.women++` מקדם את המונה המתאים (שימו לב: זה mutation של הצובר), ואז `return counter` מחזיר את אותו צובר לקריאה הבאה. התוצאה `{ men: 2, women: 2 }` היא אגרגציה בסגנון `group by` של SQL — ספירת איברים לפי קטגוריה — וזו תבנית חשובה מאוד לבחינה: reduce שמחזירה מפה."
+    }
+   ],
+   "headingHe": "Reduce"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:12",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [],
+   "headingHe": "סיכום"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:13",
+   "depth": 3,
+   "headingEn": "Literal Expressions and Complex Values",
+   "raw": "### Literal Expressions and Complex Values\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:13:0",
+     "type": "list",
+     "en": "* Programming languages define as part of their syntax ways to describe **literal expressions** which are evaluated to values.\n* JavaScript (and most *dynamic programming languages* which do not require type declarations for all variables) allow programmers to write **literal compound expressions** which encode compound values.\n* Compound values can be embedded recursively to yield complex data structures.\n* JavaScript variables and data structures are mutable.\n\n",
+     "hash": "7054f3f8c2a01ac2",
+     "he": "* שפות תכנות מגדירות, כחלק מהתחביר שלהן, דרכים לתאר **ביטויים ליטרליים** שמוערכים לערכים.\n* JavaScript (ורוב *שפות התכנות הדינמיות*, שאינן דורשות הצהרות טיפוס לכל המשתנים) מאפשרת למתכנתים לכתוב **ביטויים ליטרליים מורכבים** שמקודדים ערכים מורכבים.\n* ערכים מורכבים יכולים להיות משובצים באופן רקורסיבי וכך להניב מבני נתונים מורכבים.\n* משתנים ומבני נתונים ב-JavaScript ניתנים לשינוי (mutable)."
+    }
+   ],
+   "headingHe": "ביטויים ליטרליים וערכים מורכבים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:14",
+   "depth": 3,
+   "headingEn": "JSON",
+   "raw": "### JSON\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:14:0",
+     "type": "list",
+     "en": "* JSON is a string serialization of JavaScript values (atomic and compound).\n* The JSON interface includes 2 functions: `JSON.stringify()` and `JSON.parse()`\n* JSON values can include embedded arrays and maps in a recursive manner - down to atomic values in the leaves.\n* JSON compound values can be taken apart using composed accessors - for example `dept.employees[0].firstName`.\n* JSON compound values can be mutated in place using composed mutators - for example, `dept.employees[0].firstName = 'avi'`\n* Components within a JSON compound value can be removed using the `delete()` operator.\n* Arrays include primitive methods to access and mutate them: `length, includes(x), indexOf(x), join(delimiter), slice(start, end), splice(index)`.\n* Arrays include higher-order methods which receive functions as parameters.  In particular, `map(), filter()` and `reduce()` are extremely useful.\n\n",
+     "hash": "a398df0a2b8074db",
+     "he": "* JSON הוא סריאליזציה למחרוזת של ערכי JavaScript (אטומיים ומורכבים).\n* ממשק ה-JSON כולל 2 פונקציות: `JSON.stringify()` ו-`JSON.parse()`\n* ערכי JSON יכולים לכלול מערכים ומפות משובצים באופן רקורסיבי — עד לערכים אטומיים בעלים.\n* ניתן לפרק ערכי JSON מורכבים באמצעות שרשור פונקציות גישה (accessors) — לדוגמה `dept.employees[0].firstName`.\n* ניתן לשנות ערכי JSON מורכבים במקום (in place) באמצעות שרשור פונקציות שינוי (mutators) — לדוגמה `dept.employees[0].firstName = 'avi'`\n* ניתן להסיר רכיבים מתוך ערך JSON מורכב באמצעות האופרטור `delete()`.\n* מערכים כוללים מתודות פרימיטיביות לגישה ולשינוי: `length, includes(x), indexOf(x), join(delimiter), slice(start, end), splice(index)`.\n* מערכים כוללים מתודות מסדר גבוה שמקבלות פונקציות כפרמטרים. בפרט, `map(), filter()` ו-`reduce()` שימושיות ביותר."
+    }
+   ],
+   "headingHe": "JSON"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:15",
+   "depth": 2,
+   "headingEn": "Exercises",
+   "raw": "## Exercises\n\n\n",
+   "blocks": [],
+   "headingHe": "תרגילים"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:16",
+   "depth": 3,
+   "headingEn": "Map, Filter, Reduce",
+   "raw": "### Map, Filter, Reduce\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:16:0",
+     "type": "list",
+     "en": "1. Define a function `product(arrayNumbers)` which returns the product of all the numbers in an array of numbers.\n**Example:**\n",
+     "hash": "a1f701e93640d10a",
+     "he": "1. הגדירו פונקציה `product(arrayNumbers)` שמחזירה את מכפלת כל המספרים במערך של מספרים.\n**דוגמה:**"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:16:1",
+     "type": "code",
+     "en": "```\nproduct([1,2,3]) -> 6\n```\n",
+     "hash": "a3026c675ec44e0a",
+     "noteHe": "דוגמת ההרצה הצפויה: הקריאה `product([1,2,3])` צריכה להחזיר את מכפלת האיברים — ‏1·2·3 = 6."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:16:2",
+     "type": "prose",
+     "en": "What should be the value of `product([])`? Justify.\n\n",
+     "hash": "5abaf5c5c59382ad",
+     "he": "מה צריך להיות הערך של `product([])`? נמקו."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:16:3",
+     "type": "list",
+     "en": "2. Using the Ramda function range (http://ramdajs.com/docs/#range) - define a version of the `factorial()` function using\n`reduce()`.\n",
+     "hash": "dfef3b7465a3087b",
+     "he": "2. באמצעות הפונקציה range מספריית Ramda‏ (http://ramdajs.com/docs/#range) — הגדירו גרסה של הפונקציה `factorial()` המשתמשת ב-`reduce()`."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:16:4",
+     "type": "code",
+     "en": "```\nimport * as R from 'ramda'; \nR.range(1,5)\n[ 1,2,3,4 ]\n```\n",
+     "hash": "ede0d43f6467229e",
+     "noteHe": "הדגמה של הפונקציה `R.range` מספריית Ramda: אחרי ייבוא הספרייה בשם `R`, הקריאה `R.range(1,5)` מחזירה את המערך `[1,2,3,4]` — כל המספרים מ-1 (כולל) עד 5 (לא כולל). זה כלי העזר שתצטרכו כדי לייצר את סדרת המספרים לחישוב העצרת."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:16:5",
+     "type": "list",
+     "en": "3. Define `map()` using `reduce()`.\n\n4. Define `filter()` using `reduce()`.\n\n\n\n",
+     "hash": "2fa5aa95571d7cd9",
+     "he": "3. הגדירו את `map()` באמצעות `reduce()`.\n\n4. הגדירו את `filter()` באמצעות `reduce()`."
+    }
+   ],
+   "headingHe": "Map, Filter, Reduce"
+  },
+  {
+   "id": "cm/1.2TypescriptJSON:17",
+   "depth": 3,
+   "headingEn": "JSON",
+   "raw": "### JSON\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.2TypescriptJSON:17:0",
+     "type": "list",
+     "en": "1. Run the exercises in http://reactivex.io/learnrx/ \n   \n2. Consider the following JSON value (obtained from a call to a Netflix API):\n\n",
+     "hash": "0c1eaf9bda28a61a",
+     "he": "1. הריצו את התרגילים באתר http://reactivex.io/learnrx/\n   \n2. התבוננו בערך ה-JSON הבא (שהתקבל מקריאה ל-API של Netflix):"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:17:1",
+     "type": "code",
+     "en": "```typescript\nlet movieLists = [\n\t\t{\n\t\t\tname: \"New Releases\",\n\t\t\tvideos: [\n\t\t\t\t{\n\t\t\t\t\t\"id\": 70111470,\n\t\t\t\t\t\"title\": \"Die Hard\",\n\t\t\t\t\t\"boxart\": \"http://cdn-0.nflximg.com/images/2891/DieHard.jpg\",\n\t\t\t\t\t\"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n\t\t\t\t\t\"rating\": 4.0,\n\t\t\t\t\t\"bookmark\": []\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"id\": 654356453,\n\t\t\t\t\t\"title\": \"Bad Boys\",\n\t\t\t\t\t\"boxart\": \"http://cdn-0.nflximg.com/images/2891/BadBoys.jpg\",\n\t\t\t\t\t\"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n\t\t\t\t\t\"rating\": 5.0,\n\t\t\t\t\t\"bookmark\": [{ id: 432534, time: 65876586 }]\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\tname: \"Dramas\",\n\t\t\tvideos: [\n\t\t\t\t{\n\t\t\t\t\t\"id\": 65432445,\n\t\t\t\t\t\"title\": \"The Chamber\",\n\t\t\t\t\t\"boxart\": \"http://cdn-0.nflximg.com/images/2891/TheChamber.jpg\",\n\t\t\t\t\t\"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n\t\t\t\t\t\"rating\": 4.0,\n\t\t\t\t\t\"bookmark\": []\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"id\": 675465,\n\t\t\t\t\t\"title\": \"Fracture\",\n\t\t\t\t\t\"boxart\": \"http://cdn-0.nflximg.com/images/2891/Fracture.jpg\",\n\t\t\t\t\t\"uri\": \"http://api.netflix.com/catalog/titles/movies/70111470\",\n\t\t\t\t\t\"rating\": 5.0,\n\t\t\t\t\t\"bookmark\": [{ id: 432534, time: 65876586 }]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n```\n\n",
+     "hash": "9093fcd698c5514d",
+     "lang": "typescript",
+     "noteHe": "`movieLists` הוא ערך JSON מציאותי בסגנון תשובת API: מערך של קטגוריות (רשימות סרטים), כשלכל קטגוריה יש `name` (למשל `\"New Releases\"` או `\"Dramas\"`) ומערך `videos`. כל סרט הוא מפה עם השדות `id`, ‏`title`, ‏`boxart` (כתובת תמונת הכרזה), `uri`, ‏`rating` (דירוג מספרי) ו-`bookmark` — מערך שיכול להיות ריק או להכיל מפה מקוננת. זהו מבנה עץ בן שתי רמות: קטגוריות ברמה הראשונה וסרטים ברמה השנייה, והוא ישמש בסיס לתרגילי `map`/`filter`/`reduce` שאחריו."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:17:2",
+     "type": "prose",
+     "en": "This JSON value is a sort of **tree** with two levels - with a list of video objects at the 2nd level.\n\n",
+     "hash": "7366ab18ecdc84ed",
+     "he": "ערך JSON זה הוא מעין **עץ** בן שתי רמות — עם רשימה של אובייקטי וידאו ברמה השנייה."
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:17:3",
+     "type": "prose",
+     "en": "Using only `map(), filter()` and `reduce()` - compute the following values:\n",
+     "hash": "81c9f197fc6a1815",
+     "he": "באמצעות `map(), filter()` ו-`reduce()` בלבד — חשבו את הערכים הבאים:"
+    },
+    {
+     "id": "cm/1.2TypescriptJSON:17:4",
+     "type": "list",
+     "en": "* The number of movies in the \"Dramas\" category\n* The number of movies (in all categories)\n* The list of the names and urls of movies with a rating of 5.0\n\n",
+     "hash": "b6af902cf07f6bdf",
+     "he": "* מספר הסרטים בקטגוריה \"Dramas\"\n* מספר הסרטים (בכל הקטגוריות)\n* רשימת השמות וכתובות ה-url של הסרטים בעלי דירוג 5.0"
+    }
+   ],
+   "headingHe": "JSON"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו ההבדל המרכזי בין ביטוי ליטרלי מורכב (compound literal expression) לבין JSON?",
+   "options": [
+    "ביטוי ליטרלי הוא מנגנון זמן ריצה, ו-JSON הוא חלק מתחביר השפה",
+    "ביטוי ליטרלי הוא חלק מתחביר השפה ונקרא על ידי ה-parser בזמן טעינת התוכנית, ואילו JSON הוא מנגנון זמן ריצה לקריאה וכתיבה של ערכים מורכבים (מקבצים או sockets)",
+    "אין הבדל — JSON הוא שם אחר לביטויים ליטרליים ב-JavaScript",
+    "JSON תומך בפונקציות וב-undefined, ואילו ביטויים ליטרליים לא"
+   ],
+   "correct": 1,
+   "explanationHe": "התשובה הנכונה: ביטויים ליטרליים מורכבים הם חלק מהתחביר של JavaScript — תת-ביטויים בתוכנית שנקראים על ידי המנתח התחבירי (parser) בזמן טעינה/פירוש/קומפילציה ומוערכים לערך מורכב. JSON, לעומת זאת, הוא מנגנון של זמן ריצה (runtime) שמאפשר לתהליך להחליף ערכים מורכבים עם העולם החיצון. מסיח 1 הופך את הכיוונים; מסיח 3 שגוי כי אלה מנגנונים שונים במהותם; מסיח 4 הפוך — דווקא JavaScript תומכת בפונקציות וב-undefined כערכים, ו-JSON אינו תומך בהם."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "אילו מהמתודות הבאות של מערכים הן פונקציות שינוי (mutators)?",
+   "options": [
+    "`concat`, `slice`, `map`",
+    "`sort`, `reverse`, `push`, `pop`, `shift`, `unshift`, `splice`",
+    "`filter`, `reduce`, `forEach`",
+    "רק `push` ו-`pop`"
+   ],
+   "correct": 1,
+   "explanationHe": "`sort`, `reverse`, `push`, `pop`, `shift`, `unshift` ו-`splice` כולן משנות את המערך המקורי במקום (in place). לעומת זאת, `concat` ו-`slice` מחזירות עותק חדש בלי לשנות את המקור, ו-`map`/`filter` מחזירות מערך חדש. `reduce` מחזירה ערך נצבר, ו-`forEach` בעצמה אינה משנה את המערך (אם כי הפונקציה שמועברת אליה עלולה לעשות זאת דרך תופעות לוואי)."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nlet a = [3, 1, 2];\nconsole.log(a.slice(0, 2));\nconsole.log(a);\nconsole.log(a.splice(1));\nconsole.log(a);\n```",
+   "answerHe": "```\n[ 3, 1 ]\n[ 3, 1, 2 ]\n[ 1, 2 ]\n[ 3 ]\n```",
+   "explanationHe": "`slice(0, 2)` מחזירה עותק רדוד של האיברים באינדקסים 0 עד 1 (הגבול העליון לא כלול) — `[3, 1]` — ואינה משנה את `a`, ולכן ההדפסה השנייה היא המערך המקורי `[3, 1, 2]`. לעומת זאת, `splice(1)` היא פונקציית שינוי: היא גוזרת את כל האיברים מאינדקס 1 והלאה, מחזירה אותם (`[1, 2]`), ומשאירה ב-`a` רק את `[3]`. זו בדיוק ההבחנה בין slice (מעתיקה) ל-splice (משנה)."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nlet p = { name: \"Dana\", age: 30 };\nlet s = JSON.stringify(p);\nconsole.log(typeof s);\nlet q = JSON.parse(s);\nconsole.log(typeof q);\nconsole.log(q.age + 1);\n```",
+   "answerHe": "```\nstring\nobject\n31\n```",
+   "explanationHe": "`JSON.stringify` ממירה את המפה למחרוזת בתחביר JSON — לכן `typeof s` הוא `string`. `JSON.parse` מבצעת את הפעולה ההפוכה ומחזירה ערך מורכב חי — לכן `typeof q` הוא `object`. מכיוון ש-`q` הוא שוב מפה רגילה, אפשר לגשת ל-`q.age` (שערכו 30 מספרי, לא מחרוזת) ולחשב `30 + 1 = 31`. שתי המתודות הן פעולות הפוכות זו לזו: ערך ← מחרוזת ← ערך."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "בהינתן מערך `people` שבו לכל אדם יש שדה `age`, מה מחזיר הביטוי הבא כאשר `people` מכיל אנשים בגילאים 23, 25, 24, 27?\n```typescript\npeople.filter(p => p.age > 24).map(p => p.age).reduce((acc, n) => acc + n, 0)\n```",
+   "answerHe": "52",
+   "explanationHe": "זהו שרשור (chaining) של שלוש המתודות המרכזיות: `filter` בוררת את האנשים שגילם גדול מ-24 — נשארים בעלי הגילאים 25 ו-27; `map` ממירה כל אדם למספר גילו — `[25, 27]`; ו-`reduce` עם ערך התחלתי 0 סוכמת: 0+25=25, ואז 25+27=52. תבנית filter-map-reduce היא המקבילה הדקלרטיבית של שאילתת SQL עם WHERE, SELECT ואגרגציה."
+  },
+  {
+   "id": "ex6",
+   "type": "mcq",
+   "questionHe": "מדוע מומלץ שהערך ההתחלתי (initial value) המועבר ל-`reduce()` יהיה איבר נייטרלי של פונקציית הצבירה?",
+   "options": [
+    "כי אחרת `reduce()` זורקת שגיאה בזמן ריצה",
+    "כדי שהערך ההתחלתי לא ישפיע על תוצאת הצבירה — למשל 0 לחיבור ו-1 לכפל — וכך גם מקרה הקצה של מערך ריק יחזיר תוצאה נכונה",
+    "כי הערך ההתחלתי חייב להיות מאותו טיפוס כמו איברי המערך",
+    "כדי לשפר את זמן הריצה של `reduce()`"
+   ],
+   "correct": 1,
+   "explanationHe": "איבר נייטרלי (איבר יחידה) אינו משנה את התוצאה כשהוא משתתף בפעולה: 0 עבור חיבור, 1 עבור כפל. כך הצבירה מתחילה 'ממצב ניטרלי', ובפרט על מערך ריק `reduce` מחזירה ישירות את הערך ההתחלתי — למשל `product([])` ראוי שיחזיר 1, המכפלה הריקה. מסיח 1 שגוי — לא נזרקת שגיאה על ערך התחלתי לא נייטרלי; מסיח 3 שגוי — הצובר יכול להיות מטיפוס שונה מאיברי המערך (למשל צבירת גילאים ממערך של מפות); מסיח 4 שגוי — אין קשר לביצועים."
+  },
+  {
+   "id": "ex7",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nlet arr = [1, [2, 3], {a: 1}, \"x\", true];\narr.forEach(x => console.log(typeof x));\n```",
+   "answerHe": "```\nnumber\nobject\nobject\nstring\nboolean\n```",
+   "explanationHe": "מערכים ב-JavaScript הם הטרוגניים — יכולים להכיל איברים מטיפוסים שונים. הנקודה החשובה: `typeof` על המערך המקונן `[2, 3]` ועל המפה `{a: 1}` מחזיר בשני המקרים `object` — האופרטור `typeof` אינו מבחין בין מערכים למפות. שאר האיברים מחזירים את הטיפוסים הצפויים: `number`, `string`, `boolean`."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "הגדירו את הפונקציה `map(f, arr)` באמצעות `reduce()` בלבד, והסבירו מדוע המימוש עובד.",
+   "answerHe": "```typescript\nconst map = (f, arr) => arr.reduce((acc, x) => acc.concat([f(x)]), []);\n```\nהצובר מתחיל כמערך ריק `[]` (האיבר הנייטרלי של שרשור מערכים). עבור כל איבר `x` במערך, פונקציית הצבירה מחשבת את `f(x)` ומצרפת אותו לסוף הצובר באמצעות `concat` (שמחזירה מערך חדש ואינה משנה את הקיים). בסוף המעבר, הצובר מכיל את `f(x)` עבור כל `x` לפי סדר ההופעה — בדיוק ההגדרה של `map`.",
+   "explanationHe": "נקודות מפתח שחייבות להופיע: (1) הערך ההתחלתי הוא מערך ריק; (2) בכל צעד מפעילים את `f` על האיבר הנוכחי ומצרפים את התוצאה לצובר; (3) שמירה על סדר האיברים; (4) עדיף שימוש בפעולה לא-משנה כמו `concat` (או spread) ברוח התכנות הפונקציונלי. מימוש עם `acc.push(f(x)); return acc` גם נכון פונקציונלית אך משתמש ב-mutation של הצובר."
+  }
+ ]
+}

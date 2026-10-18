@@ -1,0 +1,778 @@
+{
+ "id": "ps/ps6",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps6.md",
+ "titleEn": "Environment Model",
+ "titleHe": "מודל הסביבות",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps6:0",
+   "depth": 1,
+   "headingEn": "Environment Model",
+   "raw": "<h1><b>Environment Model</b></h1>\n\n",
+   "blocks": [],
+   "headingHe": "מודל הסביבות"
+  },
+  {
+   "id": "ps/ps6:1",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #6",
+   "raw": "<h2><b>Practical Session - Week #6</b></h2>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:1:0",
+     "type": "prose",
+     "en": "In this session, we will:\n",
+     "hash": "04e0bdf21d213446",
+     "he": "בתרגול הזה נעשה את הדברים הבאים:"
+    },
+    {
+     "id": "ps/ps6:1:1",
+     "type": "list",
+     "en": "* ***Introduce the environment model***\n\n* ***Understand how to evaluate Scheme expressions in this model***\n\n* ***Learn how to draw environment diagrams and procedure calls***\n\n* ***Distinguish different scoping policies***\n\n",
+     "hash": "06591c207ecb9a28",
+     "he": "* ***נציג את מודל הסביבות***\n\n* ***נבין כיצד להעריך ביטויי Scheme במודל הזה***\n\n* ***נלמד כיצד לצייר דיאגרמות סביבות וקריאות לפרוצדורות***\n\n* ***נבחין בין מדיניויות שונות של תחום הכרה***"
+    },
+    {
+     "id": "ps/ps6:1:2",
+     "type": "prose",
+     "en": "<h3><b>Introduction</b></h3>\n<b>Q:</b> we already learned about the \"Substitution\" evaluation model, why do we need another one?\n\n",
+     "hash": "038639ea07985d33",
+     "he": "<h3><b>מבוא</b></h3>\n<b>ש:</b> כבר למדנו על מודל ההערכה \"הצבה\", אז למה אנחנו צריכים עוד אחד?"
+    },
+    {
+     "id": "ps/ps6:1:3",
+     "type": "prose",
+     "en": "The environment model is an optimization of the substitution applicative model of the operational semantics. \nIt changes the way we map variables to their values.\n",
+     "hash": "8a19f8c4279e5d63",
+     "he": "מודל הסביבות הוא אופטימיזציה של מודל ההצבה בסדר יישומי של הסמנטיקה התפעולית.\nהוא משנה את האופן שבו אנחנו ממפים משתנים לערכיהם."
+    },
+    {
+     "id": "ps/ps6:1:4",
+     "type": "list",
+     "en": "* ***Instead of eagerly substituting variables by their values when we apply a closure, we leave the body of the closure untouched, and maintain an environment data structure on the side.***\n\n* ***The current environment is passed when traversing expressions to evaluate them.***\n\n* ***When we evaluate a procedure expression, we construct a closure value which saves the current env (at time of closure creation).***\n\n* ***When we evaluate an application expression, we construct a new environment - which is made up of the closure environment extended by the mapping of params to args.***\n\n* ***Environments are linked lists of frames.***\n\n* ***An extended environment is constructed by adding a new frame to an existing environment.***\n\n\n\n",
+     "hash": "a86e8253ba714fe3",
+     "he": "* ***במקום להציב בלהיטות את המשתנים בערכיהם כשאנחנו מיישמים closure, אנחנו משאירים את גוף ה-closure ללא שינוי, ומתחזקים מבנה נתונים של סביבה בצד.***\n\n* ***הסביבה הנוכחית מועברת כשסורקים ביטויים כדי להעריך אותם.***\n\n* ***כשאנחנו מעריכים ביטוי פרוצדורה, אנחנו בונים ערך closure ששומר את הסביבה הנוכחית (בזמן יצירת ה-closure).***\n\n* ***כשאנחנו מעריכים ביטוי יישום, אנחנו בונים סביבה חדשה — שמורכבת מסביבת ה-closure מורחבת במיפוי של הפרמטרים לארגומנטים.***\n\n* ***סביבות הן רשימות מקושרות של מסגרות.***\n\n* ***סביבה מורחבת נבנית על ידי הוספת מסגרת חדשה לסביבה קיימת.***"
+    }
+   ],
+   "headingHe": "תרגול — שבוע #6"
+  },
+  {
+   "id": "ps/ps6:2",
+   "depth": 3,
+   "headingEn": "Q: Why do we need to nest environments?",
+   "raw": "<h3><b>Q: Why do we need to nest environments?</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:2:0",
+     "type": "prose",
+     "en": "We do not have a single frame that contains all the variables defined in the body of a closure - instead we may need to lookup\nvariables in other frames.  This is because we construct a new frame only when we enter a new scope.\nA new scope is entered when the interpreter enters a let-exp or when it applies a closure.\nAt this point, the expression we execute in the current scope may refer to variables that come from the enclosing scope - according\nto lexical scoping rules.\n\n",
+     "hash": "e2a1770404276f92",
+     "he": "אין לנו מסגרת יחידה שמכילה את כל המשתנים שמוגדרים בגוף של closure — במקום זאת ייתכן שנצטרך לחפש\nמשתנים במסגרות אחרות. הסיבה היא שאנחנו בונים מסגרת חדשה רק כשאנחנו נכנסים לתחום הכרה חדש.\nנכנסים לתחום הכרה חדש כשהמפרש נכנס ל-let-exp או כשהוא מיישם closure.\nבנקודה הזאת, הביטוי שאנחנו מריצים בתחום ההכרה הנוכחי עשוי להתייחס למשתנים שמגיעים מתחום ההכרה העוטף — בהתאם\nלכללי תחום ההכרה הלקסיקלי."
+    },
+    {
+     "id": "ps/ps6:2:1",
+     "type": "prose",
+     "en": "Consider this program:\n",
+     "hash": "79fa3425398b9c2f",
+     "he": "נבחן את התוכנית הזאת:"
+    },
+    {
+     "id": "ps/ps6:2:2",
+     "type": "code",
+     "en": "```scheme\n(let ((x 1))                ;; Enter scope E1\n  (let ((y (+ x 1)))        ;; Enter scope E2\n    (+ (* y y) x)))\n```\n\n",
+     "hash": "71d1fef98b30215b",
+     "lang": "scheme",
+     "noteHe": "שני let-ים מקוננים שמדגימים למה נחוצה שרשרת מסגרות ולא מסגרת אחת. ה-let החיצוני קושר `x=1` ופותח את E1; הפנימי מחשב `y = (+ x 1) = 2` ופותח את E2. הגוף `(+ (* y y) x)` משתמש בשני המשתנים — `y` מהמסגרת הקרובה ו-`x` מהרחוקה — ומחזיר `4 + 1 = 5`. שימו לב שאילו הייתה רק מסגרת אחת לכל תחום הכרה בלי קישור לעוטפת, ההפניה ל-`x` בגוף הפנימי הייתה נכשלת."
+    },
+    {
+     "id": "ps/ps6:2:3",
+     "type": "prose",
+     "en": "When we compute the body of the inner-let <code>(+ (* y y) x)</code>, variable **y** is defined in the first frame accessible (head of E2),\nand variable **x** is defined in the second frame accessible (head of E1). E1 has E2 as a tail.\n\n\n",
+     "hash": "a7db34785fbb9720",
+     "he": "כשאנחנו מחשבים את הגוף של ה-let הפנימי <code>(+ (* y y) x)</code>, המשתנה **y** מוגדר במסגרת הראשונה הנגישה (בראש E2),\nוהמשתנה **x** מוגדר במסגרת השנייה הנגישה (בראש E1). ל-E1 יש את E2 כזנב."
+    },
+    {
+     "id": "ps/ps6:2:4",
+     "type": "prose",
+     "en": "Consider this program:\n",
+     "hash": "79fa3425398b9c2f",
+     "he": "נבחן את התוכנית הזאת:"
+    },
+    {
+     "id": "ps/ps6:2:5",
+     "type": "code",
+     "en": "```scheme\n(let ((x 1))                ;; Enter scope E1\n  (let ((x (+ x 1)))        ;; Enter scope E2\n    (+ x x)))    \n```\n",
+     "hash": "7b9f5b74e930acc7",
+     "lang": "scheme",
+     "noteHe": "אותו מבנה, אבל הפעם שני ה-let-ים משתמשים באותו שם `x` — וזו הדגמה של הסתרה (shadowing). ה-x הפנימי מקבל את הערך `(+ x 1)`, כאשר ה-`x` שבתוך הביטוי הזה הוא עדיין החיצוני (1), כי ערכי הקשירות מוערכים בסביבה שלפני המסגרת החדשה. לכן `x` הפנימי הוא 2, והגוף `(+ x x)` מחזיר `4`. שימו לב לחשיבות הסדר: אילו ערכי הקשירות היו מוערכים בסביבה החדשה, `(+ x 1)` היה מנסה לקרוא את `x` שעדיין לא אותחל. **תרגיל מחשבה:** מה היה קורה עם `letrec` במקום `let`?"
+    },
+    {
+     "id": "ps/ps6:2:6",
+     "type": "prose",
+     "en": "when we compute the body of the inner-let the  variable **x** that was defined in E1 is hidden by the variable x that was defined in E2\n\n\n",
+     "hash": "6e969a676095d755",
+     "he": "כשאנחנו מחשבים את הגוף של ה-let הפנימי, המשתנה **x** שהוגדר ב-E1 מוסתר על ידי המשתנה x שהוגדר ב-E2"
+    }
+   ],
+   "headingHe": "ש: מדוע אנחנו צריכים לקנן סביבות?"
+  },
+  {
+   "id": "ps/ps6:3",
+   "depth": 3,
+   "headingEn": "Q: Why do we use the closure environment and not the current environment when applying a closure to obtain lexical scoping?",
+   "raw": "<h3><b>Q: Why do we use the closure environment and not the current environment when applying a closure to obtain lexical scoping? </b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:3:0",
+     "type": "prose",
+     "en": "At every step of the computation of an expression, the evaluation function has access to a parameter env which represents the <b>current environment</b>.\n\n",
+     "hash": "c4f8a3a4011d45c2",
+     "he": "בכל שלב בחישוב של ביטוי, לפונקציית ההערכה יש גישה לפרמטר env שמייצג את <b>הסביבה הנוכחית</b>."
+    },
+    {
+     "id": "ps/ps6:3:1",
+     "type": "prose",
+     "en": "When we apply a closure to arguments, we ignore the current environment, and instead evaluate the body of the closure in an environment which extends the \nenvironment stored in the closure with a frame that maps the parameters of the closure to the arguments on which it is applied.\n\n",
+     "hash": "af84fb0c7dc9166e",
+     "he": "כשאנחנו מיישמים closure על ארגומנטים, אנחנו מתעלמים מהסביבה הנוכחית, ובמקום זאת מעריכים את גוף ה-closure בסביבה שמרחיבה את\nהסביבה השמורה ב-closure במסגרת שממפה את הפרמטרים של ה-closure לארגומנטים שעליהם הוא מיושם."
+    },
+    {
+     "id": "ps/ps6:3:2",
+     "type": "prose",
+     "en": "Consider this snippet:\n",
+     "hash": "f52057c658f605df",
+     "he": "נבחן את הקטע הזה:"
+    },
+    {
+     "id": "ps/ps6:3:3",
+     "type": "code",
+     "en": "```scheme\n(define make-adder\n  (lambda (c)\n    (lambda (x) (+ x c))))\n\n(let ((a3 (make-adder 3)))  ;; E1\n  (let ((c 1))              ;; E2\n    (a3 2)))\n```\n\n",
+     "hash": "a3ffc59fd151dc61",
+     "lang": "scheme",
+     "noteHe": "דוגמה שנועדה להעמיד למבחן את שאלת הסביבה. `make-adder` היא מפעל closures מוכר: היא מקבלת `c` ומחזירה `(lambda (x) (+ x c))`, שבו `c` חופשי. ב-E1 נוצר `a3` בערך `(make-adder 3)`, כלומר closure שזוכר `c=3`. ב-E2 מוגדר משתנה **חדש** בשם `c` בערך `1` — שם שמתנגש בכוונה עם המשתנה החופשי של ה-closure. השאלה: כשמפעילים `(a3 2)`, איזה `c` ייראה? התשובה הנכונה היא `3` (מסביבת היצירה), ולכן התוצאה `5`. אילו היינו משתמשים בסביבה הנוכחית היינו מקבלים `3`. **זו אותה דוגמה מבנית שראינו ב-2.7, בגרסה קומפקטית יותר.**"
+    },
+    {
+     "id": "ps/ps6:3:4",
+     "type": "prose",
+     "en": "We observe in this program a risk that the variable `c` which appears free in the body of the closure returned when computing <code>(lambda (x) (+ x c))</code>\ncould be captured in the `let` of E2.\n\n",
+     "hash": "e446b0efe6098898",
+     "he": "אנחנו מבחינים בתוכנית הזאת בסיכון שהמשתנה `c`, שמופיע חופשי בגוף ה-closure שמוחזר בחישוב <code>(lambda (x) (+ x c))</code>,\nעלול להילכד ב-`let` של E2."
+    },
+    {
+     "id": "ps/ps6:3:5",
+     "type": "prose",
+     "en": "<h4><b>How does this program work in the substitution model</b></h4>\n\n",
+     "hash": "b2f84f29b5d72998",
+     "he": "<h4><b>כיצד התוכנית הזאת עובדת במודל ההצבה</b></h4>"
+    },
+    {
+     "id": "ps/ps6:3:6",
+     "type": "code",
+     "en": "```\napplicative-eval[ (let ((a3 (make-adder 3)))\n                     (let ((c 1))\n                        (a3 2))] ==>\n\napplicative-eval[ ((lambda (a3) (let ((c 1)) (a3 2))) (make-adder 3))] ==>\n\n   applicative-eval[ (lambda (a3) (let ((c 1)) (a3 2))) ] ==>\n      closure <a3> (let ((c 1)) (a3 2))) ==>\n\n   applicative-eval[ (make-adder 3) ] ==>\n      applicative-eval[ make-adder ] ==> <closure <c> (lambda (x) (+ x c))>\n      applicative-eval[3] ==> 3\n   ==>\n   applicative-eval[(lambda (x) (+ x 3))] ==> <closure (x) (+ x 3)>\n\napplicative-eval[(let ((c 1)) (<closure (x) (+ x 3)> 2))] ==>\napplicative-eval[((lambda (c) (<closure (x) (+ x 3)> 2)) 1)] ==>\n   \n   applicative-eval[(lambda (c) (<closure (x) (+ x 3)> 2)] \n      ==> <closure (c) (<closure (x) (+ x 3)> 2)>\n   applicative-eval[1]\n      ==> 1\n   ...\n   applicative-eval[ (+ 2 3) ] ==>\n      applicative-eval[+] ==> <prime-op +>\n      applicative-eval[2] ==> 2\n      applicative-eval[3] ==> 3\n==> 5\n```\n\n",
+     "hash": "642cb2bfb6b87890",
+     "noteHe": "הגזירה במודל ההצבה, שמסתיימת ב-`5`. שימו לב לשלב הראשון: `let` נפרס תחילה ליישום של lambda (סוכר תחבירי), ורק אז מופעל כלל היישום הרגיל. הנקודה המכריעה נמצאת בשורה `applicative-eval[(lambda (x) (+ x 3))]`: **כבר בשלב הזה** ה-`c` הוחלף ב-`3` בתוך גוף ה-lambda הפנימית, מפני שיישום `make-adder` הציב את הארגומנט בגוף. לכן כשמגיעים ל-`let` של `c=1`, כבר לא נותר בקוד שום `c` להחליף — הביטוי הוא `(+ x 3)` ולא `(+ x c)`. במילים אחרות: **במודל ההצבה הלכידה נמנעת מאליה**, כי המשתנה החופשי כבר \"נצרב\" לערכו לפני שנוצרה ההתנגשות. זו הסיבה שמודל ההצבה לא נזקק לשדה env ב-closure. (בקוד יש כמה טעויות הקלדה קלות: סוגריים לא מאוזנים בשורות אחדות ו-`prime-op` במקום `prim-op`.)"
+    },
+    {
+     "id": "ps/ps6:3:7",
+     "type": "prose",
+     "en": "<h4><b>How does it work in the environment model</b></h4>\n\n",
+     "hash": "6d73fda09ea2d670",
+     "he": "<h4><b>כיצד זה עובד במודל הסביבות</b></h4>"
+    },
+    {
+     "id": "ps/ps6:3:8",
+     "type": "code",
+     "en": "```scheme\n(let ((a3 (make-adder 3))) ;;E1\n  (let ((c 1))             ;;E2\n    (a3 2)))               ;;E3\n```\n\n",
+     "hash": "d39e09aa24fcab30",
+     "lang": "scheme",
+     "noteHe": "אותה תוכנית, מסומנת הפעם בשלוש הסביבות שייווצרו: E1 (מה-let החיצוני), E2 (מה-let הפנימי) ו-E3 (מיישום ה-closure `a3`). הסימון הזה יעזור לעקוב אחרי השאלה המרכזית: את מי E3 מרחיבה — את E2 (הסביבה הנוכחית) או את הסביבה ששמורה ב-`a3`?"
+    },
+    {
+     "id": "ps/ps6:3:9",
+     "type": "prose",
+     "en": "when evaluating the body of the inner **let** <code>(a3 2)</code>:\n\n",
+     "hash": "a559dfb02307f61f",
+     "he": "כשמעריכים את הגוף של ה-**let** הפנימי <code>(a3 2)</code>:"
+    },
+    {
+     "id": "ps/ps6:3:10",
+     "type": "prose",
+     "en": "If we use the current environment, we will use E2 to evaluate **c** in <code>(lambda (x) (+ x c))</code> and get <code>(+ 2 1)</code>\n\n",
+     "hash": "a001cf7b27754a6f",
+     "he": "אם נשתמש בסביבה הנוכחית, נשתמש ב-E2 כדי להעריך את **c** בתוך <code>(lambda (x) (+ x c))</code> ונקבל <code>(+ 2 1)</code>"
+    },
+    {
+     "id": "ps/ps6:3:11",
+     "type": "prose",
+     "en": "If we use the closure's environment, we will use E1 to evaluate **c** in <code>(lambda (x) (+ x c))</code> and get <code>(+ 2 3)</code>\n\n\n",
+     "hash": "14878ead73508042",
+     "he": "אם נשתמש בסביבה של ה-closure, נשתמש ב-E1 כדי להעריך את **c** בתוך <code>(lambda (x) (+ x c))</code> ונקבל <code>(+ 2 3)</code>"
+    }
+   ],
+   "headingHe": "ש: מדוע אנחנו משתמשים בסביבת ה-closure ולא בסביבה הנוכחית ביישום closure, כדי לקבל תחום הכרה לקסיקלי?"
+  },
+  {
+   "id": "ps/ps6:4",
+   "depth": 3,
+   "headingEn": "Environment Diagrams",
+   "raw": "<h3><b>Environment Diagrams</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:4:0",
+     "type": "prose",
+     "en": "We exercise the drawing of environment diagrams in the box-env model presented in class.\n\n",
+     "hash": "528a4faa141375ce",
+     "he": "נתרגל ציור של דיאגרמות סביבות במודל ה-box-env שהוצג בכיתה."
+    },
+    {
+     "id": "ps/ps6:4:1",
+     "type": "prose",
+     "en": "<h4><b>Definitions</b></h4>\n\n",
+     "hash": "113c2582cb84c571",
+     "he": "<h4><b>הגדרות</b></h4>"
+    },
+    {
+     "id": "ps/ps6:4:2",
+     "type": "list",
+     "en": "* <b>Frame:</b> mapping variables to values.  Displayed as a rectangle with bindings x:val.\n\n* <b>Environment:</b> finite linked list of frames, where the last frame is the frame of the global \nenvironment (GE).\n\n* <b>Enclosing environment of E:</b> E excluding its first frame.\n\n* <b>Variable x's value in E:</b> the value of x in the first frame it is defined in.\n\n",
+     "hash": "5739017b10c4e998",
+     "he": "* <b>מסגרת (Frame):</b> מיפוי של משתנים לערכים. מוצגת כמלבן עם קשירות x:val.\n\n* <b>סביבה (Environment):</b> רשימה מקושרת סופית של מסגרות, שבה המסגרת האחרונה היא המסגרת של הסביבה\nהגלובלית (GE).\n\n* <b>הסביבה העוטפת של E:</b> ‏E בלי המסגרת הראשונה שלה.\n\n* <b>הערך של המשתנה x ב-E:</b> הערך של x במסגרת הראשונה שבה הוא מוגדר."
+    },
+    {
+     "id": "ps/ps6:4:3",
+     "type": "prose",
+     "en": "When a define expression is evaluated, a new binding is added to the GE single frame.\n![image:1_1.PNG](resources/ps6/1_1.png)\n\n",
+     "hash": "260687aab57bf97c",
+     "he": "כשמוערך ביטוי define, נוספת קשירה חדשה למסגרת היחידה של ה-GE.\n![image:1_1.PNG](resources/ps6/1_1.png)"
+    },
+    {
+     "id": "ps/ps6:4:4",
+     "type": "list",
+     "en": "* <b>Closure:</b> a complex data structure, composed of parameters, body, and env at the time the lambda expression was evaluated.\nDisplayed as a double circle, with body and params written below, and second circle pointing to the env.\n\n",
+     "hash": "5c0cee655a9fd073",
+     "he": "* <b>Closure:</b> מבנה נתונים מורכב, שמורכב מפרמטרים, מגוף, ומהסביבה בזמן שבו ביטוי ה-lambda הוערך.\nמוצג כעיגול כפול, כשהגוף והפרמטרים כתובים מתחת, והעיגול השני מצביע על הסביבה."
+    },
+    {
+     "id": "ps/ps6:4:5",
+     "type": "image",
+     "en": "![image:1_2.PNG](resources/ps6/1_2.png)\n\n",
+     "hash": "c5ea92fe7a58abc9"
+    },
+    {
+     "id": "ps/ps6:4:6",
+     "type": "list",
+     "en": "* <b>Procedure call:</b> when a closure f with parameters <code>x1...xn</code> is called with values <code>v1...vn</code>:\n\n   * The evaluation algorithm extends the closure's env with a new frame including the mapping from \n   <code>x1...xn</code> to <code>v1...vn</code>. \n   \n   * In the diagram, we assign a number to the environments to reflect the order in which they are created during the evaluation of the program. (Ei+1)\n   \n   * This new frame extends the env in the closure f (according to lexical scoping rule)\n   \n   * The new environment has a control link which indicates to which environment control returns when the evaluation of the body will complete.  This is marked with a dotted line.\n\n\n",
+     "hash": "a522fa501f2aee13",
+     "he": "* <b>קריאה לפרוצדורה:</b> כאשר closure ‏f עם פרמטרים <code>x1...xn</code> נקרא עם ערכים <code>v1...vn</code>:\n\n   * אלגוריתם ההערכה מרחיב את הסביבה של ה-closure במסגרת חדשה שכוללת את המיפוי מ-\n   <code>x1...xn</code> ל-<code>v1...vn</code>.\n   \n   * בדיאגרמה, אנחנו מקצים מספר לסביבות כדי לשקף את הסדר שבו הן נוצרות במהלך הערכת התוכנית. ‏(Ei+1)\n   \n   * המסגרת החדשה הזאת מרחיבה את הסביבה שב-closure ‏f (בהתאם לכלל תחום ההכרה הלקסיקלי)\n   \n   * לסביבה החדשה יש קישור בקרה שמציין לאיזו סביבה תחזור הבקרה כשהערכת הגוף תסתיים. זה מסומן בקו מקווקו."
+    },
+    {
+     "id": "ps/ps6:4:7",
+     "type": "prose",
+     "en": "<h4><b>Env Diagram Example 1: Recursion</b></h4>\n\n",
+     "hash": "f88ddd377f107c50",
+     "he": "<h4><b>דוגמה 1 לדיאגרמת סביבות: רקורסיה</b></h4>"
+    },
+    {
+     "id": "ps/ps6:4:8",
+     "type": "image",
+     "en": "![image:2_1.PNG](resources/ps6/2_1.png)\n\n",
+     "hash": "f7fc81ccfb60c3d3"
+    },
+    {
+     "id": "ps/ps6:4:9",
+     "type": "prose",
+     "en": "Notice how the closure is pointing to the GE, and so each call to this closure (including recursive ones) will extend the GE. The depth of the recursion is represented by the control links.\nSuccessive recursive calls return in sequential order (Ei+1 control link points to Ei).\n\n",
+     "hash": "271bc18c134ebb52",
+     "he": "שימו לב כיצד ה-closure מצביע ל-GE, ולכן כל קריאה ל-closure הזה (כולל הקריאות הרקורסיביות) תרחיב את ה-GE. עומק הרקורסיה מיוצג על ידי קישורי הבקרה.\nקריאות רקורסיביות עוקבות חוזרות בסדר סדרתי (קישור הבקרה של Ei+1 מצביע ל-Ei)."
+    },
+    {
+     "id": "ps/ps6:4:10",
+     "type": "prose",
+     "en": "<h4><b>Env Diagram Example 2: Definition and application</b></h4>\n\n",
+     "hash": "d84835424d4641ff",
+     "he": "<h4><b>דוגמה 2 לדיאגרמת סביבות: הגדרה ויישום</b></h4>"
+    },
+    {
+     "id": "ps/ps6:4:11",
+     "type": "prose",
+     "en": "Consider another example:\n\n",
+     "hash": "dff93dde713611ab",
+     "he": "נבחן דוגמה נוספת:"
+    },
+    {
+     "id": "ps/ps6:4:12",
+     "type": "image",
+     "en": "![image:3_1.PNG](resources/ps6/3_1.png)\n\n",
+     "hash": "a941ff31c8879a31"
+    },
+    {
+     "id": "ps/ps6:4:13",
+     "type": "image",
+     "en": "![image:3_2.PNG](resources/ps6/3_2.png)\n\n",
+     "hash": "8ba993600cad794a"
+    },
+    {
+     "id": "ps/ps6:4:14",
+     "type": "prose",
+     "en": "<h4><b>Env Diagram Example 3: Definition and Let</b></h4>\n\n",
+     "hash": "79e9b257a0bbfaef",
+     "he": "<h4><b>דוגמה 3 לדיאגרמת סביבות: הגדרה ו-Let</b></h4>"
+    },
+    {
+     "id": "ps/ps6:4:15",
+     "type": "prose",
+     "en": "When we encounter a \"let\" expression, we can convert it to a lambda expression which we already know how to handle.\n\n",
+     "hash": "78cb19fb4fe448a2",
+     "he": "כשאנחנו נתקלים בביטוי \"let\", אנחנו יכולים להמיר אותו לביטוי lambda שאנחנו כבר יודעים לטפל בו."
+    },
+    {
+     "id": "ps/ps6:4:16",
+     "type": "image",
+     "en": "![image:4_1.PNG](resources/ps6/4_1.png)\n\n",
+     "hash": "f62976b1e4a7118e"
+    },
+    {
+     "id": "ps/ps6:4:17",
+     "type": "image",
+     "en": "![image:4_2.PNG](resources/ps6/4_2.png)\n\n",
+     "hash": "aea70a6baa42835f"
+    },
+    {
+     "id": "ps/ps6:4:18",
+     "type": "prose",
+     "en": "<b>Q: </b>which environments and which procedures will remain in the end of the evaluation?\n\n",
+     "hash": "074494086a478a16",
+     "he": "<b>ש: </b>אילו סביבות ואילו פרוצדורות יישארו בסוף ההערכה?"
+    },
+    {
+     "id": "ps/ps6:4:19",
+     "type": "prose",
+     "en": "The closures f and p will remain.\nE3 will finish its evaluation and return to E2, which will finish and return to E1, which will finish and return to the GE.\nE1, E2, E3 will disappear since no accessible data structure refers to them anymore.\n\n",
+     "hash": "d40bb9e6e50202d1",
+     "he": "ה-closures ‏f ו-p יישארו.\n‏E3 תסיים את ההערכה שלה ותחזור ל-E2, שתסיים ותחזור ל-E1, שתסיים ותחזור ל-GE.\n‏E1, ‏E2, ‏E3 ייעלמו מכיוון ששום מבנה נתונים נגיש אינו מפנה אליהן יותר."
+    },
+    {
+     "id": "ps/ps6:4:20",
+     "type": "prose",
+     "en": "<h4><b>Env Diagram Example 4: Inferring code from a diagram</b></h4>\nWhat program will generate the following environment diagram?\n\n",
+     "hash": "91ac1aca068f486e",
+     "he": "<h4><b>דוגמה 4 לדיאגרמת סביבות: שחזור קוד מתוך דיאגרמה</b></h4>\nאיזו תוכנית תייצר את דיאגרמת הסביבות הבאה?"
+    },
+    {
+     "id": "ps/ps6:4:21",
+     "type": "image",
+     "en": "![image:PS6_code_restoring.JPG](resources/ps6/PS6_code_restoring.jpg)\n\n",
+     "hash": "3e2758ebe8fb7e11"
+    },
+    {
+     "id": "ps/ps6:4:22",
+     "type": "prose",
+     "en": "We can notice that the structure is serial, which implies nested applications of procedures.\n\n",
+     "hash": "7c57b1e4b0189045",
+     "he": "אנחנו יכולים לשים לב שהמבנה הוא סדרתי, מה שמרמז על יישומים מקוננים של פרוצדורות."
+    },
+    {
+     "id": "ps/ps6:4:23",
+     "type": "prose",
+     "en": "Each environment extends the previous one.\n\n",
+     "hash": "52af3ee0903b3c6f",
+     "he": "כל סביבה מרחיבה את הקודמת לה."
+    },
+    {
+     "id": "ps/ps6:4:24",
+     "type": "prose",
+     "en": "The following code will produce the environment diagram from above:\n",
+     "hash": "2e63ba50d428b586",
+     "he": "הקוד הבא ייצר את דיאגרמת הסביבות שלמעלה:"
+    },
+    {
+     "id": "ps/ps6:4:25",
+     "type": "code",
+     "en": "```scheme\n(define x 5)\n\n(let ((a 2))\n  (let ((b 3))\n     (let ((c 4))\n        (+ x a b c))))\n```\n\n\n",
+     "hash": "25748f3ea247e1d9",
+     "lang": "scheme",
+     "noteHe": "הפתרון לתרגיל השחזור. שלושה let-ים מקוננים מייצרים שרשרת סדרתית של שלוש סביבות — E1 עם `{a=2}`, E2 עם `{b=3}`, E3 עם `{c=4}` — כשכל אחת מרחיבה את קודמתה, ומתחת לכולן ה-GE עם `{x=5}`. הגוף הפנימי `(+ x a b c)` נוגע במשתנה אחד מכל מסגרת בשרשרת, ולכן מחייב את כולן להישאר נגישות; התוצאה היא `5+2+3+4 = 14`. **איך זיהינו את המבנה מהדיאגרמה:** צורה \"שרשרתית\" בלי הסתעפויות ובלי closures שנוצרו בסביבות פנימיות מעידה על קינון פשוט; אילו היה מדובר בפונקציות, היינו רואים עיגולים כפולים וחצים חוזרים ל-GE. שימו לב שאותה דיאגרמה בדיוק הייתה מתקבלת גם משלושה יישומי lambda מקוננים, שכן `let` הוא סוכר תחבירי עבורם."
+    }
+   ],
+   "headingHe": "דיאגרמות סביבות"
+  },
+  {
+   "id": "ps/ps6:5",
+   "depth": 3,
+   "headingEn": "Pair Data Structure using Closures",
+   "raw": "<h3><b>Pair Data Structure using Closures</b></h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:5:0",
+     "type": "prose",
+     "en": "<h4><b>Env Diagram Example 4: lazy procedural pair implementation</b></h4>\n\n",
+     "hash": "e4e2fd354b007b78",
+     "he": "<h4><b>דוגמה 4 לדיאגרמת סביבות: מימוש עצל ופרוצדורלי של זוג</b></h4>"
+    },
+    {
+     "id": "ps/ps6:5:1",
+     "type": "prose",
+     "en": "<b>Part A:</b>\n\n",
+     "hash": "5b5ac0972d29a40d",
+     "he": "<b>חלק א:</b>"
+    },
+    {
+     "id": "ps/ps6:5:2",
+     "type": "image",
+     "en": "![image:5_1.PNG](resources/ps6/5_1.png)\n\n",
+     "hash": "1963041baf491afd"
+    },
+    {
+     "id": "ps/ps6:5:3",
+     "type": "image",
+     "en": "![image:5_2.PNG](resources/ps6/5_2.png)\n\n",
+     "hash": "95c1dbf90b0a4f19"
+    },
+    {
+     "id": "ps/ps6:5:4",
+     "type": "prose",
+     "en": "Notice p1 is a closure expecting a selector procedure. \nWhen we call p1, the env we extend will be E1, which is why we see x, y.\n\n",
+     "hash": "8fea6962a2b53121",
+     "he": "שימו לב ש-p1 הוא closure שמצפה לפרוצדורת בורר (selector).\nכשאנחנו קוראים ל-p1, הסביבה שנרחיב תהיה E1, ולכן אנחנו רואים את x, y."
+    },
+    {
+     "id": "ps/ps6:5:5",
+     "type": "prose",
+     "en": "<b>Part B:</b>\nWe will display a call to p1 with a selector:\n\n\n",
+     "hash": "9793c6b76903f801",
+     "he": "<b>חלק ב:</b>\nנציג קריאה ל-p1 עם בורר:"
+    },
+    {
+     "id": "ps/ps6:5:6",
+     "type": "image",
+     "en": "![image:6_1.PNG](resources/ps6/6_1.png)\n\n",
+     "hash": "ab7c48add0ae6cf5"
+    },
+    {
+     "id": "ps/ps6:5:7",
+     "type": "prose",
+     "en": "Watch the evaluation process:\n\n",
+     "hash": "0563af98600b038f",
+     "he": "עקבו אחרי תהליך ההערכה:"
+    },
+    {
+     "id": "ps/ps6:5:8",
+     "type": "list",
+     "en": "* There is a new closure created, which is the value of \"sel\" in the new env \"E2\".\n\n* The enclosing env of E2 is E1, which is why it was created by calling B2 - the only closure whose env is E1.\n\n* Parameter names in the new env, E3, present the parameter names in the code we build.\nfurthermore, the fact that E3 points to the GE shows us this env was created in the GE (not in a lambda or Let expression).\n\n",
+     "hash": "68a47668e12709d1",
+     "he": "* נוצר closure חדש, שהוא הערך של \"sel\" בסביבה החדשה \"E2\".\n\n* הסביבה העוטפת של E2 היא E1, ולכן היא נוצרה על ידי קריאה ל-B2 — ה-closure היחיד שסביבתו היא E1.\n\n* שמות הפרמטרים בסביבה החדשה, E3, מציגים את שמות הפרמטרים בקוד שאנחנו בונים.\nיתרה מזאת, העובדה ש-E3 מצביעה ל-GE מראה לנו שהסביבה הזאת נוצרה ב-GE (ולא בביטוי lambda או Let)."
+    },
+    {
+     "id": "ps/ps6:5:9",
+     "type": "prose",
+     "en": "What line of code needs to be added to produce this diagram?\n\n",
+     "hash": "ee2afaabe9621426",
+     "he": "איזו שורת קוד יש להוסיף כדי לייצר את הדיאגרמה הזאת?"
+    },
+    {
+     "id": "ps/ps6:5:10",
+     "type": "prose",
+     "en": "Accordingly, the env diagram for this evaluation is:\n\n",
+     "hash": "298967577d0e6714",
+     "he": "בהתאם לכך, דיאגרמת הסביבות של ההערכה הזאת היא:"
+    },
+    {
+     "id": "ps/ps6:5:11",
+     "type": "code",
+     "en": "```scheme\n(p1 (lambda (a b) a))\n```\n\n",
+     "hash": "346961c7578583de",
+     "lang": "scheme",
+     "noteHe": "הפתרון: שורת הקוד שחסרה היא הפעלת `p1` על בורר. `(lambda (a b) a)` הוא הבורר שמחזיר את האיבר הראשון — בדיוק התבנית של `pair-first` מ-2.7. שימו לב לשמות הפרמטרים `a` ו-`b`: אלה בדיוק השמות שהופיעו במסגרת E3 בדיאגרמה, וזה מה שאיפשר לשחזר את הקוד. שימו לב גם שהיישום מתבצע ברמה הגלובלית, ולכן E3 מצביעה ל-GE — רמז נוסף שהופיע בדיאגרמה. **שיטת העבודה בשאלות שחזור:** קוראים מהדיאגרמה את שמות הפרמטרים בכל מסגרת, את הסביבה שכל מסגרת מרחיבה, ואת הסביבה שכל closure מצביע אליה — ומהם משחזרים את המבנה הלקסיקלי של הקוד."
+    },
+    {
+     "id": "ps/ps6:5:12",
+     "type": "prose",
+     "en": "<b>Q: </b>which env and closures will remain at the end of the evaluation?\n",
+     "hash": "ae2bd90786cfdf80",
+     "he": "<b>ש: </b>אילו סביבות ו-closures יישארו בסוף ההערכה?"
+    }
+   ],
+   "headingHe": "מבנה נתונים \"זוג\" בעזרת closures"
+  },
+  {
+   "id": "ps/ps6:6",
+   "depth": 3,
+   "headingEn": "set!",
+   "raw": "<h3>set!</h3>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:6:0",
+     "type": "prose",
+     "en": "set! is a way to change the value of a variable.\nfor example : \n\n",
+     "hash": "bd4fa424f3658bdb",
+     "he": "‏set! הוא דרך לשנות את הערך של משתנה.\nלדוגמה:"
+    },
+    {
+     "id": "ps/ps6:6:1",
+     "type": "code",
+     "en": "```scheme\n>(define x 5)\n>x\n5\n>(set! x 80)\n>x\n80\n```\n\n",
+     "hash": "304ded1966eeba9c",
+     "lang": "scheme",
+     "noteHe": "הרצה ב-REPL שמדגימה את `set!`. תחילה `(define x 5)` יוצר את הקשירה, והערכת `x` מחזירה `5`. אחר כך `(set! x 80)` **משנה** את הערך של הקשירה הקיימת, והערכת `x` מחזירה עכשיו `80`. שימו לב להבדל המהותי בין `define` ל-`set!`: `define` יוצר קשירה חדשה, `set!` משנה קשירה קיימת (ותיכשל אם המשתנה אינו מוגדר). שימו לב גם ש-`set!` אינו מחזיר ערך שימושי — הוא קיים רק בשביל תופעת הלוואי, ולכן ה-REPL אינו מדפיס דבר אחריו. **מוסכמה שכדאי להכיר:** סימן הקריאה בסוף שם ב-Scheme מסמן פונקציה שמשנה מצב."
+    }
+   ],
+   "headingHe": "‏!set"
+  },
+  {
+   "id": "ps/ps6:7",
+   "depth": 2,
+   "headingEn": "Box",
+   "raw": "<h2><b>Box</b></h2>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:7:0",
+     "type": "prose",
+     "en": "Boxing in scheme is required to wrap a variable in a box, so we can access it through the box, but also change the value inside that box.\nA natural way to look at boxes is like pointers, which we can access data through but the data inside can be changed.\n\n",
+     "hash": "39bcc6433883c340",
+     "he": "‏Boxing ב-scheme נדרש כדי לעטוף משתנה בקופסה, כך שנוכל לגשת אליו דרך הקופסה, אבל גם לשנות את הערך שבתוך אותה קופסה.\nדרך טבעית להסתכל על קופסאות היא כעל מצביעים, שדרכם אנחנו יכולים לגשת לנתונים, אבל הנתונים שבפנים יכולים להשתנות."
+    },
+    {
+     "id": "ps/ps6:7:1",
+     "type": "prose",
+     "en": "In the <b>box environment model</b>, we use boxing to enable mutation.  We saw in the lecture why we needed mutation to properly model recursion (letrec) and \nmodel the global environment with forward usage of global variables and global mutual recursive procedures.\n\n",
+     "hash": "ff79780d6b38bc65",
+     "he": "ב<b>מודל סביבת הקופסאות (box environment model)</b>, אנחנו משתמשים ב-boxing כדי לאפשר שינוי מצב. ראינו בהרצאה מדוע היינו זקוקים לשינוי מצב כדי למדל כראוי רקורסיה (letrec) ולמדל\nאת הסביבה הגלובלית עם שימוש קדימה במשתנים גלובליים ועם פרוצדורות רקורסיביות הדדית גלובליות."
+    },
+    {
+     "id": "ps/ps6:7:2",
+     "type": "prose",
+     "en": "In the box environment model variables are bound to boxes that contain a value, instead of mapping variables directly to values.\nIn addition, the global environment is modeled in a special way that allows addition of a binding (with a method add-binding!).\n\n",
+     "hash": "bca9769dc825e946",
+     "he": "במודל סביבת הקופסאות, משתנים קשורים לקופסאות שמכילות ערך, במקום שימופו ישירות לערכים.\nבנוסף, הסביבה הגלובלית ממודלת באופן מיוחד שמאפשר הוספה של קשירה (בעזרת המתודה add-binding!‎)."
+    },
+    {
+     "id": "ps/ps6:7:3",
+     "type": "prose",
+     "en": "Motivation: we want to support mutation in the language we implement.\nNote that at this point, all the variables are immutable - we can create a new variable and bind it to a value, but we cannot change its value.\nIn some cases, we want to be able to change the value of an existing variable.\n\n",
+     "hash": "0d07683bc10b3e61",
+     "he": "מוטיבציה: אנחנו רוצים לתמוך בשינוי מצב בשפה שאנחנו מממשים.\nשימו לב שבנקודה הזאת כל המשתנים בלתי־משתנים — אנחנו יכולים ליצור משתנה חדש ולקשור אותו לערך, אבל איננו יכולים לשנות את ערכו.\nבמקרים מסוימים, אנחנו רוצים להיות מסוגלים לשנות את הערך של משתנה קיים."
+    },
+    {
+     "id": "ps/ps6:7:4",
+     "type": "prose",
+     "en": "Example: a counter.\n\n",
+     "hash": "4f20f28bbf2ac7b0",
+     "he": "דוגמה: מונה."
+    },
+    {
+     "id": "ps/ps6:7:5",
+     "type": "list",
+     "en": "1) How do we do this in Scheme?\n\n",
+     "hash": "b593d0df1d2f098f",
+     "he": "1) כיצד עושים זאת ב-Scheme?"
+    },
+    {
+     "id": "ps/ps6:7:6",
+     "type": "prose",
+     "en": "We use the box data type which has the following interface:\n",
+     "hash": "68d9156e3d866d2d",
+     "he": "אנחנו משתמשים בטיפוס הנתונים box, שיש לו את הממשק הבא:"
+    },
+    {
+     "id": "ps/ps6:7:7",
+     "type": "code",
+     "en": "```scheme\n(box v)\n(box? x)\n(unbox b)\n(set-box! b v)\n```\n\n",
+     "hash": "1b343bc51b61fcca",
+     "lang": "scheme",
+     "noteHe": "ארבע הפעולות של טיפוס `box` ב-Scheme, המקבילות ל-`makeBox`/`isBox`/`unbox`/`setBox` שראינו ב-TypeScript ב-2.8. `(box v)` יוצר קופסה סביב ערך, `(box? x)` הוא פרדיקט טיפוס, `(unbox b)` שולף את הערך, ו-`(set-box! b v)` **משנה** את התוכן. שימו לב לסימן הקריאה ב-`set-box!` — המוסכמה שמסמנת שינוי מצב."
+    },
+    {
+     "id": "ps/ps6:7:8",
+     "type": "prose",
+     "en": "Box works like a pointer to an existing variable.\n\n",
+     "hash": "c04c60798776f0bc",
+     "he": "‏Box עובד כמו מצביע למשתנה קיים."
+    },
+    {
+     "id": "ps/ps6:7:9",
+     "type": "prose",
+     "en": "Example application - let us create a counter object.\n\n",
+     "hash": "ebf241d7177360c4",
+     "he": "דוגמה ליישום — נבנה אובייקט מונה."
+    },
+    {
+     "id": "ps/ps6:7:10",
+     "type": "code",
+     "en": "```scheme\n(define make-counter\n  (lambda ()\n    (let ((count (box 0)))\n      (lambda (msg)\n        (cond ((eq? msg 'get) (unbox count))\n              ((eq? msg 'inc!) (set-box! count (+ 1 (unbox count))))\n              ((eq? msg 'reset!) (set-box! count 0))\n              (else (error \"unknown message to counter\")))))))\n```\n\n",
+     "hash": "b54a98c55f0cd5a1",
+     "lang": "scheme",
+     "noteHe": "מונה אמיתי — סוף־סוף אובייקט עם מצב שמשתנה. `make-counter` אינה מקבלת פרמטרים; היא פותחת `let` שקושר את `count` ל**קופסה** שמכילה `0`, ומחזירה closure עם שיגור הודעות. שלוש ההודעות: `'get` שולפת עם `unbox`; `'inc!` מגדילה עם `set-box!`; `'reset!` מאפסת. שימו לב מדוע הקופסה הכרחית: אילו `count` היה קשור ישירות ל-`0`, לא הייתה שום דרך לשנות אותו — כל הקשירות בשפה בלתי־משתנות. הקופסה מוסיפה שכבת עקיפין שאותה כן אפשר לשנות. **השוו ל-make-counter מ-2.7:** שם ה\"מונה\" תמיד החזיר את אותו ערך; כאן הוא באמת סופר. שימו לב גם שכל קריאה ל-`make-counter` יוצרת `let` **חדש** ולכן קופסה חדשה — כלומר שני מונים עצמאיים לחלוטין, וזו בדיוק ההתנהגות של אובייקטים בתכנות מונחה־עצמים. ה-`else` עם `error` מטפל בהודעה לא מוכרת — שיפור על דוגמת ה-pair שהשמיטה את המקרה הזה."
+    },
+    {
+     "id": "ps/ps6:7:11",
+     "type": "prose",
+     "en": "This counter works with the same pattern as the make-pair example we saw in class: it is a closure factory with a message dispatch body.\nThe functional interface of the counter is:\n\n",
+     "hash": "c7472e4ac00edd40",
+     "he": "המונה הזה עובד באותה תבנית כמו דוגמת make-pair שראינו בכיתה: זהו מפעל closures עם גוף של שיגור הודעות.\nהממשק הפונקציונלי של המונה הוא:"
+    },
+    {
+     "id": "ps/ps6:7:12",
+     "type": "code",
+     "en": "```scheme\n;; Type: [Counter -> Number]\n(define counter-get\n  (lambda (counter) (counter 'get)))\n\n;; Type: [Counter -> Void]\n(define counter-inc!\n  (lambda (counter) (counter 'inc!)))\n\n;; Type: [Counter -> Void]\n(define counter-reset!\n  (lambda (counter) (counter 'reset!)))\n```\n\n",
+     "hash": "4bd0a005a1e32431",
+     "lang": "scheme",
+     "noteHe": "שלוש פונקציות עטיפה שמסתירות מהלקוח את מנגנון ההודעות. במקום שהלקוח יכתוב `(counter 'inc!)` — ויצטרך לדעת את שמות ההודעות — הוא כותב `(counter-inc! counter)`. שימו לב לטיפוסים בהערות: `counter-get` מחזירה `Number`, ואילו השתיים האחרות מחזירות `Void` — כלומר קיימות רק בשביל תופעת הלוואי. **הרעיון התכנותי:** הפרדה בין הממשק (מה שהלקוח רואה) לבין המימוש (שיגור הודעות עם סמלים), כך שאפשר יהיה להחליף את המימוש בלי לשבור את הלקוחות — וזה בדיוק מה שהבלוק האחרון בסעיף מדגים."
+    },
+    {
+     "id": "ps/ps6:7:13",
+     "type": "prose",
+     "en": "How to use a counter in code:\n\n",
+     "hash": "6a047a40a104f9ca",
+     "he": "כיצד להשתמש במונה בקוד:"
+    },
+    {
+     "id": "ps/ps6:7:14",
+     "type": "code",
+     "en": "```scheme\n;; Count how many odd numbers there are in a given tree.\n(define count-odds\n  (lambda (tree)\n    (let ((counter (make-counter)))\n      (letrec ((loop (lambda (tree)\n                       (cond ((empty? tree) (void))\n                             ((pair? tree) (loop (car tree)) (loop (cdr tree)))\n                             ((and (number? tree) (odd? tree)) (counter-inc! counter))))))\n        (loop tree)\n        (counter-get counter)))))\n```\n\n",
+     "hash": "2b894c7b947cfcf9",
+     "lang": "scheme",
+     "noteHe": "שימוש מעשי במונה: ספירת המספרים האי־זוגיים בעץ. `count-odds` יוצרת מונה מקומי, ואז מגדירה ב-`letrec` פונקציה רקורסיבית `loop` שסורקת את העץ. שלושת המקרים ב-`cond`: עץ ריק — לא עושים כלום (`(void)`); זוג — סורקים רקורסיבית את שני הצדדים; מספר אי־זוגי — מקדמים את המונה. שימו לב לשורה `(loop (car tree)) (loop (cdr tree))` — **שני** ביטויים בגוף ה-cond, שהראשון בהם קיים רק בשביל תופעת הלוואי; זה עובד בדיוק בגלל שהמונה משנה מצב. בסוף, `(loop tree)` מריצה את הסריקה ו-`(counter-get counter)` מחזירה את התוצאה — שוב גוף בן שני ביטויים. **הנקודה החינוכית:** בלי שינוי מצב היינו צריכים לכתוב את הפונקציה כרקורסיה שמחזירה ומחברת מספרים; המונה מאפשר \"לצבור בצד\" — סגנון אימפרטיבי בתוך שפה פונקציונלית. שימו לב ש-`loop` מוגדרת ב-`letrec` ולא ב-`let`, כי היא רקורסיבית."
+    },
+    {
+     "id": "ps/ps6:7:15",
+     "type": "code",
+     "en": "```scheme\n;; Variant of the counter object: functional selector instead of message dispatch (lazy selector)\n\n;; [Empty -> Counter]\n;; Counter is implemented as: [(Box(Number) -> Any) -> Any]\n(define make-counter-sel\n  (let ((count (box 0)))\n    (lambda (sel)\n      (sel count))))\n\n;; Implement counter interface:\n\n(define counter-sel-get\n  (lambda (counter-sel) \n    (counter-sel (lambda (b) (unbox b)))))\n\n(define counter-sel-inc!\n  (lambda (counter-sel) \n    (counter-sel (lambda (b) (set-box! b (+ 1 (unbox b)))))))\n\n(define counter-sel-reset!\n  (lambda (counter-sel) \n    (counter-sel (lambda (b) (set-box! b 0)))))\n```\n\n",
+     "hash": "07600a8c71d961ea",
+     "lang": "scheme",
+     "noteHe": "אותו מונה בדיוק, הפעם בתבנית **הבורר הפונקציונלי** במקום שיגור הודעות. `make-counter-sel` מחזירה closure שמקבל פונקציה `sel` ומפעיל אותה על הקופסה: `(sel count)`. שלוש הפונקציות שמתחת מממשות את אותו ממשק בדיוק, אבל במקום לשלוח סמל הן שולחות פעולה: `counter-sel-get` שולחת `(lambda (b) (unbox b))`, `counter-sel-inc!` שולחת פונקציה שמקדמת, וכן הלאה. שימו לב שהממשק החיצוני זהה לחלוטין לגרסה הקודמת — הלקוח לא מבחין בהבדל — וזה בדיוק מה שהפרדת הממשק מהמימוש נועדה לאפשר. **אבל שימו לב לבאג חשוב בקוד הזה:** `make-counter-sel` מוגדרת כ-`(define make-counter-sel (let ((count (box 0))) (lambda (sel) ...)))` — כלומר ה-`let` נמצא **מחוץ** ל-lambda, ולכן הקופסה נוצרת **פעם אחת בלבד** בזמן ההגדרה. המשמעות: `make-counter-sel` אינה מפעל מונים אלא מונה **יחיד**, וכל מי שישתמש בה יחלוק את אותו מונה. הכוונה הייתה כנראה `(lambda () (let ((count (box 0))) (lambda (sel) (sel count))))`, בהתאמה לחתימה `[Empty -> Counter]` שבהערה. השוו למיקום ה-`let` ב-`make-counter` שלמעלה — שם הוא בתוך ה-lambda, וזה ההבדל היחיד אך המכריע. **שאלת מבחן קלאסית:** היכן ממקמים את הקופסה, ומה ההשלכה על מספר האובייקטים שנוצרים."
+    }
+   ],
+   "headingHe": "Box"
+  },
+  {
+   "id": "ps/ps6:8",
+   "depth": 2,
+   "headingEn": "Adding set! to our language",
+   "raw": "<h2><b>Adding set! to our language</b></h2>\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps6:8:0",
+     "type": "prose",
+     "en": "There are 3 steps we should take to add set! to our language: \n",
+     "hash": "caa7399332373dbf",
+     "he": "יש 3 צעדים שעלינו לבצע כדי להוסיף את set! לשפה שלנו:"
+    },
+    {
+     "id": "ps/ps6:8:1",
+     "type": "list",
+     "en": "* Add set! in the syntax: Should we consider set! a special form? Explain.\n* Add set! to the parser\n* Add set! to the env-eval algorithm\n\n",
+     "hash": "f5179347d251f6c8",
+     "he": "* להוסיף את set! לתחביר: האם עלינו להתייחס ל-set! כאל צורה מיוחדת? הסבירו.\n* להוסיף את set! ל-parser\n* להוסיף את set! לאלגוריתם env-eval"
+    },
+    {
+     "id": "ps/ps6:8:2",
+     "type": "prose",
+     "en": "<b>Syntax definition:</b>\n\n",
+     "hash": "fb062452b4c2ad2e",
+     "he": "<b>הגדרת התחביר:</b>"
+    },
+    {
+     "id": "ps/ps6:8:3",
+     "type": "code",
+     "en": "```\n<cexp> ::= ... | ( set! <var> <cexp>)            // SetExp(var: varRef, val: CExp)\n```\n\n",
+     "hash": "1f4a41a0542b8721",
+     "noteHe": "כלל הדקדוק החדש: `set!` מתווסף כאפשרות ל-`<cexp>`, עם צומת AST בשם `SetExp` שיש לו שני שדות — `var` מטיפוס `varRef` ו-`val` מטיפוס `CExp`. **התשובה לשאלה מהרשימה שלמעלה — האם `set!` הוא צורה מיוחדת — היא כן**, ומהסיבה הזאת בדיוק: הארגומנט הראשון הוא **שם משתנה שאסור להעריך**. אילו `set!` היה יישום רגיל, `(set! x 80)` היה מעריך את `x` ומקבל את ערכו הנוכחי (5), ואז לא הייתה שום דרך לדעת איזו קשירה לעדכן. שימו לב שהשדה מוגדר כ-`VarRef` ולא כ-`VarDecl`, כי `set!` מתייחס לקשירה **קיימת** ואינו יוצר חדשה."
+    },
+    {
+     "id": "ps/ps6:8:4",
+     "type": "prose",
+     "en": "<b> Adding type definitions for ***set!***: </b>\n\n",
+     "hash": "f04dda70001a9d44",
+     "he": "<b> הוספת הגדרות טיפוס עבור ***set!***: </b>"
+    },
+    {
+     "id": "ps/ps6:8:5",
+     "type": "code",
+     "en": "```typescript\nexport interface SetExp {tag: \"SetExp\", var: VarRef; val: CExp; }\n\nexport const makeSetExp = (v: VarRef, val: CExp): SetExp =>\n    ({tag: \"SetExp\", var: v, val: val});\n\nexport const isSetExp = (x: any): x is SetExp => x.tag === \"SetExp\";\n```\n\n",
+     "hash": "8f71b1cf73b0dc96",
+     "lang": "typescript",
+     "noteHe": "המימוש הסטנדרטי של צומת AST חדש ב-TypeScript, בדיוק באותה תבנית שראינו בכל שאר סוגי הביטויים: הגדרת `interface` עם שדה `tag` ייחודי, קונסטרוקטור `makeSetExp`, ופרדיקט טיפוס `isSetExp` שבודק את ה-tag. שימו לב לטיפוסים של השדות: `var: VarRef` ו-`val: CExp`. אין כאן שום דבר מפתיע — התוספת של סוג ביטוי חדש היא פעולה שגרתית לגמרי במבנה הזה."
+    },
+    {
+     "id": "ps/ps6:8:6",
+     "type": "prose",
+     "en": "<b> Update the Compound disjoint union type: </b>\n\n",
+     "hash": "925ec63ce7e41c18",
+     "he": "<b> עדכון טיפוס האיחוד המפורק Compound: </b>"
+    },
+    {
+     "id": "ps/ps6:8:7",
+     "type": "code",
+     "en": "```typescript\nexport type CompoundExp = AppExp | IfExp | ProcExp | LetExp | LitExp | LetrecExp | SetExp;\n\nexport const isCompoundExp = (x: any): x is CompoundExp =>\n    isAppExp(x) || isIfExp(x) || isProcExp(x) || isLitExp(x) || isLetExp(x) ||\n    isLetrecExp(x) || isSetExp(x);\n```\n\n",
+     "hash": "06c4170bb12a3011",
+     "lang": "typescript",
+     "noteHe": "עדכון האיחוד המפורק של הביטויים המורכבים: מוסיפים את `SetExp` לרשימת הטיפוסים ואת `isSetExp` לפרדיקט. שימו לב לעיקרון החוזר: **כל תוספת לשפה דורשת עדכון בשני מקומות מקבילים** — בטיפוס ובפרדיקט — ואם שוכחים אחד מהם, TypeScript יתפוס חלק מהמקרים אבל לא את כולם. שימו לב לסדר השונה בין שתי השורות (`LetExp` ו-`LitExp` מופיעים בסדר הפוך); זה חסר משמעות פונקציונלית."
+    },
+    {
+     "id": "ps/ps6:8:8",
+     "type": "prose",
+     "en": "<b> Modify the function ***parseL4SpecialForm***</b>\n\n",
+     "hash": "5dc4e634d75dbbb7",
+     "he": "<b> שינוי הפונקציה ***parseL4SpecialForm***</b>"
+    },
+    {
+     "id": "ps/ps6:8:9",
+     "type": "code",
+     "en": "```typescript\nexport const parseL4SpecialForm = (op: Sexp, params: Sexp[]): Result<CExp> =>\n    isEmpty(params) ? makeFailure(\"Empty args for special form\") :\n    op === \"if\" ? parseIfExp(params) :\n    op === \"lambda\" ? parseProcExp(first(params), rest(params)) :\n    op === \"let\" ? parseLetExp(first(params), rest(params)) :\n    op === \"quote\" ? parseLitExp(first(params)) :\n    op === \"letrec\" ? parseLetrecExp(first(params), rest(params)) :\n    op === \"set!\" ? parseSetExp(params) :\n    makeFailure(\"Never\");\n```\n\n",
+     "hash": "0eb93aecc8378c95",
+     "lang": "typescript",
+     "noteHe": "הפונקציה שמפצלת בין הצורות המיוחדות בזמן ה-parsing — כאן רואים את **כל** הצורות המיוחדות של L4 במקום אחד: `if`, `lambda`, `let`, `quote`, `letrec` והחדשה `set!`. שימו לב שכל מה שאינו ברשימה הזאת מטופל כיישום רגיל (`app-exp`). זו הרשימה שכדאי לזכור לשאלת מבחן מהסוג \"מנו את הצורות המיוחדות של השפה והסבירו מדוע כל אחת מהן חייבת להיות מיוחדת\". השורה הרלוונטית לנו היא `op === \"set!\" ? parseSetExp(params)`."
+    },
+    {
+     "id": "ps/ps6:8:10",
+     "type": "prose",
+     "en": "<b> Add the parsing functions for ***SetExp***</b>\n\n",
+     "hash": "048a02929ef13c3d",
+     "he": "<b> הוספת פונקציות ה-parsing עבור ***SetExp***</b>"
+    },
+    {
+     "id": "ps/ps6:8:11",
+     "type": "code",
+     "en": "```typescript\nconst parseSetExp = (params: Sexp[]): Result<SetExp> =>\n    isEmpty(params) ? makeFailure(\"set! missing 2 arguments\") :\n    isEmpty(rest(params)) ? makeFailure(\"set! missing 1 argument\") :\n    ! isEmpty(rest(rest(params))) ? makeFailure(\"set! has too many arguments\") :\n    parseGoodSetExp(first(params), second(params));\n\nconst parseGoodSetExp = (variable: Sexp, val: Sexp): Result<SetExp> =>\n    ! isIdentifier(variable) ? makeFailure(\"First arg of set! must be an identifier\") :\n    bind(parseL4CExp(val), (val: CExp) => makeOk(makeSetExp(makeVarRef(variable), val)));\n```\n\n",
+     "hash": "7de1325a31bc0412",
+     "lang": "typescript",
+     "noteHe": "פונקציות ה-parsing, מחולקות לשתיים: בדיקות תקינות ואז בנייה בפועל. `parseSetExp` בודקת שיש **בדיוק** שני ארגומנטים בשלוש שורות עוקבות — רשימה ריקה, רשימה בת איבר אחד, ורשימה עם יותר משניים — וכל אחת מחזירה הודעת שגיאה מדויקת. `parseGoodSetExp` מבצעת את הבדיקה המהותית: `! isIdentifier(variable)` — הארגומנט הראשון **חייב** להיות מזהה. זו הבדיקה שאוכפת את מה שאמרנו קודם על היות `set!` צורה מיוחדת: `(set! 5 3)` או `(set! (f x) 3)` יידחו כבר בזמן ה-parsing. אחר כך היא מפרקת את ערך אגף ימין בצורה רגילה (`parseL4CExp`) ובונה `SetExp` שבו השם עטוף ב-`makeVarRef`. שימו לב לתבנית: `bind` משמש לשרשור, כי `parseL4CExp` עשוי להיכשל."
+    },
+    {
+     "id": "ps/ps6:8:12",
+     "type": "prose",
+     "en": "<b>***env-eval***</b>\n\n",
+     "hash": "373373cb1fa4d73a",
+     "he": "<b>***env-eval***</b>"
+    },
+    {
+     "id": "ps/ps6:8:13",
+     "type": "code",
+     "en": "```typescript\nconst evalSet = (exp: SetExp, env: Env): Result<void> =>\n    bind(applicativeEval(exp.val, env), (val: Value) => \n        bind(applyEnvBdg(env, exp.var.var), (bdg: FBinding) =>\n          makeOk(setFBinding(bdg, val))\n        )\n    )\n```\n",
+     "hash": "6295aaecab4ede2f",
+     "lang": "typescript",
+     "noteHe": "כלל ההערכה של `set!` — שלושה שלבים בשני `bind` מקוננים. (1) מעריכים את `exp.val` בסביבה הנוכחית ומקבלים ערך; שימו לב שאגף **ימין** כן מוערך, בניגוד לאגף שמאל. (2) `applyEnvBdg(env, exp.var.var)` מחפשת בסביבה ומחזירה את ה-**FBinding** — הקשירה עצמה, לא הערך שבתוכה. זו הפונקציה שמבדילה בין `applyEnv` הרגילה (שמחזירה ערך) לבין מה שנחוץ כאן; בלעדיה לא הייתה שום דרך להגיע לקופסה. (3) `setFBinding(bdg, val)` משנה את תוכן הקופסה. שימו לב לטיפוס ההחזרה `Result<void>` — `set!` אינו מחזיר ערך שימושי. שימו לב גם לתוצאת לוואי חשובה: מכיוון שהחיפוש מתבצע בשרשרת הסביבות הרגילה, `set!` יכול לשנות משתנה **בכל מסגרת** בשרשרת — כולל בסביבה הגלובלית מתוך פונקציה — וזה בדיוק מה שמאפשר למונה לעבוד."
+    }
+   ],
+   "headingHe": "הוספת !set לשפה שלנו"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "בסוף סעיף \"מבנה נתונים זוג בעזרת closures\" נשאלת השאלה: אילו סביבות ואילו closures יישארו בסוף ההערכה של `(p1 (lambda (a b) a))`? ענו והסבירו את הכלל הכללי.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n\n**מה נשאר:** ה-GE עם הקשירות שנוצרו בו (למשל `p1`), וה-closure של `p1` יחד עם הסביבה E1 שהוא מצביע אליה — כי E1 מחזיקה את `x` ו-`y`, הערכים הפרטיים של הזוג.\n\n**מה נעלם:** E2 (המסגרת שקושרת את `sel` לבורר שהועבר) ו-E3, וכן ה-closure של הבורר `(lambda (a b) a)` עצמו. ברגע שהיישום הסתיים והערך הוחזר, אף מבנה נתונים נגיש אינו מפנה אליהם.\n\n**הכלל הכללי:** מסגרת שורדת אם ורק אם משהו **נגיש** מפנה אליה — כלומר, אם היא בשרשרת של סביבה חיה, או אם closure חי מצביע אליה בשדה ה-env שלו. מסגרות שנוצרו רק לצורך יישום שהסתיים, ואף closure לא \"ברח\" מהן החוצה, נאספות. זו בדיוק הסיבה שאי אפשר לנהל את המסגרות במחסנית בלבד: closure שמוחזר החוצה מאריך את חיי המסגרת שבה נוצר, ולכן דרושים ערימה (heap) ואיסוף זבל.\n\n**כלל אצבע לזיהוי מהיר בדיאגרמה:** עקבו אחרי החצים שנכנסים לכל מסגרת. אם החצים היחידים אליה מגיעים ממסגרות שכבר \"מתו\", גם היא מתה.",
+   "explanationHe": "נקודות שחייבות להופיע: (1) E1 שורדת בזכות ה-closure של `p1` שמצביע אליה; (2) E2/E3 והבורר נעלמים כי אין אליהם הפניה נגישה; (3) ניסוח הכלל הכללי — שרידות = נגישות, לא סדר יצירה; (4) בונוס: הקישור לכך שסביבות אינן מנוהלות במחסנית בגלל closures שבורחים החוצה. השוו לתשובה המקבילה בדוגמה 3 בסעיף הקודם, שם דווקא ה-closures f ו-p נשארו ו-E1/E2/E3 נעלמו."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "ברשימת שלושת הצעדים להוספת `set!` לשפה מופיעה השאלה: \"האם עלינו להתייחס ל-set! כאל צורה מיוחדת? הסבירו.\" ענו במלואה.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** כן, `set!` **חייב** להיות צורה מיוחדת (special form), ולא יישום רגיל.\n\n**הנימוק:** כלל ההערכה של `AppExp` מחייב להעריך את **כל** האופרנדים לפני היישום. אילו `set!` היה פרוצדורה רגילה, אז ב-`(set! x 80)` היה מוערך גם `x` — ומה שהיה מתקבל הוא **הערך הנוכחי** של `x` (למשל `5`), ולא הקשירה עצמה. הפרוצדורה הייתה מקבלת שני מספרים, `5` ו-`80`, ולא הייתה לה שום דרך לדעת איזו קשירה בסביבה יש לעדכן — המידע \"מאיזה משתנה הגיע הערך\" אבד.\n\nלכן `set!` נדרש לגשת לארגומנט הראשון שלו **כשם** ולא כערך. זה משתקף בשלושה מקומות במימוש: (1) בדקדוק — `(set! <var> <cexp>)`, כשהראשון הוא `<var>` ולא `<cexp>`; (2) ב-parser — `parseGoodSetExp` בודקת `isIdentifier(variable)` ודוחה כל דבר אחר; (3) בכלל ההערכה — `evalSet` מעריך רק את `exp.val`, ואילו את `exp.var.var` הוא מעביר כמחרוזת ל-`applyEnvBdg` כדי לקבל את ה-FBinding.\n\n**השוואה מועילה:** אותו נימוק בדיוק תקף ל-`if` (אין להעריך את שני הענפים), ל-`lambda` (אין להעריך את הגוף) ול-`quote` (אין להעריך כלל). המכנה המשותף לכל הצורות המיוחדות: **לא כל תת-הביטויים מוערכים, או שהם מוערכים באופן חריג.**",
+   "explanationHe": "נקודות שחייבות להופיע: (1) הנימוק המרכזי — כלל ה-AppExp מעריך את כל האופרנדים, ולכן שם המשתנה היה הופך לערכו והזהות שלו הייתה אובדת; (2) הקישור לשדה `VarRef` בדקדוק ולבדיקת `isIdentifier` ב-parser; (3) ההבחנה ש-`evalSet` מעריך רק את אגף ימין; (4) בונוס: השוואה לצורות מיוחדות אחרות והכלל הכללי שמאחוריהן. תשובה שאומרת רק \"כן, כי הוא משנה מצב\" אינה מספיקה — תופעת לוואי כשלעצמה אינה מחייבת צורה מיוחדת (`display` הוא פרימיטיב רגיל עם תופעת לוואי)."
+  }
+ ]
+}

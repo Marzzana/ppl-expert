@@ -1,0 +1,1699 @@
+{
+ "id": "cm/2.3Syntax",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.3Syntax.md",
+ "titleEn": "Syntax",
+ "titleHe": "תחביר (Syntax)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.3Syntax:0",
+   "depth": 1,
+   "headingEn": "Syntax",
+   "raw": "# Syntax\n",
+   "blocks": [],
+   "headingHe": "תחביר (Syntax)"
+  },
+  {
+   "id": "cm/2.3Syntax:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:1:0",
+     "type": "prose",
+     "en": "In the previous section, we introduced new programming languages by adopting the following method:\n",
+     "hash": "13dc233661d34ebd",
+     "he": "בסעיף הקודם הצגנו שפות תכנות חדשות באמצעות השיטה הבאה:"
+    },
+    {
+     "id": "cm/2.3Syntax:1:1",
+     "type": "list",
+     "en": "* Define the syntax of the language - which defines the set of all possible expressions in the language.\n* Define the set of all possible values that can be computed by the language.\n* Define the computation rules for each type of expression which map any expression to a value.\n\n",
+     "hash": "ba63b48cd9108466",
+     "he": "* הגדרת התחביר של השפה — המגדיר את קבוצת כל הביטויים האפשריים בשפה.\n* הגדרת קבוצת כל הערכים האפשריים שהשפה יכולה לחשב.\n* הגדרת כללי החישוב לכל סוג ביטוי, הממפים כל ביטוי לערך."
+    },
+    {
+     "id": "cm/2.3Syntax:1:2",
+     "type": "prose",
+     "en": "This method provides a complete operational semantics procedure for the language by applying the method of **structural induction**: by applying the computation rules over all possible expressions in the language recursively, we can map any expression to a value.  \n\n",
+     "hash": "7b5e576b62562590",
+     "he": "השיטה הזו מספקת פרוצדורה שלמה של סמנטיקה אופרציונלית לשפה, באמצעות שיטת ה**אינדוקציה המבנית (structural induction)**: על ידי הפעלת כללי החישוב על כל הביטויים האפשריים בשפה באופן רקורסיבי, נוכל למפות כל ביטוי לערך."
+    },
+    {
+     "id": "cm/2.3Syntax:1:3",
+     "type": "prose",
+     "en": "To describe this process more formally, we must provide a more detailled account of the **syntax** of the language.\nThis is the topic of this Lecture.\n\n",
+     "hash": "008baac372972fc2",
+     "he": "כדי לתאר את התהליך הזה באופן פורמלי יותר, עלינו לספק תיאור מפורט יותר של ה**תחביר** של השפה.\nזהו הנושא של הרצאה זו."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.3Syntax:2",
+   "depth": 2,
+   "headingEn": "Syntax: Concrete vs. Abstract",
+   "raw": "## Syntax: Concrete vs. Abstract\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:2:0",
+     "type": "prose",
+     "en": "The syntax of a language determines which sequences of tokens form an expression in the language (and which don't).\nIt also determines how to extract the significant parts of the expression, and what is their function within the larger expression.  \n\n",
+     "hash": "349f7829315b1234",
+     "he": "התחביר של שפה קובע אילו רצפי אסימונים (tokens) מרכיבים ביטוי בשפה (ואילו לא).\nהוא גם קובע כיצד לחלץ את החלקים המשמעותיים של הביטוי, ומה תפקידם בתוך הביטוי הגדול יותר."
+    },
+    {
+     "id": "cm/2.3Syntax:2:1",
+     "type": "prose",
+     "en": "The syntax also has another objective: make it easy for humans to read and understand code and identify the structure\nof expressions which form the program. (Recall the distinction between the lambda-application and the let-expression forms we used in the previous lecture -- the motivation for introducing `let` was to make the expression easier to read.)\n\n",
+     "hash": "c619a1bf8e5798eb",
+     "he": "לתחביר יש גם מטרה נוספת: להקל על בני אדם לקרוא ולהבין קוד ולזהות את מבנה הביטויים שמרכיבים את התוכנית. (היזכרו בהבחנה בין צורת הפעלת ה-lambda לצורת ה-let שראינו בהרצאה הקודמת — המוטיבציה להצגת `let` הייתה להקל על קריאת הביטוי.)"
+    },
+    {
+     "id": "cm/2.3Syntax:2:2",
+     "type": "prose",
+     "en": "Accordingly, we distinguish two aspects of the definition of the syntax of a programming language:\n",
+     "hash": "914327bb22dc9a2d",
+     "he": "בהתאם לכך, אנו מבחינים בין שני היבטים בהגדרת התחביר של שפת תכנות:"
+    },
+    {
+     "id": "cm/2.3Syntax:2:3",
+     "type": "list",
+     "en": "* **Concrete syntax**: this determines how expressions \"look like\" to the programmer.  It includes devices such as keywords to mark the type of the expression, delimiters and punctuation, parentheses, indentation.\n* **Abstract syntax**: this is an internal data type representing expressions of the program in a way that is easy to consume by programs operating on expressions - such as interpreters or compilers.  Such data types are called **abstract syntax trees** (AST).\n\n",
+     "hash": "579af121c8c8f993",
+     "he": "* **תחביר קונקרטי (Concrete syntax)**: קובע איך ביטויים \"נראים\" למתכנת. הוא כולל אמצעים כמו מילות מפתח לסימון סוג הביטוי, תוחמים וסימני פיסוק, סוגריים והזחה.\n* **תחביר מופשט (Abstract syntax)**: זהו טיפוס נתונים פנימי שמייצג את ביטויי התוכנית באופן שקל לתוכניות לצרוך — כמו מפרשים או מהדרים. טיפוסי נתונים כאלה נקראים **עצי תחביר מופשט (abstract syntax trees, AST)**."
+    }
+   ],
+   "headingHe": "תחביר: קונקרטי לעומת מופשט"
+  },
+  {
+   "id": "cm/2.3Syntax:3",
+   "depth": 3,
+   "headingEn": "Many Concrete Syntax Variants can be mapped to the same Abstract Syntax",
+   "raw": "### Many Concrete Syntax Variants can be mapped to the same Abstract Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:3:0",
+     "type": "prose",
+     "en": "In general, concrete syntax can be quite varied - according to stylistic preferences.\nFor example, most languages encode arithmetic operations in infix style as in:\n\n",
+     "hash": "bde1f8e4b2ae22e6",
+     "he": "באופן כללי, תחביר קונקרטי יכול להיות מגוון מאוד — בהתאם להעדפות סגנוניות.\nלמשל, רוב השפות מקודדות פעולות אריתמטיות בסגנון תוכי (infix), כמו:"
+    },
+    {
+     "id": "cm/2.3Syntax:3:1",
+     "type": "code",
+     "en": "```scheme\n1 + 2*3\n```\n\n",
+     "hash": "9bc3d316b37f98fe",
+     "lang": "scheme",
+     "noteHe": "כתיב תוכי (infix): האופרטורים `+` ו-`*` מופיעים **בין** האופרנדים. זהו הכתיב המוכר ממתמטיקה ומרוב שפות התכנות — אבל שימו לב שהוא דורש כללי קדימות (precedence) כדי להיות חד-משמעי."
+    },
+    {
+     "id": "cm/2.3Syntax:3:2",
+     "type": "prose",
+     "en": "Scheme uses a prefix syntax as in:\n\n",
+     "hash": "d1b9c416fee2c201",
+     "he": "Scheme משתמשת בתחביר קידומי (prefix), כמו:"
+    },
+    {
+     "id": "cm/2.3Syntax:3:3",
+     "type": "code",
+     "en": "```scheme\n(+ 1 (* 2 3))\n```\n\n",
+     "hash": "d2c92bbd0a3a7502",
+     "lang": "scheme",
+     "noteHe": "אותו חישוב בדיוק בכתיב קידומי (prefix) של Scheme. הסוגריים מקודדים את המבנה **במפורש** — ולכן אין כאן שום עמימות: ברור מיד ש-`(* 2 3)` הוא אופרנד של החיבור. זה בדיוק מה שחוסך ל-Scheme את הצורך בכללי קדימות."
+    },
+    {
+     "id": "cm/2.3Syntax:3:4",
+     "type": "prose",
+     "en": "which more or less corresponds to the English way of expressing:\n\n",
+     "hash": "7684a1b121b1ca94",
+     "he": "שמקביל פחות או יותר לדרך שבה מבטאים זאת באנגלית:"
+    },
+    {
+     "id": "cm/2.3Syntax:3:5",
+     "type": "code",
+     "en": "```\nthe sum of 1 and the product of 2 and 3.\n```\n",
+     "hash": "c42501e8fc4c0d16",
+     "noteHe": "הניסוח המילולי באנגלית (\"הסכום של 1 ושל המכפלה של 2 ו-3\") ממחיש את הרעיון: גם בשפה טבעית, שם הפעולה בא **לפני** הארגומנטים שלה — בדיוק כמו בכתיב הקידומי של Scheme."
+    },
+    {
+     "id": "cm/2.3Syntax:3:6",
+     "type": "prose",
+     "en": "(the words that denote the operations occur before the words that denote the arguments to the operations).\n\n",
+     "hash": "fb32d969f46bcef3",
+     "he": "(המילים שמציינות את הפעולות מופיעות לפני המילים שמציינות את הארגומנטים של הפעולות)."
+    },
+    {
+     "id": "cm/2.3Syntax:3:7",
+     "type": "prose",
+     "en": "Similarly, there can be different concrete syntax ways to express the same construct.  In JavaScript, we saw that we can define functions in two ways:\n",
+     "hash": "0485ec2537cc6741",
+     "he": "באופן דומה, יכולות להיות דרכים תחביריות קונקרטיות שונות לבטא את אותו מבנה. ב-JavaScript ראינו שאפשר להגדיר פונקציות בשתי דרכים:"
+    },
+    {
+     "id": "cm/2.3Syntax:3:8",
+     "type": "list",
+     "en": "* With the `function` keyword: `function (<params>) <body>;`\n* With the fat-arrow construct: `(<params>) => <body>;`\n\n",
+     "hash": "87e4b044633c445f",
+     "he": "* עם מילת המפתח `function`: ‏`function (<params>) <body>;`\n* עם מבנה החץ השמן (fat-arrow): ‏`(<params>) => <body>;`"
+    },
+    {
+     "id": "cm/2.3Syntax:3:9",
+     "type": "prose",
+     "en": "In Scheme, we also saw that different concrete syntax forms are interpreted in the same way - for example:\n",
+     "hash": "0f23b1b79e84f83f",
+     "he": "גם ב-Scheme ראינו שצורות תחביריות קונקרטיות שונות מתפרשות באותו אופן — למשל:"
+    },
+    {
+     "id": "cm/2.3Syntax:3:10",
+     "type": "list",
+     "en": "* `(let ((a 1)) (f a))` is interpreted in the same way as `((lambda (a) (f a)) 1)`.\n* `(if (f x) (+ x 1) x)` is interpreted in the same way as `(cond ((f x) (+ x 1)) (else x))`.\n\n\n",
+     "hash": "020a4d3e7ffbc390",
+     "he": "* `(let ((a 1)) (f a))` מתפרש באותו אופן כמו `((lambda (a) (f a)) 1)`.\n* `(if (f x) (+ x 1) x)` מתפרש באותו אופן כמו `(cond ((f x) (+ x 1)) (else x))`."
+    }
+   ],
+   "headingHe": "וריאנטים רבים של תחביר קונקרטי יכולים להתמפות לאותו תחביר מופשט"
+  },
+  {
+   "id": "cm/2.3Syntax:4",
+   "depth": 3,
+   "headingEn": "Concrete Syntax can be Ambiguous",
+   "raw": "### Concrete Syntax can be Ambiguous\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:4:0",
+     "type": "prose",
+     "en": "In order to interpret concrete syntax, an interpreter must be able to:\n",
+     "hash": "c07ae7e8d14b8c10",
+     "he": "כדי לפרש תחביר קונקרטי, מפרש חייב להיות מסוגל:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:1",
+     "type": "list",
+     "en": "* Separate the sub-parts of an expression\n* Determine what is the role of each sub-part within the expression\n\n",
+     "hash": "8ba5b9cbac7b0bd9",
+     "he": "* להפריד בין תת-החלקים של ביטוי\n* לקבוע מהו תפקידו של כל תת-חלק בתוך הביטוי"
+    },
+    {
+     "id": "cm/2.3Syntax:4:2",
+     "type": "prose",
+     "en": "For example, in a JavaScript statement:\n\n",
+     "hash": "663254857a098261",
+     "he": "למשל, במשפט JavaScript:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:3",
+     "type": "code",
+     "en": "```typescript\nif (x > 2)\n  console.log(\"big\");\nelse\n  console.log(\"large\");\n```\n\n",
+     "hash": "80143b4c3edd4a9d",
+     "lang": "typescript",
+     "noteHe": "משפט `if` פשוט ב-TypeScript עם שלושה רכיבים: התנאי `(x > 2)`, המשפט שיתבצע אם התנאי מתקיים, והמשפט שאחרי `else`. שימו לב שכאן מילות המפתח (`if`, `else`) הן שמסמנות את התפקידים — בניגוד ל-Scheme, שבה המיקום בלבד קובע."
+    },
+    {
+     "id": "cm/2.3Syntax:4:4",
+     "type": "prose",
+     "en": "the keyword `if` is used to mark the type of the conditional compound statement which has 3 components - the test (`(x>2)`), the consequent statement and the alternative statement.  The keyword `else` is used to separate the consequent from the alternative and to indicate the role that the alternative statement plays with respect to the if-statement of which it is a part.\n\n",
+     "hash": "652d56ab817f244d",
+     "he": "מילת המפתח `if` משמשת לסימון סוגו של המשפט המורכב המותנה, שיש לו שלושה רכיבים — הבדיקה (`(x>2)`), משפט התוצאה (consequent) ומשפט החלופה (alternative). מילת המפתח `else` משמשת להפרדה בין התוצאה לחלופה, ולציון התפקיד שממלא משפט החלופה ביחס למשפט ה-if שהוא חלק ממנו."
+    },
+    {
+     "id": "cm/2.3Syntax:4:5",
+     "type": "prose",
+     "en": "Sometimes, the relation between embedded components and their parents is ambiguous. \nFor example, in the following statement, the place of the `else` statement is ambiguous:\n\n\n",
+     "hash": "4c2b538c082ea3e0",
+     "he": "לפעמים, היחס בין רכיבים מוטמעים לבין ההורים שלהם הוא דו-משמעי.\nלמשל, במשפט הבא, מיקומו של משפט ה-`else` דו-משמעי:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:6",
+     "type": "code",
+     "en": "```typescript\n{\n  let x=3, y=5;\n  if (x > 2)\n    if (y < 4)\n      console.log('mid');\n  else\n    console.log('large');\n}\n// --> large\n```\n\n",
+     "hash": "0706af912cbc35ea",
+     "lang": "typescript",
+     "noteHe": "בעיית ה-**dangling else** הקלאסית: ההזחה מרמזת ש-`else` שייך ל-`if` החיצוני `(x > 2)` — אבל הפלט הוא `large`, כלומר הוא שייך למעשה ל-`if` הפנימי `(y < 4)`! עם `x`=3 ו-`y`=5: התנאי החיצוני מתקיים, נכנסים ל-if הפנימי, `(5 < 4)` נכשל — ולכן מתבצע ה-`else` שלו. הלקח: **ההזחה אינה קובעת את המבנה**; הכלל בפועל הוא ש-`else` נצמד ל-`if` הקרוב ביותר שטרם שויך."
+    },
+    {
+     "id": "cm/2.3Syntax:4:7",
+     "type": "prose",
+     "en": "We could interpret the syntactic structure in two ways:\n",
+     "hash": "dcf37523065514d8",
+     "he": "אפשר לפרש את המבנה התחבירי בשתי דרכים:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:8",
+     "type": "list",
+     "en": "* Either it is the `else` part matching the `(x > 2)` test\n* Or it is the `else` part matching the `(y < 4)` test\n\n",
+     "hash": "67e3e92a2abcefe9",
+     "he": "* או שזהו חלק ה-`else` שמתאים לבדיקה `(x > 2)`\n* או שזהו חלק ה-`else` שמתאים לבדיקה `(y < 4)`"
+    },
+    {
+     "id": "cm/2.3Syntax:4:9",
+     "type": "prose",
+     "en": "Similarly, in the infix expression:\n\n",
+     "hash": "e004e55630e367ea",
+     "he": "באופן דומה, בביטוי התוכי:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:10",
+     "type": "code",
+     "en": "```typescript\n1+3*5\n```\n\n",
+     "hash": "53c0c4d027f4bfac",
+     "lang": "typescript",
+     "noteHe": "ביטוי תוכי קצר שממחיש עמימות מבנית: בלי כללי קדימות אי אפשר לדעת אם הכפל או החיבור \"תופס\" קודם — ושתי הפרשנויות נותנות תוצאות שונות (16 לעומת 20)."
+    },
+    {
+     "id": "cm/2.3Syntax:4:11",
+     "type": "prose",
+     "en": "The structure could be interpreted as either:\n",
+     "hash": "76690822f1dd983d",
+     "he": "אפשר לפרש את המבנה כאחד משניים:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:12",
+     "type": "list",
+     "en": "* 1+(3*5) (which reduces to 16)\n* (1+3)*5 (which reduces to 20)\n\n",
+     "hash": "7cb1a491250b5ffc",
+     "he": "* ‏1+(3*5) (שמצטמצם ל-16)\n* ‏(1+3)*5 (שמצטמצם ל-20)"
+    },
+    {
+     "id": "cm/2.3Syntax:4:13",
+     "type": "prose",
+     "en": "These forms of ambiguity are frequent in natural language as well - as in the example:\n",
+     "hash": "1a560c918039d4a6",
+     "he": "צורות עמימות כאלה נפוצות גם בשפה טבעית — כמו בדוגמה:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:14",
+     "type": "list",
+     "en": "* *I saw a man on the hill with a telescope.*\n\n",
+     "hash": "42ee69b92a3e4d9b",
+     "he": "* *I saw a man on the hill with a telescope.* (ראיתי אדם על הגבעה עם טלסקופ.)"
+    },
+    {
+     "id": "cm/2.3Syntax:4:15",
+     "type": "prose",
+     "en": "which can be interpreted in multiple ways:\n",
+     "hash": "6b01f89ca3218123",
+     "he": "שאפשר לפרש בכמה דרכים:"
+    },
+    {
+     "id": "cm/2.3Syntax:4:16",
+     "type": "list",
+     "en": "* *The man I saw was on the hill and I saw him through a telescope*\n* *The man I saw was on the hill and he had a telescope with him*\n\n",
+     "hash": "a5de01d5f975c50b",
+     "he": "* *האדם שראיתי היה על הגבעה, וראיתי אותו דרך טלסקופ*\n* *האדם שראיתי היה על הגבעה, ולו היה טלסקופ*"
+    },
+    {
+     "id": "cm/2.3Syntax:4:17",
+     "type": "prose",
+     "en": "In natural languages, we rely on the intelligence of the reader to resolve these ambiguities.\n\n",
+     "hash": "68b9736b4740316e",
+     "he": "בשפות טבעיות, אנו סומכים על תבונתו של הקורא כדי ליישב את העמימויות האלה."
+    },
+    {
+     "id": "cm/2.3Syntax:4:18",
+     "type": "prose",
+     "en": "In programming languages, in contrast, such ambiguities must be resolved in a unique and deterministic manner - so that the same program is always interpreted in the same manner.  The concrete syntax, therefore, must also provide **precedence rules** to disambiguate such cases.\n\n",
+     "hash": "aab8ad61d56a888a",
+     "he": "בשפות תכנות, לעומת זאת, עמימויות כאלה חייבות להיפתר באופן יחיד ודטרמיניסטי — כך שאותה תוכנית תתפרש תמיד באותו אופן. לכן התחביר הקונקרטי חייב לספק גם **כללי קדימות (precedence rules)** ליישוב מקרים כאלה."
+    },
+    {
+     "id": "cm/2.3Syntax:4:19",
+     "type": "prose",
+     "en": "For example, in infix arithmetic notation, preference rules specify that the operations * and / have higher precedence over operations + and -.  \n\n",
+     "hash": "c7e826781e6a7496",
+     "he": "למשל, בכתיב האריתמטי התוכי, כללי הקדימות קובעים שלפעולות `*` ו-`/` יש קדימות גבוהה יותר מהפעולות `+` ו-`-`."
+    },
+    {
+     "id": "cm/2.3Syntax:4:20",
+     "type": "prose",
+     "en": "When multiple operations with the same preference occur, **associativity rules** determine how operations are grouped.\nFor example, `1 - 3 - 5` is intepreted as `(1-3)-5` (yielding -7) and not as `1 - (3 -5)` (which would yield 3) - because\nthe infix operator `-` is specified as left-associative.\n\n",
+     "hash": "83c19eaad1599eac",
+     "he": "כאשר מופיעות כמה פעולות בעלות אותה קדימות, **כללי אסוציאטיביות (associativity rules)** קובעים כיצד הפעולות מקובצות.\nלמשל, `1 - 3 - 5` מתפרש כ-`(1-3)-5` (ומניב ‎-7) ולא כ-`1 - (3 - 5)` (שהיה מניב 3) — כי האופרטור התוכי `-` מוגדר כאסוציאטיבי-שמאלית."
+    },
+    {
+     "id": "cm/2.3Syntax:4:21",
+     "type": "prose",
+     "en": "Parentheses can also be used in most languages to explicitly override or indicate the desired syntactic structure of an expression - as in `1 - (3 - 5)`.\n\n",
+     "hash": "0cbdf1a76142fce2",
+     "he": "ברוב השפות אפשר להשתמש גם בסוגריים כדי לעקוף במפורש או לציין את המבנה התחבירי הרצוי של ביטוי — כמו ב-`1 - (3 - 5)`."
+    },
+    {
+     "id": "cm/2.3Syntax:4:22",
+     "type": "prose",
+     "en": "The Scheme concrete syntax does not require such precedence and associativity disambiguation rules, because it requires full parentheses to explicitly encode the structure of expressions.\n\n",
+     "hash": "97e941a64604a2f6",
+     "he": "התחביר הקונקרטי של Scheme אינו דורש כללי קדימות ואסוציאטיביות ליישוב עמימות, כי הוא דורש סוגריים מלאים כדי לקודד במפורש את מבנה הביטויים."
+    }
+   ],
+   "headingHe": "תחביר קונקרטי עלול להיות דו-משמעי"
+  },
+  {
+   "id": "cm/2.3Syntax:5",
+   "depth": 3,
+   "headingEn": "Parser",
+   "raw": "### Parser\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:5:0",
+     "type": "list",
+     "en": "* Concrete syntax is intended to be read by humans\n* Abstract syntax is intended to be consumed by programs (interpreter, compiler...).\n\n",
+     "hash": "01f9cd1c06c7992f",
+     "he": "* תחביר קונקרטי נועד לקריאה על ידי בני אדם\n* תחביר מופשט נועד לצריכה על ידי תוכניות (מפרש, מהדר...)."
+    },
+    {
+     "id": "cm/2.3Syntax:5:1",
+     "type": "prose",
+     "en": "It is the role of a **parser** to map the input **concrete syntax** (encoded as a string) into ASTs.\n\n",
+     "hash": "6c95a3df6b420554",
+     "he": "תפקידו של **מנתח תחבירי (parser)** הוא למפות את התחביר הקונקרטי שבקלט (המקודד כמחרוזת) לעצי תחביר מופשט (ASTs)."
+    },
+    {
+     "id": "cm/2.3Syntax:5:2",
+     "type": "prose",
+     "en": "To specify how a parser works, we must specify both:\n",
+     "hash": "f2e521aa9d2a397b",
+     "he": "כדי להגדיר איך מנתח תחבירי עובד, עלינו להגדיר שני דברים:"
+    },
+    {
+     "id": "cm/2.3Syntax:5:3",
+     "type": "list",
+     "en": "* The rules of the concrete syntax\n* The structure of all possible ASTs the parser can construct\n\n",
+     "hash": "79f7184824e49fa8",
+     "he": "* את כללי התחביר הקונקרטי\n* את המבנה של כל ה-ASTs האפשריים שהמנתח יכול לבנות"
+    },
+    {
+     "id": "cm/2.3Syntax:5:4",
+     "type": "prose",
+     "en": "A good way to think about the role of the parser is that it is a `factory` to construct ASTs given linear string representations of programs.\n\n",
+     "hash": "6981dfaaf993cde7",
+     "he": "דרך טובה לחשוב על תפקידו של המנתח התחבירי היא שהוא `מפעל (factory)` לבניית ASTs בהינתן ייצוגי מחרוזת לינאריים של תוכניות."
+    }
+   ],
+   "headingHe": "מנתח תחבירי (Parser)"
+  },
+  {
+   "id": "cm/2.3Syntax:6",
+   "depth": 2,
+   "headingEn": "Specifying Concrete Syntax",
+   "raw": "## Specifying Concrete Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:6:0",
+     "type": "prose",
+     "en": "Concrete syntax is defined as a formal language using grammatical rules.\n\n",
+     "hash": "665ecc901fcb2f54",
+     "he": "תחביר קונקרטי מוגדר כשפה פורמלית באמצעות כללים דקדוקיים."
+    },
+    {
+     "id": "cm/2.3Syntax:6:1",
+     "type": "prose",
+     "en": "Programming language specifications have mostly adopted mild variants of **context free languages** (CFG) to specify concrete syntax.  In the hierarchy of formal languages (see [Chomsky Hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy)),  CFGs are right above **regular language** and below Context Sensitive Languages (which are hard to parse).\n\n",
+     "hash": "a962dc9138466c0f",
+     "he": "מפרטים של שפות תכנות אימצו ברובם וריאנטים מתונים של **שפות חסרות הקשר (context free languages, CFG)** להגדרת תחביר קונקרטי. בהיררכיה של שפות פורמליות (ראו [היררכיית חומסקי](https://en.wikipedia.org/wiki/Chomsky_hierarchy)), שפות חסרות הקשר נמצאות מעל **שפות רגולריות (regular languages)** ומתחת לשפות תלויות הקשר (שקשה לנתח אותן)."
+    },
+    {
+     "id": "cm/2.3Syntax:6:2",
+     "type": "prose",
+     "en": "In programming languages, language designers have adopted the Backus-Naur Form (BNF) notation to specify formally\nthe rules of concrete syntax.  \nFor example:\n",
+     "hash": "72ddc614735fdc4f",
+     "he": "בשפות תכנות, מעצבי שפות אימצו את כתיב **Backus-Naur Form‏ (BNF)** להגדרה פורמלית של כללי התחביר הקונקרטי.\nלמשל:"
+    },
+    {
+     "id": "cm/2.3Syntax:6:3",
+     "type": "list",
+     "en": "* [R4RS Scheme Grammar](https://www.cs.indiana.edu/scheme-repository/R4RS/r4rs_9.html#SEC76) presents the formal syntax of the R4RS Scheme programming language\n* [ECMAScript Grammar](https://262.ecma-international.org/#sec-grammar-summary) presents the formal syntax of JavaScript 2020\n* [Java Grammar](https://docs.oracle.com/javase/specs/jls/se15/html/jls-19.html) presents the formal syntax of Java 15.\n* [Python Grammar](https://docs.python.org/3/reference/grammar.html) presents the formal syntax of Python.\n\n",
+     "hash": "b594c355de2fdae2",
+     "he": "* [דקדוק R4RS Scheme](https://www.cs.indiana.edu/scheme-repository/R4RS/r4rs_9.html#SEC76) מציג את התחביר הפורמלי של שפת התכנות R4RS Scheme\n* [דקדוק ECMAScript](https://262.ecma-international.org/#sec-grammar-summary) מציג את התחביר הפורמלי של JavaScript 2020\n* [דקדוק Java](https://docs.oracle.com/javase/specs/jls/se15/html/jls-19.html) מציג את התחביר הפורמלי של Java 15.\n* [דקדוק Python](https://docs.python.org/3/reference/grammar.html) מציג את התחביר הפורמלי של Python."
+    },
+    {
+     "id": "cm/2.3Syntax:6:4",
+     "type": "prose",
+     "en": "We confirm in a brief overview the minimalistic approach of Scheme - the full language only needs about 10 keywords and 8 syntactic forms. In comparison, Python has 33 keywords and 110 syntactic forms, and Java has 50 keywords and 133 syntactic forms. \n\n",
+     "hash": "c7056730ff87df7e",
+     "he": "בסקירה קצרה אנו מאשרים את הגישה המינימליסטית של Scheme — השפה המלאה זקוקה לכ-10 מילות מפתח ו-8 צורות תחביריות בלבד. בהשוואה, ל-Python יש 33 מילות מפתח ו-110 צורות תחביריות, ול-Java יש 50 מילות מפתח ו-133 צורות תחביריות."
+    }
+   ],
+   "headingHe": "הגדרת תחביר קונקרטי"
+  },
+  {
+   "id": "cm/2.3Syntax:7",
+   "depth": 3,
+   "headingEn": "BNF Specification",
+   "raw": "### BNF Specification\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:7:0",
+     "type": "prose",
+     "en": "BNF is a meta-syntax used to express context-free grammars: it is a formal way to describe formal languages.\nBNF specifications include two types of rules:\n",
+     "hash": "eee893aa96346a21",
+     "he": "‏BNF הוא מטא-תחביר המשמש לביטוי דקדוקים חסרי הקשר: זו דרך פורמלית לתאר שפות פורמליות.\nמפרטי BNF כוללים שני סוגי כללים:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:1",
+     "type": "list",
+     "en": "* Lexical rules\n* Syntactic rules\n\n",
+     "hash": "5c625e6fcb8c64be",
+     "he": "* כללים לקסיקליים (Lexical rules)\n* כללים תחביריים (Syntactic rules)"
+    },
+    {
+     "id": "cm/2.3Syntax:7:2",
+     "type": "prose",
+     "en": "Lexical rules determine how to tokenize a stream of characters into a stream of significant tokens.\nIt indicates which delimiters can be skipped (for example, white spaces) and which delimiters indicate the end or\nbeginning of other tokens (for example, parentheses or punctuation).  Lexical rules also specify the types of tokens \nthat can be distinguished - for example, numbers are sequences of digit characters, identifiers are sequences of \nalpha-numeric characters, left parenthesis, right parenthesis etc.\n\n",
+     "hash": "11662cd6677501f8",
+     "he": "כללים לקסיקליים קובעים כיצד לפרק זרם של תווים לזרם של אסימונים (tokens) משמעותיים.\nהם מציינים אילו תוחמים אפשר לדלג עליהם (למשל רווחים לבנים) ואילו תוחמים מציינים סוף או תחילה של אסימונים אחרים (למשל סוגריים או סימני פיסוק). כללים לקסיקליים גם מגדירים את סוגי האסימונים שאפשר להבחין ביניהם — למשל, מספרים הם רצפים של תווי ספרה, מזהים (identifiers) הם רצפים של תווים אלפאנומריים, סוגר שמאלי, סוגר ימני וכדומה."
+    },
+    {
+     "id": "cm/2.3Syntax:7:3",
+     "type": "prose",
+     "en": "Syntactic rules determine how tokens are combined into significant hierarchical structures which form the expressions of the language.  Syntactic rules refer to the token categories defined by lexical rules.\n\n",
+     "hash": "7ae8c00fda52f108",
+     "he": "כללים תחביריים קובעים כיצד אסימונים מצטרפים למבנים היררכיים משמעותיים שמרכיבים את ביטויי השפה. כללים תחביריים מפנים לקטגוריות האסימונים שהוגדרו על ידי הכללים הלקסיקליים."
+    },
+    {
+     "id": "cm/2.3Syntax:7:4",
+     "type": "prose",
+     "en": "Usually, lexical rules form a **regular language** - which are powerful enough to describe tokenization.\nIn contrast, **syntactic rules** form a **context free language** (sometimes BNFs are extended to support mildly more powerful languages than CFGs). \n\n",
+     "hash": "0f9839955626ae12",
+     "he": "בדרך כלל, כללים לקסיקליים מרכיבים **שפה רגולרית (regular language)** — חזקה מספיק כדי לתאר פירוק לאסימונים.\nלעומת זאת, **כללים תחביריים** מרכיבים **שפה חסרת הקשר (context free language)** (לעיתים BNF מורחב כדי לתמוך בשפות חזקות במעט מ-CFG)."
+    },
+    {
+     "id": "cm/2.3Syntax:7:5",
+     "type": "prose",
+     "en": "Because lexical rules and syntactic rules are of different nature, they are processed by different software components:\n",
+     "hash": "49ab77e5df0c89dd",
+     "he": "מכיוון שכללים לקסיקליים וכללים תחביריים הם בעלי אופי שונה, הם מעובדים על ידי רכיבי תוכנה שונים:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:6",
+     "type": "list",
+     "en": "* The **scanner** turns a stream of characters into a stream of tokens (each tagged by its category)\n* The **parser** turns a stream of tokens into a parse tree where each token is a terminal, covered by non-terminal categories.\n\n",
+     "hash": "b0447cd011a92fbc",
+     "he": "* ה**סורק (scanner)** הופך זרם של תווים לזרם של אסימונים (כשכל אחד מתויג בקטגוריה שלו)\n* ה**מנתח התחבירי (parser)** הופך זרם של אסימונים לעץ ניתוח (parse tree) שבו כל אסימון הוא טרמינל, מכוסה על ידי קטגוריות לא-טרמינליות."
+    },
+    {
+     "id": "cm/2.3Syntax:7:7",
+     "type": "prose",
+     "en": "#### Scheme Lexical Rules\n\n",
+     "hash": "d277a5b0d8e63793",
+     "he": "#### הכללים הלקסיקליים של Scheme"
+    },
+    {
+     "id": "cm/2.3Syntax:7:8",
+     "type": "prose",
+     "en": "Consider the first few lexical rules in the Scheme specification [R4RS Scheme Grammar](https://www.cs.indiana.edu/scheme-repository/R4RS/r4rs_9.html#SEC76):\n\n",
+     "hash": "a2945818d4915bf8",
+     "he": "נתבונן בכללים הלקסיקליים הראשונים במפרט Scheme ‏[דקדוק R4RS Scheme](https://www.cs.indiana.edu/scheme-repository/R4RS/r4rs_9.html#SEC76):"
+    },
+    {
+     "id": "cm/2.3Syntax:7:9",
+     "type": "code",
+     "en": "```typescript\n<token> ==> <identifier> | <boolean> | <number> | <character> | <string> | ( | ) | ' | .\n<delimiter> ==> <whitespace> | ( | ) | \" | ;\n<whitespace> ==> <space or newline>\n<comment> ==> ; <all subsequent characters up to a line break>\n<identifier> ==> <initial> <subsequent>*\n<initial> ==> <letter>\n<letter> ==> a | b | c | ... | z\n<subsequent> ==> <initial> | <digit>\n<digit> ==> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n<string> ==> \" <string element>* \"\n<string element> ==> <any character other than \" or \\> | \\\" | \\\\\n<boolean> ==> #t | #f\n```\n\n",
+     "hash": "8b03fd7d228b88f3",
+     "lang": "typescript",
+     "noteHe": "הכללים הלקסיקליים של Scheme בכתיב BNF. איך קוראים את זה: `<token>` הוא **קטגוריה** (לא-טרמינל), החץ `==>` פירושו \"מוגדר כ-\", והקו `|` מפריד בין חלופות. למשל `<boolean> ==> #t | #f` אומר: אסימון בוליאני הוא או `#t` או `#f`. הכוכבית ב-`<subsequent>*` פירושה \"אפס פעמים או יותר\". שימו לב לכלל `<identifier> ==> <initial> <subsequent>*` — מזהה מתחיל באות ואחריה אותיות או ספרות. **הנקודה החשובה**: אף אחד מהכללים האלה אינו רקורסיבי — אף קטגוריה בצד ימין לא מובילה חזרה לעצמה — ולכן אפשר לממש את הסורק בעזרת ביטויים רגולריים. שימו לב ש\"אינו רקורסיבי\" פירושו **שאין מעגל**, ולא \"שאין הפניות לקטגוריות אחרות\"; ההערה שאחרי הבלוק הבא מנוסחת במקור בצורה מטעה, וההסבר המלא נמצא שם. ⚠️ ועוד נקודה שכדאי להבחין בה כבר עכשיו, כי היא תחזור בעוד כמה בלוקים: לפי `<initial> ==> <letter>`, מזהה **חייב** להתחיל באות — ולכן `+` **אינו** מזהה חוקי לפי הכללים שכאן."
+    },
+    {
+     "id": "cm/2.3Syntax:7:10",
+     "type": "prose",
+     "en": "In BNF notation, categories (non-terminals) are denoted as `<category>`.\nRules are specified as `<lhs> ==> rhs` -- where `lhs` is the left-hand side of the rule, `rhs` the right-hand side.\n\n",
+     "hash": "777cf8f4550434d9",
+     "he": "בכתיב BNF, קטגוריות (לא-טרמינלים) מסומנות כ-`<category>`.\nכללים מוגדרים כ-`<lhs> ==> rhs` — כאשר `lhs` הוא הצד השמאלי של הכלל, ו-`rhs` הוא הצד הימני."
+    },
+    {
+     "id": "cm/2.3Syntax:7:11",
+     "type": "prose",
+     "en": "The LHS of rules is a single `<category>` (which means that the language defined by BNF is CFG or Regular and not Context Sensitive or Recursively Enumerable).\n\n",
+     "hash": "32e165c0f044ddb5",
+     "he": "הצד השמאלי (LHS) של כללים הוא `<category>` יחידה (מה שאומר שהשפה המוגדרת על ידי BNF היא חסרת הקשר או רגולרית, ולא תלוית הקשר או ניתנת למנייה רקורסיבית)."
+    },
+    {
+     "id": "cm/2.3Syntax:7:12",
+     "type": "prose",
+     "en": "The RHS can be a sequence of terminals (for lexical rules, terminals are characters) or categories, or an alternation of such sequences, indicated by the \"\\|\" special character.  In syntactic rules, terminals are usually marked with quotes around them.\n\n",
+     "hash": "1d86ecf709751090",
+     "he": "הצד הימני (RHS) יכול להיות רצף של טרמינלים (בכללים לקסיקליים, הטרמינלים הם תווים) או קטגוריות, או חלופה בין רצפים כאלה — המסומנת בתו המיוחד \"\\|\". בכללים תחביריים, טרמינלים מסומנים בדרך כלל במרכאות סביבם."
+    },
+    {
+     "id": "cm/2.3Syntax:7:13",
+     "type": "prose",
+     "en": "Within the RHS sequences, categories can be followed by the special markers `*` to indicate repetition 0 or more times, `+` to indicate 1 or more times and `?` to indicate optional elements.\n\n",
+     "hash": "38332b0dec8bbfe6",
+     "he": "בתוך רצפי ה-RHS, אחרי קטגוריות יכולים לבוא הסמנים המיוחדים `*` לציון חזרה 0 פעמים או יותר, `+` לציון פעם אחת או יותר, ו-`?` לציון רכיבים אופציונליים."
+    },
+    {
+     "id": "cm/2.3Syntax:7:14",
+     "type": "prose",
+     "en": "Observe in particular that the lexical rules above are **not recursive** (there is no category reachable from the RHS which is on the LHS).  Because lexical rules denote a regular language, we can use **regular expressions** to implement the scanner.\n\n",
+     "hash": "8f4e238b873a55b2",
+     "he": "שימו לב במיוחד שהכללים הלקסיקליים לעיל **אינם רקורסיביים** (אין קטגוריה שנגישה מה-RHS ומופיעה ב-LHS). מכיוון שכללים לקסיקליים מציינים שפה רגולרית, אפשר להשתמש ב**ביטויים רגולריים (regular expressions)** כדי לממש את הסורק.\n\n> ⚠️ **הניסוח שבסוגריים מטעה במקור, וכדאי לתקן אותו לעצמכם.** כפשוטו הוא אומר שאף קטגוריה המופיעה באגף ימין אינה מופיעה גם באגף שמאל של כלל כלשהו — וזה פשוט אינו נכון כאן: `<subsequent> ==> <initial> | <digit>` מפנה ל-`<initial>` ול-`<digit>`, ולשתיהן יש כללים משלהן. למעשה **כל** דקדוק בנוי מהפניות כאלה; בלעדיהן לא היה כאן דקדוק אלא רשימת מילים.\n>\n> **הכוונה האמיתית היא היעדר מעגל**: אין קטגוריה שאפשר להגיע ממנה חזרה **אל עצמה**. כך בודקים: צאו מקטגוריה, עברו לאגף ימין שלה, משם לאגף ימין של כל קטגוריה שהיא מפנה אליה, וכן הלאה. אם חזרתם לקטגוריה שממנה יצאתם — יש רקורסיה. כאן: מ-`<subsequent>` ל-`<initial>`, משם ל-`<letter>`, ומשם לטרמינלים בלבד. השרשרת נגמרת, ולעולם אין חזרה ל-`<subsequent>`.\n>\n> להשוואה, בכללים **התחביריים** שבהמשך הדף יש מעגל: `<expression>` → `<procedure call>` → `<operator>` → `<expression>`. **וזה בדיוק ההבדל שקובע איזה כלי דרוש**: בלי מעגל השפה רגולרית ואפשר לסרוק אותה בביטוי רגולרי; עם מעגל נדרש דקדוק חסר הקשר. כדאי לשנן את המבחן הזה — \"האם קטגוריה יכולה להגיע לעצמה?\" — הוא הניסוח המדויק של מה שהדף ניסה לומר."
+    },
+    {
+     "id": "cm/2.3Syntax:7:15",
+     "type": "prose",
+     "en": "#### Scheme Syntactic Rules\n\n",
+     "hash": "e60fbe75c9f618b8",
+     "he": "#### הכללים התחביריים של Scheme"
+    },
+    {
+     "id": "cm/2.3Syntax:7:16",
+     "type": "prose",
+     "en": "Consider the top-level (slightly simplified) definition of Scheme expressions in the formal syntactic rules for Scheme:\n\n",
+     "hash": "14e15f23e2d8063f",
+     "he": "נתבונן בהגדרה ברמה העליונה (מפושטת מעט) של ביטויי Scheme בכללים התחביריים הפורמליים של השפה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:17",
+     "type": "code",
+     "en": "```typescript\n<expression> ==> <variable>\n     | <procedure call>\n     | <lambda expression>\n     | <conditional>\n     | <literal>\n     \n<variable> ==> <identifier>\n```\n\n",
+     "hash": "5a925fa4bc2ff27d",
+     "lang": "typescript",
+     "noteHe": "הכלל הראשי של Scheme: ביטוי (`<expression>`) הוא **אחד מחמישה** דברים — משתנה, קריאה לפרוצדורה, ביטוי lambda, ביטוי תנאי, או ליטרל. זהו כלל של **חלופה בלבד** (disjunction) — אין בו רצף. שימו לב כמה זה קצר בהשוואה לדקדוקים של Java או Python; זו המינימליות של Scheme הלכה למעשה."
+    },
+    {
+     "id": "cm/2.3Syntax:7:18",
+     "type": "prose",
+     "en": "These are the different types of syntactic forms that are defined in Scheme - this rule only contains a disjunction.\nEach syntactic form is defined in turn:\n\n",
+     "hash": "7ed1d7cf9dce7127",
+     "he": "אלה סוגי הצורות התחביריות השונות שמוגדרות ב-Scheme — הכלל הזה מכיל רק חלופה (disjunction).\nכל צורה תחבירית מוגדרת בתורה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:19",
+     "type": "prose",
+     "en": "##### Procedure Call\n\n",
+     "hash": "425b26055201c6ba",
+     "he": "##### קריאה לפרוצדורה (Procedure Call)"
+    },
+    {
+     "id": "cm/2.3Syntax:7:20",
+     "type": "code",
+     "en": "```typescript\n<procedure call> ==> (<operator> <operand>*)\n<operator> ==> <expression>\n<operand> ==> <expression>\n```\n\n",
+     "hash": "3c6e3fee33b3d8a5",
+     "lang": "typescript",
+     "noteHe": "כלל הקריאה לפרוצדורה: סוגר שמאלי, אופרטור, אפס או יותר אופרנדים (הכוכבית), סוגר ימני. הנקודה הקריטית: `<operator>` ו-`<operand>` מוגדרים שניהם כ-`<expression>` — כלומר הכלל **רקורסיבי**, וזה מה שמאפשר קינון בעומק בלתי מוגבל. שימו לב שהסוגריים כאן הם טרמינלים ממשיים (תווים בקוד), לא סימון של הדקדוק."
+    },
+    {
+     "id": "cm/2.3Syntax:7:21",
+     "type": "prose",
+     "en": "An example concrete string that corresponds to this specification of procedure call is:\n\n",
+     "hash": "223f0abe21e9e7fa",
+     "he": "דוגמה למחרוזת קונקרטית שמתאימה למפרט הזה של קריאה לפרוצדורה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:22",
+     "type": "code",
+     "en": "```scheme\n(+ a b)\n```\n\n",
+     "hash": "5b64523607cd44f0",
+     "lang": "scheme",
+     "noteHe": "מחרוזת פשוטה שנעקוב אחריה בשלושת השלבים הבאים: קודם פירוק לאסימונים, אחר כך בניית עץ ניתוח, ולבסוף (בהמשך הפרק) המרה ל-AST."
+    },
+    {
+     "id": "cm/2.3Syntax:7:23",
+     "type": "prose",
+     "en": "It is *recognized* by first applying lexical rules to turn it into a sequence of tokens:\n\n",
+     "hash": "ed491d3deb91e40f",
+     "he": "היא *מזוהה* על ידי הפעלת הכללים הלקסיקליים תחילה, כדי להפוך אותה לרצף של אסימונים:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:24",
+     "type": "code",
+     "en": "```scheme\n<(:lparen> <+:identifier> <a:identifier> <b:identifier> <):rparen>\n```\n\n",
+     "hash": "fdb7fc63b45388ae",
+     "lang": "scheme",
+     "noteHe": "פלט הסורק: חמישה אסימונים, כל אחד בכתיב `<טקסט:קטגוריה>`. הרעיון המרכזי נכון וחשוב: הסורק אינו יודע דבר על **משמעות**, הוא רק מסווג אסימונים — ולכן `+` אינו \"פעולת חיבור\" בשלב הזה אלא סתם שם, בדיוק כמו `a` ו-`b`.\n\n⚠️ **אבל כאן יש אי-עקביות אמיתית בחומר, ואם היא בלבלה אתכם — צדקתם.** לפי הכללים הלקסיקליים שהדף עצמו הציג קודם, `+` **אינו יכול** להיות `<identifier>`: שם נכתב `<identifier> ==> <initial> <subsequent>*` ו-`<initial> ==> <letter>`, ו-`+` אינו אות. כלומר התיוג `<+:identifier>` כאן סותר את הדקדוק שהוצג באותו עמוד.\n\n**ההסבר — ואין צורך \"לתקן\" דבר:** הדף אמר במפורש שהוא מביא רק את *\"the first few lexical rules\"*, כלומר קיצור. במפרט המלא של **R4RS** אין סתירה, משתי סיבות: ה-`<initial>` האמיתי כולל גם תווים מיוחדים (`! $ % & * / : < = > ? ^ _ ~`), ובנוסף קיימת קטגוריה נפרדת של **מזהים חריגים** (peculiar identifiers) שכוללת בדיוק את `+`, `-` ו-`...`. בסכימה אמיתית `+` הוא באמת מזהה — ולכן `(define + -)` הוא קוד חוקי. הדקדוק המקוצר שבדף פשוט צר מכדי לכסות את הדוגמה שהוא עצמו נתן.\n\n🟢 **ומעניין מכך: המימוש של הקורס פותר את זה בדרך שלישית, ואותה תקראו בפועל.** ב-`L1-ast.ts` הפונקציה `parseL1Atomic` בודקת `isPrimitiveOp` **לפני** המקרה של משתנה, ולכן `+` נעצר שם והופך ל-`PrimOp` — קטגוריית אסימון נפרדת משלה, לא מזהה כלל. הפרדיקט `isIdentifier` שב-`shared/type-predicates.ts` דורש אות בהתחלה בדיוק כמו הדקדוק המקוצר, ו**אינו נקרא במסלול הזה בכלל**. כדאי לשנן את התמונה המלאה: יש שלוש תשובות שונות לשאלה \"מה הקטגוריה של `+`\" — הדקדוק המקוצר שבדף אומר \"לא חוקי\", R4RS אומר \"מזהה\", והמימוש של הקורס אומר \"פרימיטיב\". ההשלכה מופיעה ב-2.5: ב-L1 הפרימיטיבים הם **תחביר** ולא קשירות בסביבה, ולכן `(define + -)` — חוקי בסכימה אמיתית — אינו אפשרי כלל ב-L1."
+    },
+    {
+     "id": "cm/2.3Syntax:7:25",
+     "type": "prose",
+     "en": "Each token is annotated by its category as recognized by the scanner.\n\n",
+     "hash": "519776bce7ebb394",
+     "he": "כל אסימון מתויג בקטגוריה שלו כפי שזוהתה על ידי הסורק."
+    },
+    {
+     "id": "cm/2.3Syntax:7:26",
+     "type": "prose",
+     "en": "The concrete parser then turns this stream of tokens into a concrete parse tree:\n\n",
+     "hash": "2f9dfdbf9b4bc35a",
+     "he": "המנתח התחבירי הקונקרטי הופך אז את זרם האסימונים לעץ ניתוח קונקרטי:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:27",
+     "type": "code",
+     "en": "```scheme\n(expression \n  (procedure-call\n    (lparen)\n    (operator (expression (variable <+:identifier>)))\n    (operands ((expression (variable <a:identifier>))\n               (expression (variable <b:identifier>))))\n    (rparen)))\n```\n\n",
+     "hash": "869fa21a35755fff",
+     "lang": "scheme",
+     "noteHe": "עץ הניתוח (parse tree) של `(+ a b)`: השורש הוא הקטגוריה `expression`, שגזורה ל-`procedure-call`, שילדיה הם בדיוק רכיבי הצד הימני של הכלל — סוגר שמאלי, אופרטור, אופרנדים וסוגר ימני. שימו לב שהעץ **הקונקרטי** שומר גם את הסוגריים עצמם, למרות שאין להם משמעות סמנטית — זה בדיוק ההבדל מה-AST שנראה בהמשך, שמשמיט אותם."
+    },
+    {
+     "id": "cm/2.3Syntax:7:28",
+     "type": "prose",
+     "en": "This representation corresponds to the instantiation of the `<expression> ==> <procedure call>` syntactic rule on a specific sequence of tokens. It is a **tree** - with the non-terminal category as its root, and derived categories as children.  There is one child for each element in the RHS of the rules.\n\n",
+     "hash": "9cdb75bc76413787",
+     "he": "הייצוג הזה מתאים להצבה (instantiation) של הכלל התחבירי `<expression> ==> <procedure call>` על רצף אסימונים מסוים. זהו **עץ** — עם הקטגוריה הלא-טרמינלית כשורש, והקטגוריות הנגזרות כילדים. יש ילד אחד לכל רכיב בצד הימני של הכללים."
+    },
+    {
+     "id": "cm/2.3Syntax:7:29",
+     "type": "image",
+     "en": "![parse tree](./resources/parse-tree-add-a-b.png)\n\n",
+     "hash": "41826dfd818778df"
+    },
+    {
+     "id": "cm/2.3Syntax:7:30",
+     "type": "prose",
+     "en": "The syntactic rule is **recursive** - the category `<expression>` can be derived into an\nexpression of type `<procedure call>` which in turn, contains in its derivation components of type `<expression>`.\nThis leads to the observation that the defined language is an infinite set of expressions.\n\n",
+     "hash": "bf9bd4d7afc497c9",
+     "he": "הכלל התחבירי הוא **רקורסיבי** — הקטגוריה `<expression>` יכולה להיגזר לביטוי מסוג `<procedure call>`, שבתורו מכיל בגזירה שלו רכיבים מסוג `<expression>`.\nמכאן המסקנה שהשפה המוגדרת היא קבוצה אינסופית של ביטויים."
+    },
+    {
+     "id": "cm/2.3Syntax:7:31",
+     "type": "prose",
+     "en": "##### Lambda Expression\n\n",
+     "hash": "79fe7f9762c79e13",
+     "he": "##### ביטוי Lambda"
+    },
+    {
+     "id": "cm/2.3Syntax:7:32",
+     "type": "prose",
+     "en": "Lambda expressions are defined by this syntactic rule:\n\n",
+     "hash": "f7484bd1644bb060",
+     "he": "ביטויי lambda מוגדרים על ידי הכלל התחבירי הזה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:33",
+     "type": "code",
+     "en": "```typescript\n<lambda expression> ==> (lambda <formals> <body>)\n<formals> ==> (<variable>*)\n<body> ==> <sequence>\n<sequence> ==> <command>* <expression>\n<command> ==> <expression>\n```\n\n",
+     "hash": "4abff987e720b9af",
+     "lang": "typescript",
+     "noteHe": "חמישה כללים שמגדירים יחד את `lambda`: המילה `lambda` היא טרמינל (מילת מפתח), `<formals>` היא רשימת הפרמטרים בסוגריים (אפס או יותר משתנים), ו-`<body>` הוא `<sequence>` — אפס או יותר `<command>` ואחריהם `<expression>` אחד. הפירוק ל-command/expression משקף שהערך המוחזר הוא של הביטוי **האחרון**; מה שלפניו מבוצע רק בשביל תופעות הלוואי."
+    },
+    {
+     "id": "cm/2.3Syntax:7:34",
+     "type": "prose",
+     "en": "An example string recognized by this rule is:\n\n",
+     "hash": "7fb8b9c3d3a31218",
+     "he": "דוגמה למחרוזת שמזוהה על ידי הכלל הזה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:35",
+     "type": "code",
+     "en": "```scheme\n(lambda (x) x)\n```\n\n",
+     "hash": "ee45c0ff800e38b2",
+     "lang": "scheme",
+     "noteHe": "פונקציית הזהות (identity) — ה-lambda הפשוטה ביותר האפשרית: פרמטר אחד `x`, וגוף שהוא `x` עצמו."
+    },
+    {
+     "id": "cm/2.3Syntax:7:36",
+     "type": "prose",
+     "en": "which is recognized as a lambda-expression through the following derivation parse tree:\n\n",
+     "hash": "31360b98ebbb1cee",
+     "he": "שמזוהה כביטוי lambda באמצעות עץ הניתוח הגזירתי הבא:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:37",
+     "type": "code",
+     "en": "```scheme\n(lambda-expression\n  (lparen)\n  (lambda)\n  (formals (lparen)\n           ((variable <x:identifier>))\n           (rparen))\n  (body (sequence ((commands ())\n                   (expression (variable <x:identifier>)))))\n  (rparen))\n```\n\n",
+     "hash": "86d3aee4c1c97838",
+     "lang": "scheme",
+     "noteHe": "עץ הניתוח של `(lambda (x) x)`. עקבו אחרי המבנה: השורש `lambda-expression`, ותחתיו בסדר — סוגר שמאלי, מילת המפתח `lambda`, ה-`formals` (עם הסוגריים שלו ורשימה שמכילה משתנה אחד `x`), ה-`body` (שהוא `sequence` עם רשימת פקודות **ריקה** ואז הביטוי `x`), וסוגר ימני. שימו לב ש-`x` מופיע פעמיים בעץ בתפקידים שונים: פעם כפרמטר ופעם כביטוי בגוף."
+    },
+    {
+     "id": "cm/2.3Syntax:7:38",
+     "type": "prose",
+     "en": "This tree proves that the expression belongs to the `<lambda-expression>` category.\nIt can be read as a top-down derivation through the rules of the grammar:\n\n",
+     "hash": "f786448f97cbe0af",
+     "he": "העץ הזה מוכיח שהביטוי שייך לקטגוריה `<lambda-expression>`.\nאפשר לקרוא אותו כגזירה מלמעלה למטה דרך כללי הדקדוק:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:39",
+     "type": "code",
+     "en": "```typescript\n1. <lambda-expression> ==> (lambda <formals> <body>)\n2. <formals> ==> (<variable>*)\n3. <variable>* ==> <variable>\n4. <variable> ==> <x:identifier>\n5. <body> ==> <command>* <expression>\n6. <command>* ==> <empty>\n7. <expression> ==> <variable>\n8. <variable> ==> <x:identifier>\n```\n\n",
+     "hash": "ad094e8b70dc951e",
+     "lang": "typescript",
+     "noteHe": "אותו ניתוח, מוצג כ**סדרת גזירה (derivation sequence)** של 8 צעדים במקום כעץ: כל שורה מפעילה כלל אחד מהדקדוק ומחליפה קטגוריה בצד הימני שלה, עד שמגיעים לטרמינלים בלבד. שימו לב לצעד 6 — `<command>* ==> <empty>` — הכוכבית מתממשת כאפס מופעים. שתי ההצגות (עץ וסדרת גזירה) שקולות; במבחן ייתכן שתתבקשו לכתוב אחת מהן."
+    },
+    {
+     "id": "cm/2.3Syntax:7:40",
+     "type": "prose",
+     "en": "##### Conditional Expressions\n\n",
+     "hash": "aa07400d8632c039",
+     "he": "##### ביטויי תנאי (Conditional Expressions)"
+    },
+    {
+     "id": "cm/2.3Syntax:7:41",
+     "type": "prose",
+     "en": "The concrete syntax of conditional expressions is specified by this rule:\n\n",
+     "hash": "ad741eb258032824",
+     "he": "התחביר הקונקרטי של ביטויי תנאי מוגדר על ידי הכלל הזה:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:42",
+     "type": "code",
+     "en": "```typescript\n<conditional> ==> (if <test> <consequent> <alternate>)\n<test> ==> <expression>\n<consequent> ==> <expression>\n<alternate> ==> <expression>\n```\n\n",
+     "hash": "184f94d0c5d4483d",
+     "lang": "typescript",
+     "noteHe": "כלל ה-`if`: מילת המפתח `if` ואחריה בדיוק שלושה ביטויים. שימו לב שלכל אחד משלושת המקומות ניתן **שם תפקיד** נפרד — `<test>`, `<consequent>`, `<alternate>` — למרות ששלושתם מוגדרים כ-`<expression>`. זו נקודה עקרונית: הדקדוק מקודד לא רק מה מותר, אלא גם מה **התפקיד** של כל רכיב."
+    },
+    {
+     "id": "cm/2.3Syntax:7:43",
+     "type": "prose",
+     "en": "An example expression of this category is:\n\n",
+     "hash": "8a225b58f81226b9",
+     "he": "דוגמה לביטוי מהקטגוריה הזו:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:44",
+     "type": "code",
+     "en": "```scheme\n(if (> x 0) x (- x))\n```\n\n",
+     "hash": "ca75f0e6288eb9ae",
+     "lang": "scheme",
+     "noteHe": "פונקציית הערך המוחלט כביטוי `if`: שלושת החלקים הם `(> x 0)` בתפקיד test, ‏`x` בתפקיד consequent, ו-`(- x)` בתפקיד alternate. שימו לב ששניים מהם הם בעצמם ביטויים מורכבים — שוב הרקורסיביות של הדקדוק."
+    },
+    {
+     "id": "cm/2.3Syntax:7:45",
+     "type": "prose",
+     "en": "##### Literal Expressions\n\n",
+     "hash": "1c45ee2d0f4b4875",
+     "he": "##### ביטויים ליטרליים (Literal Expressions)"
+    },
+    {
+     "id": "cm/2.3Syntax:7:46",
+     "type": "prose",
+     "en": "Literal expressions are either self-evaluating expressions (boolean, number or string tokens) or quoted expressions:\n\n",
+     "hash": "f0745b1fae0f15c6",
+     "he": "ביטויים ליטרליים הם או ביטויים שמעריכים את עצמם (self-evaluating — אסימונים בוליאניים, מספריים או מחרוזות), או ביטויים מצוטטים (quoted):"
+    },
+    {
+     "id": "cm/2.3Syntax:7:47",
+     "type": "code",
+     "en": "```typescript\n<literal> ==> <quotation> | <self-evaluating>\n<self-evaluating> ==> <boolean> | <number> | <string>\n<quotation> ==> '<datum> | (quote <datum>)\n```\n\n",
+     "hash": "bb757343d7e6146e",
+     "lang": "typescript",
+     "noteHe": "שני סוגי ליטרלים: **מעריכי-עצמם** (מספר, בוליאני, מחרוזת — הערך שלהם הוא הם עצמם), ו**ציטוט (quotation)**. שימו לב שלציטוט יש שתי צורות שקולות לגמרי: הקיצור `'<datum>` והצורה המלאה `(quote <datum>)` — הגרש הוא בסך הכול סוכר תחבירי."
+    },
+    {
+     "id": "cm/2.3Syntax:7:48",
+     "type": "prose",
+     "en": "Datum (also called **s-exp** for Symbol-Expressions) plays in Scheme the same role as the JSON notation in JavaScript - it corresponds to the external notation for values that can be read by the `read` primitive procedure (equivalent to the JavaScript JSON.parse primitive) and manipulated as a value. \nReversely, any value in Scheme can be turned into a well-formed `<datum>` string by using the `format` primitive (equivalent to `JSON.stringify` in JavaScript).\n\n",
+     "hash": "283eaba9f9845897",
+     "he": "‏Datum (הנקרא גם **s-exp**, קיצור של Symbol-Expressions) ממלא ב-Scheme את אותו תפקיד שממלא כתיב JSON ב-JavaScript — הוא מתאים לכתיב החיצוני של ערכים שאפשר לקרוא באמצעות הפרוצדורה הפרימיטיבית `read` (המקבילה לפרימיטיב `JSON.parse` ב-JavaScript) ולטפל בהם כערך.\nבכיוון ההפוך, כל ערך ב-Scheme אפשר להפוך למחרוזת `<datum>` תקינה באמצעות הפרימיטיב `format` (המקביל ל-`JSON.stringify` ב-JavaScript)."
+    },
+    {
+     "id": "cm/2.3Syntax:7:49",
+     "type": "prose",
+     "en": "In particular, any string that parses as an `<expression>` will also parse as a `<datum>`.  \n\n",
+     "hash": "eb06fdf359fe6245",
+     "he": "בפרט, כל מחרוזת שמתפרשת כ-`<expression>` תתפרש גם כ-`<datum>`."
+    },
+    {
+     "id": "cm/2.3Syntax:7:50",
+     "type": "code",
+     "en": "```typescript\n<datum> ==> <simple datum> | <compound datum>\n<simple datum> ==> <boolean> | <number> | <string> |  <symbol>\n<symbol> ==> <identifier>\n<compound datum> ==> <list>\n<list> ==> (<datum>*) | (<datum>+ . <datum>)\n```\n\n",
+     "hash": "3f0a33583bf67422",
+     "lang": "typescript",
+     "noteHe": "הדקדוק של `<datum>` — כלומר של **ערכים** (בניגוד לביטויים): נתון פשוט (בוליאני, מספר, מחרוזת, סמל) או נתון מורכב (רשימה). שימו לב לשתי צורות הרשימה בשורה האחרונה: `(<datum>*)` היא רשימה רגילה, ו-`(<datum>+ . <datum>)` היא רשימה עם נקודה — כלומר זוג שהאיבר האחרון בו אינו הרשימה הריקה. השוו את הדקדוק הזה לדקדוק ה-`<expression>` — הדמיון ביניהם הוא בדיוק מה שהופך תוכניות Scheme לנתונים."
+    },
+    {
+     "id": "cm/2.3Syntax:7:51",
+     "type": "prose",
+     "en": "Examples of literal expressions in Scheme are:\n\n",
+     "hash": "b1b5d91ee8b3bd03",
+     "he": "דוגמאות לביטויים ליטרליים ב-Scheme:"
+    },
+    {
+     "id": "cm/2.3Syntax:7:52",
+     "type": "code",
+     "en": "```scheme\n1\n'1  \n#t\n#f\n\"a string\"\n'symbol\n'()\n'(1)\n'(a 1)\n'(a . 1)\n'(a b . 1)\n```\n\n",
+     "hash": "912995871b2e42d2",
+     "lang": "scheme",
+     "noteHe": "מגוון ליטרלים, מהפשוט למורכב: `1` ו-`'1` שקולים (למספר אין מה לצטט); `#t`/`#f` בוליאניים; מחרוזת; `'symbol` — **סמל**, טיפוס ייחודי ל-Scheme שאין לו מקבילה ישירה ב-JavaScript; `'()` רשימה ריקה; ואז רשימות: `'(1)`, `'(a 1)`. שלוש האחרונות מדגימות את כתיב הנקודה: `'(a . 1)` הוא זוג (לא רשימה!), ו-`'(a b . 1)` הוא רשימה שהזנב האחרון שלה הוא 1 במקום `'()`."
+    },
+    {
+     "id": "cm/2.3Syntax:7:53",
+     "type": "prose",
+     "en": "It is a remarkable property of Scheme that the concrete syntax of the language can be recognized as a literal value.\nIt makes it possible with little effort to **manipulate programs as data**.  In other words, the concrete syntax of Scheme\nis a subset of the S-Expressions.\n\n",
+     "hash": "a056e459639ee675",
+     "he": "זו תכונה יוצאת דופן של Scheme, שהתחביר הקונקרטי של השפה יכול להיות מזוהה כערך ליטרלי.\nהיא מאפשרת במאמץ קטן **לטפל בתוכניות כבנתונים (programs as data)**. במילים אחרות, התחביר הקונקרטי של Scheme הוא תת-קבוצה של ה-S-Expressions."
+    },
+    {
+     "id": "cm/2.3Syntax:7:54",
+     "type": "prose",
+     "en": "This is not the case for JavaScript with the JSON notation - JavaScript programs are not JSON literal expressions and cannot be read by a primitive function in the language. For example, the expression `x => x` is a JavaScript expression, but it is not a valid JSON literal value.\n\n",
+     "hash": "6b4fbe1097a26d79",
+     "he": "זה אינו המצב ב-JavaScript עם כתיב JSON — תוכניות JavaScript אינן ביטויים ליטרליים של JSON ואי אפשר לקרוא אותן באמצעות פונקציה פרימיטיבית של השפה. למשל, הביטוי `x => x` הוא ביטוי JavaScript תקין, אבל הוא אינו ערך JSON ליטרלי חוקי."
+    }
+   ],
+   "headingHe": "מפרט BNF"
+  },
+  {
+   "id": "cm/2.3Syntax:8",
+   "depth": 2,
+   "headingEn": "Abstract Syntax",
+   "raw": "## Abstract Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:8:0",
+     "type": "prose",
+     "en": "The Abstract Syntax of a language is a way to encode expressions in a way that captures the relevant information in the expressions so that they can be processed by programs.  \nThe key perspective is that Abstract Syntax considers **programs as data** - so that they can be manipulated by other programs.\n\n",
+     "hash": "793f92fdbdf1923f",
+     "he": "התחביר המופשט של שפה הוא דרך לקודד ביטויים באופן שלוכד את המידע הרלוונטי שבהם, כך שתוכניות יוכלו לעבד אותם.\nנקודת המבט המרכזית היא שתחביר מופשט רואה **תוכניות כנתונים (programs as data)** — כך שתוכניות אחרות יוכלו לטפל בהן."
+    },
+    {
+     "id": "cm/2.3Syntax:8:1",
+     "type": "prose",
+     "en": "Abstract syntax removes details from the concrete syntax and presents the parsed expressions through an abstract interface that can be manipulated by an interpreter or a compiler.  The overall pipeline of modules we have defined at this point is summarized here:\n\n",
+     "hash": "9221839d1295be8d",
+     "he": "תחביר מופשט מסיר פרטים מהתחביר הקונקרטי ומציג את הביטויים המנותחים דרך ממשק מופשט שמפרש או מהדר יכולים לטפל בו. צינור המודולים הכולל שהגדרנו עד כה מסוכם כאן:"
+    },
+    {
+     "id": "cm/2.3Syntax:8:2",
+     "type": "image",
+     "en": "![evaluation process](./resources/eval-process.jpg)\n\n",
+     "hash": "8df11aee330f63b9"
+    },
+    {
+     "id": "cm/2.3Syntax:8:3",
+     "type": "prose",
+     "en": "The abstract syntax of a language captures the following two types of relations between expressions and other expressions:\n",
+     "hash": "7c656e77edf665cf",
+     "he": "התחביר המופשט של שפה לוכד שני סוגי יחסים בין ביטויים לביטויים אחרים:"
+    },
+    {
+     "id": "cm/2.3Syntax:8:4",
+     "type": "list",
+     "en": "* An expression can be of different types of expressions\n* An expression is composed of sub-expressions, each fulfilling a specific role with respect to the parent expression.\n\n",
+     "hash": "a6c88a27d2fd946e",
+     "he": "* ביטוי יכול להיות מסוגים שונים של ביטויים\n* ביטוי מורכב מתת-ביטויים, כשכל אחד ממלא תפקיד מסוים ביחס לביטוי ההורה."
+    },
+    {
+     "id": "cm/2.3Syntax:8:5",
+     "type": "prose",
+     "en": "For example, in the Scheme abstract syntax, an expression can be of the following types:\n",
+     "hash": "9d12891f38304377",
+     "he": "למשל, בתחביר המופשט של Scheme, ביטוי יכול להיות מהסוגים הבאים:"
+    },
+    {
+     "id": "cm/2.3Syntax:8:6",
+     "type": "code",
+     "en": "```typescript\n<expression> ==> <variable>\n     | <procedure call>\n     | <lambda expression>\n     | <conditional>\n     | <literal>\n```\n\n",
+     "hash": "86493022c7df35ef",
+     "lang": "typescript",
+     "noteHe": "אותו כלל שראינו קודם, אבל עכשיו נקרא אותו כהגדרת **טיפוס נתונים** ולא כדקדוק: הקו `|` הוא כעת **איחוד זר (disjoint union)** — ביטוי הוא בדיוק אחד מחמשת הסוגים. זהו בדיוק הדפוס שלמדנו בפרק 1.4."
+    },
+    {
+     "id": "cm/2.3Syntax:8:7",
+     "type": "prose",
+     "en": "We call this relation a **disjunction** between different types of expressions.\n\n",
+     "hash": "8bba64576b88ff54",
+     "he": "אנו קוראים ליחס הזה **חלופה (disjunction)** בין סוגים שונים של ביטויים."
+    },
+    {
+     "id": "cm/2.3Syntax:8:8",
+     "type": "prose",
+     "en": "A specific expression type, such as a lambda-expression, contains sub-expressions:\n",
+     "hash": "f4645b41ca5896fc",
+     "he": "סוג ביטוי מסוים, כמו ביטוי lambda, מכיל תת-ביטויים:"
+    },
+    {
+     "id": "cm/2.3Syntax:8:9",
+     "type": "code",
+     "en": "```typescript\nlambda-expression: \n    formals: List(var-expression) \n    body: List(expression)\n```\n\n",
+     "hash": "f760bcf533f7982d",
+     "lang": "typescript",
+     "noteHe": "כך נראה ביטוי lambda בתחביר **מופשט**: שני שדות בלבד — `formals` (רשימת הצהרות משתנה) ו-`body` (רשימת ביטויים). שימו לב מה **נעלם** בהשוואה לעץ הניתוח הקונקרטי: הסוגריים ומילת המפתח `lambda`. הם היו נחוצים רק כדי לזהות את סוג הביטוי בטקסט; ב-AST סוג הביטוי כבר ידוע מהתגית."
+    },
+    {
+     "id": "cm/2.3Syntax:8:10",
+     "type": "prose",
+     "en": "We call this relation a **conjunction** between different sub-expressions.\nWhen we specify a conjunction in abstract syntax, we abstract away the details of the concrete syntax - for example, the fact that the keyword 'lambda' is used to mark this type of expression and the place of parentheses to separate the components of the sub-expressions (formals and body) within the parent expression (the lambda-expression).\n\n",
+     "hash": "626d294c28a34e6b",
+     "he": "אנו קוראים ליחס הזה **צירוף (conjunction)** בין תת-ביטויים שונים.\nכשאנו מגדירים צירוף בתחביר מופשט, אנו מפשיטים את פרטי התחביר הקונקרטי — למשל, את העובדה שמילת המפתח 'lambda' משמשת לסימון סוג הביטוי, ואת מיקום הסוגריים המפרידים בין רכיבי תת-הביטויים (formals ו-body) בתוך ביטוי ההורה (ביטוי ה-lambda)."
+    },
+    {
+     "id": "cm/2.3Syntax:8:11",
+     "type": "prose",
+     "en": "We do specify the type of the expected sub-expressions (for example, `formals` is a list of `var-expression` specifically) and their cardinality.\n\n",
+     "hash": "b91d5aef0a9df0bd",
+     "he": "אנחנו כן מגדירים את הטיפוס של תת-הביטויים המצופים (למשל, `formals` הוא רשימה של `var-expression` ספציפית) ואת המנייה (cardinality) שלהם."
+    }
+   ],
+   "headingHe": "תחביר מופשט (Abstract Syntax)"
+  },
+  {
+   "id": "cm/2.3Syntax:9",
+   "depth": 3,
+   "headingEn": "Abstract Syntax as Disjoint Union Type",
+   "raw": "### Abstract Syntax as Disjoint Union Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:9:0",
+     "type": "prose",
+     "en": "Abstract Syntax defines a data type which denotes a set of values: the values representing all legal expressions in the programming language.  \n\n",
+     "hash": "580ed8312c9c6ccd",
+     "he": "תחביר מופשט מגדיר טיפוס נתונים שמציין קבוצת ערכים: הערכים שמייצגים את כל הביטויים החוקיים בשפת התכנות."
+    },
+    {
+     "id": "cm/2.3Syntax:9:1",
+     "type": "prose",
+     "en": "Abstract syntax defines alternative **kinds for expression categories**, and the **components of composite elements**. \nFor each component, the abstract syntax defines:\n",
+     "hash": "6abcf801d86350e2",
+     "he": "תחביר מופשט מגדיר **סוגים חלופיים לקטגוריות ביטוי**, ואת **הרכיבים של אלמנטים מורכבים**.\nלכל רכיב, התחביר המופשט מגדיר:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:2",
+     "type": "list",
+     "en": "* its **role** in the composite sentence, \n* its **category** and \n* its **cardinality** (how many instances of the component can appear in the parent expression).  \n  Specifically, we distinguish single value components and List value components.\n\n",
+     "hash": "2eec7945f88b9bf2",
+     "he": "* את ה**תפקיד (role)** שלו במשפט המורכב,\n* את ה**קטגוריה (category)** שלו, ו\n* את ה**מנייה (cardinality)** שלו (כמה מופעים של הרכיב יכולים להופיע בביטוי ההורה).\n  באופן ספציפי, אנו מבחינים בין רכיבים בעלי ערך יחיד לרכיבים בעלי ערך מסוג רשימה."
+    },
+    {
+     "id": "cm/2.3Syntax:9:3",
+     "type": "prose",
+     "en": "We apply the construct of **disjoint union types** (which we introduced in [Chapter 1.4](./1.3TypescriptTypeChecking.html)) \nto define formally the abstract syntax of a language.\nThe notation we adopt is the following (defined in the book \"Essentials of Programming Languages\"):\n\n",
+     "hash": "a99b34019d0f0643",
+     "he": "אנו מיישמים את מבנה **טיפוסי האיחוד הזר (disjoint union types)** (שהצגנו ב[פרק 1.4](./1.3TypescriptTypeChecking.html)) כדי להגדיר פורמלית את התחביר המופשט של שפה.\nהכתיב שאנו מאמצים הוא הבא (מוגדר בספר \"Essentials of Programming Languages\"):"
+    },
+    {
+     "id": "cm/2.3Syntax:9:4",
+     "type": "code",
+     "en": "```typescript\n<exp> ::= <define> | <cexp>            / def-exp | cexp\n<define> ::= ( define <var> <cexp> )   / def-exp(var:varDecl, val:cexp)\n<var> ::= <identifier>                 / varRef(var:string)\n<binding> ::= ( <var> <cexp> )         / binding(var:varDecl, val:cexp)\n<cexp> ::= <number>                    / num-exp(val:number)\n  |  <boolean>                         / bool-exp(val:boolean)\n  |  <string>                          / str-exp(val:string)\n  |  <varRef>                          / varRef(var)\n  |  ( lambda ( <varDecl>* ) <cexp>+ ) / proc-exp(params:List(varDecl), body:List(cexp))\n  |  ( if <cexp> <cexp> <cexp> )       / if-exp(test: cexp, then: cexp, else: cexp)F\n  |  ( let ( binding* ) <cexp>+ )      / let-exp(bindings:List(binding), body:List(cexp))\n  |  ( <cexp> <cexp>* )                / app-exp(operator:cexp, operands:List(cexp))\n  |  ( quote <sexp> )                  / literal-exp(val:sexp)\n```\n\n",
+     "hash": "fdd671ebf014812b",
+     "lang": "typescript",
+     "noteHe": "**הטבלה המרכזית של הפרק — שווה ללמוד בעל פה.** כל שורה מכילה שני חלקים המופרדים בלוכסן `/`: משמאל התחביר **הקונקרטי** בכתיב BNF, ומימין ה-AST **המופשט** המתאים לו. למשל השורה `( if <cexp> <cexp> <cexp> ) / if-exp(test: cexp, then: cexp, else: cexp)` אומרת: מהמחרוזת `(if a b c)` נבנה AST מסוג `if-exp` עם שלושה שדות בעלי שמות תפקיד. שימו לב להבחנה בין `<exp>` (שכולל `define`) לבין `<cexp>` — ביטוי שאפשר לחשב (מ-`define` אי אפשר לקבל ערך). שימו לב גם ל-`varDecl` לעומת `varRef`: אותו שם משתנה, אבל תפקיד שונה — הצהרה (בפרמטרים) מול הפניה (בשימוש). (יש טעות דפוס במקור בשורת ה-`if` — ה-`F` בסופה מיותרת.)"
+    },
+    {
+     "id": "cm/2.3Syntax:9:5",
+     "type": "prose",
+     "en": "This definition combines in one notation the concrete syntax syntactic rules as BNF notation and for each rule,\nthe corresponding abstract syntax type.  \n\n",
+     "hash": "b50b190d450f022b",
+     "he": "ההגדרה הזו משלבת בכתיב אחד את הכללים התחביריים של התחביר הקונקרטי בכתיב BNF, ולכל כלל — את טיפוס התחביר המופשט המתאים לו."
+    },
+    {
+     "id": "cm/2.3Syntax:9:6",
+     "type": "prose",
+     "en": "The abstract syntax type is a variant notation of what would be defined as disjoint types in TypeScript as follows:\n\n\n",
+     "hash": "bf759c5c70907f2a",
+     "he": "טיפוס התחביר המופשט הוא כתיב חלופי למה שיוגדר כטיפוסים זרים ב-TypeScript כך:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:7",
+     "type": "code",
+     "en": "```typescript\n// Disjoint union types\ntype Exp = DefineExp | CExp;\ntype CExp = NumExp | BoolExp | StrExp | IfExp | PrimOp | VarRef | ProcExp | AppExp | LitExp | LetExp;\n\n// Composite types\ntype Program = {tag: \"Program\"; exps: Exp[]; };\ntype DefineExp = {tag: \"DefineExp\"; var: VarDecl; val: CExp; };\ntype NumExp = {tag: \"NumExp\"; val: number; };\ntype BoolExp = {tag: \"BoolExp\"; val: boolean; };\ntype StrExp = {tag: \"StrExp\"; val: string; };\ntype PrimOp = {tag: \"PrimOp\"; op: string; };\ntype VarRef = {tag: \"VarRef\"; var: string; };\ntype VarDecl = {tag: \"VarDecl\"; var: string; };\ntype AppExp = {tag: \"AppExp\"; rator: CExp; rands: CExp[]; };\ntype IfExp = {tag: \"IfExp\"; test: CExp; then: CExp; alt: CExp; };\ntype LitExp = {tag: \"LitExp\"; val: SExp; };\ntype LetExp = {tag: \"LetExp\"; bindings: Bindings[]; body: CExp[]; }\ntype ProcExp = {tag: \"ProcExp\"; params: VarDecl[]; body: CExp[]; }\n```\n\n",
+     "hash": "ab3940cdab13cb8c",
+     "lang": "typescript",
+     "noteHe": "אותה הגדרה בדיוק, אבל כקוד TypeScript אמיתי — זהו הקוד שתראו בקבצי המפרש של הקורס (`L3-ast.ts` וכדומה). שני החלקים: למעלה **טיפוסי האיחוד הזר** (`Exp` ו-`CExp`), ולמטה **הטיפוסים המורכבים** — כל אחד רשומה עם שדה `tag` שמזהה את סוגה, ושדות נוספים לתת-הביטויים. ה-`tag` הוא מה שמאפשר למפרש לבדוק בזמן ריצה באיזה סוג ביטוי מדובר (type guard). שימו לב לשמות `rator`/`rands` ב-`AppExp` — קיצורים מקובלים ל-operator ו-operands."
+    },
+    {
+     "id": "cm/2.3Syntax:9:8",
+     "type": "prose",
+     "en": "Given this definition of Abstract Syntax types, the role of the parser is to map concrete expressions (strings) to values of the appropriate type.  For example, the expression:\n\n",
+     "hash": "28bc3a531827b6fb",
+     "he": "בהינתן ההגדרה הזו של טיפוסי התחביר המופשט, תפקידו של המנתח התחבירי הוא למפות ביטויים קונקרטיים (מחרוזות) לערכים מהטיפוס המתאים. למשל, הביטוי:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:9",
+     "type": "code",
+     "en": "```scheme\n(lambda (x) x)\n```\n\n",
+     "hash": "ee45c0ff800e38b2",
+     "lang": "scheme",
+     "noteHe": "שוב פונקציית הזהות — נראה עכשיו איך היא נראית כ-AST בשלושה ייצוגים שונים: כתמונה, כרשימת Scheme, וכ-JSON."
+    },
+    {
+     "id": "cm/2.3Syntax:9:10",
+     "type": "prose",
+     "en": "corresponds to the abstract syntax tree:\n\n",
+     "hash": "6cda381a3d322bad",
+     "he": "מתאים לעץ התחביר המופשט:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:11",
+     "type": "image",
+     "en": "![ast for identity](./resources/id-ast.png)\n\n",
+     "hash": "545baafd9a7c21c1"
+    },
+    {
+     "id": "cm/2.3Syntax:9:12",
+     "type": "prose",
+     "en": "This tree value is encoded as follows in a Scheme implementation of the AST data type:\n\n",
+     "hash": "a2a91e04014515c2",
+     "he": "ערך העץ הזה מקודד כך במימוש Scheme של טיפוס הנתונים AST:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:13",
+     "type": "code",
+     "en": "```scheme\n'(proc-exp ((var-exp x)) ((var-exp x)))\n```\n\n",
+     "hash": "4047618f202e3703",
+     "lang": "scheme",
+     "noteHe": "ה-AST כרשימת Scheme מצוטטת: התגית `proc-exp`, אחריה רשימת הפרמטרים `((var-exp x))` ורשימת ביטויי הגוף `((var-exp x))`. השוו לעץ הניתוח הקונקרטי מקודם — כאן אין סוגריים מיותרים ואין מילת המפתח `lambda`, רק המידע המהותי. זו ההמחשה הישירה של \"תוכניות כנתונים\": ה-AST הוא בסך הכול רשימה של Scheme."
+    },
+    {
+     "id": "cm/2.3Syntax:9:14",
+     "type": "prose",
+     "en": "In a JSON type corresponding to the TypeScript type definitions above, it is encoded as the following value, in whch we distinguish here between the two roles of variables: variable declarations as VarDecl when they appear in the context of the procedure formal parameters) and variable references as VarRef:\n\n",
+     "hash": "bd1c1fcf6a2f83b8",
+     "he": "בטיפוס JSON המתאים להגדרות הטיפוסים של TypeScript לעיל, הוא מקודד כערך הבא, שבו אנו מבחינים בין שני התפקידים של משתנים: הצהרות משתנה כ-VarDecl (כשהם מופיעים בהקשר של הפרמטרים הפורמליים של הפרוצדורה) והפניות למשתנה כ-VarRef:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:15",
+     "type": "code",
+     "en": "```typescript\n{ tag: 'ProcExp',\n  params: [ { tag: 'VarDecl', var: 'x' } ],\n  body: [ { tag: 'VarRef', var: 'x' } ] }\n```\n\n",
+     "hash": "724873ce4025e110",
+     "lang": "typescript",
+     "noteHe": "אותו AST כ-JSON/TypeScript. שימו לב להבחנה החשובה שהטקסט מדגיש: אותו `x` מופיע פעמיים — פעם כ-`VarDecl` (בתוך `params`, כלומר **הצהרה**) ופעם כ-`VarRef` (בתוך `body`, כלומר **הפניה**). ההבחנה הזו קריטית לשלבים הבאים בקורס: בדיקת תחומי הכרה, כתובות לקסיקליות והצבה מסתמכות עליה."
+    },
+    {
+     "id": "cm/2.3Syntax:9:16",
+     "type": "prose",
+     "en": "Similarly, the expression:\n\n",
+     "hash": "2fa1d4014e89856b",
+     "he": "באופן דומה, הביטוי:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:17",
+     "type": "code",
+     "en": "```scheme\n(if #t (+ 1 2) 'ok) \n```\n\n",
+     "hash": "9bee98bda207ba3c",
+     "lang": "scheme",
+     "noteHe": "ביטוי `if` שמדגים שלושה סוגי ביטוי שונים בתוך AST אחד: `#t` הוא ליטרל בוליאני, `(+ 1 2)` הוא הפעלה (app-exp), ו-`'ok` הוא ליטרל מצוטט (סמל)."
+    },
+    {
+     "id": "cm/2.3Syntax:9:18",
+     "type": "prose",
+     "en": "corresponds to the abstract syntax tree:\n\n",
+     "hash": "6cda381a3d322bad",
+     "he": "מתאים לעץ התחביר המופשט:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:19",
+     "type": "image",
+     "en": "![ast for if expression](./resources/if-ast.png)\n\n",
+     "hash": "5f0190c5e8ee59e4"
+    },
+    {
+     "id": "cm/2.3Syntax:9:20",
+     "type": "prose",
+     "en": "This tree can be encoded in a Scheme value as follows:\n\n",
+     "hash": "79825aa2fc5fea1f",
+     "he": "אפשר לקודד את העץ הזה כערך Scheme כך:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:21",
+     "type": "code",
+     "en": "```scheme\n'(if-exp (bool-exp #t) (app-exp (var-exp +) ((num-exp 1) (num-exp 2))) (literal-exp ok))\n```\n\n",
+     "hash": "22affaa9d65ffd23",
+     "lang": "scheme",
+     "noteHe": "ה-AST של `(if #t (+ 1 2) 'ok)` כרשימת Scheme. פרקו אותו לפי המבנה: `if-exp` ואחריו שלושת החלקים — `(bool-exp #t)` הוא ה-test, אחריו ה-then שהוא `app-exp` שלם (עם אופרטור `(var-exp +)` ורשימת אופרנדים), ולבסוף `(literal-exp ok)` בתפקיד ה-else. שימו לב שהמבנה המקונן של ה-AST משקף בדיוק את המבנה המקונן של הביטוי המקורי."
+    },
+    {
+     "id": "cm/2.3Syntax:9:22",
+     "type": "prose",
+     "en": "And in the following JSON value in TypeScript:\n\n",
+     "hash": "143c4d039487991f",
+     "he": "ובערך ה-JSON הבא ב-TypeScript:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:23",
+     "type": "code",
+     "en": "```typescript\n{ tag: 'IfExp',\n  test: { tag: 'BoolExp', val: true },\n  then:\n   { tag: 'AppExp',\n     rator: { tag: 'PrimOp', op: '+' },\n     rands: [ { tag: 'NumExp', val: 1 }, \n              { tag: 'NumExp', val: 2 } ] },\n  alt: { tag: 'LitExp', val: ok } }\n```\n\n",
+     "hash": "c5040dd551deaffd",
+     "lang": "typescript",
+     "noteHe": "אותו AST בייצוג TypeScript. שימו לב לשמות השדות בעלי המשמעות — `test`, `then`, `alt` — במקום מיקום בלבד: זה בדיוק היתרון של AST על פני העץ הקונקרטי. הבחינו גם ש-`+` יוצג כאן כ-`PrimOp` (אופרטור פרימיטיבי) ולא כ-`VarRef` — המנתח מזהה את הפרימיטיבים המובנים ומתייג אותם בנפרד."
+    },
+    {
+     "id": "cm/2.3Syntax:9:24",
+     "type": "prose",
+     "en": "It should be clear that abstract syntax is **not** intended for human consumption.  ASTs are to be consumed by programs that manipulate expressions.\n\n",
+     "hash": "84252d883db756c3",
+     "he": "צריך להיות ברור שתחביר מופשט **אינו** מיועד לקריאה אנושית. ASTs נועדו לצריכה על ידי תוכניות שמטפלות בביטויים."
+    },
+    {
+     "id": "cm/2.3Syntax:9:25",
+     "type": "prose",
+     "en": "##### Parse Tree vs. AST\n\n",
+     "hash": "126006b8c6bbf11c",
+     "he": "##### עץ ניתוח (Parse Tree) לעומת AST"
+    },
+    {
+     "id": "cm/2.3Syntax:9:26",
+     "type": "prose",
+     "en": "In the AST type definitions, disjoint union types (exp, cexp) play the role of **abstract types** (as was defined in Java) - that is, there are no values in the AST of this specific type.  There can only be values of composite types with components.\n\n",
+     "hash": "0289971725ee91a5",
+     "he": "בהגדרות טיפוסי ה-AST, טיפוסי איחוד זר (exp, cexp) ממלאים את התפקיד של **טיפוסים מופשטים (abstract types)** (כפי שהוגדרו ב-Java) — כלומר, אין ב-AST ערכים מהטיפוס הספציפי הזה. יכולים להיות רק ערכים של טיפוסים מורכבים עם רכיבים."
+    },
+    {
+     "id": "cm/2.3Syntax:9:27",
+     "type": "prose",
+     "en": "Compare the AST displayed above with the Parse Tree displayed when we discussed concrete syntax.\nThe Parse Tree includes trees for `<expression>` - the AST does not.  \n\n",
+     "hash": "304cc889f437238e",
+     "he": "השוו את ה-AST שהוצג לעיל עם עץ הניתוח שהוצג כשדנו בתחביר קונקרטי.\nעץ הניתוח כולל עצים עבור `<expression>` — ה-AST אינו כולל אותם."
+    },
+    {
+     "id": "cm/2.3Syntax:9:28",
+     "type": "prose",
+     "en": "These two trees play different functions:\n",
+     "hash": "94bc566a05f672a1",
+     "he": "שני העצים האלה ממלאים תפקידים שונים:"
+    },
+    {
+     "id": "cm/2.3Syntax:9:29",
+     "type": "list",
+     "en": "* The AST is a concrete value that will be manipulated by the interpreter.\n* The Parse Tree is a proof that a concrete expression belongs to the language.\n\n",
+     "hash": "0b0217f040a7c21c",
+     "he": "* ה-AST הוא ערך קונקרטי שהמפרש יטפל בו.\n* עץ הניתוח הוא הוכחה שביטוי קונקרטי שייך לשפה."
+    },
+    {
+     "id": "cm/2.3Syntax:9:30",
+     "type": "prose",
+     "en": "ASTs are defined for all programming languages, they provide the first part of the formal specification of the language.\nYou can experiment with ASTs of existing languages in the [AST Explorer](https://astexplorer.net/) site which provides an interactive browser of ASTs for a wide range of programming languages (JavaScript, Scala, Go, SQL and many more).\n\n",
+     "hash": "4ebb9774ed0cce3a",
+     "he": "‏ASTs מוגדרים לכל שפות התכנות, והם מספקים את החלק הראשון של המפרט הפורמלי של השפה.\nאפשר להתנסות ב-ASTs של שפות קיימות באתר [AST Explorer](https://astexplorer.net/), שמספק דפדפן אינטראקטיבי של ASTs עבור מגוון רחב של שפות תכנות (JavaScript, ‏Scala, ‏Go, ‏SQL ועוד רבות)."
+    }
+   ],
+   "headingHe": "תחביר מופשט כטיפוס איחוד זר"
+  },
+  {
+   "id": "cm/2.3Syntax:10",
+   "depth": 3,
+   "headingEn": "Implementing ASTs in TypeScript",
+   "raw": "### Implementing ASTs in TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:10:0",
+     "type": "prose",
+     "en": "Please refer to the code in our [Github](https://github.com/bguppl/interpreters) to review and execute the code of the implementation of ASTs and Parsers in TypeScript.\nIn this lecture, we will cover the code in the following aspects:\n",
+     "hash": "69761eaca076f1fd",
+     "he": "עיינו בקוד ב-[Github](https://github.com/bguppl/interpreters) שלנו כדי לסקור ולהריץ את קוד המימוש של ASTs ומנתחים תחביריים ב-TypeScript.\nבהרצאה זו נכסה את הקוד בהיבטים הבאים:"
+    },
+    {
+     "id": "cm/2.3Syntax:10:1",
+     "type": "list",
+     "en": "* __[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__ \n* __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__\n* __[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__\n* __[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__ \n* __[shared/result.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/result.ts)__\n\n\n",
+     "hash": "15dc1f5cbaee6c35",
+     "he": "* __[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__ \n* __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__\n* __[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__\n* __[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__ \n* __[shared/result.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/result.ts)__"
+    },
+    {
+     "id": "cm/2.3Syntax:10:2",
+     "type": "prose",
+     "en": "ASTs describe types which correspond directly to Disjoint Union Types.\n\n",
+     "hash": "33553260dc8d0a0d",
+     "he": "‏ASTs מתארים טיפוסים שמתאימים ישירות לטיפוסי איחוד זר."
+    },
+    {
+     "id": "cm/2.3Syntax:10:3",
+     "type": "prose",
+     "en": "We implement them in TypeScript in the following manner:\n\n",
+     "hash": "a8fbd05feb6c18d2",
+     "he": "אנו מממשים אותם ב-TypeScript באופן הבא:"
+    },
+    {
+     "id": "cm/2.3Syntax:10:4",
+     "type": "list",
+     "en": "1. For every composite type `CT`, define:\n   1. A type definition `type CT = { tag:\"CT\"; ... }` with a field for each constituent\n   1. A value constructor named `makeCT`\n   1. A type predicate named `isCT`\n2. For every disjoint union type `DT` , define:\n   2. A type definition `type DT = CT1 | CT2 | ...` \n   2. A type predicate named `isDT` \n\n",
+     "hash": "d524d2f249fcc2d9",
+     "he": "1. לכל טיפוס מורכב `CT`, הגדירו:\n   1. הגדרת טיפוס `type CT = { tag:\"CT\"; ... }` עם שדה לכל רכיב\n   1. בנאי ערכים בשם `makeCT`\n   1. פרדיקט טיפוס בשם `isCT`\n2. לכל טיפוס איחוד זר `DT`, הגדירו:\n   2. הגדרת טיפוס `type DT = CT1 | CT2 | ...` \n   2. פרדיקט טיפוס בשם `isDT`"
+    },
+    {
+     "id": "cm/2.3Syntax:10:5",
+     "type": "prose",
+     "en": "The functions defined by this recipe provide a functional interface which encapsulates the data type definition.\n\n",
+     "hash": "0930277f2278f0d7",
+     "he": "הפונקציות שמוגדרות במתכון הזה מספקות ממשק פונקציונלי שמכמס את הגדרת טיפוס הנתונים."
+    },
+    {
+     "id": "cm/2.3Syntax:10:6",
+     "type": "prose",
+     "en": "For example, let us consider the following abstract syntax definition.\nIt specifies infix arithmetic formula, with no parentheses (not Scheme expressions):\n\n",
+     "hash": "834f416e1d57ef26",
+     "he": "למשל, נתבונן בהגדרת התחביר המופשט הבאה.\nהיא מגדירה נוסחה אריתמטית בכתיב תוכי, ללא סוגריים (לא ביטויי Scheme):"
+    },
+    {
+     "id": "cm/2.3Syntax:10:7",
+     "type": "code",
+     "en": "```typescript\n<E> ::= <number>    / num-exp(val:number)\n     |  <E> + <E>   / add-exp(arg1:E, arg2:E)\n     |  <E> * <E>   / mul-exp(arg1:E, arg2:E)\n```\n\n",
+     "hash": "34461c65fa710de1",
+     "lang": "typescript",
+     "noteHe": "דוגמת צעצוע קטנה שתלווה אותנו: שפת ביטויים אריתמטיים תוכיים. שלוש שורות, בכתיב המשולב שראינו: משמאל התחביר, מימין ה-AST. שימו לב שהתחביר `<E> + <E>` הוא **דו-משמעי** (אין סוגריים ואין קדימות) — אבל ה-AST `add-exp(arg1, arg2)` כבר חד-משמעי לגמרי. זה ממחיש שהעמימות היא בעיה של התחביר הקונקרטי בלבד."
+    },
+    {
+     "id": "cm/2.3Syntax:10:8",
+     "type": "prose",
+     "en": "We derive one disjoint union type (E) and three composite types (num-exp, add-exp and mul-exp).\n\n",
+     "hash": "e3de3fd2f30b5423",
+     "he": "אנו גוזרים טיפוס איחוד זר אחד (E) ושלושה טיפוסים מורכבים (num-exp, ‏add-exp ו-mul-exp)."
+    },
+    {
+     "id": "cm/2.3Syntax:10:9",
+     "type": "prose",
+     "en": "We define the following AST definition (similar to the more complete definition in __[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__):\n\n\n",
+     "hash": "dd6aa2a5e06516ff",
+     "he": "נגדיר את הגדרת ה-AST הבאה (דומה להגדרה המלאה יותר ב-__[L1/L1-ast.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/L1-ast.ts)__):"
+    },
+    {
+     "id": "cm/2.3Syntax:10:10",
+     "type": "code",
+     "en": "```typescript\n// Disjoint type E\ntype E = NumExp | AddExp | MulExp;\nconst isE = (x: any): x is E => isNumExp(x) || isAddExp(x) || isMulExp(x);\n\n// For each constituent type define a type, a constructor and a type predicate.\ntype NumExp = { tag: \"NumExp\"; val: number; };\nconst makeNumExp = (n: number): NumExp => ({ tag: \"NumExp\", val: n });\nconst isNumExp = (x: any): x is NumExp => x.tag === \"NumExp\";\n\ntype AddExp = { tag: \"AddExp\"; left: E; right: E };\nconst makeAddExp = (left: E, right: E): AddExp => ({ tag: \"AddExp\", left: left, right: right });\nconst isAddExp = (x: any): x is AddExp => x.tag === \"AddExp\";\n\ntype MulExp = { tag: \"MulExp\"; left: E; right: E };\nconst makeMulExp = (left: E, right: E): MulExp => ({ tag: \"MulExp\", left: left, right: right });\nconst isMulExp = (x: any): x is MulExp => x.tag === \"MulExp\";\n```\n\n",
+     "hash": "109d473def6923e6",
+     "lang": "typescript",
+     "noteHe": "**המתכון בפעולה** — זהו הדפוס שחוזר בכל קבצי המפרש של הקורס, שווה להכיר אותו היטב. לכל טיפוס מורכב יש שלישייה: (1) `type NumExp = {...}` — הגדרת הטיפוס עם שדה `tag`; (2) `makeNumExp` — **בנאי** שיוצר ערך תקין (שימו לב שהוא מוסיף את ה-`tag` אוטומטית, כך שהמשתמש לא יכול לטעות); (3) `isNumExp` — **פרדיקט טיפוס** שבודק את ה-`tag`. הכתיב `x is NumExp` בטיפוס ההחזרה הוא type guard של TypeScript: אחרי `if (isNumExp(x))` המהדר יודע ש-`x` הוא `NumExp` ומאפשר גישה לשדותיו. הפרדיקט של טיפוס האיחוד `isE` פשוט מאחד את שלושת הפרדיקטים ב-`||`."
+    }
+   ],
+   "headingHe": "מימוש ASTs ב-TypeScript"
+  },
+  {
+   "id": "cm/2.3Syntax:11",
+   "depth": 3,
+   "headingEn": "Parser as AST Factory",
+   "raw": "### Parser as AST Factory\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:11:0",
+     "type": "prose",
+     "en": "The parser plays the role of a **factory of ASTs** - given a stream of tokens, it returns an AST of the appropriate type.\n\n",
+     "hash": "0f0b2531d5bf7db9",
+     "he": "המנתח התחבירי ממלא את התפקיד של **מפעל של ASTs** — בהינתן זרם אסימונים, הוא מחזיר AST מהטיפוס המתאים."
+    },
+    {
+     "id": "cm/2.3Syntax:11:1",
+     "type": "prose",
+     "en": "In the case of working on Scheme, it is convenient to split the work of the parser in 2 stages:\n",
+     "hash": "ddcbc7b4e60d195a",
+     "he": "כשעובדים על Scheme, נוח לפצל את עבודת המנתח לשני שלבים:"
+    },
+    {
+     "id": "cm/2.3Syntax:11:2",
+     "type": "list",
+     "en": "* Stream of tokens to S-exp\n* S-exp to AST\n\n",
+     "hash": "45f45bb09b994561",
+     "he": "* מזרם אסימונים ל-S-exp\n* מ-S-exp ל-AST"
+    },
+    {
+     "id": "cm/2.3Syntax:11:3",
+     "type": "prose",
+     "en": "This strategy exploits the characteristic property of Scheme that all Scheme expressions are also S-expressions.\nFor other languages (such as JavaScript or Python), a similar strategy is also often employed.\n\n",
+     "hash": "8e5bab4071991abc",
+     "he": "האסטרטגיה הזו מנצלת את התכונה האופיינית של Scheme שכל ביטויי Scheme הם גם S-expressions.\nעבור שפות אחרות (כמו JavaScript או Python), נעשה לעיתים קרובות שימוש באסטרטגיה דומה."
+    },
+    {
+     "id": "cm/2.3Syntax:11:4",
+     "type": "prose",
+     "en": "In TypeScript, we rely on an existing package to parse S-expressions into nested lists of tokens.\nThis package is installed through npm:\n\n",
+     "hash": "c9f9ca45b08e3cc9",
+     "he": "ב-TypeScript אנו מסתמכים על חבילה קיימת כדי לנתח S-expressions לרשימות מקוננות של אסימונים.\nהחבילה הזו מותקנת דרך npm:"
+    },
+    {
+     "id": "cm/2.3Syntax:11:5",
+     "type": "code",
+     "en": "```\n> npm install s-expression --save\n```\n\n",
+     "hash": "82641f231c19e77d",
+     "noteHe": "פקודת ההתקנה של החבילה מ-npm. הדגל `--save` מוסיף אותה לרשימת התלויות ב-`package.json`."
+    },
+    {
+     "id": "cm/2.3Syntax:11:6",
+     "type": "prose",
+     "en": "This package performs two functions:\n",
+     "hash": "ffdaa63ee1514ca9",
+     "he": "החבילה הזו מבצעת שתי פונקציות:"
+    },
+    {
+     "id": "cm/2.3Syntax:11:7",
+     "type": "list",
+     "en": "* Scanning\n* Token stream to S-exp conversion\n\n",
+     "hash": "66d640ae42cf9e12",
+     "he": "* סריקה (Scanning)\n* המרת זרם אסימונים ל-S-exp"
+    },
+    {
+     "id": "cm/2.3Syntax:11:8",
+     "type": "prose",
+     "en": "The following example illustrates the structure of a parser.\n",
+     "hash": "167c7625fa2988d1",
+     "he": "הדוגמה הבאה ממחישה את מבנה המנתח התחבירי."
+    },
+    {
+     "id": "cm/2.3Syntax:11:9",
+     "type": "list",
+     "en": "* The type of a parser is [Sexp -> Exp]\n* The structure of the parser follows the structure of SExp:\n  * Atomic values that are acceptable as Exp\n  * List values represent compound Exp\n* For compound values, the parser recognizes each of the shapes of the various composite expressions in the grammar.\n* At the end of all branches in the logic, appears a constructor for one of the expression types (make-xxx) according to the AST type definition. This is the main property of a parser as a factory function for ASTs.\n* The parameters of the constructors are recursive calls to the parser.\n\n",
+     "hash": "19a123fa7e04868d",
+     "he": "* הטיפוס של מנתח תחבירי הוא [Sexp -> Exp]\n* מבנה המנתח עוקב אחרי מבנה ה-SExp:\n  * ערכים אטומיים שקבילים כ-Exp\n  * ערכי רשימה שמייצגים Exp מורכב\n* עבור ערכים מורכבים, המנתח מזהה כל אחת מהצורות של הביטויים המורכבים השונים בדקדוק.\n* בסוף כל הענפים בלוגיקה מופיע בנאי עבור אחד מסוגי הביטויים (make-xxx) בהתאם להגדרת טיפוס ה-AST. זו התכונה המרכזית של מנתח תחבירי כפונקציית מפעל ל-ASTs.\n* הפרמטרים של הבנאים הם קריאות רקורסיביות למנתח."
+    }
+   ],
+   "headingHe": "המנתח התחבירי כמפעל ASTs"
+  },
+  {
+   "id": "cm/2.3Syntax:12",
+   "depth": 3,
+   "headingEn": "The S-exp Type",
+   "raw": "### The S-exp Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:12:0",
+     "type": "prose",
+     "en": "The S-expression parser we use from npm is written in JavaScript - it does not specify the type of the value it returns.\n\n",
+     "hash": "61b8f9e1b6c24da9",
+     "he": "מנתח ה-S-expression שאנו משתמשים בו מ-npm כתוב ב-JavaScript — הוא אינו מגדיר את הטיפוס של הערך שהוא מחזיר."
+    },
+    {
+     "id": "cm/2.3Syntax:12:1",
+     "type": "prose",
+     "en": "We analyzed the code, and inferred manually the precise type returned by this parser and added this type annotation, which we add as the \"contract\" that we expect from the library and which can be trusted by the TypeScript type checker.  This is achieved by adding a file with extension d.ts in our codebase __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__:\n\n",
+     "hash": "597e9e90a15cb37b",
+     "he": "ניתחנו את הקוד, הסקנו ידנית את הטיפוס המדויק שהמנתח הזה מחזיר, והוספנו את הערת הטיפוס הזו — שאנו מוסיפים כ\"חוזה\" שאנו מצפים לו מהספרייה ושבודק הטיפוסים של TypeScript יכול לסמוך עליו. זה מושג על ידי הוספת קובץ עם סיומת d.ts לבסיס הקוד שלנו — __[shared/s-expression.d.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts)__:"
+    },
+    {
+     "id": "cm/2.3Syntax:12:2",
+     "type": "code",
+     "en": "```typescript\ndeclare module 's-expression' {\n    export type SexpString = String;\n    export type Token = string | SexpString;\n    export type CompoundSexp = Sexp[];\n    export type Sexp = Token | CompoundSexp;\n\n    /*\n        The types returned by the parser are:\n        string - for any token which is not a string,\n                 according to the tokenization rules of S-expressions.\n        SexpString - for tokens of the form \"...\"\n        Sexp[] - for S-expressions that contain sub-expressions\n                 (of the form \"(<s-expr1> ... <s-exprn>)\")\n    */\n    export default function parse(x: string): Sexp;\n}\n```\n\n",
+     "hash": "c2aceed41657ff85",
+     "lang": "typescript",
+     "noteHe": "קובץ הצהרת טיפוסים (`.d.ts`) — כך \"מלבישים\" טיפוסים על ספריית JavaScript שאין לה טיפוסים משלה. `declare module` אומר ל-TypeScript: \"כשמייבאים את החבילה `s-expression`, אלה הטיפוסים\". שימו לב להגדרה הרקורסיבית `Sexp = Token | CompoundSexp` כאשר `CompoundSexp = Sexp[]` — בדיוק המבנה האינדוקטיבי של אטומי/מורכב. שימו לב במיוחד ל-`SexpString = String` עם S גדולה — טיפוס שונה מ-`string` הרגיל, וזה מה שמאפשר להבחין בין מחרוזת ליטרלית `\"abc\"` לבין מזהה `abc`."
+    },
+    {
+     "id": "cm/2.3Syntax:12:3",
+     "type": "prose",
+     "en": "The S-expression parser interprets all atomic tokens according to Scheme's lexical rules.\nIn particular, it encodes tokens of type string, which are written as balanced double-quotes `\".....\"` in a specific TypeScript type called String (with capital-S, which is different from the usual string).  We call this token type a `SexpString` in our type definition.\n\n",
+     "hash": "1ea135f0c134f7c0",
+     "he": "מנתח ה-S-expression מפרש את כל האסימונים האטומיים לפי הכללים הלקסיקליים של Scheme.\nבפרט, הוא מקודד אסימונים מטיפוס מחרוזת, הנכתבים כמרכאות כפולות מאוזנות `\".....\"`, בטיפוס TypeScript ספציפי בשם String (עם S גדולה, שהוא שונה מ-string הרגיל). אנו קוראים לסוג האסימון הזה `SexpString` בהגדרת הטיפוס שלנו."
+    },
+    {
+     "id": "cm/2.3Syntax:12:4",
+     "type": "prose",
+     "en": "The structure of the `Sexp` type is the usual disjunction between Atomic tokens and Compound expressions.\nAtomic tokens form the base case of the inductive definition. \nCompound expressions are encoded as arrays of embedded expressions.\n\n",
+     "hash": "692d01ae2e2da257",
+     "he": "המבנה של הטיפוס `Sexp` הוא החלופה הרגילה בין אסימונים אטומיים לביטויים מורכבים.\nאסימונים אטומיים מהווים את מקרה הבסיס של ההגדרה האינדוקטיבית.\nביטויים מורכבים מקודדים כמערכים של ביטויים מוטמעים."
+    }
+   ],
+   "headingHe": "הטיפוס S-exp"
+  },
+  {
+   "id": "cm/2.3Syntax:13",
+   "depth": 3,
+   "headingEn": "Recognizing Token Types",
+   "raw": "### Recognizing Token Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:13:0",
+     "type": "prose",
+     "en": "Different types of tokens can be returned by the parser - as indicated by the Scheme lexical rule reviewed above:\n\n",
+     "hash": "bc6c8896fd955860",
+     "he": "המנתח יכול להחזיר סוגים שונים של אסימונים — כפי שמצוין בכלל הלקסיקלי של Scheme שנסקר לעיל:"
+    },
+    {
+     "id": "cm/2.3Syntax:13:1",
+     "type": "code",
+     "en": "```typescript\n<token> ==> <identifier> | <boolean> | <number> | <character> | <string> | ( | ) | ' | .\n```\n\n",
+     "hash": "9886311c156ce03a",
+     "lang": "typescript",
+     "noteHe": "תזכורת לכלל הלקסיקלי מתחילת הפרק — רשימת כל סוגי האסימונים שהסורק יכול להחזיר. בקוד שבהמשך נצטרך פרדיקט לכל אחד מהם."
+    },
+    {
+     "id": "cm/2.3Syntax:13:2",
+     "type": "prose",
+     "en": "The relevant types of tokens must be recognized by analyzing a `Token` value to decide the type of literal value the token represents (boolean, number or string).\nWe use the following TypeScript type predicates (using the TypeScript type predicate notation `x is <T>`).\nThese definitions are provided in __[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__:\n\n\n",
+     "hash": "a244556027c38aae",
+     "he": "יש לזהות את סוגי האסימונים הרלוונטיים על ידי ניתוח ערך `Token` כדי להחליט איזה סוג ערך ליטרלי האסימון מייצג (בוליאני, מספר או מחרוזת).\nאנו משתמשים בפרדיקטי הטיפוס הבאים של TypeScript (בכתיב פרדיקט הטיפוס `x is <T>`).\nההגדרות האלה מסופקות ב-__[shared/type-predicates.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/type-predicates.ts)__:"
+    },
+    {
+     "id": "cm/2.3Syntax:13:3",
+     "type": "code",
+     "en": "```typescript\n// ========================================================\n// Parsing utilities to distinguish types of tokens\n// ========================================================\n// Type utilities\nexport const isArray = Array.isArray;\nexport const isString = (x: any): x is string => typeof x === \"string\";\nexport const isNumber = (x: any): x is number => typeof x === \"number\";\nexport const isBoolean = (x: any): x is boolean => typeof x === \"boolean\";\nexport const isError = (x: any): x is Error => x instanceof Error;\n\n// A weird method to check that a string is a string encoding of a number\nexport const isNumericString = (x: string): boolean => JSON.stringify(+x) === x;\n\n// A predicate for a valid identifier\n// In Scheme, a valid identifier is a token that starts with an alphabetic letter (a-z or A-Z) followed by any number of letters or numbers.\n// As discussed in the Section on Lexical Rules - we use Regular Expressions (regexp) to recognize these.\nexport type Identifier = string;\nexport const isIdentifier = (x: any): x is Identifier =>\n    /[A-Za-z][A-Za-z0-9]*/i.test(x);\n```\n\n",
+     "hash": "13464f61c56b852a",
+     "lang": "typescript",
+     "noteHe": "פרדיקטי טיפוס בסיסיים — המימוש בפועל של הכללים הלקסיקליים ב-TypeScript. שלושת הראשונים (`isString`, `isNumber`, `isBoolean`) פשוט עוטפים את `typeof`. שני מעניינים יותר: `isNumericString` בודק אם מחרוזת מקודדת מספר בטריק חכם — `+x` ממיר למספר ו-`JSON.stringify` חזרה למחרוזת; אם התוצאה זהה למקור, זה היה מספר תקין (למשל `\"1\"` → `1` → `\"1\"` ✓, אבל `\"1a\"` → `NaN` → `\"null\"` ✗). `isIdentifier` משתמש בביטוי רגולרי — בדיוק כפי שהובטח בסעיף על כללים לקסיקליים. **שימו לב לבאג עדין**: הביטוי הרגולרי חסר עוגנים (`^` ו-`$`), ולכן הוא יחזיר `true` גם למחרוזת כמו `\"1a\"` שמכילה אות איפשהו."
+    },
+    {
+     "id": "cm/2.3Syntax:13:4",
+     "type": "prose",
+     "en": "The code above corresponds to the TypeScript implementation (our meta-language) of the BNF Lexical Rules discussed above.\nWe use TypeScript primitives when they exist to distinguish among the various types of tokens (string, number).\nFor more delicate tests, we rely on Regular Expressions (regexp) - as exemplified in the `isIdentifier` predicate.\nYou can read more on the important topic of regexp in [Regular Expressions Page](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions).\n\n",
+     "hash": "fa838fbdc50c8f64",
+     "he": "הקוד לעיל מתאים למימוש ב-TypeScript (שפת-העל שלנו) של הכללים הלקסיקליים של BNF שנדונו לעיל.\nאנו משתמשים בפרימיטיבים של TypeScript כשהם קיימים כדי להבחין בין סוגי האסימונים השונים (מחרוזת, מספר).\nלבדיקות עדינות יותר אנו מסתמכים על ביטויים רגולריים (regexp) — כפי שמודגם בפרדיקט `isIdentifier`.\nאפשר לקרוא עוד על הנושא החשוב של ביטויים רגולריים ב[דף הביטויים הרגולריים](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions)."
+    },
+    {
+     "id": "cm/2.3Syntax:13:5",
+     "type": "prose",
+     "en": "Since we rely on the S-expression external library to parse S-Expressions into TypeScript values, we introduce TypeScript type definitions that reflect the exact types we expect,\nin __[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__. \n\n\n",
+     "hash": "067d98bb09e8af2b",
+     "he": "מכיוון שאנו מסתמכים על ספריית S-expression חיצונית לניתוח S-Expressions לערכי TypeScript, אנו מציגים הגדרות טיפוס ב-TypeScript שמשקפות את הטיפוסים המדויקים שאנו מצפים להם, ב-__[shared/parser.ts](https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts)__."
+    },
+    {
+     "id": "cm/2.3Syntax:13:6",
+     "type": "code",
+     "en": "```typescript\nimport p, { Sexp, SexpString, Token, CompoundSexp } from \"s-expression\";\nimport { makeFailure, makeOk, Result } from \"./result\";\nimport { isString, isArray, isError } from \"./type-predicates\";\nimport { allT } from \"./list\";\n\n// s-expression returns strings quoted as \"a\" as [String: 'a'] objects\n// to distinguish them from symbols - which are encoded as 'a'\n// These are constructed using the new String(\"a\") constructor\n// and can be distinguished from regular strings based on the constructor.\nexport const isSexpString = (x: any): x is SexpString =>\n    ! isString(x) && x.constructor && x.constructor.name === \"String\";\n\nexport const isSexp = (x: any): x is Sexp => isToken(x) || isCompoundSexp(x);\nexport const isToken = (x: any): x is Token => isString(x) || isSexpString(x);\nexport const isCompoundSexp = (x: any): x is CompoundSexp => isArray(x) && allT(isSexp, x);\n\nexport const parse = (x: string): Result<Sexp> => {\n    const parsed = p(x);\n    return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n}\n```\n\n",
+     "hash": "00a942da42f393ab",
+     "lang": "typescript",
+     "noteHe": "הפרדיקטים של טיפוס `Sexp`. הפונקציה המעניינת כאן היא `isSexpString`: הספרייה מחזירה מחרוזות ליטרליות כאובייקטי `String` (שנוצרו עם `new String(\"a\")`) כדי להבדיל אותן מסמלים (שמוחזרים כמחרוזות רגילות) — ולכן הבדיקה היא \"אינו string רגיל **וגם** שם הבנאי שלו הוא String\". שאר הפרדיקטים ממשים את ההגדרה האינדוקטיבית ישירות: `isSexp` הוא אטומי או מורכב, `isCompoundSexp` הוא מערך שכל איבריו Sexp (העזר `allT` בודק שפרדיקט מתקיים לכל איברי המערך)."
+    },
+    {
+     "id": "cm/2.3Syntax:13:7",
+     "type": "prose",
+     "en": "The external s-expression parser library can fail when it faces an illegal combination of parentheses or ill-formed tokens.\nIn this case, it returns a value of type `Error`.  \nIn the rest of the course, we will use a functional approach to handle errors, based on the `Result<T>` monad.  \nTherefore, we wrap the call to the library parser in a function that adapts the `Error` protocol into a `Result<Sexp>`:\n\n",
+     "hash": "994c4fd16731597b",
+     "he": "ספריית מנתח ה-s-expression החיצונית עלולה להיכשל כשהיא נתקלת בשילוב לא-חוקי של סוגריים או באסימונים פגומים.\nבמקרה כזה היא מחזירה ערך מטיפוס `Error`.\nבהמשך הקורס נשתמש בגישה פונקציונלית לטיפול בשגיאות, המבוססת על המונאדה `Result<T>`.\nלכן אנו עוטפים את הקריאה למנתח הספרייה בפונקציה שמתאימה את פרוטוקול ה-`Error` ל-`Result<Sexp>`:"
+    },
+    {
+     "id": "cm/2.3Syntax:13:8",
+     "type": "code",
+     "en": "```typescript\nexport const parse = (x: string): Result<Sexp> => {\n    const parsed = p(x);\n    return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n}\n```\n\n",
+     "hash": "aa7bb2fb157a67b6",
+     "lang": "typescript",
+     "noteHe": "העטיפה שממירה שגיאות לערך `Result`: קוראים לספרייה (`p(x)`), ואם התוצאה היא `Error` — מחזירים `makeFailure` עם הודעת השגיאה; אחרת `makeOk` עם התוצאה. מכאן והלאה כל הקוד עובד עם `Result<T>` בלבד ולא צריך לזרוק חריגות — זהו יישום מעשי של המונאדה שלמדנו ב-1.5."
+    }
+   ],
+   "headingHe": "זיהוי סוגי אסימונים"
+  },
+  {
+   "id": "cm/2.3Syntax:14",
+   "depth": 2,
+   "headingEn": "Parsing into an AST",
+   "raw": "## Parsing into an AST\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:14:0",
+     "type": "prose",
+     "en": "Given a stream of tokens, each one identified as a specific type of Token (number, identifier, boolean) according to the lexical rules of the grammar,\nwe now construct an AST.  The following code shows how to construct an AST according to the rules of the grammar for the E-expressions shown above:\n\n",
+     "hash": "086ad83c198f614c",
+     "he": "בהינתן זרם אסימונים, שכל אחד מהם מזוהה כסוג אסימון מסוים (מספר, מזהה, בוליאני) לפי הכללים הלקסיקליים של הדקדוק, אנו בונים כעת AST. הקוד הבא מראה כיצד לבנות AST לפי כללי הדקדוק של ביטויי ה-E שהוצגו לעיל:"
+    },
+    {
+     "id": "cm/2.3Syntax:14:1",
+     "type": "code",
+     "en": "```typescript\n<E> ::= <number>    / num-exp(val:number)\n     |  <E> + <E>   / add-exp(arg1:E, arg2:E)\n     |  <E> * <E>   / mul-exp(arg1:E, arg2:E)\n```\n\n",
+     "hash": "34461c65fa710de1",
+     "lang": "typescript",
+     "noteHe": "תזכורת לדקדוק שפת ה-E מהסעיף הקודם — נממש עכשיו מנתח תחבירי שממיר מחרוזות בשפה הזו ל-ASTs שהגדרנו."
+    },
+    {
+     "id": "cm/2.3Syntax:14:2",
+     "type": "prose",
+     "en": "The full code is available in __[L1/E-parser.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/E-parser.ts)__:\n\n\n",
+     "hash": "bf13d8592ecf5e03",
+     "he": "הקוד המלא זמין ב-__[L1/E-parser.ts](https://github.com/bguppl/interpreters/blob/master/src/L1/E-parser.ts)__:"
+    },
+    {
+     "id": "cm/2.3Syntax:14:3",
+     "type": "code",
+     "en": "```typescript\n// --------------------------------------------\n// Toplevel function: parse a string into an E expression.\n// Since parse can fail, return a Result<E>\n// We split the parsing process in 2 stages:\n// - Tokenization and embedding with the general S-expression parser.\n// - Parsing according to the E-grammar implemented in this package.\n// We adopt the Result<T> monad pattern to process errors.\n// bind is used to compose functions that return Result<T> values.\n// - First invoke parse(x)\n// - If the result is a Failure, stop\n// - Else we received an Ok<Sexp> value, pass the Sexp result to the next function (parseESexp)\n// Once we get used to this notation, we can simplify this type of calls as follows:\n// bind(parse(x), parseESexp);\n// since the function (s: Sexp) => parseESexp(s); is just parseESexp.\nexport const parseE = (x: string): Result<E> =>\n    bind(parse(x), (s: Sexp) => \n         parseESexp(s));\n\n// ========================================================\n// Parsing\n\nconst parseESexp = (sexp: Sexp): Result<E> =>\n    isEmpty(sexp) ? makeFailure(\"Unexpected empty\") :\n    isString(sexp) ? parseEAtomic(sexp) :\n    isArray(sexp) ? parseECompound(sexp) :\n    // Quoted strings are not legal in the E-expression language\n    makeFailure(\"Expected either a compound expression or a token, got a quoted string\");\n\n// Only numeric tokens are ok in this language\n// We decided not to refer to \"+\" and other primitives as distinct atomic expressions.\n// The decision is different in Scheme (and L1)\nconst parseEAtomic = (sexp: string): Result<E> =>\n    isNumericString(sexp) ? makeOk(makeNumExp(+sexp)) :\n    makeFailure(\"Bad token \" + sexp);\n\n// Compound expressions must be of the form (<exp> <op> <exp>) where op in (*, +)\n// This procedure is recursive since the left and right sides can be embedded compound expressions.\nconst parseECompound = (sexps: Sexp[]): Result<E> =>\n    (sexps.length !== 3) ? makeFailure(\"Wrong length\") :\n    isString(sexps[1]) ? bind(parseESexp(sexps[0]), (arg1: E) =>\n                              bind(parseESexp(sexps[2]), (arg2: E) =>\n                                   parseE3(sexps[1], arg1, arg2))) :\n    makeFailure(\"Expected operator, got compound expression\");\n\nconst parseE3 = (op: Sexp, arg1: E, arg2: E): Result<E> =>\n    op === \"+\" ? makeOk(makeAddExp(arg1, arg2)) :\n    op === \"*\" ? makeOk(makeMulExp(arg1, arg2)) :\n    makeFailure(\"Bad operator \" + op);\n```\n\n",
+     "hash": "b1b85b416f4b38a7",
+     "lang": "typescript",
+     "noteHe": "**מנתח תחבירי שלם** — ארבע פונקציות שכדאי לעקוב אחריהן לפי הסדר:\n- `parseE` — נקודת הכניסה. היא משרשרת שני שלבים בעזרת `bind` של מונאדת `Result`: קודם `parse(x)` (מחרוזת → Sexp), ואם זה הצליח — `parseESexp`. אם השלב הראשון נכשל, `bind` פשוט מעביר את הכישלון הלאה בלי להריץ את השני.\n- `parseESexp` — **מפצלת לפי מבנה ה-Sexp**: ריק → שגיאה, מחרוזת → אטומי, מערך → מורכב. זהו בדיוק הדפוס האינדוקטיבי.\n- `parseEAtomic` — רק מחרוזות מספריות קבילות בשפה הזו; `+sexp` ממיר לערך מספרי והבנאי `makeNumExp` יוצר את ה-AST.\n- `parseECompound` — דורשת בדיוק שלושה איברים (`<exp> <op> <exp>` — כתיב תוכי), ואז **קוראת רקורסיבית** לשני צדדיה. שרשרת ה-`bind` המקוננת מבטיחה שאם צד אחד נכשל, כל הביטוי נכשל.\n- `parseE3` — בוחרת את הבנאי לפי האופרטור.\nשימו לב לתכונה המרכזית: בסוף כל ענף מופיע `make…` — המנתח הוא **מפעל של ASTs**."
+    },
+    {
+     "id": "cm/2.3Syntax:14:4",
+     "type": "code",
+     "en": "```typescript\nconsole.log(parseE(\"1\"));\n-->\n{ tag: 'Ok', value: { tag: 'NumExp', val: 1 } }\n\nconsole.log(parseE(\"(1 + 2)\"));\n-->\nparseE(\"(1 + 2)\");\n\n{ tag: 'Ok',\n  value: { tag: 'AddExp',\n           left: { tag: 'NumExp', val: 1 },\n           right: { tag: 'NumExp', val: 2 } } }\n\nconsole.log(parseE(\"(1 + (2 * 3))\"));\n-->\nparseE(\"(1 + (2 * 3))\")\n\n{ tag: 'Ok',\n  value: { tag: 'AddExp',\n           left: { tag: 'NumExp', val: 1 },\n           right: { tag: 'MulExp',\n                    left: { tag: 'NumExp', val: 2 },\n                    right: { tag: 'NumExp', val: 3 } } } }\n```  \n\n",
+     "hash": "edd8c75e93f9bfaa",
+     "lang": "typescript",
+     "noteHe": "שלוש הרצות לדוגמה שממחישות את הפלט: `\"1\"` נותן `NumExp` פשוט; `\"(1 + 2)\"` נותן `AddExp` עם שני ילדים; ו-`\"(1 + (2 * 3))\"` נותן `AddExp` שהילד הימני שלו הוא `MulExp` — הקינון ב-AST משקף את הקינון בסוגריים. שימו לב שכל תוצאה עטופה ב-`{tag: 'Ok', value: …}` — זו מונאדת ה-`Result`."
+    },
+    {
+     "id": "cm/2.3Syntax:14:5",
+     "type": "prose",
+     "en": "In this example, there is no handling for precedence rules or various associativity.  So that, we do not know how to parse an expression such as \"1 + 2 * 3\".  This would require explicit handling of a stack to resolve the ambiguous structure into an unambiguous fully parenthesized structure.\n\n",
+     "hash": "7f71c8da8b22964f",
+     "he": "בדוגמה הזו אין טיפול בכללי קדימות או באסוציאטיביות שונה. לכן איננו יודעים כיצד לנתח ביטוי כמו \"1 + 2 * 3\". זה היה דורש טיפול מפורש במחסנית כדי ליישב את המבנה הדו-משמעי למבנה חד-משמעי עם סוגריים מלאים."
+    },
+    {
+     "id": "cm/2.3Syntax:14:6",
+     "type": "prose",
+     "en": "This is as much as needed for Scheme parsing - for other languages, more logic would be needed to implement such rules.\nYou will learn about more complex parsing implementation in the Compilation course.\n\n",
+     "hash": "05b3fbd83d66b454",
+     "he": "זה כל מה שנדרש לניתוח תחבירי של Scheme — עבור שפות אחרות תידרש לוגיקה נוספת כדי לממש כללים כאלה.\nתלמדו על מימושי ניתוח תחבירי מורכבים יותר בקורס קומפילציה."
+    }
+   ],
+   "headingHe": "ניתוח תחבירי ל-AST"
+  },
+  {
+   "id": "cm/2.3Syntax:15",
+   "depth": 3,
+   "headingEn": "Recipe for Processing ASTs",
+   "raw": "### Recipe for Processing ASTs\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:15:0",
+     "type": "prose",
+     "en": "This convention to implement the AST as a disjoint union types with `make`-constructors and `is`-type-predicates determines the **interface between the parser module and the interpreter**.\n\n",
+     "hash": "b6910f8338fdc0a3",
+     "he": "המוסכמה הזו — לממש את ה-AST כטיפוסי איחוד זר עם בנאי `make` ופרדיקטי טיפוס `is` — קובעת את ה**ממשק בין מודול המנתח למפרש**."
+    },
+    {
+     "id": "cm/2.3Syntax:15:1",
+     "type": "prose",
+     "en": "On the basis of this recipe, we define a recipe to write procedures that process ASTs relying on the disjoint-union type interface.\n\n",
+     "hash": "55d4ce12fbe98202",
+     "he": "על בסיס המתכון הזה, נגדיר מתכון לכתיבת פרוצדורות שמעבדות ASTs תוך הסתמכות על ממשק טיפוס האיחוד הזר."
+    },
+    {
+     "id": "cm/2.3Syntax:15:2",
+     "type": "prose",
+     "en": "For example, let us write a function to compute the height of an AST for the simple arithmetic language introduced above.\n\n\n",
+     "hash": "896f7bcb78d08225",
+     "he": "למשל, נכתוב פונקציה שמחשבת את הגובה של AST עבור שפת האריתמטיקה הפשוטה שהצגנו לעיל."
+    },
+    {
+     "id": "cm/2.3Syntax:15:3",
+     "type": "code",
+     "en": "```typescript\nconst max = (n1: number, n2: number): number =>\n    (n1 > n2) ? n1 : n2;\n\n// Compute the height of an E-AST\nconst Eheight = (e: E): number =>\n    isNumExp(e) ? 0 :\n    isAddExp(e) ? max(Eheight(e.left), Eheight(e.right)) + 1 :\n    isMulExp(e) ? max(Eheight(e.left), Eheight(e.right)) + 1 :\n    0;\n```\n\n",
+     "hash": "0ca377df2c61f501",
+     "lang": "typescript",
+     "noteHe": "**התבנית לעיבוד AST — שווה לזכור למבחן.** הפונקציה `Eheight` מחשבת את גובה העץ, והמבנה שלה הוא שרשרת תנאים שמכסה את **כל** סוגי הביטויים: עלה (`NumExp`) → גובה 0; צומת מורכב → הגובה הוא המקסימום של גובהי הילדים ועוד 1. שימו לב לשני דברים: (1) הגישה לשדות `e.left`/`e.right` בטוחה מבחינת טיפוסים כי היא מופיעה **אחרי** ה-guard המתאים; (2) הענף האחרון `: 0` הוא ברירת מחדל שהמהדר דורש. הכתיב `cond ? a : cond2 ? b : c` הוא שרשרת אופרטורים משולשים — הניב הפונקציונלי המקביל ל-`cond` של Scheme."
+    },
+    {
+     "id": "cm/2.3Syntax:15:4",
+     "type": "prose",
+     "en": "This typical processor of AST has the following structure:\n",
+     "hash": "b29f919f2d73910e",
+     "he": "למעבד AST טיפוסי כזה יש את המבנה הבא:"
+    },
+    {
+     "id": "cm/2.3Syntax:15:5",
+     "type": "list",
+     "en": "* The type is [AST -> something]\n* The structure of the function is a conditional expression that covers all types of expressions according to the AST disjoint-type definition.\n* For each branch in the conditional, the code breaks the AST into its components using the AST accessors for the specific type of the branch. (For example, in the branch for `isAddExp`, we have accessors for `AddExp.left` and `AddExp.right`.)\n* Usually, the function is called recursively on each of the components of compound AST values.\n\n",
+     "hash": "35d4cf9738f13cbc",
+     "he": "* הטיפוס הוא [AST -> משהו]\n* מבנה הפונקציה הוא ביטוי תנאי שמכסה את כל סוגי הביטויים לפי הגדרת טיפוס האיחוד הזר של ה-AST.\n* בכל ענף בתנאי, הקוד מפרק את ה-AST לרכיביו באמצעות פונקציות הגישה של ה-AST עבור הסוג הספציפי של הענף. (למשל, בענף של `isAddExp` יש לנו גישה ל-`AddExp.left` ול-`AddExp.right`.)\n* בדרך כלל, הפונקציה נקראת רקורסיבית על כל אחד מרכיבי ערכי ה-AST המורכבים."
+    },
+    {
+     "id": "cm/2.3Syntax:15:6",
+     "type": "prose",
+     "en": "The type system of TypeScript infers that the parameter `e` is of type `AddExp` in the clause that follows the `isAddExp` guard, and similarly for `isMulExp` - so that we obtain type-safe code in TypeScript when using this idiom.\n\n",
+     "hash": "e5d015fdf0555148",
+     "he": "מערכת הטיפוסים של TypeScript מסיקה שהפרמטר `e` הוא מטיפוס `AddExp` בפסוקית שבאה אחרי השומר `isAddExp`, ובאופן דומה עבור `isMulExp` — כך שאנו מקבלים קוד בטוח-טיפוסים ב-TypeScript כשמשתמשים בניב הזה."
+    }
+   ],
+   "headingHe": "מתכון לעיבוד ASTs"
+  },
+  {
+   "id": "cm/2.3Syntax:16",
+   "depth": 2,
+   "headingEn": "Scheme Abstract Syntax",
+   "raw": "## Scheme Abstract Syntax\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:16:0",
+     "type": "prose",
+     "en": "In the rest of the review of the interpreter we will adopt this syntax for Scheme:\n\n",
+     "hash": "71cdcfd9f4b7db8e",
+     "he": "בהמשך סקירת המפרש נאמץ את התחביר הזה עבור Scheme:"
+    },
+    {
+     "id": "cm/2.3Syntax:16:1",
+     "type": "code",
+     "en": "```typescript\n;; <program> ::= <exp>+                     / program(exps:List(exp))\n;; <exp> ::= <define> | <cexp>              / def-exp | cexp\n;; <define> ::= ( define <varDecl> <cexp> ) / def-exp(var:varDecl, val:cexp)\n;; <binding> ::= ( <varDecl> <cexp> )       / binding(var:varDecl, val:cexp)\n;; <cexp> ::= <number>                      / num-exp(val:number)\n;;    |  <boolean>                     / bool-exp(val:boolean)\n;;    |  <string>                      / str-exp(val:string)\n;;    |  <varRef>                      / varRef(var:string)\n;;    |  ( lambda ( <var>* ) <cexp>+ ) / proc-exp(params:List(varDecl), body:List(cexp))\n;;    |  ( if <cexp> <cexp> <cexp> )   / if-exp(test: cexp, then: cexp, else: cexp)\n;;    |  ( let ( binding* ) <cexp>+ )  / let-exp(bindings:List(binding), body:List(cexp))\n;;    |  ( <cexp> <cexp>* )            / app-exp(operator:cexp, operands:List(cexp))\n;;    |  ( quote <sexp> )              / literal-exp(val:sexp)\n```\n\n",
+     "hash": "3775ecff39dc630a",
+     "lang": "typescript",
+     "noteHe": "**זהו המפרט הרשמי שילווה אתכם עד סוף הקורס — כדאי לשנן אותו.** זו אותה טבלה שראינו קודם, עם תוספת חשובה בשורה הראשונה: `<program> ::= <exp>+` — תוכנית היא רצף של ביטויים. שימו לב להיררכיה: `<exp>` מתפצל ל-`define` או `cexp`, ורק `cexp` יכולים לקנן זה בזה. הכתיב `;;` בתחילת כל שורה הוא הערה של Scheme — כך המפרט מופיע בפועל בראש קבצי ה-`ast.ts` בקוד הקורס."
+    },
+    {
+     "id": "cm/2.3Syntax:16:2",
+     "type": "prose",
+     "en": "The `define` category is defined in a way that define expressions cannot be embedded inside other expressions.\n`cexp` correspond to expressions that can be embedded into each other recursively. (C-exp stands for Constituent expressions - that is, expressions which can occur as components of a larger expression.)\n\n",
+     "hash": "d597dc1267d9bf08",
+     "he": "הקטגוריה `define` מוגדרת כך שביטויי define אינם יכולים להיות מוטמעים בתוך ביטויים אחרים.\n`cexp` מתאים לביטויים שיכולים להיות מוטמעים זה בזה באופן רקורסיבי. (C-exp הוא קיצור של Constituent expressions — כלומר, ביטויים שיכולים להופיע כרכיבים של ביטוי גדול יותר.)"
+    }
+   ],
+   "headingHe": "התחביר המופשט של Scheme"
+  },
+  {
+   "id": "cm/2.3Syntax:17",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.3Syntax:17:0",
+     "type": "list",
+     "en": "* The syntax of a language:\n  * determines which sequences of tokens form an expression in the language. \n  * determines how to extract the significant parts of an expression, and what is their function within the parent expression.\n  * is designed make it easy for humans to read and understand code\n* **Concrete syntax** determines how expressions \"look like\" to the programmer using:\n  * keywords to mark the type of the expression, \n  * delimiters and punctuation, parentheses, indentation.\n* **Abstract syntax** is an internal data type  called abstract syntax trees (AST) and representing expressions of the program in a way that is easy to consume by programs.\n* Many Concrete Syntax Variants can be mapped to the same Abstract Syntax - for example, `cond` and `if` can be mapped to the same abstract syntax.\n* Concrete syntax can be ambiguous.  When this is the case, additional rules (precedence, associativity) must be specified to provide a deterministic way to analyze expressions.\n\n* Syntax is specified using **BNF rules**.  \n  * **Lexical rules** specify how the character stream is split into tokens of different types (numbers, identifiers, etc).\n  * **Syntactic rules** specify how compound expressions are formed from tokens and sub-expressions.\n* A **parser** maps concrete syntax (a stream of characters) to abstract syntax (AST values).\n  The overall parsing process is split into different sub-modules:\n  * A **scanner** implements the lexical rules and outputs a stream of tokens - using regular expressions.\n  * A **reader** parses the stream of tokens into a stream of nested S-expressions (S-exp).\n  * A **parser** maps S-exps into ASTs.\n\n* ASTs are implemented using the pattern of **disjoint union types**.\n  * Each compound expression form is represented by a map-like type which has a distinct tag and a field for each sub-expression.\n  * Unions of compound types correspond to the abstract types such as \"expression\".\n  * Such disjoint union types are implemented in TypeScript using a recipe which defines a functional interface for each type:\n    * Union types are implemented using a type predicate function `isExp`\n    * Compound types are implemented by:\n      1. a value constructor `makeC`\n      2. a type predicate `isC`\n      3. a type definition with a field for each sub-expression `c.subexp`\n  * The parser is implemented as a factory function to build AST values.\n\n* Functions operating over ASTs operate according to the recipe of **structural induction**:\n  They have a structure that reflects the type structure:\n  * A conditional for each type of expression (disjunction).\n  * In each branch, the sub-expressions are extracted from the expression using the appropriate accessors and processed recursively.\n",
+     "hash": "f79cbf137c285f9a",
+     "he": "* התחביר של שפה:\n  * קובע אילו רצפי אסימונים מרכיבים ביטוי בשפה.\n  * קובע כיצד לחלץ את החלקים המשמעותיים של ביטוי, ומה תפקידם בתוך ביטוי ההורה.\n  * מתוכנן להקל על בני אדם לקרוא ולהבין קוד\n* **תחביר קונקרטי** קובע איך ביטויים \"נראים\" למתכנת, באמצעות:\n  * מילות מפתח לסימון סוג הביטוי,\n  * תוחמים וסימני פיסוק, סוגריים, הזחה.\n* **תחביר מופשט** הוא טיפוס נתונים פנימי הנקרא עצי תחביר מופשט (AST), שמייצג את ביטויי התוכנית באופן שקל לתוכניות לצרוך.\n* וריאנטים רבים של תחביר קונקרטי יכולים להתמפות לאותו תחביר מופשט — למשל, `cond` ו-`if` יכולים להתמפות לאותו תחביר מופשט.\n* תחביר קונקרטי עלול להיות דו-משמעי. במקרה כזה יש להגדיר כללים נוספים (קדימות, אסוציאטיביות) כדי לספק דרך דטרמיניסטית לנתח ביטויים."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו ההבדל המהותי בין עץ ניתוח (parse tree) לבין עץ תחביר מופשט (AST)?",
+   "options": [
+    "עץ הניתוח הוא הוכחה שביטוי שייך לשפה ומכיל את כל פרטי התחביר הקונקרטי; ה-AST הוא ערך נתונים שמכיל רק את המידע המהותי ומיועד לעיבוד על ידי המפרש",
+    "עץ הניתוח מיועד למפרש וה-AST מיועד לבני אדם",
+    "אין הבדל — אלה שני שמות לאותו מבנה",
+    "עץ הניתוח מתאר את הסמנטיקה וה-AST את התחביר"
+   ],
+   "correct": 0,
+   "explanationHe": "עץ הניתוח כולל צמתים לכל קטגוריה דקדוקית (כולל `<expression>`), את הסוגריים ואת מילות המפתח — כי תפקידו להוכיח שהמחרוזת נגזרת מהדקדוק. ה-AST משמיט את כל אלה ומשאיר רק את סוג הביטוי ואת תת-הביטויים בעלי התפקיד — כי תפקידו לשמש **ערך** שהמפרש יטפל בו. שימו לב גם שב-AST אין ערכים מטיפוס `Exp`/`CExp` עצמם — הם טיפוסים מופשטים בלבד."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "כתבו את ה-AST (בכתיב TypeScript עם תגיות) של הביטוי הבא:\n```scheme\n(if (> x 1) 5 x)\n```",
+   "answerHe": "```typescript\n{ tag: 'IfExp',\n  test: { tag: 'AppExp',\n          rator: { tag: 'PrimOp', op: '>' },\n          rands: [ { tag: 'VarRef', var: 'x' },\n                   { tag: 'NumExp', val: 1 } ] },\n  then: { tag: 'NumExp', val: 5 },\n  alt:  { tag: 'VarRef', var: 'x' } }\n```",
+   "explanationHe": "שלושה דברים לבדוק בתשובה: (1) התגית החיצונית `IfExp` עם שלושת השדות בעלי השם `test`/`then`/`alt`; (2) ה-test הוא `AppExp` שלם — לא שוכחים שגם `(> x 1)` הוא ביטוי מורכב; (3) `x` מיוצג כ-`VarRef` (הפניה) ולא כ-`VarDecl`, כי הוא בשימוש ולא בהצהרה. שימו לב ש-`>` מתויג כ-`PrimOp` ולא כ-`VarRef`."
+  },
+  {
+   "id": "ex3",
+   "type": "mcq",
+   "questionHe": "מדוע התחביר הקונקרטי של Scheme אינו זקוק לכללי קדימות (precedence) ואסוציאטיביות?",
+   "options": [
+    "כי ב-Scheme יש רק אופרטור אחד",
+    "כי Scheme דורשת סוגריים מלאים סביב כל ביטוי מורכב, ולכן מבנה הביטוי מקודד במפורש ואין עמימות",
+    "כי המנתח התחבירי של Scheme חכם יותר",
+    "כי ב-Scheme הכול מוערך משמאל לימין"
+   ],
+   "correct": 1,
+   "explanationHe": "כללי קדימות נחוצים רק כשהמבנה **אינו** מקודד במפורש — כמו בכתיב תוכי `1+3*5`, שאפשר לקרוא בשתי דרכים. בכתיב הקידומי המסוגרר של Scheme, `(+ 1 (* 3 5))` ו-`(* (+ 1 3) 5)` הם שני ביטויים שונים לגמרי מלכתחילה. זהו מחיר-תמורה: יותר סוגריים לכתוב, אבל דקדוק פשוט הרבה יותר."
+  },
+  {
+   "id": "ex4",
+   "type": "open",
+   "questionHe": "הסבירו מהי בעיית ה-'dangling else' והדגימו אותה. מדוע היא אינה יכולה לקרות ב-Scheme?",
+   "answerHe": "בשפות כמו C/Java/TypeScript, כשיש `if` מקונן בתוך `if` ורק `else` אחד — התחביר אינו קובע חד-משמעית לאיזה `if` ה-`else` שייך. בדוגמה מהשיעור, ההזחה מרמזת שהוא שייך ל-`if` החיצוני, אבל בפועל הוא שייך לפנימי (הכלל: `else` נצמד ל-`if` הקרוב ביותר שטרם שויך) — ולכן הפלט הוא `large`.\nב-Scheme זה בלתי אפשרי, כי הצורה `(if <test> <then> <else>)` תחומה בסוגריים: כל `if` מכיל בדיוק שלושה ביטויים בתוך הסוגריים שלו, ולכן מיקומו של כל חלק ברור לגמרי מהמבנה.",
+   "explanationHe": "נקודות מפתח: הבנת מקור העמימות (היעדר תוחם סוגר ל-if), הכלל שפותר אותה בשפות תוכיות, וההסבר מדוע סוגריים מלאים מונעים אותה מלכתחילה."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "בתחביר המופשט של הקורס, מהי ההבחנה בין `VarDecl` ל-`VarRef`?",
+   "options": [
+    "`VarDecl` למשתנים גלובליים ו-`VarRef` למקומיים",
+    "`VarDecl` הוא הצהרה על משתנה (בפרמטרים של lambda או ב-define), ו-`VarRef` הוא הפניה למשתנה בשימוש בתוך ביטוי",
+    "`VarDecl` למספרים ו-`VarRef` למחרוזות",
+    "אין ביניהם הבדל מעשי"
+   ],
+   "correct": 1,
+   "explanationHe": "אותו שם משתנה יכול להופיע בשני תפקידים שונים לגמרי. ב-`(lambda (x) x)`, ה-`x` הראשון הוא `VarDecl` — הוא **יוצר** קשירה חדשה; ה-`x` השני הוא `VarRef` — הוא **משתמש** בקשירה. ההבחנה הזו חיונית לכל מה שיבוא בהמשך הקורס: חישוב משתנים חופשיים, כתובות לקסיקליות, הצבה ובדיקת טיפוסים."
+  },
+  {
+   "id": "ex6",
+   "type": "code-reading",
+   "questionHe": "לפי המתכון לעיבוד ASTs מהשיעור, מה יחזיר `Eheight` על ה-AST של `(1 + (2 * 3))`?",
+   "answerHe": "‏2.",
+   "explanationHe": "ה-AST הוא `AddExp` שילדו השמאלי הוא `NumExp` (גובה 0) והימני הוא `MulExp`. גובה ה-`MulExp` הוא `max(0,0)+1 = 1`. לכן גובה ה-`AddExp` הוא `max(0, 1)+1 = 2`. שימו לב שהמבנה של הפונקציה — תנאי לכל סוג ביטוי + קריאה רקורסיבית לתת-הביטויים — עוקב בדיוק אחר ההגדרה האינדוקטיבית של הטיפוס."
+  },
+  {
+   "id": "ex7",
+   "type": "open",
+   "questionHe": "מהם שני שלבי הניתוח התחבירי שהמפרש של הקורס מבצע על מחרוזת Scheme, ומדוע הפיצול הזה אפשרי ב-Scheme במיוחד?",
+   "answerHe": "**שלב 1**: מחרוזת → S-expression (רשימות מקוננות של אסימונים) — מבוצע על ידי ספריית `s-expression` חיצונית, שכוללת גם סריקה (scanning) וגם בניית המבנה המקונן.\n**שלב 2**: S-expression → AST — מבוצע על ידי הקוד שלנו (`parseESexp` / `parseL3` וכו'), שמזהה את צורת כל ביטוי וקורא לבנאי ה-AST המתאים.\nהפיצול אפשרי כי **כל ביטוי Scheme הוא גם S-expression חוקי** — התחביר הקונקרטי של השפה הוא תת-קבוצה של כתיב הנתונים שלה. זו התכונה שמאפשרת גם 'תוכניות כנתונים'.",
+   "explanationHe": "בתשובה מלאה חשוב לציין את שני השלבים בשמם, מי מבצע כל אחד, ובעיקר את הסיבה — הזהות בין תחביר התוכניות לתחביר הנתונים (S-expressions), שאין לה מקבילה ב-JavaScript/JSON."
+  }
+ ]
+}

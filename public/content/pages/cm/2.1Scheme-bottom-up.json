@@ -1,0 +1,1882 @@
+{
+ "id": "cm/2.1Scheme-bottom-up",
+ "kind": "lecture",
+ "sourcePath": "class_material/2.1Scheme-bottom-up.md",
+ "titleEn": "Chapter 2 - Syntax and Semantics with Scheme",
+ "titleHe": "פרק 2 — תחביר וסמנטיקה עם Scheme",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/2.1Scheme-bottom-up:0",
+   "depth": 1,
+   "headingEn": "Chapter 2 - Syntax and Semantics with Scheme",
+   "raw": "# Chapter 2 - Syntax and Semantics with Scheme  \n",
+   "blocks": [],
+   "headingHe": "פרק 2 — תחביר (Syntax) וסמנטיקה (Semantics) עם Scheme"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:1:0",
+     "type": "prose",
+     "en": "We have introduced the following main concepts in Chapter 1 through examples in JavaScript and TypeScript:\n\n",
+     "hash": "24f0d8d5a5e56c27",
+     "he": "בפרק 1 הצגנו את המושגים המרכזיים הבאים, דרך דוגמאות ב-JavaScript וב-TypeScript:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:1:1",
+     "type": "list",
+     "en": "* Different programming languages encourage different programming practices and make other practices difficult by providing programming tools and idioms.  We compared the familiar *procedural programming paradigm* with the *functional programming (FP) paradigm* and identified the key tools each provides (for FP: first-class citizen functions, immutability and functional abstractions).\n* We distinguished two aspects that participate in the definition of a programming language: the *syntax of expressions*, on the one hand, and the set of *values* that can be computed when evaluating the expressions in the language on the other. The process of mapping from expression to value is called *evaluation*.  The description of the evaluation algorithm for a given algorithm provides the *operational semantics* of the language.\n\n* Atomic vs. Compound\n    * In the syntactic description of a language, we distinguished *atomic* expressions (which have no sub-components) and *compound* expressions (which have sub-expressions).\n    * Similarly, in the semantic domain, we distinguish *atomic values* (such as boolean and numbers) and *compound values* (such as arrays and maps)\n\n* *Data types* denote specific subsets of values over which operations can be performed uniformly. Programming languages define primitive data types (sets of values with well defined operations).  They also provide means to define user defined types\n* A *type system* defines a *type language* to construct new data type expressions to *denote* useful sets of data structures. Relations of *subtyping* and *disjoint types* are derived from this perspective on types, and operations on types such as union, intersection and product provide ways to construct new types.  \n* A language with *type checking* allows programmers to annotate variables and functions with *type annotations* which express constraints on which values can be bound to these variables in any execution of the program.  The *type checker* can establish that a given program satisfies the type declaration constraints.  \n* The structure of type definitions is important in general because it provides an abstract model of the structure of the data values expected by functions, and the type of values they can return.  The structure of the code in the functions usually follows the structure of the data it receives.\n\n",
+     "hash": "3a65753a33405d15",
+     "he": "* שפות תכנות שונות מעודדות פרקטיקות תכנות שונות ומקשות על פרקטיקות אחרות, באמצעות הכלים והניבים (idioms) שהן מספקות. השווינו בין *פרדיגמת התכנות הפרוצדורלי* המוכרת לבין *פרדיגמת התכנות הפונקציונלי (FP)*, וזיהינו את כלי המפתח שכל אחת מספקת (עבור FP: פונקציות כאזרח ממדרגה ראשונה, אי-שינוי (immutability) והפשטות פונקציונליות).\n* הבחנו בין שני היבטים שמשתתפים בהגדרה של שפת תכנות: *התחביר של ביטויים (syntax)* מצד אחד, וקבוצת *הערכים (values)* שניתן לחשב בעת הערכת הביטויים בשפה מצד שני. תהליך המיפוי מביטוי לערך נקרא *הערכה (evaluation)*. תיאור אלגוריתם ההערכה עבור שפה נתונה מגדיר את *הסמנטיקה האופרציונלית (operational semantics)* של השפה.\n\n* אטומי לעומת מורכב\n    * בתיאור התחבירי של שפה, הבחנו בין ביטויים *אטומיים* (שאין להם תת-רכיבים) לביטויים *מורכבים* (שיש להם תת-ביטויים).\n    * באופן דומה, בתחום הסמנטי אנו מבחינים בין *ערכים אטומיים* (כמו ערכים בוליאניים ומספרים) לבין *ערכים מורכבים* (כמו מערכים ומפות)\n\n* *טיפוסי נתונים (data types)* מציינים תת-קבוצות מוגדרות של ערכים שעליהן ניתן לבצע פעולות באופן אחיד. שפות תכנות מגדירות טיפוסי נתונים פרימיטיביים (קבוצות ערכים עם פעולות מוגדרות היטב), ומספקות גם אמצעים להגדרת טיפוסים מוגדרי-משתמש\n* *מערכת טיפוסים (type system)* מגדירה *שפת טיפוסים (type language)* לבניית ביטויי טיפוס חדשים אשר *מציינים (denote)* קבוצות שימושיות של מבני נתונים. יחסי *תת-טיפוס (subtyping)* ו*טיפוסים זרים (disjoint types)* נגזרים מנקודת מבט זו על טיפוסים, ופעולות על טיפוסים כמו איחוד, חיתוך ומכפלה מספקות דרכים לבנות טיפוסים חדשים.\n* שפה עם *בדיקת טיפוסים (type checking)* מאפשרת למתכנתים להוסיף למשתנים ולפונקציות *הערות טיפוס (type annotations)* שמבטאות אילוצים על אילו ערכים יכולים להיקשר למשתנים אלה בכל ריצה של התוכנית. *בודק הטיפוסים (type checker)* יכול לוודא שתוכנית נתונה מקיימת את אילוצי הצהרות הטיפוסים.\n* למבנה של הגדרות הטיפוסים יש חשיבות כללית, כי הוא מספק מודל מופשט של מבנה ערכי הנתונים שפונקציות מצפות לקבל, ושל טיפוס הערכים שהן מחזירות. מבנה הקוד בפונקציות עוקב בדרך כלל אחרי מבנה הנתונים שהן מקבלות."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:1:2",
+     "type": "prose",
+     "en": "In Chapter 2, we develop these concepts in a more systematic and in-depth manner.  \nThe method we use is to design a new programming language, to specify exactly its syntax and its operational semantics, and to implement this specification into an executable interpreter.  \n\n",
+     "hash": "e6f9db77b8bbbc8a",
+     "he": "בפרק 2 נפתח את המושגים האלה באופן שיטתי ומעמיק יותר.\nהשיטה שבה נשתמש: לתכנן שפת תכנות חדשה, להגדיר במדויק את התחביר ואת הסמנטיקה האופרציונלית שלה, ולממש את המפרט הזה למפרש (interpreter) בר-הרצה."
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:2",
+   "depth": 2,
+   "headingEn": "Interpreters",
+   "raw": "## Interpreters\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:0",
+     "type": "prose",
+     "en": "In this chapter, we define a small but complete programming language.  We demonstrate what are the elements necessary to define a programming language.  \nWe first present these elements informally - to define a subset of the Scheme language.\nThis language is a simple functional language.  \n\n",
+     "hash": "e5d09d2a0ceb5e53",
+     "he": "בפרק זה נגדיר שפת תכנות קטנה אך שלמה. נדגים מהם הרכיבים הנחוצים להגדרת שפת תכנות.\nתחילה נציג את הרכיבים האלה באופן לא-פורמלי — כדי להגדיר תת-קבוצה של שפת Scheme.\nשפה זו היא שפה פונקציונלית פשוטה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:1",
+     "type": "prose",
+     "en": "We then move on to define the elements formally in the form of:\n",
+     "hash": "e82b69ceb55644d8",
+     "he": "לאחר מכן נעבור להגדיר את הרכיבים באופן פורמלי, בצורה של:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:2",
+     "type": "list",
+     "en": "* The syntax of the language (defining the set of expressions which belong to the language)\n* The operational semantics of the language (defining how to map any expression in the language to a value in a recursive manner).\n\n",
+     "hash": "e756318b3fb3f02b",
+     "he": "* התחביר (syntax) של השפה (הגדרת קבוצת הביטויים ששייכים לשפה)\n* הסמנטיקה האופרציונלית (operational semantics) של השפה (הגדרה כיצד למפות כל ביטוי בשפה לערך, באופן רקורסיבי)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:3",
+     "type": "prose",
+     "en": "We implement these formal definitions into concrete programs - which together form an *interpreter* of the language.\n\n",
+     "hash": "6086b021f67ae679",
+     "he": "נממש את ההגדרות הפורמליות האלה כתוכניות קונקרטיות — שיחד מרכיבות *מפרש (interpreter)* של השפה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:4",
+     "type": "prose",
+     "en": "As summarized by Hal Abelson in the introduction to *Essentials of Programming Languages* (Friedman, Wand and Haynes, 2000) - this chapter: \n*brings us face to face with the most fundamental idea in computer programming: The interpreter for a computer language is just another program.*\n\n",
+     "hash": "c1246d5b72f66960",
+     "he": "כפי שסיכם זאת Hal Abelson במבוא לספר *Essentials of Programming Languages* ‏(Friedman, Wand and Haynes, 2000) — פרק זה:\n*מפגיש אותנו פנים אל פנים עם הרעיון היסודי ביותר בתכנות מחשבים: המפרש של שפת מחשב הוא בסך הכול עוד תוכנית.*"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:5",
+     "type": "prose",
+     "en": "Interpreters are interesting because:\n",
+     "hash": "db157b3a2fdbf8ac",
+     "he": "מפרשים מעניינים אותנו משום ש:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:2:6",
+     "type": "list",
+     "en": "* They clarify *what programs do when they are executed*\n* They illustrate how to build a wide class of programs which transform complex data from one form into another based on syntactic structure.\n\n\n",
+     "hash": "c8744b7ef62aaa27",
+     "he": "* הם מבהירים *מה תוכניות עושות כשהן רצות*\n* הם מדגימים כיצד לבנות מחלקה רחבה של תוכניות שממירות נתונים מורכבים מצורה אחת לאחרת על סמך מבנה תחבירי."
+    }
+   ],
+   "headingHe": "מפרשים (Interpreters)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:3",
+   "depth": 3,
+   "headingEn": "Object Language vs. Meta Language",
+   "raw": "### Object Language vs. Meta Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:3:0",
+     "type": "prose",
+     "en": "We use interpreters to implement the formal definitions of a programming language.  \nThe interpreter itself is written in a programming language, and it defines a programming language.\nTo distinguish between these two programming roles, we use the following terminology:\n\n",
+     "hash": "9ff30d35efb4685b",
+     "he": "אנו משתמשים במפרשים כדי לממש את ההגדרות הפורמליות של שפת תכנות.\nהמפרש עצמו כתוב בשפת תכנות, והוא מגדיר שפת תכנות.\nכדי להבחין בין שני התפקידים האלה, נשתמש בטרמינולוגיה הבאה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:3:1",
+     "type": "list",
+     "en": "* The language we define and describe is called the *object language*\n* The language we use to implement the interpreter is called the *meta language*\n\n",
+     "hash": "7dc15152c2be7eb3",
+     "he": "* השפה שאותה אנו מגדירים ומתארים נקראת *שפת המושא (object language)*\n* השפה שבה אנו משתמשים כדי לממש את המפרש נקראת *שפת-העל (meta language)*"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:3:2",
+     "type": "prose",
+     "en": "The choice of each of these languages (object and meta) depends on the objective we set for ourselves.\n\n",
+     "hash": "86599fc6a3ecdfd8",
+     "he": "הבחירה של כל אחת מהשפות (מושא ועל) תלויה במטרה שאנו מציבים לעצמנו."
+    }
+   ],
+   "headingHe": "שפת המושא לעומת שפת-העל (Object Language vs. Meta Language)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:4",
+   "depth": 2,
+   "headingEn": "Scheme as an Object Language",
+   "raw": "## Scheme as an Object Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:4:0",
+     "type": "prose",
+     "en": "We introduce a subset of Scheme to illustrate how to specify a programming language and how to implement a full interpreter because Scheme is a *small language* (it has few primitives, few data types, an extremely simple and regular syntax) and a *simple language* (the evaluation rules are consistent and simple, there are not many special cases).\nYet, Scheme is an *expressive* language - it is Turing complete, and because it follows the functional programming paradigm, it allows the definition of powerful functional abstractions which make programming productive.\n\n",
+     "hash": "17db115c977b41c6",
+     "he": "אנו מציגים תת-קבוצה של Scheme כדי להדגים איך מגדירים שפת תכנות ואיך מממשים מפרש מלא, משום ש-Scheme היא *שפה קטנה* (יש בה מעט פרימיטיבים, מעט טיפוסי נתונים, ותחביר פשוט וסדיר במיוחד) ו*שפה פשוטה* (כללי ההערכה עקביים ופשוטים, ואין הרבה מקרים מיוחדים).\nועם זאת, Scheme היא שפה *אקספרסיבית* — היא שלמת-טיורינג (Turing complete), ומכיוון שהיא עוקבת אחר פרדיגמת התכנות הפונקציונלי, היא מאפשרת הגדרה של הפשטות פונקציונליות עוצמתיות שהופכות את התכנות לפרודוקטיבי."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:4:1",
+     "type": "prose",
+     "en": "All of these elements stand in contrast with JavaScript - which has evolved into a *large language* with many primitives, a very complex syntax, and because it is a multi-paradigm language - supporting FP, OOP, procedural programming and more - JavaScript has a complex evaluation semantics.  \n\n",
+     "hash": "f9245e00b5c79e43",
+     "he": "כל המאפיינים האלה עומדים בניגוד ל-JavaScript — שהתפתחה לכדי *שפה גדולה* עם פרימיטיבים רבים ותחביר מורכב מאוד; ומכיוון שהיא שפה מרובת-פרדיגמות — התומכת ב-FP, ב-OOP, בתכנות פרוצדורלי ועוד — ל-JavaScript יש סמנטיקת הערכה מורכבת."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:4:2",
+     "type": "prose",
+     "en": "We thus select to describe a *small and simple but full* language - a subset of Scheme - as the object language of this course.\n\n",
+     "hash": "11a21a41f2f7a7bc",
+     "he": "לכן אנו בוחרים לתאר שפה *קטנה ופשוטה אך שלמה* — תת-קבוצה של Scheme — כשפת המושא של הקורס."
+    }
+   ],
+   "headingHe": "Scheme כשפת מושא"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:5",
+   "depth": 2,
+   "headingEn": "TypeScript as a Meta Language",
+   "raw": "## TypeScript as a Meta Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:5:0",
+     "type": "prose",
+     "en": "We select to use a subset of TypeScript used as a Functional Language to implement the interpreter.  \nOne of the advantages of this decision is that we exploit the TypeScript type system to encode the objects manipulated in the interpreter - abstract syntax trees and values. If the algorithm of the operational semantics is well understood, it can be implemented as a pure functional model in a code that is surprisingly short and elegant - and ported to any functional language. \n\n",
+     "hash": "4aa34d4c7b61d906",
+     "he": "אנו בוחרים להשתמש בתת-קבוצה של TypeScript, בשימוש כשפה פונקציונלית, כדי לממש את המפרש.\nאחד היתרונות של החלטה זו הוא שאנו מנצלים את מערכת הטיפוסים של TypeScript כדי לקודד את העצמים שהמפרש מטפל בהם — עצי תחביר מופשטים (ASTs) וערכים. כשהאלגוריתם של הסמנטיקה האופרציונלית מובן היטב, אפשר לממש אותו כמודל פונקציונלי טהור בקוד קצר ואלגנטי במפתיע — ולהעביר אותו לכל שפה פונקציונלית."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:5:1",
+     "type": "prose",
+     "en": "Let us engage thus in developing a programming language bottom up, starting from small blocks and building up into a fuller version of a functional programming language.\n\n",
+     "hash": "8220b73be5491f2a",
+     "he": "הבה נצא אם כן לדרך של פיתוח שפת תכנות מלמטה למעלה (bottom-up), החל מאבני בניין קטנות וכלה בגרסה מלאה יותר של שפת תכנות פונקציונלית."
+    }
+   ],
+   "headingHe": "TypeScript כשפת-על"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:6",
+   "depth": 1,
+   "headingEn": "Elements of a Programming Language",
+   "raw": "# Elements of a Programming Language\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:0",
+     "type": "prose",
+     "en": "How do we specify a programming language? What are the elements that together define a programming language?\n\n",
+     "hash": "9e5b2623fca4b2f4",
+     "he": "איך מגדירים שפת תכנות? מהם הרכיבים שיחד מגדירים שפת תכנות?"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:1",
+     "type": "prose",
+     "en": "The key elements are:\n",
+     "hash": "9e90976c694b3f64",
+     "he": "רכיבי המפתח הם:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:2",
+     "type": "list",
+     "en": "1. **Primitives**: expressions whose evaluation is built-in in the interpreter and which are not explained by the semantics of the language.  These include primitive operations (for example, arithmetic operations on number or comparison operators) and primitive literal values (for examples, numbers or boolean values).\n2. **Combination means**: ways to create compound expressions and compound values from simpler ones.\n3. **Abstraction means**: ways to manipulate compound objects (expressions or data values) as standalone units by giving them simple names.\n\n\n",
+     "hash": "00073b7054109b4b",
+     "he": "1. **פרימיטיבים (Primitives)**: ביטויים שההערכה שלהם מובנית במפרש ואינה מוסברת על ידי הסמנטיקה של השפה. אלה כוללים פעולות פרימיטיביות (למשל פעולות אריתמטיות על מספרים או אופרטורי השוואה) וערכים ליטרליים פרימיטיביים (למשל מספרים או ערכים בוליאניים).\n2. **אמצעי צירוף (Combination means)**: דרכים ליצור ביטויים מורכבים וערכים מורכבים מתוך פשוטים יותר.\n3. **אמצעי הפשטה (Abstraction means)**: דרכים לטפל בעצמים מורכבים (ביטויים או ערכי נתונים) כיחידות עצמאיות, על ידי מתן שמות פשוטים להם."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:3",
+     "type": "prose",
+     "en": "The language definition is structured in two aspects:\n",
+     "hash": "346a04af03c2eac0",
+     "he": "הגדרת השפה בנויה משני היבטים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:4",
+     "type": "list",
+     "en": "1. **Expressions** are the words and sentences of the language.\n2. **Values** are the results of the computation of expressions according to the evaluation rules of the language.  Values belong to the semantic domain of the language.\n\n",
+     "hash": "5d4b2f70ada64899",
+     "he": "1. **ביטויים (Expressions)** הם המילים והמשפטים של השפה.\n2. **ערכים (Values)** הם התוצאות של חישוב ביטויים לפי כללי ההערכה של השפה. ערכים שייכים לתחום הסמנטי (semantic domain) של השפה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:5",
+     "type": "prose",
+     "en": "To describe our object programming language, we first present all the types of expressions in the language (this is called the **syntax** of the language) on the one hand, and all the possible values that can be computed by the language on the other.\nThe **syntax** is the input to the interpreter, the **values** are the output of the interpreter.\n\n",
+     "hash": "e70279ac28eb6507",
+     "he": "כדי לתאר את שפת המושא שלנו, נציג תחילה את כל סוגי הביטויים בשפה (זה נקרא **התחביר** של השפה) מצד אחד, ואת כל הערכים האפשריים שהשפה יכולה לחשב מצד שני.\n**התחביר** הוא הקלט של המפרש; **הערכים** הם הפלט של המפרש."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:6:6",
+     "type": "prose",
+     "en": "We will introduce the syntax and semantics of the Scheme subset in several iterations - starting from the simplest forms \nof expressions, then describing the rules to evaluate their value, then introducing more complex forms of expressions and their evaluation rules.\nWe will give names to each of the stages, starting from a very small language $$L1$$, and growing the language to larger stages, $$L2$$ and $$L3$$.\n\n",
+     "hash": "dd773fc6fba73e25",
+     "he": "נציג את התחביר והסמנטיקה של תת-קבוצת ה-Scheme בכמה איטרציות — נתחיל מצורות הביטויים הפשוטות ביותר, נתאר את הכללים להערכת הערך שלהן, ואז נציג צורות מורכבות יותר של ביטויים ואת כללי ההערכה שלהן.\nניתן שמות לכל אחד מהשלבים: נתחיל משפה קטנה מאוד $$L1$$, ונגדיל את השפה לשלבים גדולים יותר, $$L2$$ ו-$$L3$$."
+    }
+   ],
+   "headingHe": "הרכיבים של שפת תכנות"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:7",
+   "depth": 2,
+   "headingEn": "Expressions",
+   "raw": "## Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:7:0",
+     "type": "prose",
+     "en": "We distinguish\n",
+     "hash": "67430f2d3d521ffb",
+     "he": "אנו מבחינים בין:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:7:1",
+     "type": "list",
+     "en": "* **Atomic expressions**\n* **Compound expressions**\n\n",
+     "hash": "c3a9164939ca4586",
+     "he": "* **ביטויים אטומיים (Atomic expressions)**\n* **ביטויים מורכבים (Compound expressions)**"
+    }
+   ],
+   "headingHe": "ביטויים (Expressions)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:8",
+   "depth": 3,
+   "headingEn": "Atomic Expressions",
+   "raw": "### Atomic Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:8:0",
+     "type": "prose",
+     "en": "The following are the types of atomic expressions in Scheme:\n",
+     "hash": "d45b9fb912937072",
+     "he": "אלה סוגי הביטויים האטומיים ב-Scheme:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:8:1",
+     "type": "list",
+     "en": "* **Literal numbers**: they are written as numbers such as `1`\n* **Literal booleans**: the true and false values are written `#t` and `#f`.  They are primitive literal atomic expressions.\n* **Primitive procedures**: are atomic expressions - they include arithmetic primitive operators `+`, `-`, `*`, `/` and comparison operators `<`, `>`, `=`.\n\n",
+     "hash": "c9cc4cc5430c3db8",
+     "he": "* **מספרים ליטרליים**: נכתבים כמספרים, כמו `1`\n* **ערכים בוליאניים ליטרליים**: ערכי האמת והשקר נכתבים `#t` ו-`#f`. אלה ביטויים אטומיים ליטרליים פרימיטיביים.\n* **פרוצדורות פרימיטיביות**: גם הן ביטויים אטומיים — כולל האופרטורים האריתמטיים הפרימיטיביים `+`, `-`, `*`, `/` ואופרטורי ההשוואה `<`, `>`, `=`."
+    }
+   ],
+   "headingHe": "ביטויים אטומיים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:9",
+   "depth": 3,
+   "headingEn": "Compound Expressions",
+   "raw": "### Compound Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:0",
+     "type": "prose",
+     "en": "The only syntactic form used to combine expressions into complex expressions in Scheme is to arrange them into parentheses.\n\n",
+     "hash": "5a87f2bdacbe05ac",
+     "he": "הצורה התחבירית היחידה ב-Scheme לצירוף ביטויים לביטויים מורכבים היא סידורם בתוך סוגריים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:1",
+     "type": "code",
+     "en": "```scheme\n(+ 45 78) ;--> 123\n(- 56 9)  ;--> 47\n(* 6 50)  ;--> 300\n(/ 25 5)  ;--> 5\n```\n\n",
+     "hash": "1e7ccb5326251d66",
+     "lang": "scheme",
+     "noteHe": "ארבע דוגמאות לביטויים מורכבים ב-Scheme. שימו לב לשני דברים: (1) האופרטור תמיד בא **ראשון**, מיד אחרי הסוגר הפותח — זו כתיבה קידומית (prefix notation). למשל `(+ 45 78)` פירושו \"חבר את 45 ו-78\". (2) ההערה `;--> 123` היא סימון מקובל בחומרי הקורס: מה שאחרי `;-->` הוא הערך שהביטוי מוערך אליו (התו `;` פותח הערה ב-Scheme). כך `(- 56 9)` מוערך ל-47, `(* 6 50)` ל-300 ו-`(/ 25 5)` ל-5."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:2",
+     "type": "prose",
+     "en": "These expressions are called **forms**. \nIn this structure, we always refer to the leftmost sub-expression of the form as an *operator* and the rest of the sub-expressions as *operands*.  \nScheme compound expressions are always written in **prefix notation**.\n\n",
+     "hash": "cad0221e9fb372f2",
+     "he": "ביטויים אלה נקראים **צורות (forms)**.\nבמבנה זה, אנו תמיד מתייחסים לתת-הביטוי השמאלי ביותר של הצורה כאל *אופרטור (operator)*, ולשאר תת-הביטויים כאל *אופרנדים (operands)*.\nביטויים מורכבים ב-Scheme נכתבים תמיד ב**כתיבה קידומית (prefix notation)**."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:3",
+     "type": "prose",
+     "en": "Forms can be nested recursively:\n",
+     "hash": "ef742d185fa4c3fe",
+     "he": "צורות יכולות לקנן זו בזו באופן רקורסיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:4",
+     "type": "code",
+     "en": "```scheme\n(+ (* 3 15) (- 9 2)) ;--> 52\n```\n\n",
+     "hash": "7ba2025e4a0db87d",
+     "lang": "scheme",
+     "noteHe": "ביטוי מקונן: כדי לחשב את `(+ (* 3 15) (- 9 2))` המפרש מחשב קודם את תת-הביטויים הפנימיים — `(* 3 15)` מוערך ל-45 ו-`(- 9 2)` מוערך ל-7 — ואז מחבר: 45 + 7 = 52. זה עיקרון ההערכה הרקורסיבית: ערך של צורה מחושב מתוך ערכי תת-הביטויים שלה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:5",
+     "type": "prose",
+     "en": "It helps to pretty print (or indent) such complex expressions to figure out their internal structure:\n\n",
+     "hash": "e369987bfd6c84c9",
+     "he": "מועיל להדפיס ביטויים מורכבים כאלה בהדפסה מסודרת (pretty print) עם הזחות, כדי להבין את המבנה הפנימי שלהם:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:6",
+     "type": "code",
+     "en": "```scheme\n(+ (* 3\n      (+ 4 2)\n      (* 2 5))\n   7)\n```\n\n",
+     "hash": "a250c5738bfe89ea",
+     "lang": "scheme",
+     "noteHe": "אותו רעיון עם הזחה שחושפת את המבנה: הצורה החיצונית היא `(+ … 7)`, כשהאופרנד הראשון שלה הוא בעצמו צורה `(* 3 (+ 4 2) (* 2 5))` — שימו לב ש-`*` יכול לקבל יותר משני אופרנדים: כאן הוא מכפיל שלושה גורמים: 3, ‏`(+ 4 2)` שהוא 6, ו-`(* 2 5)` שהוא 10, כלומר 3·6·10 = 180, ואז 180 + 7 = 187. ההזחה מיישרת אופרנדים של אותה צורה באותו עומק — כך קל לקרוא קוד Scheme מקונן."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:9:7",
+     "type": "prose",
+     "en": "Expressions are evaluated by the interpreter and return a value.\nIn Scheme, there are only expressions in the language.\nThis is in contrast to JavaScript which contains expressions and **statements** (syntactic elements which, when evaluated, do not return a value, but simply execute a command).\n\n",
+     "hash": "3801e7ffe2af52c5",
+     "he": "ביטויים מוערכים על ידי המפרש ומחזירים ערך.\nב-Scheme יש בשפה **רק ביטויים**.\nזאת בניגוד ל-JavaScript, שמכילה גם ביטויים וגם **משפטים (statements)** — רכיבים תחביריים שכאשר מעריכים אותם אינם מחזירים ערך, אלא פשוט מבצעים פקודה."
+    }
+   ],
+   "headingHe": "ביטויים מורכבים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:10",
+   "depth": 2,
+   "headingEn": "Variables and Values",
+   "raw": "## Variables and Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:0",
+     "type": "prose",
+     "en": "The programming language provides means to **name objects**.  This is a fundamental form of **abstraction**: using a simple name instead of using a complex value or a complex expression.\n\n",
+     "hash": "a2f5f7ea88350b0c",
+     "he": "שפת התכנות מספקת אמצעים **לתת שמות לעצמים**. זו צורה יסודית של **הפשטה (abstraction)**: שימוש בשם פשוט במקום בערך מורכב או בביטוי מורכב."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:1",
+     "type": "prose",
+     "en": "In Scheme, `define` is used to bind a name to the value of an expression.\n",
+     "hash": "8becc7d290f084bf",
+     "he": "ב-Scheme, ‏`define` משמש לקשירת שם לערכו של ביטוי."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:2",
+     "type": "code",
+     "en": "```scheme\n(define size 6) \n\n(* 2 size) ;--> 12 ;; size is now understood \n```\n\n",
+     "hash": "0f7b473858d6ce22",
+     "lang": "scheme",
+     "noteHe": "`(define size 6)` קושר את השם `size` לערך 6. מרגע זה, בכל מקום שבו יופיע `size` בתוכנית, הערכתו תחזיר 6 — ולכן `(* 2 size)` מוערך ל-12. שימו לב: `define` עצמו אינו מחזיר ערך שימושי; תפקידו הוא ליצור את הקשירה (binding) בסביבה הגלובלית."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:3",
+     "type": "prose",
+     "en": "`size` in this context is called a **variable**.\nThe relation between a variable and the value it denotes is called a **binding**.\n\n",
+     "hash": "0eec974f93544f2e",
+     "he": "`size` בהקשר זה נקרא **משתנה (variable)**.\nהיחס בין משתנה לבין הערך שהוא מציין נקרא **קשירה (binding)**."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:4",
+     "type": "prose",
+     "en": "Variables can be used as atomic expressions.\nThey are evaluated to the value to which they were bound using `define`.\n\n",
+     "hash": "8b5f31baf13a2dcb",
+     "he": "משתנים יכולים לשמש כביטויים אטומיים.\nהם מוערכים לערך שאליו נקשרו באמצעות `define`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:5",
+     "type": "prose",
+     "en": "`define` is a form of *abstraction* because it allows the programmer to use names (variables) instead of complex operations.\n\n",
+     "hash": "aa7486489c7f428a",
+     "he": "`define` הוא צורה של *הפשטה*, כי הוא מאפשר למתכנת להשתמש בשמות (משתנים) במקום בפעולות מורכבות."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:6",
+     "type": "code",
+     "en": "```scheme\n(define area (* size size)) ;--> 36\n```\n\n",
+     "hash": "28bcac576a5e6ab0",
+     "lang": "scheme",
+     "noteHe": "כאן `define` קושר את השם `area` לערכו של **ביטוי** — `(* size size)` מוערך קודם (עם `size` = 6, מתקבל 36), ורק אז נוצרת הקשירה. ההערה `;--> 36` מציינת את הערך שנקשר. שימו לב: הקשירה היא לערך המחושב (36), לא לביטוי עצמו — אם `size` ישתנה בעתיד, `area` לא יתעדכן."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:7",
+     "type": "prose",
+     "en": "In the syntax of a `define` operation, `define` is a **special operator** - it indicates that a special operation must be performed by the interpreter to evaluate the `(define <var> <expression>)` form.  \n\n",
+     "hash": "f645cff1c7d84493",
+     "he": "בתחביר של פעולת `define`, המילה `define` היא **אופרטור מיוחד (special operator)** — היא מציינת שעל המפרש לבצע פעולה מיוחדת כדי להעריך את הצורה `(define <var> <expression>)`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:8",
+     "type": "prose",
+     "en": "The result of evaluating a `define` form is that the interpreter remembers that the variable is now bound to a value.\nThe steps of this evaluation are:\n\n",
+     "hash": "5953b2de02e82199",
+     "he": "תוצאת ההערכה של צורת `define` היא שהמפרש זוכר שהמשתנה קשור כעת לערך.\nשלבי ההערכה הם:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:9",
+     "type": "code",
+     "en": "```\nEvaluation rule for forms of the type: (define <var> <exp>)\n1. Let val = Evaluate(<exp>)\n2. Add the binding < <var>, val > to the global environment\n```\n\n",
+     "hash": "c677b70e4069868b",
+     "noteHe": "זהו **כלל ההערכה** של צורת `define`, כתוב כפסאודו-קוד (לא קוד Scheme): שלב 1 — מעריכים את הביטוי `<exp>` ומקבלים ערך `val`; שלב 2 — מוסיפים את הקשירה בין שם המשתנה `<var>` לערך `val` אל **הסביבה הגלובלית (global environment)**. שימו לב ש-`<var>` עצמו אינו מוערך — הוא רק שם."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:10:10",
+     "type": "prose",
+     "en": "The global environment is a function which maps variable names to values.  \nIt is best to think of it as an object of type `variable => value`.\n\n",
+     "hash": "5e07963e89ddc438",
+     "he": "הסביבה הגלובלית היא פונקציה שממפה שמות משתנים לערכים.\nהכי טוב לחשוב עליה כעל עצם מטיפוס `variable => value`."
+    }
+   ],
+   "headingHe": "משתנים וערכים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:11",
+   "depth": 2,
+   "headingEn": "Expression Types and Evaluation Rules - Round 1",
+   "raw": "## Expression Types and Evaluation Rules - Round 1\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:11:0",
+     "type": "prose",
+     "en": "We have now presented different expression types with the corresponding evaluation rules for each type of expression.\nLet us call this language $$L1$$ and summarize the rules to evaluate all of the expression types in $$L1$$.  \nWe also summarize the set of all possible values computed by $$L1$$.\n\n",
+     "hash": "40a2f16e494cdba9",
+     "he": "הצגנו עד כה סוגים שונים של ביטויים, עם כלל ההערכה המתאים לכל סוג ביטוי.\nנקרא לשפה הזו $$L1$$ ונסכם את הכללים להערכת כל סוגי הביטויים ב-$$L1$$.\nנסכם גם את קבוצת כל הערכים האפשריים ש-$$L1$$ יכולה לחשב."
+    }
+   ],
+   "headingHe": "סוגי ביטויים וכללי הערכה — סבב ראשון"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:12",
+   "depth": 3,
+   "headingEn": "Expression Types",
+   "raw": "### Expression Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:12:0",
+     "type": "prose",
+     "en": "All the expression types presented so far are:\n",
+     "hash": "7320d6bf7e53ef61",
+     "he": "כל סוגי הביטויים שהוצגו עד כה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:12:1",
+     "type": "list",
+     "en": "1. Atomic expressions:\n   1. number literal expression (0, 1, 2, ...)\n   2. boolean literal expression (#t and #f)\n   3. primitive operation expression (+, -, *, /, <, >, =)\n   4. variable expression (a well formed name - made up of letters and punctuations)\n2. Compound expressions:\n   1. Special compound expressions: `(define <var> <exp>)` - where `<var>` is a variable expression and `<exp>` is any expression except a define expression.\n   2. Non-special compound expressions: $$(exp_0 \\ldots exp_n)$$ - where each $$exp_i$$ is any expression type except a define expression.\n   \n",
+     "hash": "94ef4e3c4f503f2a",
+     "he": "1. ביטויים אטומיים:\n   1. ביטוי מספר ליטרלי (0, 1, 2, ...)\n   2. ביטוי בוליאני ליטרלי (`#t` ו-`#f`)\n   3. ביטוי פעולה פרימיטיבית (+, -, *, /, <, >, =)\n   4. ביטוי משתנה (שם תקין — המורכב מאותיות וסימני פיסוק)\n2. ביטויים מורכבים:\n   1. ביטויים מורכבים מיוחדים: `(define <var> <exp>)` — כאשר `<var>` הוא ביטוי משתנה ו-`<exp>` הוא כל ביטוי שאינו ביטוי define.\n   2. ביטויים מורכבים לא-מיוחדים: $$(exp_0 \\ldots exp_n)$$ — כאשר כל $$exp_i$$ הוא כל סוג ביטוי שאינו ביטוי define."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:12:2",
+     "type": "prose",
+     "en": "This inductive definition corresponds to the set $$Expression$$ of all possible expressions in the language. (The definition is *inductive* because we use the term\n*expression* to define what are compound expressions.)\n\n",
+     "hash": "b00b066566763c20",
+     "he": "ההגדרה האינדוקטיבית הזו מתאימה לקבוצה $$Expression$$ של כל הביטויים האפשריים בשפה. (ההגדרה היא *אינדוקטיבית* משום שאנו משתמשים במונח *ביטוי* כדי להגדיר מהם ביטויים מורכבים.)"
+    }
+   ],
+   "headingHe": "סוגי ביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:13",
+   "depth": 3,
+   "headingEn": "Evaluation Rules for Expressions",
+   "raw": "### Evaluation Rules for Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:0",
+     "type": "prose",
+     "en": "We define the function $$evaluate: Expression \\rightarrow Value$$ in an inductive manner:\n\n",
+     "hash": "e83b0c2093a92b92",
+     "he": "אנו מגדירים את הפונקציה $$evaluate: Expression \\rightarrow Value$$ באופן אינדוקטיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:1",
+     "type": "prose",
+     "en": "#### 1. Evaluation of atomic expressions:\n",
+     "hash": "76469d80595b2f0c",
+     "he": "#### 1. הערכת ביטויים אטומיים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:2",
+     "type": "list",
+     "en": "1. Variables are evaluated by looking up their value in the global environment.\n2. Primitive atomic expressions evaluate to their pre-defined denoted value.\n   * Number atomic literal expressions evaluate to number values.\n   * Boolean atomic literal expressions evaluate to boolean values true and false.\n   * Primitive procedures evaluate to the primitive function that performs the denoted operation.\n   \n",
+     "hash": "5e622e63de2236af",
+     "he": "1. משתנים מוערכים על ידי חיפוש ערכם בסביבה הגלובלית.\n2. ביטויים אטומיים פרימיטיביים מוערכים לערך המוגדר-מראש שהם מציינים.\n   * ביטויי מספר ליטרליים מוערכים לערכי מספר.\n   * ביטויים בוליאניים ליטרליים מוערכים לערכים הבוליאניים אמת ושקר.\n   * פרוצדורות פרימיטיביות מוערכות לפונקציה הפרימיטיבית שמבצעת את הפעולה המצוינת."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:3",
+     "type": "prose",
+     "en": "#### 2. Evaluation of compound special forms:\n",
+     "hash": "75eec9d30004af6d",
+     "he": "#### 2. הערכת צורות מורכבות מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:4",
+     "type": "list",
+     "en": "1. For each special form - a special evaluation rule exists.\n   * The special form `(define <var> <exp>)` is evaluated according to this rule:\n     1. Let val = `evaluate(<exp>)`\n     2. Add the binding `< <var>, val >` to the global environment.\n     3. The form returns a special `void` value.\n\n",
+     "hash": "1807d1ce39784bf8",
+     "he": "1. לכל צורה מיוחדת קיים כלל הערכה מיוחד.\n   * הצורה המיוחדת `(define <var> <exp>)` מוערכת לפי הכלל הזה:\n     1. יהי val = ‏`evaluate(<exp>)`\n     2. הוסף את הקשירה `< <var>, val >` לסביבה הגלובלית.\n     3. הצורה מחזירה ערך `void` מיוחד."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:5",
+     "type": "prose",
+     "en": "In this rule, the sub-expression `<var>` is **not** evaluated.\n\n",
+     "hash": "70b399d26c368967",
+     "he": "בכלל זה, תת-הביטוי `<var>` **אינו** מוערך."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:6",
+     "type": "prose",
+     "en": "We have only introduced one special form (`define`) so far - we will introduce more later.\n\n",
+     "hash": "87b81ee621ac61a2",
+     "he": "עד כה הצגנו רק צורה מיוחדת אחת (`define`) — נציג נוספות בהמשך."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:7",
+     "type": "prose",
+     "en": "#### 3. Evaluation of compound non-special forms:\n",
+     "hash": "d54105e5ef6a81dc",
+     "he": "#### 3. הערכת צורות מורכבות לא-מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:8",
+     "type": "prose",
+     "en": "All compound forms are of the form $$(exp_0 \\ldots exp_n)$$.\n",
+     "hash": "e21b81ed444a6db0",
+     "he": "כל הצורות המורכבות הן מהצורה $$(exp_0 \\ldots exp_n)$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:9",
+     "type": "list",
+     "en": "1. Let $$(val_0 \\ldots val_n) = (evaluate(exp_0) \\ldots evaluate(exp_n))$$\n2. Apply the procedure $$val_0$$ to the values $$(val_1 \\ldots val_n)$$.\n\n",
+     "hash": "623f237fb72d2dd5",
+     "he": "1. יהי $$(val_0 \\ldots val_n) = (evaluate(exp_0) \\ldots evaluate(exp_n))$$\n2. הפעל את הפרוצדורה $$val_0$$ על הערכים $$(val_1 \\ldots val_n)$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:10",
+     "type": "prose",
+     "en": "**NOTE**: We assume that $$val_0$$ evaluates into a primitive procedure - otherwise the second step above will not succeed.\nCan you think of which expressions are evaluated into primitive procedure values?\n\n",
+     "hash": "60e6110bd98ba3d0",
+     "he": "**הערה**: אנו מניחים ש-$$val_0$$ מוערך לפרוצדורה פרימיטיבית — אחרת השלב השני למעלה ייכשל.\nהאם אתם יכולים לחשוב אילו ביטויים מוערכים לערכים שהם פרוצדורות פרימיטיביות?"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:13:11",
+     "type": "prose",
+     "en": "**NOTE**: Observe that this definition of the `evaluate` function is inductive - and that it follows the inductive definition of the set of expressions.\nThis is an instance of the general principle we discussed in [Section 1.4](https://bguppl.github.io/interpreters/class_material/1.4TypesAndOperations.html)\nwhich indicates that the structure of the types we define determines the structure of the code that processes values of the type.\n\n",
+     "hash": "032506483e436f08",
+     "he": "**הערה**: שימו לב שההגדרה של פונקציית `evaluate` היא אינדוקטיבית — והיא עוקבת אחרי ההגדרה האינדוקטיבית של קבוצת הביטויים.\nזהו מופע של העיקרון הכללי שדנו בו ב[סעיף 1.4](https://bguppl.github.io/interpreters/class_material/1.4TypesAndOperations.html), שלפיו מבנה הטיפוסים שאנו מגדירים קובע את מבנה הקוד שמעבד ערכים מהטיפוס."
+    }
+   ],
+   "headingHe": "כללי הערכה לביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:14",
+   "depth": 3,
+   "headingEn": "Computed Values",
+   "raw": "### Computed Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:14:0",
+     "type": "prose",
+     "en": "Looking at all the evaluation rules, we can summarize the set of all possible values that can be returned by an invocation\nof evaluate:\n",
+     "hash": "a8846d5496f7d13f",
+     "he": "במבט על כל כללי ההערכה, נוכל לסכם את קבוצת כל הערכים האפשריים שיכולים לחזור מהפעלה של evaluate:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:14:1",
+     "type": "list",
+     "en": "* Number values\n* Boolean values\n* Primitive operations (the value of primitive operators like `+` or `<`).\n* void (the value of `define` expressions)\n\n\n",
+     "hash": "410d211e2529fb43",
+     "he": "* ערכי מספר\n* ערכים בוליאניים\n* פעולות פרימיטיביות (הערך של אופרטורים פרימיטיביים כמו `+` או `<`).\n* void (הערך של ביטויי `define`)"
+    }
+   ],
+   "headingHe": "ערכים מחושבים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:15",
+   "depth": 3,
+   "headingEn": "Example Programs in $$L1$$",
+   "raw": "### Example Programs in $$L1$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:0",
+     "type": "prose",
+     "en": "Let us write a few examples of programs in $$L1$$:\n\n",
+     "hash": "909048d49d126993",
+     "he": "נכתוב כמה דוגמאות לתוכניות ב-$$L1$$:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:1",
+     "type": "code",
+     "en": "```scheme\n5 ;--> 5\n\n(* 3 2) ;--> 6\n\n(+ (* 3 2) 4) --> 10\n\n(> 2 3) ;--> #f\n\n(= 2 (+ 1 1)) ;--> #t\n```\n\n",
+     "hash": "eeac73078cc70471",
+     "lang": "scheme",
+     "noteHe": "חמש תוכניות שלמות ב-$$L1$$, מהפשוטה למורכבת: ביטוי אטומי `5` מוערך לעצמו; `(* 3 2)` מפעיל פרוצדורה פרימיטיבית; `(+ (* 3 2) 4)` מדגים קינון (6 + 4 = 10); `(> 2 3)` מחזיר ערך בוליאני `#f` (שקר, כי 2 אינו גדול מ-3); ו-`(= 2 (+ 1 1))` מדגים השוואה שהאופרנד השני שלה הוא בעצמו צורה — `(+ 1 1)` מוערך ל-2, ולכן ההשוואה מחזירה `#t`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:2",
+     "type": "prose",
+     "en": "Expressions in general are evaluated one by one.\nThe order in which expressions are evaluated does not change their value.\n\n",
+     "hash": "4406df9570e657a4",
+     "he": "ביטויים מוערכים באופן כללי בזה אחר זה.\nהסדר שבו מעריכים את הביטויים אינו משנה את ערכם."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:3",
+     "type": "prose",
+     "en": "Only in the case of the `define` form, there is a side-effect which makes the sequence of expressions significant:  \n\n",
+     "hash": "92c8f8d4c3a70bc5",
+     "he": "רק במקרה של צורת `define` יש תופעת לוואי (side-effect), שהופכת את רצף הביטויים למשמעותי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:4",
+     "type": "code",
+     "en": "```scheme\n(define radius 12)\n(define pi 3.14)\n(define area (* (* radius radius) pi))\n\n(+ area (* 2 3))\n```\n\n",
+     "hash": "42fcf738ccf2ded3",
+     "lang": "scheme",
+     "noteHe": "תוכנית של ארבעה ביטויים שבה **הסדר חשוב**: שלושת ה-`define` הראשונים חייבים לרוץ לפני הביטוי האחרון, כי כל אחד מוסיף קשירה לסביבה הגלובלית שהבאים אחריו תלויים בה. `radius` נקשר ל-12, ‏`pi` ל-3.14, ואז `area` מוערך: `(* radius radius)` = 144, כפול `pi` = 452.16. הביטוי האחרון `(+ area (* 2 3))` מחשב 452.16 + 6 = 458.16. אילו הסדר היה הפוך — הערכת `area` הייתה נכשלת על משתנה לא-קשור."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:5",
+     "type": "prose",
+     "en": "#### Sequences in $$L1$$\n\n",
+     "hash": "b3e83c71a440383c",
+     "he": "#### רצפים (Sequences) ב-$$L1$$"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:15:6",
+     "type": "prose",
+     "en": "In order to make sense of a program that includes `define` forms, we must define a compound expression which is a sequence of expressions and its evaluation rule.  We will describe the details of the evaluation rule for sequences including define-expressions in more details later.\n\n",
+     "hash": "1ed4d77cf4e5f96d",
+     "he": "כדי שתוכנית שכוללת צורות `define` תהיה בעלת משמעות, עלינו להגדיר ביטוי מורכב שהוא רצף (sequence) של ביטויים, ואת כלל ההערכה שלו. נתאר את פרטי כלל ההערכה לרצפים הכוללים ביטויי define ביתר פירוט בהמשך."
+    }
+   ],
+   "headingHe": "תוכניות לדוגמה ב-$$L1$$"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:16",
+   "depth": 3,
+   "headingEn": "What is Not in $$L1$$",
+   "raw": "### What is Not in $$L1$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:0",
+     "type": "prose",
+     "en": "Let us try to assess what programs can be written in $$L1$$ as defined.\n\n",
+     "hash": "2edc3adc7d35aa1a",
+     "he": "ננסה להעריך אילו תוכניות אפשר לכתוב ב-$$L1$$ כפי שהוגדרה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:1",
+     "type": "prose",
+     "en": "On the side of the restrictions - we have:\n",
+     "hash": "171aa9b44f9d1f69",
+     "he": "בצד המגבלות — יש לנו:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:2",
+     "type": "list",
+     "en": "* Few primitives - and no way to define other functions besides primitive functions (no *functional abstraction means*).\n* The computed values can only be numbers or booleans - there are no way to build compound values (no *value composition means*).\n* We can define global variables and no scoping mechanism\n* There are no control structures: no conditionals, no loops (sequence and embedding are the only *control composition means*)\n\n",
+     "hash": "72dd0791435a0b93",
+     "he": "* מעט פרימיטיבים — ואין דרך להגדיר פונקציות נוספות מעבר לפונקציות הפרימיטיביות (אין *אמצעי הפשטה פונקציונליים*).\n* הערכים המחושבים יכולים להיות רק מספרים או ערכים בוליאניים — אין דרך לבנות ערכים מורכבים (אין *אמצעי הרכבת ערכים*).\n* אפשר להגדיר משתנים גלובליים, ואין מנגנון תחומי הכרה (scoping)\n* אין מבני בקרה: אין תנאים, אין לולאות (רצף וקינון הם *אמצעי הרכבת הבקרה* היחידים)"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:3",
+     "type": "prose",
+     "en": "On the positive side:\n",
+     "hash": "b9af8427f2ed9a75",
+     "he": "בצד החיובי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:4",
+     "type": "list",
+     "en": "* We can build expressions as deeply nested as required\n* We can give names to complex expressions so that they can be reused to avoid repetition\n\n",
+     "hash": "6dca6f73012decbe",
+     "he": "* אפשר לבנות ביטויים מקוננים בכל עומק נדרש\n* אפשר לתת שמות לביטויים מורכבים כדי לעשות בהם שימוש חוזר ולהימנע מחזרות"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:16:5",
+     "type": "prose",
+     "en": "**NOTE**:  consider the claim that **programs in $$L1$$ always terminate**.  Can you prove it? (Using structural induction).\n\n",
+     "hash": "4728590071713898",
+     "he": "**הערה**: שקלו את הטענה ש**תוכניות ב-$$L1$$ תמיד עוצרות**. האם תוכלו להוכיח אותה? (באמצעות אינדוקציה מבנית)."
+    }
+   ],
+   "headingHe": "מה אין ב-$$L1$$"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:17",
+   "depth": 2,
+   "headingEn": "$$L2$$: User Defined Procedures and Conditional Expressions",
+   "raw": "## $$L2$$: User Defined Procedures and Conditional Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:17:0",
+     "type": "prose",
+     "en": "Let us introduce two new types of expression into $$L1$$ - leading to a new language we will call $$L2$$.\nWe choose to add together user defined procedures and conditional expressions - because these two language\nfacilities *work well together*.  The reason is that we will develop recursive functions - and when we write\na recursive function, it helps to be able to test for the base case vs. recursive case.\n\n\n",
+     "hash": "7a2a405eea87297f",
+     "he": "נכניס שני סוגי ביטויים חדשים ל-$$L1$$ — ונקבל שפה חדשה שנקרא לה $$L2$$.\nאנו בוחרים להוסיף יחד פרוצדורות מוגדרות-משתמש וביטויי תנאי — כי שני מנגנוני השפה האלה *עובדים היטב יחד*. הסיבה: נרצה לפתח פונקציות רקורסיביות — וכשכותבים פונקציה רקורסיבית, חיוני להיות מסוגלים לבדוק אם אנחנו במקרה הבסיס או במקרה הרקורסיבי."
+    }
+   ],
+   "headingHe": "$$L2$$: פרוצדורות מוגדרות-משתמש וביטויי תנאי"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:18",
+   "depth": 3,
+   "headingEn": "Compound Procedure Definition with Lambda",
+   "raw": "### Compound Procedure Definition with Lambda\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:0",
+     "type": "prose",
+     "en": "`lambda` is a special operator which can be used in a special form of type `lambda`.\nThe syntax is:\n",
+     "hash": "723e587510deaef5",
+     "he": "`lambda` הוא אופרטור מיוחד שמשמש בצורה מיוחדת מסוג `lambda`.\nהתחביר הוא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:1",
+     "type": "code",
+     "en": "```scheme\n(lambda (<var> ...) <exp> ...)\n```\n\n",
+     "hash": "1acf7e0c21efe396",
+     "lang": "scheme",
+     "noteHe": "זו **תבנית** התחביר של ביטוי lambda (הסוגריים המשולשים `<var>` ו-`<exp>` הם מצייני-מקום, לא קוד): אחרי המילה `lambda` באה רשימת פרמטרים בסוגריים — אפס או יותר משתנים — ואחריה גוף הפרוצדורה: ביטוי אחד או יותר. שלוש הנקודות `...` מציינות חזרה אפשרית."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:2",
+     "type": "prose",
+     "en": "For example:\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:3",
+     "type": "code",
+     "en": "```scheme\n(lambda (x) (* x x))\n```\n",
+     "hash": "d6c273c8009139f5",
+     "lang": "scheme",
+     "noteHe": "ביטוי lambda קונקרטי: פרוצדורה אנונימית שמקבלת פרמטר אחד `x` ומחזירה את `(* x x)` — כלומר את הריבוע של `x`. זהו המקביל של `(x) => x * x` ב-TypeScript."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:4",
+     "type": "prose",
+     "en": "This expression is a procedure expression.  It has three sub-expressions:\n",
+     "hash": "431d5b16d64ee338",
+     "he": "הביטוי הזה הוא ביטוי פרוצדורה. יש לו שלושה תת-ביטויים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:5",
+     "type": "list",
+     "en": "* The special operator `lambda`\n* The list of parameters - all of which are variables.\n* The body of the procedure - which is an expression.\n\n",
+     "hash": "5932d5ab3306dceb",
+     "he": "* האופרטור המיוחד `lambda`\n* רשימת הפרמטרים — שכולם משתנים.\n* גוף הפרוצדורה — שהוא ביטוי."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:6",
+     "type": "prose",
+     "en": "When this expression is evaluated, it creates a value whose type is called a **closure**.\nWe will denote such values as `<Closure (x) (* x x)>`.\n\n",
+     "hash": "483e39fd29798f55",
+     "he": "כאשר הביטוי הזה מוערך, הוא יוצר ערך שהטיפוס שלו נקרא **סגור (closure)**.\nנסמן ערכים כאלה כך: `<Closure (x) (* x x)>`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:7",
+     "type": "prose",
+     "en": "**NOTE**: `(lambda (x) (* x x))` is an expression.  `<Closure (x) (* x x)>` is a value.\nThis is a similar distinction as: the literal expression `2` is an expression.  Its value is the number 2.\n\n",
+     "hash": "d81a08f9c1cd0936",
+     "he": "**הערה**: `(lambda (x) (* x x))` הוא ביטוי. `<Closure (x) (* x x)>` הוא ערך.\nזו הבחנה דומה לזו שבין: הביטוי הליטרלי `2` שהוא ביטוי, לבין ערכו — המספר 2."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:8",
+     "type": "prose",
+     "en": "**NOTE**: The expression `(lambda (x) (* x x))` in Scheme is equivalent to `(x) => x * x` in TypeScript.\nThe difference is syntactic only:\n",
+     "hash": "93c8cea2030879c6",
+     "he": "**הערה**: הביטוי `(lambda (x) (* x x))` ב-Scheme שקול ל-`(x) => x * x` ב-TypeScript.\nההבדל תחבירי בלבד:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:9",
+     "type": "list",
+     "en": "* Scheme prefers prefix notation (which is the general syntactic preference of Scheme for all syntactic constructs).\n* The only delimiters in Scheme are parentheses - whereas in TypeScript there is a selection of {} and punctuation (=>);\n* In Scheme every syntactic construct is an expression - in contrast in JavaScript there can be expressions or statements.\nWhen statements are used, the special form `return` must be used - when they are not, it can be skipped.  In general,\nScheme's syntax is more consistent - but it can be less readable to the untrained eye.\n\n\n",
+     "hash": "e38c6b72dcf52e48",
+     "he": "* Scheme מעדיפה כתיבה קידומית (וזו ההעדפה התחבירית הכללית של Scheme לכל המבנים התחביריים).\n* התוחמים היחידים ב-Scheme הם סוגריים — בעוד שב-TypeScript יש מבחר של `{}` וסימני פיסוק (`=>`);\n* ב-Scheme כל מבנה תחבירי הוא ביטוי — לעומת JavaScript, שבה יש ביטויים ומשפטים (statements).\nכשמשתמשים במשפטים, חובה להשתמש בצורה המיוחדת `return` — וכשלא, אפשר להשמיט אותה. באופן כללי, התחביר של Scheme עקבי יותר — אבל הוא עלול להיות פחות קריא לעין לא מאומנת."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:10",
+     "type": "prose",
+     "en": "#### Closures: Composite or Atomic Values?\n\n",
+     "hash": "788fa945a31430ca",
+     "he": "#### סגורים: ערכים מורכבים או אטומיים?"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:11",
+     "type": "prose",
+     "en": "A closure value contains multiple parts - the parameters and the body.\nBut there are no accessors to take apart these components from the value.\n\n",
+     "hash": "9e24ae810434b297",
+     "he": "ערך סגור מכיל כמה חלקים — הפרמטרים והגוף.\nאבל אין פונקציות גישה (accessors) שמאפשרות לפרק את הרכיבים האלה מתוך הערך."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:12",
+     "type": "prose",
+     "en": "This leads to an interesting distinction:\n",
+     "hash": "a5d98951223480f2",
+     "he": "זה מוביל להבחנה מעניינת:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:13",
+     "type": "list",
+     "en": "* From the programmer perspective, a closure is an atomic value.\n* From the interpreter perspective, a closure is a compound data structure with accessible sub-components.\n\n",
+     "hash": "160b316785f33d83",
+     "he": "* מנקודת המבט של המתכנת, סגור הוא ערך אטומי.\n* מנקודת המבט של המפרש, סגור הוא מבנה נתונים מורכב עם תת-רכיבים נגישים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:14",
+     "type": "prose",
+     "en": "When a `lambda` expression is evaluated, the `body` is **not** evaluated.\n\n",
+     "hash": "9e7183512b952a44",
+     "he": "כאשר ביטוי `lambda` מוערך, הגוף (`body`) **אינו** מוערך."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:15",
+     "type": "prose",
+     "en": "#### Naming User Procedures\n\n",
+     "hash": "f1e87ced7f4bdfda",
+     "he": "#### מתן שמות לפרוצדורות משתמש"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:16",
+     "type": "prose",
+     "en": "To give a name to a procedure, we use the existing `define` mechanism:\n\n",
+     "hash": "89e34dc40910153a",
+     "he": "כדי לתת שם לפרוצדורה, אנו משתמשים במנגנון `define` הקיים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:17",
+     "type": "code",
+     "en": "```scheme\n(define square (lambda (x) (* x x)))\n```\n\n",
+     "hash": "8010a29b26249c18",
+     "lang": "scheme",
+     "noteHe": "שילוב של שני מנגנונים שכבר הכרנו: ביטוי ה-`lambda` מוערך לסגור `<Closure (x) (* x x)>`, ו-`define` קושר את השם `square` לסגור הזה בסביבה הגלובלית. מעכשיו אפשר לכתוב `(square 5)` ולקבל 25. שימו לב שאין ב-Scheme תחביר מיוחד להגדרת פונקציה בעלת שם — זה תמיד `define` + `lambda`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:18:18",
+     "type": "prose",
+     "en": "We will see later in the course that the capability to name procedures is *a big deal* - as it allows the definition\nof recursive functions - and, in particular, it changes the expressive power of the programming language.\n\n",
+     "hash": "b2a76a3159a93c88",
+     "he": "נראה בהמשך הקורס שהיכולת לתת שמות לפרוצדורות היא *עניין גדול* — היא מאפשרת הגדרה של פונקציות רקורסיביות, ובפרט, היא משנה את כוח הביטוי (expressive power) של שפת התכנות."
+    }
+   ],
+   "headingHe": "הגדרת פרוצדורה מורכבת עם Lambda"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:19",
+   "depth": 3,
+   "headingEn": "Compound Procedure Application",
+   "raw": "### Compound Procedure Application\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:0",
+     "type": "prose",
+     "en": "When a `lambda` expression is computed, we obtain a closure.  Closures can then be applied to values.\nThis is the mechanism used when applying a closure to values:\n\n",
+     "hash": "f5e16c517383fbce",
+     "he": "כאשר ביטוי `lambda` מחושב, מתקבל סגור. את הסגור אפשר אחר כך להפעיל על ערכים.\nזה המנגנון שבו מפעילים סגור על ערכים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:1",
+     "type": "prose",
+     "en": "Recall the evaluation rule for non-special forms in $$L1$$:\n\n",
+     "hash": "4a51149fff13eb66",
+     "he": "ניזכר בכלל ההערכה לצורות לא-מיוחדות ב-$$L1$$:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:2",
+     "type": "prose",
+     "en": "Given a compound forms of the form $$(exp_0 \\ldots exp_n)$$ where $$exp_0$$ is not a special operator:\n",
+     "hash": "0f73db2065fcc32b",
+     "he": "בהינתן צורה מורכבת מהצורה $$(exp_0 \\ldots exp_n)$$ שבה $$exp_0$$ אינו אופרטור מיוחד:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:3",
+     "type": "list",
+     "en": "1. Let $$(val_0 \\ldots val_n) = (evaluate(exp_0) \\ldots evaluate(exp_n))$$\n2. Apply the procedure $$val_0$$ to the values $$(val_1 \\ldots val_n)$$.\n\n",
+     "hash": "623f237fb72d2dd5",
+     "he": "1. יהי $$(val_0 \\ldots val_n) = (evaluate(exp_0) \\ldots evaluate(exp_n))$$\n2. הפעל את הפרוצדורה $$val_0$$ על הערכים $$(val_1 \\ldots val_n)$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:4",
+     "type": "prose",
+     "en": "In $$L1$$ - the only possible procedure values were primitive procedures (the value of the atomic expressions `+`, `*` etc).\n\n",
+     "hash": "7b56336da8220534",
+     "he": "ב-$$L1$$ — ערכי הפרוצדורה האפשריים היחידים היו פרוצדורות פרימיטיביות (הערך של הביטויים האטומיים `+`, `*` וכו')."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:5",
+     "type": "prose",
+     "en": "In $$L2$$ - we also have user created closures.\n\n",
+     "hash": "21b9d81888be72c4",
+     "he": "ב-$$L2$$ — יש לנו גם סגורים שיצר המשתמש."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:6",
+     "type": "prose",
+     "en": "The way a closure $$val_0$$ = `<Closure <p1, ..., pn> <exp1> ... <expk>>` is applied to values $$(val_1, \\ldots, val_n)$$ is according to the following rule:\n",
+     "hash": "de9ba842258e4fec",
+     "he": "הדרך שבה סגור $$val_0$$ = ‏`<Closure <p1, ..., pn> <exp1> ... <expk>>` מופעל על ערכים $$(val_1, \\ldots, val_n)$$ היא לפי הכלל הבא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:7",
+     "type": "list",
+     "en": "1. Replace all occurrences of $$p_1, \\ldots, p_n$$ in the expressions `<exp1> ... <expk>` of the body of the procedure with the corresponding values $$val_1, \\ldots, val_n$$.\n2. Evaluate all resulting expressions.\n3. The value returned by the application is the value of the last expression `<expk>`.\n\n",
+     "hash": "3a7d24f53078bd5f",
+     "he": "1. החלף את כל המופעים של $$p_1, \\ldots, p_n$$ בביטויים `<exp1> ... <expk>` של גוף הפרוצדורה בערכים המתאימים $$val_1, \\ldots, val_n$$.\n2. הערך את כל הביטויים שמתקבלים.\n3. הערך שההפעלה מחזירה הוא ערכו של הביטוי האחרון `<expk>`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:8",
+     "type": "prose",
+     "en": "In summary:\n",
+     "hash": "684866c71a5c6c2d",
+     "he": "לסיכום:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:19:9",
+     "type": "list",
+     "en": "* We introduced a new syntactic form (lambda expressions) and a new type of values (closures).\n* We defined the evaluation rule for lambda expressions - which yield closures - without performing any recursive evaluation.\n* Finally, we expanded the evaluation rule of non-special forms to work for the case where the operator value is a closure type - in addition to the known case in $$L1$$ where the operator value was a primitive operator.\n\n\n",
+     "hash": "fb0f86a14dc83824",
+     "he": "* הצגנו צורה תחבירית חדשה (ביטויי lambda) וסוג ערכים חדש (סגורים).\n* הגדרנו את כלל ההערכה לביטויי lambda — שמניבים סגורים — בלי לבצע שום הערכה רקורסיבית.\n* לבסוף, הרחבנו את כלל ההערכה של צורות לא-מיוחדות כך שיעבוד גם במקרה שערך האופרטור הוא מטיפוס סגור — בנוסף למקרה המוכר מ-$$L1$$ שבו ערך האופרטור היה אופרטור פרימיטיבי."
+    }
+   ],
+   "headingHe": "הפעלת פרוצדורה מורכבת"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:20",
+   "depth": 2,
+   "headingEn": "Conditional Expressions",
+   "raw": "## Conditional Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:0",
+     "type": "prose",
+     "en": "We introduce a third special form to the syntax of the language, in addition to `define` and `lambda` together with its specific evaluation rule to enable conditional evaluation.\n\n",
+     "hash": "180ef1223362c775",
+     "he": "נציג צורה מיוחדת שלישית בתחביר השפה, בנוסף ל-`define` ול-`lambda`, יחד עם כלל ההערכה הייחודי שלה — כדי לאפשר הערכה מותנית."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:1",
+     "type": "prose",
+     "en": "The syntax of a Scheme conditional expression is:\n\n",
+     "hash": "c69c916c45152c19",
+     "he": "התחביר של ביטוי תנאי ב-Scheme הוא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:2",
+     "type": "code",
+     "en": "```scheme\n(if <exp> <exp> <exp>)\n```\n\n",
+     "hash": "a3334b6bdfad4fda",
+     "lang": "scheme",
+     "noteHe": "תבנית התחביר של ביטוי `if`: שלושה תת-ביטויים אחרי האופרטור — בסדר הזה: ביטוי הבדיקה (test), ביטוי ה\"אז\" (then) וביטוי ה\"אחרת\" (else). בניגוד לשפות רבות, ב-Scheme אין מילות מפתח `then`/`else` — הסדר בלבד קובע את התפקיד."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:3",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:4",
+     "type": "code",
+     "en": "```scheme\n(if (> x 2) x (* x 2))\n```\n\n",
+     "hash": "4085db28ac61b597",
+     "lang": "scheme",
+     "noteHe": "אם `x` גדול מ-2 — ערך הביטוי הוא `x` עצמו; אחרת — ערך הביטוי הוא `(* x 2)`, כלומר כפול שניים. שימו לב שהביטוי כולו מוערך **לערך** — כמו אופרטור `?:` ב-TypeScript, לא כמו משפט `if`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:5",
+     "type": "prose",
+     "en": "`if` is a special operator - it has a special evaluation rule.\nThe three other sub-expressions are called the test-part, then-part, and else-part of the compound if-expression.\nThey can recursively be any type of expression.\n\n",
+     "hash": "97a377fe9830d465",
+     "he": "`if` הוא אופרטור מיוחד — יש לו כלל הערכה מיוחד.\nשלושת תת-הביטויים האחרים נקראים חלק-הבדיקה (test), חלק-האז (then) וחלק-האחרת (else) של ביטוי ה-if המורכב.\nהם יכולים להיות, רקורסיבית, כל סוג של ביטוי."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:6",
+     "type": "prose",
+     "en": "**NOTE**: if-expressions are *expressions* - not *statements* as they are in TypeScript.  They are evaluated into a value.\nThey are equivalent to the ternary `?:` operator we used in TypeScript.\n\n",
+     "hash": "8792d094907e0ccb",
+     "he": "**הערה**: ביטויי if הם *ביטויים* — לא *משפטים* כמו ב-TypeScript. הם מוערכים לערך.\nהם שקולים לאופרטור המשולש `?:` שהשתמשנו בו ב-TypeScript."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:7",
+     "type": "prose",
+     "en": "#### Example: abs\n\n",
+     "hash": "ea42cc784b220fc9",
+     "he": "#### דוגמה: abs"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:8",
+     "type": "code",
+     "en": "```scheme\n(define abs (lambda (x) (if (> x 0) x (- x))))\n\n(abs 2)  ;--> 2\n(abs -3) ;--> 3\n```\n\n",
+     "hash": "60f265fb827fb771",
+     "lang": "scheme",
+     "noteHe": "פונקציית הערך המוחלט: אם `x` חיובי — מחזירים אותו כמו שהוא; אחרת מחזירים את `(- x)` — מינוס אונרי שהופך את הסימן. `(abs 2)` מחזיר 2 (הבדיקה `(> 2 0)` נותנת `#t`), ו-`(abs -3)` מחזיר 3 (הבדיקה נכשלת, אז מוערך `(- -3)` שהוא 3). שימו לב לקצה: עבור `x` = 0 הבדיקה `(> 0 0)` היא `#f`, ולכן מוחזר `(- 0)` = 0 — עדיין נכון."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:9",
+     "type": "prose",
+     "en": "if-expressions can be nested as needed to define complicated decisions:\n\n",
+     "hash": "c6c3f7dbe0dc9b42",
+     "he": "אפשר לקנן ביטויי if ככל הנדרש כדי להגדיר החלטות מסובכות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:10",
+     "type": "code",
+     "en": "```scheme\n(if (= x y)\n    0\n    (if (> x y)\n        1\n        -1))\n```\n\n",
+     "hash": "fd84e6c6799cc319",
+     "lang": "scheme",
+     "noteHe": "מימוש של פונקציית \"סימן ההשוואה\" (בדומה ל-compare): אם `x` שווה ל-`y` — הערך 0; אחרת נכנסים ל-if פנימי: אם `x` גדול — הערך 1, ואם לא — הערך -1. ה-else של ה-if החיצוני הוא בעצמו ביטוי if שלם — זה מותר כי if הוא ביטוי שמוערך לערך."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:11",
+     "type": "prose",
+     "en": "Scheme also includes an additional special form called `cond` which allows a more general form of conditional expression:\n\n",
+     "hash": "0260d12c5dfd06bd",
+     "he": "Scheme כוללת גם צורה מיוחדת נוספת בשם `cond`, שמאפשרת צורה כללית יותר של ביטוי תנאי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:12",
+     "type": "code",
+     "en": "```scheme\n(cond (<p1> <e11> <e12> ... <e1k1>)\n      (<p2> <e21> <e22> ... <e2k2>>)\n      ...\n      (else <en1> <en2> ... <enkn>>))\n```\n\n",
+     "hash": "96782826c2a67afc",
+     "lang": "scheme",
+     "noteHe": "תבנית התחביר של `cond` — מקבילה ל-\"if / else if / else\" משורשר: כל שורה בסוגריים היא פסוקית (clause) שמתחילה בפרדיקט `<pi>` ואחריו ביטויי תוצאה. המפרש בודק את הפרדיקטים לפי הסדר; הפסוקית הראשונה שהפרדיקט שלה אמת — ביטויי התוצאה שלה מוערכים, וערך האחרון בהם הוא ערך ה-`cond` כולו. פסוקית `else` היא ברירת המחדל אם אף פרדיקט לא הצליח."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:20:13",
+     "type": "prose",
+     "en": "The sub-expressions of the `cond` form are called *clauses* - each clause starts with a predicate-expression and is followed by consequence-expressions.\n\n",
+     "hash": "476c4fe2d51c8afe",
+     "he": "תת-הביטויים של צורת ה-`cond` נקראים *פסוקיות (clauses)* — כל פסוקית מתחילה בביטוי-פרדיקט ואחריו ביטויי-תוצאה."
+    }
+   ],
+   "headingHe": "ביטויי תנאי (Conditional Expressions)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:21",
+   "depth": 3,
+   "headingEn": "Evaluation Rule for If-expressions",
+   "raw": "### Evaluation Rule for If-expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:21:0",
+     "type": "prose",
+     "en": "To evaluate an if-expression `(if <test-exp> <then-exp> <else-exp>)`:\n",
+     "hash": "2b83d0dd99e06bf9",
+     "he": "כדי להעריך ביטוי if ‏`(if <test-exp> <then-exp> <else-exp>)`:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:21:1",
+     "type": "list",
+     "en": "1. Let p = `evaluate <test-exp>`\n2. If p is true, then evaluate `<then-exp>` and return this value as the value of the if-expression.\n2. else evaluate `<else-exp>` and return its value as the value of the if-expression.\n\n",
+     "hash": "061833ddc89c16ef",
+     "he": "1. יהי p = ‏`evaluate <test-exp>`\n2. אם p אמת — הערך את `<then-exp>` והחזר את ערכו כערך של ביטוי ה-if.\n2. אחרת — הערך את `<else-exp>` והחזר את ערכו כערך של ביטוי ה-if."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:21:2",
+     "type": "prose",
+     "en": "**NOTE**: When evaluating an if-expression, the `<test-exp>` is always evaluated, but only one of `<then-exp>` or `<else-exp>` \nis evaluated.  This is in contrast to what happens when we evaluate a non-special form - where all the sub-expressions are always evaluated.\n\n",
+     "hash": "0da3f8d86e2cc293",
+     "he": "**הערה**: בהערכת ביטוי if, ‏`<test-exp>` מוערך תמיד, אבל רק **אחד** מבין `<then-exp>` או `<else-exp>` מוערך. זאת בניגוד למה שקורה כשמעריכים צורה לא-מיוחדת — שם כל תת-הביטויים מוערכים תמיד."
+    }
+   ],
+   "headingHe": "כלל ההערכה לביטויי If"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:22",
+   "depth": 3,
+   "headingEn": "Example Program in $$L2$$",
+   "raw": "### Example Program in $$L2$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:0",
+     "type": "prose",
+     "en": "The language we have defined so far is quite expressive.  Let us define an example program demonsrating this:\nthis program implements Newton's method for computing square roots.\n\n",
+     "hash": "8f74d06d566901ee",
+     "he": "השפה שהגדרנו עד כה היא כבר די אקספרסיבית. נגדיר תוכנית לדוגמה שמדגימה זאת:\nהתוכנית מממשת את שיטת ניוטון (Newton's method) לחישוב שורשים ריבועיים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:1",
+     "type": "prose",
+     "en": "Newton's method is stated as this algorithm:\n",
+     "hash": "52d5eb8b9b851f0e",
+     "he": "שיטת ניוטון מנוסחת כאלגוריתם הבא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:2",
+     "type": "list",
+     "en": "* If y is non-zero guess for a square root of x, then $$(y + x/y)/2$$ is a better approximation of $$\\sqrt x$$.\n\n",
+     "hash": "98e4cd6a2f3f76df",
+     "he": "* אם y הוא ניחוש שונה-מאפס לשורש הריבועי של x, אז $$(y + x/y)/2$$ הוא קירוב טוב יותר ל-$$\\sqrt x$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:3",
+     "type": "prose",
+     "en": "To start this computation, we provide a non-zero guess like 1, and we need to decide when to stop guessing.\n\n",
+     "hash": "60d3c34b353481c0",
+     "he": "כדי להתחיל את החישוב, מספקים ניחוש שונה-מאפס כמו 1, וצריך להחליט מתי להפסיק לנחש."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:4",
+     "type": "prose",
+     "en": "This algorithm is iterative:\n",
+     "hash": "c04d1d15022af49b",
+     "he": "האלגוריתם הזה איטרטיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:5",
+     "type": "list",
+     "en": "* Is the current guess good enough? if yes return it.\n* Else improve the guess and try again.\n\n",
+     "hash": "a3a88520017d0fbf",
+     "he": "* האם הניחוש הנוכחי טוב מספיק? אם כן — החזר אותו.\n* אחרת — שפר את הניחוש ונסה שוב."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:6",
+     "type": "prose",
+     "en": "Interestingly - we can implement this iterative algorithm even though we have no construct in the language to iterate.\n\n",
+     "hash": "654d6d89259c7879",
+     "he": "באופן מעניין — אנחנו יכולים לממש את האלגוריתם האיטרטיבי הזה למרות שאין בשפה שום מבנה לאיטרציה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:7",
+     "type": "code",
+     "en": "```scheme\n(define sqrt (lambda (x) (sqrt-iter 1 x)))\n\n(define sqrt-iter\n  (lambda (guess x)\n     (if (good-enough? guess x)\n         guess\n         (sqrt-iter (improve guess x)\n                    x))))\n\n(define abs (lambda (x) (if (< x 0) (- x) x)))\n(define square (lambda (x) (* x x)))\n(define epsilon 0.0001)\n\n(define good-enough?\n  (lambda (guess x)\n     (< (abs (- (square guess) x)) epsilon)))\n \n(define average\n  (lambda (x y) (/ (+ x y) 2.0)))\n  \n(define improve\n  (lambda (guess x)\n    (average guess (/ x guess))))\n```\n\n",
+     "hash": "e122f0b9ad2bc895",
+     "lang": "scheme",
+     "noteHe": "תוכנית שלמה בשיטת ניוטון, בנויה כהיררכיה של פרוצדורות קטנות:\n- `sqrt` — נקודת הכניסה: קוראת ל-`sqrt-iter` עם ניחוש התחלתי 1.\n- `sqrt-iter` — לב האלגוריתם, והדוגמה הראשונה שלנו ל**רקורסיה**: אם הניחוש `guess` טוב מספיק — מחזירים אותו; אחרת קוראים שוב ל-`sqrt-iter` עם ניחוש משופר. כך מקבלים לולאה בלי שום מבנה לולאה בשפה!\n- `good-enough?` — בודקת אם `guess` בריבוע קרוב ל-`x` עד כדי `epsilon` (0.0001). שימו לב למוסכמת השמות של Scheme: פרדיקטים מסתיימים ב-`?`.\n- `improve` — צעד ניוטון: הממוצע של `guess` ושל `x/guess`.\n- `average`, `abs`, `square` — פרוצדורות עזר. השימוש ב-`2.0` (ולא `2`) ב-`average` גורם לחישוב בנקודה צפה.\nלמשל `(sqrt 2)` ייתן בערך 1.4142."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:8",
+     "type": "prose",
+     "en": "This program illustrates many of the \"good properties\" we associated with the Procedural Programming paradigm in Chapter 1:\n",
+     "hash": "e5afc09d3291ef55",
+     "he": "התוכנית הזו מדגימה רבות מ\"התכונות הטובות\" שקשרנו לפרדיגמת התכנות הפרוצדורלי בפרק 1:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:9",
+     "type": "list",
+     "en": "* Encourage the use of small units of codes, called procedures, which encapsulate well-defined commands. \n* Procedures interact through well-defined interfaces published by each procedure (the contract of the procedure, including the signature of which arguments it expects, and which return value it returns)\n\n",
+     "hash": "e1f2eb3187ad5422",
+     "he": "* עידוד השימוש ביחידות קוד קטנות, הנקראות פרוצדורות, שמכמסות (encapsulate) פקודות מוגדרות היטב.\n* פרוצדורות מתקשרות דרך ממשקים מוגדרים היטב שכל פרוצדורה מפרסמת (החוזה של הפרוצדורה, כולל החתימה — אילו ארגומנטים היא מצפה לקבל ואיזה ערך היא מחזירה)"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:10",
+     "type": "prose",
+     "en": "We haven't discussed local variables (used inside each procedure without affecting the state of the program outside the scope of the procedures).  We will see later in the chapter that even in $$L2$$, we have enough *semantic power* to define local variables, but we have not provided *syntactic constructs* to encourage the use of this feature.\n\n",
+     "hash": "202ae3573fe15724",
+     "he": "עוד לא דיברנו על משתנים מקומיים (המשמשים בתוך כל פרוצדורה בלי להשפיע על מצב התוכנית מחוץ לתחום ההכרה של הפרוצדורות). נראה בהמשך הפרק שאפילו ב-$$L2$$ יש לנו מספיק *כוח סמנטי* להגדיר משתנים מקומיים, אבל לא סיפקנו *מבנים תחביריים* שמעודדים שימוש ביכולת הזו."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:11",
+     "type": "prose",
+     "en": "We have created a hierarchy of procedures, higher-level procedures call lower-level procedures:\n\n",
+     "hash": "cf6108b00b445551",
+     "he": "יצרנו היררכיה של פרוצדורות — פרוצדורות ברמה גבוהה קוראות לפרוצדורות ברמה נמוכה יותר:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:22:12",
+     "type": "image",
+     "en": "![](./resources/sqrt.svg)\n\n",
+     "hash": "ec4f52e1ac9bec9b"
+    }
+   ],
+   "headingHe": "תוכנית לדוגמה ב-$$L2$$"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:23",
+   "depth": 2,
+   "headingEn": "Expression Types and Evaluation Rules - Round 2",
+   "raw": "## Expression Types and Evaluation Rules - Round 2\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:23:0",
+     "type": "prose",
+     "en": "Let us summarize the syntax (expression types) of the language $$L2$$ and summarize the rules to evaluate all of the expression types in $$L2$$.  \n\n",
+     "hash": "2ca9f32655b26b6e",
+     "he": "נסכם את התחביר (סוגי הביטויים) של השפה $$L2$$ ואת הכללים להערכת כל סוגי הביטויים ב-$$L2$$."
+    }
+   ],
+   "headingHe": "סוגי ביטויים וכללי הערכה — סבב שני"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:24",
+   "depth": 3,
+   "headingEn": "Expression Types",
+   "raw": "### Expression Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:24:0",
+     "type": "prose",
+     "en": "All the expression types presented so far are:\n",
+     "hash": "7320d6bf7e53ef61",
+     "he": "כל סוגי הביטויים שהוצגו עד כה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:24:1",
+     "type": "list",
+     "en": "1. Atomic expressions:\n   1. number literal expression (0, 1, 2, ...)\n   2. boolean literal expression (#t and #f)\n   3. primitive operation expression (+, -, *, /, <, >, =)\n   4. variable expression (a well formed name - made up of letters and punctuations)\n2. Compound expressions:\n   1. Special compound expressions: \n      * `(define <var> <exp>)`\n      * `(lambda (<var> ...) <exp> ...)`\n      * `(if <exp> <exp> <exp>)`\n      * `(cond (<exp> ...) ...)`\n   2. Non-special compound expressions: $$(exp_0 \\ldots exp_n)$$\n   \n",
+     "hash": "f9f3fedbf120b5e5",
+     "he": "1. ביטויים אטומיים:\n   1. ביטוי מספר ליטרלי (0, 1, 2, ...)\n   2. ביטוי בוליאני ליטרלי (`#t` ו-`#f`)\n   3. ביטוי פעולה פרימיטיבית (+, -, *, /, <, >, =)\n   4. ביטוי משתנה (שם תקין — המורכב מאותיות וסימני פיסוק)\n2. ביטויים מורכבים:\n   1. ביטויים מורכבים מיוחדים:\n      * `(define <var> <exp>)`\n      * `(lambda (<var> ...) <exp> ...)`\n      * `(if <exp> <exp> <exp>)`\n      * `(cond (<exp> ...) ...)`\n   2. ביטויים מורכבים לא-מיוחדים: $$(exp_0 \\ldots exp_n)$$"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:24:2",
+     "type": "prose",
+     "en": "This inductive definition corresponds to the set $$Expression$$ of all possible expressions in the language.\n\n",
+     "hash": "46848dec6c0e58f7",
+     "he": "ההגדרה האינדוקטיבית הזו מתאימה לקבוצה $$Expression$$ של כל הביטויים האפשריים בשפה."
+    }
+   ],
+   "headingHe": "סוגי ביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:25",
+   "depth": 3,
+   "headingEn": "Evaluation Rules for Expressions",
+   "raw": "### Evaluation Rules for Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:0",
+     "type": "prose",
+     "en": "We define the function $$evaluate: Expression \\rightarrow Value$$ in an inductive manner:\n\n",
+     "hash": "e83b0c2093a92b92",
+     "he": "אנו מגדירים את הפונקציה $$evaluate: Expression \\rightarrow Value$$ באופן אינדוקטיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:1",
+     "type": "prose",
+     "en": "#### 1. Evaluation of atomic expressions:\n",
+     "hash": "76469d80595b2f0c",
+     "he": "#### 1. הערכת ביטויים אטומיים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:2",
+     "type": "list",
+     "en": "1. Special operators are not evaluated (`define`, `lambda`, `if`, `cond` and `else` are the special operators).\n2. Variables are evaluated by looking up their value in the global environment.\n3. Primitive atomic expressions evaluate to their pre-defined denoted value.\n   * Number atomic literal expressions evaluate to number values.\n   * Boolean atomic literal expressions evaluate to boolean values true and false.\n   * Primitive procedures evaluate to the primitive function that performs the denoted operation.\n   \n",
+     "hash": "cbbd53f607a3988e",
+     "he": "1. אופרטורים מיוחדים אינם מוערכים (`define`, `lambda`, `if`, `cond` ו-`else` הם האופרטורים המיוחדים).\n2. משתנים מוערכים על ידי חיפוש ערכם בסביבה הגלובלית.\n3. ביטויים אטומיים פרימיטיביים מוערכים לערך המוגדר-מראש שהם מציינים.\n   * ביטויי מספר ליטרליים מוערכים לערכי מספר.\n   * ביטויים בוליאניים ליטרליים מוערכים לערכים הבוליאניים אמת ושקר.\n   * פרוצדורות פרימיטיביות מוערכות לפונקציה הפרימיטיבית שמבצעת את הפעולה המצוינת."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:3",
+     "type": "prose",
+     "en": "#### 2. Evaluation of compound special forms:\n",
+     "hash": "75eec9d30004af6d",
+     "he": "#### 2. הערכת צורות מורכבות מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:4",
+     "type": "list",
+     "en": "1. The special form `(define <var> <exp>)` is evaluated according to this rule:\n     1. Let val = `evaluate(<exp>)`\n     2. Add the binding `< <var>, val >` to the global environment.\n     3. The form does not have any value (which we state as: it has a `void` value).\n2. The special form `(lambda (<p1> ..) <exp1> ...)` is evaluated into a value `<Closure (<p1>...) <exp1>...>`.\n     The sub-expressions of the lambda-form are **not** evaluated.\n3. The special form `(if <test-exp> <then-exp> <else-exp>)` is evaluated as follows:\n     * Let p = evaluate(`<test-exp>`)\n     * If p is true - the value of the if-expression is evaluate(`<then-exp>`)\n     * else it is evaluate(`<else-exp>`).\n  \n",
+     "hash": "260f3c8eb389bd39",
+     "he": "1. הצורה המיוחדת `(define <var> <exp>)` מוערכת לפי הכלל הזה:\n     1. יהי val = ‏`evaluate(<exp>)`\n     2. הוסף את הקשירה `< <var>, val >` לסביבה הגלובלית.\n     3. לצורה אין ערך (מה שאנו מנסחים כך: יש לה ערך `void`).\n2. הצורה המיוחדת `(lambda (<p1> ..) <exp1> ...)` מוערכת לערך `<Closure (<p1>...) <exp1>...>`.\n     תת-הביטויים של צורת ה-lambda **אינם** מוערכים.\n3. הצורה המיוחדת `(if <test-exp> <then-exp> <else-exp>)` מוערכת כך:\n     * יהי p = evaluate(`<test-exp>`)\n     * אם p אמת — ערך ביטוי ה-if הוא evaluate(`<then-exp>`)\n     * אחרת — הערך הוא evaluate(`<else-exp>`)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:5",
+     "type": "prose",
+     "en": "A similar rule applies for `cond`. For all special forms - not all sub-expressions are evaluated.\n\n\n",
+     "hash": "dda60889b5c3f581",
+     "he": "כלל דומה חל על `cond`. בכל הצורות המיוחדות — לא כל תת-הביטויים מוערכים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:6",
+     "type": "prose",
+     "en": "#### 3. Evaluation of compound non-special forms:\n",
+     "hash": "d54105e5ef6a81dc",
+     "he": "#### 3. הערכת צורות מורכבות לא-מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:7",
+     "type": "prose",
+     "en": "All compound forms are of the form $$(exp_0 \\ldots exp_n)$$.\n",
+     "hash": "e21b81ed444a6db0",
+     "he": "כל הצורות המורכבות הן מהצורה $$(exp_0 \\ldots exp_n)$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:8",
+     "type": "list",
+     "en": "1. Let $$(val_0, \\ldots, val_n) = (evaluate(exp_0), \\ldots, evaluate(exp_n))$$\n2. If $$val_0$$ is a primitive procedure: Apply the procedure $$val_0$$ to the values $$(val_1, \\ldots, val_n)$$.\n3. Else if $$val_0$$ is a closure `<Closure <p1...pn> <exp1>..<expk>)`:\n   * Replace $$p_1 ... p_n$$ by $$val_1 ... val_n$$ in `<exp1> .. <expk>`\n   * Evaluate the resulting expressions and return the value of `<expk>`.\n\n",
+     "hash": "f787e67044a1079a",
+     "he": "1. יהי $$(val_0, \\ldots, val_n) = (evaluate(exp_0), \\ldots, evaluate(exp_n))$$\n2. אם $$val_0$$ הוא פרוצדורה פרימיטיבית: הפעל את הפרוצדורה $$val_0$$ על הערכים $$(val_1, \\ldots, val_n)$$.\n3. אחרת, אם $$val_0$$ הוא סגור `<Closure <p1...pn> <exp1>..<expk>)`:\n   * החלף את $$p_1 ... p_n$$ ב-$$val_1 ... val_n$$ בתוך `<exp1> .. <expk>`\n   * הערך את הביטויים שמתקבלים והחזר את ערכו של `<expk>`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:9",
+     "type": "prose",
+     "en": "**MISSING PARTS**: In this specification, we did not explain yet:\n",
+     "hash": "fa434b61e2f76954",
+     "he": "**חלקים חסרים**: במפרט הזה עוד לא הסברנו:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:10",
+     "type": "list",
+     "en": "* how the substitution operation works in step 3.\n* how to behave for error cases (wrong number of arguments, wrong type of value for $$val_0$$).\n* how the global environment works (to extend the environment when `define` is invoked and to apply the environment when a variable is evaluated).\n\n",
+     "hash": "64beedfe54771414",
+     "he": "* איך פעולת ההצבה (substitution) עובדת בשלב 3.\n* איך להתנהג במקרי שגיאה (מספר שגוי של ארגומנטים, ערך מטיפוס שגוי עבור $$val_0$$).\n* איך הסביבה הגלובלית עובדת (הרחבת הסביבה כשמפעילים `define`, והפעלת הסביבה כשמעריכים משתנה)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:25:11",
+     "type": "prose",
+     "en": "These parts will become explicit and will need to be specified when we implement the evaluation rules in the code of the interpreter.\n\n",
+     "hash": "4c5facd9b775ee8a",
+     "he": "החלקים האלה יהפכו מפורשים ויצטרכו להיות מוגדרים כשנממש את כללי ההערכה בקוד המפרש."
+    }
+   ],
+   "headingHe": "כללי הערכה לביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:26",
+   "depth": 3,
+   "headingEn": "Computed Values",
+   "raw": "### Computed Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:26:0",
+     "type": "prose",
+     "en": "The set of all possible values computed by $$L2$$ is:\n",
+     "hash": "ea4e64a260157821",
+     "he": "קבוצת כל הערכים האפשריים ש-$$L2$$ מחשבת היא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:26:1",
+     "type": "list",
+     "en": "* Numbers\n* Booleans\n* Primitive operations\n* Void\n* Closures\n\n",
+     "hash": "820e0718a52bf1b0",
+     "he": "* מספרים\n* ערכים בוליאניים\n* פעולות פרימיטיביות\n* Void\n* סגורים (Closures)"
+    }
+   ],
+   "headingHe": "ערכים מחושבים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:27",
+   "depth": 3,
+   "headingEn": "What is Not in $$L2$$",
+   "raw": "### What is Not in $$L2$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:27:0",
+     "type": "prose",
+     "en": "Note the programming constructs which are absent from $$L2$$:\n",
+     "hash": "4bb40d75cee161dd",
+     "he": "שימו לב למבני התכנות שנעדרים מ-$$L2$$:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:27:1",
+     "type": "list",
+     "en": "* No loop data sructures.\n* No mutation of variables.\n* No compound data structures.\n* No local variables.\n\n",
+     "hash": "5dc5ee55da65b178",
+     "he": "* אין מבני לולאה.\n* אין שינוי מצב (mutation) של משתנים.\n* אין מבני נתונים מורכבים.\n* אין משתנים מקומיים."
+    }
+   ],
+   "headingHe": "מה אין ב-$$L2$$"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:28",
+   "depth": 3,
+   "headingEn": "Termination",
+   "raw": "### Termination\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:28:0",
+     "type": "prose",
+     "en": "Can you prove that some programs in $$L2$$ may not terminate?\n\n",
+     "hash": "1fd95e0848d4f79a",
+     "he": "האם תוכלו להוכיח שתוכניות מסוימות ב-$$L2$$ עלולות לא לעצור?"
+    }
+   ],
+   "headingHe": "עצירה (Termination)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:29",
+   "depth": 2,
+   "headingEn": "Extending the Language with Compound Values: $$L3$$",
+   "raw": "## Extending the Language with Compound Values: $$L3$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:29:0",
+     "type": "prose",
+     "en": "We observe that the computed values of $$L2$$ are atomic values (numbers, booleans) or closures (which are a compoound value but which has no accessors).\n\n",
+     "hash": "ae7d75bfdadc230c",
+     "he": "נשים לב שהערכים המחושבים של $$L2$$ הם ערכים אטומיים (מספרים, ערכים בוליאניים) או סגורים (שהם ערך מורכב אך ללא פונקציות גישה)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:29:1",
+     "type": "prose",
+     "en": "To introduce compound data values in the language, we need:\n",
+     "hash": "be8491c9211f2684",
+     "he": "כדי להכניס לשפה ערכי נתונים מורכבים, אנחנו צריכים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:29:2",
+     "type": "list",
+     "en": "* Constructors for compound values\n* Literal expressions that denote compound values\n\n",
+     "hash": "837be678042ca074",
+     "he": "* בנאים (constructors) לערכים מורכבים\n* ביטויים ליטרליים שמציינים ערכים מורכבים"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:29:3",
+     "type": "prose",
+     "en": "In JavaScript, for example, compound values are constructed with the array and map constructors and denoted by the [] and {} notations for literal expressions.\n\n",
+     "hash": "4dd9cc39a7e3b582",
+     "he": "ב-JavaScript, למשל, ערכים מורכבים נבנים עם הבנאים של מערך ומפה, ומצוינים בכתיבי `[]` ו-`{}` של ביטויים ליטרליים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:29:4",
+     "type": "prose",
+     "en": "In the minimalistic spirit which characterizes Scheme, we will introduce into $$L3$$ a single compound value constructor and the capability to use it recursively.\n\n",
+     "hash": "b27b17107811eb43",
+     "he": "ברוח המינימליסטית שמאפיינת את Scheme, נכניס ל-$$L3$$ בנאי ערכים מורכבים יחיד, ואת היכולת להשתמש בו באופן רקורסיבי."
+    }
+   ],
+   "headingHe": "הרחבת השפה עם ערכים מורכבים: $$L3$$"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:30",
+   "depth": 3,
+   "headingEn": "The Pair Compound Data Type",
+   "raw": "### The Pair Compound Data Type\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:0",
+     "type": "prose",
+     "en": "A pair is a minimal compound data type that combines two values together into a single new unit.\nThe language supports this by introducing:\n",
+     "hash": "a200943ef3fd9950",
+     "he": "זוג (pair) הוא טיפוס נתונים מורכב מינימלי שמצרף שני ערכים יחד ליחידה חדשה אחת.\nהשפה תומכת בכך באמצעות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:1",
+     "type": "list",
+     "en": "* A value constructor: this is called `cons` in Scheme \n* Accessors to take apart a compound pair value: these are called `car` and `cdr` (for the first and second element of the pair).\n* A type predicate to check whether a value belongs to the set of pair values: `pair?`.\n* An equality predicate for pairs `equal?`.\n\n",
+     "hash": "28404721928e1779",
+     "he": "* בנאי ערכים: ב-Scheme הוא נקרא `cons`\n* פונקציות גישה לפירוק ערך זוג מורכב: הן נקראות `car` ו-`cdr` (לאיבר הראשון והשני של הזוג, בהתאמה).\n* פרדיקט טיפוס לבדיקה האם ערך שייך לקבוצת ערכי הזוג: `pair?`.\n* פרדיקט שוויון לזוגות: `equal?`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:2",
+     "type": "prose",
+     "en": "We thus extend the language with 5 primitive functions: `cons`, `car`, `cdr`, `pair?`, `equal?`.\n\n",
+     "hash": "174a656afdb09dc8",
+     "he": "אנו מרחיבים אם כן את השפה בחמש פונקציות פרימיטיביות: `cons`, `car`, `cdr`, `pair?`, `equal?`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:3",
+     "type": "prose",
+     "en": "In addition, Scheme defines a standard form to print pair values and literal expressions that denote pair values:\nA literal pair expression is denoted as `'( <exp> . <exp> )`.  For example:\n\n",
+     "hash": "fd672ded66b3886b",
+     "he": "בנוסף, Scheme מגדירה צורה סטנדרטית להדפסת ערכי זוג, וביטויים ליטרליים שמציינים ערכי זוג:\nביטוי זוג ליטרלי נכתב `'( <exp> . <exp> )`. לדוגמה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:4",
+     "type": "code",
+     "en": "```scheme\n(define p1 '(1 . 5))    ;; literal pair expression \n(define p2 (cons 1 5))  ;; constructor invocation\n\n(car p1) ;--> 1\n(cdr p1) ;--> 5\n```\n\n",
+     "hash": "b279302d8d2f71e2",
+     "lang": "scheme",
+     "noteHe": "שתי דרכים שקולות ליצור את אותו זוג: `p1` נוצר מ**ביטוי ליטרלי** `'(1 . 5)` (שימו לב לגרש `'` ולנקודה בין האיברים), ו-`p2` נוצר מ**קריאה לבנאי** `(cons 1 5)`. שני הערכים זהים. פונקציות הגישה: `(car p1)` מחזירה את האיבר הראשון (1) ו-`(cdr p1)` את השני (5)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:5",
+     "type": "prose",
+     "en": "Pairs can be combined recursively into complex compound values:\n",
+     "hash": "c59566e3f15811c2",
+     "he": "אפשר לצרף זוגות באופן רקורסיבי לערכים מורכבים מסובכים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:6",
+     "type": "code",
+     "en": "```scheme\n(define p3 (cons p1 p2))\n(define p4 (cons p3 p2))\n\n(car p3) ;--> '(1 . 5)\n(cdr p3) ;--> '(1 . 5)\n```\n\n",
+     "hash": "2a2e8337d0bc92bf",
+     "lang": "scheme",
+     "noteHe": "קינון של זוגות: `p3` הוא זוג ששני איבריו הם בעצמם זוגות — `p1` ו-`p2` (ששניהם `'(1 . 5)`). לכן גם `(car p3)` וגם `(cdr p3)` מחזירים `'(1 . 5)`. ‏`p4` מקנן עוד רמה. זה הרעיון המרכזי: בנאי אחד (`cons`) מספיק כדי לבנות מבנים בכל עומק."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:7",
+     "type": "prose",
+     "en": "**NOTE**: The `cons` Pair constructor can receive parameters of any types.\nThe type of `cons` is thus described as `(first T1, second T2)=>Pair(T1,T2)`.\n\n",
+     "hash": "c81e3fa99386f5a0",
+     "he": "**הערה**: בנאי הזוג `cons` יכול לקבל פרמטרים מכל טיפוס.\nהטיפוס של `cons` מתואר לכן כ-`(first T1, second T2)=>Pair(T1,T2)`."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:30:8",
+     "type": "code",
+     "en": "```scheme\n(cons #t 1) ;--> '(#t . 1)\n```\n\n",
+     "hash": "233e8f9b2ad0a8a0",
+     "lang": "scheme",
+     "noteHe": "דוגמה לזוג הטרוגני: האיבר הראשון בוליאני (`#t`) והשני מספר (1) — `cons` לא דורש ששני האיברים יהיו מאותו טיפוס."
+    }
+   ],
+   "headingHe": "טיפוס הנתונים המורכב Pair (זוג)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:31",
+   "depth": 3,
+   "headingEn": "The List Compound Data Type",
+   "raw": "### The List Compound Data Type\n\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:0",
+     "type": "prose",
+     "en": "In addition to the Pair data type, $$L3$$ introduces a recursive data type - called List.\nWe first introduce it inductively:\n",
+     "hash": "473dab3a029607a1",
+     "he": "בנוסף לטיפוס הזוג, ‏$$L3$$ מציגה טיפוס נתונים רקורסיבי — הנקרא רשימה (List).\nנציג אותו תחילה באופן אינדוקטיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:1",
+     "type": "list",
+     "en": "* The *empty list* denoted '() is the base case.\n* A non empty list is built by combining a value $$v_0$$ together with a list $$(v_1, \\ldots, v_n)$$ to obtain a non empty list $$(v_0 v_1 \\ldots v_n)$$ - which combines a *head* ($$v_0$$) and a *tail* which is a list.\n\n",
+     "hash": "23d9b5330fad60f5",
+     "he": "* *הרשימה הריקה*, המסומנת `'()`, היא מקרה הבסיס.\n* רשימה לא-ריקה נבנית מצירוף ערך $$v_0$$ יחד עם רשימה $$(v_1, \\ldots, v_n)$$ לקבלת רשימה לא-ריקה $$(v_0 v_1 \\ldots v_n)$$ — המצרפת *ראש (head)* ($$v_0$$) עם *זנב (tail)* שהוא רשימה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:2",
+     "type": "prose",
+     "en": "Non empty lists are constructed from a value and a list. The size that characterizes lists in this inductive definition is the length of the list: a list of size $$n+1$$ is constructed from a value and a list of size $$n$$.\n\n",
+     "hash": "c4e3ddb42012fa3a",
+     "he": "רשימות לא-ריקות נבנות מערך ורשימה. הגודל שמאפיין רשימות בהגדרה האינדוקטיבית הזו הוא אורך הרשימה: רשימה בגודל $$n+1$$ נבנית מערך ורשימה בגודל $$n$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:3",
+     "type": "prose",
+     "en": "The definition of this inductive data type is a **disjoint union** between the empty list and non-empty lists.\n\n",
+     "hash": "acdcc8c9f9407756",
+     "he": "ההגדרה של טיפוס הנתונים האינדוקטיבי הזה היא **איחוד זר (disjoint union)** בין הרשימה הריקה לרשימות לא-ריקות."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:4",
+     "type": "prose",
+     "en": "Scheme implements List values by re-using the Pair data type for non-empty lists and a special value for the empty list.\nThe additions to the language are:\n",
+     "hash": "c45fe503579c56b1",
+     "he": "Scheme מממשת ערכי רשימה על ידי שימוש חוזר בטיפוס הזוג עבור רשימות לא-ריקות, וערך מיוחד עבור הרשימה הריקה.\nהתוספות לשפה הן:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:5",
+     "type": "list",
+     "en": "* A new primitive value '() and a corresponding predicate `empty?`\n* A special type of literal compound expressions for list values: `'(e1 ... en)` (This is read `\"quote e1 ... en\"`)\n* The predicate primitive `list?` to check that an object belongs to the `List` data type (either empty or non empty).\n\n\n",
+     "hash": "2c621b096dba2640",
+     "he": "* ערך פרימיטיבי חדש `'()` ופרדיקט מתאים `empty?`\n* סוג מיוחד של ביטויים ליטרליים מורכבים לערכי רשימה: `'(e1 ... en)` (נקרא `\"quote e1 ... en\"`)\n* הפרדיקט הפרימיטיבי `list?` לבדיקה שעצם שייך לטיפוס הנתונים `List` (ריק או לא-ריק)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:6",
+     "type": "code",
+     "en": "```scheme\n(define l14 (cons 1 (cons 2 (cons 3 (cons 4 '()))))) ;--> '(1 2 3 4)\n(list? l12) ;--> #t\n(cdr l14)   ;--> '(2 3 4)\n(car (cdr l14)) ;--> 2\n(cons 10 l14)   ;--> '(10 1 2 3 4)\n```\n\n",
+     "hash": "f7b54c5dd9614240",
+     "lang": "scheme",
+     "noteHe": "בנייה של רשימה `'(1 2 3 4)` באמצעות קינון `cons`. ‏`(cdr l14)` מחזיר את הזנב `'(2 3 4)`; ‏`(car (cdr l14))` הוא ניב נפוץ לקבלת האיבר השני (2); ו-`(cons 10 l14)` בונה רשימה **חדשה** עם 10 בראש — `l14` עצמה לא משתנה (אין mutation). שימו לב: בשורה השנייה יש כנראה טעות דפוס במקור — `l12` צריך להיות `l14`.\n\n⚠️ **כאן נמצאת נקודת הבלבול הגדולה של כל הפרק, וכדאי לעצור עליה עכשיו כדי לא לשלם עליה בהמשך: אין בכלל טיפוס נפרד שנקרא \"רשימה\".** רשימה **היא** זוגות. מה שנראה על המסך כ-`'(1 2 3 4)` הוא רק **תצוגה מקוצרת** למבנה `(1 . (2 . (3 . (4 . ()))))` — אותו דבר בדיוק, שתי צורות כתיבה. Scheme מדפיסה את הצורה הקצרה כשהמבנה עומד בתנאי אחד, ואת הצורה עם הנקודות כשהוא לא.\n\n**והתנאי הזה הוא כל ההגדרה**: לכו אחרי ה-`cdr`-ים, שוב ושוב. אם בסוף השרשרת אתם נוחתים על `'()` — זו רשימה. אם אתם נוחתים על משהו אחר — זה זוג, ולא רשימה. זהו. אין שום מבחן אחר. ההגדרה האינדוקטיבית שמעל אומרת בדיוק את זה: `'()` היא רשימה, ו-`(cons x l)` היא רשימה **אם `l` היא רשימה** — כלומר תכונת ה\"רשימתיות\" יושבת כולה בשרשרת ה-`cdr`, שנקראת גם **השדרה** (spine) של הרשימה.\n\n⚠️ **ומכאן הטעות הנפוצה ביותר: לא מספיק ש-`'()` תופיע איפשהו במבנה — היא חייבת לשבת בסוף שרשרת ה-`cdr`.** השוו: `(cons 1 '())` נותן `'(1)` — לוקחים `cdr` פעם אחת ומגיעים ל-`'()`, ולכן רשימה. אבל `(cons '() 1)` נותן `(() . 1)` — יש כאן `'()`, אבל היא יושבת ב-`car`, ושרשרת ה-`cdr` מסתיימת מיד במספר `1`. **לא רשימה.** אותם שני רכיבים בדיוק, סדר הפוך, תוצאה שונה לגמרי.\n\n**הכלל המעשי שכדאי לשנן**: מה שכבר הוא רשימה נכנס תמיד ל**ארגומנט השני** של `cons`. הביטו בקוד למעלה — בכל אחד מהקינונים, הארגומנט השני הוא מה שנבנה עד כה, והפנימי ביותר הוא `'()`. שאלת מבחן קלאסית היא בדיוק להחליף את סדר הארגומנטים ולשאול מה מתקבל; התשובה היא מבנה זוגות שגדל שמאלה, שאף פונקציית רשימה לא תדע לעבוד איתו. אותה מלכודת חוזרת ב-2.2 בתרגיל על `reduce`/`reduce2`, וב-5.2 בגרסה חמורה יותר — שם `wrong_reverse` ב-Prolog מחזירה מבנה שאינו רשימה ו**אינה מדווחת על שום שגיאה**. זו המחיר של ייצוג שהוא מוסכמה ולא טיפוס נאכף."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:7",
+     "type": "prose",
+     "en": "On the basis of this inductive definition, we can define functions over lists:\n\n",
+     "hash": "b1800126c22429ae",
+     "he": "על בסיס ההגדרה האינדוקטיבית הזו, אפשר להגדיר פונקציות על רשימות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:8",
+     "type": "code",
+     "en": "```scheme\n(define length\n  (lambda (l)\n    (if (empty? l)\n        0\n        (+ 1 (length (cdr l))))))\n```\n\n",
+     "hash": "809df8f7f9b97513",
+     "lang": "scheme",
+     "noteHe": "חישוב אורך רשימה — הדוגמה הקלאסית לרקורסיה על מבנה אינדוקטיבי: מקרה הבסיס — רשימה ריקה, אורך 0; המקרה האינדוקטיבי — 1 (בשביל הראש) ועוד אורך הזנב `(cdr l)`. מבנה הפונקציה משקף אחד-לאחד את מבנה ההגדרה האינדוקטיבית של רשימה."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:9",
+     "type": "prose",
+     "en": "As usual, recursive functions operating over an inductive type have a structure similar to the inductive definition of the inductive compound data type: because List is a disjoint union over Empty and Non-Empty lists, the structure of a function operating over lists will be:\n",
+     "hash": "aace05997c70e1f8",
+     "he": "כרגיל, לפונקציות רקורסיביות שפועלות על טיפוס אינדוקטיבי יש מבנה דומה להגדרה האינדוקטיבית של טיפוס הנתונים המורכב: מכיוון ש-List הוא איחוד זר של רשימות ריקות ולא-ריקות, מבנה של פונקציה שפועלת על רשימות יהיה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:10",
+     "type": "code",
+     "en": "```scheme\n    (if (empty? l)\n        <process empty list case>\n        <process non-empty list case>\n```\n",
+     "hash": "acf9d2a293425b45",
+     "lang": "scheme",
+     "noteHe": "זו **תבנית** הקוד הכללית לעיבוד רשימות (הסוגריים המשולשים הם מצייני-מקום): בדיקת `empty?` מפצלת בין שני המקרים של האיחוד הזר — הטיפול ברשימה ריקה (מקרה הבסיס) והטיפול ברשימה לא-ריקה (בדרך כלל: עיבוד ה-`car` וקריאה רקורסיבית על ה-`cdr`)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:11",
+     "type": "prose",
+     "en": "For example:\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:12",
+     "type": "code",
+     "en": "```scheme\n(define nth\n  (lambda (n l)\n    (if (empty? l)\n        '()\n        (if (= n 0)\n            (car l)\n            (nth (- n 1) (cdr l))))))\n            \n(nth 2 '(0 1 2 3 4)) ;--> 2\n(nth 3 '(0 1))       ;--> '()\n```\n\n",
+     "hash": "6548050fa8ea60dc",
+     "lang": "scheme",
+     "noteHe": "`nth` מחזירה את האיבר ה-`n` (באינדוקס מבוסס-0) של רשימה: אם הרשימה ריקה — מחזירים `'()` כערך-כשל; אם `n` הגיע ל-0 — הראש הוא התשובה; אחרת ממשיכים רקורסיבית עם `n-1` על הזנב. `(nth 2 '(0 1 2 3 4))` מחזיר 2; ‏`(nth 3 '(0 1))` \"נופל מהרשימה\" ולכן מחזיר `'()` — שיטת טיפול בשגיאות פשטנית שנשפר בהמשך הקורס."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:13",
+     "type": "prose",
+     "en": "The list constructor can also receive parameters of any types.  In particular, we can create list of pairs and \nrecursive tree structures using the compound list data type.\n\n",
+     "hash": "fe29505289034f0b",
+     "he": "גם בנאי הרשימה יכול לקבל פרמטרים מכל טיפוס. בפרט, אפשר ליצור רשימות של זוגות ומבני עץ רקורסיביים באמצעות טיפוס הרשימה המורכב."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:14",
+     "type": "prose",
+     "en": "Another list constructor is available in Scheme - which avoids the need for nested calls to `cons`: \n`(list <e1> ... <en>) ;--> '(v1 ... vn)` where `vi` is the value of `<ei>`.  \nSyntactically, `list` is complex because it can take variable number of arguments. \n\n",
+     "hash": "1766883760c3d560",
+     "he": "ב-Scheme זמין בנאי רשימות נוסף — שחוסך את הצורך בקריאות מקוננות ל-`cons`:\n‏`(list <e1> ... <en>) ;--> '(v1 ... vn)` כאשר `vi` הוא ערכו של `<ei>`.\nמבחינה תחבירית, `list` מורכב יותר כי הוא יכול לקבל מספר משתנה של ארגומנטים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:31:15",
+     "type": "prose",
+     "en": "**NOTE**: Compare `(list 1 2)` and `(cons 1 2)` - how different are they?\n\n",
+     "hash": "3f8a572e5182a7d1",
+     "he": "**הערה**: השוו את `(list 1 2)` ואת `(cons 1 2)` — עד כמה הם שונים? (רמז: `(list 1 2)` הוא `'(1 2)` — כלומר `(cons 1 (cons 2 '()))` — ואילו `(cons 1 2)` הוא הזוג `'(1 . 2)` שאינו רשימה כלל.)"
+    }
+   ],
+   "headingHe": "טיפוס הנתונים המורכב List (רשימה)"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:32",
+   "depth": 2,
+   "headingEn": "Expression Types and Evaluation Rules - Round 3",
+   "raw": "## Expression Types and Evaluation Rules - Round 3\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:32:0",
+     "type": "prose",
+     "en": "Let us summarize the syntax (expression types) of the language $$L3$$ and the rules to evaluate all of the expression types in $$L3$$.  \n\n",
+     "hash": "3183837bbc267c90",
+     "he": "נסכם את התחביר (סוגי הביטויים) של השפה $$L3$$ ואת הכללים להערכת כל סוגי הביטויים ב-$$L3$$."
+    }
+   ],
+   "headingHe": "סוגי ביטויים וכללי הערכה — סבב שלישי"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:33",
+   "depth": 3,
+   "headingEn": "Expression Types",
+   "raw": "### Expression Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:33:0",
+     "type": "prose",
+     "en": "All the expression types presented so far are:\n",
+     "hash": "7320d6bf7e53ef61",
+     "he": "כל סוגי הביטויים שהוצגו עד כה:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:33:1",
+     "type": "list",
+     "en": "1. Atomic expressions:\n   1. number literal expression (`0, 1, 2`, ...)\n   2. boolean literal expression (`#t` and `#f`)\n   3. primitive operation expression (+, -, \\*, /, <, >, =, **cons, car, cdr, pair?, list?** )\n   4. variable expression (a well formed name - made up letters and punctuations)\n   5. **the empty list literal expression '()**\n2. Compound expressions:\n   1. **Literal compound expressions: denoted `'(<lit> . <lit>)` for pairs or `'(<lit> ... <lit>)` for lists.** where `<lit>` \n      is an embedded literal expression (either atomic or compound).\n   2. Special compound expressions: \n      * `(define <var> <exp>)`\n      * `(lambda (<var> ...) <exp> ...)`\n      * `(if <exp> <exp> <exp>)`\n      * `(cond (<exp> ...) ...)`\n   3. Non-special compound expressions: $$(exp_0 \\ldots exp_n)$$\n   \n",
+     "hash": "217b6130b24a23e2",
+     "he": "1. ביטויים אטומיים:\n   1. ביטוי מספר ליטרלי (`0, 1, 2`, ...)\n   2. ביטוי בוליאני ליטרלי (`#t` ו-`#f`)\n   3. ביטוי פעולה פרימיטיבית (+, -, \\*, /, <, >, =, **cons, car, cdr, pair?, list?**)\n   4. ביטוי משתנה (שם תקין — המורכב מאותיות וסימני פיסוק)\n   5. **ביטוי הרשימה הריקה הליטרלי `'()`**\n2. ביטויים מורכבים:\n   1. **ביטויים ליטרליים מורכבים: הנכתבים `'(<lit> . <lit>)` לזוגות או `'(<lit> ... <lit>)` לרשימות**, כאשר `<lit>` הוא ביטוי ליטרלי מוטמע (אטומי או מורכב).\n   2. ביטויים מורכבים מיוחדים:\n      * `(define <var> <exp>)`\n      * `(lambda (<var> ...) <exp> ...)`\n      * `(if <exp> <exp> <exp>)`\n      * `(cond (<exp> ...) ...)`\n   3. ביטויים מורכבים לא-מיוחדים: $$(exp_0 \\ldots exp_n)$$"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:33:2",
+     "type": "prose",
+     "en": "This inductive definition corresponds to the set $$Expression$$ of all possible expressions in the language.\n\n",
+     "hash": "46848dec6c0e58f7",
+     "he": "ההגדרה האינדוקטיבית הזו מתאימה לקבוצה $$Expression$$ של כל הביטויים האפשריים בשפה."
+    }
+   ],
+   "headingHe": "סוגי ביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:34",
+   "depth": 3,
+   "headingEn": "Evaluation Rules for Expressions",
+   "raw": "### Evaluation Rules for Expressions\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:0",
+     "type": "prose",
+     "en": "We define the function $$evaluate: Expression \\rightarrow Value$$ in an inductive manner:\n\n",
+     "hash": "e83b0c2093a92b92",
+     "he": "אנו מגדירים את הפונקציה $$evaluate: Expression \\rightarrow Value$$ באופן אינדוקטיבי:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:1",
+     "type": "prose",
+     "en": "#### 1. Evaluation of atomic expressions:\n",
+     "hash": "76469d80595b2f0c",
+     "he": "#### 1. הערכת ביטויים אטומיים:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:2",
+     "type": "list",
+     "en": "1. Special operators are not evaluated (`define`, `lambda`, `if`, `cond` and `else` are the special operators).\n2. Variables are evaluated by looking up their value in the global environment.\n3. Primitive atomic expressions evaluate to their pre-defined denoted value.\n   * Number atomic literal expressions evaluate to number values.\n   * Boolean atomic literal expressions evaluate to boolean values true and false.\n   * Primitive procedures evaluate to the primitive function that performs the denoted operation.\n   * **The Empty list atomic literal expression evaluates to an empty list value.**\n   \n",
+     "hash": "3e96ed9854268c65",
+     "he": "1. אופרטורים מיוחדים אינם מוערכים (`define`, `lambda`, `if`, `cond` ו-`else` הם האופרטורים המיוחדים).\n2. משתנים מוערכים על ידי חיפוש ערכם בסביבה הגלובלית.\n3. ביטויים אטומיים פרימיטיביים מוערכים לערך המוגדר-מראש שהם מציינים.\n   * ביטויי מספר ליטרליים מוערכים לערכי מספר.\n   * ביטויים בוליאניים ליטרליים מוערכים לערכים הבוליאניים אמת ושקר.\n   * פרוצדורות פרימיטיביות מוערכות לפונקציה הפרימיטיבית שמבצעת את הפעולה המצוינת.\n   * **ביטוי הרשימה הריקה הליטרלי מוערך לערך רשימה ריקה.**"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:3",
+     "type": "prose",
+     "en": "#### 2. Evaluation of compound special forms:\n",
+     "hash": "75eec9d30004af6d",
+     "he": "#### 2. הערכת צורות מורכבות מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:4",
+     "type": "list",
+     "en": "1. The special form `(define <var> <exp>)` is evaluated according to this rule:\n     1. Let val = `evaluate(<exp>)`\n     2. Add the binding `< <var>, val >` to the global environment.\n     3. The form does not have any value (which we state as: it has a `void` value).\n     4. **Compound literal expressions evaluate to compound values (pair or list).** \n2. The special form `(lambda (<p1> ..) <exp1> ...)` is evaluated into a value `<Closure (<p1>...) <exp1>...>`.\n     The sub-expressions of the lambda-form are **not** evaluated.\n3. The special form `(if <test-exp> <then-exp> <else-exp>)` is evaluated as follows:\n    1. Let p = evaluate(`<test-exp>`)\n    2. If p is true - the value of the if-expression is evaluate(`<then-exp>`)\n    3. else it is evaluate(`<else-exp>`).\n  \n",
+     "hash": "8ec07bd58ff202b1",
+     "he": "1. הצורה המיוחדת `(define <var> <exp>)` מוערכת לפי הכלל הזה:\n     1. יהי val = ‏`evaluate(<exp>)`\n     2. הוסף את הקשירה `< <var>, val >` לסביבה הגלובלית.\n     3. לצורה אין ערך (מה שאנו מנסחים כך: יש לה ערך `void`).\n     4. **ביטויים ליטרליים מורכבים מוערכים לערכים מורכבים (זוג או רשימה).**\n2. הצורה המיוחדת `(lambda (<p1> ..) <exp1> ...)` מוערכת לערך `<Closure (<p1>...) <exp1>...>`.\n     תת-הביטויים של צורת ה-lambda **אינם** מוערכים.\n3. הצורה המיוחדת `(if <test-exp> <then-exp> <else-exp>)` מוערכת כך:\n    1. יהי p = evaluate(`<test-exp>`)\n    2. אם p אמת — ערך ביטוי ה-if הוא evaluate(`<then-exp>`)\n    3. אחרת — הערך הוא evaluate(`<else-exp>`)."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:5",
+     "type": "prose",
+     "en": "A similar rule applies for `cond`. For all special forms - not all sub-expressions are evaluated.\n\n\n",
+     "hash": "dda60889b5c3f581",
+     "he": "כלל דומה חל על `cond`. בכל הצורות המיוחדות — לא כל תת-הביטויים מוערכים."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:6",
+     "type": "prose",
+     "en": "#### 3. Evaluation of compound non-special forms:\n",
+     "hash": "d54105e5ef6a81dc",
+     "he": "#### 3. הערכת צורות מורכבות לא-מיוחדות:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:7",
+     "type": "prose",
+     "en": "All compound forms are of the form $$(exp_0, \\ldots, exp_n)$$.\n",
+     "hash": "bc39b31bee112295",
+     "he": "כל הצורות המורכבות הן מהצורה $$(exp_0, \\ldots, exp_n)$$."
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:34:8",
+     "type": "list",
+     "en": "1. Let $$(val_0, \\ldots, val_n) = (evaluate(exp_0), \\ldots, evaluate(exp_n))$$\n2. If $$val_0$$ is a primitive procedure: Apply the procedure $$val_0$$ to the values $$(val_1, \\ldots, val_n)$$.\n3. Else if $$val_0$$ is a closure `<Closure <p1...pn> <exp1>..<expk>)`:\n   * Replace $$p_1 ... p_n$$ by $$val_1 ... val_n$$ in `<exp1> .. <expk>`\n   * Evaluate the resulting expressions and return the value of `<expk>`.\n\n",
+     "hash": "f787e67044a1079a",
+     "he": "1. יהי $$(val_0, \\ldots, val_n) = (evaluate(exp_0), \\ldots, evaluate(exp_n))$$\n2. אם $$val_0$$ הוא פרוצדורה פרימיטיבית: הפעל את הפרוצדורה $$val_0$$ על הערכים $$(val_1, \\ldots, val_n)$$.\n3. אחרת, אם $$val_0$$ הוא סגור `<Closure <p1...pn> <exp1>..<expk>)`:\n   * החלף את $$p_1 ... p_n$$ ב-$$val_1 ... val_n$$ בתוך `<exp1> .. <expk>`\n   * הערך את הביטויים שמתקבלים והחזר את ערכו של `<expk>`."
+    }
+   ],
+   "headingHe": "כללי הערכה לביטויים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:35",
+   "depth": 3,
+   "headingEn": "Computed Values",
+   "raw": "### Computed Values\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:35:0",
+     "type": "prose",
+     "en": "The set of all possible values computed by $$L3$$ is:\n",
+     "hash": "ed5304ec45cb74b8",
+     "he": "קבוצת כל הערכים האפשריים ש-$$L3$$ מחשבת היא:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:35:1",
+     "type": "list",
+     "en": "* Numbers\n* Booleans\n* Primitive operations\n* Void\n* Closures\n* **Pairs**\n* **Lists** (empty or non-empty lists).\n\n\n",
+     "hash": "f43c8c940629ebc9",
+     "he": "* מספרים\n* ערכים בוליאניים\n* פעולות פרימיטיביות\n* Void\n* סגורים (Closures)\n* **זוגות (Pairs)**\n* **רשימות (Lists)** — ריקות או לא-ריקות."
+    }
+   ],
+   "headingHe": "ערכים מחושבים"
+  },
+  {
+   "id": "cm/2.1Scheme-bottom-up:36",
+   "depth": 3,
+   "headingEn": "Comparison Functional JavaScript and $$L3$$",
+   "raw": "### Comparison Functional JavaScript and $$L3$$\n\n",
+   "blocks": [
+    {
+     "id": "cm/2.1Scheme-bottom-up:36:0",
+     "type": "prose",
+     "en": "Let us compare the language we have obtained in $$L3$$ and the Functional JavaScript subset we used in Chapter 1:\n",
+     "hash": "f26a61b3f77c677c",
+     "he": "נשווה בין השפה שקיבלנו ב-$$L3$$ לבין תת-הקבוצה הפונקציונלית של JavaScript שבה השתמשנו בפרק 1:"
+    },
+    {
+     "id": "cm/2.1Scheme-bottom-up:36:1",
+     "type": "list",
+     "en": "* $$L3$$ does not have local variables - JavaScript can define them with `let`.\n* $$L3$$ has less primitive operations, less primitive data types (no strings), less compound data types (no maps - arrays are quite similar to Scheme lists).\n* There is no mutation in $$L3$$ of variables and of compound data values (in contrast to JavaScript).\n",
+     "hash": "696be805ce0b3c26",
+     "he": "* ב-$$L3$$ אין משתנים מקומיים — JavaScript יכולה להגדיר אותם עם `let`.\n* ל-$$L3$$ יש פחות פעולות פרימיטיביות, פחות טיפוסי נתונים פרימיטיביים (אין מחרוזות), פחות טיפוסי נתונים מורכבים (אין מפות — מערכים דומים למדי לרשימות של Scheme).\n* אין ב-$$L3$$ שינוי מצב (mutation) של משתנים ושל ערכי נתונים מורכבים (בניגוד ל-JavaScript)."
+    }
+   ],
+   "headingHe": "השוואה בין JavaScript פונקציונלי ל-$$L3$$"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מהו ההבדל בין הביטוי `(lambda (x) (* x x))` לבין הערך `<Closure (x) (* x x)>`?",
+   "options": [
+    "אין הבדל — אלה שני סימונים לאותו דבר בדיוק",
+    "הראשון הוא ביטוי (תחביר); השני הוא הערך שמתקבל כשמעריכים אותו — כמו היחס בין הביטוי הליטרלי `2` למספר 2",
+    "הראשון נכתב ב-Scheme והשני ב-TypeScript",
+    "הראשון הוא פרוצדורה פרימיטיבית והשני פרוצדורת משתמש"
+   ],
+   "correct": 1,
+   "explanationHe": "זו הבחנת יסוד בקורס: **ביטוי** שייך לעולם התחביר, **ערך** שייך לתחום הסמנטי. הערכת ביטוי lambda יוצרת ערך מטיפוס סגור (closure) — בדיוק כמו שהערכת הביטוי הליטרלי `2` נותנת את הערך המספרי 2. חשוב לזכור שבזמן ההערכה הזו הגוף `(* x x)` **אינו** מוערך."
+  },
+  {
+   "id": "ex2",
+   "type": "mcq",
+   "questionHe": "מדוע `if` חייב להיות צורה מיוחדת (special form) ואינו יכול להיות פרוצדורה רגילה?",
+   "options": [
+    "כי הוא קצר יותר משם של פרוצדורה רגילה",
+    "כי בצורה לא-מיוחדת כל תת-הביטויים מוערכים תמיד — ואז שני הענפים היו מוערכים, כולל ענף שעלול לא לעצור או לזרוק שגיאה",
+    "כי `if` מחזיר ערך בוליאני בלבד",
+    "כי אי אפשר להעביר שלושה ארגומנטים לפרוצדורה ב-Scheme"
+   ],
+   "correct": 1,
+   "explanationHe": "כלל ההערכה של צורה לא-מיוחדת מעריך את **כל** תת-הביטויים לפני ההפעלה. אילו `if` היה פרוצדורה, בקריאה כמו `(if (empty? l) 0 (+ 1 (length (cdr l))))` שני הענפים היו מוערכים תמיד — והרקורסיה לעולם לא הייתה עוצרת. הכלל המיוחד של `if` מעריך את הבדיקה, ואז מעריך **רק** את הענף הרלוונטי."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "מה הערך של כל אחד מהביטויים הבאים?\n```scheme\n(cons 1 2)\n(list 1 2)\n(car (cdr (list 1 2 3)))\n(pair? '(1 2))\n```",
+   "answerHe": "`(cons 1 2)` → הזוג `'(1 . 2)` (שאינו רשימה!).\n`(list 1 2)` → הרשימה `'(1 2)`, כלומר `(cons 1 (cons 2 '()))`.\n`(car (cdr (list 1 2 3)))` → 2 (ה-`cdr` הוא `'(2 3)` וה-`car` שלו הוא 2).\n`(pair? '(1 2))` → `#t` — רשימה לא-ריקה ממומשת כזוג, ולכן היא גם pair.",
+   "explanationHe": "נקודות המפתח: ההבדל בין `cons` (זוג) ל-`list` (רשימה שמסתיימת ב-`'()`), הרכבת accessors לגישה לאיברים פנימיים, והעובדה שרשימות לא-ריקות **הן** זוגות (מימוש הרשימה עושה שימוש חוזר בטיפוס הזוג)."
+  },
+  {
+   "id": "ex4",
+   "type": "open",
+   "questionHe": "כתבו את כלל ההערכה המלא של צורה מורכבת לא-מיוחדת $$(exp_0 \\ldots exp_n)$$ ב-$$L2$$, כולל שני המקרים של ערך האופרטור.",
+   "answerHe": "1. מעריכים את **כל** תת-הביטויים: $$(val_0, \\ldots, val_n) = (evaluate(exp_0), \\ldots, evaluate(exp_n))$$.\n2. אם $$val_0$$ הוא פרוצדורה פרימיטיבית — מפעילים אותה ישירות על $$(val_1, \\ldots, val_n)$$.\n3. אם $$val_0$$ הוא סגור `<Closure (p1…pn) <exp1>…<expk>>` — מציבים את $$val_1 \\ldots val_n$$ במקום $$p_1 \\ldots p_n$$ בביטויי הגוף, מעריכים את הביטויים שמתקבלים, וערך ההפעלה הוא ערכו של הביטוי האחרון `<expk>`.",
+   "explanationHe": "בתשובה מלאה חייבים להופיע: הערכת כל תת-הביטויים (כולל האופרטור), ההבחנה בין פרימיטיב לסגור, ושלושת שלבי הפעלת הסגור: הצבה → הערכה → החזרת ערך הביטוי האחרון. זהו הבסיס למודל ההצבה (substitution model) שיפורמל ב-2.6."
+  },
+  {
+   "id": "ex5",
+   "type": "code-reading",
+   "questionHe": "מה יחזיר הביטוי הבא, ומדוע הסדר של פסוקיות ה-`cond` משנה?\n```scheme\n(define classify\n  (lambda (n)\n    (cond ((> n 100) 'big)\n          ((> n 10) 'medium)\n          (else 'small))))\n(classify 50)\n```",
+   "answerHe": "`'medium`. הפרדיקט הראשון `(> 50 100)` נכשל, השני `(> 50 10)` מצליח — ולכן מוחזר `'medium` בלי לבדוק את ה-`else`. אילו היינו הופכים את סדר שתי הפסוקיות הראשונות, כל מספר גדול מ-10 (כולל 500) היה מסווג `'medium` — כי `cond` בוחר את הפסוקית **הראשונה** שמצליחה.",
+   "explanationHe": "`cond` מעריך פרדיקטים לפי הסדר ועוצר בראשון שמחזיר אמת. לכן פסוקיות חייבות להיות מסודרות מהתנאי הספציפי/החזק ביותר לחלש ביותר."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הסבירו: מדוע תוכניות ב-$$L1$$ תמיד עוצרות, ואילו ב-$$L2$$ קיימות תוכניות שאינן עוצרות? מה בדיוק התווסף לשפה שמאפשר אי-עצירה?",
+   "answerHe": "ב-$$L1$$ ההערכה היא רקורסיה על **מבנה הביטוי**: כל צעד הערכה עובר לתת-ביטויים קטנים יותר (ממש), ולביטוי יש עומק סופי — לכן ההערכה חייבת להסתיים (אפשר להוכיח באינדוקציה מבנית). ב-$$L2$$ התווספו `define` + `lambda`, שמאפשרים **לקרוא לפרוצדורה בשם בתוך גוף הפרוצדורה עצמה** — רקורסיה. בהפעלת סגור, ההצבה יוצרת ביטוי חדש שאינו בהכרח קטן יותר מהמקורי (למשל `(define loop (lambda (x) (loop x)))` — הערכת `(loop 1)` מייצרת שוב `(loop 1)`), ולכן ההערכה עלולה שלא לעצור.",
+   "explanationHe": "נקודות מפתח: הקשר בין אינדוקציה מבנית לעצירה ב-$$L1$$; ההבנה שהשילוב של מתן שם (define) + סגור (lambda) הוא שמאפשר רקורסיה; ודוגמה קונקרטית לתוכנית שאינה עוצרת."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "בהערכת `(define area (* size size))` — מה מוערך ומה לא?",
+   "options": [
+    "גם `area` וגם `(* size size)` מוערכים",
+    "רק `area` מוערך",
+    "רק `(* size size)` מוערך; השם `area` אינו מוערך — הוא רק נקשר לערך שהתקבל",
+    "שום דבר לא מוערך עד השימוש הראשון ב-`area`"
+   ],
+   "correct": 2,
+   "explanationHe": "בכלל ההערכה של `define`, תת-הביטוי `<var>` **אינו מוערך** (אילו היה מוערך — היינו מקבלים שגיאת 'משתנה לא קשור'). מוערך רק `<exp>`, וערכו נקשר לשם בסביבה הגלובלית. התשובה הרביעית מתארת הערכה עצלה — לא כך `define` עובד ב-Scheme."
+  }
+ ]
+}

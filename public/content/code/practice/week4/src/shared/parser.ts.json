@@ -1,0 +1,8 @@
+{
+ "id": "practice/week4/src/shared/parser.ts",
+ "repo": "practice",
+ "path": "week4/src/shared/parser.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/practice/blob/main/week4/src/shared/parser.ts",
+ "code": "/// <reference path=\"s-expression.d.ts\" />\n\nimport p, { Sexp, SexpString, Token, CompoundSexp } from \"s-expression\";\nimport { makeFailure, makeOk, Result } from \"./result\";\nimport { isString, isArray, isError } from \"./type-predicates\";\nimport { allT } from \"./list\";\n\n// s-expression returns strings quoted as \"a\" as [String: 'a'] objects\n// to distinguish them from symbols - which are encoded as 'a'\n// These are constructed using the new String(\"a\") constructor\n// and can be distinguished from regular strings based on the constructor.\nexport const isSexpString = (x: any): x is SexpString =>\n    ! isString(x) && x.constructor && x.constructor.name === \"String\";\n\nexport const isSexp = (x: any): x is Sexp => isToken(x) || isCompoundSexp(x);\nexport const isToken = (x: any): x is Token => isString(x) || isSexpString(x);\nexport const isCompoundSexp = (x: any): x is CompoundSexp => isArray(x) && allT(isSexp, x);\n\nexport const parse = (x: string): Result<Sexp> => {\n    const parsed = p(x);\n    return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n}"
+}

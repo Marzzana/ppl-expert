@@ -1,0 +1,8 @@
+{
+ "id": "interpreters/README.md",
+ "repo": "interpreters",
+ "path": "README.md",
+ "lang": "markdown",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/README.md",
+ "code": "# Principles of Programming Languages\n\nThis repository contains the source code used in the \"Principles of Programming Languages\" course taught at the Computer Science Dept of Ben Gurion University.\nCourse material is available [here](https://bguppl.github.io/interpreters/).\nExercises and practical sessions are available [here](https://github.com/bguppl/practice).\n\nThe main part of this repo is a sequence of interpreters written in TypeScript with a functional style of a Scheme-like language.\nThe languages start from a very simple subset of Scheme and increase up to a tail call optimized version using continuation passing style.\n\nThe repo also contains a small Prolog interpreter implemented in Racket.\n\n\n## Installation\n\n1. Clone the repository either using `git clone https://github.com/bguppl/interpreters.git` or download the archive from [here](https://github.com/bguppl/interpreters/archive/master.zip).\n2. Run `npm install` inside the `interpreters` folder.\n\n## Running the Tests\n\nRun `npm test` inside the `interpreters` folder.\n\n## Code Coverage\n\nRun `npm run coverage` inside the `interpreters` folder. A new folder called `coverage` will be created. \nOpen the `lcov-report/index.html` file inside it to see coverage statistics.  \nIn each file of the tests, you can see which lines have been covered by a test.\n"
+}

@@ -1,0 +1,1558 @@
+{
+ "id": "ps/ps2",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps2.md",
+ "titleEn": "TypeScript: Type Checking",
+ "titleHe": "TypeScript: בדיקת טיפוסים (Type Checking)",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps2:0",
+   "depth": 1,
+   "headingEn": "TypeScript: Type Checking",
+   "raw": "# TypeScript: Type Checking\n\n",
+   "blocks": [],
+   "headingHe": "TypeScript: בדיקת טיפוסים (Type Checking)"
+  },
+  {
+   "id": "ps/ps2:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n",
+   "blocks": [],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "ps/ps2:2",
+   "depth": 2,
+   "headingEn": "Practical Session - Week #2",
+   "raw": "## Practical Session - Week #2\n\n",
+   "blocks": [],
+   "headingHe": "תרגול — שבוע 2"
+  },
+  {
+   "id": "ps/ps2:3",
+   "depth": 3,
+   "headingEn": "Why Types",
+   "raw": "### Why Types\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:3:0",
+     "type": "prose",
+     "en": "Adding types to a program has two key advantages:\n",
+     "hash": "533049e333551a1a",
+     "he": "להוספת טיפוסים לתוכנית יש שני יתרונות מרכזיים:"
+    },
+    {
+     "id": "ps/ps2:3:1",
+     "type": "list",
+     "en": "* It allows the compiler to detect errors that would otherwise only be detected at runtime. It is much better to detect errors as early as possible in the development cycle.\n* It serves as excellent documentation by reflecting the intention of the programmer.\n\n",
+     "hash": "5be5d4dfdb0c591f",
+     "he": "* היא מאפשרת לקומפיילר לגלות שגיאות שאחרת היו מתגלות רק בזמן ריצה. עדיף בהרבה לגלות שגיאות מוקדם ככל האפשר במחזור הפיתוח.\n* היא משמשת תיעוד מצוין, בכך שהיא משקפת את כוונת המתכנת."
+    },
+    {
+     "id": "ps/ps2:3:2",
+     "type": "prose",
+     "en": "Types also help programmers structure the code they write so that it follows the structure of the data it processes.\n\n",
+     "hash": "d3efe6aae2f0ebc4",
+     "he": "טיפוסים גם עוזרים למתכנתים לבנות את הקוד שהם כותבים כך שילך בעקבות המבנה של הנתונים שהוא מעבד."
+    },
+    {
+     "id": "ps/ps2:3:3",
+     "type": "prose",
+     "en": "In this session, we review:\n",
+     "hash": "2423ea961b15ef5e",
+     "he": "בתרגול הזה נסקור:"
+    },
+    {
+     "id": "ps/ps2:3:4",
+     "type": "list",
+     "en": "* the syntax of type annotations in TypeScript\n* analyze an example of recursive type definition with the corresponding operations\n* analyze how the type of functions is derived\n\n",
+     "hash": "a3a19babfa67a80b",
+     "he": "* את התחביר של הערות טיפוס (type annotations) ב-TypeScript\n* ננתח דוגמה של הגדרת טיפוס רקורסיבית יחד עם הפעולות המתאימות לה\n* ננתח כיצד נגזר הטיפוס של פונקציות"
+    }
+   ],
+   "headingHe": "למה טיפוסים?"
+  },
+  {
+   "id": "ps/ps2:4",
+   "depth": 3,
+   "headingEn": "Types in TypeScript",
+   "raw": "### Types in TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:4:0",
+     "type": "prose",
+     "en": "TypeScript adds optional type declarations to JavaScript.\nThe principles of this addition are:\n",
+     "hash": "9033258b7ff66205",
+     "he": "TypeScript מוסיפה ל-JavaScript הצהרות טיפוס אופציונליות.\nהעקרונות של התוספת הזו הם:"
+    },
+    {
+     "id": "ps/ps2:4:1",
+     "type": "list",
+     "en": "* Type declarations are optional. If they are present, they are checked, otherwise no check is performed. This means that regular JavaScript with no type annotations at all are valid TypeScript expressions.\n* The TypeScript compiler performs two tasks:\n    * It translates a TypeScript program into a JavaScript program\n    * It checks that the program satisfies all the type declarations specified in the program.\n* Type annotations can be implicit and inferred by the TypeScript compiler.\n\n\n",
+     "hash": "8835402d6c30507c",
+     "he": "* הצהרות טיפוס הן אופציונליות. אם הן קיימות — הן נבדקות; אחרת לא מתבצעת שום בדיקה. משמעות הדבר היא שקוד JavaScript רגיל, ללא הערות טיפוס בכלל, הוא ביטוי TypeScript תקין.\n* הקומפיילר של TypeScript מבצע שתי משימות:\n    * הוא מתרגם תוכנית TypeScript לתוכנית JavaScript\n    * הוא בודק שהתוכנית מקיימת את כל הצהרות הטיפוס שצוינו בה.\n* הערות טיפוס יכולות להיות מובלעות (implicit), ואז הקומפיילר של TypeScript מסיק אותן בעצמו (הסקת טיפוסים — type inference)."
+    },
+    {
+     "id": "ps/ps2:4:2",
+     "type": "code",
+     "en": "```typescript\n// This TypeScript program\nfunction add(a: number, b: number): number {\n    return a + b;\n}\n\nadd(1, 3); // ==> 4\n\n// is translated by `tsc` into this JavaScript program:\nfunction add(a, b) {\n    return a + b;\n}\n\nadd(1, 3); // ==> 4\n```\n\n",
+     "hash": "55d3dcab35dbe0c2",
+     "lang": "typescript",
+     "noteHe": "הדוגמה ממחישה את שתי המשימות של הקומפיילר `tsc`. בחלק העליון מוגדרת פונקציה `add` עם הערות טיפוס: כל אחד מהפרמטרים `a` ו-`b` מסומן כ-`number`, וה-`number` שאחרי הסוגריים מציין את טיפוס הערך המוחזר. בחלק התחתון רואים את תוצאת התרגום ל-JavaScript: הקוד זהה לחלוטין, רק שהערות הטיפוס נמחקו. זו הנקודה החשובה — הטיפוסים קיימים רק בזמן קומפילציה (לצורך בדיקה), ואינם משאירים שום זכר בקוד שרץ בפועל; ההתנהגות בזמן ריצה זהה, ושתי הגרסאות מחזירות `4` עבור הקריאה `add(1, 3)`."
+    }
+   ],
+   "headingHe": "טיפוסים ב-TypeScript"
+  },
+  {
+   "id": "ps/ps2:5",
+   "depth": 3,
+   "headingEn": "Type Annotations",
+   "raw": "### Type Annotations\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:5:0",
+     "type": "prose",
+     "en": "Type annotations are optional in TypeScript. They can occur in the following contexts:\n\n",
+     "hash": "8d1aadf5eff6cd6e",
+     "he": "הערות טיפוס הן אופציונליות ב-TypeScript. הן יכולות להופיע בהקשרים הבאים:\n<<<HE ps/ps2:5:0"
+    },
+    {
+     "id": "ps/ps2:5:1",
+     "type": "code",
+     "en": "```typescript\n// After variable declarations\nlet varName: <typeAnnotation>; \n\n// As part of a function signature\nfunction fname(param : <typeAnnotation>, ...) : <typeAnnotation> { ... } \n\n// With fat arrow notation for functions\n(param: <typeAnnotation>, ...): <typeAnnotation> => ...\n```\n\n",
+     "hash": "23baecc8bc9a6e56",
+     "lang": "typescript",
+     "noteHe": "זו תבנית כללית (לא קוד שרץ) שמראה את שלושת המקומות שבהם אפשר לכתוב הערת טיפוס — הסימון `<typeAnnotation>` הוא מציין-מקום שבמקומו כותבים ביטוי טיפוס אמיתי. המקום הראשון: אחרי הצהרת משתנה, בצורה `let varName: type`. המקום השני: בתוך חתימת פונקציה רגילה — הערת טיפוס לכל פרמטר, והערת טיפוס נוספת אחרי הסוגריים עבור הערך המוחזר. המקום השלישי: בפונקציית חץ (fat arrow) — אותו רעיון בדיוק, טיפוס לכל פרמטר וטיפוס מוחזר לפני החץ `=>`."
+    },
+    {
+     "id": "ps/ps2:5:2",
+     "type": "prose",
+     "en": "Type annotations are written in a specific form - which we call the **type language**. \nThe type language is used to describe the expected type of variables, parameters or the values returned by functions.\n\n",
+     "hash": "a3369c531b060638",
+     "he": "הערות טיפוס נכתבות בצורה מוגדרת — שאותה אנו מכנים **שפת הטיפוסים** (type language).\nשפת הטיפוסים משמשת לתיאור הטיפוס הצפוי של משתנים, של פרמטרים או של הערכים שפונקציות מחזירות."
+    },
+    {
+     "id": "ps/ps2:5:3",
+     "type": "prose",
+     "en": "The simplest type language expression refers to an **atomic type** - for example `number`, `boolean`, `string`. \nMore complex type language expressions are needed to describe types over compound values.\n\n",
+     "hash": "08f485980c4150cb",
+     "he": "ביטוי שפת הטיפוסים הפשוט ביותר מתייחס ל**טיפוס אטומי** — למשל `number`, `boolean`, `string`.\nנדרשים ביטויים מורכבים יותר בשפת הטיפוסים כדי לתאר טיפוסים של ערכים מורכבים (compound values)."
+    }
+   ],
+   "headingHe": "הערות טיפוס (Type Annotations)"
+  },
+  {
+   "id": "ps/ps2:6",
+   "depth": 3,
+   "headingEn": "Array Type Expressions - Homogeneous Array",
+   "raw": "### Array Type Expressions - Homogeneous Array\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:6:0",
+     "type": "code",
+     "en": "```typescript\nlet numberArr : number[] = [1, 2, 3];\nlet num: number = numberArr[0];\nconsole.log(num); // ==> 1\n```\n\n",
+     "hash": "d476098d3b799b23",
+     "lang": "typescript",
+     "noteHe": "הדוגמה מציגה את ביטוי הטיפוס למערך הומוגני: `number[]` מציין \"מערך שכל איבריו מטיפוס `number`\". המשתנה `numberArr` מקבל הערת טיפוס כזו ומאותחל בליטרל מערך מתאים. בזכות ההערה הזו, הקומפיילר יודע שגישה לאינדקס במערך — `numberArr[0]` — מחזירה ערך מטיפוס `number`, ולכן ההשמה למשתנה `num` (שמסומן `number`) עוברת בדיקת טיפוסים, וההדפסה מציגה `1`."
+    },
+    {
+     "id": "ps/ps2:6:1",
+     "type": "prose",
+     "en": "One may use the notation `Array<T>` instead of `T[]`.\n\n",
+     "hash": "62fbf431aac00bd1",
+     "he": "אפשר להשתמש בכתיב `Array<T>` במקום `T[]`."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס למערכים — מערך הומוגני"
+  },
+  {
+   "id": "ps/ps2:7",
+   "depth": 3,
+   "headingEn": "Map Type Expressions",
+   "raw": "### Map Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:7:0",
+     "type": "prose",
+     "en": "To describe map types, the following notation is used:\n\n",
+     "hash": "31f46d33efd2f97b",
+     "he": "לתיאור טיפוסי מפה (map) משתמשים בכתיב הבא:"
+    },
+    {
+     "id": "ps/ps2:7:1",
+     "type": "code",
+     "en": "```typescript\n{ <key>: <typeAnnotation>; ... }\n```\n\n",
+     "hash": "32b0e9f481a5135d",
+     "lang": "typescript",
+     "noteHe": "זו התבנית הכללית של ביטוי טיפוס למפה: בין סוגריים מסולסלים מופיעה רשימה של מפתחות, וכל מפתח (`<key>`) מלווה בהערת הטיפוס של הערך שלו (`<typeAnnotation>`), כשהזוגות מופרדים בנקודה-פסיק. שימו לב שהתחביר דומה לליטרל של מפה — אבל כאן, במקום ערכים קונקרטיים, מופיעים טיפוסים."
+    },
+    {
+     "id": "ps/ps2:7:2",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "ps/ps2:7:3",
+     "type": "code",
+     "en": "```typescript\nlet s: { name: string, cs: boolean, age: number } = { name: \"avi\", cs: true, age: 22 };\ns; // => { name: 'avi', cs: true, age: 22 }\n```\n\n",
+     "hash": "fef71c89f2849ddb",
+     "lang": "typescript",
+     "noteHe": "המשתנה `s` מקבל הערת טיפוס של מפה עם שלושה מפתחות: `name` מטיפוס `string`, `cs` מטיפוס `boolean` ו-`age` מטיפוס `number`. הערך שמושם בו — `{ name: \"avi\", cs: true, age: 22 }` — מתאים בדיוק למבנה הזה (כל מפתח קיים והערך שלו מהטיפוס הנכון), ולכן הקוד עובר בדיקת טיפוסים. הערכת `s` מחזירה את המפה עצמה."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס למפות (Map)"
+  },
+  {
+   "id": "ps/ps2:8",
+   "depth": 3,
+   "headingEn": "Named Type Expressions",
+   "raw": "### Named Type Expressions\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:8:0",
+     "type": "prose",
+     "en": "Type expressions can be given names. \n\n",
+     "hash": "03fb685389caab66",
+     "he": "אפשר לתת שמות לביטויי טיפוס."
+    },
+    {
+     "id": "ps/ps2:8:1",
+     "type": "prose",
+     "en": "Type expressions can be named using the type alias construct:\n\n",
+     "hash": "e25720fe329215f2",
+     "he": "אפשר לתת שם לביטוי טיפוס באמצעות מנגנון כינוי הטיפוס (type alias):"
+    },
+    {
+     "id": "ps/ps2:8:2",
+     "type": "code",
+     "en": "```typescript\ntype <typeName> = {\n    <key>: <typeAnnotation>;\n    ...\n}\n```\n\n",
+     "hash": "b0edaa27f493fa48",
+     "lang": "typescript",
+     "noteHe": "זו התבנית הכללית של הגדרת כינוי טיפוס (type alias) לטיפוס מפה: המילה השמורה `type`, אחריה השם שאנו בוחרים לטיפוס (`<typeName>`), ואחרי סימן `=` — ביטוי טיפוס המפה עצמו. מרגע ההגדרה אפשר להשתמש בשם החדש בכל מקום שבו מותר לכתוב הערת טיפוס."
+    },
+    {
+     "id": "ps/ps2:8:3",
+     "type": "prose",
+     "en": "Or in general, to give a name to any type annotation:\n\n",
+     "hash": "8389dc1e0159f7bb",
+     "he": "או, באופן כללי, כדי לתת שם לכל הערת טיפוס שהיא:"
+    },
+    {
+     "id": "ps/ps2:8:4",
+     "type": "code",
+     "en": "```typescript\ntype <typeName> = <typeAnnotation>;\n```\n\n",
+     "hash": "e936bd301eb38535",
+     "lang": "typescript",
+     "noteHe": "הצורה הכללית של `type`: לא רק טיפוסי מפה — כל ביטוי טיפוס שהוא (מערך, טיפוס פונקציה, איחוד וכדומה) יכול לקבל שם באמצעות אותו מנגנון."
+    },
+    {
+     "id": "ps/ps2:8:5",
+     "type": "code",
+     "en": "```typescript\ntype Student = {\n    name: string;\n    cs: boolean;\n    age: number;\n}\n\nlet s: Student = { name: \"avi\", cs: true, age: 22 };\ns; // => { name: 'avi', cs: true, age: 22 }\n```\n\n",
+     "hash": "98d194a22ca3d22f",
+     "lang": "typescript",
+     "noteHe": "כאן מגדירים את טיפוס המפה מהדוגמה הקודמת כטיפוס בעל שם — `Student`. עכשיו, במקום לכתוב את כל ביטוי המפה בהערת הטיפוס של `s`, כותבים פשוט `let s: Student`. ההתנהגות זהה לחלוטין לדוגמה הקודמת; היתרונות הם קריאוּת (השם מתעד את הכוונה) ושימוש חוזר — אפשר להשתמש ב-`Student` בהערות טיפוס רבות מבלי לשכפל את ההגדרה. כפי שנראה מיד, מתן שם לטיפוס הוא גם מה שמאפשר הגדרות רקורסיביות."
+    }
+   ],
+   "headingHe": "ביטויי טיפוס בעלי שם"
+  },
+  {
+   "id": "ps/ps2:9",
+   "depth": 3,
+   "headingEn": "Recursive Types",
+   "raw": "### Recursive Types\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:9:0",
+     "type": "prose",
+     "en": "Naming types allows the definition of recursive types. Consider the case of defining a Linked List of numbers:\n\n\n",
+     "hash": "e4ec815809841d26",
+     "he": "מתן שמות לטיפוסים מאפשר הגדרה של טיפוסים רקורסיביים. נתבונן במקרה של הגדרת רשימה מקושרת (Linked List) של מספרים:"
+    },
+    {
+     "id": "ps/ps2:9:1",
+     "type": "code",
+     "en": "```typescript\ntype NumberLink = {\n    num: number;\n    next?: NumberLink;\n}\n\nlet lst1: NumberLink = {\n    num: 1,\n    next: {\n        num: 2,\n        // The last element does NOT have a next field.\n        next: { num: 3 },\n    }\n};\n\nlst1; // => { num: 1, next: { num: 2, next: { num: 3 } } }\n```\n\n",
+     "hash": "dacb9798f2d6c1d6",
+     "lang": "typescript",
+     "noteHe": "הטיפוס `NumberLink` מייצג חוליה ברשימה מקושרת של מספרים, והוא רקורסיבי: השדה `next` הוא בעצמו מטיפוס `NumberLink`. שני פרטים חשובים בהגדרה: המפתח `num` הוא חובה ומטיפוס `number`, ואילו המפתח `next` מסומן בסימן שאלה — `next?` — כלומר הוא אופציונלי. האופציונליות הזו היא מה שמאפשר לרקורסיה להיעצר: החוליה האחרונה ברשימה (`{ num: 3 }`) פשוט לא כוללת שדה `next` בכלל, כפי שמציינת ההערה בקוד. הערך `lst1` הוא רשימה בת שלוש חוליות — 1, 2, 3 — הבנויה כמפות מקוננות זו בתוך זו."
+    }
+   ],
+   "headingHe": "טיפוסים רקורסיביים"
+  },
+  {
+   "id": "ps/ps2:10",
+   "depth": 3,
+   "headingEn": "Operations over Recursive Types",
+   "raw": "### Operations over Recursive Types\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:10:0",
+     "type": "prose",
+     "en": "This type definition is *recursive* - we observe that the definition of the `NumberLink` uses the `NumberLink` type as a component of its own definition.  This type annotation defines a set of values.  Think of this set of values as the set of values which are `map` with a mandatory key `num` with a `number` value and a `next` key which can either not occur, or when it occurs must be of type `NumberLink`.  \n\n",
+     "hash": "df0cbbca913de34e",
+     "he": "הגדרת הטיפוס הזו היא *רקורסיבית* — שימו לב שההגדרה של `NumberLink` משתמשת בטיפוס `NumberLink` עצמו כרכיב בהגדרתו. הערת הטיפוס הזו מגדירה קבוצת ערכים. חשבו על קבוצת הערכים הזו כעל קבוצת הערכים שהם `map` עם מפתח חובה `num` שערכו מטיפוס `number`, ומפתח `next` שיכול לא להופיע כלל, או — אם הוא מופיע — חייב להיות מטיפוס `NumberLink`."
+    },
+    {
+     "id": "ps/ps2:10:1",
+     "type": "prose",
+     "en": "This recursive type, thus, defines a set of *embedded* values - down to a terminal case, where the `next` key is not defined, and the embedding stops.\n\n",
+     "hash": "dbade470b810af1c",
+     "he": "הטיפוס הרקורסיבי הזה מגדיר, אם כן, קבוצה של ערכים *מקוננים* — עד למקרה סופי (terminal case), שבו המפתח `next` אינו מוגדר, והקינון נעצר."
+    },
+    {
+     "id": "ps/ps2:10:2",
+     "type": "prose",
+     "en": "Given this type recursive definition, we can define procedures to traverse the linked list from start until a condition is met or until we reach the end of the list.  The following function illustrates the method:\n\n\n",
+     "hash": "055ba8dcda8bfe6d",
+     "he": "בהינתן הגדרת הטיפוס הרקורסיבית הזו, נוכל להגדיר פרוצדורות שסורקות את הרשימה המקושרת מתחילתה — עד שתנאי מסוים מתקיים או עד שמגיעים לסוף הרשימה. הפונקציה הבאה ממחישה את השיטה:"
+    },
+    {
+     "id": "ps/ps2:10:3",
+     "type": "code",
+     "en": "```typescript\nconst printNumberLinkedList: (list: NumberLink) => void = list => {\n    // We know list.num is a number\n    console.log(list.num);\n\n    // list.next can either be undefined or a NumberLink\n    if (list.next === undefined) {\n        console.log(\"end of list\");\n    } else {\n        // It is safe to pass a NumberLink value\n        // to the recursive call\n        printNumberLinkedList(list.next);\n    }\n};\n\nprintNumberLinkedList({ num: 1, next: { num: 2, next: { num: 3 } } });\n// ==>\n// 1\n// 2\n// 3\n// end of list\n```\n\n",
+     "hash": "3a142f774e6e21ea",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `printNumberLinkedList` מדפיסה את כל חוליות הרשימה. הערת הטיפוס שלה היא `(list: NumberLink) => void` — היא מקבלת רשימה ואינה מחזירה ערך (רק תופעת לוואי של הדפסה), ולכן טיפוס הערך המוחזר הוא `void`. גוף הפונקציה עוקב במדויק אחרי מבנה הטיפוס: ראשית, מכיוון ש-`num` הוא מפתח חובה, בטוח להדפיס את `list.num`. לאחר מכן בודקים את `next`: אם `list.next === undefined` הגענו לחוליה האחרונה (מקרה הבסיס) ומדפיסים \"end of list\"; אחרת, הטיפוס מבטיח ש-`list.next` הוא `NumberLink` תקין, ולכן בטוח להעביר אותו לקריאה הרקורסיבית. ההרצה על הרשימה 1→2→3 מדפיסה את שלושת המספרים ואז את הודעת הסיום."
+    },
+    {
+     "id": "ps/ps2:10:4",
+     "type": "prose",
+     "en": "The structure of the function follows the type definition - when the function receives a value of type `NumberLink`, it knows \nit is a map value, that must contain a `num` key which must be of type `number`.  It is thus safe to invoke `list.num` and to expect a `number` value.  \n\n",
+     "hash": "f339d22582f706fe",
+     "he": "מבנה הפונקציה עוקב אחר הגדרת הטיפוס — כאשר הפונקציה מקבלת ערך מטיפוס `NumberLink`, היא יודעת שזהו ערך map שחייב להכיל מפתח `num` מטיפוס `number`. לכן בטוח לגשת ל-`list.num` ולצפות לקבל ערך מטיפוס `number`."
+    },
+    {
+     "id": "ps/ps2:10:5",
+     "type": "prose",
+     "en": "Then when we need to access the `next` key - the type definition indicates we may find 2 different configurations:\n",
+     "hash": "9c1728685e81e042",
+     "he": "לאחר מכן, כשאנו צריכים לגשת למפתח `next` — הגדרת הטיפוס מציינת שאנו עשויים למצוא שתי תצורות שונות:"
+    },
+    {
+     "id": "ps/ps2:10:6",
+     "type": "list",
+     "en": "* Either `next` is not present - in which case, `list.next` will return the `undefined` value.\n* Or `next` is present and it must be a value of type NumberLink.\n\n",
+     "hash": "0aaea55b495a01dc",
+     "he": "* או ש-`next` אינו קיים — ובמקרה זה `list.next` יחזיר את הערך `undefined`.\n* או ש-`next` קיים, ואז הוא חייב להיות ערך מטיפוס NumberLink."
+    },
+    {
+     "id": "ps/ps2:10:7",
+     "type": "prose",
+     "en": "The code enumerates these options according to the type definition, and specifies what operations are possible according to the structure of the data that we process.\n\n",
+     "hash": "78d557030aea9f26",
+     "he": "הקוד מונה את האפשרויות האלה בהתאם להגדרת הטיפוס, ומפרט אילו פעולות אפשריות בהתאם למבנה הנתונים שאנו מעבדים."
+    }
+   ],
+   "headingHe": "פעולות על טיפוסים רקורסיביים"
+  },
+  {
+   "id": "ps/ps2:11",
+   "depth": 3,
+   "headingEn": "Generic Types",
+   "raw": "### Generic Types\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:11:0",
+     "type": "prose",
+     "en": "Consider the case of defining an **homogeneous generic** Linked List.  This is an abstraction over the previous type definition - we make the type of the values in the linked list a type variable.  This is indicated by the `<T>` component in the type annotation.  \n\n\n",
+     "hash": "5725fc1760999d85",
+     "he": "נתבונן במקרה של הגדרת רשימה מקושרת **גנרית הומוגנית**. זוהי הפשטה של הגדרת הטיפוס הקודמת — אנו הופכים את הטיפוס של הערכים ברשימה המקושרת למשתנה טיפוס (type variable). הדבר מסומן באמצעות הרכיב `<T>` בהערת הטיפוס."
+    },
+    {
+     "id": "ps/ps2:11:1",
+     "type": "code",
+     "en": "```typescript\ntype Link<T> = {\n    x: T;\n    next?: Link<T>;\n}\n\n\nlet lst2: Link<string> = {\n    x: \"avi\",\n    next: { x: \"bob\", next: { x: \"charles\" } }\n};\n\nlst2; // ==> { x: 'avi', next: { x: 'bob', next: { x: 'charles' } } }\n```\n\n",
+     "hash": "7f6ef7712b8819d7",
+     "lang": "typescript",
+     "noteHe": "`Link<T>` הוא הגרסה הגנרית של `NumberLink`: במקום לקבע את טיפוס הערך בחוליה ל-`number`, השדה `x` מקבל את משתנה הטיפוס `T`, שמוכרז בסוגריים המשולשים `<T>` שאחרי שם הטיפוס. השדה `next?` נשאר אופציונלי ומטיפוס `Link<T>` — כלומר כל החוליות באותה רשימה חולקות את אותו `T` (הרשימה הומוגנית). בהמשך, `lst2` מדגים אינסטנציאציה קונקרטית: `Link<string>` — רשימה מקושרת של מחרוזות בת שלוש חוליות (\"avi\", \"bob\", \"charles\"), כשהחוליה האחרונה משמיטה את `next`."
+    },
+    {
+     "id": "ps/ps2:11:2",
+     "type": "prose",
+     "en": "The type variable, T, can be replaced with a compound type as well:\n\n",
+     "hash": "6bd441f499cc13dd",
+     "he": "את משתנה הטיפוס T אפשר להחליף גם בטיפוס מורכב:"
+    },
+    {
+     "id": "ps/ps2:11:3",
+     "type": "code",
+     "en": "```typescript\nlet lst3: Link<{ name: string }> = {\n    x: { name: \"xx\" },\n    next: { x: { name: \"yy\" }, next: { x: { name: \"last\" } } }\n};\n\nlst3; // ==> { x: { name: 'xx' }, next: { x: { name: 'yy' }, next: { x: [Object] } } }\n```\n\n",
+     "hash": "8c9e9b09e617827e",
+     "lang": "typescript",
+     "noteHe": "כאן משתנה הטיפוס `T` מוחלף בטיפוס מורכב — טיפוס המפה `{ name: string }`. כלומר, כל שדה `x` בחוליות הרשימה הוא בעצמו מפה עם מפתח `name` מטיפוס מחרוזת. הפלט מסתיים ב-`[Object]` רק בגלל אופן ההדפסה של Node (שמקצר עצמים מקוננים עמוק) — הערך עצמו שלם ותקין."
+    },
+    {
+     "id": "ps/ps2:11:4",
+     "type": "prose",
+     "en": "Consider the case of defining an **heterogeneous** Linked List, we can use the special type called `any` - which denotes the set of all possible values that can be computed by the language:\n\n\n",
+     "hash": "3d4d48dce60a9ab7",
+     "he": "נתבונן במקרה של הגדרת רשימה מקושרת **הטרוגנית**: נוכל להשתמש בטיפוס המיוחד `any` — המציין את קבוצת כל הערכים האפשריים שהשפה יכולה לחשב:"
+    },
+    {
+     "id": "ps/ps2:11:5",
+     "type": "code",
+     "en": "```typescript\nlet lst4: Link<any> = {\n    x: \"hi\",\n    next: { x: 1, next: { x: \"bye\" } }\n};\n\nlst4; // ==> { x: 'hi', next: { x: 1, next: { x: 'bye' } } }\n```\n\n",
+     "hash": "bb4b806941921f08",
+     "lang": "typescript",
+     "noteHe": "באינסטנציאציה `Link<any>`, השדה `x` יכול להכיל ערך מכל טיפוס שהוא — ולכן הרשימה יכולה לערבב מחרוזות (\"hi\", \"bye\") ומספרים (1) באותה רשימה. זה המחיר של `any`: מקבלים גמישות, אבל מוותרים על הבטחת ההומוגניות ועל בדיקות הטיפוסים על איברי הרשימה."
+    },
+    {
+     "id": "ps/ps2:11:6",
+     "type": "prose",
+     "en": "How can we write a function that operates over a generic data structure such as `Link<T>`?\nDoes the function need to know the type `T` to be useful at all?\n\n",
+     "hash": "ccfd5186a3350306",
+     "he": "כיצד נוכל לכתוב פונקציה שפועלת על מבנה נתונים גנרי כמו `Link<T>`?\nהאם הפונקציה חייבת להכיר את הטיפוס `T` כדי להיות שימושית בכלל?"
+    },
+    {
+     "id": "ps/ps2:11:7",
+     "type": "prose",
+     "en": "There are three ways when it can be relevant to write an operation over a generic type:\n",
+     "hash": "5e5c2b79aa40752d",
+     "he": "ישנן שלוש דרכים שבהן רלוונטי לכתוב פעולה על טיפוס גנרי:"
+    },
+    {
+     "id": "ps/ps2:11:8",
+     "type": "list",
+     "en": "* Either the operation does not depend on knowledge of the type which is contained;\n* Or the operation itself is a generic function which can be applied to a variety of types.\n* Or we write an operation that is only applicable for a specific instance of the generic type.\n\n",
+     "hash": "5427b6bb77a63ef6",
+     "he": "* או שהפעולה אינה תלויה כלל בידיעת הטיפוס של הערכים המאוחסנים במבנה;\n* או שהפעולה עצמה היא פונקציה גנרית שאפשר להפעיל על מגוון טיפוסים;\n* או שאנו כותבים פעולה שמתאימה רק לאינסטנציה (instance) מסוימת של הטיפוס הגנרי."
+    },
+    {
+     "id": "ps/ps2:11:9",
+     "type": "prose",
+     "en": "Let us see an example of each case: a function which counts how many elements are in a Linked List does not depend on the type of the elements in the list.  We can write it as follows:\n\n\n",
+     "hash": "81772b1b5bec2de6",
+     "he": "נראה דוגמה לכל אחד מהמקרים: פונקציה שסופרת כמה איברים יש ברשימה מקושרת אינה תלויה בטיפוס האיברים שברשימה. נוכל לכתוב אותה כך:"
+    },
+    {
+     "id": "ps/ps2:11:10",
+     "type": "code",
+     "en": "```typescript\nconst countLink: <T>(list: Link<T>) => number = (list) => {\n    return list.next === undefined ? 1 : 1 + countLink(list.next);\n};\n\ncountLink({ x: \"hi\", next: { x: \"hello\", next: { x: \"bye\" } } }); // => 3\n```\n\n",
+     "hash": "5d5b0889bf7ab438",
+     "lang": "typescript",
+     "noteHe": "`countLink` סופרת את חוליות הרשימה מבלי לגעת כלל בערכים שבשדה `x` — ולכן היא אינה תלויה ב-`T` (המקרה הראשון מבין השלושה). הערת הטיפוס `<T>(list: Link<T>) => number` מכריזה על משתנה הטיפוס `T` בתחילת ביטוי הטיפוס, ובכך מסמנת שהפונקציה עצמה גנרית. הלוגיקה משתמשת בביטוי טרנרי: אם `list.next === undefined` זו החוליה האחרונה ומחזירים 1; אחרת מחזירים 1 ועוד ספירת שארית הרשימה בקריאה רקורסיבית. ההפעלה על רשימת שלוש המחרוזות מחזירה `3`."
+    },
+    {
+     "id": "ps/ps2:11:11",
+     "type": "prose",
+     "en": "Note how the type of the function must also be marked as a generic function - since it can be applied to parameters for any type `T`.  This is noted with the notation:\n\n",
+     "hash": "c8a24bc6b24dc943",
+     "he": "שימו לב כיצד גם הטיפוס של הפונקציה חייב להיות מסומן כטיפוס של פונקציה גנרית — שכן אפשר להפעיל אותה על פרמטרים עבור כל טיפוס `T`. הדבר מסומן בכתיב:"
+    },
+    {
+     "id": "ps/ps2:11:12",
+     "type": "code",
+     "en": "```typescript\n<T>(list: Link<T>) => number;\n```\n\n",
+     "hash": "8a008a47de62bfa9",
+     "lang": "typescript",
+     "noteHe": "זהו ביטוי טיפוס של פונקציה גנרית: הקידומת `<T>` מכריזה על משתנה הטיפוס וקושרת אותו לכל שאר הביטוי — הפונקציה מקבלת `Link<T>` עבור `T` כלשהו ומחזירה תמיד `number`, ללא תלות ב-`T`."
+    },
+    {
+     "id": "ps/ps2:11:13",
+     "type": "prose",
+     "en": "For the second case, consider the case of the primitive function `console.log()` - it can receive parameters of any type.\nIn this case, we can write a function that operates over the elements in the list even if they are of different types:\n\n\n",
+     "hash": "9eda829436c5ac2d",
+     "he": "עבור המקרה השני, נתבונן בפונקציה הפרימיטיבית `console.log()` — היא יכולה לקבל פרמטרים מכל טיפוס.\nבמקרה כזה נוכל לכתוב פונקציה שפועלת על איברי הרשימה גם אם הם מטיפוסים שונים:"
+    },
+    {
+     "id": "ps/ps2:11:14",
+     "type": "code",
+     "en": "```typescript\nconst printLink: <T>(list: Link<T>) => void = (list) => {\n    console.log(list.x);\n    list.next === undefined ? console.log(\"end of list\") : printLink(list.next);\n};\n\nprintLink({ x: \"hi\", next: { x: \"hello\", next: { x: \"bye\" } } });\n// ==>\n// hi\n// hello\n// bye\n// end of list\n\nprintLink({ x: 1, next: { x: 2, next: { x: 3 } } });\n// ==>\n// 1\n// 2\n// 3\n// end of list\n```\n\n",
+     "hash": "99d4faf455fba20e",
+     "lang": "typescript",
+     "noteHe": "`printLink` כן ניגשת לערכים `list.x` — אבל הפעולה שהיא מבצעת עליהם, `console.log`, היא בעצמה גנרית ומקבלת כל טיפוס. לכן הפונקציה עדיין גנרית לחלוטין: `<T>(list: Link<T>) => void` (מחזירה `void` כי כל פעולתה היא תופעת לוואי של הדפסה). מבנה הרקורסיה זהה ל-`countLink`: מדפיסים את הערך הנוכחי, ואם `next` הוא `undefined` מדפיסים \"end of list\", אחרת ממשיכים רקורסיבית. שתי ההפעלות מדגימות שהיא עובדת גם על `Link<string>` וגם על `Link<number>` — אותה פונקציה בדיוק לשני טיפוסים שונים."
+    },
+    {
+     "id": "ps/ps2:11:15",
+     "type": "prose",
+     "en": "Note that in the two invocations of the generic functions above, the compiler guesses the type of the parameter (`Link<string>` and `Link<number>`) from inspection of the literal.\n\n",
+     "hash": "24fd8ec2f05886ed",
+     "he": "שימו לב שבשתי ההפעלות של הפונקציות הגנריות לעיל, הקומפיילר מנחש את טיפוס הפרמטר (`Link<string>` ו-`Link<number>`) מתוך בחינת הליטרל."
+    },
+    {
+     "id": "ps/ps2:11:16",
+     "type": "prose",
+     "en": "The following invocation on a heterogeneous list, though, will not pass compilation:\n\n",
+     "hash": "19cbda49f12e3f14",
+     "he": "לעומת זאת, ההפעלה הבאה, על רשימה הטרוגנית, לא תעבור קומפילציה:"
+    },
+    {
+     "id": "ps/ps2:11:17",
+     "type": "code",
+     "en": "```typescript\nprintLink({ x: 1, next: { x: \"a\", next: { x: 3 } } });\n```\n\n",
+     "hash": "7fd05050eacce134",
+     "lang": "typescript",
+     "noteHe": "כאן הליטרל מערבב `number` (1, 3) ו-`string` (\"a\") באותה רשימה. הקומפיילר מנסה להסיק `T` יחיד מתוך הליטרל — והוא לא מצליח: הרשימה אינה `Link<number>` ואינה `Link<string>`, ולכן הקריאה נכשלת בקומפילציה."
+    },
+    {
+     "id": "ps/ps2:11:18",
+     "type": "prose",
+     "en": "This is because the compiler will not infer on its own that the programmer intends to use an `any` type or a type union.\nTo make this work, the programmer must explicitly indicate that this is what is intended as follows:\n\n\n",
+     "hash": "abeaaff7e9efcb26",
+     "he": "הסיבה היא שהקומפיילר לא יסיק בעצמו שהמתכנת מתכוון להשתמש בטיפוס `any` או באיחוד טיפוסים (type union).\nכדי שזה יעבוד, על המתכנת לציין במפורש שזו כוונתו, באופן הבא:"
+    },
+    {
+     "id": "ps/ps2:11:19",
+     "type": "code",
+     "en": "```typescript\nlet l: Link<any> = { x: 1, next: { x: \"a\", next: { x: 3 } } };\nprintLink(l);\n// ==>\n// 1\n// a\n// 3\n// end of list\n```\n\n",
+     "hash": "b5b001ec9cee99eb",
+     "lang": "typescript",
+     "noteHe": "הפתרון: לתת לליטרל ההטרוגני הערת טיפוס מפורשת — `Link<any>` — על המשתנה `l`. עכשיו הקומפיילר אינו צריך לנחש: המתכנת הצהיר במפורש שהרשימה מכילה ערכים מכל טיפוס, וההפעלה `printLink(l)` עוברת קומפילציה (עם `T = any`) ומדפיסה את כל האיברים כרגיל."
+    },
+    {
+     "id": "ps/ps2:11:20",
+     "type": "prose",
+     "en": "The third option to operate over a generic data type, is to create a function which operates specifically over a type instance of the type variable `T`.  For example, the following function operates only on `List<number>`:\n\n",
+     "hash": "ab039fae10f6ee4e",
+     "he": "האפשרות השלישית לפעול על טיפוס נתונים גנרי היא ליצור פונקציה שפועלת ספציפית על אינסטנציה מסוימת של משתנה הטיפוס `T`. למשל, הפונקציה הבאה פועלת רק על `List<number>`:"
+    },
+    {
+     "id": "ps/ps2:11:21",
+     "type": "code",
+     "en": "```typescript\nconst squareSumList: (list: Link<number>, acc: number) => number = (list, acc) => {\n    if (list.next === undefined) return acc + list.x * list.x;\n    else return squareSumList(list.next, acc + list.x * list.x);\n};\n\nsquareSumList({ x: 1, next: { x: 2, next: { x: 3 } } }, 0); // = 1*1 + 2*2 + 3*3\n// ==> 14\n```\n\n",
+     "hash": "0d308e3af293c965",
+     "lang": "typescript",
+     "noteHe": "`squareSumList` מחשבת את סכום ריבועי האיברים ברשימה — פעולה שמשתמשת בכפל, ולכן הגיונית רק על מספרים. בהתאם, הערת הטיפוס שלה אינה גנרית: הפרמטר הוא `Link<number>` — אינסטנציה ספציפית של הטיפוס הגנרי (המקרה השלישי). הפרמטר הנוסף `acc` הוא צובר (accumulator): בכל צעד מוסיפים אליו את `list.x * list.x`, ובמקרה הבסיס (כש-`next` הוא `undefined`) מחזירים את הצובר בתוספת ריבוע האיבר האחרון. שימו לב שזה הופך את הרקורסיה לרקורסיית זנב. ההפעלה על הרשימה 1→2→3 עם צובר התחלתי 0 מחזירה 1+4+9 = `14`."
+    }
+   ],
+   "headingHe": "טיפוסים גנריים"
+  },
+  {
+   "id": "ps/ps2:12",
+   "depth": 2,
+   "headingEn": "Recursive Types: Tree Variations",
+   "raw": "## Recursive Types: Tree Variations\n\n",
+   "blocks": [],
+   "headingHe": "טיפוסים רקורסיביים: וריאציות של עצים"
+  },
+  {
+   "id": "ps/ps2:13",
+   "depth": 3,
+   "headingEn": "Trees with Arbritrary Number of Children",
+   "raw": "### Trees with Arbritrary Number of Children\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:13:0",
+     "type": "prose",
+     "en": "We saw in class the definition of a `BinTree<T>` type specification. It demonstrated:\n\n",
+     "hash": "11f36d48c9041a28",
+     "he": "ראינו בהרצאה את ההגדרה של מפרט הטיפוס `BinTree<T>`. היא הדגימה:"
+    },
+    {
+     "id": "ps/ps2:13:1",
+     "type": "list",
+     "en": "* the need for naming types (with the `type` alias construct) to allow recursive type specification\n* the need to define optional properties in maps (with the `key?` notation) to allow the *end of the recursion* in the values.\n\n",
+     "hash": "0a6f398ef383ca93",
+     "he": "* את הצורך לתת שמות לטיפוסים (באמצעות מנגנון הכינוי `type`) כדי לאפשר הגדרת טיפוס רקורסיבית\n* את הצורך להגדיר תכונות אופציונליות במפות (באמצעות הכתיב `key?`) כדי לאפשר את *סוף הרקורסיה* בערכים."
+    },
+    {
+     "id": "ps/ps2:13:2",
+     "type": "prose",
+     "en": "**Exercise:**\nDefine a Tree with an arbitrary number of children below each node.\n\n\n",
+     "hash": "70786aadf9d7c8fa",
+     "he": "**תרגיל:**\nהגדירו עץ עם מספר שרירותי של ילדים מתחת לכל צומת."
+    },
+    {
+     "id": "ps/ps2:13:3",
+     "type": "code",
+     "en": "```typescript\ntype Tree<T> = {\n    root: T;\n    children: Tree<T>[];\n}\n\n// A tree of number nodes with just a root\nlet numbersTree: Tree<number> = {\n    root: 1,\n    children: []\n};\n\n// A tree of string nodes with just a root\nlet stringsTree: Tree<string> = {\n    root: \"tirgul 2\",\n    children: []\n};\n\n// A tree of numbers with one root and 2 children.\nlet t: Tree<number> = {\n    root: 1,\n    children: [\n        { root: 2, children: [] },\n        { root: 3, children: [] }\n    ]\n};\n\n// A heterogeneous tree with string and number nodes\nlet anyTree: Tree<any> = {\n    root: \"numbers and strings\",\n    children: [numbersTree, stringsTree]\n};\n\nanyTree;\n// ==>\n//    { root: 'numbers and strings',\n//      children: \n//       [ { root: 1, children: [] },\n//         { root: 'tirgul 2', children: [] } ] }\n```\n\n",
+     "hash": "073e1e80ec3239bd",
+     "lang": "typescript",
+     "noteHe": "זה פתרון התרגיל: הטיפוס `Tree<T>` מגדיר צומת עץ באמצעות שני שדות — `root` הוא הערך המאוחסן בצומת (מטיפוס `T`), ו-`children` הוא **מערך** של תת-עצים, `Tree<T>[]`. השימוש במערך הוא מה שמאפשר מספר שרירותי של ילדים: אפס ילדים, ילד אחד, או כמה שרוצים. שימו לב ש-`children` אינו אופציונלי — עלה (leaf) מיוצג באמצעות מערך ריק `[]`, כפי שמדגימים `numbersTree` ו-`stringsTree` (עצים בני צומת יחיד). הערך `t` הוא עץ מספרים עם שורש ושני עלים; `anyTree` (מטיפוס `Tree<any>`) מדגים עץ הטרוגני, שבו הילדים הם עצים שלמים שהוגדרו קודם — אחד של מספרים ואחד של מחרוזות."
+    },
+    {
+     "id": "ps/ps2:13:4",
+     "type": "prose",
+     "en": "**QUESTIONS**: \nIn this case, we did not mark the field `children` as optional in the type definition.\nIt is `children: []` and not `children?: []` as it was in the case of `BinTree` or `Link` above.\n\n",
+     "hash": "02c3c0d2f8c8021f",
+     "he": "**שאלות**:\nבמקרה הזה לא סימנּו את השדה `children` כאופציונלי בהגדרת הטיפוס.\nכתוב `children: []` ולא `children?: []`, כפי שהיה במקרה של `BinTree` או `Link` לעיל."
+    },
+    {
+     "id": "ps/ps2:13:5",
+     "type": "prose",
+     "en": "What is the difference?\n\n",
+     "hash": "1f706727b9be2f03",
+     "he": "מה ההבדל?"
+    },
+    {
+     "id": "ps/ps2:13:6",
+     "type": "prose",
+     "en": "What are the arguments for and against defining `children` as optional?\n\n",
+     "hash": "5788db7ce906db90",
+     "he": "מהם הנימוקים בעד ונגד הגדרת `children` כאופציונלי?"
+    },
+    {
+     "id": "ps/ps2:13:7",
+     "type": "prose",
+     "en": "**ANSWERS**\n\n",
+     "hash": "4e93845034e227b6",
+     "he": "**תשובות**"
+    },
+    {
+     "id": "ps/ps2:13:8",
+     "type": "prose",
+     "en": "The question is related to the definition of the **base case** vs. **inductive case** in the recursive definition of the type.\n",
+     "hash": "1ffbbcc17952d7cc",
+     "he": "השאלה קשורה להגדרת **מקרה הבסיס** (base case) לעומת **המקרה האינדוקטיבי** (inductive case) בהגדרה הרקורסיבית של הטיפוס."
+    },
+    {
+     "id": "ps/ps2:13:9",
+     "type": "list",
+     "en": "* In the case of `BinTree` and `Link` above, we marked the base case with a key being `undefined`.\n* In the case of `Tree` with many children, we mark the base case with a key of type `Tree[]` being equal to `[]`.\n\n",
+     "hash": "a652a4a708296acd",
+     "he": "* במקרה של `BinTree` ו-`Link` לעיל, סימנּו את מקרה הבסיס בכך שמפתח מסוים הוא `undefined`.\n* במקרה של `Tree` עם ילדים רבים, אנו מסמנים את מקרה הבסיס בכך שמפתח מטיפוס `Tree[]` שווה ל-`[]`."
+    },
+    {
+     "id": "ps/ps2:13:10",
+     "type": "prose",
+     "en": "The decision of what is the base case is completely in the hands of the programmer - so both options are legitimate.\n\n",
+     "hash": "27915bf01758ddfa",
+     "he": "ההחלטה מהו מקרה הבסיס נתונה לחלוטין בידי המתכנת — ולכן שתי האפשרויות לגיטימיות."
+    },
+    {
+     "id": "ps/ps2:13:11",
+     "type": "prose",
+     "en": "But we must aim for a situation where the base case is **distinct** from the inductive case - so that they can be easily \ndistinguished when we write code that must decide whether we reached the end of the recursion.  We must make sure as much\nas possible that the type definition we provide allows us to encode:\n",
+     "hash": "41be22fa4c27ccae",
+     "he": "אבל עלינו לשאוף למצב שבו מקרה הבסיס **נבדל** מהמקרה האינדוקטיבי — כך שיהיה קל להבחין ביניהם כאשר אנו כותבים קוד שצריך להחליט אם הגענו לסוף הרקורסיה. עלינו לוודא, ככל האפשר, שהגדרת הטיפוס שאנו מספקים מאפשרת לקודד:"
+    },
+    {
+     "id": "ps/ps2:13:12",
+     "type": "list",
+     "en": "* *All the possible values* in the type\n* *Only the possible values* in the type.\n\n",
+     "hash": "ccc1dddff5dba2e6",
+     "he": "* את *כל הערכים האפשריים* של הטיפוס\n* *רק את הערכים האפשריים* של הטיפוס."
+    },
+    {
+     "id": "ps/ps2:13:13",
+     "type": "prose",
+     "en": "If we defined `Tree` as:\n\n",
+     "hash": "6fd516140c9e057a",
+     "he": "אילו הגדרנו את `Tree` כך:"
+    },
+    {
+     "id": "ps/ps2:13:14",
+     "type": "code",
+     "en": "```typescript\ntype Tree<T> = {\n    root: T;\n    children?: Tree<T>[];\n}\n```\n",
+     "hash": "b3ea421637ac76b7",
+     "lang": "typescript",
+     "noteHe": "זו הגרסה האלטרנטיבית שנבחנת בתשובה: אותו טיפוס עץ, אבל עם `children?` — כלומר שדה הילדים אופציונלי ויכול גם לא להופיע כלל. כפי שיוסבר מיד, השילוב של \"אופציונלי\" ושל \"יכול להיות מערך ריק\" יוצר בעיה."
+    },
+    {
+     "id": "ps/ps2:13:15",
+     "type": "prose",
+     "en": "we could still define all the possible values as requested.\nBut the following two values would also be valid values of the type:\n\n",
+     "hash": "2d536071d4b89ac0",
+     "he": "עדיין היינו יכולים להגדיר את כל הערכים האפשריים, כנדרש.\nאבל גם שני הערכים הבאים היו ערכים תקינים של הטיפוס:"
+    },
+    {
+     "id": "ps/ps2:13:16",
+     "type": "code",
+     "en": "```typescript\n{ root:1, children: [] }\n// and\n{ root: 1 }\n```\n\n",
+     "hash": "ed32acdb5b4ebb63",
+     "lang": "typescript",
+     "noteHe": "תחת ההגדרה עם `children?`, שני הערכים האלה תקינים — והם שניהם מייצגים את אותו דבר בדיוק: עלה שערכו 1. האחד עם מערך ילדים ריק, והשני בלי שדה `children` בכלל. כלומר, יש שני ייצוגים שונים לאותה ישות — ייצוג רב-משמעי."
+    },
+    {
+     "id": "ps/ps2:13:17",
+     "type": "prose",
+     "en": "This means we would have two options to represent a leaf in a tree - which would mean it is an ambiguous representation. This would force us to test for the fact that a node is a leaf as follows:\n\n",
+     "hash": "88eaa746b2a36512",
+     "he": "משמעות הדבר היא שהיו לנו שתי אפשרויות לייצג עלה (leaf) בעץ — כלומר, זהו ייצוג רב-משמעי. הדבר היה מאלץ אותנו לבדוק אם צומת הוא עלה באופן הבא:"
+    },
+    {
+     "id": "ps/ps2:13:18",
+     "type": "code",
+     "en": "```typescript\nif (root.children.length === 0) || (root.children === undefined) {\n   // ...\n}\n```\n",
+     "hash": "eb3a6cb420637bbb",
+     "lang": "typescript",
+     "noteHe": "זו הבדיקה הכפולה שהייצוג הרב-משמעי כופה עלינו: צומת הוא עלה גם אם `children` הוא מערך ריק וגם אם הוא `undefined` — ולכן צריך לבדוק את שני התנאים. הקטע סכמטי (כפסאודו-קוד), ושימו לב לנקודה מעשית: בקוד אמיתי היה צריך לבדוק קודם את `=== undefined` ורק אחר כך לגשת ל-`length`, אחרת גישה ל-`length` של `undefined` תיכשל בזמן ריצה. כך או כך — הצורך בבדיקה כפולה הוא בדיוק הסרבול שרוצים להימנע ממנו."
+    },
+    {
+     "id": "ps/ps2:13:19",
+     "type": "prose",
+     "en": "In this case, we prefer to have a non-ambiguous way to mark the base case - and write only:\n\n",
+     "hash": "bc632428f8e200f6",
+     "he": "במקרה הזה, אנו מעדיפים דרך חד-משמעית לסמן את מקרה הבסיס — ולכתוב רק:"
+    },
+    {
+     "id": "ps/ps2:13:20",
+     "type": "code",
+     "en": "```typescript\nif (root.children.length === 0) {\n   // ...\n}\n```\n\n",
+     "hash": "121f453925bbbeaa",
+     "lang": "typescript",
+     "noteHe": "כאשר `children` הוא שדה חובה, יש ייצוג יחיד לעלה — מערך ילדים ריק — ולכן מספיקה בדיקה אחת פשוטה: האם אורך המערך הוא 0."
+    },
+    {
+     "id": "ps/ps2:13:21",
+     "type": "prose",
+     "en": "Thus, the definition of the type:\n\n",
+     "hash": "b0bf251e93e5670d",
+     "he": "לפיכך, הגדרת הטיפוס:"
+    },
+    {
+     "id": "ps/ps2:13:22",
+     "type": "code",
+     "en": "```typescript\ntype Tree<T> = {\n    root: T;\n    children: Tree<T>[];\n}\n```\n",
+     "hash": "7199bbb06b00b854",
+     "lang": "typescript",
+     "noteHe": "זו ההגדרה המועדפת — `children` הוא שדה חובה מטיפוס `Tree<T>[]`, כך שלכל ערך של הטיפוס יש ייצוג חד-משמעי, ועלה מסומן תמיד במערך ריק."
+    },
+    {
+     "id": "ps/ps2:13:23",
+     "type": "prose",
+     "en": "**without** the `?` option is preferred.\n\n",
+     "hash": "ed16780670dfbe3d",
+     "he": "**ללא** האפשרות `?` — היא המועדפת."
+    },
+    {
+     "id": "ps/ps2:13:24",
+     "type": "prose",
+     "en": "**Exercise:**\nCreate a function that follows a path within the tree and returns the node found at this place.\n\n",
+     "hash": "e29fc7a1dabf5f6f",
+     "he": "**תרגיל:**\nכתבו פונקציה שעוקבת אחר מסלול (path) בתוך העץ ומחזירה את הצומת שנמצא במקום זה."
+    },
+    {
+     "id": "ps/ps2:13:25",
+     "type": "prose",
+     "en": "First, how do we encode a path in this tree?\n\n",
+     "hash": "079be73d2e92b719",
+     "he": "ראשית, כיצד נקודד מסלול בעץ הזה?"
+    },
+    {
+     "id": "ps/ps2:13:26",
+     "type": "prose",
+     "en": "A path must indicate a way to reach a specific node in the tree starting at the root and selecting one of the children at each step.\n\n",
+     "hash": "60f299c8b8fd911d",
+     "he": "מסלול צריך לציין דרך להגיע לצומת מסוים בעץ, החל מהשורש, תוך בחירת אחד הילדים בכל צעד."
+    },
+    {
+     "id": "ps/ps2:13:27",
+     "type": "prose",
+     "en": "For example, let's look at this tree:\n\n\n",
+     "hash": "86736ce9dd8fe1fc",
+     "he": "לדוגמה, נתבונן בעץ הזה:"
+    },
+    {
+     "id": "ps/ps2:13:28",
+     "type": "code",
+     "en": "```typescript\ntype Tree<T> = {\n    root: T;\n    children: Tree<T>[];\n}\n\nconst t: Tree<number> = {\n    root: 0,\n    children: [\n        { root: 2, children: [{ root: 4, children: [] }] },\n        { root: 1, children: [{ root: 3, children: [] }] }\n    ]\n};\n```\n\n",
+     "hash": "4d80b0fad07a62c4",
+     "lang": "typescript",
+     "noteHe": "העץ `t` הוא עץ מספרים שישמש כדוגמה: השורש שלו הוא 0, ולו שני ילדים — הילד הראשון (אינדקס 0) הוא הצומת 2, שלו ילד יחיד 4 (עלה); הילד השני (אינדקס 1) הוא הצומת 1, שלו ילד יחיד 3 (עלה). זה העץ שמצויר באיור שמתחת לקוד."
+    },
+    {
+     "id": "ps/ps2:13:29",
+     "type": "image",
+     "en": "![tree](./resources/ps2/tree.png)\n\n",
+     "hash": "5fe7d8226300d921"
+    },
+    {
+     "id": "ps/ps2:13:30",
+     "type": "prose",
+     "en": "We decide to encode paths as an array of numbers, indicating which child to select among the children of each node on the path:\n\n",
+     "hash": "b456ccabf44a7007",
+     "he": "אנו מחליטים לקודד מסלולים כמערך של מספרים, המציין באיזה ילד לבחור מבין ילדיו של כל צומת במסלול:"
+    },
+    {
+     "id": "ps/ps2:13:31",
+     "type": "code",
+     "en": "```\nthe path of the child with {root:4} will be [0,0]\nthe path of the child with {root:3} will be [1,0]\nthe path of the child with {root:2} will be [0]\nthe path of the child with {root:1} will be [1]\n``` \n\n",
+     "hash": "8673bb2ee3aa3913",
+     "noteHe": "דוגמאות לקידוד מסלולים בעץ `t`: כל מספר במערך הוא אינדקס הילד שבוחרים בצעד הבא. המסלול `[0,0]` פירושו \"מהשורש לך לילד באינדקס 0 (הצומת 2), וממנו לילד באינדקס 0 שלו\" — וכך מגיעים לצומת `{root:4}`. באופן דומה, `[1,0]` מוביל דרך הצומת 1 אל הצומת 3, ומסלולים באורך 1 — `[0]` ו-`[1]` — מובילים ישירות לילדי השורש, הצמתים 2 ו-1 בהתאמה. מערך ריק `[]` היה מייצג את השורש עצמו."
+    },
+    {
+     "id": "ps/ps2:13:32",
+     "type": "prose",
+     "en": "We know the type of the tree, so we can design a function that will not give errors at runtime.\n\n\n",
+     "hash": "4d3522e99a95375f",
+     "he": "אנחנו מכירים את הטיפוס של העץ, ולכן נוכל לתכנן פונקציה שלא תגרום לשגיאות בזמן ריצה."
+    },
+    {
+     "id": "ps/ps2:13:33",
+     "type": "code",
+     "en": "```typescript\nfunction getChild<T>(t: Tree<T>, path: number[]): Tree<T> {\n    if (path.length === 0)\n        // end of path\n        return t;\n    else if (t.children.length === 0)\n        // t is a leaf - cannot go down\n        return t;\n    else return getChild(t.children[path[0]], path.slice(1)); // recursive case\n}\nconsole.log(getChild(t, [0, 0])); // ==> { root: 2, children: [] }\nconsole.log(getChild(t, [1, 0])); // ==> { root: 3, children: [] }\nconsole.log(getChild(t, [1, 0, 0, 0])); // ==> { root: 3, children: [] } (Do not go \"after\" the leaves.)\n```\n\n",
+     "hash": "788f8e9b6410a5ea",
+     "lang": "typescript",
+     "noteHe": "זה פתרון התרגיל — הפונקציה הגנרית `getChild` (שימו לב לתחביר `<T>` אחרי שם הפונקציה) מקבלת עץ ומסלול, ומטפלת בשני מקרי עצירה לפני המקרה הרקורסיבי: אם `path.length === 0` המסלול מוצה ומחזירים את הצומת הנוכחי; אם `t.children.length === 0` הגענו לעלה ואי אפשר לרדת עוד — מחזירים את העלה (במקום לקרוס). אחרת, יורדים לילד שבאינדקס `path[0]` וממשיכים עם שארית המסלול, `path.slice(1)`. הבדיקה המוקדמת של שני המקרים היא מה שמונע שגיאות זמן ריצה: הקריאה עם המסלול הארוך מדי `[1, 0, 0, 0]` פשוט נעצרת בעלה `{root: 3}` ואינה מנסה להמשיך \"מעבר\" לעלים. (הערה קטנה: הפלט בהערת הקוד של `[0, 0]` מציג את `{ root: 2, ... }`, אך לפי העץ שהוגדר, המסלול `[0,0]` מגיע בפועל לצומת `{ root: 4, children: [] }`.)"
+    },
+    {
+     "id": "ps/ps2:13:34",
+     "type": "prose",
+     "en": "In the rest of the semester, we write functions in TypeScript in the style of functional programming, using the fat arrow syntax.\nThe same function will be defined as follows:\n\n",
+     "hash": "483ed1557a39d920",
+     "he": "בהמשך הסמסטר נכתוב פונקציות ב-TypeScript בסגנון של תכנות פונקציונלי, תוך שימוש בתחביר החץ (fat arrow).\nאותה פונקציה תוגדר באופן הבא:"
+    },
+    {
+     "id": "ps/ps2:13:35",
+     "type": "code",
+     "en": "```typescript\nconst getChild = <T>(t: Tree<T>, path: number[]): Tree<T> =>\n    // end of the path\n    (path.length === 0) ? t :\n    // t is a leaf - cannot go down\n    (t.children.length === 0) ? t : \n    // recursive case\n    getChild(t.children[path[0]], path.slice(1));\n\nconsole.log(getChild(t, [1, 0]));\n```\n\n",
+     "hash": "f6e28a0ae57b7390",
+     "lang": "typescript",
+     "noteHe": "אותה פונקציה בדיוק, כתובה בסגנון פונקציונלי: `getChild` מוגדרת כ-`const` שערכו פונקציית חץ גנרית, וכל הגוף הוא ביטוי יחיד — שרשרת של ביטויים טרנריים `? :` שמחליפה את משפטי ה-if/else. הקריאה נעשית מלמעלה למטה: מסלול ריק מחזיר את `t`; עלה מחזיר את `t`; אחרת קריאה רקורסיבית. אין צורך במילה `return` כלל, כי ערך הביטוי הוא ערך הפונקציה."
+    },
+    {
+     "id": "ps/ps2:13:36",
+     "type": "prose",
+     "en": "The differences are:\n",
+     "hash": "33a926559b75ce78",
+     "he": "ההבדלים הם:"
+    },
+    {
+     "id": "ps/ps2:13:37",
+     "type": "list",
+     "en": "* The function is defined as a const name and an anonymous function on the right hand side of the const\n* The body of the function is a single expression\n* We use the ternary if expression (as opposed to the if-statement) `test ? then : else`\n* There is no use for the `return` reserved word.\n\n",
+     "hash": "113d7c961b7dc6e8",
+     "he": "* הפונקציה מוגדרת כשם `const`, עם פונקציה אנונימית בצד ימין של ההשמה\n* גוף הפונקציה הוא ביטוי יחיד\n* אנו משתמשים בביטוי ה-if הטרנרי `test ? then : else` (בניגוד למשפט ה-if)\n* אין שימוש במילה השמורה `return`."
+    }
+   ],
+   "headingHe": "עצים עם מספר שרירותי של ילדים"
+  },
+  {
+   "id": "ps/ps2:14",
+   "depth": 2,
+   "headingEn": "Function Types",
+   "raw": "## Function Types\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:14:0",
+     "type": "prose",
+     "en": "**Review**:\n\n",
+     "hash": "0387cc144a2350fd",
+     "he": "**חזרה**:"
+    },
+    {
+     "id": "ps/ps2:14:1",
+     "type": "prose",
+     "en": "Functions in Functional Programming languages are values - that is, we can write expressions, which when they are evaluated at run time become functions (more precisely, *closures* - since these values are functions that may capture variable bindings).\n\n",
+     "hash": "78df9ae48b8292c8",
+     "he": "פונקציות בשפות תכנות פונקציונלי הן ערכים — כלומר, אנו יכולים לכתוב ביטויים שכאשר הם מוערכים בזמן ריצה, הם הופכים לפונקציות (ליתר דיוק, ל*סגורים* (closures) — שכן ערכים אלה הם פונקציות שעשויות ללכוד קשירות (bindings) של משתנים)."
+    },
+    {
+     "id": "ps/ps2:14:2",
+     "type": "prose",
+     "en": "We must have the ability to describe the type of these values and distinguish among different types of functions.\n\n",
+     "hash": "1d518496af1111ce",
+     "he": "עלינו להיות מסוגלים לתאר את הטיפוס של ערכים אלה, ולהבחין בין טיפוסים שונים של פונקציות."
+    },
+    {
+     "id": "ps/ps2:14:3",
+     "type": "prose",
+     "en": "An untyped function in Javascript has the following form:\n\n",
+     "hash": "e8b8e680db0c0be0",
+     "he": "לפונקציה לא מטופסת ב-JavaScript יש את הצורה הבאה:"
+    },
+    {
+     "id": "ps/ps2:14:4",
+     "type": "code",
+     "en": "```typescript\n// Named function (has global scope)\nfunction add(x, y) {\n    return x + y;\n}\n\n// Anonymous function\nconst myAdd = function (x, y) {\n    return x + y;\n};\n\n// Using the fat arrow notation:\nconst myFatAdd = (x, y) => x + y;\n\nmyFatAdd(3, 5); // ==> 8\n```\n\n",
+     "hash": "8dd4642a56eabbcc",
+     "lang": "typescript",
+     "noteHe": "שלוש דרכים לכתוב את אותה פונקציית חיבור ב-JavaScript, ללא שום טיפוסים: הראשונה — פונקציה בעלת שם (`function add`), שמוגדרת בתחום ההכרה הגלובלי. השנייה — ביטוי פונקציה אנונימי (`function (x, y) {...}`) שמושם למשתנה `myAdd`; זה ממחיש שפונקציה היא ערך שאפשר להשים למשתנה. השלישית — תחביר החץ (fat arrow), הקצר מכולם: כשהגוף הוא ביטוי יחיד, אין צורך בסוגריים מסולסלים או ב-`return`. הקריאה `myFatAdd(3, 5)` מחזירה `8`."
+    },
+    {
+     "id": "ps/ps2:14:5",
+     "type": "prose",
+     "en": "We can first specify the types of the parameters and the return type, in a way similar to the way it would be done in Java. This applies both to named functions and to anonymous functions.\n\n",
+     "hash": "e47450f0ca1217cc",
+     "he": "בשלב ראשון, נוכל לציין את טיפוסי הפרמטרים ואת טיפוס הערך המוחזר, באופן דומה לאופן שבו הדבר נעשה ב-Java. זה חל הן על פונקציות בעלות שם והן על פונקציות אנונימיות."
+    },
+    {
+     "id": "ps/ps2:14:6",
+     "type": "code",
+     "en": "```typescript\n// Named function\nfunction addT(x: number, y: number): number {\n    return x + y;\n}\n\n// Anonymous function\nconst myAdd = function (x: number, y: number): number {\n    return x + y;\n};\n\n// Using the fat arrow notation:\nconst myFatAdd = (x: number, y: number): number => x + y;\n\nmyFatAdd(2, 4); // ==> 6\n```\n\n",
+     "hash": "87d223bde04adcac",
+     "lang": "typescript",
+     "noteHe": "אותן שלוש צורות מהדוגמה הקודמת, הפעם עם הערות טיפוס: כל פרמטר מסומן `: number`, וטיפוס הערך המוחזר מצוין אחרי סוגריים — `): number`. שימו לב שההערות מתווספות באותו אופן בשלושת הסגנונות, כולל בפונקציית חץ, שבה טיפוס הערך המוחזר נכתב לפני החץ `=>`. עדיין לא כתבנו את הטיפוס המלא של הפונקציה כערך — זה יגיע בדוגמה הבאה."
+    },
+    {
+     "id": "ps/ps2:14:7",
+     "type": "prose",
+     "en": "Let us now write the full type of the function out of the function value:\n\n",
+     "hash": "a456966bac05796d",
+     "he": "כעת נכתוב את הטיפוס המלא של הפונקציה, בנפרד מערך הפונקציה עצמו:"
+    },
+    {
+     "id": "ps/ps2:14:8",
+     "type": "code",
+     "en": "```typescript\n\nconst myAdd: (x: number, y: number) => number = function (x: number, y: number): number {\n    return x + y;\n};\n\nconst myFatAdd: (x: number, y: number) => number = (x: number, y: number): number => x + y;\n\nmyFatAdd(2, 7); // ==> 9\n```\n\n",
+     "hash": "ae527813d6803e22",
+     "lang": "typescript",
+     "noteHe": "כאן מופיע לראשונה **טיפוס הפונקציה** במלואו, כהערת טיפוס על המשתנה עצמו: `myAdd: (x: number, y: number) => number`. שימו לב להפרדה בין שני צידי סימן ה-`=`: משמאל — שם המשתנה והערת טיפוס שמתארת \"פונקציה שמקבלת שני מספרים ומחזירה מספר\"; מימין — ערך הפונקציה עצמו (עם הערות טיפוס משלו). נקודה שעלולה לבלבל: החץ `=>` בהערת הטיפוס הוא חלק מתחביר שפת הטיפוסים (מפריד בין הפרמטרים לטיפוס המוחזר), ואילו החץ בביטוי `(x, y) => x + y` הוא תחביר של ערך פונקציה — אותו סימן, שני תפקידים שונים."
+    },
+    {
+     "id": "ps/ps2:14:9",
+     "type": "prose",
+     "en": "The type expression:\n\n",
+     "hash": "9107e17850535494",
+     "he": "ביטוי הטיפוס:"
+    },
+    {
+     "id": "ps/ps2:14:10",
+     "type": "code",
+     "en": "```typescript\n(x: number, y: number) => number;\n```\n",
+     "hash": "54b25fb6b0471e25",
+     "lang": "typescript",
+     "noteHe": "זהו ביטוי טיפוס פונקציה בפני עצמו — משמאל לחץ מפורטים הפרמטרים וטיפוסיהם, ומימין לחץ טיפוס הערך המוחזר. הפסקה הבאה מסבירה איזו קבוצת ערכים הוא מציין."
+    },
+    {
+     "id": "ps/ps2:14:11",
+     "type": "prose",
+     "en": "is a **function type**. The values that this type denotes are functions that map a pair of numbers to a number - in other words, functions whose domain is within  $$Number \\times Number$$ and whose range is within $$Number$$. (Remember that types denote a set of values.)\n\n",
+     "hash": "d3266d78928f248c",
+     "he": "הוא **טיפוס פונקציה** (function type). הערכים שהטיפוס הזה מציין הם פונקציות שממפות זוג מספרים למספר — במילים אחרות, פונקציות שהתחום (domain) שלהן מוכל ב-$$Number \\times Number$$ והטווח (range) שלהן מוכל ב-$$Number$$. (זכרו שטיפוסים מציינים קבוצה של ערכים.)"
+    },
+    {
+     "id": "ps/ps2:14:12",
+     "type": "prose",
+     "en": "This function type together with the name of the parameters is also called the **function signature**.\n\n",
+     "hash": "de514090887e95d2",
+     "he": "טיפוס הפונקציה הזה, יחד עם שמות הפרמטרים, נקרא גם **חתימת הפונקציה** (function signature)."
+    },
+    {
+     "id": "ps/ps2:14:13",
+     "type": "prose",
+     "en": "Function types include parameter names and parameter types and a return type.\nParameter names are just to help with readability. We could have instead written:\n\n",
+     "hash": "9f29c1f99c531a2b",
+     "he": "טיפוסי פונקציות כוללים שמות פרמטרים, טיפוסי פרמטרים וטיפוס ערך מוחזר.\nשמות הפרמטרים נועדו רק לסייע לקריאוּת. יכולנו לכתוב במקום זאת:"
+    },
+    {
+     "id": "ps/ps2:14:14",
+     "type": "code",
+     "en": "```typescript\nconst myAdd: (baseValue: number, increment: number) => number = function (x: number, y: number): number {\n    return x + y;\n};\n```\n\n",
+     "hash": "58d0813344af915b",
+     "lang": "typescript",
+     "noteHe": "בדוגמה הזו, שמות הפרמטרים בטיפוס הפונקציה (`baseValue`, `increment`) שונים משמות הפרמטרים בערך הפונקציה עצמו (`x`, `y`) — וזה תקין לחלוטין. מה שהקומפיילר בודק הוא רק התאמת ה**טיפוסים** (שני `number`); השמות בביטוי הטיפוס משמשים לתיעוד וקריאוּת בלבד."
+    },
+    {
+     "id": "ps/ps2:14:15",
+     "type": "prose",
+     "en": "As long as the parameter types align, it’s considered a valid type for the function, regardless of the names you give the parameters in the function type.\n\n",
+     "hash": "3d85268f52d66f9c",
+     "he": "כל עוד טיפוסי הפרמטרים מתאימים, זה נחשב טיפוס תקין עבור הפונקציה — ללא קשר לשמות שאתם נותנים לפרמטרים בטיפוס הפונקציה."
+    },
+    {
+     "id": "ps/ps2:14:16",
+     "type": "prose",
+     "en": "The second part of the function type is the return type. We make it clear which is the return type by using a fat arrow (**=>**) between the parameters and the return type. This is a required part of the function type, so if the function doesn’t return a value (which means this is a function that just has a side-effect - no return value), we use the special type **void** instead of leaving it off.\n\n",
+     "hash": "42149d4eba149826",
+     "he": "החלק השני של טיפוס הפונקציה הוא טיפוס הערך המוחזר. אנו מבהירים מהו טיפוס הערך המוחזר באמצעות חץ (**=>**) בין הפרמטרים לטיפוס המוחזר. זהו חלק הכרחי של טיפוס הפונקציה, ולכן אם הפונקציה אינה מחזירה ערך (כלומר, זו פונקציה שיש לה רק תופעת לוואי (side effect) — ללא ערך מוחזר), נשתמש בטיפוס המיוחד **void** במקום להשמיט אותו."
+    }
+   ],
+   "headingHe": "טיפוסי פונקציות"
+  },
+  {
+   "id": "ps/ps2:15",
+   "depth": 2,
+   "headingEn": "Function Types Examples",
+   "raw": "## Function Types Examples\n\n",
+   "blocks": [],
+   "headingHe": "דוגמאות לטיפוסי פונקציות"
+  },
+  {
+   "id": "ps/ps2:16",
+   "depth": 3,
+   "headingEn": "1. Square Function",
+   "raw": "### 1. Square Function\n\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:16:0",
+     "type": "code",
+     "en": "```typescript\nconst square = x => x * x;\nsquare(10); // ==> 100\n```\n\n",
+     "hash": "25e74bb1158c966e",
+     "lang": "typescript",
+     "noteHe": "פונקציית ריבוע שנכתבה ללא שום הערות טיפוס — כמו JavaScript רגיל. היא משמשת כאן כנקודת מוצא לדיון: מה TypeScript מסוגל להסיק בעצמו על הטיפוס שלה? ההפעלה `square(10)` מחזירה `100`."
+    },
+    {
+     "id": "ps/ps2:16:1",
+     "type": "prose",
+     "en": "The **value** of `square` is a closure.\n\n",
+     "hash": "d9ae314c275cfb98",
+     "he": "ה**ערך** של `square` הוא סגור (closure)."
+    },
+    {
+     "id": "ps/ps2:16:2",
+     "type": "prose",
+     "en": "The **type** of `square` is: `(x: any) => number`.\n\n",
+     "hash": "21ad2a9499f596ec",
+     "he": "ה**טיפוס** של `square` הוא: `(x: any) => number`."
+    },
+    {
+     "id": "ps/ps2:16:3",
+     "type": "prose",
+     "en": "We infer that the return type of the function is `number` because the value of the function is that which is returned when computing its body; the body is an expression of the form `x * x` and the primitive operator `*` returns a `number`.\n\n",
+     "hash": "fd56bdf92764ca3e",
+     "he": "אנו מסיקים שטיפוס הערך המוחזר של הפונקציה הוא `number`, מפני שערך הפונקציה הוא הערך שמוחזר בעת חישוב גופה; הגוף הוא ביטוי מהצורה `x * x`, והאופרטור הפרימיטיבי `*` מחזיר `number`."
+    },
+    {
+     "id": "ps/ps2:16:4",
+     "type": "prose",
+     "en": "In scheme we would also infer that the `x` variable must be of type `number` because it appears as an argument of the `*` operator which works on numbers.\n(We cannot do the same in JavaScript, why?)\n\n",
+     "hash": "3a797fcb427a3dc2",
+     "he": "ב-Scheme היינו מסיקים גם שהמשתנה `x` חייב להיות מטיפוס `number`, מפני שהוא מופיע כארגומנט של האופרטור `*`, שעובד על מספרים.\n(איננו יכולים לעשות זאת ב-JavaScript — מדוע?)"
+    }
+   ],
+   "headingHe": "1. פונקציית הריבוע"
+  },
+  {
+   "id": "ps/ps2:17",
+   "depth": 3,
+   "headingEn": "2. Generic Type Function",
+   "raw": "### 2. Generic Type Function\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:17:0",
+     "type": "code",
+     "en": "```typescript\nconst id = x => x;\nconsole.log(`${id(0)}`); // ==> 0\nconsole.log(`${id(\"tirgul 2\")}`); // ==> tirgul 2\n```\n\n",
+     "hash": "1c64390455a8791b",
+     "lang": "typescript",
+     "noteHe": "פונקציית הזהות `id` מחזירה את הארגומנט שלה כמות שהוא. שתי ההפעלות מדגימות שהיא עובדת על מספר (`0`) ועל מחרוזת (`\"tirgul 2\"`) באותה מידה — מה שמרמז שהטיפוס הטבעי שלה גנרי. (התחביר `` `${...}` `` הוא template string של JavaScript, שממיר את הערך למחרוזת לצורך ההדפסה.)"
+    },
+    {
+     "id": "ps/ps2:17:1",
+     "type": "prose",
+     "en": "The function id can be applied on any value - for example: string, boolean, number, but also arrays and maps.\n\n",
+     "hash": "c9ed4361074eb775",
+     "he": "את הפונקציה id אפשר להפעיל על כל ערך — למשל: string, boolean, number, אבל גם על מערכים ומפות."
+    },
+    {
+     "id": "ps/ps2:17:2",
+     "type": "prose",
+     "en": "We mark its argument as a type variable T1 and the type of the function is:\n\n",
+     "hash": "b38b7314f3c5e5af",
+     "he": "אנו מסמנים את הארגומנט שלה כמשתנה טיפוס T1, וטיפוס הפונקציה הוא:"
+    },
+    {
+     "id": "ps/ps2:17:3",
+     "type": "code",
+     "en": "```typescript\n<T1>(x: T1) => T1\n```\n\n",
+     "hash": "a53dfe0359270e53",
+     "lang": "typescript",
+     "noteHe": "טיפוס הפונקציה הגנרי של פונקציית הזהות: לכל טיפוס `T1`, הפונקציה מקבלת ערך מטיפוס `T1` ומחזירה ערך **מאותו** טיפוס בדיוק. הקשר הזה בין טיפוס הקלט לטיפוס הפלט הוא לב העניין — הוא מה שמבדיל את הטיפוס הזה מ-`(x: any) => any`, כפי שנדון בהערות הבאות."
+    },
+    {
+     "id": "ps/ps2:17:4",
+     "type": "prose",
+     "en": "**NOTE**: This is the most basic example of a **polymorphic function** - also called a **generic function**.\n\n",
+     "hash": "8d43e9336aab63f9",
+     "he": "**הערה**: זוהי הדוגמה הבסיסית ביותר ל**פונקציה פולימורפית** (polymorphic function) — הנקראת גם **פונקציה גנרית** (generic function)."
+    },
+    {
+     "id": "ps/ps2:17:5",
+     "type": "prose",
+     "en": "**NOTE**: Defining this identity function as `<T1>(x: T1) => T1` is very different from defining it as<br> **`(x: any) => any`**. Can you explain why? Give examples of functions to illustrate.\n\n",
+     "hash": "950dc36063581b6b",
+     "he": "**הערה**: הגדרת פונקציית הזהות הזו כ-`<T1>(x: T1) => T1` שונה מאוד מהגדרתה כ-<br>**`(x: any) => any`**. האם תוכלו להסביר מדוע? תנו דוגמאות לפונקציות כדי להמחיש זאת."
+    },
+    {
+     "id": "ps/ps2:17:6",
+     "type": "prose",
+     "en": "**NOTE**: To mark a function as generic in TypeScript, we must use the syntax:\n`function id<T>(x: T): T { return x; }`.\n\n",
+     "hash": "a02fa81a994053fa",
+     "he": "**הערה**: כדי לסמן פונקציה כגנרית ב-TypeScript, עלינו להשתמש בתחביר:\n`function id<T>(x: T): T { return x; }`."
+    }
+   ],
+   "headingHe": "2. פונקציה עם טיפוס גנרי"
+  },
+  {
+   "id": "ps/ps2:18",
+   "depth": 3,
+   "headingEn": "3. Union Type Function",
+   "raw": "###  3. Union Type Function\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:18:0",
+     "type": "prose",
+     "en": "Consider this function:\n\n",
+     "hash": "9aff7c091f74f978",
+     "he": "נתבונן בפונקציה הזו:"
+    },
+    {
+     "id": "ps/ps2:18:1",
+     "type": "code",
+     "en": "```typescript\nlet unionFunc = x => {\n    if (x === 0) return 0;\n    else return false;\n};\n\nconsole.log(`${unionFunc(0)}`); // ==> 0\nconsole.log(`${unionFunc(5)}`); // ==> false\n```\n\n",
+     "hash": "9c18d6df75371b45",
+     "lang": "typescript",
+     "noteHe": "`unionFunc` היא דוגמה מכוונת לפונקציה בעייתית: אם הארגומנט שווה ל-0 היא מחזירה `0` (ערך מטיפוס `number`), ואחרת היא מחזירה `false` (ערך מטיפוס `boolean`). כלומר, טיפוס הערך המוחזר תלוי בענף שבו הסתיים החישוב — שתי ההפעלות מדגימות את שתי התוצאות האפשריות. השאלה שנדונה בהמשך: איך בכלל מתארים טיפוס לפונקציה כזו, והאם רצוי לכתוב פונקציות כאלה."
+    },
+    {
+     "id": "ps/ps2:18:2",
+     "type": "prose",
+     "en": "**NOTE**: the function can return two different types. \n\n",
+     "hash": "56f0510fa187dbc5",
+     "he": "**הערה**: הפונקציה יכולה להחזיר שני טיפוסים שונים."
+    },
+    {
+     "id": "ps/ps2:18:3",
+     "type": "prose",
+     "en": "How can we describe its type? \n\n",
+     "hash": "64f459841ff6cfaa",
+     "he": "כיצד נוכל לתאר את הטיפוס שלה?"
+    },
+    {
+     "id": "ps/ps2:18:4",
+     "type": "prose",
+     "en": "One weak description is to use: `(x: number) => any`.\n\n",
+     "hash": "25582239d1cd3ef2",
+     "he": "תיאור חלש אחד הוא להשתמש ב-`(x: number) => any`."
+    },
+    {
+     "id": "ps/ps2:18:5",
+     "type": "prose",
+     "en": "A more informative description would be to use a *type union*:\n`<T1>(x: T1) => number | boolean`.\n\n",
+     "hash": "96748d84e80a5f8d",
+     "he": "תיאור אינפורמטיבי יותר יהיה להשתמש ב*איחוד טיפוסים* (type union):\n`<T1>(x: T1) => number | boolean`."
+    },
+    {
+     "id": "ps/ps2:18:6",
+     "type": "prose",
+     "en": "Note that we could infer that `x` is of type `number` because we compare it to `0`.\nBut the operator `===` is a universal operator in JavaScript and does not require its parameters to be of the same type. In other words, the primitive `===` has type: `(x: any, y: any) => boolean`.\n\n",
+     "hash": "e9145e387f11a944",
+     "he": "שימו לב שלכאורה יכולנו להסיק ש-`x` הוא מטיפוס `number`, מפני שאנו משווים אותו ל-`0`.\nאבל האופרטור `===` הוא אופרטור אוניברסלי ב-JavaScript, והוא אינו דורש שהפרמטרים שלו יהיו מאותו טיפוס. במילים אחרות, לפרימיטיב `===` יש את הטיפוס: `(x: any, y: any) => boolean`."
+    },
+    {
+     "id": "ps/ps2:18:7",
+     "type": "prose",
+     "en": "**NOTE**: Do we want to define functions which return union types of this sort?\n\n",
+     "hash": "c7108689f593a109",
+     "he": "**הערה**: האם אנו רוצים להגדיר פונקציות שמחזירות איחודי טיפוסים מהסוג הזה?"
+    },
+    {
+     "id": "ps/ps2:18:8",
+     "type": "prose",
+     "en": "**Answer**: This is **not** a good idea.  Such functions are surely not defined well if their return value must be described by a *complicated* type of this sort - it is almost always the sign of a bug.\n\n",
+     "hash": "f42512b77f891f09",
+     "he": "**תשובה**: זה **לא** רעיון טוב. פונקציות כאלה בוודאי אינן מוגדרות היטב אם צריך לתאר את הערך המוחזר שלהן באמצעות טיפוס *מסובך* מהסוג הזה — כמעט תמיד זהו סימן לבאג."
+    },
+    {
+     "id": "ps/ps2:18:9",
+     "type": "prose",
+     "en": "Such return values are very complicated to consume - if we want to call this function, we must always test the return value as:\n\n",
+     "hash": "f95c7f662c3ae45d",
+     "he": "ערכים מוחזרים כאלה מסובכים מאוד לצריכה — אם נרצה לקרוא לפונקציה הזו, נצטרך תמיד לבדוק את הערך המוחזר, כך:"
+    },
+    {
+     "id": "ps/ps2:18:10",
+     "type": "code",
+     "en": "```typescript\nlet x = unionFunc(2);\n\nif (typeof x === \"number\")\n    return x + 2;\nelse\n    return 0;\n```\n",
+     "hash": "d264fe26dcb6cebc",
+     "lang": "typescript",
+     "noteHe": "זה המחיר שמשלם מי שקורא לפונקציה עם טיפוס מוחזר \"מאוחד\": בכל נקודת קריאה חייבים קודם לברר בזמן ריצה איזה טיפוס התקבל בפועל — כאן באמצעות `typeof x === \"number\"` — ורק אז מותר לבצע פעולה שתלויה בטיפוס (כמו `x + 2`). הבדיקה הזו נכפית על כל צרכן של הפונקציה, שוב ושוב."
+    },
+    {
+     "id": "ps/ps2:18:11",
+     "type": "prose",
+     "en": "and we will almost never be able to invoke `g(unionFunc(2))` for usual functions.\n\n",
+     "hash": "c4c03469aa33c191",
+     "he": "וכמעט לעולם לא נוכל להפעיל `g(unionFunc(2))` עבור פונקציות רגילות."
+    }
+   ],
+   "headingHe": "3. פונקציה עם טיפוס איחוד (Union)"
+  },
+  {
+   "id": "ps/ps2:19",
+   "depth": 3,
+   "headingEn": "4. Map Function Type",
+   "raw": "### 4. Map Function Type\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:19:0",
+     "type": "prose",
+     "en": "We can apply map (of the ramda package) on varied arguments:\n\n",
+     "hash": "41dfb378a2e131c4",
+     "he": "אנו יכולים להפעיל את map (מחבילת ramda) על ארגומנטים מגוונים:"
+    },
+    {
+     "id": "ps/ps2:19:1",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\n\nlet numbersArray = map(x => x + 1, [1, 2, 3]);\nlet stringsArray = map(x => x + \"d\", [\"a\", \"b\", \"c\"]);\nconsole.log(numbersArray); // ==> [ 2, 3, 4 ]\nconsole.log(stringsArray); // ==> [ 'ad', 'bd', 'cd' ]\n```\n\n",
+     "hash": "c44967b6057a0091",
+     "lang": "typescript",
+     "noteHe": "`map` מפעילה פונקציה על כל איבר במערך ומחזירה מערך חדש של התוצאות. ההפעלה הראשונה מוסיפה 1 לכל מספר במערך `[1, 2, 3]` ומחזירה `[2, 3, 4]`; השנייה משרשרת \"d\" לכל מחרוזת ומחזירה `['ad', 'bd', 'cd']`. העובדה שאותה `map` עובדת גם על מערך מספרים וגם על מערך מחרוזות — עם פונקציות שונות — היא בדיוק מה שנצטרך לבטא כשנכתוב את הטיפוס הגנרי שלה."
+    },
+    {
+     "id": "ps/ps2:19:2",
+     "type": "prose",
+     "en": "`map` receives two arguments: a function and an array.\n\n",
+     "hash": "6beeea28e96506e7",
+     "he": "`map` מקבלת שני ארגומנטים: פונקציה ומערך."
+    },
+    {
+     "id": "ps/ps2:19:3",
+     "type": "prose",
+     "en": "Let us name them `func` and `array`.\n\n",
+     "hash": "cedba53f161bb6c3",
+     "he": "נקרא להם `func` ו-`array`."
+    },
+    {
+     "id": "ps/ps2:19:4",
+     "type": "prose",
+     "en": "`array` can contain items of any type - let us mark it as T1 under the assumption that the array is **homogeneous**.\n\n",
+     "hash": "a304cfe8b99a957f",
+     "he": "`array` יכול להכיל איברים מכל טיפוס — נסמן אותו T1, תחת ההנחה שהמערך **הומוגני**."
+    },
+    {
+     "id": "ps/ps2:19:5",
+     "type": "prose",
+     "en": "`func` gets one parameter - which must be of the type of the elements in `array`.\n\n",
+     "hash": "610a1d73f3634d18",
+     "he": "`func` מקבלת פרמטר אחד — שחייב להיות מטיפוס האיברים של `array`."
+    },
+    {
+     "id": "ps/ps2:19:6",
+     "type": "prose",
+     "en": "For each item in `array` it returns a value of a given type - let us call this return type `T2`.\n\n",
+     "hash": "2364993b1de6b52a",
+     "he": "עבור כל איבר ב-`array` היא מחזירה ערך מטיפוס מסוים — נקרא לטיפוס המוחזר הזה `T2`."
+    },
+    {
+     "id": "ps/ps2:19:7",
+     "type": "prose",
+     "en": "The type of the parameter `func` is therefore: `(x:T1)=>T2`.\n\n",
+     "hash": "0be5da05bbdb4e1c",
+     "he": "טיפוס הפרמטר `func` הוא, אם כן: `(x:T1)=>T2`."
+    },
+    {
+     "id": "ps/ps2:19:8",
+     "type": "prose",
+     "en": "The value returned by `map` is an array of the values returned by `func` - that is, its type is `T2[]`.\n\n",
+     "hash": "3b988dc022f4e99f",
+     "he": "הערך ש-`map` מחזירה הוא מערך של הערכים שהוחזרו על ידי `func` — כלומר, הטיפוס שלו הוא `T2[]`."
+    },
+    {
+     "id": "ps/ps2:19:9",
+     "type": "prose",
+     "en": "Putting all the elements together: the type of the `map` function is: \n\n",
+     "hash": "5c40605fd85eec0c",
+     "he": "נחבר את כל הרכיבים יחד: הטיפוס של הפונקציה `map` הוא:"
+    },
+    {
+     "id": "ps/ps2:19:10",
+     "type": "code",
+     "en": "```typescript\n<T1, T2>(func: (x: T1) => T2, array: T1[]) => T2[]\n```\n\n",
+     "hash": "8d7a1eca56458891",
+     "lang": "typescript",
+     "noteHe": "הטיפוס הגנרי המלא של `map`, עם שני משתני טיפוס: `T1` הוא טיפוס איברי מערך הקלט, ו-`T2` הוא טיפוס איברי מערך הפלט. הטיפוס מקודד את כל האילוצים שנגזרו בפסקאות הקודמות: `func` חייבת לקבל `T1` (כדי שאפשר יהיה להפעיל אותה על איברי `array`), והתוצאה היא מערך מטיפוס הערכים ש-`func` מחזירה. בדוגמת המספרים לעיל: `T1 = number` ו-`T2 = number`; בדוגמת המחרוזות: `T1 = string` ו-`T2 = string` — אבל באופן כללי `T1` ו-`T2` יכולים גם להיות שונים זה מזה."
+    }
+   ],
+   "headingHe": "4. הטיפוס של הפונקציה map"
+  },
+  {
+   "id": "ps/ps2:20",
+   "depth": 3,
+   "headingEn": "5. Filter Function Type",
+   "raw": "### 5. Filter Function Type\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:20:0",
+     "type": "prose",
+     "en": "We can apply `filter` (of the ramda package) on varied arguments:\n\n",
+     "hash": "5e0c63d81508f451",
+     "he": "אנו יכולים להפעיל את `filter` (מחבילת ramda) על ארגומנטים מגוונים:"
+    },
+    {
+     "id": "ps/ps2:20:1",
+     "type": "code",
+     "en": "```typescript\nimport { filter } from \"ramda\";\n\nlet numbersArray = filter(x => x % 2 === 0, [1, 2, 3]);\nlet stringsArray = filter(x => x[0] === \"d\", [\"david\", \"dani\", \"moshe\"]);\nconsole.log(numbersArray); // ==> [ 2 ]\nconsole.log(stringsArray); // ==> [ 'david', 'dani' ]\n```\n\n",
+     "hash": "2a8076dc3069cee0",
+     "lang": "typescript",
+     "noteHe": "`filter` מקבלת פרדיקט (פונקציה שמחזירה `boolean`) ומערך, ומחזירה מערך חדש שמכיל רק את האיברים שעבורם הפרדיקט החזיר `true`. ההפעלה הראשונה משאירה רק את המספרים הזוגיים (`x % 2 === 0`) — ומ-`[1, 2, 3]` נשאר `[2]`; השנייה משאירה רק מחרוזות שהתו הראשון שלהן (`x[0]`) הוא \"d\" — ולכן \"david\" ו-\"dani\" נשארים ו-\"moshe\" מסונן החוצה."
+    },
+    {
+     "id": "ps/ps2:20:2",
+     "type": "prose",
+     "en": "So what should be the type of the `filter` function?\n\n",
+     "hash": "696af3daad81ea9d",
+     "he": "אז מה צריך להיות הטיפוס של הפונקציה `filter`?"
+    },
+    {
+     "id": "ps/ps2:20:3",
+     "type": "prose",
+     "en": "`filter` receives two parameters: a function `pred` and an `array`.\n\n",
+     "hash": "583299468a7aa564",
+     "he": "`filter` מקבלת שני פרמטרים: פונקציה `pred` ומערך `array`."
+    },
+    {
+     "id": "ps/ps2:20:4",
+     "type": "prose",
+     "en": "`array` can contain items of any type - let us call it `T1` under the assumption that the array is **homogeneous**.\n\n",
+     "hash": "9ac09fe830255e64",
+     "he": "`array` יכול להכיל איברים מכל טיפוס — נקרא לו `T1`, תחת ההנחה שהמערך **הומוגני**."
+    },
+    {
+     "id": "ps/ps2:20:5",
+     "type": "prose",
+     "en": "`pred` is a function, that gets one parameter of type `T1` and returns a `boolean` value.\n\n",
+     "hash": "0cc20cc44ddd1875",
+     "he": "`pred` היא פונקציה שמקבלת פרמטר אחד מטיפוס `T1` ומחזירה ערך `boolean`."
+    },
+    {
+     "id": "ps/ps2:20:6",
+     "type": "prose",
+     "en": "`filter` returns a sub-array of the original array, so that the type it returns is `T1[]`.\n\n",
+     "hash": "8b2d57647415b766",
+     "he": "`filter` מחזירה תת-מערך של המערך המקורי, ולכן הטיפוס שהיא מחזירה הוא `T1[]`."
+    },
+    {
+     "id": "ps/ps2:20:7",
+     "type": "prose",
+     "en": "Putting all elements together, the type of the `filter` function is:\n\n",
+     "hash": "7a5dd2b9f8b3fd53",
+     "he": "בחיבור כל הרכיבים יחד, הטיפוס של הפונקציה `filter` הוא:"
+    },
+    {
+     "id": "ps/ps2:20:8",
+     "type": "code",
+     "en": "```typescript\n<T1>(pred: (x: T1) => boolean, array: T1[]) => T1[]\n```\n\n",
+     "hash": "35ae0f57f6f0d77e",
+     "lang": "typescript",
+     "noteHe": "הטיפוס הגנרי של `filter`. שימו לב להבדל מ-`map`: כאן מספיק משתנה טיפוס **אחד**, `T1`, כי `filter` אינה ממירה את האיברים — היא רק בוררת מתוכם, ולכן טיפוס איברי הפלט זהה לטיפוס איברי הקלט (`T1[]`). טיפוס הערך המוחזר של הפרדיקט קבוע תמיד: `boolean`."
+    }
+   ],
+   "headingHe": "5. הטיפוס של הפונקציה filter"
+  },
+  {
+   "id": "ps/ps2:21",
+   "depth": 3,
+   "headingEn": "6. Reduce Function Type",
+   "raw": "### 6. Reduce Function Type\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:21:0",
+     "type": "prose",
+     "en": "We can apply `reduce` (of the ramda package) on varied arguments:\n\n",
+     "hash": "89f2a79aaa844eb0",
+     "he": "אנו יכולים להפעיל את `reduce` (מחבילת ramda) על ארגומנטים מגוונים:"
+    },
+    {
+     "id": "ps/ps2:21:1",
+     "type": "code",
+     "en": "```typescript\nimport { reduce } from 'ramda'\n\nlet num = reduce((acc, curr) => acc + curr, 0, [1, 2, 3]);\nlet count = reduce((acc, curr) => acc + curr.length, 0, [\"a\", \"bc\", \"def\"]);\nconsole.log(num); // ==> 6\nconsole.log(count); // ==> 6\n```\n\n",
+     "hash": "f1e5c8c38ebe5d0b",
+     "lang": "typescript",
+     "noteHe": "`reduce` \"מקפלת\" מערך לערך יחיד: היא מפעילה את פונקציית הצמצום על צובר (`acc`) ועל האיבר הנוכחי (`curr`), איבר אחר איבר, החל מערך התחלתי. בהפעלה הראשונה מחברים את איברי `[1, 2, 3]` החל מ-0 — התוצאה `6`. ההפעלה השנייה מעניינת יותר מבחינת טיפוסים: המערך מכיל **מחרוזות**, אבל הצובר הוא **מספר** — סכום האורכים `1 + 2 + 3 = 6`. כלומר, טיפוס הצובר אינו חייב להיות זהה לטיפוס איברי המערך — תובנה מרכזית לקביעת הטיפוס של `reduce` בהמשך."
+    },
+    {
+     "id": "ps/ps2:21:2",
+     "type": "prose",
+     "en": "So what should be the type of the `reduce` function?\n\n",
+     "hash": "463e36204ee7da44",
+     "he": "אז מה צריך להיות הטיפוס של הפונקציה `reduce`?"
+    },
+    {
+     "id": "ps/ps2:21:3",
+     "type": "prose",
+     "en": "`reduce` receives 3 arguments: \n",
+     "hash": "5a901fd9f7a37003",
+     "he": "`reduce` מקבלת 3 ארגומנטים:"
+    },
+    {
+     "id": "ps/ps2:21:4",
+     "type": "list",
+     "en": "* The reducer function `reducer`\n* The initial value `init`\n* The `array`\n\n",
+     "hash": "3f5bfa9d51ab318f",
+     "he": "* פונקציית הצמצום `reducer`\n* הערך ההתחלתי `init`\n* המערך `array`"
+    },
+    {
+     "id": "ps/ps2:21:5",
+     "type": "prose",
+     "en": "The elements of `array` can be of any type - let us call it `T1` under the assumption that the array is **homogeneous**.\n\n",
+     "hash": "03e2125db09cfc1a",
+     "he": "איברי `array` יכולים להיות מכל טיפוס — נקרא לו `T1`, תחת ההנחה שהמערך **הומוגני**."
+    },
+    {
+     "id": "ps/ps2:21:6",
+     "type": "prose",
+     "en": "`reducer` gets two parameters (`acc` and `curr`) and outputs a value that will be the `acc` at the next iteration.\n`curr` is one of the items of `array` at each iteration.  \nWe infer that:\n",
+     "hash": "3d14f778325b9470",
+     "he": "`reducer` מקבלת שני פרמטרים (`acc` ו-`curr`) ומוציאה ערך שישמש כ-`acc` באיטרציה הבאה.\n`curr` הוא אחד מאיברי `array` בכל איטרציה.\nאנו מסיקים כי:"
+    },
+    {
+     "id": "ps/ps2:21:7",
+     "type": "list",
+     "en": "* `curr` must be of type `T1` (same type as the elements in `array`)\n* `acc` and `init` must be of the same type `T2`\n* `reducer` is of type: `(acc: T2, curr: T1)=>T2`.\n\n",
+     "hash": "b8265bbef8e18732",
+     "he": "* `curr` חייב להיות מטיפוס `T1` (אותו טיפוס כמו של האיברים ב-`array`)\n* `acc` ו-`init` חייבים להיות מאותו טיפוס `T2`\n* `reducer` היא מטיפוס: `(acc: T2, curr: T1)=>T2`."
+    },
+    {
+     "id": "ps/ps2:21:8",
+     "type": "prose",
+     "en": "`reduce` eventually returns the last value of `acc` returned by `reducer` - so the type of the return value should be `T2`.\n\n",
+     "hash": "cb5d79c259c7bbac",
+     "he": "`reduce` מחזירה בסופו של דבר את הערך האחרון של `acc` שהוחזר מ-`reducer` — ולכן טיפוס הערך המוחזר צריך להיות `T2`."
+    },
+    {
+     "id": "ps/ps2:21:9",
+     "type": "prose",
+     "en": "Putting all things together, the type of `reduce` is:\n\n",
+     "hash": "ce96ee3cfdb88e9e",
+     "he": "בחיבור הכול יחד, הטיפוס של `reduce` הוא:"
+    },
+    {
+     "id": "ps/ps2:21:10",
+     "type": "code",
+     "en": "```typescript\n<T1, T2>(reducer: (acc: T2, curr: T1) => T2, init: T2, array: T1[]) => T2\n```\n\n",
+     "hash": "36480f1db3e0983f",
+     "lang": "typescript",
+     "noteHe": "הטיפוס הגנרי המלא של `reduce`, עם שני משתני טיפוס: `T1` — טיפוס איברי המערך, `T2` — טיפוס הצובר והתוצאה. הטיפוס קושר יחד את כל האילוצים: `init` חייב להתאים לטיפוס ה-`acc` של `reducer` (שניהם `T2`), הפרמטר `curr` של `reducer` חייב להתאים לאיברי `array` (שניהם `T1`), והערך שהפונקציה כולה מחזירה הוא ה-`acc` הסופי — `T2`. בדוגמת סכום האורכים לעיל: `T1 = string` ו-`T2 = number`."
+    }
+   ],
+   "headingHe": "6. הטיפוס של הפונקציה reduce"
+  },
+  {
+   "id": "ps/ps2:22",
+   "depth": 2,
+   "headingEn": "7. Compose Function Type",
+   "raw": "## 7. Compose Function Type\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps2:22:0",
+     "type": "prose",
+     "en": "Compose receives two function arguments `f` and `g` and returns a new function as a value:\n\n",
+     "hash": "84b922772c1c0781",
+     "he": "compose מקבלת שני ארגומנטים שהם פונקציות, `f` ו-`g`, ומחזירה פונקציה חדשה כערך:"
+    },
+    {
+     "id": "ps/ps2:22:1",
+     "type": "code",
+     "en": "```typescript\nimport { compose } from 'ramda'\nlet hn = compose(y => y * y, x => x + 1);\nhn(3); // ==> (3 + 1) * (3 + 1) = 16\n```\n\n",
+     "hash": "d8df021e76f74ec5",
+     "lang": "typescript",
+     "noteHe": "`compose` יוצרת פונקציה חדשה שהיא הרכבה של שתי פונקציות. נקודה חשובה: ההרכבה פועלת **מימין לשמאל** — הפונקציה השנייה (`x => x + 1`) מופעלת ראשונה, ותוצאתה מוזנת לפונקציה הראשונה (`y => y * y`). לכן `hn(3)` מחשבת קודם `3 + 1 = 4`, ואז `4 * 4 = 16`. זה מקביל לכתיב המתמטי \\(f \\circ g\\), שבו \\((f \\circ g)(x) = f(g(x))\\)."
+    },
+    {
+     "id": "ps/ps2:22:2",
+     "type": "code",
+     "en": "```typescript\n// Reverse a string: \n// - Make an array of chars out of the string (split(\"\"))\n// - Reverse the array\n// - Join the chars back into a string array.join(\"\")\nconst reverse: (s: string) => string = s => s.split(\"\").reverse().join(\"\");\nreverse(\"abcd\"); // ==> 'dcba'\n```\n\n",
+     "hash": "c5cbac1737b758f0",
+     "lang": "typescript",
+     "noteHe": "`reverse` הופכת מחרוזת בשלושה שלבים, כמתואר בהערות שבקוד: `split(\"\")` מפרקת את המחרוזת למערך תווים, `reverse()` הופכת את סדר המערך, ו-`join(\"\")` מאחה את התווים חזרה למחרוזת. הערת הטיפוס שלה — `(s: string) => string` — תשמש אותנו מיד בהרכבה."
+    },
+    {
+     "id": "ps/ps2:22:3",
+     "type": "code",
+     "en": "```typescript\n// Return a new string with all upper case chars\nconst upper: (s: string) => string = s => s.toUpperCase();\nupper(\"abcd\"); // ==> 'ABCD'\n```\n\n",
+     "hash": "bf8bb66e992983d7",
+     "lang": "typescript",
+     "noteHe": "`upper` מחזירה מחרוזת חדשה שבה כל התווים באותיות גדולות, באמצעות המתודה `toUpperCase`. גם הטיפוס שלה הוא `(s: string) => string` — מה שהופך אותה למתאימה להרכבה עם `reverse`."
+    },
+    {
+     "id": "ps/ps2:22:4",
+     "type": "code",
+     "en": "```typescript\nlet upperReverse: (s: string) => string = compose(reverse, upper);\nupperReverse(\"abcd\"); // ==> 'DCBA'\n```\n\n",
+     "hash": "dfa761847770ea20",
+     "lang": "typescript",
+     "noteHe": "הרכבה של שתי הפונקציות הקודמות: `compose(reverse, upper)` יוצרת פונקציה שמפעילה קודם את `upper` (הארגומנט הימני) ואז את `reverse`. עבור \"abcd\": קודם `upper` מחזירה \"ABCD\", ואז `reverse` הופכת אותה ל-'DCBA'. הטיפוס של הפונקציה המורכבת נשאר `(s: string) => string`, כי שני \"הקצוות\" של השרשרת הם מחרוזות."
+    },
+    {
+     "id": "ps/ps2:22:5",
+     "type": "prose",
+     "en": "What is the type of the function `compose`?\n\n",
+     "hash": "af874ccb314347fb",
+     "he": "מהו הטיפוס של הפונקציה `compose`?"
+    },
+    {
+     "id": "ps/ps2:22:6",
+     "type": "prose",
+     "en": "The first parameter `f` receives a value of any type, let us call it `T1` and returns a value of any type `T2`.\n\n",
+     "hash": "c034b02b73720464",
+     "he": "הפרמטר הראשון `f` מקבל ערך מטיפוס כלשהו — נקרא לו `T1` — ומחזיר ערך מטיפוס כלשהו `T2`."
+    },
+    {
+     "id": "ps/ps2:22:7",
+     "type": "prose",
+     "en": "The second parameter `g` receives a value of any type, `T3` and returns a value of any type `T4`.\n\n",
+     "hash": "4f22aa2008180e9c",
+     "he": "הפרמטר השני `g` מקבל ערך מטיפוס כלשהו, `T3`, ומחזיר ערך מטיפוס כלשהו `T4`."
+    },
+    {
+     "id": "ps/ps2:22:8",
+     "type": "prose",
+     "en": "The returned value is a function which computes `f(g(x))` for any parameter `x`.\n\n",
+     "hash": "aa21b11f27b8e967",
+     "he": "הערך המוחזר הוא פונקציה שמחשבת `f(g(x))` עבור כל פרמטר `x`."
+    },
+    {
+     "id": "ps/ps2:22:9",
+     "type": "prose",
+     "en": "We infer that the returned function must receive parameters of the same type as `g` - that is `T3`.\n\n",
+     "hash": "8611fa21ebbdf552",
+     "he": "אנו מסיקים שהפונקציה המוחזרת חייבת לקבל פרמטרים מאותו טיפוס כמו `g` — כלומר `T3`."
+    },
+    {
+     "id": "ps/ps2:22:10",
+     "type": "prose",
+     "en": "In addition, we infer that the value returned by `g(x)` must be of the type that `f` expects - that is, `T4` must be the same as `T1`.\n\n",
+     "hash": "5f9a43f656b4a496",
+     "he": "בנוסף, אנו מסיקים שהערך שמוחזר על ידי `g(x)` חייב להיות מהטיפוס ש-`f` מצפה לקבל — כלומר, `T4` חייב להיות זהה ל-`T1`."
+    },
+    {
+     "id": "ps/ps2:22:11",
+     "type": "prose",
+     "en": "Finally, the value returned by `f(g(x))` is of the same type as that returned by `f` - that is, `T2`.\n\n",
+     "hash": "a19e4b4fe77c78ab",
+     "he": "לבסוף, הערך שמוחזר על ידי `f(g(x))` הוא מאותו טיפוס כמו הערך ש-`f` מחזירה — כלומר, `T2`."
+    },
+    {
+     "id": "ps/ps2:22:12",
+     "type": "prose",
+     "en": "Putting all things together - the type of `compose` is:\n\n",
+     "hash": "b4adeeca4bcbc0e9",
+     "he": "בחיבור הכול יחד — הטיפוס של `compose` הוא:"
+    },
+    {
+     "id": "ps/ps2:22:13",
+     "type": "code",
+     "en": "```typescript\n<T1, T2, T3>(f: (y: T1) => T2, g: (x: T3) => T1) => (x: T3) => T2;\n```\n\n",
+     "hash": "094b8b6e5b449889",
+     "lang": "typescript",
+     "noteHe": "הטיפוס של `compose` אחרי איחוד האילוצים: מכיוון ש-`T4` חייב להיות שווה ל-`T1` (הפלט של `g` הוא הקלט של `f`), נשארים רק שלושה משתני טיפוס. קראו את הטיפוס כך: `f` ממפה `T1` ל-`T2`, `g` ממפה `T3` ל-`T1`, והפונקציה המוחזרת — `(x: T3) => T2` — ממפה ישירות מהקלט של `g` לפלט של `f`. שימו לב שגם טיפוס הערך המוחזר הוא בעצמו טיפוס פונקציה, כי `compose` מחזירה פונקציה."
+    },
+    {
+     "id": "ps/ps2:22:14",
+     "type": "prose",
+     "en": "It helps to renumber the type variables according to the order in which they are computed:\n\n",
+     "hash": "3b855ade3d45c4d0",
+     "he": "מועיל למספר מחדש את משתני הטיפוס לפי הסדר שבו הם מחושבים:"
+    },
+    {
+     "id": "ps/ps2:22:15",
+     "type": "code",
+     "en": "```typescript\n<T1, T2, T3>(f: (y: T2) => T3, g: (x: T1) => T2) => (x: T1) => T3;\n```\n\n",
+     "hash": "c9889339b1872f84",
+     "lang": "typescript",
+     "noteHe": "אותו טיפוס בדיוק, רק עם שמות משתני טיפוס שממוספרים לפי סדר זרימת החישוב: הקלט `x` הוא מטיפוס `T1`, הוא עובר דרך `g` ומתקבל ערך מטיפוס `T2`, וזה עובר דרך `f` ומתקבל ערך מטיפוס `T3`. המספור מחדש אינו משנה את משמעות הטיפוס (שמות משתני טיפוס הם שרירותיים) — הוא רק הופך אותו לקריא יותר."
+    },
+    {
+     "id": "ps/ps2:22:16",
+     "type": "prose",
+     "en": "which can be read as: a value `x` of type `T1` is mapped to a value of type `T2` and then to a value of type `T3`.\n",
+     "hash": "d4795f658be56d78",
+     "he": "שאפשר לקרוא אותו כך: ערך `x` מטיפוס `T1` ממופה לערך מטיפוס `T2`, ולאחר מכן לערך מטיפוס `T3`."
+    }
+   ],
+   "headingHe": "7. הטיפוס של הפונקציה compose"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "עבור הפונקציה `const square = x => x * x;` — ב-Scheme היינו מסיקים שהמשתנה `x` חייב להיות מטיפוס `number`, כי הוא מופיע כארגומנט של האופרטור `*` שעובד על מספרים. מדוע איננו יכולים להסיק זאת באותו אופן ב-JavaScript?",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** מפני שב-JavaScript האופרטור `*` אינו מוגדר רק על מספרים — הוא מקבל ערכים מכל טיפוס ומבצע עליהם המרות טיפוס מובלעות (type coercion) במקום לזרוק שגיאה. למשל: `\"3\" * \"4\"` מחזיר `12`, `true * 5` מחזיר `5`, ו-`\"a\" * 2` מחזיר `NaN` — שהוא בעצמו ערך מטיפוס `number`. כלומר, הטיפוס האפקטיבי של `*` ב-JavaScript הוא בקירוב `(x: any, y: any) => number`: העובדה ש-`x` מופיע כארגומנט של `*` אינה מגבילה את הטיפוס שלו כלל. לכן TypeScript יכול להסיק רק שהערך המוחזר הוא `number` (כי `*` תמיד מחזיר מספר), אבל עבור הפרמטר `x` הוא מסיק `any`. ב-Scheme, לעומת זאת, הפרימיטיב `*` מוגדר אך ורק על מספרים (וקריאה עם ארגומנט שאינו מספר היא שגיאה), ולכן הופעת `x` כארגומנט של `*` כן מחייבת ש-`x` יהיה מטיפוס `number`.",
+   "explanationHe": "נקודות מפתח: (1) `*` ב-JavaScript הוא אופרטור אוניברסלי שמבצע type coercion ואינו דורש ארגומנטים מספריים; (2) לכן טיפוסו הוא בקירוב `(x: any, y: any) => number` ואי אפשר ללמוד ממנו על טיפוס הארגומנט; (3) ב-Scheme `*` מוגדר רק על מספרים ולכן ההסקה כן אפשרית; (4) דוגמה קונקרטית להמרה מובלעת מחזקת את התשובה."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "מדוע הגדרת פונקציית הזהות בטיפוס `<T1>(x: T1) => T1` שונה מאוד מהגדרתה בטיפוס `(x: any) => any`? הסבירו ותנו דוגמאות לפונקציות שממחישות את ההבדל.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):** ההבדל המהותי הוא שהטיפוס הגנרי `<T1>(x: T1) => T1` מקודד **קשר** בין טיפוס הקלט לטיפוס הפלט: בכל הפעלה, הערך המוחזר הוא בדיוק מאותו הטיפוס של הארגומנט. לעומת זאת, `(x: any) => any` אומר רק \"מקבלת ערך כלשהו ומחזירה ערך כלשהו\" — אין שום קשר בין הקלט לפלט, והקומפיילר מאבד כל מידע על טיפוס הערך המוחזר.\n\nדוגמאות:\n\n1. עם `const id: <T>(x: T) => T`, הביטוי `id(\"abc\").length` עובר קומפילציה — הקומפיילר יודע ש-`id(\"abc\")` הוא `string`; ואילו `id(5).length` נכשל בקומפילציה, בדיוק כפי שנרצה (למספר אין שדה `length`).\n\n2. עם `const idAny: (x: any) => any`, הביטוי `idAny(5).length` עובר קומפילציה בלי אזהרה — ומחזיר `undefined` בזמן ריצה. איבדנו את בטיחות הטיפוסים.\n\n3. הטיפוס `(x: any) => any` מתאר קבוצת ערכים רחבה בהרבה: גם פונקציות שאינן קשורות לזהות כלל, כמו `x => 42` או `x => \"hello\"`, שייכות לו. לעומת זאת, קבוצת הפונקציות מהטיפוס `<T>(x: T) => T` מצומצמת מאוד — פונקציה שחייבת להחזיר ערך מאותו טיפוס `T` עבור **כל** `T` אינה יכולה \"להמציא\" ערך מהטיפוס הלא-ידוע, ולכן (עבור פונקציה טהורה) היא למעשה חייבת להחזיר את `x` עצמו. כלומר, הטיפוס הגנרי הוא גם תיעוד מדויק ואינפורמטיבי הרבה יותר של התנהגות הפונקציה.",
+   "explanationHe": "נקודות מפתח: (1) הטיפוס הגנרי שומר על הקשר קלט–פלט ומאפשר לקומפיילר לעקוב אחרי הטיפוס דרך הקריאה; (2) `any` שובר את שרשרת בדיקת הטיפוסים ומעביר שגיאות מזמן קומפילציה לזמן ריצה; (3) דוגמה קונקרטית לשגיאה שנתפסת עם הטיפוס הגנרי ומוחמצת עם any; (4) הטיפוס הגנרי מציין קבוצת ערכים מצומצמת ומדויקת בהרבה מאשר `(x: any) => any`."
+  }
+ ]
+}

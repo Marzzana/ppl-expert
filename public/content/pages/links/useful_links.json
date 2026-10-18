@@ -1,0 +1,165 @@
+{
+ "id": "links/useful_links",
+ "kind": "links",
+ "sourcePath": "useful_links.md",
+ "titleEn": "Useful Links",
+ "titleHe": "קישורים שימושיים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "links/useful_links:0",
+   "depth": 1,
+   "headingEn": "Useful Links",
+   "raw": "# Useful Links\n\n",
+   "blocks": [],
+   "headingHe": "קישורים שימושיים"
+  },
+  {
+   "id": "links/useful_links:1",
+   "depth": 2,
+   "headingEn": "Books to which we refer in class",
+   "raw": "## Books to which we refer in class\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:1:0",
+     "type": "list",
+     "en": "1. Structure and Interpretation of Computer Programs, by H. Abelson and G.J. Sussman, MIT Press, 2nd edition, 1996. Available online in [pdf](https://sicpebook.wordpress.com/ebook/) or [html](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html).\n\n2. How to Design Programs, by M. Felleisen, R.B. Findler, M. Flatt and S. Krishnamurthi, MIT Press, 2003. Available online [http://www.htdp.org/](http://www.htdp.org/)\n\n3. Programming Languages: Application and Interpretation, by S. Krishnamurthi, 2nd edition 2012. Available online [https://www.plai.org/](https://www.plai.org/)\n\n4. The Art of Prolog by L. Sterling and E. Shapiro, 2nd edition MIT Press, 1994. Available online [https://mitpress.mit.edu/books/art-prolog-second-edition](https://mitpress.mit.edu/books/art-prolog-second-edition) (under the Open Access tab)\n\n5. Essentials of Programming Languages, by D.P. Friedman and M.Wand, 3rd edition, MIT Press, 2008.\n\n6. Programming and Programming Languages, by Shriram Krishnamurthi, Benjamin S. Lerner, Joe Gibbs Politz, 2019. Available online [https://papl.cs.brown.edu/2019/](https://papl.cs.brown.edu/2019/)\n\n7. Professor Frisby's Mostly Adequate Guide to Functional Programming, Mostly Adequate team, 2020, Available online [https://mostly-adequate.gitbooks.io/mostly-adequate-guide/](https://mostly-adequate.gitbooks.io/mostly-adequate-guide/)\n\n8. Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I John McCarthy, Communications of the ACM, April 1960, Available online [http://www-formal.stanford.edu/jmc/recursive.pdf](http://www-formal.stanford.edu/jmc/recursive.pdf). \n\n",
+     "hash": "dec50c942ce28aec",
+     "he": "1. *Structure and Interpretation of Computer Programs* (SICP) מאת H. Abelson ו-G.J. Sussman, הוצאת MIT Press, מהדורה שנייה, 1996. זמין אונליין כ-[pdf](https://sicpebook.wordpress.com/ebook/) או כ-[html](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html).\n\n2. *How to Design Programs* מאת M. Felleisen, ‏R.B. Findler, ‏M. Flatt ו-S. Krishnamurthi, הוצאת MIT Press, ‏2003. זמין אונליין: [http://www.htdp.org/](http://www.htdp.org/)\n\n3. *Programming Languages: Application and Interpretation* מאת S. Krishnamurthi, מהדורה שנייה, 2012. זמין אונליין: [https://www.plai.org/](https://www.plai.org/)\n\n4. *The Art of Prolog* מאת L. Sterling ו-E. Shapiro, מהדורה שנייה, הוצאת MIT Press, ‏1994. זמין אונליין: [https://mitpress.mit.edu/books/art-prolog-second-edition](https://mitpress.mit.edu/books/art-prolog-second-edition) (תחת הלשונית Open Access)\n\n5. *Essentials of Programming Languages* מאת D.P. Friedman ו-M. Wand, מהדורה שלישית, הוצאת MIT Press, ‏2008.\n\n6. *Programming and Programming Languages* מאת Shriram Krishnamurthi, ‏Benjamin S. Lerner ו-Joe Gibbs Politz, ‏2019. זמין אונליין: [https://papl.cs.brown.edu/2019/](https://papl.cs.brown.edu/2019/)\n\n7. *Professor Frisby's Mostly Adequate Guide to Functional Programming*, צוות Mostly Adequate, ‏2020. זמין אונליין: [https://mostly-adequate.gitbooks.io/mostly-adequate-guide/](https://mostly-adequate.gitbooks.io/mostly-adequate-guide/)\n\n8. *Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I* מאת John McCarthy, ‏Communications of the ACM, אפריל 1960 (המאמר המכונן של Lisp). זמין אונליין: [http://www-formal.stanford.edu/jmc/recursive.pdf](http://www-formal.stanford.edu/jmc/recursive.pdf)"
+    }
+   ],
+   "headingHe": "ספרים שאליהם אנו מפנים בשיעורים"
+  },
+  {
+   "id": "links/useful_links:2",
+   "depth": 2,
+   "headingEn": "Software",
+   "raw": "## Software\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:2:0",
+     "type": "prose",
+     "en": "This section contains links to installations of the programming languages used in this course. These links may be useful if you intend to develop programs in these languages on computers that are not CS lab computers.\n\n",
+     "hash": "ce54f1371c098bd8",
+     "he": "חלק זה מכיל קישורים להתקנות של שפות התכנות שבהן משתמשים בקורס. הקישורים שימושיים אם בכוונתכם לפתח תוכניות בשפות אלו על מחשבים שאינם מחשבי המעבדה של המחלקה."
+    },
+    {
+     "id": "links/useful_links:2:1",
+     "type": "prose",
+     "en": "The instructions for installations are similar for Windows, Linux and MacOS (using a command line shell).\n\n",
+     "hash": "9174a137b0654b46",
+     "he": "הוראות ההתקנה דומות עבור Windows, ‏Linux ו-MacOS (באמצעות מעטפת שורת פקודה)."
+    }
+   ],
+   "headingHe": "תוכנה"
+  },
+  {
+   "id": "links/useful_links:3",
+   "depth": 3,
+   "headingEn": "Node / TypeScript",
+   "raw": "### Node / TypeScript\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:3:0",
+     "type": "prose",
+     "en": "The full installation and configuration guide can be seen [here](https://youtu.be/tnn_a4hReKs) (the video shows older versions of VS Code and Node, but the setup should still be relevant).\n\n\n",
+     "hash": "fe3069a5addf2af4",
+     "he": "מדריך ההתקנה וההגדרה המלא זמין [כאן](https://youtu.be/tnn_a4hReKs) (הסרטון מציג גרסאות ישנות יותר של VS Code ו-Node, אבל תהליך ההתקנה עדיין רלוונטי)."
+    },
+    {
+     "id": "links/useful_links:3:1",
+     "type": "list",
+     "en": "0. Download node.js from [https://nodejs.org](https://nodejs.org) and install the LTS version (18).\n0. Download VS Code from [https://code.visualstudio.com/](https://code.visualstudio.com/) and install.\n0. Open command prompt by clicking on Start and typing `cmd`.\n0. Make sure node is installed by running `node -v`. The expected output should start with 'v18.'.\n0. Globally install Typescript's compiler and REPL `npm i -g ts-node typescript`.\n1. Make sure Typescript is installed by running `tsc -v`. The expected output should start with '4.5'.\n2. Navigate to a directory you want to create your projects in (e.g., 'Desktop\\ppl').\n3. Open VS Code in this foler using `code .`\n4. Open the \"Extensions\" panel (`ctrl-shift-x`) and search for \"runner\".\n5. Install the \"Code Runner\" extension.\n6. Open the \"Explorer\" panel (`ctrl-shift-E`) and select \"New Folder\" and name the new folder `hw`.\n7. Right-click on the new folder and select `open in the integrated terminal`.\n8. Initialize `npm` in this directory using `npm init -y` in the terminal (this will create a `package.json` file in the `hw` folder)\n9. Run `npm i -D ramda` to install the `ramda` library as a development/compile-time dependency for this project.\n10. Run `npm i -D typescript @types/ramda` to install development/compile-time dependencies for this project.\n11. Create an empty file `tsconfig.json` in the `hw` folder.\n12. Right click `hw` and select \"New File\". Call it `hw1.ts`.\n13. In the newly created file, type `console.log(\"Hello, world\");`, save using Ctrl+S, and run using Ctrl+Alt+N. You should see \"Hello, world\" on the screen.\n14. Check `ramda` is properly installed by adding to the top of your file the line `import { map } from \"ramda\";` and change your `console.log(\"Hello, world\");` to `console.log(map(x => x * x, [1, 2, 3, 4]));`. Again, save using Ctrl+S, and run using Ctrl+Alt+N. You should see `[1, 4, 9, 16]` on the screen.\n\n",
+     "hash": "c4426fa4f1f666c6",
+     "he": "0. הורידו את node.js מ-[https://nodejs.org](https://nodejs.org) והתקינו את גרסת ה-LTS ‏(18).\n0. הורידו את VS Code מ-[https://code.visualstudio.com/](https://code.visualstudio.com/) והתקינו.\n0. פתחו שורת פקודה: לחצו על Start והקלידו `cmd`.\n0. ודאו ש-node מותקן על ידי הרצת `node -v`. הפלט הצפוי מתחיל ב-'v18.'.\n0. התקינו גלובלית את המהדר וה-REPL של TypeScript: ‏`npm i -g ts-node typescript`.\n1. ודאו ש-TypeScript מותקן על ידי הרצת `tsc -v`. הפלט הצפוי מתחיל ב-'4.5'.\n2. נווטו לתיקייה שבה תרצו ליצור את הפרויקטים שלכם (למשל 'Desktop\\ppl').\n3. פתחו את VS Code בתיקייה זו באמצעות `code .`\n4. פתחו את פאנל ה-\"Extensions\" ‏(`ctrl-shift-x`) וחפשו \"runner\".\n5. התקינו את ההרחבה \"Code Runner\".\n6. פתחו את פאנל ה-\"Explorer\" ‏(`ctrl-shift-E`), בחרו \"New Folder\" וקראו לתיקייה החדשה `hw`.\n7. לחצו לחיצה ימנית על התיקייה החדשה ובחרו `open in the integrated terminal`.\n8. אתחלו `npm` בתיקייה זו באמצעות `npm init -y` בטרמינל (זה ייצור קובץ `package.json` בתיקיית `hw`)\n9. הריצו `npm i -D ramda` כדי להתקין את ספריית `ramda` כתלות פיתוח/קומפילציה לפרויקט.\n10. הריצו `npm i -D typescript @types/ramda` כדי להתקין תלויות פיתוח/קומפילציה לפרויקט.\n11. צרו קובץ ריק בשם `tsconfig.json` בתיקיית `hw`.\n12. לחצו לחיצה ימנית על `hw` ובחרו \"New File\". קראו לו `hw1.ts`.\n13. בקובץ החדש הקלידו `console.log(\"Hello, world\");`, שמרו עם Ctrl+S והריצו עם Ctrl+Alt+N. אמור להופיע \"Hello, world\" על המסך.\n14. בדקו ש-`ramda` מותקנת כראוי: הוסיפו בראש הקובץ את השורה `import { map } from \"ramda\";` ושנו את `console.log(\"Hello, world\");` ל-`console.log(map(x => x * x, [1, 2, 3, 4]));`. שוב שמרו עם Ctrl+S והריצו עם Ctrl+Alt+N. אמור להופיע `[1, 4, 9, 16]` על המסך."
+    },
+    {
+     "id": "links/useful_links:3:2",
+     "type": "prose",
+     "en": "**Note**: every assignment that has TypeScript coding in it will come with a predefined `package.json` which specifies the packages and package versions for the assignment. For every assignment, extract the files in a *new folder*, open a `cmd` in that folder, and run `npm i`. This will install all necessary packages for the assignment.\n\n",
+     "hash": "10b4765447ef2f2c",
+     "he": "**הערה**: כל מטלה שכוללת כתיבת קוד ב-TypeScript תגיע עם `package.json` מוגדר מראש שמפרט את החבילות והגרסאות עבור המטלה. עבור כל מטלה, חלצו את הקבצים ל*תיקייה חדשה*, פתחו `cmd` בתיקייה זו והריצו `npm i`. פעולה זו תתקין את כל החבילות הנחוצות למטלה."
+    }
+   ],
+   "headingHe": "Node / TypeScript"
+  },
+  {
+   "id": "links/useful_links:4",
+   "depth": 3,
+   "headingEn": "Visual Studio Live Share",
+   "raw": "### Visual Studio Live Share\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:4:0",
+     "type": "prose",
+     "en": "In order to work on the assignments in pairs, we recommend using the Visual Studio Live Share extension. A short tutorial on how to install and use it can be seen [here](https://youtu.be/tjJf0UgMd0Q).\n\n",
+     "hash": "ae803c55ef94ec49",
+     "he": "כדי לעבוד על המטלות בזוגות, אנו ממליצים להשתמש בהרחבה Visual Studio Live Share. מדריך קצר להתקנה ולשימוש זמין [כאן](https://youtu.be/tjJf0UgMd0Q)."
+    },
+    {
+     "id": "links/useful_links:4:1",
+     "type": "prose",
+     "en": "#### Notes\n\n",
+     "hash": "76a5ebc9af070abc",
+     "he": "#### הערות"
+    },
+    {
+     "id": "links/useful_links:4:2",
+     "type": "list",
+     "en": "1. Upon first starting or joining a collaboration session on VS Live Share, you will be prompted to log in using either a GitHub account or a Microsoft account. We suggest logging in using a GitHub account. If you don't have one already, create a GitHub account using [this link](https://education.github.com/students).\n2. You can work on different files simultaneously and not necessarily work on the same file, as shown in the video.\n\n",
+     "hash": "e59e2ab14068cf6a",
+     "he": "1. בהתחלה או בהצטרפות ראשונה לסשן שיתוף ב-VS Live Share תתבקשו להתחבר עם חשבון GitHub או חשבון Microsoft. אנו ממליצים להתחבר עם חשבון GitHub. אם אין לכם כזה, צרו חשבון GitHub דרך [הקישור הזה](https://education.github.com/students).\n2. אפשר לעבוד על קבצים שונים במקביל, ולא בהכרח על אותו קובץ, כפי שמוצג בסרטון."
+    }
+   ],
+   "headingHe": "Visual Studio Live Share"
+  },
+  {
+   "id": "links/useful_links:5",
+   "depth": 3,
+   "headingEn": "Docker",
+   "raw": "### Docker\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:5:0",
+     "type": "prose",
+     "en": "You may use [Docker](https://www.docker.com/) technology to install the needed software for this course.\nWe have prepared a [Dockerfile](https://gist.github.com/yarongon/ea997b25faa7723fc648fa0710b883ea#file-dockerfile) with all the needed installations, and a [devcontainer.json](https://gist.github.com/yarongon/ea997b25faa7723fc648fa0710b883ea#file-devcontainer-json) if you wish to use VSCode.\n\n",
+     "hash": "3995bf4315059058",
+     "he": "אפשר להשתמש בטכנולוגיית [Docker](https://www.docker.com/) כדי להתקין את התוכנה הנדרשת לקורס.\nהכנו [Dockerfile](https://gist.github.com/yarongon/ea997b25faa7723fc648fa0710b883ea#file-dockerfile) עם כל ההתקנות הנדרשות, וכן [devcontainer.json](https://gist.github.com/yarongon/ea997b25faa7723fc648fa0710b883ea#file-devcontainer-json) אם ברצונכם להשתמש ב-VSCode."
+    }
+   ],
+   "headingHe": "Docker"
+  },
+  {
+   "id": "links/useful_links:6",
+   "depth": 2,
+   "headingEn": "Scheme",
+   "raw": "## Scheme\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:6:0",
+     "type": "list",
+     "en": "* The Racket [homepage](http://racket-lang.org/) includes downloads and documentation. Current version is Racket 8.8.\n* A tutorial [The Scheme Programming Language](http://www.scheme.com/tspl4/) by R.K. Dybvig.\n* [R6RS Standard](http://www.r6rs.org/final/r6rs.pdf)\n\n",
+     "hash": "51bd4f48af9839c4",
+     "he": "* [דף הבית](http://racket-lang.org/) של Racket כולל הורדות ותיעוד. הגרסה הנוכחית היא Racket 8.8.\n* מדריך [The Scheme Programming Language](http://www.scheme.com/tspl4/) מאת R.K. Dybvig.\n* [תקן R6RS](http://www.r6rs.org/final/r6rs.pdf)"
+    }
+   ],
+   "headingHe": "Scheme"
+  },
+  {
+   "id": "links/useful_links:7",
+   "depth": 2,
+   "headingEn": "Prolog",
+   "raw": "## Prolog\n\n",
+   "blocks": [
+    {
+     "id": "links/useful_links:7:0",
+     "type": "list",
+     "en": "* SWI Prolog [homepage](http://www.swi-prolog.org/) includes downloads and documentation.\n",
+     "hash": "fa9f54e986c9aec0",
+     "he": "* [דף הבית](http://www.swi-prolog.org/) של SWI Prolog כולל הורדות ותיעוד."
+    }
+   ],
+   "headingHe": "Prolog"
+  }
+ ]
+}

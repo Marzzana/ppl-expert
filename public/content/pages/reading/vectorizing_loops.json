@@ -1,0 +1,336 @@
+{
+ "id": "reading/vectorizing_loops",
+ "kind": "reading",
+ "sourcePath": "practice_sessions/reading_material/vectorizing_loops.md",
+ "titleEn": "Vectorizing Loops: Random Walk Example with Accumulate",
+ "titleHe": "וקטוריזציה של לולאות: דוגמת הילוך אקראי עם Accumulate",
+ "translated": true,
+ "sections": [
+  {
+   "id": "reading/vectorizing_loops:0",
+   "depth": 1,
+   "headingEn": "Vectorizing Loops: Random Walk Example with Accumulate",
+   "raw": "# Vectorizing Loops: Random Walk Example with Accumulate\n",
+   "blocks": [],
+   "headingHe": "וקטוריזציה של לולאות: דוגמת הילוך אקראי עם Accumulate"
+  },
+  {
+   "id": "reading/vectorizing_loops:1",
+   "depth": 2,
+   "headingEn": "PPL 2021 - Week #1",
+   "raw": "## PPL 2021 - Week #1\n\n",
+   "blocks": [
+    {
+     "id": "reading/vectorizing_loops:1:0",
+     "type": "prose",
+     "en": "This example is taken from: [http://www.labri.fr/perso/nrougier/from-python-to-numpy/](http://www.labri.fr/perso/nrougier/from-python-to-numpy/).\n\n",
+     "hash": "98ab814597e35805",
+     "he": "הדוגמה הזו לקוחה מתוך: [http://www.labri.fr/perso/nrougier/from-python-to-numpy/](http://www.labri.fr/perso/nrougier/from-python-to-numpy/)."
+    },
+    {
+     "id": "reading/vectorizing_loops:1:1",
+     "type": "prose",
+     "en": "To demonstrate the performance advantage of the FP paradigm, we show an example written in Python. Python is similar to JavaScript in the sense that it is a multi-paradigm language - supporting procedural, object-oriented and functional programming. In this example, we exploit Python's FP features.\n\n",
+     "hash": "54ae7866c957c56b",
+     "he": "כדי להדגים את יתרון הביצועים של פרדיגמת התכנות הפונקציונלי (Functional Programming), נציג דוגמה הכתובה ב-Python. שפת Python דומה ל-JavaScript במובן זה שהיא שפה מרובת פרדיגמות — היא תומכת בתכנות פרוצדורלי, מונחה-עצמים ופונקציונלי. בדוגמה הזו ננצל את היכולות הפונקציונליות של Python."
+    },
+    {
+     "id": "reading/vectorizing_loops:1:2",
+     "type": "prose",
+     "en": "Let's take a slightly more interesting example than map(cube): a random walk. A random walk is an important tool in statistics that is used to compute approximations of samplers for complex distributions. (See [https://en.wikipedia.org/wiki/Random_walk](https://en.wikipedia.org/wiki/Random_walk))\n\n",
+     "hash": "e93a12dffbf0ef5b",
+     "he": "ניקח דוגמה מעניינת קצת יותר מ-`map(cube)`: הילוך אקראי (random walk). הילוך אקראי הוא כלי חשוב בסטטיסטיקה, המשמש לחישוב קירובים של דוגמים (samplers) עבור התפלגויות מורכבות. (ראו [https://en.wikipedia.org/wiki/Random_walk](https://en.wikipedia.org/wiki/Random_walk))"
+    },
+    {
+     "id": "reading/vectorizing_loops:1:3",
+     "type": "prose",
+     "en": "(In particular, random walks can be used to derive an efficient approximation of the PageRank algorithm which is used by Google to rank search results - see [https://en.wikipedia.org/wiki/PageRank](https://en.wikipedia.org/wiki/PageRank)).\n\n",
+     "hash": "0f01b0cfdaad7b04",
+     "he": "(בפרט, אפשר להשתמש בהילוכים אקראיים כדי לגזור קירוב יעיל לאלגוריתם PageRank, שבו משתמשת Google לדירוג תוצאות חיפוש — ראו [https://en.wikipedia.org/wiki/PageRank](https://en.wikipedia.org/wiki/PageRank))."
+    }
+   ],
+   "headingHe": "PPL 2021 - שבוע מס' 1"
+  },
+  {
+   "id": "reading/vectorizing_loops:2",
+   "depth": 2,
+   "headingEn": "Object-oriented Approach",
+   "raw": "## Object-oriented Approach\n\n",
+   "blocks": [
+    {
+     "id": "reading/vectorizing_loops:2:0",
+     "type": "prose",
+     "en": "One possible object-oriented approach would be to define a `RandomWalker` class and to write a `walk` method that would return the current position after each (random) steps. It's nice, it's readable, but it is slow:\n\n",
+     "hash": "2bf8ac9aaf936446",
+     "he": "גישה מונחית-עצמים אפשרית אחת היא להגדיר מחלקה `RandomWalker` ולכתוב מתודה `walk` שמחזירה את המיקום הנוכחי אחרי כל צעד (אקראי). זה נחמד, זה קריא, אבל זה איטי:"
+    },
+    {
+     "id": "reading/vectorizing_loops:2:1",
+     "type": "code",
+     "en": "```python\nimport random\n\nclass RandomWalker:\n    # Constructor\n    def __init__(self):\n        self.position = 0\n\n    # Walk n steps forward from 0 - each step updates the state of the object with a random increment.\n    def walk(self, n):\n        self.position = 0\n        for i in range(n):\n            yield self.position\n            self.position += 2 * random.randint(0, 1) - 1\n```\n\n",
+     "hash": "dceb81f5f444d36f",
+     "lang": "python",
+     "noteHe": "הקוד מציג את המימוש מונחה-העצמים של ההילוך האקראי. המחלקה `RandomWalker` מחזיקה שדה מצב (state) יחיד בשם `position`, שהבנאי (constructor) `__init__` מאתחל ל-0. המתודה `walk(n)` מאפסת את המיקום ואז מבצעת לולאה של `n` צעדים: בכל איטרציה היא קודם מחזירה את המיקום הנוכחי באמצעות `yield`, ואז מעדכנת את המצב בתוספת אקראית — הביטוי `random.randint(0, 1)` מגריל 0 או 1, ולכן `2 * random.randint(0, 1) - 1` נותן ‎-1 או ‎+1 בהסתברות שווה. שימו לב שזהו קוד אימפרטיבי מובהק: כל צעד משנה (mutation) את מצב האובייקט. `yield` הופך את המתודה לגנרטור (generator) — היא \"מחזירה\" ערך אך ממשיכה מאותה נקודה בקריאה הבאה, כפי שיוסבר בהמשך העמוד."
+    },
+    {
+     "id": "reading/vectorizing_loops:2:2",
+     "type": "prose",
+     "en": "The `RandomWalker` object encapsulates the state of the object, which contains a single field `position`.\nThe method `walk()` describes how to advance to the next step in a stochastic manner:\n\n",
+     "hash": "28d289dd64649acb",
+     "he": "האובייקט `RandomWalker` עוטף (מכמס) את מצב האובייקט, שמכיל שדה יחיד `position`.\nהמתודה `walk()` מתארת כיצד להתקדם לצעד הבא באופן סטוכסטי:"
+    },
+    {
+     "id": "reading/vectorizing_loops:2:3",
+     "type": "prose",
+     "en": "$$position_{n+1} = position_{n} + 2 \\times random(0,1) - 1$$\n\n",
+     "hash": "4c18b682e5254665",
+     "he": "$$position_{n+1} = position_{n} + 2 \\times random(0,1) - 1$$"
+    },
+    {
+     "id": "reading/vectorizing_loops:2:4",
+     "type": "prose",
+     "en": "This relation means that at each step, we randomly select a direction $$+1$$ or $$-1$$ and move left or right\naccordingly.  After $$n$$ steps, we observe the position reached.\n\n",
+     "hash": "addb24107ab61742",
+     "he": "משמעות היחס הזה היא שבכל צעד אנו בוחרים באקראי כיוון $$+1$$ או $$-1$$ וזזים ימינה או שמאלה בהתאם. אחרי $$n$$ צעדים אנו בודקים לאיזה מיקום הגענו."
+    },
+    {
+     "id": "reading/vectorizing_loops:2:5",
+     "type": "prose",
+     "en": "We will explain the behavior of `yield` in Chapter 4, when introducing advanced control flow (lazy evaluation and generators).  For now, think of `yield` as a way to do `return`, but when the function is invoked next time, it will continue on the line after the `yield`.\n\n",
+     "hash": "87dfdca6f7c7bff9",
+     "he": "את ההתנהגות של `yield` נסביר בפרק 4, כשנציג מנגנוני בקרת זרימה מתקדמים (הערכה עצלה (lazy evaluation) וגנרטורים (generators)). בינתיים, חשבו על `yield` כדרך לבצע `return`, אלא שבפעם הבאה שהפונקציה תיקרא, היא תמשיך מהשורה שאחרי ה-`yield`."
+    },
+    {
+     "id": "reading/vectorizing_loops:2:6",
+     "type": "prose",
+     "en": "Let us test this OO version:\n\n",
+     "hash": "7978e439f8573066",
+     "he": "נבחן את הגרסה מונחית-העצמים הזו:"
+    },
+    {
+     "id": "reading/vectorizing_loops:2:7",
+     "type": "code",
+     "en": "```python\n%%timeit\nwalker = RandomWalker()\nwalk = [position for position in walker.walk(1000)]\n```\n\n",
+     "hash": "5ef34e3447375c51",
+     "lang": "python",
+     "noteHe": "כאן מודדים את זמן הריצה של הגרסה מונחית-העצמים. `%%timeit` היא פקודת \"קסם\" של Jupyter/IPython שמריצה את התא פעמים רבות ומדווחת את זמן הריצה הממוצע וסטיית התקן. הקוד יוצר מופע של `RandomWalker`, ואז אוסף באמצעות list comprehension את 1000 המיקומים שהגנרטור `walker.walk(1000)` מניב, לתוך הרשימה `walk`."
+    },
+    {
+     "id": "reading/vectorizing_loops:2:8",
+     "type": "code",
+     "en": "```\n1.01 ms ± 85.2 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "a4b7c31bdc136124",
+     "noteHe": "זהו הפלט של `%%timeit`: הגרסה מונחית-העצמים רצה בממוצע כ-1.01 מילישניות (עם סטיית תקן של 85.2 מיקרושניות, על פני 7 הרצות של 1000 חזרות כל אחת). זהו קו הבסיס שאליו נשווה את הגרסאות הבאות."
+    }
+   ],
+   "headingHe": "הגישה מונחית העצמים"
+  },
+  {
+   "id": "reading/vectorizing_loops:3",
+   "depth": 2,
+   "headingEn": "Functional Approach",
+   "raw": "## Functional Approach\n\n",
+   "blocks": [
+    {
+     "id": "reading/vectorizing_loops:3:0",
+     "type": "prose",
+     "en": "For such a simple problem, we can probably save the class definition and concentrate only on the walk method that computes successive positions after each random step.\n\n",
+     "hash": "ca9a1809925923c0",
+     "he": "לבעיה פשוטה כזו, כנראה שאפשר לוותר על הגדרת המחלקה ולהתרכז רק במתודת ה-walk שמחשבת את המיקומים העוקבים אחרי כל צעד אקראי."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:1",
+     "type": "prose",
+     "en": "Instead of generating positions one at a time on the basis of the state of the object, this approach accumulates the successive positions into a list.\n\n",
+     "hash": "bcd2409e15ee90c1",
+     "he": "במקום לייצר את המיקומים אחד-אחד על סמך מצב האובייקט, הגישה הזו צוברת את המיקומים העוקבים לתוך רשימה."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:2",
+     "type": "code",
+     "en": "```python\ndef random_walk(n):\n    position = 0\n    walk = [position]\n    for i in range(n):\n        position += 2 * random.randint(0, 1) - 1\n        walk.append(position)\n    return walk\n```\n\n",
+     "hash": "e176a50bab80ba96",
+     "lang": "python",
+     "noteHe": "זו גרסה כפונקציה רגילה, ללא מחלקה: `random_walk(n)` מתחילה ממיקום 0, יוצרת רשימה `walk` שמכילה את מיקום ההתחלה, ובכל אחת מ-`n` האיטרציות מגרילה צעד של ‎±1 (שוב בעזרת `2 * random.randint(0, 1) - 1`), מעדכנת את `position` ומוסיפה אותו לסוף הרשימה עם `append`. בסוף היא מחזירה את רשימת כל המיקומים. שימו לב: למרות שנפטרנו מהמחלקה, הפונקציה עדיין אימפרטיבית — היא משתמשת בלולאה ומשנה (mutation) את המשתנים המקומיים `position` ו-`walk` בכל צעד."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:3",
+     "type": "prose",
+     "en": "This new method saves some CPU cycles but not that much because this function is pretty much the same as in the object-oriented approach and the few cycles we saved probably come from the inner Python object-oriented machinery.\n\n",
+     "hash": "5930e28ca6040bd8",
+     "he": "הגרסה החדשה הזו חוסכת מעט מחזורי מעבד, אך לא הרבה — כי הפונקציה הזו כמעט זהה לזו שבגישה מונחית-העצמים, ומעט המחזורים שנחסכו נובעים כנראה מהמנגנון הפנימי של מונחה-העצמים ב-Python."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:4",
+     "type": "code",
+     "en": "```python\n%%timeit\nrandom_walk(n=1000)\n```\n\n",
+     "hash": "adc8fc5aa1686346",
+     "lang": "python",
+     "noteHe": "מדידת זמן הריצה של הגרסה הפונקציית-הרגילה עם 1000 צעדים, שוב באמצעות `%%timeit`, כדי להשוות לקו הבסיס של הגרסה מונחית-העצמים."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:5",
+     "type": "code",
+     "en": "```\n916 µs ± 54.3 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "33e8f0c5d8a68a80",
+     "noteHe": "הפלט: כ-916 מיקרושניות בממוצע — שיפור קל בלבד לעומת 1.01 מילישניות של הגרסה מונחית-העצמים. החיסכון הקטן נובע מכך שוויתרנו על תקורת מנגנון האובייקטים של Python, אבל מבנה החישוב עצמו לא השתנה."
+    },
+    {
+     "id": "reading/vectorizing_loops:3:6",
+     "type": "prose",
+     "en": "This function is in fact not very *functional* - it uses a loop and it mutates the `walk` local variable.\n\n",
+     "hash": "8f6973577901606a",
+     "he": "הפונקציה הזו למעשה לא ממש *פונקציונלית* — היא משתמשת בלולאה ומבצעת שינוי מצב (mutation) של המשתנה המקומי `walk`."
+    }
+   ],
+   "headingHe": "הגישה הפונקציונלית"
+  },
+  {
+   "id": "reading/vectorizing_loops:4",
+   "depth": 2,
+   "headingEn": "Vectorized Approach",
+   "raw": "## Vectorized Approach\n\n",
+   "blocks": [
+    {
+     "id": "reading/vectorizing_loops:4:0",
+     "type": "prose",
+     "en": "But we can do better using the itertools Python module that offers a set of functions creating iterators for smart looping. \n\n",
+     "hash": "556d7fffbb5d1efb",
+     "he": "אבל אפשר לעשות טוב יותר בעזרת מודול ה-itertools של Python, שמציע אוסף פונקציות היוצרות איטרטורים (iterators) ללולאות חכמות."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:1",
+     "type": "prose",
+     "en": "If we observe that a random walk is an *accumulation of steps*, we can rewrite the function as follows:\n\n",
+     "hash": "2f5a7fd5b925c133",
+     "he": "אם נשים לב שהילוך אקראי הוא בעצם *צבירה של צעדים*, נוכל לכתוב את הפונקציה מחדש כך:"
+    },
+    {
+     "id": "reading/vectorizing_loops:4:2",
+     "type": "prose",
+     "en": "First observe that we can sample all the decisions to move left or right all at once, using the `sample` method.\n`sample(list, n)` returns `n` random elements out of `list` (which is expected to have more than `n` elements).\n`[1, -1] * n` returns the list `[1, -1]` repeated `n` times.\n\n",
+     "hash": "a21cbdc3ea0a4956",
+     "he": "ראשית, שימו לב שאפשר להגריל את כל ההחלטות אם לזוז שמאלה או ימינה בבת אחת, באמצעות המתודה `sample`.\nהקריאה `sample(list, n)` מחזירה `n` איברים אקראיים מתוך `list` (שאמורה להכיל יותר מ-`n` איברים).\nהביטוי `[1, -1] * n` מחזיר את הרשימה `[1, -1]` משוכפלת `n` פעמים."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:3",
+     "type": "code",
+     "en": "```python\nimport random\nrandom.sample([1, -1] * 10, 10)  # ==> [-1, -1, 1, 1, -1, 1, 1, -1, -1, -1]\n```\n\n",
+     "hash": "9c554af5c7e3f95c",
+     "lang": "python",
+     "noteHe": "דוגמה לשימוש ב-`random.sample`: הביטוי `[1, -1] * 10` יוצר רשימה של 20 איברים (הרשימה `[1, -1]` משוכפלת 10 פעמים), ו-`sample` בוחרת ממנה 10 איברים באקראי. התוצאה היא רשימה של 10 צעדים אקראיים, כל אחד ‎+1 או ‎-1 — כלומר כל החלטות הכיוון של ההילוך הוגרלו מראש, בבת אחת, בלי לולאה."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:4",
+     "type": "code",
+     "en": "```python\nfrom itertools import accumulate\n\ndef random_walk_faster(n=1000):\n    steps = random.sample([1, -1] * n, n)\n    return list(accumulate(steps))\n```\n\n",
+     "hash": "1ec1c605e09d0a30",
+     "lang": "python",
+     "noteHe": "זו הגרסה הפונקציונלית: `random_walk_faster` מגרילה תחילה את כל `n` הצעדים בבת אחת לתוך `steps` (רשימה של ערכי ‎±1), ואז מפעילה עליהם את `accumulate` מהמודול `itertools`. הפונקציה `accumulate` מחשבת סכומים מצטברים: האיבר ה-i בתוצאה הוא סכום `i` הצעדים הראשונים — בדיוק המיקום אחרי `i` צעדים. `list(...)` ממירה את האיטרטור שמוחזר לרשימה ממשית. אין כאן לולאה מפורשת ואין שינוי מצב (mutation) — הקוד מצהיר *מה* מחושב (צבירה של צעדים), לא *איך*."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:5",
+     "type": "prose",
+     "en": "Note that this function does not use mutation anymore - we initialize the local variable steps with a list of the expected size (`n` elements).\n\n",
+     "hash": "2a190af26c99f33a",
+     "he": "שימו לב שהפונקציה הזו כבר אינה משתמשת בשינוי מצב (mutation) — אנו מאתחלים את המשתנה המקומי steps עם רשימה בגודל הצפוי (`n` איברים)."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:6",
+     "type": "prose",
+     "en": "Instead of looping for picking sequential steps and add them to the current position, we first generated all the steps at once and used the `accumulate` function to compute all the positions.\n\n",
+     "hash": "378c70666883396b",
+     "he": "במקום לרוץ בלולאה שמגרילה צעדים בזה אחר זה ומוסיפה אותם למיקום הנוכחי, ייצרנו תחילה את כל הצעדים בבת אחת והשתמשנו בפונקציה `accumulate` כדי לחשב את כל המיקומים."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:7",
+     "type": "prose",
+     "en": "`accumulate` is the third most useful array or list operator most commonly used in FP (after `map` and `filter`) - it consists of reducing a list of values to a single value, by applying the same operation successively.  In our case, `accumulate([1, 2, 3])` computes the sum `0 + 1 + 2 + 3` (where 0 is the neutral element of the addition). Naturally, we can use `accumulate` to perform other operations than `+` and start with other values than `0`.\n\n",
+     "hash": "d01331a253379506",
+     "he": "`accumulate` הוא האופרטור השלישי בחשיבותו על מערכים או רשימות מבין הנפוצים בתכנות פונקציונלי (אחרי `map` ו-`filter`) — מהותו היא רדוקציה (reduction) של רשימת ערכים לערך יחיד, על ידי הפעלה חוזרת ונשנית של אותה פעולה. במקרה שלנו, `accumulate([1, 2, 3])` מחשב את הסכום `0 + 1 + 2 + 3` (כאשר 0 הוא איבר היחידה של החיבור). כמובן, אפשר להשתמש ב-`accumulate` עם פעולות אחרות מלבד `+` ולהתחיל מערכים אחרים מלבד `0`."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:8",
+     "type": "prose",
+     "en": "In fact, we've just vectorized our function. We got rid of the loop and this makes things faster:\n\n",
+     "hash": "3d5cdd6819451076",
+     "he": "למעשה, זה עתה ביצענו וקטוריזציה (vectorization) של הפונקציה. נפטרנו מהלולאה, וזה מאיץ את הריצה:"
+    },
+    {
+     "id": "reading/vectorizing_loops:4:9",
+     "type": "code",
+     "en": "```python\n%%timeit\nrandom_walk_faster(n=1000)\n```\n\n",
+     "hash": "7a14d5f6d81cb1bc",
+     "lang": "python",
+     "noteHe": "מדידת זמן הריצה של הגרסה הפונקציונלית המבוססת על `accumulate`, עם 1000 צעדים, לשם השוואה לשתי הגרסאות הקודמות."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:10",
+     "type": "code",
+     "en": "```\n499 µs ± 19.6 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)\n```\n\n",
+     "hash": "939ce2cd1d413991",
+     "noteHe": "הפלט: כ-499 מיקרושניות בממוצע — בערך מחצית מזמן הריצה של הגרסה הקודמת (916 מיקרושניות). ההימנעות מלולאה מפורשת ב-Python חסכה כ-50% מזמן החישוב."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:11",
+     "type": "prose",
+     "en": "We gained ~50% of computation-time compared to the previous version, not so bad. \n\n",
+     "hash": "e28a969ce17c8276",
+     "he": "הרווחנו כ-50% מזמן החישוב בהשוואה לגרסה הקודמת — לא רע בכלל."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:12",
+     "type": "prose",
+     "en": "But the advantage of this new version is that it makes numpy vectorization super simple. We just have to translate `itertools` call into `numpy` ones.\n\n\n",
+     "hash": "40ceb0f0a1e3ba04",
+     "he": "אבל היתרון של הגרסה החדשה הזו הוא שהיא הופכת וקטוריזציה באמצעות numpy לפשוטה במיוחד. כל שעלינו לעשות הוא לתרגם את הקריאות ל-`itertools` לקריאות מקבילות ב-`numpy`."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:13",
+     "type": "code",
+     "en": "```python\nimport numpy as np\n\ndef random_walk_fastest(n=1000):\n    steps = 2 * np.random.randint(0, 2, size=n) - 1\n    return np.cumsum(steps)\n```\n\n",
+     "hash": "d79f252787b2916c",
+     "lang": "python",
+     "noteHe": "הגרסה הווקטורית ב-NumPy, מבנה זהה לקודמתה אבל עם פעולות על מערכים שלמים: `np.random.randint(0, 2, size=n)` מייצר בבת אחת מערך של `n` ערכים אקראיים 0 או 1 (הגבול העליון 2 אינו נכלל), והביטוי `2 * ... - 1` ממיר את כולם לצעדים של ‎±1 בפעולה וקטורית אחת על כל המערך. `np.cumsum` היא המקבילה של `accumulate` — היא מחשבת סכום מצטבר (cumulative sum) ומחזירה את כל המיקומים לאורך ההילוך. כל הפעולות מתבצעות בקוד C מקומפל ומאופטם על מערכים רציפים בזיכרון, ולא באיטרציה איטית של Python — ומכאן ההאצה הדרמטית."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:14",
+     "type": "prose",
+     "en": "Not too difficult, but we gained a factor ~500x using NumPy:\n\n\n",
+     "hash": "c093ba917a5db507",
+     "he": "לא קשה במיוחד, אבל בזכות NumPy הרווחנו האצה בפקטור של פי ~500:"
+    },
+    {
+     "id": "reading/vectorizing_loops:4:15",
+     "type": "code",
+     "en": "```python\n%%timeit\nrandom_walk_fastest(n=1000)\n```\n\n",
+     "hash": "1e9a9aa09faa689f",
+     "lang": "python",
+     "noteHe": "מדידת זמן הריצה של גרסת ה-NumPy הווקטורית, שוב עם 1000 צעדים, להשוואה מול כל הגרסאות הקודמות."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:16",
+     "type": "code",
+     "en": "```\n31 µs ± 3.72 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)\n```\n\n",
+     "hash": "751c51e03d134509",
+     "noteHe": "הפלט: כ-31 מיקרושניות בלבד — פי ~16 מהר יותר מגרסת ה-`accumulate` (499 מיקרושניות) ופי ~30 מהגרסה מונחית-העצמים המקורית (1.01 מילישניות). זהו הרווח של ביצוע החישוב כולו בפעולות מערך וקטוריות של NumPy במקום בלולאות של Python."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:17",
+     "type": "prose",
+     "en": "This specific example demonstrates the performance benefit of vectorization. \n\n",
+     "hash": "eaae870210a7720c",
+     "he": "הדוגמה הספציפית הזו מדגימה את יתרון הביצועים של וקטוריזציה."
+    },
+    {
+     "id": "reading/vectorizing_loops:4:18",
+     "type": "prose",
+     "en": "The key take-away message though, is that because the functional version of the program is declarative (it indicates what we intend to compute, not exactly how to compute it), we can decide at runtime to use different, more effective ways to compute the process described by the code, that take advantage of the processors and of concurrency.\n",
+     "hash": "447a4f8977c1d878",
+     "he": "אבל המסר המרכזי שיש לקחת מכאן הוא שמכיוון שהגרסה הפונקציונלית של התוכנית היא דקלרטיבית (declarative) — היא מציינת *מה* אנו מתכוונים לחשב, ולא בדיוק *איך* לחשב זאת — אנו יכולים להחליט בזמן ריצה להשתמש בדרכים שונות ויעילות יותר לחישוב התהליך שהקוד מתאר, דרכים שמנצלות את המעבדים ואת המקביליות (concurrency)."
+    }
+   ],
+   "headingHe": "הגישה הווקטורית"
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+{
+ "id": "interpreters/src/cps/racket/sumlist.rkt",
+ "repo": "interpreters",
+ "path": "src/cps/racket/sumlist.rkt",
+ "lang": "scheme",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/cps/racket/sumlist.rkt",
+ "code": "#lang racket\n(require racket/trace)\n(define id (lambda (x) x))\n\n;; Signature: sumlist(li)\n;; Purpose: Sum the elements of a number list. \n;; If the list includes a non number element -- produce an error.\n;; Type: [List -> Number union ???]\n(define sumlist\n  (lambda (li)\n    (cond ((empty? li) 0)\n          ((not (number? (car li))) (error \"non numeric value!\"))\n          (else (+ (car li) (sumlist (cdr li)))))))\n\n(trace sumlist)\n\n(define sumlist2\n  (lambda (li)\n    (letrec ((sumlist$\n               ;; [List * [Number -> Number] * [Empty -> Void] -> (Number | Void)]\n               (lambda (li succ-cont fail-cont)\n                 (cond ((empty? li) (succ-cont 0))\n                       ((number? (car li))\n                        (sumlist$ (cdr li)\n                                  (lambda (sum-cdr) ;success continuation\n                                    (succ-cont (+ (car li) sum-cdr)))\n                                  fail-cont))\n                       ;; error condition: invoke error handler\n                       (else (fail-cont))))))\n      (trace sumlist$)\n      (sumlist$ li\n                 (lambda (x) x)\n                 (lambda () (display \"non numeric value!\"))))))\n\n;; In the CPS style, we handle errors by using continuations -\n;; instead of using one continuation as we did in the transformation discussed above,\n;; we carry 2 continuations: one for the successful computation path, and one for error conditions.\n;; This is similar to the definition of Optional with the either operator in TypeScript\n\n\n",
+ "titleHe": "sumlist — סכום רשימה, ושתי המשכיות: הצלחה וכישלון",
+ "descriptionHe": "שייך ל-**4.2 (CPS)**, והוא ההמשך הישיר של `fact.rkt`: אותו מסלול בדיוק — גרסה רקורסיבית רגילה ואחריה גרסת CPS — אבל הפעם על רשימה ועם תוספת אחת מהותית. `sumlist2` נושאת **שתי** המשכיות במקום אחת: `succ-cont` למסלול המוצלח ו-`fail-cont` למקרה שנתקלנו באיבר שאינו מספר.\n\nזו הדגמה קטנה ומדויקת של הרעיון שהקורס חוזר אליו שוב ושוב: **טיפול בשגיאות אינו מנגנון נפרד — הוא רק בחירה של המשכית**. הקובץ עצמו אומר זאת בהערה שבסופו, ומקשר ל-`Optional`/`either` של TypeScript; השוו ל-`shared/result.ts` ו-`shared/optional.ts` מפרק 2, שפותרים בדיוק את אותה בעיה בכיוון ההפוך — שם הכישלון הוא **ערך** מוחזר, וכאן הוא **פונקציה** שנקראת.",
+ "annotations": [
+  {
+   "line": 5,
+   "noteHe": "הגרסה הרקורסיבית הרגילה, ונקודת ההשוואה לכל השאר. שימו לב לחתימת הטיפוס בשורה 8: `[List -> Number union ???]` — סימני השאלה הם **התוכן, לא רשלנות**. מה בדיוק מחזירה הפונקציה כשהיא נתקלת באיבר לא-מספרי? `(error …)` אינו מחזיר ערך כלל אלא מקפיץ את זרימת הבקרה החוצה, אל מחוץ לכל הקריאות הרקורסיביות שנצברו — ולכן אין טיפוס שאפשר לכתוב שם. כל שאר הקובץ הוא התשובה לסימני השאלה האלה. השוו ל-3.1: שם ראינו שמערכת טיפוסים מחייבת שלכל ביטוי יהיה טיפוס, וקריאה ל-`error` היא בדיוק המקום שבו זה נשבר."
+  },
+  {
+   "line": 17,
+   "noteHe": "‏`sumlist2` בנויה בשתי שכבות, וזו תבנית שכדאי לזהות: פונקציה חיצונית שהחתימה שלה זהה למקורית (מקבלת רק `li`), ובתוכה `letrec` שמגדיר את גרסת ה-CPS האמיתית `sumlist$`. השורות 31–33 הן ה\"הפעלה\" — הן מספקות את ההמשכיות ההתחלתיות. כך המשתמש אינו צריך לדעת דבר על המשכיות, בדיוק כפי ש-`sumlist` הרגילה לא חשפה את המחסנית. ה-`letrec` נחוץ כאן משום ש-`sumlist$` קוראת לעצמה בשורה 24 — עם `let` רגיל השם `sumlist$` לא היה מוגדר בתוך גוף ה-`lambda`. זה בדיוק הנושא של 2.8, וההבדל בין `RecEnv` ל-`Box` שם."
+  },
+  {
+   "line": 21,
+   "noteHe": "‏`sumlist$` היא לב הקובץ, ושלושת הענפים שלה ממפים אחד-לאחד את שלושת הענפים של `sumlist` המקורית: מקרה הבסיס `0` הפך ל-`(succ-cont 0)`, הסכימה `(+ (car li) …)` נארזה בהמשכית חדשה, וה-`(error …)` הפך ל-`(fail-cont)`. **הנקודה החשובה ביותר כאן היא ההבדל בין שתי ההמשכיות**: `succ-cont` **גדלה** בכל צעד — כל קריאה עוטפת אותה ב-`lambda` נוספת שזוכרת את `(car li)` — בעוד `fail-cont` מועברת הלאה **ללא שינוי**. וזו כל התועלת: כשמתגלה איבר לא-מספרי, `(fail-cont)` נקראת ישירות וכל מגדל ההמשכיות שנצבר פשוט **נזרק**. הפעולות הדחויות לעולם לא יתבצעו. זו קפיצה לא-מקומית (non-local control flow) שמומשה בתוך השפה עצמה, בלי מנגנון מיוחד — וזה הרעיון שמאחורי `try`/`catch`, שנראה אותו שוב בצורתו המלאה ב-`L7`."
+  },
+  {
+   "line": 31,
+   "noteHe": "שתי ההמשכיות ההתחלתיות, ושתיהן שוות מבט. `(lambda (x) x)` היא פונקציית הזהות — ההמשכית ההתחלתית היא **תמיד** הזהות, כי ברמה העליונה \"מה שנשאר לעשות אחרי החישוב\" הוא כלום. ⚠️ שימו לב ש-`id` כבר הוגדרה בשורה 3 בדיוק לשם כך ואינה בשימוש בשום מקום בקובץ. המשכית הכישלון, לעומת זאת, רק **מדפיסה** ומחזירה `void`, ולכן `(sumlist2 '(1 a 2))` אינו מחזיר ערך שאפשר להבדיל בין הצלחה לכישלון — הקורא רואה רק פלט על המסך. השוו ל-`Result` של פרק 2: שם הכישלון הוא ערך מוחזר שהקורא **חייב** לפרק עם `isOk`, וזה בדיוק ההבדל שההערה בשורות 35–38 מצביעה עליו. שאלת מבחן קלאסית: שתי המשכיות עם טיפוסי החזרה שונים (`Number` לעומת `Void`) הן בדיוק מה שהטיפוס `[List -> Number union ???]` בשורה 8 לא הצליח לבטא."
+  }
+ ]
+}

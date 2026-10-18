@@ -1,0 +1,24 @@
+{
+ "id": "interpreters/src/shared/parser.ts",
+ "repo": "interpreters",
+ "path": "src/shared/parser.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/shared/parser.ts",
+ "code": "/// <reference path=\"s-expression.d.ts\" />\n\nimport p, { Sexp, SexpString, Token, CompoundSexp } from \"s-expression\";\nimport { makeFailure, makeOk, Result } from \"./result\";\nimport { isString, isArray, isError } from \"./type-predicates\";\nimport { allT } from \"./list\";\n\n// s-expression returns strings quoted as \"a\" as [String: 'a'] objects\n// to distinguish them from symbols - which are encoded as 'a'\n// These are constructed using the new String(\"a\") constructor\n// and can be distinguished from regular strings based on the constructor.\nexport const isSexpString = (x: any): x is SexpString =>\n  !isString(x) && x.constructor && x.constructor.name === \"String\";\n\nexport const isToken = (x: any): x is Token => isString(x) || isSexpString(x);\nexport const isSexp = (x: any): x is Sexp => isToken(x) || isCompoundSexp(x);\nexport const isCompoundSexp = (x: any): x is CompoundSexp =>\n  isArray(x) && allT(isSexp, x);\n\nexport const parse = (x: string): Result<Sexp> => {\n  const parsed = p(x);\n  return isError(parsed) ? makeFailure(parsed.message) : makeOk(parsed);\n};\n",
+ "titleHe": "המנתח התחבירי הקונקרטי — ממחרוזת לביטוי S",
+ "descriptionHe": "**נקודת הכניסה של כל המפרשים בקורס.** עשרים וארבע שורות שהופכות מחרוזת כמו `\"(+ 1 (f x))\"` למבנה נתונים מקונן — כלומר מבצעות את **הניתוח התחבירי הקונקרטי** (concrete parsing). ומכאן ואילך `L1` עד `L5` עוסקים רק ב**תחביר המופשט**: להחליט מה המבנה המקונן הזה *אומר*.\n\nשייך ל-**2.3 (תחביר)**, והוא המקום שבו ההבחנה המרכזית של השיעור הזה מתגלמת בקוד: `parse` כאן מטפלת בסוגריים ובאסימונים, ואילו `parseL3Exp` (בקובץ ה-AST של כל שפה) מטפלת במשמעות — `if` מול `lambda` מול קריאה לפונקציה. **שני שלבים נפרדים לגמרי, וזו אחת השאלות הנפוצות במבחן.**\n\nהקובץ עצמו כמעט אינו עושה עבודה: הניתוח האמיתי נעשה בספרייה החיצונית `s-expression`, וכל תפקידו הוא **לעטוף אותה בבטחה** — לזהות מה כל ערך שהיא מחזירה, ולהמיר כישלון ל-`Result` במקום להשאיר אובייקט `Error` משוטט. כדאי לקרוא אותו מיד אחרי `s-expression.d.ts`, שהוא ההצהרה שהקובץ הזה מיישם עליה את כל הבדיקות.",
+ "annotations": [
+  {
+   "line": 8,
+   "noteHe": "**הפונקציה המחוכמת בקובץ, ובלעדיה השפה שבורה.** ההערה מעליה מסבירה את הבעיה: הספרייה מחזירה את המחרוזת `\"a\"` שבקוד המקור כאובייקט `[String: 'a']`, ואת הסמל `a` כמחרוזת רגילה `'a'`. שני דברים שונים לחלוטין בשפה — מזהה מול ליטרל מחרוזת — ובלי ההבחנה הזאת `(define \"x\" 5)` היה נראה זהה ל-`(define x 5)`.\n\nוהתחבולה: `!isString(x) && x.constructor.name === \"String\"`. החלק הראשון פוסל מחרוזת פרימיטיבית, והשני מוודא שזה בכל זאת אובייקט מסוג `String`. שימו לב **למה אי אפשר להשתמש ב-`typeof`** — הוא מחזיר `\"object\"` לשניהם... לא, בדיוק להפך: `typeof 'a'` הוא `\"string\"` ו-`typeof new String('a')` הוא `\"object\"`, ולכן `typeof` **כן** מבדיל, ו-`isString` היא בדיוק זה. הבדיקה השנייה נחוצה כדי לפסול אובייקטים אחרים — מערך, למשל — שגם עליהם `isString` תחזיר `false`.\n\n⚠️ שתי נקודות תורפה. ראשית, `x.constructor` נקרא על ערך מטיפוס `any`, ולכן `isSexpString(null)` **קורסת** במקום להחזיר `false` — והשמירה `x.constructor &&` מגינה רק מפני `constructor` חסר, לא מפני `x` חסר. שנית, ההשוואה היא על **שם** ה-constructor כמחרוזת, וזו בדיקה שברירה: היא נשברת בסביבה שבה יש יותר מהקשר ריצה אחד, ובקוד מוקטן (minified). התבנית `instanceof String` הייתה חזקה יותר. במפרש לימודי זה בטוח, אבל שווה לזהות את הריח."
+  },
+  {
+   "line": 15,
+   "noteHe": "שלושת הפרדיקטים האלה הם **ההגדרה האינדוקטיבית מ-`s-expression.d.ts`, מתורגמת לקוד רץ**. שווה להעמיד אותם זה מול זה:\n- אסימון = מחרוזת או `SexpString`;\n- ביטוי מורכב = מערך שכל איבריו הם ביטויי S;\n- ביטוי S = אסימון או ביטוי מורכב.\n\nשימו לב ש-`isSexp` ו-`isCompoundSexp` הן **רקורסיביות הדדית**, ושהרקורסיה מסתיימת רק בזכות מבנה הקלט — כל צלילה עוברת למערך פנימי יותר. זו אותה תבנית בדיוק שראינו ב-`term?`/`compound-term?` של המפרש הלוגי בפרק 5.\n\nושימו לב איך `allT` (מ-`list.ts`) עושה כאן את כל העבודה: בלעדיה, \"מערך שכל איבריו הם ביטויי S\" היה דורש לולאה והמרת טיפוס כפויה. **זו הסיבה שהפונקציה הקטנה ההיא קיימת.**"
+  },
+  {
+   "line": 20,
+   "noteHe": "‏`parse` היא כל הממשק החיצוני של הקובץ, ושתי שורות: קרא לספרייה, ואם קיבלת `Error` — המר ל-`Failure`, אחרת ל-`Ok`.\n\n**וזו נקודה עקרונית שכדאי לשנן.** הספרייה מדווחת על כישלון בדרך של JavaScript — מחזירה אובייקט `Error` שאינו מופיע בטיפוס המוצהר. הקובץ הזה הוא ה**גבול** שבו המוסכמה הזרה מומרת למוסכמה של הפרויקט: `Result<T>`, שהכישלון בו הוא **ערך רגיל** ולא חריגה. מכאן והלאה, כל שאר הקוד במפרש כותב `bind(parse(s), parseL3Exp)` ואינו נוגע ב-`try`/`catch` לעולם.\n\nהשוו למה שראינו בפרק 5: שם `try` ב-`auxiliary.rkt` מילא בדיוק את התפקיד הזה, והמיר `error` של Racket ל-`'fail` שאפשר לסנן. **אותו דפוס בדיוק, בשתי שפות ובשני פרקים — לתרגם כישלון לערך בקצה המערכת, פעם אחת.**"
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "id": "interpreters/src/logic/README.md",
+ "repo": "interpreters",
+ "path": "src/logic/README.md",
+ "lang": "markdown",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/logic/README.md",
+ "code": "Prolog Interpreter in Scheme (Racket)\n\n# How to run\n* Clone this in a folder\n* Launch DrRacket\n* Load the file \"answer-query-test.rkt\"\n* Run the tests - it should print\n```\n6 tests passed.\n5 tests passed.\n9 tests passed.\n```\n\n# How to read the code\n* LP-ast.rkt: AST for Logic Programming\n* LP-ast-tests.rkt: AST tests and examples\n* LP-rename.rkt: variable renaming\n* substitution-ADT.rkt: Substitution ADT\n* substitution-adt-tests.rkt: Substitution tests\n* lazy-tree-ADT.rkt: Lazy tree ADT\n* lazy-tree-ADT-tests.rkt: lazy tree tests\n* auxiliary.rkt: auxiliary functions\n* utils.rkt: Utility functions\n* unify.rkt: unification algorithm\n* term-equation-adt.rkt: term equation ADT (pair of terms)\n* unify-tests.rkt: unification tests\n* answer-query.rkt: answer-query algorithm\n* answer-query-test.rkt: answer query tests\n\nMore details in [5.3 Logic Program Interpreter](https://bguppl.github.io/interpreters/class_material/5.3LPInterpreter.html) of the PPL Course Notes.\n\n![Architecture](./LP-interpreter-architecture-diagram.jpg)\n"
+}

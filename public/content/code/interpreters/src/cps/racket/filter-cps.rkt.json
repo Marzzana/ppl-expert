@@ -1,0 +1,28 @@
+{
+ "id": "interpreters/src/cps/racket/filter-cps.rkt",
+ "repo": "interpreters",
+ "path": "src/cps/racket/filter-cps.rkt",
+ "lang": "scheme",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/cps/racket/filter-cps.rkt",
+ "code": "#lang racket\n(require racket/trace)\n(define id (lambda (x) x))\n\n#|\n(define filter\n  (lambda (pred? list)\n    (cond ((empty? list) list)\n          ((pred? (car list)) \n           (cons (car list) (filter pred? (cdr list))))\n          (else (filter pred? (cdr list))))))\n\nThe new configuration we meet is that the test part of the second branch is a user-procedure application (pred? (car list)).\nIn this case, we must change the structure of the cond so that we first compute the test value outside the cond,\nthen route the conditional inside the continuation:\n\n(define filter$\n  (lambda (pred? list cont)\n    (cond ((empty? list) (cont list))\n          (else (pred?$ (car list)\n                  (lambda (pred-res)\n                    <<CPS-transformation \n                    (cond (pred-res (cons (car list) (filter pred? (cdr list))))\n                          (else (filter pred? (cdr list))))>> ))))))\n\nThe transformation here is that the cond structure is split -\nin branches which can be evaluated all in tail-form and those which follow the test evaluation.\n\n|#\n\n(define even?$\n  (lambda (x cont) (cont (even? x))))\n\n(define filter$\n  (lambda (pred?$ list cont)\n    (cond ((empty? list) (cont list))\n          (else (pred?$ (car list)\n                  (lambda (pred-res)\n                    (cond (pred-res (filter$ pred?$ (cdr list)\n                                      (lambda (filter-cdr-res)\n                                        (cont (cons (car list) filter-cdr-res)))))\n                          (else (filter$ pred?$ (cdr list) cont)))))))))\n\n(trace filter$ even?$)\n\n",
+ "titleHe": "filter-cps — מה קורה כשהתנאי עצמו הוא קריאה לפונקציית משתמש",
+ "descriptionHe": "שייך ל-**4.2 (CPS)**, והוא ההמשך הישיר של `map-cps.rkt` — אותו מבנה בדיוק (הערת בלוק שגוזרת את הטרנספורמציה, ואחריה התוצאה הסופית), אבל עם **תצורה חדשה אחת**: ב-`filter` הקריאה לפונקציית המשתמש `pred?` יושבת ב**תנאי** של ה-`cond`, לא בגוף הענף.\n\nזה מאלץ שינוי מבני שלא נדרש ב-`map`: אי אפשר \"לדחוף החוצה\" רק את התנאי ולהשאיר את ה-`cond` במקומו — ה-`cond` כולו חייב לעבור **אל תוך ההמשכית**, שם תוצאת הבדיקה כבר זמינה כערך רגיל. קִראו קודם את `map-cps.rkt`, ואז את הקובץ הזה כתוספת של מקרה אחד.",
+ "annotations": [
+  {
+   "line": 5,
+   "noteHe": "הערת הבלוק (שורות 5–29) היא הגזירה, בדיוק כמו ב-`map-cps.rkt`. היא פותחת ב-`filter` המקורית, ומצביעה מיד על מה שחדש כאן: `(pred? (car list))` — קריאה לפונקציית משתמש — יושבת ב**תנאי** של הענף השני ב-`cond`, ולא בגופו. זה מקרה שלא נתקלנו בו קודם, והוא דורש שינוי מבני ולא רק עטיפה. הסיבה: בסגנון CPS תוצאה של פונקציית משתמש מגיעה אלינו רק כארגומנט של המשכית, כלומר **בתוך `lambda`** — ולכן כל מה שתלוי בתוצאה הזאת, ובכלל זה מבנה ההסתעפות עצמו, חייב לעבור לתוך אותה `lambda`. שורות 26–27 מנסחות זאת כפיצול: הענפים שכולם בצורת זנב נשארים בחוץ, וכל מה שבא **אחרי** הערכת התנאי עובר פנימה."
+  },
+  {
+   "line": 17,
+   "noteHe": "גרסת הביניים — שוב עם מציין מקום בסוגריים משולשים, ושוב **אינה קוד רץ**. הצעד שנעשה: ה-`cond` המקורי היה בעל שלושה ענפים, וכאן הוא הצטמצם לשניים — מקרה הבסיס נשאר בחוץ (הוא אינו תלוי בבדיקה), וכל היתר התכווץ ל-`else` יחיד שקורא לפרדיקט. ה-`cond` שנעלם לא נמחק אלא **נדד פנימה**, אל תוך ההמשכית בשורות 23–24, ושם הוא בודק את `pred-res` — ערך בוליאני רגיל. שימו לב שההסתעפות עצמה אינה זקוקה לטיפול CPS: `cond` הוא צורה מיוחדת ולא קריאה לפונקציה, ולכן ברגע שהתנאי הוא ערך, הוא חוזר להיות פשוט. ⚠️ טעות בחומר: החתימה בשורה 18 מכריזה על הפרמטר `pred?` בעוד הגוף בשורה 20 קורא ל-`pred?$`. בגרסה הסופית (שורה 35) זה תוקן ל-`pred?$` בשני המקומות. אין \"לתקן\" כאן דבר — רק לשים לב."
+  },
+  {
+   "line": 31,
+   "noteHe": "‏`even?$` היא עטיפת CPS סביב הפרדיקט המובנה `even?`, והיא זהה במבנה ל-`square$` מ-`map-cps.rkt`: `(lambda (x cont) (cont (even? x)))`. זו התבנית להעברת פונקציה **פרימיטיבית** ל-CPS — פשוט קוראים לה ומעבירים את התוצאה להמשכית, בלי לפרק דבר. היא נדרשת לא משום שיש כאן מה לשפר, אלא בגלל כלל הכול-או-כלום מ-`map-cps.rkt`: `filter$` תעביר לפרדיקט שני ארגומנטים, ולכן הפרדיקט חייב לצפות לשניים. כדאי לשים לב שזו נקודת המפגש עם `L7-eval.ts` בהמשך הפרק — שם, כשהמפרש כולו עובר ל-CPS, כל פרימיטיב בשפה המפורשת מקבל בדיוק את הטיפול הזה."
+  },
+  {
+   "line": 34,
+   "noteHe": "הגרסה הסופית, וכאן נמצאת התובנה המעניינת ביותר בקובץ. השוו את שני הענפים של ה-`cond` הפנימי: כשהאיבר **מתקבל** (שורות 39–41) נבנית המשכית חדשה שזוכרת את `(car list)` כדי לחבר אותו לתוצאה — ההמשכית **גדלה**. כשהאיבר **נדחה** (שורה 42) נשלחת `cont` הלאה **ללא שינוי** — אין מה לזכור, כי האיבר לא ישתתף בתוצאה. כלומר עומק ההמשכיות שנצבר שווה למספר האיברים ש**עברו** את הסינון, לא לאורך הרשימה. זו אותה תופעה בדיוק שראינו ב-`sumlist.rkt`, שם `fail-cont` הועברה ללא שינוי — **המשכית גדלה רק כשיש עבודה דחויה אמיתית**, ובענף שהוא כבר בצורת זנב אין כזו. כדאי לשנן: מספר ה-`lambda`-ות שנוצרות הוא מדד ישיר לכמות ההקשר שהתוכנית נושאת, וזה בדיוק מה ש-4.4 יבוא לבטל בעזרת רגיסטרים."
+  }
+ ]
+}

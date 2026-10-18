@@ -1,0 +1,16 @@
+{
+ "id": "interpreters/src/L5/L5.ts",
+ "repo": "interpreters",
+ "path": "src/L5/L5.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/L5/L5.ts",
+ "code": "import { readFileSync } from \"fs\";\nimport { parseL5 } from \"./L5-ast\";\nimport { evalProgram } from \"./L5-eval\";\nimport { isClosure, valueToString, Value, Closure } from \"./L5-value\";\nimport { bind, either } from \"../shared/result\";\n\nconst filename = process.argv[2];\nif (!filename) {\n    console.error(\"Usage: L5 <filename>\");\n    process.exit(1);\n}\n\nlet source: string;\ntry {\n    source = readFileSync(filename, \"utf-8\");\n} catch (e) {\n    console.error(`Error reading file '${filename}': ${(e as Error).message}`);\n    process.exit(1);\n}\n\nconst stripComments = (x: string): string =>\n    x.replace(/;[^\\r\\n]*/g, '');\n\nconst displayClosure = (c: Closure): string => {\n    const params = c.params.map((p) => p.var).join(\" \");\n    return `<Closure (${params}) ${c.body}>`;\n};\n\nconst displayValue = (val: Value): string =>\n    isClosure(val) ? displayClosure(val) :\n    valueToString(val);\n\nconst result = bind(parseL5(stripComments(source)), evalProgram);\n\neither(\n    result,\n    (value) => console.log(displayValue(value)),\n    (message) => {\n        console.error(`Error: ${message}`);\n        process.exit(1);\n    }\n);\n",
+ "titleHe": "נקודת הכניסה של L5 — ומה שחסר בה",
+ "descriptionHe": "תוכנית ההרצה של `L5`, וכמעט העתק של `L4.ts`: אותו צינור `bind(parseL5(stripComments(source)), evalProgram)`.\n\nשייך ל-**3.1**. ⚠️ **והדבר שהכי כדאי לשים לב אליו הוא מה שאין כאן: אף קריאה לבודק הטיפוסים.** אחרי פרק שלם על בדיקת טיפוסים, תוכנית ההרצה מנתחת ומריצה — ומדלגת על `typeofExp` לגמרי.",
+ "annotations": [
+  {
+   "line": 33,
+   "noteHe": "⚠️ **השורה הזאת היא כל המפרש, ומה שחסר בה הוא הפרט המעניין: `bind(parseL5(…), evalProgram)` — בלי שום בדיקת טיפוסים.**\n\nאחרי שלושה שיעורים על מערכת טיפוסים, 986 שורות של `TExp.ts` + `L5-typecheck.ts` + `L5-type-equations.ts` + `L5-typeinference.ts`, **תוכנית ההרצה פשוט לא קוראת להם**. הצינור המלא היה אמור להיראות `bind(bind(parseL5(s), typeCheckProgram), evalProgram)` — ניתוח, **בדיקה**, ואז הרצה.\n\n**וזו התוצאה המעשית**: אפשר להריץ ב-`L5` תוכנית עם הכרזות טיפוס שגויות לחלוטין והיא תרוץ בשמחה, בדיוק כמו `L4`. הכרזות הטיפוס הן, מבחינת ההרצה, **הערות מעוטרות**.\n\nזה לא בהכרח פגם: בודק הטיפוסים נבדק דרך קובצי הבדיקות, והקורס מלמד אותו כאלגוריתם ולא ככלי. אבל שווה לדעת — ובעיקר שווה לשים לב **איפה** בצינור הוא היה אמור לשבת: **בין הניתוח להרצה, כשלב שיכול להיכשל**. זהו בדיוק המבנה של מהדר אמיתי, וזו גם התשובה לשאלה \"מה ההבדל בין שגיאת תחביר לשגיאת טיפוס\" — **שתיהן לפני ההרצה, בשני שלבים עוקבים.**\n\n(שאר הקובץ — `stripComments`, `displayClosure`, `either` — זהה ל-`L4.ts`. ⚠️ אלא ש-`displayClosure` כאן **הידרדרה**: היא מזריקה את `c.body` ישירות לתבנית מחרוזת במקום להפעיל `unparse`, ולכן היא מדפיסה `[object Object]` — בדיוק הבאג ש-`L4.ts` נוצר כדי לעקוף. **התיקון אבד בהעתקה.**)"
+  }
+ ]
+}

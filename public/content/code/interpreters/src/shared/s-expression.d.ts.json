@@ -1,0 +1,20 @@
+{
+ "id": "interpreters/src/shared/s-expression.d.ts",
+ "repo": "interpreters",
+ "path": "src/shared/s-expression.d.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/shared/s-expression.d.ts",
+ "code": "declare module 's-expression' {\n    export type SexpString = String;\n    export type Token = string | SexpString;\n    export type CompoundSexp = Sexp[];\n    export type Sexp = Token | CompoundSexp;\n\n    /*\n        The types returned by the parser are:\n        string - for any token which is not a string,\n                 according to the tokenization rules of S-expressions.\n        SexpString - for tokens of the form \"...\"\n        Sexp[] - for S-expressions that contain sub-expressions\n                 (of the form \"(<s-expr1> ... <s-exprn>)\")\n    */\n    export default function parse(x: string): Sexp;\n}",
+ "titleHe": "הצהרת טיפוסים לספריית ביטויי S — ו-String מול string",
+ "descriptionHe": "קובץ מסוג מיוחד: **`.d.ts`, קובץ הצהרות בלבד**. אין בו שום קוד שרץ — הוא רק מתאר ל-TypeScript מה הטיפוסים של ספריית JavaScript חיצונית (`s-expression`) שנכתבה בלי טיפוסים כלל.\n\nשייך ל-**2.3 (תחביר)**, והוא נקודת הכניסה של כל הקורס: כל מנתח תחבירי ב-`L1` עד `L5` מתחיל בקריאה לספרייה הזאת, שממירה מחרוזת כמו `\"(+ 1 2)\"` למבנה נתונים.\n\nזהו גם מקום טוב להבין תבנית מרכזית של TypeScript. השפה יושבת מעל JavaScript, ורוב הספריות בעולם אינן מטופסות — קובץ `.d.ts` הוא ה\"חוזה\" שמישהו כותב **בדיעבד** עבור ספרייה קיימת. שימו לב שאיש אינו מאמת אותו מול הספרייה: אם ההצהרה שגויה, המהדר יאשר בביטחון קוד שקורס בזמן ריצה. **גבול האמינות של מערכת הטיפוסים עובר כאן.**\n\n⚠️ ובתוך ארבע שורות ההגדרה מסתתרת אחת המלכודות המפורסמות של TypeScript — ההבדל בין `String` ל-`string`. ראו את ההערה.",
+ "annotations": [
+  {
+   "line": 2,
+   "noteHe": "ארבע שורות שמגדירות את כל התחביר הקונקרטי של Scheme, וכדאי לקרוא אותן מלמטה למעלה: **ביטוי S** הוא או **אסימון** או **ביטוי מורכב**; ביטוי מורכב הוא **מערך של ביטויי S** (ומכאן הרקורסיה); ואסימון הוא מחרוזת רגילה או `SexpString`.\n\nזו ההגדרה האינדוקטיבית הקלאסית של ביטויי S, ושווה לשים לב כמה היא קטנה — **כל התחביר של Scheme הוא שתי שורות**, וזו בדיוק הסיבה שהשפה נבחרה ללימוד מפרשים. השוו למה שהיה נדרש לתאר את התחביר של JavaScript.\n\n⚠️ **ועכשיו לשורה 2, שהיא הפרט המעניין בקובץ: `SexpString = String` — עם S גדולה.** ב-TypeScript `string` (קטנה) הוא טיפוס היסוד, ואילו `String` (גדולה) הוא **טיפוס האובייקט העוטף** שנוצר על ידי `new String(\"a\")`. בדרך כלל שימוש ב-`String` הוא **טעות קלאסית** שכל מדריך סגנון אוסר — אבל כאן הוא **מכוון ונחוץ**.\n\nהסיבה: הספרייה צריכה להבדיל בין שני דברים שנראים דומים בקוד המקור — הסמל `a` (מזהה) והמחרוזת `\"a\"` (ליטרל מחרוזת). היא מקודדת את הראשון כ-`string` רגיל, ואת השני כאובייקט `String`. ומכיוון ש-`typeof new String(\"a\")` הוא `\"object\"` ולא `\"string\"`, אפשר להבחין ביניהם בזמן ריצה — וזה בדיוק מה ש-`isSexpString` ב-`parser.ts` עושה, על ידי בדיקת `x.constructor.name`.\n\n**כדאי לשנן**: זו דוגמה נדירה שבה ה\"טיפוס הרע\" נבחר בכוונה, כי הוא היחיד שנושא את המידע הדרוש. ואם המנתח שלכם אי פעם מבלבל בין מזהה למחרוזת — זו הנקודה שבה לחפש."
+  },
+  {
+   "line": 15,
+   "noteHe": "‏`export default function parse(x: string): Sexp;` — **חתימה בלי גוף**, וזה כל מה שקובץ `.d.ts` יכול להכיל. ההצהרה אומרת למהדר \"קיימת פונקציה כזו, סמוך עליי\", והמימוש נמצא בחבילת JavaScript שהותקנה מ-npm.\n\n⚠️ ושימו לב למה שהחתימה **אינה** אומרת: היא מבטיחה `Sexp` תמיד, ולא מזכירה במילה שהספרייה מחזירה אובייקט `Error` כשהקלט אינו תקין. כלומר **ההצהרה הזאת שקרית** — טיפוס ההחזרה האמיתי הוא `Sexp | Error`. זו הסיבה ש-`parser.ts` **חייבת** לעטוף את הקריאה: `isError(parsed) ? makeFailure(...) : makeOk(parsed)`. בלי העטיפה הזאת, קלט שגוי היה זולג פנימה כאילו היה ביטוי תקין, והשגיאה הייתה מתפוצצת אי-שם עמוק במפרש.\n\nזו הדגמה נאה לגבול שהוזכר למעלה: **קובץ `.d.ts` הוא הבטחה, לא הוכחה.** כשהוא לא מדויק, המהדר משתף פעולה בשקט."
+  }
+ ]
+}

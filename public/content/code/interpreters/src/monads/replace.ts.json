@@ -1,0 +1,24 @@
+{
+ "id": "interpreters/src/monads/replace.ts",
+ "repo": "interpreters",
+ "path": "src/monads/replace.ts",
+ "lang": "typescript",
+ "githubUrl": "https://github.com/bguppl/interpreters/blob/master/src/monads/replace.ts",
+ "code": "// Replace item at position Offset in an array of types with the type Item.\n// This is done when we identify that a function type \"breaks\" the chain of composition.\n// $Draft is a local variable used in the recursion to accumulate the elements until the replacement.\n// We check that the length of $Draft === the desired position with \"$Draft[\"length\"] extends Offset\"\n// because we know Offset is a number - the only way to extend the type 3 for example is to be 3.\n// Else we recurse with the last item $Item pushed into $Draft and $Before containing all but the last item.\nexport type Replace<\n  T extends unknown[],\n  Offset extends number,\n  Item,\n  $Draft extends unknown[] = []\n> = $Draft[\"length\"] extends Offset\n  ? $Draft extends [any, ...infer $After]\n    ? [...T, Item, ...$After]\n    : never\n  : T extends [...infer $Before, infer $Item]\n  ? Replace<$Before, Offset, Item, [$Item, ...$Draft]>\n  : never;\n\n// Example: the type asdf is [1, 2, 3, 4, 5, 6, \"hey\", 8, 9]\ntype asdf = Replace<[1, 2, 3, 4, 5, 6, 7, 8, 9], 3, \"hey\">;\n",
+ "titleHe": "תכנות ברמת הטיפוסים — רקורסיה שרצה בזמן קומפילציה",
+ "descriptionHe": "עשרים ושתיים שורות, וכולן **טיפוס אחד**. ‏`Replace<T, Offset, Item>` מקבלת טיפוס של רשימה (tuple) ומחזירה טיפוס זהה שבו איבר אחד הוחלף. הקובץ אינו מכיל שום קוד שרץ — הוא כולו **תכנות ברמת הטיפוסים** (type-level programming), שמתבצע במלואו בזמן הקומפילציה.\n\nשייך ל-**1.5 (מונאדות)**, והוא קובץ עזר של `monad.ts`: כשמרכיבים שרשרת פונקציות, לפעמים מתגלה שפונקציה אחת \"שוברת\" את השרשרת, ואז צריך להחליף את הטיפוס שלה במיקום הזה. ‏`Replace` היא הכלי לכך.\n\nלמה שווה להסתכל עליו למרות גודלו: זו **ההדגמה הקומפקטית ביותר בקורס לכך שמערכת הטיפוסים של TypeScript היא בעצמה שפת תכנות** — ובאופן מפתיע, שפה **פונקציונלית**. יש בה רקורסיה (`Replace` קוראת לעצמה), התאמת תבניות (`infer`), צובר (`$Draft`), ותנאי (`? :`) — כלומר בדיוק ארבעת המרכיבים שהקורס בנה איתם מפרשים לאורך פרק 2, רק שכאן הם רצים לפני שהתוכנית בכלל התחילה. השוו לפרק 3: שם ראינו את **בודק הטיפוסים** של השפה; כאן רואים תוכנית שהמתכנת כתב **בתוך** מערכת הטיפוסים.",
+ "annotations": [
+  {
+   "line": 7,
+   "noteHe": "ארבעת פרמטרי הטיפוס הם למעשה **פרמטרים של פונקציה רקורסיבית**, וכדאי לקרוא אותם ככאלה: `T` הרשימה שנותרה לעבד, `Offset` המיקום המבוקש, `Item` הערך החדש, ו-`$Draft` — **צובר** (accumulator) שמתחיל ריק (`= []` הוא ערך ברירת מחדל, בדיוק כמו פרמטר אופציונלי בפונקציה רגילה).\n\nהתבנית `רקורסיה + צובר` היא בדיוק זו שהקורס מלמד מ-1.2, וה-`$` בשמות אינו תחביר — זו מוסכמה של המחבר לסמן \"משתנה פנימי לרקורסיה, לא חלק מהממשק\". שימו לב שאין כאן `let` ואין השמה: **ערך משתנה רק על ידי העברתו לקריאה הרקורסיבית הבאה**, בדיוק כמו בקוד פונקציונלי טהור. מערכת הטיפוסים אינה מאפשרת שינוי מצב כלל, ולכן אין ברירה — וזו הסיבה שהיא יוצאת שפה פונקציונלית."
+  },
+  {
+   "line": 12,
+   "noteHe": "**גוף הרקורסיה, ושווה לפרק אותו לאט.** התנאי `$Draft[\"length\"] extends Offset` הוא בדיקת העצירה, וההערה למעלה מסבירה את התחבולה: ברמת הטיפוסים אין אופרטור `===`, אבל `extends` על טיפוס מספרי מילולי (literal) הוא שקילות — הדרך היחידה ש-`3` \"מרחיב\" את `3` היא להיות `3`. **זהו הטריק שכדאי לזכור מהקובץ הזה.**\n\nהצעד הרקורסיבי, בשורה 16, מפרק את `T` לתבנית `[...infer $Before, infer $Item]` — כלומר **שולף את האיבר האחרון** ודוחף אותו לראש `$Draft`. ‏`infer` הוא התאמת התבנית של מערכת הטיפוסים, המקבילה המדויקת ל-destructuring שראינו בפרק 2.\n\nוכשמגיעים לעצירה: `$Draft extends [any, ...infer $After]` **משליך את האיבר הראשון של הצובר** — הוא זה שמוחלף — ומרכיב `[...T, Item, ...$After]`.\n\n⚠️ **ומכאן נובע דבר שהתיעוד אינו אומר: `Offset` נספר מ*סוף* הרשימה, לא מתחילתה.** הרקורסיה אוכלת מהסוף, ולכן `Offset` הוא בעצם \"כמה איברים מהסוף\". בדוגמה למטה `Offset` הוא 3 והאיבר שהוחלף הוא זה שבאינדקס 6 מתוך 9. ההערה \"Replace item at position Offset\" מטעה, ומי שיסמוך עליה יחליף את האיבר הלא נכון. **טעות שקל מאוד ליפול בה.**"
+  },
+  {
+   "line": 20,
+   "noteHe": "הדוגמה עובדת, וכדאי להריץ אותה בראש כדי לוודא שהבנתם: `Offset` הוא 3, הרשימה באורך 9, והתוצאה מחליפה את `7` — האיבר השלישי **מהסוף**.\n\nושווה לשים לב למקרה קצה אמיתי: עם `Offset` **אפס**, הבדיקה `[][\"length\"] extends 0` מצליחה מיד, אבל אז `[] extends [any, ...infer $After]` **נכשלת** — לרשימה הריקה אין איבר ראשון — והתוצאה היא `never`. כלומר **אי אפשר להחליף את האיבר האחרון**, והשגיאה אינה הודעה מובנת אלא טיפוס `never` שיצוץ במקום אחר לגמרי. אותה בעיה בדיוק כמו `term->vars` ב-5.3 שאין לה ענף `else`: כשמקרה לא-מטופל מחזיר ערך \"ריק\" במקום לזעוק, הבאג נודד. **טעות נפוצה, וקשה במיוחד לניפוי ברמת הטיפוסים** — שם אין נקודות עצירה ואין `console.log`."
+  }
+ ]
+}

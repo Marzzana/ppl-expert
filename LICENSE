@@ -24,13 +24,13 @@ SOFTWARE.
 
 Scope note
 
-This license covers the code in this repository — the reader application under
-src/ and the content pipeline under pipeline/.
+This license covers the work of this repository's author: the reader
+application under src/, the content pipeline under pipeline/, and the Hebrew
+layer under public/content/ (translations, code walkthroughs, exercises and
+glossary).
 
-It does not cover the course material that the pipeline consumes. The lesson
-pages, figures and interpreter source files of Ben-Gurion University's
-"Principles of Programming Languages" course, and any Hebrew translation
-derived from them, are the property of their respective authors. None of that
-material is distributed in this repository; it is fetched from the course's own
-public repositories at setup time and generated locally. Nothing here grants
-any right to it.
+It does not cover the underlying course material — the lesson pages, figures
+and interpreter source files of Ben-Gurion University's "Principles of
+Programming Languages" course, which are redistributed here under their own MIT
+License, Copyright (c) 2021-2023 Michael Elhadad. See NOTICE.md for the full
+attribution and license text.

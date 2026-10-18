@@ -1,0 +1,120 @@
+{
+ "id": "ps/ps1_sol",
+ "kind": "practice",
+ "sourcePath": "practice_sessions/ps1_sol.md",
+ "titleEn": "TypeScript: Complex Data Types, JSON, Map, Filter, Reduce",
+ "titleHe": "TypeScript: טיפוסי נתונים מורכבים, JSON, Map, Filter, Reduce",
+ "translated": true,
+ "sections": [
+  {
+   "id": "ps/ps1_sol:0",
+   "depth": 1,
+   "headingEn": "TypeScript: Complex Data Types, JSON, Map, Filter, Reduce",
+   "raw": "# TypeScript: Complex Data Types, JSON, Map, Filter, Reduce\n\n",
+   "blocks": [],
+   "headingHe": "TypeScript: טיפוסי נתונים מורכבים, JSON, Map, Filter, Reduce"
+  },
+  {
+   "id": "ps/ps1_sol:1",
+   "depth": 2,
+   "headingEn": "Solutions to Practical Session Exercises - Week #1",
+   "raw": "## Solutions to Practical Session Exercises - Week #1\n\n",
+   "blocks": [],
+   "headingHe": "פתרונות לתרגילי התרגול — שבוע מס' 1"
+  },
+  {
+   "id": "ps/ps1_sol:2",
+   "depth": 2,
+   "headingEn": "Exercise 1: Implementing `map` with `reduce`",
+   "raw": "## Exercise 1: Implementing `map` with `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1_sol:2:0",
+     "type": "code",
+     "en": "```typescript\nconst mapExercise = (f, elements) =>\n    elements.reduce((acc, curr) => { // reducer\n        acc.push(f(curr));\n        return acc;\n    }, []);\n\nconsole.log(mapExercise(x => x * x, [0, 1, 2, 3, 4, 5, 6])); // ==> [ 0, 1, 4, 9, 16, 25, 36 ]\n```\n\n",
+     "hash": "06422ca9789a3214",
+     "lang": "typescript",
+     "noteHe": "הפתרון מראה איך אפשר לממש את `map` בעזרת `reduce` בלבד — הרעיון המרכזי הוא ש-`reduce` הוא הכללי מבין שלושת האופרטורים, וכל השאר ניתנים למימוש באמצעותו. הפונקציה `mapExercise` מקבלת פונקציה `f` ומערך `elements`, ומפעילה `reduce` עם צוֹבֵר (accumulator) שמתחיל כמערך ריק `[]` (הארגומנט השני של `reduce`). פונקציית הצבירה (ה-reducer) מקבלת בכל צעד את הצובר `acc` ואת האיבר הנוכחי `curr`: היא מוסיפה לצובר את `f(curr)` — כלומר את תוצאת הפעלת `f` על האיבר — בעזרת `acc.push(...)`, ומחזירה את הצובר לצעד הבא. כך, אחרי מעבר על כל האיברים, מתקבל מערך חדש שבו כל איבר עבר דרך `f`, בדיוק כמו ב-`map`. בדוגמה, הפעלה עם פונקציית הריבוע `x => x * x` על `[0..6]` מחזירה את מערך הריבועים. שימו לב לנקודה החשובה: `push` משנה את המערך במקום (in-place), כלומר יש כאן שינוי מצב (mutation) — ועל כך בהערה שמתחת לקוד."
+    },
+    {
+     "id": "ps/ps1_sol:2:1",
+     "type": "prose",
+     "en": "**Note**: this version uses mutation in the reducer (`acc.push(...)`).\n\n",
+     "hash": "71ad80c338ef6108",
+     "he": "**שימו לב**: גרסה זו משתמשת בשינוי מצב (mutation) בתוך ה-reducer‏ (`acc.push(...)`)."
+    },
+    {
+     "id": "ps/ps1_sol:2:2",
+     "type": "prose",
+     "en": "Rewrite this to avoid mutation.\n\n",
+     "hash": "b2a150df39ec562a",
+     "he": "כתבו מחדש את המימוש כך שיימנע משינוי מצב (mutation)."
+    }
+   ],
+   "role": "solution",
+   "questionId": 1,
+   "headingHe": "תרגיל 1: מימוש `map` באמצעות `reduce`"
+  },
+  {
+   "id": "ps/ps1_sol:3",
+   "depth": 2,
+   "headingEn": "Exercise 2: Implementing `filter` with `reduce`",
+   "raw": "## Exercise 2: Implementing `filter` with `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1_sol:3:0",
+     "type": "code",
+     "en": "```typescript\nfunction filterExercise(pred, elements) {\n    return elements.reduce((acc, curr) => {\n        if (pred(curr)) {\n            acc.push(curr);\n        }\n        return acc;\n    }, []);\n}\n\nconsole.log(filterExercise(x => x % 2 === 0, [0, 1, 2, 3, 4, 5, 6])); // ==> [ 0, 2, 4, 6 ]\n\n// Using the more compact => notation and the ternary ( test ? then : else ) expression\nconst filter2 = (pred, elements) =>\n    elements.reduce((acc, cur) => (pred(cur) ? acc.concat(cur) : acc), []);\n\nfilter2(x => x % 2 === 0, [0, 1, 2, 3, 4]); // ==> [ 0, 2, 4 ]\n\n// Using the Ramda reduce operator instead of the array method elements.reduce()\n// With TypeScript type declarations - note the usage of Array<T>() instead of [] to denote an empty array of type T[]\nimport { reduce } from \"ramda\";\nconst filter3 = <T>(pred: (x: T) => boolean, elements: T[]) =>\n    reduce(\n        (acc, cur) => (pred(cur) ? acc.concat(cur) : acc),\n        Array<T>(),\n        elements\n    );\n\nconsole.log(filter3(x => x % 2 === 0, [0, 1, 2, 3, 4])); // ==> [ 0, 2, 4 ]\n```\n\n",
+     "hash": "3488594c50ec24ea",
+     "lang": "typescript",
+     "noteHe": "כאן מוצגות שלוש גרסאות למימוש `filter` באמצעות `reduce`, מהמפורשת ביותר ועד המטופסת ביותר. בגרסה הראשונה, `filterExercise`, הצובר מתחיל כמערך ריק, ובכל צעד ה-reducer בודק אם האיבר הנוכחי `curr` מקיים את הפרדיקט `pred`; רק אם כן — האיבר נדחף לצובר עם `acc.push(curr)`. כך לצובר נכנסים בדיוק האיברים שעוברים את הסינון (בדוגמה: הזוגיים בלבד). שימו לב שגם כאן יש mutation בגלל `push`. הגרסה השנייה, `filter2`, מקצרת: היא כתובה כפונקציית חץ (`=>`), ומחליפה את ה-`if` בביטוי משולש (ternary)‏ `pred(cur) ? acc.concat(cur) : acc` — אם הפרדיקט מתקיים מוחזר מערך **חדש** שנוצר על-ידי `concat` (ללא mutation), ואחרת מוחזר הצובר כמות שהוא. הגרסה השלישית, `filter3`, משתמשת באופרטור `reduce` של ספריית Ramda (פונקציה עצמאית שמקבלת את המערך כארגומנט אחרון, במקום המתודה `elements.reduce()`), ומוסיפה הערות טיפוסים (type annotations) של TypeScript: `filter3` היא פונקציה גנרית בפרמטר `<T>`, הפרדיקט מטופס כ-`(x: T) => boolean`. נקודה עדינה: את הצובר ההתחלתי כותבים `Array<T>()` ולא `[]`, כדי שהמפרש יסיק שטיפוסו `T[]` (מ-`[]` לבדו TypeScript לא יכול להסיק את טיפוס האיברים)."
+    },
+    {
+     "id": "ps/ps1_sol:3:1",
+     "type": "prose",
+     "en": "**Note**: Implement `filter` using `chain` and without mutation (no `push()`).\n\n",
+     "hash": "7b40caa3febbad5c",
+     "he": "**שימו לב**: ממשו את `filter` באמצעות `chain` וללא שינוי מצב (mutation) — בלי `push()`."
+    }
+   ],
+   "role": "solution",
+   "questionId": 2,
+   "headingHe": "תרגיל 2: מימוש `filter` באמצעות `reduce`"
+  },
+  {
+   "id": "ps/ps1_sol:4",
+   "depth": 2,
+   "headingEn": "Exercise 3: Implementing `some` and `every` with `map` and `reduce`",
+   "raw": "## Exercise 3: Implementing `some` and `every` with `map` and `reduce`\n\n",
+   "blocks": [
+    {
+     "id": "ps/ps1_sol:4:0",
+     "type": "code",
+     "en": "```typescript\nconst someExercise = (pred,arr) => arr.map(pred).reduce((acc,curr) => acc || curr, false);\nconst even = (x) => x % 2 === 0;\nconst arr1 = [0, 1, 2, 3];\nconst arr2 = [1, 3];\n\nconsole.log(`arr1HasEvenNumbers = ${someExercise(even, arr1)}`); // ==> arr1HasEvenNumbers = true\nconsole.log(`arr2HasEvenNumbers = ${someExercise(even, arr2)}`); // ==> arr2HasEvenNumbers = false\n\nfunction everyExercise(pred, arr) {\n    return arr.map(pred).reduce((acc, curr) => {\n        return acc && curr;\n    }, true);\n}\n\nconsole.log(`allInArr1AreEven = ${everyExercise(even, arr1)}`); // ==> allInArr1AreEven = false\nconsole.log(`allInArr3AreEven = ${everyExercise(even, arr3)}`); // ==> allInArr3AreEven = true\n\n// Every with ramda map and reduce and TypeScript types.\nimport { map, reduce } from \"ramda\";\n\nconst even = (x: number) => x % 2 === 0;\nconst arr1 = [0, 1, 2, 3];\nconst arr2 = [0, 2];\n\n// Note the requirement to cast 'true' as boolean\nconst everyExercise2 = <T>(pred: (x: T) => boolean, arr: T[]) =>\n    reduce(\n        (acc: boolean, cur: boolean) => acc && cur,\n        <boolean>true,\n        map(pred, arr)\n    );\n\nconsole.log(`allInArr1AreEven = ${everyExercise2(even, arr1)}`); // ==> allInArr1AreEven = false\nconsole.log(`allInArr2AreEven = ${everyExercise2(even, arr2)}`); // ==> allInArr2AreEven = true\n```\n",
+     "hash": "7c3be9fb9f89888e",
+     "lang": "typescript",
+     "noteHe": "הפתרון מראה איך לממש את `some` (האם **קיים** איבר שמקיים את הפרדיקט) ואת `every` (האם **כל** האיברים מקיימים אותו) כשילוב של `map` ו-`reduce`, בתבנית אחידה בת שני שלבים: קודם `arr.map(pred)` ממפה את המערך למערך של ערכים בוליאניים (`true`/`false` לכל איבר), ואחר-כך `reduce` \"מקפל\" את המערך הבוליאני לערך יחיד. ב-`someExercise` הקיפול הוא עם או לוגי — `(acc, curr) => acc || curr` — וערך התחלתי `false`: מספיק `true` אחד כדי שהתוצאה תהיה `true`, ועל מערך ריק מתקבל `false` (אין אף איבר שמקיים). ב-`everyExercise` הקיפול הוא עם וגם לוגי — `acc && curr` — וערך התחלתי `true`: מספיק `false` אחד כדי להפיל את התוצאה, ועל מערך ריק מתקבל `true` (באופן ריק, כל האיברים מקיימים). שימו לב שבשורת ה-`console.log` האחרונה של `everyExercise` הקוד המקורי מפנה ל-`arr3` שלא הוגדר בקטע — הכוונה למערך שכל איבריו זוגיים (כמו `arr2` שבהמשך), ולכן התוצאה המוצגת היא `true`. הגרסה האחרונה, `everyExercise2`, כותבת את אותו רעיון עם `map` ו-`reduce` של Ramda ועם טיפוסים של TypeScript: הפונקציה גנרית ב-`<T>`, וה-reducer מטופס במפורש `(acc: boolean, cur: boolean)`. נקודה עדינה: הערך ההתחלתי נכתב `<boolean>true` — המרה (cast) של הליטרל `true` לטיפוס `boolean` הרחב — כדי שהמפרש לא יסיק ל-`reduce` את טיפוס הליטרל הצר `true`, שהיה גורם לשגיאת טיפוס בצבירה."
+    }
+   ],
+   "role": "solution",
+   "questionId": 3,
+   "headingHe": "תרגיל 3: מימוש `some` ו-`every` באמצעות `map` ו-`reduce`"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "q1",
+   "type": "open",
+   "questionHe": "שאלת המשך לתרגיל 1: כתבו מחדש את `mapExercise` כך שהמימוש יימנע משינוי מצב (mutation) — בלי `push()`.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n```typescript\nconst mapExercise = (f, elements) =>\n    elements.reduce((acc, curr) => acc.concat(f(curr)), []);\n\nconsole.log(mapExercise(x => x * x, [0, 1, 2, 3, 4, 5, 6])); // ==> [ 0, 1, 4, 9, 16, 25, 36 ]\n```\nבמקום לדחוף את `f(curr)` לתוך הצובר עם `acc.push(...)` (שמשנה את המערך במקום), משתמשים ב-`acc.concat(f(curr))`: המתודה `concat` אינה משנה את `acc` אלא מחזירה מערך **חדש** שמכיל את איברי `acc` ובסופו את הערך החדש. כך ה-reducer הוא פונקציה טהורה ללא תופעות לוואי (side effects).",
+   "explanationHe": "נקודות מפתח: `push` מבצע mutation ומחזיר את האורך החדש, ולכן דורש `return acc` נפרד; `concat` מחזיר מערך חדש ולכן אפשר להחזיר את תוצאתו ישירות כביטוי יחיד. הימנעות מ-mutation היא עיקרון מרכזי בתכנות פונקציונלי (Functional Programming)."
+  },
+  {
+   "id": "q2",
+   "type": "open",
+   "questionHe": "שאלת המשך לתרגיל 2: ממשו את `filter` באמצעות `chain` (flatMap) וללא שינוי מצב (mutation) — בלי `push()`.",
+   "answerHe": "**תשובת מודל (לא מפתרון הקורס הרשמי):**\n```typescript\nimport { chain } from \"ramda\";\n\nconst filterChain = <T>(pred: (x: T) => boolean, elements: T[]) =>\n    chain((x: T) => (pred(x) ? [x] : []), elements);\n\nconsole.log(filterChain((x: number) => x % 2 === 0, [0, 1, 2, 3, 4])); // ==> [ 0, 2, 4 ]\n```\nהאופרטור `chain` (המוכר גם כ-`flatMap`) ממפה כל איבר למערך, ואז \"משטח\" את כל המערכים לתוצאה אחת. הטריק: ממפים כל איבר `x` למערך `[x]` אם הוא מקיים את הפרדיקט, או למערך הריק `[]` אם לא — וכך איברים שנכשלים בבדיקה פשוט נעלמים בשלב ההשטחה. אין כאן שום mutation: נוצרים רק מערכים חדשים.",
+   "explanationHe": "נקודות מפתח: `chain` = `map` + השטחה ברמה אחת; מיפוי ל-`[x]` או `[]` הוא הדרך הסטנדרטית לבטא סינון באמצעות flatMap; המימוש טהור לחלוטין — ללא `push` וללא שינוי של מערכים קיימים."
+  }
+ ]
+}

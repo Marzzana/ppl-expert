@@ -1,0 +1,1051 @@
+{
+ "id": "cm/1.4TypesAndOperations",
+ "kind": "lecture",
+ "sourcePath": "class_material/1.4TypesAndOperations.md",
+ "titleEn": "Data Types and Operations on Data",
+ "titleHe": "טיפוסי נתונים ופעולות על נתונים",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/1.4TypesAndOperations:0",
+   "depth": 1,
+   "headingEn": "Data Types and Operations on Data",
+   "raw": "# Data Types and Operations on Data\n\n",
+   "blocks": [],
+   "headingHe": "טיפוסי נתונים ופעולות על נתונים"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:1",
+   "depth": 3,
+   "headingEn": "PPL 2023",
+   "raw": "### PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:1:0",
+     "type": "prose",
+     "en": "In previous sections, we reviewed tools a programming language provides that help programmers design set of values that have common properties.  The concrete form is a type language with which we can express type annotations.  These type annotations denote sets of values.  They are associated to variables or function parameters and function return values. \n\n",
+     "hash": "139af5d20d6f2793",
+     "he": "בפרקים הקודמים סקרנו כלים ששפת תכנות מעמידה לרשות המתכנתים כדי לעצב קבוצות של ערכים בעלי תכונות משותפות. הצורה הקונקרטית של כלים אלה היא שפת טיפוסים, שבאמצעותה אנו כותבים הערות טיפוס (type annotations). הערות טיפוס אלה מציינות (denote) קבוצות של ערכים, והן מוצמדות למשתנים, לפרמטרים של פונקציות ולערכי ההחזרה של פונקציות."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:1:1",
+     "type": "prose",
+     "en": "Such type annotations are useful to enable type checking - the process through which a compiler can ensure that variables will always be bound to values that belong to a specified type for all possible executions of the program - and issue errors when such assurance cannot be proven.\nType annotations are also useful in documenting the intention of the programmer.\n\n",
+     "hash": "5a321d9fd9230c73",
+     "he": "הערות טיפוס כאלה מאפשרות בדיקת טיפוסים (type checking) — התהליך שבו הקומפיילר מוודא שמשתנים תמיד יהיו קשורים לערכים השייכים לטיפוס שהוגדר, בכל ריצה אפשרית של התוכנית — ומדווח על שגיאות כאשר לא ניתן להוכיח הבטחה כזו.\nבנוסף, הערות טיפוס מועילות לתיעוד כוונת המתכנת."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:1:2",
+     "type": "prose",
+     "en": "Type definitions have a third important function: they help the programmer structure the code that operates on complex values in a way that reflects the structure of the data type.  \nIn other words, knowing the structure of a data type helps the programmer write correct functions that operates over values of this type.  \n\n",
+     "hash": "b6c28df9381a4af5",
+     "he": "להגדרות טיפוסים יש תפקיד שלישי וחשוב: הן עוזרות למתכנת לבנות את הקוד שפועל על ערכים מורכבים כך שהמבנה שלו ישקף את מבנה טיפוס הנתונים.\nבמילים אחרות, הכרת המבנה של טיפוס נתונים עוזרת למתכנת לכתוב פונקציות נכונות שפועלות על ערכים מהטיפוס הזה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:1:3",
+     "type": "prose",
+     "en": "Reversely, programmers design and name types for sets of values that will be processed by the same set of functions. \nThat is, type definitions allow the definition of uniform functional interfaces.\n\n",
+     "hash": "47657e1f3665af7a",
+     "he": "ובכיוון ההפוך, מתכנתים מעצבים טיפוסים ונותנים להם שמות עבור קבוצות של ערכים שיעובדו בידי אותה קבוצת פונקציות.\nכלומר, הגדרות טיפוסים מאפשרות להגדיר ממשקים פונקציונליים אחידים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:1:4",
+     "type": "prose",
+     "en": "We illustrate this point through 4 examples:\n",
+     "hash": "dc5e94bd9863a759",
+     "he": "נמחיש נקודה זו באמצעות 4 דוגמאות:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:1:5",
+     "type": "list",
+     "en": "* Homogeneous array types and the sequence interface (`map`, `filter`, `reduce`, ...)\n* Modeling trees\n* Mutable data types in FP\n* Disjoint types and Disjoint Unions to enable uniform functional interfaces\n\n",
+     "hash": "ecefc507978e67b2",
+     "he": "* טיפוסי מערכים הומוגניים וממשק הסדרות (sequence interface) — ‏(`map`,‏ `filter`,‏ `reduce` ועוד)\n* מידול עצים\n* טיפוסי נתונים ניתנים לשינוי (mutable) בתכנות פונקציונלי\n* טיפוסים זרים (disjoint types) ואיחודים זרים (disjoint unions) שמאפשרים ממשקים פונקציונליים אחידים"
+    }
+   ],
+   "headingHe": "PPL 2023"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:2",
+   "depth": 2,
+   "headingEn": "Homogeneous Array Types and the Sequence Interface",
+   "raw": "## Homogeneous Array Types and the Sequence Interface\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:2:0",
+     "type": "prose",
+     "en": "Array values can be homogeneous (all items have the same type) or heterogeneous (items of different types appear).\n\n",
+     "hash": "3eb42c5f1919bf42",
+     "he": "ערכי מערך (array) יכולים להיות הומוגניים (כל האיברים מאותו טיפוס) או הטרוגניים (מופיעים בהם איברים מטיפוסים שונים)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:1",
+     "type": "prose",
+     "en": "The *natural* way to operate over arrays is to use the sequence interface - that is, a set of higher-order functions \nwhich can be applied on arrays.  For example:\n",
+     "hash": "0d82456a980c4707",
+     "he": "הדרך *הטבעית* לפעול על מערכים היא באמצעות ממשק הסדרות (sequence interface) — כלומר, קבוצה של פונקציות מסדר גבוה (higher-order functions) שאפשר להפעיל על מערכים. לדוגמה:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:2",
+     "type": "list",
+     "en": "* `map(f, array)`\n* `filter(pred, array)`\n* `reduce(f, array, init)`\n\n",
+     "hash": "70717e0418445c16",
+     "he": "* `map(f, array)`\n* `filter(pred, array)`\n* `reduce(f, array, init)`"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:3",
+     "type": "prose",
+     "en": "and similar functions (such as `every`, `some`, `find`).\n\n",
+     "hash": "c5d944cded5ddf3e",
+     "he": "ופונקציות דומות (כגון `every`,‏ `some`,‏ `find`)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:4",
+     "type": "prose",
+     "en": "When we analyze the type of these functions, we realize that such operations will be easy and natural if the type of the function passed as a parameter is a simple type.  For example:\n\n",
+     "hash": "7fba8e487403f98f",
+     "he": "כאשר אנו מנתחים את הטיפוס של פונקציות אלה, אנו מגלים שפעולות כאלה יהיו קלות וטבעיות אם הטיפוס של הפונקציה המועברת כפרמטר הוא טיפוס פשוט. לדוגמה:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:5",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\n\nlet arr = [1, 2, 3];\nmap(x => x * x, arr); // ==> [ 1, 4, 9 ]\n\n// Or in curried manner:\nmap(x => x * x)(arr); \n```\n\n",
+     "hash": "e7a1bfc390113046",
+     "lang": "typescript",
+     "noteHe": "הקוד מדגים שימוש בסיסי ב-`map` מהספרייה ramda. הפונקציה `map` מקבלת פונקציית מיפוי (`x => x * x` — העלאה בריבוע) ומערך `arr`, ומחזירה מערך חדש שבו הפונקציה הופעלה על כל איבר: `[1, 4, 9]`. השורה האחרונה מציגה את אותה קריאה בצורה מקוררת (curried): ‏`map(x => x * x)` בלבד מחזירה פונקציה חדשה שמצפה לקבל מערך, ורק ההפעלה עליה עם `(arr)` מבצעת את המיפוי בפועל. שתי הצורות מחזירות אותה תוצאה — הצורה המקוררת שימושית כשרוצים לבנות פונקציה \"מורמת\" (lifted) לשימוש חוזר."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:6",
+     "type": "prose",
+     "en": "This operation over the array *works well* because the type of the mapper function is simple and can be derived from the type of the array:\n\n",
+     "hash": "23af56f321004f51",
+     "he": "הפעולה הזו על המערך *עובדת היטב* מפני שהטיפוס של פונקציית המיפוי הוא פשוט וניתן לגזור אותו מהטיפוס של המערך:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:7",
+     "type": "list",
+     "en": "* `arr` is of type `number[]`\n* `x => x * x` is a function of type `number => number` - it can thus be applied to all the items in `arr`\n* the resulting array is also of type `number[]`\n* the function `map(x => x * x)` is a function of type `number[] => number[]` - we say it is lifted from `number` to `number[]`.\n\n",
+     "hash": "c5d15279da985844",
+     "he": "* `arr` הוא מטיפוס `number[]`\n* `x => x * x` היא פונקציה מטיפוס `number => number` — ולכן אפשר להפעיל אותה על כל האיברים ב-`arr`\n* המערך המתקבל הוא גם מטיפוס `number[]`\n* הפונקציה `map(x => x * x)` היא פונקציה מטיפוס `number[] => number[]` — אנו אומרים שהיא \"הורמה\" (lifted) מ-`number` ל-`number[]`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:8",
+     "type": "prose",
+     "en": "Similarly, if we use a mapper function of type `number => boolean` - we know the return value of `map` will be `boolean[]`:\n\n",
+     "hash": "3ba6ed21bab51418",
+     "he": "באופן דומה, אם נשתמש בפונקציית מיפוי מטיפוס `number => boolean` — אנו יודעים שערך ההחזרה של `map` יהיה `boolean[]`:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:9",
+     "type": "code",
+     "en": "```typescript\nimport { map } from \"ramda\";\n\nlet arr = [1, 2, 3];\nmap(x => x > 2, arr); // ==> [ false, false, true ]\n```\n\n",
+     "hash": "14eef050e6de3b5b",
+     "lang": "typescript",
+     "noteHe": "כאן פונקציית המיפוי היא `x => x > 2` — פונקציה מטיפוס `number => boolean`. לכן `map` מחזירה מערך של ערכים בוליאניים: עבור 1 ו-2 התנאי לא מתקיים (`false`), ועבור 3 הוא מתקיים (`true`). הדוגמה ממחישה שטיפוס הפלט של `map` נגזר ישירות מטיפוס ההחזרה של פונקציית המיפוי: מ-`number[]` קיבלנו `boolean[]`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:10",
+     "type": "prose",
+     "en": "Operating over a heterogeneous array like `[1, \"a\" ,true]` would make the usage of these functions much more challenging - because the mapper function would need to know what to do for each type of parameter.\n\n",
+     "hash": "9092f840d8fee32c",
+     "he": "פעולה על מערך הטרוגני כמו `[1, \"a\" ,true]` הייתה הופכת את השימוש בפונקציות אלה למאתגר הרבה יותר — מפני שפונקציית המיפוי הייתה צריכה לדעת מה לעשות עבור כל טיפוס אפשרי של הפרמטר."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:2:11",
+     "type": "prose",
+     "en": "**Summary:** Homogeneous array types encourage the use of a simple functional interface - including map, filter, reduce. This functional interface (set of functions which operate on the same data structure) receive a function parameter with a simple type signature and abstract many forms of loops over repeated values of the same type.\n\n",
+     "hash": "1094a0f4f9c3b415",
+     "he": "**סיכום:** טיפוסי מערכים הומוגניים מעודדים שימוש בממשק פונקציונלי פשוט — הכולל את map,‏ filter,‏ reduce. ממשק פונקציונלי זה (קבוצת פונקציות שפועלות על אותו מבנה נתונים) מקבל כפרמטר פונקציה עם חתימת טיפוס פשוטה, ומהווה הפשטה של צורות רבות של לולאות על ערכים חוזרים מאותו טיפוס."
+    }
+   ],
+   "headingHe": "טיפוסי מערכים הומוגניים וממשק הסדרות"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:3",
+   "depth": 2,
+   "headingEn": "Modeling Trees with Types",
+   "raw": "## Modeling Trees with Types\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:3:0",
+     "type": "prose",
+     "en": "Let us review the definition of a binary tree:\n\n",
+     "hash": "de43e7a75f0fabd2",
+     "he": "נחזור על ההגדרה של עץ בינארי:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:1",
+     "type": "code",
+     "en": "```typescript\ntype BinTree<T> = {\n    root: T;\n    left?: BinTree<T>;\n    right?: BinTree<T>;\n}\n\nconst bt: BinTree<number> = { root: 1, left: { root: 2 }, right: { root: 3 } };\n\nbt; // ==> { root: 1, left: { root: 2 }, right: { root: 3 } }\n```\n\n",
+     "hash": "113db0d1990569f2",
+     "lang": "typescript",
+     "noteHe": "הקוד מגדיר טיפוס גנרי רקורסיבי `BinTree<T>` שמייצג עץ בינארי: לכל צומת יש שדה חובה `root` (הערך בצומת, מטיפוס `T`) ושני שדות אופציונליים `left` ו-`right` — סימן השאלה (`?`) אחרי שם השדה אומר שהשדה יכול להיות חסר (כלומר `undefined`). שימו לב שהטיפוס מוגדר במונחים של עצמו — זהו טיפוס רקורסיבי: תת-העץ השמאלי והימני הם בעצמם `BinTree<T>`. האופציונליות של הבנים היא מה שמאפשר לעץ להסתיים — עלה הוא צומת שיש לו רק `root`. המשתנה `bt` הוא דוגמה לעץ קונקרטי מטיפוס `BinTree<number>`: שורש עם הערך 1 ושני עלים עם הערכים 2 ו-3."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:2",
+     "type": "prose",
+     "en": "When we write operations that operate over such trees, we must write code that operates according to the expected structure of the values in this type.\n\n",
+     "hash": "24ad42c7a02ec90a",
+     "he": "כאשר אנו כותבים פעולות שפועלות על עצים כאלה, עלינו לכתוב קוד שפועל בהתאם למבנה הצפוי של הערכים בטיפוס הזה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:3",
+     "type": "prose",
+     "en": "For example, let us write a function that traverses a `BinTree` in Depth-First order:\n\n",
+     "hash": "118db1c87e2f2b4c",
+     "he": "לדוגמה, נכתוב פונקציה שסורקת `BinTree` בסדר \"עומק תחילה\" (Depth-First):"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:4",
+     "type": "code",
+     "en": "```typescript\nconst traverseDFS: <T>(t: BinTree<T>) => void = t => {\n    console.log(t.root);\n    if (t.left !== undefined) traverseDFS(t.left);\n    if (t.right !== undefined) traverseDFS(t.right);\n};\ntraverseDFS(bt);\n// ==>\n// 1\n// 2\n// 3\n```\n\n",
+     "hash": "8e9183956212c1fe",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `traverseDFS` סורקת את העץ בסדר עומק-תחילה (שורש, ואז תת-עץ שמאלי, ואז ימני — pre-order). המבנה שלה משקף בדיוק את הגדרת הטיפוס: הגישה ל-`t.root` בטוחה תמיד (זהו שדה חובה), אבל לפני כל קריאה רקורסיבית חייבים לבדוק `!== undefined`, כי `left` ו-`right` אופציונליים — הבדיקה הזו היא בדיוק תנאי העצירה (מקרה הבסיס) של הרקורסיה. שימו לב שטיפוס ההחזרה הוא `void` — הפונקציה לא מחזירה ערך אלא מדפיסה (תופעת לוואי). על העץ `bt` מודפסים 1, 2, 3 בסדר זה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:5",
+     "type": "prose",
+     "en": "The structure of this function follows the structure of the type definition - when we process a value of type `BinTree`, we know that accessing the field `t.root` is safe (will not return `undefined` or throw an exception).\nTo access `t.left` we must first check whether it is `undefined` since the type allows for this (base case of the recursion). If it is not, we know it must be a value of type `BinTree`.  \n\n",
+     "hash": "dd629f21a7da2162",
+     "he": "מבנה הפונקציה עוקב אחר מבנה הגדרת הטיפוס — כאשר אנו מעבדים ערך מטיפוס `BinTree`, אנו יודעים שהגישה לשדה `t.root` בטוחה (לא תחזיר `undefined` ולא תזרוק חריגה).\nכדי לגשת ל-`t.left` עלינו לבדוק תחילה האם הוא `undefined`, מכיוון שהטיפוס מתיר זאת (זהו מקרה הבסיס של הרקורסיה). אם הוא אינו `undefined`, אנו יודעים שהוא בהכרח ערך מטיפוס `BinTree`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:6",
+     "type": "prose",
+     "en": "In addition to these assurances, we also know that after checking these conditions we have checked all possible configurations of values (that is, the function exhaustively covers all possible `BinTree` values).\n\n",
+     "hash": "6685a9c8b4b3636d",
+     "he": "בנוסף להבטחות אלה, אנו גם יודעים שאחרי בדיקת התנאים האלה בדקנו את כל התצורות האפשריות של ערכים (כלומר, הפונקציה מכסה באופן ממצה את כל ערכי ה-`BinTree` האפשריים)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:7",
+     "type": "prose",
+     "en": "Let us consider a variant task where we actually build values of type `BinTree`:\n\n",
+     "hash": "d7a12de03b0c3fb9",
+     "he": "נבחן כעת משימה דומה שבה אנו גם בונים ערכים חדשים מטיפוס `BinTree`:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:8",
+     "type": "code",
+     "en": "```typescript\nlet bt2 = {\n    root: 2,\n    left: {\n        root: 3,\n        left: { root: 4 }\n    },\n    right: {\n        root: 5,\n        right: { root: 6 }\n    }\n};\n\nconst square: (x: number) => number = x => x * x;\n\nconst squareTree: (t: BinTree<number>) => BinTree<number> = t =>\n    t.left === undefined && t.right === undefined ? { root: square(t.root) } :\n    t.left === undefined ? { root: square(t.root), right: squareTree(t.right) } :\n    t.right === undefined ? { root: square(t.root), left: squareTree(t.left) } :\n    { root: square(t.root), left: squareTree(t.left), right: squareTree(t.right) };\n\nsquareTree(bt2);\n// ==>\n// {\n//   root: 4,\n//   left: { root: 9, left: { root: 16 } },\n//   right: { root: 25, right: { root: 36 } }\n// }\n```\n\n",
+     "hash": "f09e0bc779a6db07",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `squareTree` מקבלת עץ של מספרים ומחזירה עץ **חדש** שבו כל ערך הועלה בריבוע — היא אינה משנה את העץ המקורי (בסגנון פונקציונלי). היא כתובה כשרשרת של ביטויי תנאי (`? :`) שממיינת את הערך לאחת מארבע התצורות האפשריות של `BinTree`: עלה (אין `left` ואין `right`), רק בן ימני, רק בן שמאלי, או שני בנים. בכל מקרה נבנה אובייקט חדש עם `square(t.root)` בשורש, וקריאות רקורסיביות ל-`squareTree` רק על הבנים שקיימים. הבדיקות המפורשות מול `undefined` נחוצות כדי שבודק הטיפוסים ידע שבקריאה הרקורסיבית מועבר ערך מטיפוס `BinTree<number>` ולא `undefined`. שימו לב לתוצאה: העץ החדש שומר על אותו מבנה בדיוק, רק עם ערכים מרובעים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:9",
+     "type": "prose",
+     "en": "The function `squareTree` operates over a `BinTree` value and creates a new `BinTree` return value.\nIt considers all possible configurations of `BinTree` (only root, root and left, root and right, root and left and right) and invokes the function `squareTree` recursively on each child value accordingly.\n\n",
+     "hash": "4aae074725e80f63",
+     "he": "הפונקציה `squareTree` פועלת על ערך `BinTree` ויוצרת ערך `BinTree` חדש כערך החזרה.\nהיא מתחשבת בכל התצורות האפשריות של `BinTree` (שורש בלבד, שורש ובן שמאלי, שורש ובן ימני, שורש ושני בנים) ומפעילה את `squareTree` באופן רקורסיבי על כל ערך-בן בהתאם."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:10",
+     "type": "prose",
+     "en": "In this case as well - type analysis allows us to verify that all accesses to the fields of the `BinTree` value are *safe* and that all recursive calls pass values of the right type as parameters.  In addition, we can verify that the function is *exhaustive* in checking all possible configurations for the value.\n\n",
+     "hash": "11719c94a04bde4d",
+     "he": "גם במקרה זה — ניתוח טיפוסים מאפשר לנו לוודא שכל הגישות לשדות של ערך ה-`BinTree` הן *בטוחות*, ושכל הקריאות הרקורסיביות מעבירות ערכים מהטיפוס הנכון כפרמטרים. בנוסף, אנו יכולים לוודא שהפונקציה *ממצה* בבדיקת כל התצורות האפשריות של הערך."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:11",
+     "type": "prose",
+     "en": "We can *relax* the type checking - and accept to receive values of type `undefined` in addition - yielding slightly shorter and more readable code, as shown below:\n\n\n",
+     "hash": "e007e8375fb57d34",
+     "he": "אנו יכולים *להקל* בבדיקת הטיפוסים — ולהסכים לקבל גם ערכים מטיפוס `undefined` — וכך לקבל קוד מעט קצר וקריא יותר, כפי שמוצג להלן:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:12",
+     "type": "code",
+     "en": "```typescript\n\nlet bt3 = {\n    root: 2,\n    left: {\n        root: 3,\n        left: { root: 4 }\n    },\n    right: {\n        root: 5,\n        right: { root: 6 }\n    }\n};\n\nconst square: (x: number) => number = x => x * x;\n\nconst squareTree2: (t: BinTree<number> | undefined) => BinTree<number> | undefined = t =>\n    t === undefined ? undefined :\n    { root: square(t.root), left: squareTree2(t.left), right: squareTree2(t.right) };\n\nsquareTree2(bt3);\n// ==>\n// {\n//   root: 4,\n//   left: {\n//     root: 9,\n//     left: { root: 16, left: undefined, right: undefined },\n//     right: undefined\n//   },\n//   right: {\n//     root: 25,\n//     left: undefined,\n//     right: { root: 36, left: undefined, right: undefined }\n//   }\n// }\n```\n\n",
+     "hash": "4ca95b45e50ee014",
+     "lang": "typescript",
+     "noteHe": "זוהי גרסה מקוצרת של `squareTree`: החתימה הורחבה לקבל ולהחזיר `BinTree<number> | undefined` (איחוד טיפוסים). בזכות ההרחבה הזו יש רק בדיקה אחת — אם `t` הוא `undefined` מחזירים `undefined` (מקרה הבסיס); אחרת בונים עץ חדש וקוראים רקורסיבית ל-`squareTree2` על `t.left` ו-`t.right` **בלי** לבדוק אם הם קיימים — כי הפונקציה עצמה כבר יודעת לטפל ב-`undefined`. ה\"מלכוד\" (gotcha): בפלט מופיעים כעת שדות מפורשים עם הערך `undefined` (למשל `right: undefined`), במקום שדות חסרים לגמרי כמו בגרסה הקודמת. מבחינה סמנטית זה שקול, אבל תחבירית האובייקט נראה אחרת."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:13",
+     "type": "prose",
+     "en": "Observe that in this version:\n",
+     "hash": "a1c988e5514bce80",
+     "he": "שימו לב שבגרסה זו:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:14",
+     "type": "list",
+     "en": "* We extended the expected values of type `BinTree` to also include the value `undefined`.\n* We explicitly test for this value as the first base case in the recursive function `squareTree2`.\n* The recursive calls are now simplified as we don't need to avoid the recursive calls with a value `undefined`\n* The return value has values marked explicitly as `undefined` - these are semantically equivalent to *absent* values - but in the syntax of the object, they still appear.\n\n",
+     "hash": "ee60b3469f4cbc7c",
+     "he": "* הרחבנו את הערכים הצפויים מטיפוס `BinTree` כך שיכללו גם את הערך `undefined`.\n* אנו בודקים ערך זה במפורש כמקרה הבסיס הראשון בפונקציה הרקורסיבית `squareTree2`.\n* הקריאות הרקורסיביות פשוטות יותר כעת, כי איננו צריכים להימנע מקריאה רקורסיבית עם הערך `undefined`\n* בערך ההחזרה יש שדות המסומנים במפורש כ-`undefined` — הם שקולים סמנטית לערכים *חסרים* — אבל בתחביר של האובייקט הם עדיין מופיעים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:15",
+     "type": "prose",
+     "en": "We can get rid of them using a simple idiom:\n\n",
+     "hash": "2f41e08287057957",
+     "he": "אפשר להיפטר מהם באמצעות אידיום פשוט:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:16",
+     "type": "code",
+     "en": "```typescript\nJSON.parse(\n    JSON.stringify({\n        root: 4,\n        left: {\n            root: 9,\n            left: { root: 16, left: undefined, right: undefined },\n            right: undefined\n        },\n        right: {\n            root: 25,\n            left: undefined,\n            right: { root: 36, left: undefined, right: undefined }\n        }\n    })\n);\n// ==>\n// {\n//   root: 4,\n//   left: { root: 9, left: { root: 16 } },\n//   right: { root: 25, right: { root: 36 } }\n// }\n```\n\n",
+     "hash": "ba1ff2b38d044fbf",
+     "lang": "typescript",
+     "noteHe": "זהו אידיום מוכר ב-JavaScript לניקוי אובייקט: `JSON.stringify` ממיר את האובייקט למחרוזת JSON, ובתהליך הזה שדות שערכם `undefined` פשוט מושמטים (כי ל-JSON אין ייצוג ל-`undefined`). לאחר מכן `JSON.parse` ממיר את המחרוזת בחזרה לאובייקט — והתוצאה היא אובייקט \"נקי\" שבו השדות החסרים באמת אינם מופיעים, בדיוק כמו בפלט של `squareTree` המקורית."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:3:17",
+     "type": "prose",
+     "en": "The difference between the two versions is a matter of style preference.\nIn general, the presence of `undefined` values complicates type analysis, but it is difficult to avoid dealing with it explicitly.\n\n",
+     "hash": "c2c2c28af1df098b",
+     "he": "ההבדל בין שתי הגרסאות הוא עניין של העדפת סגנון.\nבאופן כללי, נוכחות של ערכי `undefined` מסבכת את ניתוח הטיפוסים, אבל קשה להימנע מטיפול מפורש בהם."
+    }
+   ],
+   "headingHe": "מידול עצים באמצעות טיפוסים"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:4",
+   "depth": 2,
+   "headingEn": "*Mutable* (Persistent) Data Types in FP",
+   "raw": "## *Mutable* (Persistent) Data Types in FP\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:4:0",
+     "type": "prose",
+     "en": "We indicated earlier that FP encourages immutable variables and data structures to achieve the goals of determinism (calling the same function with the same arguments should return the same value) and safe concurrency (avoid shared mutable data across threads). \n\n",
+     "hash": "9febc950e0072cd8",
+     "he": "ציינו קודם שתכנות פונקציונלי מעודד משתנים ומבני נתונים בלתי ניתנים לשינוי (immutable) כדי להשיג את מטרות הדטרמיניזם (קריאה לאותה פונקציה עם אותם ארגומנטים צריכה להחזיר את אותו ערך) והמקביליות הבטוחה (הימנעות מנתונים משותפים הניתנים לשינוי בין threads)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:1",
+     "type": "prose",
+     "en": "Yet, some data types are thought of a **mutable** in their definition.  Consider the example of a **stack**.  It is defined as a container of values that enforces a specific access pattern through an interface:\n",
+     "hash": "f5665bbbe930ec99",
+     "he": "ובכל זאת, יש טיפוסי נתונים שנתפסים כ**ניתנים לשינוי** (mutable) כבר בהגדרתם. נבחן את הדוגמה של **מחסנית (stack)**. היא מוגדרת כמכל של ערכים שאוכף דפוס גישה מסוים באמצעות ממשק:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:2",
+     "type": "list",
+     "en": "* `push(x)`: modifies the stack by adding a new value x on top of it.\n* `pop()`: modifies the stack by removing the top value of the stack and returning its value.\n* `empty()`: determines whether the stack is empty.\n\n",
+     "hash": "f682184083bc8074",
+     "he": "* `push(x)`: משנה את המחסנית על ידי הוספת ערך חדש x בראשה.\n* `pop()`: משנה את המחסנית על ידי הסרת הערך העליון שלה והחזרת ערכו.\n* `empty()`: קובעת האם המחסנית ריקה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:3",
+     "type": "prose",
+     "en": "As was discussed in SPL (for those who took this course), in OOP and Imperative Langauges, it is useful to split the Stack interface into **Queries** (functions that only return information about the data structure without changing it) and **Commands** (functions which only modify the data structure and do not return any value). Such distinction makes writing tests much easier (see [Command Query Separation pattern](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation)).\n\n",
+     "hash": "138a8210f63d2271",
+     "he": "כפי שנדון בקורס SPL (למי שלמד אותו), בתכנות מונחה-עצמים ובשפות אימפרטיביות מועיל לפצל את ממשק המחסנית ל**שאילתות (Queries)** — פונקציות שרק מחזירות מידע על מבנה הנתונים בלי לשנות אותו — ול**פקודות (Commands)** — פונקציות שרק משנות את מבנה הנתונים ואינן מחזירות ערך. הבחנה כזו מקלה מאוד על כתיבת בדיקות (ראו [Command Query Separation pattern](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation))."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:4",
+     "type": "prose",
+     "en": "To adopt this distinction, we split the `pop()` method into two distinct methods:\n",
+     "hash": "31773914c3e16394",
+     "he": "כדי לאמץ הבחנה זו, אנו מפצלים את המתודה `pop()` לשתי מתודות נפרדות:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:5",
+     "type": "list",
+     "en": "* `peek()`: returns the value of the top element in the stack (this is a query method).\n* `pop()`: modifies the stack by removing the top element (this is a command method - that just has a side effect and no return value).\n\n",
+     "hash": "047f4d84ab320719",
+     "he": "* `peek()`: מחזירה את הערך של האיבר העליון במחסנית (זוהי מתודת שאילתה).\n* `pop()`: משנה את המחסנית על ידי הסרת האיבר העליון (זוהי מתודת פקודה — שיש לה רק תופעת לוואי ואין לה ערך החזרה)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:6",
+     "type": "prose",
+     "en": "This definition is inherently procedural - as it defines the data type in terms of mutation (with the commands `push()` and `pop()`) in addition to the queries `peek()` and `empty()`.\n\n",
+     "hash": "36e9d8944a122323",
+     "he": "הגדרה זו היא פרוצדורלית במהותה — שכן היא מגדירה את טיפוס הנתונים במונחים של שינוי מצב (mutation), באמצעות הפקודות `push()` ו-`pop()`, בנוסף לשאילתות `peek()` ו-`empty()`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:7",
+     "type": "prose",
+     "en": "Note that according to this methodology, even the queries are **not** pure functions - because they are not deterministic (that is, we can call the same function twice on the same variable at different times and obtain different answers). Let us illustrate these points with a simple implementation of Stacks in TypeScript:\n\n",
+     "hash": "028db02c84e8777f",
+     "he": "שימו לב שלפי מתודולוגיה זו, אפילו השאילתות **אינן** פונקציות טהורות — מפני שהן אינן דטרמיניסטיות (כלומר, אפשר לקרוא לאותה פונקציה פעמיים על אותו משתנה בזמנים שונים ולקבל תשובות שונות). נמחיש נקודות אלה במימוש פשוט של מחסניות ב-TypeScript:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:8",
+     "type": "code",
+     "en": "```typescript\n// Mutable implementation of stacks (NON Functional)\n\n// Constructor\nconst makeStack = <T>(initValues: T[]): T[] => initValues;\n\n// peek and empty are queries - they do not mutate the stack\nconst peek = <T>(stack: T[]): T => stack[0];\nconst empty = <T>(stack: T[]): boolean => stack.length === 0;\n\n// push() and pop() are commands - they mutate the stack and return void (no return value)\nconst push = <T>(stack: T[], newVal: T): void => {\n    stack.unshift(newVal);\n    return;\n};\n\nconst pop = <T>(stack: T[]): void => {\n    stack.shift();\n    return;\n};\n\nlet s = makeStack([1, 2, 3]);\npush(s, 0);\ns; // ==> [ 0, 1, 2, 3 ]\n```\n\n",
+     "hash": "bca528f5a9f2030e",
+     "lang": "typescript",
+     "noteHe": "זהו מימוש **ניתן לשינוי (לא פונקציונלי)** של מחסנית, המקודד את המחסנית כמערך `T[]` שראשו הוא ראש המחסנית. הבנאי `makeStack` פשוט מחזיר את מערך הערכים ההתחלתי. השאילתות: `peek` מחזירה את `stack[0]` (האיבר העליון) ו-`empty` בודקת אם האורך 0 — שתיהן לא משנות את המחסנית. הפקודות: `push` משתמשת ב-`unshift` (פרימיטיב של JavaScript שמוסיף איבר לתחילת המערך **תוך שינוי המערך עצמו**), ו-`pop` משתמשת ב-`shift` (שמסיר את האיבר הראשון באותו אופן). שתיהן מחזירות `void` — זהו הסימן המובהק לפקודה בסגנון הזה: כל התועלת שלהן היא בתופעת הלוואי. אחרי `push(s, 0)` המשתנה `s` עצמו השתנה ל-`[0, 1, 2, 3]` — בלי השמה מחדש."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:9",
+     "type": "prose",
+     "en": "This implementation relies on an array encoding for Stack values.\nIt relies on generic data types in TypeScript so that we can use it for Stacks of any type - as long as it is a homogeneous stack.\n\n",
+     "hash": "3d896d9c7a82bd35",
+     "he": "מימוש זה מסתמך על קידוד ערכי המחסנית כמערך.\nהוא מסתמך על טיפוסים גנריים ב-TypeScript, כך שנוכל להשתמש בו עבור מחסניות מכל טיפוס — כל עוד המחסנית הומוגנית."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:10",
+     "type": "prose",
+     "en": "It relies on the fact that arrays in JavaScript are mutable - and implements `push()` using the primitive `unshift()` operation on arrays, and `pop()` using the primitive `shift()` operation.\n\n",
+     "hash": "8504007f7e93aced",
+     "he": "הוא מסתמך על העובדה שמערכים ב-JavaScript ניתנים לשינוי — ומממש את `push()` באמצעות הפעולה הפרימיטיבית `unshift()` על מערכים, ואת `pop()` באמצעות הפעולה הפרימיטיבית `shift()`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:11",
+     "type": "prose",
+     "en": "We skipped checking the preconditions to simplify the presentation.\n\n",
+     "hash": "9b865362e8b5189e",
+     "he": "דילגנו על בדיקת תנאים מקדימים (preconditions) כדי לפשט את ההצגה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:12",
+     "type": "prose",
+     "en": "Note the specific style: commands (functions that have a side-effect - in this case `push()` and `pop()`) have no return value - we mark them as `void` in TypeScript.  \n\n",
+     "hash": "aa7b36ad50c13760",
+     "he": "שימו לב לסגנון המסוים: לפקודות (פונקציות שיש להן תופעת לוואי — במקרה זה `push()` ו-`pop()`) אין ערך החזרה — אנו מסמנים אותן כ-`void` ב-TypeScript."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:13",
+     "type": "prose",
+     "en": "In contrast, queries (functions that have no side-effect and only return information about the data structure - in this case `peek()` and `empty()`) return a value.\n\n",
+     "hash": "6d6c0e7ef5cf1292",
+     "he": "לעומת זאת, שאילתות (פונקציות שאין להן תופעת לוואי והן רק מחזירות מידע על מבנה הנתונים — במקרה זה `peek()` ו-`empty()`) מחזירות ערך."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:14",
+     "type": "prose",
+     "en": "Given that the underlying data type is mutable, we cannot obtain deterministic behavior:\n\n",
+     "hash": "aef5e6d6c8578b7c",
+     "he": "מכיוון שטיפוס הנתונים שבבסיס המימוש ניתן לשינוי, איננו יכולים לקבל התנהגות דטרמיניסטית:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:15",
+     "type": "code",
+     "en": "```typescript\nlet s = makeStack([1, 2, 3]);\npush(s, 0);\nconsole.log(peek(s)); // ==> 0\npop(s);\nconsole.log(peek(s)); // ==> 1\n```\n\n",
+     "hash": "433704956ddb25e9",
+     "lang": "typescript",
+     "noteHe": "הקטע מדגים את חוסר הדטרמיניזם: קוראים פעמיים לאותה שאילתה `peek(s)` על אותו משתנה `s` — ומקבלים תוצאות שונות (0 ואחר כך 1), כי בין שתי הקריאות בוצע `pop(s)` ששינה את המחסנית. זו בדיוק ההפרה של טוהר פונקציונלי: הערך של `peek(s)` תלוי לא רק בארגומנט אלא גם בהיסטוריית השינויים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:4:16",
+     "type": "prose",
+     "en": "The same operation `peek(s)` on the same variable `s` returns different values when mutation has occurred between the two calls. This is a case of *non-determinism* due to mutation.\n\n",
+     "hash": "da2b08989188af66",
+     "he": "אותה פעולה `peek(s)` על אותו משתנה `s` מחזירה ערכים שונים כאשר התרחש שינוי מצב בין שתי הקריאות. זהו מקרה של *אי-דטרמיניזם* הנובע משינוי מצב (mutation)."
+    }
+   ],
+   "headingHe": "טיפוסי נתונים *ניתנים לשינוי* (מתמידים) בתכנות פונקציונלי"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:5",
+   "depth": 3,
+   "headingEn": "Functional Stack: Step 1",
+   "raw": "### Functional Stack: Step 1\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:5:0",
+     "type": "prose",
+     "en": "Can we define a **functional data structure** for the Stack data type?\n\n",
+     "hash": "3e03752b9e53639e",
+     "he": "האם נוכל להגדיר **מבנה נתונים פונקציונלי** עבור טיפוס הנתונים מחסנית?"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:1",
+     "type": "prose",
+     "en": "For example, can we define a Stack data structure that operates as an immutable data structure, while still offering the same interface to its clients (`peek`, `empty`, `push`, `pop`)?\n\n",
+     "hash": "4b513d033faad4ca",
+     "he": "למשל, האם נוכל להגדיר מבנה נתונים של מחסנית שפועל כמבנה נתונים בלתי ניתן לשינוי, ועדיין מציע ללקוחותיו את אותו ממשק (`peek`,‏ `empty`,‏ `push`,‏ `pop`)?"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:2",
+     "type": "prose",
+     "en": "The key change that is required to obtain such immutable functional data types is to modify the **commands** so that instead of mutating the existing data structure and returning `void` (that is, having no return value), the commands will return a new copy of the data structure.\n\n",
+     "hash": "18c431075c4ce301",
+     "he": "השינוי המרכזי הנדרש כדי לקבל טיפוסי נתונים פונקציונליים בלתי ניתנים לשינוי הוא לשנות את **הפקודות** כך שבמקום לשנות את מבנה הנתונים הקיים ולהחזיר `void` (כלומר, ללא ערך החזרה), הפקודות יחזירו עותק חדש של מבנה הנתונים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:3",
+     "type": "prose",
+     "en": "This imposes first a change on the type of the functions, next a change on the client side.  Let us illustrate this first round of changes (which we will find out is necessary but not sufficient):\n\n\n",
+     "hash": "bccf18a98cc1a0bf",
+     "he": "הדבר מחייב תחילה שינוי בטיפוס של הפונקציות, ולאחר מכן שינוי בצד הלקוח. נדגים את סבב השינויים הראשון הזה (שכפי שנגלה — הוא הכרחי אך לא מספיק):"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:4",
+     "type": "code",
+     "en": "```typescript\n// Implementation 2 of stacks (Towards Functional - not yet)\n\n// To document the type, we give it a name - distinct from its implementation.\ntype Stack<T> = T[];\n\n// Constructor\nconst makeStack = <T>(initValues: T[]): Stack<T> => initValues;\n\n// peek and empty are queries - they do not mutate the stack - no change needed from V1 above.\nconst peek = <T>(stack: Stack<T>): T => stack[0];\nconst empty = <T>(stack: Stack<T>): boolean => stack.length === 0;\n\n// push() and pop() are commands - they return a new version of the stack (instead of void in V1)\nconst push = <T>(stack: Stack<T>, newVal: T): Stack<T> => {\n    stack.unshift(newVal);\n    return stack;\n};\nconst pop = <T>(stack: Stack<T>): Stack<T> => {\n    stack.shift();\n    return stack;\n};\n\nlet s1 = makeStack([1, 2, 3]);\nlet s2 = push(s1, 0); // This is a new stack\ns2; // ==> [ 0, 1, 2, 3 ]\n```\n\n",
+     "hash": "55c21d47da3e2c25",
+     "lang": "typescript",
+     "noteHe": "זהו \"שלב 1\" בדרך למחסנית פונקציונלית — והוא עדיין לא מספיק. שני שינויים ביחס לגרסה הקודמת: ראשית, הוגדר שם טיפוס `Stack<T>` (כינוי ל-`T[]`) כדי לתעד את הכוונה ולהפריד בין הממשק למימוש. שנית, חתימות הפקודות השתנו: `push` ו-`pop` מחזירות עכשיו `Stack<T>` במקום `void`. אבל שימו לב לגוף הפונקציות — הן **עדיין** קוראות ל-`unshift` ו-`shift`, שמשנים את המערך המקורי במקום (in-place), ואז מחזירות את **אותו** מערך עצמו. כלומר, שינינו רק את החתימה ולא את ההתנהגות: `s2` אינו עותק חדש אלא הפניה (reference) לאותו מערך של `s1`. הבעיה הזו תתגלה מיד בסעיף על value aliasing."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:5",
+     "type": "prose",
+     "en": "This modification in the signature of the commands requires clients to change as well: each time a command is invoked, we must bind the return value to a new variable so that it can be used further:\n\n",
+     "hash": "4519fc11002166f8",
+     "he": "שינוי זה בחתימת הפקודות מחייב גם את הלקוחות להשתנות: בכל פעם שמפעילים פקודה, עלינו לקשור את ערך ההחזרה למשתנה חדש כדי שנוכל להמשיך להשתמש בו:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:5:6",
+     "type": "code",
+     "en": "```typescript\nlet s1 = makeStack([1, 2, 3]);\nlet s2 = push(s1, 0); // This is a new stack\nconsole.log(peek(s2)); // ==> 0\nlet s3 = pop(s2); // Another stack\npeek(s3); // ==> 1\n```\n\n",
+     "hash": "8addafa88c6133d0",
+     "lang": "typescript",
+     "noteHe": "כך נראה צד הלקוח בסגנון החדש: במקום לקרוא לפקודה ולהמשיך להשתמש באותו משתנה, כל קריאה לפקודה קושרת את התוצאה למשתנה חדש — `s2` אחרי `push`, ו-`s3` אחרי `pop`. הערכים המודפסים נראים תקינים: `peek(s2)` הוא 0 (הערך שנדחף) ו-`peek(s3)` הוא 1 (אחרי הסרת ה-0). למראית עין הכל דטרמיניסטי — אך כפי שנראה מיד, זו אשליה, כי `s1`,‏ `s2` ו-`s3` הם למעשה הפניות לאותו מערך בזיכרון."
+    }
+   ],
+   "headingHe": "מחסנית פונקציונלית: שלב 1"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:6",
+   "depth": 3,
+   "headingEn": "Value Aliasing",
+   "raw": "### Value Aliasing\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:6:0",
+     "type": "prose",
+     "en": "In this new style, we do not observe direct mutation - the calls seem to be deterministic.\n\n",
+     "hash": "21fc280ade277bd6",
+     "he": "בסגנון החדש הזה איננו רואים שינוי מצב ישיר — הקריאות נראות דטרמיניסטיות."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:1",
+     "type": "prose",
+     "en": "**Unfortunately, this is an illusion:**\n\n",
+     "hash": "b7b6d26dc693d2f8",
+     "he": "**למרבה הצער, זוהי אשליה:**"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:2",
+     "type": "code",
+     "en": "```typescript\nconst s1 = makeStack([1, 2, 3]);\nconst s2 = push(s1, 0);\nconst s3 = pop(s2);\npeek(s1); // ==> 1\npop(s1); // ==> [ 2, 3 ]\npeek(s1); // ==> 2\n```\n\n",
+     "hash": "d874280ec340577d",
+     "lang": "typescript",
+     "noteHe": "הקטע חושף את הבעיה: אחרי `push(s1, 0)` ו-`pop(s2)`, היינו מצפים ש-`s1` יישאר `[1, 2, 3]` כפי שנוצר. אבל `peek(s1)` מחזיר 1 רק \"במקרה\" — שתי הפעולות שינו את אותו מערך משותף (ה-`push` הוסיף 0 בראשו וה-`pop` הסיר אותו). כעת `pop(s1)` מסיר את 1, ו-`peek(s1)` מחזיר 2 — כלומר `s1` השתנה למרות שהוא הוכרז `const` ומעולם לא \"הוקצה מחדש\". ההכרזה `const` מונעת רק השמה חוזרת של המשתנה, לא שינוי פנימי של הערך שאליו הוא מצביע."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:3",
+     "type": "prose",
+     "en": "The implementation relies on JavaScript arrays - which are internally mutable. \nWe did not prevent this mutation by just changing the signature of the methods, because in the body of the commands we still call mutators on the internal representation of the stack.\n\n",
+     "hash": "bc58f40250e096dc",
+     "he": "המימוש מסתמך על מערכים של JavaScript — שהם ניתנים לשינוי באופן פנימי.\nלא מנענו את השינוי הזה רק על ידי שינוי חתימת המתודות, כי בגוף הפקודות אנחנו עדיין קוראים לפונקציות שינוי (mutators) על הייצוג הפנימי של המחסנית."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:4",
+     "type": "prose",
+     "en": "The situation is even worse because we have created a very risky situation called **variable aliasing** - the stacks `s2` and `s3` share in memory cells that are used by `s1`.  As a result, operations on `s1` end up modifying the state of `s2`.\nIf we now call the same expression `peek(s2)` and `peek(s3)` - we obtain different values from the earlier results (0 and 1) **even though no direct mutation of `s2` and `s3` was performed**:\n\n",
+     "hash": "5514da3d9ab7b487",
+     "he": "המצב אף גרוע יותר, כי יצרנו מצב מסוכן מאוד שנקרא **כינוי משתנים (variable aliasing)** — המחסניות `s2` ו-`s3` חולקות בזיכרון תאים שבהם משתמש גם `s1`. כתוצאה מכך, פעולות על `s1` משנות בפועל את המצב של `s2`.\nאם נקרא כעת לאותם ביטויים `peek(s2)` ו-`peek(s3)` — נקבל ערכים שונים מהתוצאות הקודמות (0 ו-1), **למרות שלא בוצע שום שינוי ישיר על `s2` ו-`s3`**:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:5",
+     "type": "code",
+     "en": "```typescript\npeek(s2) // This was 0 before invoking pop(s1)\n// ==> 2\npeek(s3) // This was 1 before invoking pop(s1)\n// ==> 2\n```\n\n",
+     "hash": "a1bd31fce71f542e",
+     "lang": "typescript",
+     "noteHe": "זו ההשלכה של ה-aliasing: קודם `peek(s2)` החזיר 0 ו-`peek(s3)` החזיר 1, ועכשיו שניהם מחזירים 2 — למרות שלא הפעלנו שום פקודה על `s2` או על `s3` עצמם. השינוי שבוצע דרך `pop(s1)` \"זלג\" אליהם, כי שלושת המשתנים מצביעים על אותו מערך בזיכרון. זהו בדיוק אי-הדטרמיניזם שרצינו למנוע."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:6:6",
+     "type": "prose",
+     "en": "The reason the stacks `s2` and `s3` were changed when we applied mutation on `s1` is because the 3 stacks actually share parts of their value in memory - because Arrays in JavaScript behave like pointers to values in C++.\n\n",
+     "hash": "60213793b8f4d8e4",
+     "he": "הסיבה שהמחסניות `s2` ו-`s3` השתנו כשהפעלנו שינוי מצב על `s1` היא ששלוש המחסניות למעשה חולקות חלקים מהערך שלהן בזיכרון — מפני שמערכים ב-JavaScript מתנהגים כמו מצביעים (pointers) לערכים ב-C++‎."
+    }
+   ],
+   "headingHe": "כינוי ערכים (Value Aliasing)"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:7",
+   "depth": 3,
+   "headingEn": "Functional Stack: Step 2",
+   "raw": "### Functional Stack: Step 2\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:7:0",
+     "type": "prose",
+     "en": "The solution to this problem is to require that commands actually **copy** the data structure when they need to modify it - so that each returned value is indeed a new value - and not an **alias** of the previous value.\n\n",
+     "hash": "b460f06cdf4983d5",
+     "he": "הפתרון לבעיה זו הוא לדרוש שהפקודות באמת **יעתיקו** את מבנה הנתונים כשהן צריכות לשנות אותו — כך שכל ערך מוחזר יהיה אכן ערך חדש — ולא **כינוי (alias)** של הערך הקודם."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:1",
+     "type": "prose",
+     "en": "This can be achieved by this new version of the Stack code:\n\n",
+     "hash": "145ee8d3d604c1a5",
+     "he": "ניתן להשיג זאת בגרסה החדשה הבאה של קוד המחסנית:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:2",
+     "type": "code",
+     "en": "```typescript\n// Implementation 3 of stacks (Functional - but inefficient)\n\n// To document the type, we give it a name - distinct from its implementation.\ntype Stack<T> = T[];\n\n// A utility to clone an array - relies on the fact that concat copies\n// This is a shallow copy\nconst cloneArray = <T>(array: T[]): T[] => [].concat(array);\n\n// Constructor\nconst makeStack = <T>(initValues: T[]): Stack<T> => cloneArray(initValues);\n\n// peek and empty are queries - they do not mutate the stack - no change needed from V1.\nconst peek = <T>(stack: Stack<T>): T => stack[0];\nconst empty = <T>(stack: Stack<T>): boolean => stack.length === 0;\n\n// push() and pop() are commands - they return a new copy of the stack\nconst push = <T>(stack: Stack<T>, newVal: T): Stack<T> => {\n    let res = cloneArray(stack);\n    res.unshift(newVal);\n    return res;\n};\nconst pop = <T>(stack: Stack<T>): Stack<T> => {\n    let res = cloneArray(stack);\n    res.shift();\n    return res;\n};\n\nlet s1 = makeStack([1, 2, 3]);\nlet s2 = push(s1, 0); // This is a new stack\ns2; // ==> [ 0, 1, 2, 3 ]\n```\n\n",
+     "hash": "c853a2923a6440e5",
+     "lang": "typescript",
+     "noteHe": "זהו \"שלב 2\" — מימוש פונקציונלי אמיתי (אך לא יעיל). התוספת המרכזית היא פונקציית העזר `cloneArray`, שמעתיקה מערך באמצעות `[].concat(array)` — הפעולה `concat` יוצרת מערך **חדש** במקום לשנות קיים. שימו לב שזהו עותק רדוד (shallow copy): רק המערך עצמו מועתק, לא האובייקטים שבתוכו. עכשיו כל פקודה (`push`,‏ `pop`) קודם משכפלת את המערך למשתנה מקומי `res`, מפעילה את השינוי (`unshift`/`shift`) **על העותק בלבד**, ומחזירה אותו — כך שהמחסנית המקורית לעולם לא נפגעת. גם הבנאי `makeStack` משכפל את מערך הקלט, כדי שהמחסנית לא תהיה alias של מערך שהלקוח עדיין מחזיק בו ועלול לשנות."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:3",
+     "type": "prose",
+     "en": "Let us verify that this new implementation provides deterministic behavior for the Stack functions and no aliasing:\n\n",
+     "hash": "b37ec5b73f45adfa",
+     "he": "נוודא שהמימוש החדש מספק התנהגות דטרמיניסטית לפונקציות המחסנית וללא aliasing:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:4",
+     "type": "code",
+     "en": "```typescript\nlet s1 = makeStack([1, 2, 3]);\nlet s2 = push(s1, 0); // This is a new stack\nconsole.log(peek(s2)); // Should be 0\n// ==> 0\nlet s3 = pop(s2); // Another stack\nconsole.log(peek(s3)); // Should be 1\n// ==> 1\n\n// Let's now change s1 and\n// verify s2 and s3 are not affected\npop(s1);\nconsole.log(peek(s1)); // Should remain 1\n// ==> 1\nconsole.log(peek(s2)); // Should remain 0\n// ==> 0\nconsole.log(peek(s3)); // Should remain 1\n// ==> 1\n```\n\n",
+     "hash": "3d9dff7b19f2d759",
+     "lang": "typescript",
+     "noteHe": "זהו מבחן האימות למימוש החדש: בונים את `s1`,‏ `s2` (אחרי push של 0) ו-`s3` (אחרי pop), ואז מפעילים `pop(s1)` ובודקים ששום מחסנית אחרת לא הושפעה. התוצאות מאשרות: `peek(s1)` עדיין 1 (כי `pop(s1)` החזיר מחסנית חדשה שלא נשמרה — `s1` עצמו לא השתנה!), `peek(s2)` עדיין 0, ו-`peek(s3)` עדיין 1. בניגוד לשלב 1, כאן כל ערך הוא עותק עצמאי בזיכרון ואין שיתוף תאים — ולכן ההתנהגות דטרמיניסטית לחלוטין."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:5",
+     "type": "prose",
+     "en": "This implementation is **safe** - it does not introduce unexepected side effects to the data structures, and the data structures remain immutable.  \n\n",
+     "hash": "7b5901a281dad643",
+     "he": "מימוש זה הוא **בטוח** — הוא אינו מכניס תופעות לוואי בלתי צפויות למבני הנתונים, ומבני הנתונים נשארים בלתי ניתנים לשינוי."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:7:6",
+     "type": "prose",
+     "en": "The cost of this implementation, though, is that each mutation requires a full copy of the data structure.\nThis is inefficient in RAM (we obtain many copies of the same objects) and in CPU (the copying operations are expensive).\n\n",
+     "hash": "a8999ee752e349c8",
+     "he": "אולם המחיר של מימוש זה הוא שכל שינוי דורש העתקה מלאה של מבנה הנתונים.\nזה לא יעיל בזיכרון (RAM) — אנו מקבלים עותקים רבים של אותם אובייקטים — ולא יעיל במעבד (CPU) — פעולות ההעתקה יקרות."
+    }
+   ],
+   "headingHe": "מחסנית פונקציונלית: שלב 2"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:8",
+   "depth": 3,
+   "headingEn": "Efficient Functional Data Structures: Step 3",
+   "raw": "### Efficient Functional Data Structures: Step 3\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:8:0",
+     "type": "prose",
+     "en": "Based on the technique of **amortization**, the work of Okasaki has demonstrated how one can design **efficient functional data structures** that are immutable and still avoid unnecessary copying.\n\n",
+     "hash": "1d29e7c8113b55e7",
+     "he": "בהתבסס על טכניקת ה**אמורטיזציה (amortization)**, עבודתו של Okasaki הדגימה כיצד ניתן לתכנן **מבני נתונים פונקציונליים יעילים** שהם בלתי ניתנים לשינוי ובכל זאת נמנעים מהעתקות מיותרות."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:1",
+     "type": "prose",
+     "en": "The book: *Purely Functional Data Structures* Chris Okasaki, Cambridge University Press, 1999 presents this general approach.  It has become the standard reference to design efficient data structures for FP.  In particular, it has been the basis for the design of the Clojure programming language.\n\n",
+     "hash": "e173a5ff4dd7b58d",
+     "he": "הספר *Purely Functional Data Structures* מאת Chris Okasaki‏ (Cambridge University Press, 1999) מציג את הגישה הכללית הזו. הוא הפך למקור הייחוס הסטנדרטי לתכנון מבני נתונים יעילים לתכנות פונקציונלי. בפרט, הוא היווה בסיס לעיצוב שפת התכנות Clojure."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:2",
+     "type": "prose",
+     "en": "The library **Immutable** [https://immutable-js.com/](https://immutable-js.com/) has been developed in TypeScript by Facebook.\nIt provides an efficient immutable implementation of the main collection data structures (Map, Stack, Queue, Lists, Set) based on Okasaki's original description.\n\n",
+     "hash": "8693b7dec8bb11f3",
+     "he": "הספרייה **Immutable**‏ [https://immutable-js.com/](https://immutable-js.com/) פותחה ב-TypeScript על ידי Facebook.\nהיא מספקת מימוש יעיל ובלתי ניתן לשינוי של מבני הנתונים המרכזיים לאוספים (Map,‏ Stack,‏ Queue,‏ Lists,‏ Set) בהתבסס על התיאור המקורי של Okasaki."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:3",
+     "type": "prose",
+     "en": "Using the Immutable Stack implementation is performed as follows:\n\n",
+     "hash": "02655f5a4c458f69",
+     "he": "השימוש במימוש המחסנית של Immutable נעשה כך:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:4",
+     "type": "code",
+     "en": "```typescript\nimport { Stack as iStack } from \"Immutable\";\n\nlet s1 = iStack.of(1, 2, 3);\nlet s2 = s1.push(0);\nconsole.log(`s1.size = ${s1.size}`); // ==> s1.size = 3\nconsole.log(`s2.size = ${s2.size}`); // ==> s2.size = 4\nconsole.log(`s1.peek() = ${s1.peek()}`); // ==> s1.peek() = 1\nconsole.log(`s2.peek() = ${s2.peek()}`); // ==> s2.peek() = 0\nlet s3 = s1.pop();\nlet s4 = s2.pop();\nconsole.log(\"After performing s1.pop() and s2.pop()\");\nconsole.log(`s1.size = ${s1.size}`); // ==> s1.size = 3\nconsole.log(`s2.size = ${s2.size}`); // ==> s2.size = 4\nconsole.log(`s3.size = ${s3.size}`); // ==> s3.size = 2\nconsole.log(`s4.size = ${s4.size}`); // ==> s4.size = 3\nconsole.log(`s1.peek() = ${s1.peek()}`); // ==> s1.peek() = 1\nconsole.log(`s2.peek() = ${s2.peek()}`); // ==> s2.peek() = 0\nconsole.log(`s3.peek() = ${s3.peek()}`); // ==> s3.peek() = 2\nconsole.log(`s4.peek() = ${s4.peek()}`); // ==> s4.peek() = 1\n```\n\n",
+     "hash": "03929efc574737cd",
+     "lang": "typescript",
+     "noteHe": "הדוגמה מציגה את מחסנית Immutable.js‏ (מיובאת בשם `iStack`). ‏`iStack.of(1, 2, 3)` בונה מחסנית שראשה 1. כל פעולה — `push`,‏ `pop` — מחזירה מחסנית **חדשה** ואינה משנה את הקיימת: אחרי `s1.push(0)` המחסנית `s1` נשארת בגודל 3 ו-`s2` היא מחסנית בגודל 4 שראשה 0. גם אחרי `s1.pop()` ו-`s2.pop()` — כל ארבע המחסניות שומרות על ערכיהן העצמאיים: `s3` היא `s1` בלי הראש (ראשה 2), ו-`s4` היא `s2` בלי הראש (ראשה 1, כלומר חזרנו לתוכן של `s1` המקורית). ההתנהגות דטרמיניסטית לחלוטין וללא aliasing — אבל בניגוד לשלב 2, מאחורי הקלעים הספרייה משתפת חלקים מהמבנה בין הגרסאות ומעתיקה מינימום הכרחי בלבד."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:5",
+     "type": "prose",
+     "en": "We confirm that the Stack functions behave in a deterministic manner, with no aliasing. Yet, internally, minimal copying was performed.\n\n",
+     "hash": "b6c8c0f4b9f547ab",
+     "he": "אנו מאשרים שפונקציות המחסנית מתנהגות באופן דטרמיניסטי, ללא aliasing. ועם זאת, באופן פנימי בוצעה העתקה מינימלית בלבד."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:6",
+     "type": "prose",
+     "en": "Immutable works well with JSON and encourages the usage of embedded data structures in a safe immutable and efficient manner. It thus provides an essential component of FP in TypeScript.\n\n",
+     "hash": "bac86def22590c85",
+     "he": "‏Immutable עובדת היטב עם JSON ומעודדת שימוש במבני נתונים מקוננים באופן בטוח, בלתי ניתן לשינוי ויעיל. בכך היא מספקת רכיב חיוני לתכנות פונקציונלי ב-TypeScript."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:7",
+     "type": "code",
+     "en": "```typescript\nJSON.stringify(s1); // ==> '[1,2,3]'\n```\n\n",
+     "hash": "c841dd5e233728d2",
+     "lang": "typescript",
+     "noteHe": "שורה בודדת שמראה שמחסנית Immutable מומרת ל-JSON באופן טבעי: `JSON.stringify(s1)` מחזיר את המחרוזת `'[1,2,3]'` — כאילו הייתה מערך רגיל."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:8",
+     "type": "code",
+     "en": "```typescript\nimport { Stack as iStack } from \"Immutable\";\nlet personsStack = iStack(\n    JSON.parse('[{\"name\":\"avi\", \"age\":23}, {\"name\":\"bob\", \"age\":26}]')\n);\npersonsStack.peek(); // ==> { name: 'avi', age: 23 }\n```\n\n",
+     "hash": "c5f1ac8d918a55c5",
+     "lang": "typescript",
+     "noteHe": "הכיוון ההפוך: בונים מחסנית Immutable ישירות מ-JSON. ‏`JSON.parse` ממיר את המחרוזת למערך של אובייקטים, והבנאי `iStack(...)` עוטף אותו במחסנית בלתי ניתנת לשינוי. `peek()` מחזיר את האיבר הראשון — האובייקט של avi. כך אפשר לעבוד בנוחות עם נתונים חיצוניים (JSON) בתוך מבני נתונים פונקציונליים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:8:9",
+     "type": "prose",
+     "en": "Another approach to functional immutable data structures is implemented in the [https://immerjs.github.io/immer/](https://immerjs.github.io/immer/) Immer library.\nSuch libraries (Immutable.js or Immer) are essential in frontend programming for efficient state management.\n\n",
+     "hash": "f8dab4efc7b766ae",
+     "he": "גישה נוספת למבני נתונים פונקציונליים בלתי ניתנים לשינוי ממומשת בספריית Immer‏ [https://immerjs.github.io/immer/](https://immerjs.github.io/immer/).\nספריות כאלה (Immutable.js או Immer) חיוניות בתכנות frontend לניהול מצב (state) יעיל."
+    }
+   ],
+   "headingHe": "מבני נתונים פונקציונליים יעילים: שלב 3"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:9",
+   "depth": 2,
+   "headingEn": "Disjoint Types and Disjoint Union",
+   "raw": "## Disjoint Types and Disjoint Union\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:9:0",
+     "type": "prose",
+     "en": "We have highlighted the perspective of Data Types as denoting sets of values over which common operations can be performed.\nOn the basis of this understanding, we defined operations over types which correspond to Set operations - such as Union and Intersection.  \n\n",
+     "hash": "73dc78ac69ce7bd3",
+     "he": "הדגשנו את נקודת המבט לפיה טיפוסי נתונים מציינים קבוצות של ערכים שעליהן ניתן לבצע פעולות משותפות.\nעל בסיס הבנה זו, הגדרנו פעולות על טיפוסים המקבילות לפעולות על קבוצות — כגון איחוד (Union) וחיתוך (Intersection)."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:1",
+     "type": "prose",
+     "en": "Such operations are provided for example in TypeScript, and we can define types such as:\n\n",
+     "hash": "94d6edb6ba96133e",
+     "he": "פעולות כאלה קיימות למשל ב-TypeScript, ואנו יכולים להגדיר טיפוסים כמו:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:2",
+     "type": "code",
+     "en": "```typescript\ntype NoS = number | string;   // union: values that are either numbers or strings\ntype SoB = string | boolean;  // union: either string or boolean\ntype S = NoS & SoB;           // intersection - should be back to string.\n```\n\n",
+     "hash": "da6932ed2883dc34",
+     "lang": "typescript",
+     "noteHe": "הקוד מדגים את אופרטורי הטיפוסים של TypeScript כפעולות על קבוצות: `|` הוא איחוד — `NoS` הוא קבוצת כל הערכים שהם מספר או מחרוזת, ו-`SoB` — מחרוזת או בוליאני. `&` הוא חיתוך — `S` מכיל רק את הערכים ששייכים לשני הטיפוסים גם יחד, וכיוון שהחלק המשותף היחיד בין `NoS` ל-`SoB` הוא המחרוזות, `S` שקול בפועל ל-`string`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:3",
+     "type": "prose",
+     "en": "Type union can be used for example if we want to model the set of values that can be denoted by the JSON notation - as a recursive union of possible values:\n",
+     "hash": "be7847f31d2d19ca",
+     "he": "באיחוד טיפוסים אפשר להשתמש למשל אם רוצים למדל את קבוצת הערכים שניתן לציין בכתיב JSON — כאיחוד רקורסיבי של ערכים אפשריים:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:4",
+     "type": "code",
+     "en": "```typescript\ntype Json =\n  // Atomic values\n  | string\n  | number\n  | boolean\n  | null\n  // Compound values - maps and arrays\n  | { [property: string]: Json } // A map where the keys are all strings\n  | Json[];\n```\n\n",
+     "hash": "705087e6ad3c87da",
+     "lang": "typescript",
+     "noteHe": "הטיפוס `Json` ממדל את כל הערכים האפשריים בכתיב JSON כאיחוד רקורסיבי: הערכים האטומיים הם `string`,‏ `number`,‏ `boolean` ו-`null`; הערכים המורכבים הם מפה (אובייקט שבו כל המפתחות מחרוזות והערכים הם עצמם `Json` — התחביר `{ [property: string]: Json }` נקרא index signature) או מערך של ערכי `Json`. שימו לב שהטיפוס מוגדר במונחים של עצמו בשני הענפים המורכבים — כך מתקבל קינון בעומק שרירותי, בדיוק כמו ב-JSON אמיתי."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:5",
+     "type": "prose",
+     "en": "We have also defined that the type system implemented in Typescript follows **structural subtyping** as opposed to **nominal subtyping**.  For example, if we define two types:\n\n",
+     "hash": "5efb1a9a87c8cdd0",
+     "he": "כמו כן הגדרנו שמערכת הטיפוסים הממומשת ב-TypeScript פועלת לפי **תת-טיפוס מבני (structural subtyping)** בניגוד ל**תת-טיפוס נומינלי (nominal subtyping)**. לדוגמה, אם נגדיר שני טיפוסים:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:6",
+     "type": "code",
+     "en": "```typescript\ntype Person = { name: string; address: string };    // a person record in a Database\ntype Variable = { name: string; address: string };  // a variable declaration in an Interpreter\n\nlet p: Person = { name: \"a\", address: \"2\" };\nlet v: Variable = p; // Compiles ok\n```\n\n",
+     "hash": "f918b1ac06ec709e",
+     "lang": "typescript",
+     "noteHe": "שני הטיפוסים `Person` (רשומת אדם במסד נתונים) ו-`Variable` (הכרזת משתנה במפרש) מוגדרים עם אותו מבנה בדיוק — שדות `name` ו-`address` מטיפוס `string` — למרות שהם מייצגים דברים שונים לחלוטין מבחינה רעיונית. ההשמה `let v: Variable = p` עוברת קומפילציה בהצלחה: תחת טיפוס מבני, TypeScript משווה רק את מבנה הטיפוסים ולא את שמותיהם, ולכן מבחינתו שני הטיפוסים זהים. זו בדיוק הבעיה שהוספת שדה tag תפתור."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:7",
+     "type": "prose",
+     "en": "Under **nominal typing** (like it exists in Java for example), these two types would be disjoint - values of type Person and values of type Variable would be different.\n\n",
+     "hash": "9c4d849c9c10415a",
+     "he": "תחת **טיפוס נומינלי (nominal typing)** — כפי שקיים למשל ב-Java — שני הטיפוסים האלה היו זרים: ערכים מטיפוס Person וערכים מטיפוס Variable היו שונים זה מזה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:8",
+     "type": "prose",
+     "en": "Under **structural typing** (like it exists in Typescript), these two types are actually equal - they describe the same set of values.\n\n",
+     "hash": "ead6ee3a587b129e",
+     "he": "תחת **טיפוס מבני (structural typing)** — כפי שקיים ב-TypeScript — שני הטיפוסים האלה למעשה שווים: הם מתארים את אותה קבוצת ערכים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:9",
+     "type": "prose",
+     "en": "When modeling data types, we are often interested in distinguishing such types - so that the values we describe are distinct, and we cannot confuse a Person value with a Variable value.\n\n",
+     "hash": "0542f8cb4c1c6c18",
+     "he": "כאשר אנו ממדלים טיפוסי נתונים, לעיתים קרובות אנו מעוניינים להבחין בין טיפוסים כאלה — כך שהערכים שאנו מתארים יהיו נבדלים, ולא נוכל לבלבל ערך Person עם ערך Variable."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:10",
+     "type": "prose",
+     "en": "The way to obtain this behavior is to add a discriminant field - called a **tag** - to distinguish values that are intended of being of different types.\n\n",
+     "hash": "84bc6dfceaad8595",
+     "he": "הדרך להשיג התנהגות זו היא להוסיף שדה מבחין (discriminant) — הנקרא **תגית (tag)** — כדי להבדיל בין ערכים שאמורים להיות מטיפוסים שונים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:11",
+     "type": "code",
+     "en": "```typescript\nconst PERSON = \"person\";\nconst VARIABLE = \"variable\";\n\ntype Person = {\n    tag: typeof PERSON;\n    name: string;\n    address: string;\n} // a person record in a Database\n\ntype Variable = {\n    tag: typeof VARIABLE;\n    name: string;\n    address: string;\n} // a variable declaration in an Interpreter\n\nlet p: Person = { tag: PERSON, name: \"a\", address: \"2\" };\nlet v: Variable = p; // Does NOT compile:\n// message:\n// Type 'Person' is not assignable to type 'Variable'.\n//   Types of property 'tag' are incompatible.\n//     Type '\"person\"' is not assignable to type '\"variable\"'.\n```\n\n",
+     "hash": "4ecd48add84dd9f7",
+     "lang": "typescript",
+     "noteHe": "כאן נפתרת בעיית הטיפוס המבני על ידי הוספת שדה `tag`. הקבועים `PERSON` ו-`VARIABLE` מחזיקים מחרוזות ליטרליות, ו-`typeof PERSON` הוא הטיפוס הליטרלי `\"person\"` — טיפוס שמכיל ערך יחיד בלבד. כך השדה `tag` של `Person` יכול להכיל אך ורק את המחרוזת `\"person\"`, ושל `Variable` — אך ורק `\"variable\"`. עכשיו שני הטיפוסים כבר אינם זהים מבנית, וההשמה `let v: Variable = p` נכשלת בקומפילציה: הודעת השגיאה מסבירה שהטיפוסים של השדה `tag` אינם תואמים. במילים אחרות — הפכנו את הטיפוסים לזרים (disjoint) גם תחת טיפוס מבני."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:12",
+     "type": "prose",
+     "en": "In this example, the type of the `tag` field is a set of a single value - the string `\"person\"` or the string `\"variable\"`.\n\n",
+     "hash": "defca909088fd252",
+     "he": "בדוגמה זו, הטיפוס של השדה `tag` הוא קבוצה בת ערך יחיד — המחרוזת `\"person\"` או המחרוזת `\"variable\"`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:9:13",
+     "type": "prose",
+     "en": "With the addition of the `tag` field with these specifications, the two types `Person` and `Variable` have become **disjoint** - that is, the set of values these type annotations denote are disjoint.\n\n",
+     "hash": "76ed827c2da34ba0",
+     "he": "עם הוספת השדה `tag` במפרט הזה, שני הטיפוסים `Person` ו-`Variable` הפכו **זרים (disjoint)** — כלומר, קבוצות הערכים שהערות הטיפוס האלה מציינות הן זרות זו לזו."
+    }
+   ],
+   "headingHe": "טיפוסים זרים ואיחוד זר"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:10",
+   "depth": 3,
+   "headingEn": "Disjoint Union",
+   "raw": "### Disjoint Union\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:10:0",
+     "type": "prose",
+     "en": "The possibility to define disjoint types can be combined into a very common pattern called **disjoint union**.\n\n",
+     "hash": "0f725cac0865766b",
+     "he": "את האפשרות להגדיר טיפוסים זרים אפשר לשלב לכדי תבנית נפוצה מאוד הנקראת **איחוד זר (disjoint union)**."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:1",
+     "type": "prose",
+     "en": "In set theory, the **disjoint union of two sets** $$A$$ and $$B$$ ([https://en.wikipedia.org/wiki/Disjoint_union](https://en.wikipedia.org/wiki/Disjoint_union)) is a binary operator that combines all distinct elements of a pair of given sets, while retaining the original set membership as a distinguishing characteristic of the union set.\n\n",
+     "hash": "03b10ae2791e86bf",
+     "he": "בתורת הקבוצות, **האיחוד הזר של שתי קבוצות** $$A$$ ו-$$B$$ ([https://en.wikipedia.org/wiki/Disjoint_union](https://en.wikipedia.org/wiki/Disjoint_union)) הוא אופרטור בינארי שמאחד את כל האיברים הנבדלים של זוג קבוצות נתונות, תוך שמירת השיוך לקבוצה המקורית כמאפיין מבחין של קבוצת האיחוד."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:2",
+     "type": "prose",
+     "en": "$$A \\uplus B = (A \\times \\{0\\}) \\cup (B \\times \\{1\\})$$\n\n",
+     "hash": "a3a23fad994bbd72",
+     "he": "$$A \\uplus B = (A \\times \\{0\\}) \\cup (B \\times \\{1\\})$$"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:3",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:4",
+     "type": "prose",
+     "en": "$$\\{0,1,2\\} \\uplus \\{2,3\\} = \\{ (0,0), (1,0), (2,0), (2,1), (3,1) \\}$$\n\n",
+     "hash": "8e3d4c088407d88a",
+     "he": "$$\\{0,1,2\\} \\uplus \\{2,3\\} = \\{ (0,0), (1,0), (2,0), (2,1), (3,1) \\}$$"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:5",
+     "type": "prose",
+     "en": "We identify in that operation that the elements (0, 1) added to each pair play a role similar to the `tag` field we added to map types to make them disjoint.\n\n",
+     "hash": "dbdac592cfd542a0",
+     "he": "אנו מזהים שבפעולה זו האיברים (0, 1) שנוספו לכל זוג ממלאים תפקיד דומה לשדה ה-`tag` שהוספנו לטיפוסי מפה כדי להפוך אותם לזרים."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:6",
+     "type": "prose",
+     "en": "In type descriptions, in order to define a **disjoint union type**, we define the union of two (or more) map types which are made disjoint by using the same `tag` field. \n\n",
+     "hash": "5500e877ca6e32d4",
+     "he": "בתיאורי טיפוסים, כדי להגדיר **טיפוס איחוד זר (disjoint union type)**, אנו מגדירים איחוד של שני טיפוסי מפה (או יותר) שהופכים לזרים באמצעות שימוש באותו שדה `tag`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:7",
+     "type": "prose",
+     "en": "**NOTE**: `tag` is just a key, any other key could be used - for example, `type` or `kind` are often used.  The key must be used consistently across all the types that appear in the union.\n\n",
+     "hash": "69f9de2e6f066e0b",
+     "he": "**הערה**: ‏`tag` הוא סתם מפתח — אפשר להשתמש בכל מפתח אחר, למשל `type` או `kind` נפוצים גם הם. חובה להשתמש באותו מפתח באופן עקבי בכל הטיפוסים שמופיעים באיחוד."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:8",
+     "type": "prose",
+     "en": "For example:\n\n",
+     "hash": "652744a2ab28954b",
+     "he": "לדוגמה:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:9",
+     "type": "code",
+     "en": "```typescript\ntype Shape = Circle | Rectangle | Triangle;\n\ntype Circle = {\n    tag: \"circle\";\n    center: { x: number; y: number };\n    radius: number;\n}\n\ntype Rectangle = {\n    tag: \"rectangle\";\n    upperLeft: { x: number; y: number };\n    lowerRight: { x: number; y: number };\n}\n\ntype Triangle = {\n    tag: \"triangle\";\n    p1: { x: number; y: number };\n    p2: { x: number; y: number };\n    p3: { x: number; y: number };\n}\n```\n\n",
+     "hash": "ed7f77f1fd712657",
+     "lang": "typescript",
+     "noteHe": "זו דוגמה קלאסית לטיפוס איחוד זר: `Shape` מוגדר כאיחוד של שלושה טיפוסים — `Circle`,‏ `Rectangle` ו-`Triangle` — שכל אחד מהם מזוהה בשדה `tag` עם טיפוס ליטרלי ייחודי (`\"circle\"`,‏ `\"rectangle\"`,‏ `\"triangle\"`). מלבד התגית, לכל טיפוס מבנה שונה לגמרי: לעיגול יש מרכז ורדיוס, למלבן שתי פינות, ולמשולש שלוש נקודות. התגית היא מה שמאפשר לבודק הטיפוסים (ולקוד בזמן ריצה) לזהות באיזו חלופה מדובר — תבנית שנקראת ב-TypeScript גם discriminated union."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:10",
+     "type": "prose",
+     "en": "These type definitions allow this type of processing - which is \"case by case\" processing of all the options in the disjoint union:\n\n",
+     "hash": "d43e31dc90726ae7",
+     "he": "הגדרות טיפוסים אלה מאפשרות עיבוד מהסוג הבא — עיבוד \"מקרה אחר מקרה\" של כל האפשרויות באיחוד הזר:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:11",
+     "type": "code",
+     "en": "```typescript\nconst area = (s: Shape): number => {\n    switch (s.tag) {\n        case \"circle\":\n            return s.radius * s.radius * 3.14;\n        case \"rectangle\":\n            return (s.upperLeft.x - s.lowerRight.x) * (s.upperLeft.y - s.lowerRight.y);\n        case \"triangle\":\n            return 0; // I do not know the formula :(\n    }\n};\n\narea({ tag: \"circle\", center: { x: 0, y: 0 }, radius: 2 }); // ==> 12.56\n```\n\n",
+     "hash": "946acfaef635effb",
+     "lang": "typescript",
+     "noteHe": "הפונקציה `area` מדגימה עיבוד \"מקרה אחר מקרה\" של איחוד זר באמצעות `switch` על השדה `s.tag`. הנקודה החשובה היא צמצום הטיפוס (type narrowing): בתוך `case \"circle\"` בודק הטיפוסים יודע ש-`s` הוא `Circle`, ולכן הגישה ל-`s.radius` חוקית ובטוחה; בתוך `case \"rectangle\"` מותר לגשת ל-`s.upperLeft` ו-`s.lowerRight`, וכן הלאה. בנוסף, הבודק מוודא שה-`switch` מכסה את כל שלוש החלופות של `Shape` — ולכן הפונקציה יכולה להחזיר `number` בלי ענף ברירת מחדל. הקריאה בסוף מחשבת שטח עיגול ברדיוס 2: ‏2·2·3.14 = 12.56."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:12",
+     "type": "prose",
+     "en": "The tool of disjoint union together with the corresponding `switch` construct achieves an effect similar to sub-classes with virtual classes in Object-Oriented Programming.  It allows the function to dispatch to different computations based on the type of the actual value received as a parameter.\n\n",
+     "hash": "fe2cf693a31c172c",
+     "he": "הכלי של איחוד זר יחד עם מבנה ה-`switch` המתאים משיג אפקט דומה לתת-מחלקות עם מתודות וירטואליות בתכנות מונחה-עצמים. הוא מאפשר לפונקציה לנתב (dispatch) לחישובים שונים על פי הטיפוס של הערך הממשי שהתקבל כפרמטר."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:13",
+     "type": "prose",
+     "en": "We prefer in the course the following functional notation instead of `switch`, using the simple conditional expression:\n",
+     "hash": "130ea5896c35dfdd",
+     "he": "בקורס אנו מעדיפים את הכתיב הפונקציונלי הבא במקום `switch`, תוך שימוש בביטוי התנאי הפשוט:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:14",
+     "type": "code",
+     "en": "```typescript\nconst area = (s: Shape): number =>\n    s.tag === \"circle\" ? s.radius * s.radius * 3.14 :\n    s.tag === \"rectangle\" ? (s.upperLeft.x - s.lowerRight.x) * (s.upperLeft.y - s.lowerRight.y) :\n    s.tag === \"triangle\" ? 0 :\n    s // s is understood as a variable of type \"never\" here - it can be returned without affecting the return type of the function which remains number\n```\n\n",
+     "hash": "9126a43f51bb2064",
+     "lang": "typescript",
+     "noteHe": "זו אותה פונקציה `area` בכתיב הפונקציונלי המועדף בקורס: שרשרת של ביטויי תנאי (`? :`) במקום `switch`. כל בדיקה `s.tag === \"...\"` מצמצמת את הטיפוס של `s` בענף המתאים. הנקודה המעניינת היא הענף האחרון: תחביר הביטוי מחייב ענף `else`, למרות שאחרי שלוש הבדיקות כבר אין אפשרויות. בנקודה זו TypeScript מסיק ש-`s` הוא מטיפוס `never` — הטיפוס שמציין את הקבוצה הריקה. מותר להחזיר את `s` שם, כי `number | never` הוא פשוט `number` — ולכן טיפוס ההחזרה של הפונקציה נשאר `number`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:15",
+     "type": "prose",
+     "en": "The conditional expression when it is chained as in this example has the same semantic as a `switch` case where all the cases are exclusive.\nThe difference is that in the last step, the syntax of the expression requires an `else` case which is a priori not needed.\nThe type inference mechanism of TypeScript recognizes that after each test, the type of the variable `s` has less and less possible options.\nIn the last `else` option, however, `s` is known to have no possible values.  In this case, it is understood to have a type called `never` (which denotes\nthe empty set, the opposite of the type `any` which denotes all possible values).  In this case, we can just return `s`, which does not contradict the return\ntype of the function, because we know that the function will return either one of the cases in the first 3 clauses (which is `number`) or `never` -- altogether,\nthe function returns `number` union `never` which is `number`.\n\n",
+     "hash": "d51bad81fcd02524",
+     "he": "לביטוי התנאי, כשהוא משורשר כמו בדוגמה זו, יש אותה סמנטיקה כמו ל-`switch` שבו כל המקרים מוציאים זה את זה.\nההבדל הוא שבשלב האחרון, תחביר הביטוי מחייב ענף `else` שמלכתחילה אינו נחוץ.\nמנגנון הסקת הטיפוסים (type inference) של TypeScript מזהה שאחרי כל בדיקה, לטיפוס של המשתנה `s` נותרות פחות ופחות אפשרויות.\nאולם בענף ה-`else` האחרון, ידוע של-`s` אין ערכים אפשריים כלל. במקרה זה, הוא מובן כבעל טיפוס בשם `never` (שמציין את הקבוצה הריקה — ההפך מהטיפוס `any` שמציין את כל הערכים האפשריים). במקרה כזה, אפשר פשוט להחזיר את `s`, וזה אינו סותר את טיפוס ההחזרה של הפונקציה: אנו יודעים שהפונקציה תחזיר או אחד מהמקרים בשלושת הענפים הראשונים (שהוא `number`) או `never` — ובסך הכול הפונקציה מחזירה איחוד של `number` ו-`never`, שהוא `number`."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:16",
+     "type": "prose",
+     "en": "Both the usage of `switch` and the conditional expression are safe against future changes in the code: if the programmer extends the definition of the type `Shape`\nwith another option, then the code for the function `area` will not compile anymore.\n\n",
+     "hash": "5291f379f6b611f6",
+     "he": "גם השימוש ב-`switch` וגם ביטוי התנאי בטוחים מפני שינויים עתידיים בקוד: אם המתכנת ירחיב את הגדרת הטיפוס `Shape` באפשרות נוספת, הקוד של הפונקציה `area` כבר לא יעבור קומפילציה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:17",
+     "type": "prose",
+     "en": "The definition of the Union type in this specific context makes sense because it expresses the intention of the programmer:\n",
+     "hash": "bcf507d225fb938f",
+     "he": "הגדרת טיפוס האיחוד בהקשר הספציפי הזה הגיונית מפני שהיא מבטאת את כוונת המתכנת:"
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:18",
+     "type": "list",
+     "en": "* these are disjoint types - they have no commonality in structure\n* but they have a similar functional interface - we *consume* them in a similar manner.\n\n",
+     "hash": "6fba7d75e7e8264b",
+     "he": "* אלה טיפוסים זרים — אין להם שום מכנה משותף במבנה\n* אבל יש להם ממשק פונקציונלי דומה — אנו *צורכים* אותם באופן דומה."
+    },
+    {
+     "id": "cm/1.4TypesAndOperations:10:19",
+     "type": "prose",
+     "en": "The type checker can determine that the switch construct covers all possible options - based on the structure of the type union - and for each case, it can check the expected keys based on the value of the tag key.\n\n",
+     "hash": "6e55d31886b423b4",
+     "he": "בודק הטיפוסים יכול לקבוע שמבנה ה-switch מכסה את כל האפשרויות — על סמך מבנה איחוד הטיפוסים — ובכל מקרה ומקרה, הוא יכול לבדוק את המפתחות הצפויים על סמך הערך של מפתח התגית."
+    }
+   ],
+   "headingHe": "איחוד זר (Disjoint Union)"
+  },
+  {
+   "id": "cm/1.4TypesAndOperations:11",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/1.4TypesAndOperations:11:0",
+     "type": "list",
+     "en": "* Type definitions help the programmer structure the code that operates on complex values in a way that reflects the structure of the data type.\n* Programmers design and name types for sets of values that will be processed by the same set of functions.\n\n* Homogeneous array types encourage the programmer to consume them using the sequence interface (map, filter, reduce) with processing functions applied to each item of the same type.\n* Recursive types are processed by recursive functions which inspect the values accordig to the type definition - and can determine the base case and the inductive case.  We illustrated this with Tree processing functions.\n* Mutable data types can be modelled in a Functional Programming style by making sure *commands* are written as *constructors* which return a new version of the values, instead of mutating an existing value.  We illustrated this on the case of the **stack** data type.\n* Disjoint types and Disjoint Unions enable the definition of uniform functional interfaces over types of values that are not structurally similar.\n",
+     "hash": "315fcbc48a6ae05e",
+     "he": "* הגדרות טיפוסים עוזרות למתכנת לבנות את הקוד שפועל על ערכים מורכבים כך שישקף את מבנה טיפוס הנתונים.\n* מתכנתים מעצבים טיפוסים ונותנים להם שמות עבור קבוצות של ערכים שיעובדו בידי אותה קבוצת פונקציות.\n\n* טיפוסי מערכים הומוגניים מעודדים את המתכנת לצרוך אותם באמצעות ממשק הסדרות (map,‏ filter,‏ reduce) עם פונקציות עיבוד המופעלות על כל איבר מאותו טיפוס.\n* טיפוסים רקורסיביים מעובדים על ידי פונקציות רקורסיביות שבוחנות את הערכים בהתאם להגדרת הטיפוס — ויכולות לקבוע את מקרה הבסיס ואת המקרה האינדוקטיבי. הדגמנו זאת עם פונקציות לעיבוד עצים.\n* טיפוסי נתונים ניתנים לשינוי אפשר למדל בסגנון תכנות פונקציונלי על ידי הקפדה על כך ש*פקודות* ייכתבו כ*בנאים* שמחזירים גרסה חדשה של הערכים, במקום לשנות ערך קיים. הדגמנו זאת על טיפוס הנתונים **מחסנית (stack)**.\n* טיפוסים זרים ואיחודים זרים מאפשרים הגדרה של ממשקים פונקציונליים אחידים על טיפוסים של ערכים שאינם דומים מבנית."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "מדוע ממשק הסדרות (map, filter, reduce) עובד באופן טבעי דווקא על מערכים הומוגניים?",
+   "options": [
+    "כי מערכים הומוגניים תופסים פחות זיכרון",
+    "כי לפונקציית העיבוד המועברת כפרמטר יש חתימת טיפוס פשוטה שנגזרת מטיפוס איברי המערך",
+    "כי JavaScript אינה תומכת במערכים הטרוגניים",
+    "כי map ו-filter מוגדרות רק על מספרים"
+   ],
+   "correct": 1,
+   "explanationHe": "כאשר המערך הומוגני (למשל `number[]`), פונקציית המיפוי היא מטיפוס פשוט כמו `number => number` ואפשר להפעיל אותה בבטחה על כל איבר. במערך הטרוגני כמו `[1, \"a\", true]` הפונקציה הייתה צריכה לטפל בכל טיפוס אפשרי בנפרד. תשובה (א) אינה הסיבה; (ג) שגויה — JavaScript דווקא תומכת במערכים הטרוגניים; (ד) שגויה — הפונקציות גנריות."
+  },
+  {
+   "id": "ex2",
+   "type": "code-reading",
+   "questionHe": "בהינתן המימוש של שלב 1 (מחסנית \"לקראת פונקציונלית\" שבה push/pop מחזירות את המערך אך משנות אותו עם unshift/shift), מה יודפס?\n```typescript\nconst s1 = makeStack([10, 20]);\nconst s2 = push(s1, 5);\npop(s1);\nconsole.log(peek(s2));\n```",
+   "answerHe": "יודפס `20`.",
+   "explanationHe": "בשלב 1 אין העתקה: `push` מפעילה `unshift` על אותו מערך ומחזירה אותו, ולכן `s1` ו-`s2` הם כינויים (aliases) לאותו מערך `[5, 10, 20]`. הקריאה `pop(s1)` מסירה את 5 מהמערך המשותף, כך ש-`peek(s2)` רואה את `[10, 20]` ומחזירה 20 — למרות שלא הופעלה שום פקודה ישירות על `s2`. זו בדיוק בעיית ה-variable aliasing."
+  },
+  {
+   "id": "ex3",
+   "type": "mcq",
+   "questionHe": "מה ההבדל בין תת-טיפוס מבני (structural) לתת-טיפוס נומינלי (nominal), וכיצד הופכים שני טיפוסי מפה זהים במבנה לזרים ב-TypeScript?",
+   "options": [
+    "בטיפוס מבני משווים שמות טיפוסים; מוסיפים שדה משותף כדי לאחד אותם",
+    "בטיפוס נומינלי טיפוסים עם אותו מבנה תמיד שווים; אין דרך להפריד ביניהם ב-TypeScript",
+    "בטיפוס מבני טיפוסים עם אותו מבנה שווים גם אם שמם שונה; מוסיפים שדה tag עם טיפוס ליטרלי שונה לכל טיפוס",
+    "ההבדל רלוונטי רק לשפות ללא בדיקת טיפוסים סטטית"
+   ],
+   "correct": 2,
+   "explanationHe": "תחת טיפוס מבני (TypeScript) ההשוואה היא לפי מבנה בלבד — `Person` ו-`Variable` עם אותם שדות הם אותו טיפוס. תחת טיפוס נומינלי (Java) השם קובע, ולכן הם זרים. ב-TypeScript משיגים זרות על ידי שדה מבחין `tag` שערכו טיפוס ליטרלי יחיד (`\"person\"` לעומת `\"variable\"`) — כך ההשמה ביניהם נכשלת בקומפילציה. שאר המסיחים הופכים את ההגדרות."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "מדוע הקוד הבא עובר קומפילציה למרות שהענף האחרון מחזיר את `s` ולא מספר?\n```typescript\nconst area = (s: Shape): number =>\n    s.tag === \"circle\" ? s.radius * s.radius * 3.14 :\n    s.tag === \"rectangle\" ? (s.upperLeft.x - s.lowerRight.x) * (s.upperLeft.y - s.lowerRight.y) :\n    s.tag === \"triangle\" ? 0 :\n    s\n```",
+   "answerHe": "אחרי שלוש הבדיקות, מנגנון הסקת הטיפוסים קובע של-`s` לא נותרו ערכים אפשריים — הטיפוס שלו בענף האחרון הוא `never` (הקבוצה הריקה). החזרת ערך מטיפוס `never` אינה סותרת את טיפוס ההחזרה, כי `number | never` שווה ל-`number`.",
+   "explanationHe": "נקודות מפתח: תחביר ביטוי התנאי מחייב ענף else אף שהוא לא נחוץ סמנטית; צמצום טיפוסים (narrowing) אחרי כל בדיקת tag; ‏`never` מציין את הקבוצה הריקה (ההפך מ-`any` שמציין את כל הערכים); איחוד עם `never` אינו משנה טיפוס. בונוס: אם יוסיפו חלופה ל-`Shape`, ‏`s` בענף האחרון כבר לא יהיה `never` והקוד לא יתקמפל — הגנה מפני שינויים עתידיים."
+  },
+  {
+   "id": "ex5",
+   "type": "mcq",
+   "questionHe": "במימוש שלב 2 של המחסנית הפונקציונלית, כל פקודה מתחילה ב-`let res = cloneArray(stack)`. מה הבעיה העיקרית של מימוש זה, וכיצד פותרות אותה ספריות כמו Immutable.js?",
+   "options": [
+    "הוא אינו בטוח — עדיין יש aliasing; ‏Immutable.js מוסיפה נעילות (locks)",
+    "הוא לא יעיל — כל שינוי דורש העתקה מלאה (בזבוז RAM ו-CPU); ‏Immutable.js משתפת מבנה בין גרסאות ומעתיקה מינימום, לפי גישת האמורטיזציה של Okasaki",
+    "הוא אינו גנרי — עובד רק על מספרים; Immutable.js גנרית",
+    "העתקה רדודה אינה חוקית ב-TypeScript; ‏Immutable.js משתמשת בהעתקה עמוקה"
+   ],
+   "correct": 1,
+   "explanationHe": "שלב 2 בטוח לחלוטין (אין aliasing, המבנים נשארים immutable) — הבעיה היא יעילות: העתקה מלאה בכל פעולה יקרה בזיכרון ובמעבד. עבודת Okasaki‏ (Purely Functional Data Structures) הראתה איך לבנות מבני נתונים פונקציונליים יעילים באמצעות אמורטיזציה ושיתוף מבנה פנימי — וזה הבסיס ל-Immutable.js. המסיחים האחרים סותרים את מה שנלמד: המימוש כן בטוח, כן גנרי, והעתקה רדודה חוקית."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "הסבירו את עקרון ההפרדה בין שאילתות (Queries) לפקודות (Commands) בממשק המחסנית, ומדוע לפי מתודולוגיה זו אפילו השאילתות אינן פונקציות טהורות במימוש הניתן לשינוי.",
+   "answerHe": "שאילתות (כמו `peek`, `empty`) רק מחזירות מידע על מבנה הנתונים בלי לשנותו; פקודות (כמו `push`, `pop`) רק משנות את מבנה הנתונים ואינן מחזירות ערך (`void`). לכן `pop` המסורתית, שגם מסירה וגם מחזירה ערך, מפוצלת ל-`peek` (שאילתה) ו-`pop` (פקודה). ההפרדה מקלה על כתיבת בדיקות (Command Query Separation). ואולם, במימוש ניתן לשינוי אפילו השאילתות אינן טהורות: הן אמנם ללא תופעות לוואי, אך אינן דטרמיניסטיות — קריאה ל-`peek(s)` על אותו משתנה בזמנים שונים יכולה להחזיר ערכים שונים אם בוצעה ביניהן פקודה ששינתה את המחסנית.",
+   "explanationHe": "נקודות חובה בתשובה: הגדרת שאילתה מול פקודה; פיצול `pop` ל-`peek`+`pop`; היתרון בבדיקות; ההבחנה בין 'ללא תופעות לוואי' לבין 'דטרמיניסטית' — פונקציה טהורה דורשת את שתיהן, והשאילתות מפרות את הדטרמיניזם בגלל mutation חיצוני."
+  },
+  {
+   "id": "ex7",
+   "type": "code-reading",
+   "questionHe": "מה יודפס בקוד הבא המשתמש ב-Immutable.js?\n```typescript\nimport { Stack as iStack } from \"Immutable\";\nlet s1 = iStack.of(1, 2, 3);\nlet s2 = s1.push(0);\nlet s3 = s2.pop();\nconsole.log(s1.peek(), s2.peek(), s3.peek(), s1.size);\n```",
+   "answerHe": "יודפס: `1 0 1 3`.",
+   "explanationHe": "ב-Immutable.js כל פעולה מחזירה מחסנית חדשה ואינה נוגעת בקיימת: `s1` נשארת `[1,2,3]` ולכן `s1.peek()` הוא 1 ו-`s1.size` הוא 3; ‏`s2` היא `[0,1,2,3]` ולכן `s2.peek()` הוא 0; ‏`s3` היא `s2` ללא הראש — `[1,2,3]` — ולכן `s3.peek()` הוא 1. אין aliasing ואין שינוי מצב נצפה, אף שבפנים הספרייה משתפת מבנה ומעתיקה מינימום."
+  },
+  {
+   "id": "ex8",
+   "type": "open",
+   "questionHe": "כיצד מבנה של טיפוס רקורסיבי כמו `BinTree<T>` (עם שדות אופציונליים `left` ו-`right`) מכתיב את מבנה הפונקציות שמעבדות אותו? התייחסו לבטיחות גישה לשדות, מקרה הבסיס וממצות (exhaustiveness).",
+   "answerHe": "מבנה הפונקציה משקף את הגדרת הטיפוס: הגישה ל-`t.root` תמיד בטוחה כי זהו שדה חובה; לעומת זאת, לפני גישה ל-`t.left` או `t.right` חובה לבדוק `undefined`, כי הטיפוס מתיר את היעדרם — ובדיקה זו היא בדיוק מקרה הבסיס של הרקורסיה (עלה). אם השדה אינו `undefined`, ידוע שהוא `BinTree<T>` ואפשר לקרוא רקורסיבית — זה המקרה האינדוקטיבי. בנוסף, בדיקת כל צירופי הקיום של `left` ו-`right` (ארבע תצורות) מבטיחה שהפונקציה ממצה את כל הערכים האפשריים של הטיפוס, ובודק הטיפוסים יכול לאמת זאת.",
+   "explanationHe": "נקודות מפתח: התאמה בין מבנה הטיפוס למבנה הקוד; שדה חובה = גישה בטוחה; שדה אופציונלי = חובת בדיקת `undefined`; הבדיקה היא מקרה הבסיס; קריאות רקורסיביות מקבלות טיפוס נכון; ממצות — כיסוי כל התצורות. אפשר להזכיר גם את החלופה: הרחבת החתימה ל-`BinTree<T> | undefined` שמפשטת את הקוד אך מכניסה שדות `undefined` מפורשים לפלט."
+  }
+ ]
+}

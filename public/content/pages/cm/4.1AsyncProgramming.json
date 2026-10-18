@@ -1,0 +1,1354 @@
+{
+ "id": "cm/4.1AsyncProgramming",
+ "kind": "lecture",
+ "sourcePath": "class_material/4.1AsyncProgramming.md",
+ "titleEn": "Asynchronous Programming",
+ "titleHe": "תכנות אסינכרוני",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/4.1AsyncProgramming:0",
+   "depth": 1,
+   "headingEn": "Asynchronous Programming",
+   "raw": "# Asynchronous Programming\n",
+   "blocks": [],
+   "headingHe": "תכנות אסינכרוני"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n\n",
+   "blocks": [],
+   "headingHe": "‏PPL 2023"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:2",
+   "depth": 2,
+   "headingEn": "Control Flow in Programming Languages",
+   "raw": "## Control Flow in Programming Languages\n\n",
+   "blocks": [],
+   "headingHe": "זרימת בקרה בשפות תכנות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:3",
+   "depth": 3,
+   "headingEn": "Types of Control Flows",
+   "raw": "### Types of Control Flows\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:3:0",
+     "type": "prose",
+     "en": "In this chapter, we will investigate the general topic of how to manage [*control flow*](https://en.wikipedia.org/wiki/Control_flow) in programming languages.\nControl flow is the order in which operations are executed within a program.  In procedural languages, the simplest form of control flow is the *sequence* \n(execute statements one after the other).  *Conditional statements* (if, switch, case) determine which of multiple continuations are followed depending \non the value of a tested expression. *Loops* determine how often a block of operations are executed depending on the value of a tested expression.\n\n",
+     "hash": "d571fee9110d290f",
+     "he": "בפרק הזה נחקור את הנושא הכללי של איך לנהל [*זרימת בקרה*](https://en.wikipedia.org/wiki/Control_flow) (control flow) בשפות תכנות.\nזרימת בקרה היא הסדר שבו פעולות מתבצעות בתוך תוכנית. בשפות פרוצדורליות, הצורה הפשוטה ביותר של זרימת בקרה היא *רצף*\n(ביצוע פקודות אחת אחרי השנייה). *פקודות תנאי* (if, switch, case) קובעות איזו מבין כמה המשכיות אפשריות תיבחר, בהתאם\nלערך של ביטוי שנבדק. *לולאות* קובעות באיזו תכיפות בלוק של פעולות מתבצע, בהתאם לערך של ביטוי שנבדק."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:3:1",
+     "type": "prose",
+     "en": "In functional languages, the key control flow is *function invocation*: the body of the function is executed within a scope in which the arguments are bound \nto the parameters of the invocation, and then the flow returns to the context in which the invocation took place.\n\n",
+     "hash": "927c75924374d596",
+     "he": "בשפות פונקציונליות, זרימת הבקרה המרכזית היא *הפעלת פונקציה*: גוף הפונקציה מתבצע בתוך תחום הכרה שבו הארגומנטים קשורים\nלפרמטרים של ההפעלה, ואחר כך הזרימה חוזרת להקשר שבו ההפעלה התרחשה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:3:2",
+     "type": "prose",
+     "en": "In addition to these classical control flows, programming languages include *non local control flow*: in these constructs, flows exits from a context of execution and continues at a predefined point.  These include *exceptions* (try/catch/finally/throw), *coroutines*, *generators*, *async/await*, and *continuation*.\n\n",
+     "hash": "a02413b1c02deea9",
+     "he": "בנוסף לזרימות הבקרה הקלאסיות האלה, שפות תכנות כוללות *זרימת בקרה לא-מקומית* (non local control flow): במבנים האלה, הזרימה יוצאת מהקשר של ביצוע וממשיכה בנקודה מוגדרת מראש. אלה כוללים *חריגות* (try/catch/finally/throw), *קו-רוטינות* (coroutines), *גנרטורים*, *async/await*, ו*המשכית* (continuation)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:3:3",
+     "type": "prose",
+     "en": "The study of control flow also includes a description of concurrency such as *threads* and their synchronization.\n\n",
+     "hash": "c467a27e1253b7e7",
+     "he": "חקר זרימת הבקרה כולל גם תיאור של מקביליות, כמו *תהליכונים* (threads) והסנכרון ביניהם."
+    }
+   ],
+   "headingHe": "סוגים של זרימות בקרה"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:4",
+   "depth": 3,
+   "headingEn": "Interpreters and Control Flow: Asynchronous Programming and Continuation Passing Style",
+   "raw": "### Interpreters and Control Flow: Asynchronous Programming and Continuation Passing Style\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:4:0",
+     "type": "prose",
+     "en": "In the interpreters we have designed in Chapter 2, we did not explicitly model the call stack.  The reason is that we relied on the call stack mechanism of the meta-language to provide the proper control of function calls and the return to their calling location.  In this sense, the interpreter we wrote does not *explain* how control flow is implemented in the object language, because we use the control flow primitives of the meta language.\n\n",
+     "hash": "3f2faa03ea4e60d6",
+     "he": "במפרשים שתכננו בפרק 2, לא מודלנו במפורש את מחסנית הקריאות (call stack). הסיבה היא שהסתמכנו על מנגנון מחסנית הקריאות של שפת-המטא (meta-language) כדי לספק את הבקרה הנכונה של קריאות לפונקציות ושל החזרה למקום הקריאה. במובן הזה, המפרש שכתבנו אינו *מסביר* איך זרימת בקרה ממומשת בשפת המושא (object language), מכיוון שאנחנו משתמשים בפרימיטיבים של זרימת הבקרה של שפת-המטא."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:4:1",
+     "type": "prose",
+     "en": "In this chapter, we investigate the mechanisms through which programming languages provide control flow, and variants of control flow across different programming paradigms.  In particular, we present practical issues in Asynchronous Programming, and techniques allowing proper management of asynchronous tasks: *callbacks*, *promises*, and *co-routines*.  We review these topics in TypeScript - where they practically fill an important role both in the domains of client user interface (to deal with User Interface events in a reactive manner) and of backend servers (to deal with protocol implementation which are IO-bound in a resource efficient manner).\n\n",
+     "hash": "0b03b24b19572687",
+     "he": "בפרק הזה נחקור את המנגנונים שדרכם שפות תכנות מספקות זרימת בקרה, ואת הווריאנטים של זרימת בקרה בפרדיגמות תכנות שונות. בפרט, נציג סוגיות מעשיות בתכנות אסינכרוני, וטכניקות שמאפשרות ניהול נכון של משימות אסינכרוניות: *callbacks*, *הבטחות* (promises), ו*קו-רוטינות* (co-routines). נסקור את הנושאים האלה ב-TypeScript — שבה הם ממלאים בפועל תפקיד חשוב גם בתחום ממשק המשתמש בצד הלקוח (כדי לטפל באירועי ממשק משתמש באופן תגובתי) וגם בתחום שרתי ה-backend (כדי לטפל במימושי פרוטוקולים שהם חסומי-קלט/פלט באופן חסכוני במשאבים)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:4:2",
+     "type": "prose",
+     "en": "We then introduce a technique called **continuation passing style (CPS)**, investigate its properties and relate it to the way our interpreters model control flow, recursion and iteration. We switch back to Scheme and to our Interpreter models and demonstrate a systematic transformation from recursive to CPS style and introduce techniques which elucidate the way asynchronous and lazy programming techniques are designed.\n\n",
+     "hash": "3773c141a5c32aa3",
+     "he": "לאחר מכן נציג טכניקה שנקראת **סגנון העברת המשכיות (continuation passing style, CPS)**, נחקור את תכונותיה ונקשר אותה לאופן שבו המפרשים שלנו מודלים זרימת בקרה, רקורסיה ואיטרציה. נחזור ל-Scheme ולמודלי המפרש שלנו ונדגים טרנספורמציה שיטתית מסגנון רקורסיבי לסגנון CPS, ונציג טכניקות שמבהירות את האופן שבו מתוכננות טכניקות תכנות אסינכרוני ועצל."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:4:3",
+     "type": "prose",
+     "en": "Finally, we use the notion of *continuation* that we have made concrete in the CPS transformation, and use it to re-implement the interpreter of Chapter 2 with explicit\ndescription of control flow as general continuations.  In this model, the interpreter is modeled as a function `eval(exp, env, cont) => (value, cont)` where `cont` represents the `control state` of the interpreter.  At each step of the computation as explained by the operational semantics, the interpreter computes which expression to evaluate next and where to pass the result of this evaluation.  We implement this new approach in the language $$L7$$.\n\n\n",
+     "hash": "f849bbf06c672788",
+     "he": "לבסוף, נשתמש במושג ה*המשכית* (continuation) שהפכנו לקונקרטי בטרנספורמציית ה-CPS, ונשתמש בו כדי לממש מחדש את המפרש של פרק 2 עם תיאור מפורש\nשל זרימת בקרה כהמשכיות כלליות. במודל הזה, המפרש ממודל כפונקציה `eval(exp, env, cont) => (value, cont)`, כאשר `cont` מייצג את `מצב הבקרה` (control state) של המפרש. בכל צעד של החישוב, כפי שמוסבר על ידי הסמנטיקה התפעולית, המפרש מחשב איזה ביטוי להעריך בהמשך ולאן להעביר את התוצאה של ההערכה הזו. נממש את הגישה החדשה הזו בשפה $$L7$$."
+    }
+   ],
+   "headingHe": "מפרשים וזרימת בקרה: תכנות אסינכרוני וסגנון העברת המשכיות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:5",
+   "depth": 2,
+   "headingEn": "Function Invocation - Call Stack",
+   "raw": "## Function Invocation - Call Stack\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:5:0",
+     "type": "prose",
+     "en": "When a function `f` calls a function `g`, `g` needs to know where to return to (inside `f`) after it is done. \nThis information is usually managed with a stack, the call stack. Let’s look at an example:\n\n\n",
+     "hash": "f8b24def27946b63",
+     "he": "כאשר פונקציה `f` קוראת לפונקציה `g`, ‏`g` צריכה לדעת לאן לחזור (בתוך `f`) לאחר שהיא מסיימת.\nהמידע הזה מנוהל בדרך כלל באמצעות מחסנית — מחסנית הקריאות (call stack). בואו נסתכל על דוגמה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:1",
+     "type": "code",
+     "en": "```typescript\n// [Based on http://exploringjs.com/es6/ch_async.html]\n\nfunction h(z) {\n    // Print stack trace\n    console.log(new Error().stack); // (A)\n}\nfunction g(y) {\n    h(y + 1); // (B)\n}\nfunction f(x) {\n    g(x + 1); // (C)\n}\nf(3); // (D)\n\n-->\n    Error\n        at h (evalmachine.<anonymous>:5:17)\n        at g (evalmachine.<anonymous>:8:5)\n        at f (evalmachine.<anonymous>:11:5)\n        at evalmachine.<anonymous>:13:1\n        at ContextifyScript.Script.runInThisContext (vm.js:26:33)\n        at Object.exports.runInThisContext (vm.js:79:17)\n        at run ([eval]:608:19)\n        at onRunRequest ([eval]:379:22)\n        at onMessage ([eval]:347:17)\n        at emitTwo (events.js:106:13)\n```    \n\n",
+     "hash": "3d22ade5a96e17b0",
+     "lang": "typescript",
+     "noteHe": "שרשרת קריאות פשוטה בת שלוש פונקציות, שנועדה **להדפיס את מחסנית הקריאות** ולהראות אותה במו עינינו. עקבו אחרי הזרימה: השורה `f(3)` בסימון (D) קוראת ל-`f`, שקוראת ל-`g` עם `4` בסימון (C), ש-קוראת ל-`h` עם `5` בסימון (B); ו-`h` אינה מחשבת דבר אלא רק מדפיסה. **הטריק שכדאי להכיר**: `new Error().stack` יוצר אובייקט שגיאה **בלי לזרוק אותו**, ושדה ה-`stack` שלו מכיל את מצב מחסנית הקריאות באותו רגע. זה כלי דיבוג שימושי מאוד. קראו את הפלט: השורה הראשונה היא `at h`, אחריה `at g`, אחריה `at f` — כלומר המחסנית מודפסת **מלמעלה למטה**, מהקריאה הפנימית ביותר כלפי חוץ. הסימונים `(A)`, `(B)`, `(C)`, `(D)` בהערות הם עוגנים שהטקסט בהמשך יתייחס אליהם, אז שווה לזכור אותם. שימו לב שהשורות מ-`at ContextifyScript` והלאה הן הפנימיות של סביבת ההרצה של Node ולא חלק מהתוכנית שלנו — התעלמו מהן. **הנקודה שהדוגמה מכינה אליה**: המחסנית הזו היא בדיוק מה שיהיה **ריק** כשנגיע לקריאות אסינכרוניות בהמשך הדף, וזה כל העניין."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:2",
+     "type": "prose",
+     "en": "Initially, when the program is started, the call stack is empty. \nAfter the function call `f(3)` in line D, the stack has one entry:\n\n",
+     "hash": "3a0e5bcbb5123e99",
+     "he": "בהתחלה, כשהתוכנית מתחילה, מחסנית הקריאות ריקה.\nלאחר הקריאה לפונקציה `f(3)` בשורה D, למחסנית יש רשומה אחת:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:3",
+     "type": "code",
+     "en": "```\nLocation in global scope\n```\n\n",
+     "hash": "d374a3022b9a58d9",
+     "noteHe": "מצב המחסנית אחרי הקריאה הראשונה — רשומה אחת. **שימו לב מה נשמר ברשומה**: לא הפונקציה `f` שנקראה, אלא **המקום שממנו קראו לה** (\"Location in global scope\"). זו נקודה שקל להתבלבל בה: המחסנית זוכרת לאן **לחזור**, ולא מי נקרא. זו בדיוק ה\"המשכית\" של הקריאה — המידע על מה שנשאר לעשות אחריה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:4",
+     "type": "prose",
+     "en": "After the function call `g(x + 1)` in line C, the stack has two entries:\n\n",
+     "hash": "74511cd739855e22",
+     "he": "לאחר הקריאה לפונקציה `g(x + 1)` בשורה C, למחסנית יש שתי רשומות:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:5",
+     "type": "code",
+     "en": "```\nLocation in f\nLocation in global scope\n```\n\n",
+     "hash": "d3428c40e0c53ccd",
+     "noteHe": "שתי רשומות. שימו לב לסדר: הרשומה **החדשה נדחפת למעלה**, ולכן \"Location in f\" מופיע מעל \"Location in global scope\". זו התנהגות LIFO קלאסית של מחסנית. קראו את זה כתשובה לשאלה \"לאן נחזור?\": קודם ל-`f`, ואחר כך מ-`f` לתחום הגלובלי."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:6",
+     "type": "prose",
+     "en": "After the function call `h(y + 1)` in line B, the stack has three entries:\n\n",
+     "hash": "d355c43bf82d0a65",
+     "he": "לאחר הקריאה לפונקציה `h(y + 1)` בשורה B, למחסנית יש שלוש רשומות:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:7",
+     "type": "code",
+     "en": "```\nLocation in g\nLocation in f\nLocation in global scope\n```\n\n",
+     "hash": "4cd5bf8b125a6935",
+     "noteHe": "שלוש רשומות — העומק המקסימלי בדוגמה, והמצב שבו נמצאת התוכנית בדיוק כשהשורה (A) מתבצעת. זהו הרגע שבו `console.log(new Error().stack)` צילם את התמונה שראינו בפלט. **השוו את שלוש השורות האלה לשלוש השורות הראשונות של הפלט**: \"Location in g / Location in f / Location in global scope\" מול \"at h / at g / at f\" — אותו מידע בשני ניסוחים, האחד לפי \"לאן לחזור\" והשני לפי \"מי רץ עכשיו\"."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:8",
+     "type": "prose",
+     "en": "The stack trace printed in line A shows you what the call stack looks like:\n\n",
+     "hash": "3d88b9f70978b061",
+     "he": "מעקב המחסנית שמודפס בשורה A מראה לכם איך מחסנית הקריאות נראית:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:9",
+     "type": "code",
+     "en": "```\nError\n    at h (...:2:17)\n    at g (...:6:5)\n    at f (...:9:5)\n    at ...\n```\n\n",
+     "hash": "a7975251f3ec6297",
+     "noteHe": "אותו פלט מהדוגמה, מקוצר לשלוש השורות הרלוונטיות (ה-`...` מחליף את מספרי השורות ואת הפנימיות של Node). קראו אותו מלמעלה למטה: `h` היא הפונקציה שרצה **כרגע**, היא נקראה מתוך `g`, ש-נקראה מתוך `f`. **זה בדיוק ההפך מסדר הקריאות בזמן**: הקריאה הראשונה שהתרחשה (`f`) מופיעה **אחרונה** בפלט. זו נקודה שמבלבלת בקריאת מעקבי שגיאה אמיתיים, וכדאי להתרגל אליה: השורה הראשונה תמיד המקום שבו הדבר קרה, והשורות שמתחתיה הן שרשרת מי-קרא-למי כלפי חוץ."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:10",
+     "type": "prose",
+     "en": "Next, each of the functions terminates and each time the top entry is removed from the stack. After function f is done, we are back in global scope and the call stack is empty. \n\n",
+     "hash": "3c2d516ec01ce149",
+     "he": "בהמשך, כל אחת מהפונקציות מסתיימת, ובכל פעם הרשומה העליונה מוסרת מהמחסנית. לאחר שהפונקציה f מסתיימת, אנחנו חוזרים לתחום הגלובלי ומחסנית הקריאות ריקה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:11",
+     "type": "prose",
+     "en": "The mechanism of a call stack to manage function calls and their return is present in all languages.  \n\n",
+     "hash": "c6438af6c8934cf4",
+     "he": "המנגנון של מחסנית קריאות לניהול קריאות לפונקציות והחזרה מהן קיים בכל השפות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:5:12",
+     "type": "prose",
+     "en": "The call stack is managed implicitly at runtime, and is usually not exposed to the programmer.  \nIn JavaScript, as demonstrated above, the `Error()` object provides access to the current state of the call stack - so that we can inspect it (this is mostly useful when debugging errors at runtime).  A similar facility exists in Java with the method `Thread.currentThread().getStackTrace()`.  \n\n\n",
+     "hash": "e0f4b04d846da8f6",
+     "he": "מחסנית הקריאות מנוהלת באופן משתמע בזמן ריצה, ובדרך כלל אינה חשופה למתכנת.\nב-JavaScript, כפי שהודגם למעלה, האובייקט `Error()` מספק גישה למצב הנוכחי של מחסנית הקריאות — כך שנוכל לבחון אותה (זה שימושי בעיקר בניפוי שגיאות בזמן ריצה). מתקן דומה קיים ב-Java עם המתודה `Thread.currentThread().getStackTrace()`."
+    }
+   ],
+   "headingHe": "הפעלת פונקציה — מחסנית הקריאות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:6",
+   "depth": 2,
+   "headingEn": "Event Loops",
+   "raw": "## Event Loops \n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:6:0",
+     "type": "prose",
+     "en": "JavaScript as a programming language is used in two main contexts:\n",
+     "hash": "35e4f56d38bad810",
+     "he": "‏JavaScript כשפת תכנות משמשת בשני הקשרים עיקריים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:6:1",
+     "type": "list",
+     "en": "* Inside Web browsers to implement user interface client code\n* Inside Node processes on the backend to perform protocol handling code - usually, exposing access to resources as a REST API.\n\n",
+     "hash": "cd5e55d04901a128",
+     "he": "* בתוך דפדפני אינטרנט, כדי לממש קוד לקוח של ממשק משתמש\n* בתוך תהליכי Node בצד ה-backend, כדי לבצע קוד של טיפול בפרוטוקולים — בדרך כלל, חשיפת גישה למשאבים כ-REST API."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:6:2",
+     "type": "prose",
+     "en": "In both of these application domains, it is useful to think of the task of the JavaScript interpreter as processing an [**event loop**](https://html.spec.whatwg.org/multipage/webappapis.html#event-loops).  \n\n",
+     "hash": "950c775c2bd56d65",
+     "he": "בשני תחומי היישום האלה, מועיל לחשוב על המשימה של מפרש ה-JavaScript כעל עיבוד של [**לולאת אירועים**](https://html.spec.whatwg.org/multipage/webappapis.html#event-loops) (event loop)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:6:3",
+     "type": "prose",
+     "en": "The following 25min presentation:\n[Philip Roberts: What the heck is the event loop anyway? | JSConf EU 2014](https://www.youtube.com/watch?v=8aGhZQkoFbQ) \nprovides a useful explanation of what is the event loop in the context of Web browsers.  \nThe companion tool to this presentation visualizes the mechanism of the event loop: [loupe](http://latentflip.com/loupe/)\n\n\n",
+     "hash": "0c9389e25e3c23fe",
+     "he": "המצגת הבאה, באורך 25 דקות:\n[Philip Roberts: What the heck is the event loop anyway? | JSConf EU 2014](https://www.youtube.com/watch?v=8aGhZQkoFbQ)\nמספקת הסבר מועיל על מהי לולאת האירועים בהקשר של דפדפני אינטרנט.\nהכלי הנלווה למצגת הזו ממחיש חזותית את מנגנון לולאת האירועים: [loupe](http://latentflip.com/loupe/)"
+    }
+   ],
+   "headingHe": "לולאות אירועים"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:7",
+   "depth": 3,
+   "headingEn": "Event Loops in the Browser",
+   "raw": "### Event Loops in the Browser\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:7:0",
+     "type": "prose",
+     "en": "Consider first a Browser context.  The browser event loop executes browser-related **tasks** that are fed into the browser **task queue**. Typical browser tasks are generated when an HTML page is loaded into a browser tab, and they include:\n\n",
+     "hash": "ad4b5a0096fa6643",
+     "he": "נתבונן קודם בהקשר של דפדפן. לולאת האירועים של הדפדפן מבצעת **משימות** (tasks) שקשורות לדפדפן ומוזנות ל**תור המשימות** (task queue) של הדפדפן. משימות דפדפן טיפוסיות נוצרות כאשר דף HTML נטען לכרטיסייה בדפדפן, והן כוללות:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:1",
+     "type": "list",
+     "en": "* Parsing HTML\n* Executing JavaScript code in script elements\n* Reacting to user input (mouse clicks, key presses, etc.)\n* Processing the result of asynchronous network requests (calls to HTTP server)\n\n",
+     "hash": "8c13b6e109a5a3b9",
+     "he": "* ניתוח תחבירי של HTML\n* ביצוע קוד JavaScript באלמנטי script\n* תגובה לקלט מהמשתמש (לחיצות עכבר, לחיצות מקלדת וכדומה)\n* עיבוד התוצאה של בקשות רשת אסינכרוניות (קריאות לשרת HTTP)"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:2",
+     "type": "prose",
+     "en": "The last 3 are tasks that run JavaScript code, in the JavaScript interpreter embedded in the browser. \nThese tasks terminate when the code terminates. \nThen the next task from the queue can be executed. \n\n",
+     "hash": "07cb718a42cd2f1f",
+     "he": "שלושת האחרונים הם משימות שמריצות קוד JavaScript, במפרש ה-JavaScript שמוטמע בדפדפן.\nהמשימות האלה מסתיימות כשהקוד מסתיים.\nאז אפשר לבצע את המשימה הבאה מהתור."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:3",
+     "type": "prose",
+     "en": "For example, browsers offer a timer facility: setTimeout() creates a timer, waits until it fires and then adds a task to the queue. It has the signature:\n\n",
+     "hash": "94431124ac9a2518",
+     "he": "לדוגמה, דפדפנים מציעים מתקן טיימר: setTimeout() יוצר טיימר, ממתין עד שהוא פורע ואז מוסיף משימה לתור. החתימה שלו היא:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:4",
+     "type": "code",
+     "en": "```typescript\nsetTimeout(callback, ms)\n```\n\n",
+     "hash": "519776043a61993a",
+     "lang": "typescript",
+     "noteHe": "החתימה של `setTimeout` — שני פרמטרים: פונקציה ומספר מילישניות. **הפרמטר הראשון הוא פונקציה**, וזו הנקודה שכל הפרק נבנה עליה: אנחנו מעבירים **קוד** כארגומנט, כדי שמישהו אחר יריץ אותו בזמן אחר. שימו לב לניסוח המדויק בפסקה שאחרי הקוד — `ms` קובע מתי ה-callback **יתווסף לתור**, ולא מתי הוא **יתבצע**. זו אבחנה חשובה שמסבירה למה `setTimeout(f, 0)` אינו מריץ את `f` מיד."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:5",
+     "type": "prose",
+     "en": "After ms milliseconds, callback is added to the task queue. It is important to understand that ms only specifies when the callback is added, not when it actually is executed. That may happen much later, especially if the event loop is heavily loaded.\n\n",
+     "hash": "c45df815bb477bbc",
+     "he": "לאחר ms מילישניות, ה-callback מתווסף לתור המשימות. חשוב להבין ש-ms מציין רק **מתי** ה-callback מתווסף, ולא מתי הוא מתבצע בפועל. זה יכול לקרות מאוחר בהרבה, במיוחד אם לולאת האירועים עמוסה מאוד."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:6",
+     "type": "prose",
+     "en": "Practically, the `setTimeout` primitive is a way to submit a task to the event loop for later execution.\n\n\n",
+     "hash": "6b9385879934f8a2",
+     "he": "מעשית, הפרימיטיב `setTimeout` הוא דרך להגיש משימה ללולאת האירועים לביצוע מאוחר יותר."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:7",
+     "type": "code",
+     "en": "```typescript\nsetTimeout(() => { console.log(\"After sometime...\"); }, 1000);\nconsole.log(\"Immediately\");\n-->\n    Immediately\n    \n    undefined\n\n    After sometime...\n``` \n\n",
+     "hash": "406477dfb171283b",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה הקטנה שממחישה את כל הרעיון** — שווה לעצור עליה. הקוד קורא ל-`setTimeout` עם השהיה של 1000 מילישניות, ואחר כך מדפיס `\"Immediately\"`. הפלט: `Immediately` **קודם**, ואחרי שנייה `After sometime...`. כלומר השורה שנכתבה **שנייה** התבצעה **ראשונה**. **מה קרה בפועל**: `setTimeout` לא חיכתה — היא רק רשמה את ה-callback ומיד חזרה; הביצוע המשיך לשורה הבאה, מחסנית הקריאות התרוקנה, ורק אז — כשלולאת האירועים הייתה פנויה — נשלף ה-callback מהתור והורץ. **כדאי לשנן**: קריאה אסינכרונית **אינה חוסמת**. שימו לב ל-`undefined` בפלט: זהו הערך המוחזר של `console.log(\"Immediately\")` שה-REPL מדפיס, ולא חלק מהתוכנית. **טעות נפוצה במבחן**: לצפות שקוד אסינכרוני יתבצע בסדר שבו הוא נכתב."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:8",
+     "type": "prose",
+     "en": "In the `setTimeout` example, the first parameter is a function passed as an argument (taking advantage of the support for closures in the JavaScript language).  The task that is posted to the event queue is called a **callback** (because it is called back by the event loop when it can instead of being called by the programmer directly).\n\n",
+     "hash": "dff53656e31e361d",
+     "he": "בדוגמה של `setTimeout`, הפרמטר הראשון הוא פונקציה שמועברת כארגומנט (תוך ניצול התמיכה ב-closures בשפת JavaScript). המשימה שנשלחת לתור האירועים נקראת **callback** (מכיוון שלולאת האירועים קוראת לה בחזרה כשהיא יכולה, במקום שהמתכנת יקרא לה ישירות)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:9",
+     "type": "prose",
+     "en": "Note how the task is represented: it is a procedure of no parameters.  What we submit to the task queue is a closure.\nThe idiom: `() => { ... }` indicates we \"package\" code to be executed later.  When and who executes it later can be decided\nby the programmer or by the runtime environment.\n\n",
+     "hash": "cfcf5da323889971",
+     "he": "שימו לב איך המשימה מיוצגת: היא פרוצדורה בלי פרמטרים. מה שאנחנו מגישים לתור המשימות הוא closure.\nהניב `() => { ... }` מציין שאנחנו \"אורזים\" קוד לביצוע מאוחר יותר. מתי ומי יבצע אותו מאוחר יותר יכול להיקבע\nעל ידי המתכנת או על ידי סביבת זמן הריצה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:10",
+     "type": "prose",
+     "en": "Another typical example of callbacks in the Browser context is to associate callbacks to User Interface widgets.\nA typical example would be:\n",
+     "hash": "691d04a1c1e30555",
+     "he": "דוגמה טיפוסית נוספת ל-callbacks בהקשר של הדפדפן היא שיוך של callbacks לרכיבי ממשק משתמש (widgets).\nדוגמה טיפוסית תהיה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:11",
+     "type": "code",
+     "en": "```typescript\n$(\"#btn_1\").click(\n  () => alert(\"Btn 1 Clicked\")\n);\n```\n\n",
+     "hash": "35245d5c3d1fcc44",
+     "lang": "typescript",
+     "noteHe": "רישום callback לאירוע לחיצה, בסינטקס של jQuery (הסימן `$` הוא שם הספרייה, ו-`#btn_1` בוחר אלמנט לפי ה-id שלו). **הנקודה המושגית**: התבנית זהה לחלוטין ל-`setTimeout` — מעבירים פונקציה בלי פרמטרים, ומישהו אחר יקרא לה בזמן שלא אנחנו קובעים. ההבדל הוא רק **מה מפעיל** אותה: שם טיימר, כאן לחיצת משתמש. שימו לב שאין כאן שום לולאה שממתינה ללחיצות ואין `if (clicked)` — כל ההמתנה מנוהלת על ידי לולאת האירועים של הדפדפן, ואנחנו רק רושמים מה לעשות כשזה יקרה. זהו הבסיס של **תכנות תגובתי** (reactive programming), וזו הסיבה שממשקי משתמש נכתבים כמעט תמיד בסגנון הזה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:7:12",
+     "type": "prose",
+     "en": "The anonymous function passed as an argument to the `click()` method defines a callback which is invoked by the Browser event loop whenever the button is clicked. \n\n",
+     "hash": "ba6ab739ecbe0fd7",
+     "he": "הפונקציה האנונימית שמועברת כארגומנט למתודה `click()` מגדירה callback שמופעל על ידי לולאת האירועים של הדפדפן בכל פעם שהכפתור נלחץ."
+    }
+   ],
+   "headingHe": "לולאות אירועים בדפדפן"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:8",
+   "depth": 3,
+   "headingEn": "Event Loops in Node",
+   "raw": "### Event Loops in Node\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:8:0",
+     "type": "prose",
+     "en": "In the node.js context, the event loop is driven by events related to asynchronous I/O calls.  For example, when invoking\nthe file system, to open a file, the time taken by the Operating System (OS) system call is extremely large compared to the time it takes to execute a function call.  Instead of making the interpreter block and wait for this system call to complete, the Node interpreter submits a task to the event loop, which consists of invoking the **callback** of the system call when it has completed.\n\n",
+     "hash": "8ffc981bc4b9c53e",
+     "he": "בהקשר של node.js, לולאת האירועים מונעת על ידי אירועים שקשורים לקריאות קלט/פלט אסינכרוניות. לדוגמה, כשמפעילים\nאת מערכת הקבצים כדי לפתוח קובץ, הזמן שנדרש לקריאת המערכת (system call) של מערכת ההפעלה ארוך בהרבה בהשוואה לזמן שנדרש לבצע קריאה לפונקציה. במקום לגרום למפרש להיחסם ולהמתין להשלמת קריאת המערכת הזו, מפרש Node מגיש משימה ללולאת האירועים, שמורכבת מהפעלת ה-**callback** של קריאת המערכת כשהיא הושלמה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:1",
+     "type": "prose",
+     "en": "This strategy requires the programmer to change fundamentally the way I/O calls are organized.  All the primitive calls to the File System (fs) module take a function as an argument - which is called the **callback** which is invoked when the slow FS operation has completed.  \n\n",
+     "hash": "3c9e1d907807abc4",
+     "he": "האסטרטגיה הזו מחייבת את המתכנת לשנות באופן יסודי את הדרך שבה קריאות קלט/פלט מסודרות. כל הקריאות הפרימיטיביות למודול מערכת הקבצים (fs) מקבלות פונקציה כארגומנט — שנקראת ה-**callback** ומופעלת כשפעולת ה-FS האיטית הושלמה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:2",
+     "type": "prose",
+     "en": "Compare the synchronous and asynchronous versions of a file system call:\n\n\n",
+     "hash": "24ad947605e85498",
+     "he": "השוו את הגרסאות הסינכרונית והאסינכרונית של קריאה למערכת הקבצים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:3",
+     "type": "code",
+     "en": "```typescript\n// Synchronous (blocking) call to readFileSync\n// The return value of the readFileSync procedure can be passed directly to the JSON.parse function.\nconst readJSONSync = (filename) => {\n  return JSON.parse(fs.readFileSync(filename, 'utf8'));\n}\n\nconst writeJSONSync = (filename, map) => {\n  return fs.writeFileSync(filename, JSON.stringify(map), 'utf8');\n}\n\nwriteJSONSync(\"test\", {id:1, text:'hello'});\nconsole.log(readJSONSync(\"test\"));\n-->\n\n    { id: 1, text: 'hello' }\n```\n\n\n",
+     "hash": "16d70d24c95e193c",
+     "lang": "typescript",
+     "noteHe": "הגרסה ה**סינכרונית** — זו שנראית נורמלית, וכדאי לשים לב עד כמה. `readJSONSync` קוראת ל-`fs.readFileSync`, מקבלת את התוכן **כערך מוחזר**, ומעבירה אותו ישירות ל-`JSON.parse`. שימו לב לצורה `return JSON.parse(fs.readFileSync(...))` — **הרכבת פונקציות רגילה**, בדיוק כמו שלמדנו לכתוב מתחילת הקורס. הפרמטר `'utf8'` הוא הקידוד, שגורם ל-`readFileSync` להחזיר מחרוזת ולא מערך בתים. שימו לב גם שסדר הפלט טריוויאלי: כותבים, ואז קוראים ומדפיסים — בדיוק כפי שנכתב. **המחיר שאינו נראה בקוד**: `readFileSync` **חוסמת** — כל התהליך עומד בזמן שמערכת ההפעלה קוראת מהדיסק. בשרת שמטפל באלף בקשות במקביל זה בלתי קביל, וזו הסיבה לכל הפרק הזה. השוו לגרסה האסינכרונית בבלוק הבא."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:4",
+     "type": "code",
+     "en": "```typescript\n// Asynchronous version using callbacks\nconst fs = require('fs');\n\nconst readJSON = (filename, callback) => {\n  fs.readFile(filename, 'utf8', (err, res) => {\n    if (err) \n      callback(err, undefined);\n    else\n      callback(undefined, JSON.parse(res));\n  });\n}\n\nconst writeJSON = (filename, map) => {\n  fs.writeFile(filename, JSON.stringify(map), (err) => {\n    if (err)\n      console.error(err);\n    else\n      console.log(\"The file was saved: \", filename);\n  });\n  console.log(\"This is invoked before the callback is invoked.\");\n}\n\nwriteJSON(\"test.async\", {id:1, test:'async'});\nreadJSON(\"test.async\", (err, res) => { console.log(res); });\n\n-->\n    This is invoked before the callback is invoked.\n    undefined\n    The file was saved:  test.async\n    { id: 1, test: 'async' }\n```\n\n",
+     "hash": "a7b69ffeb6012ed1",
+     "lang": "typescript",
+     "noteHe": "הגרסה ה**אסינכרונית** — אותה פונקציונליות, מבנה שונה לגמרי. **מה השתנה**: `readJSON` אינה **מחזירה** את התוצאה אלא מקבלת פרמטר נוסף, `callback`, וקוראת לו עם התוצאה. כלומר הערך \"זורם קדימה\" במקום \"חזרה\". **שימו לב למוסכמת (err, res)** — זו מוסכמת Node הקלאסית: הפרמטר **הראשון** של כל callback הוא השגיאה, והשני הוא הנתונים. אם הצליח, מעבירים `undefined` כשגיאה; אם נכשל, מעבירים את השגיאה ו-`undefined` כנתונים. **כדאי לשנן את המוסכמת הזו** — כל קוד Node שתראו משתמש בה. **עקבו אחרי סדר הפלט, זה החלק המלמד**: `This is invoked before the callback is invoked` מודפס **ראשון**, למרות שבקוד הוא כתוב **אחרי** הקריאה ל-`fs.writeFile`. הסיבה: `writeFile` רק רושמת את המשימה וחוזרת מיד. אחר כך `undefined` (הערך המוחזר של `writeJSON` שה-REPL מדפיס), ואז — כשלולאת האירועים מתפנה — שני ה-callbacks מופעלים בתורם. **גוטצ'ה אמיתית שכדאי לשים לב אליה**: הקוד קורא ל-`writeJSON` ואז מיד ל-`readJSON` על אותו קובץ, בלי להמתין לסיום הכתיבה. כאן זה עבד, אבל זו **מקריות** — אין שום הבטחה שהכתיבה תסתיים לפני הקריאה. זו בדיוק הבעיה שהסעיף על הרכבת פונקציות אסינכרוניות בא לפתור."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:5",
+     "type": "prose",
+     "en": "In the example above, the `fs.writeFile` Node method takes 3 arguments:\n",
+     "hash": "2774035d3cc2b685",
+     "he": "בדוגמה שלמעלה, המתודה `fs.writeFile` של Node מקבלת 3 ארגומנטים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:6",
+     "type": "list",
+     "en": "* The name of the file to create\n* The string to write into the file\n* The callback to invoke when the writeFile operation has completed.\n\n",
+     "hash": "495ca38db086fe4c",
+     "he": "* שם הקובץ שיש ליצור\n* המחרוזת שיש לכתוב לתוך הקובץ\n* ה-callback שיש להפעיל כשפעולת ה-writeFile הושלמה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:7",
+     "type": "prose",
+     "en": "This pattern takes advantage of the fact that JavaScript allows passing functions as arguments to other functions: the callback is an argument passed to the file system primitive.\n\n",
+     "hash": "524040866760a36c",
+     "he": "התבנית הזו מנצלת את העובדה ש-JavaScript מאפשרת להעביר פונקציות כארגומנטים לפונקציות אחרות: ה-callback הוא ארגומנט שמועבר לפרימיטיב של מערכת הקבצים."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:8",
+     "type": "prose",
+     "en": "Internally, the way the Node interpreter implements asynchronous methods such as `fs.writeFile` is that it invokes a non-blocking system call of the Operating System.\n(For students who took the Systems Programming course, recall the lecture on non-blocking-IO in Java ([SPL chapter on Reactor](https://www.cs.bgu.ac.il/~spl211/index.php?page=Reactor).)\nThe Node interpreter then adds a subscription to the corresponding selector (which indicates when the asynchronous non-blocking call has completed). The event-loop of the interpreter performs as follows: execute a task, when the task is completed, wait on the selector, when the selector is fired (indicating an earlier asynchronous call completed), retrieve the closure corresponding to the fired event and execute it as a task, then loop again.\n\n",
+     "hash": "1fc17a1d7dd39e2f",
+     "he": "מבחינה פנימית, האופן שבו מפרש Node מממש מתודות אסינכרוניות כמו `fs.writeFile` הוא שהוא מפעיל קריאת מערכת לא-חוסמת (non-blocking) של מערכת ההפעלה.\n(לסטודנטים שלקחו את הקורס תכנות מערכות, היזכרו בהרצאה על קלט/פלט לא-חוסם ב-Java ([פרק ה-Reactor ב-SPL](https://www.cs.bgu.ac.il/~spl211/index.php?page=Reactor).)\nמפרש Node מוסיף אז מנוי (subscription) לסלקטור המתאים (שמציין מתי הקריאה האסינכרונית הלא-חוסמת הושלמה). לולאת האירועים של המפרש פועלת כך: מבצעת משימה, כשהמשימה הושלמה — ממתינה על הסלקטור, כשהסלקטור פורע (מה שמציין שקריאה אסינכרונית קודמת הושלמה) — שולפת את ה-closure שמתאים לאירוע שפרע ומבצעת אותו כמשימה, ואז חוזרת ללולאה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:9",
+     "type": "prose",
+     "en": "Programming with callbacks is not easy.  We cannot make the usual time-sequencing assumptions we make in sequential code.\nIn the example above, we know that the expression immediately after the call to fs.writeFile() is executed **before** the callback is invoked.  This guarantee is part of the semantics of the Node interpreter.  \n\n",
+     "hash": "64adee6d7daabbf6",
+     "he": "תכנות עם callbacks אינו קל. איננו יכולים להניח את הנחות סדר-הזמן הרגילות שאנחנו מניחים בקוד סדרתי.\nבדוגמה שלמעלה, אנחנו יודעים שהביטוי שמופיע מיד אחרי הקריאה ל-fs.writeFile() מתבצע **לפני** שה-callback מופעל. ההבטחה הזו היא חלק מהסמנטיקה של מפרש Node."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:10",
+     "type": "prose",
+     "en": "But we cannot make any assumption as to **when** the callback will be executed.  It can take a very long time.\nThe problem for the programmer is to decide where and how to write code which **depends** on the completion of the file system operation.  Answering this question will be the main topic of this chapter.\n\n",
+     "hash": "676fecb451551764",
+     "he": "אבל איננו יכולים להניח שום הנחה לגבי **מתי** ה-callback יתבצע. זה יכול לקחת זמן רב מאוד.\nהבעיה של המתכנת היא להחליט איפה ואיך לכתוב קוד ש**תלוי** בהשלמת פעולת מערכת הקבצים. מענה על השאלה הזו יהיה הנושא המרכזי של הפרק הזה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:8:11",
+     "type": "prose",
+     "en": "Thinking of the JavaScript engine as a **reactive event loop** instead of an active process which invokes procedures\nis an important change of perspective - which is related to the design pattern of [**inversion of control**](https://en.wikipedia.org/wiki/Inversion_of_control) and which defines the **event-driven** programming paradigm.\n\n",
+     "hash": "0048f27cdf05f701",
+     "he": "לחשוב על מנוע ה-JavaScript כעל **לולאת אירועים תגובתית** (reactive event loop) במקום כעל תהליך אקטיבי שמפעיל פרוצדורות\nהוא שינוי פרספקטיבה חשוב — שקשור לתבנית התכנון [**היפוך הבקרה**](https://en.wikipedia.org/wiki/Inversion_of_control) (inversion of control) ושמגדיר את פרדיגמת התכנות **מונחית-האירועים** (event-driven)."
+    }
+   ],
+   "headingHe": "לולאות אירועים ב-Node"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:9",
+   "depth": 2,
+   "headingEn": "Callbacks and the Call Stack",
+   "raw": "## Callbacks and the Call Stack\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:9:0",
+     "type": "prose",
+     "en": "In asynchronous programming, callbacks are not invoked in the same call stack as the procedure that creates the callback.\nInstead, the function which generates the task (the asynchronous call) executes, and when it ends, it creates a task (a closure) which is added to the task queue.\n\n",
+     "hash": "88524bcfd18e290e",
+     "he": "בתכנות אסינכרוני, ‏callbacks אינם מופעלים באותה מחסנית קריאות של הפרוצדורה שיוצרת את ה-callback.\nבמקום זאת, הפונקציה שמייצרת את המשימה (הקריאה האסינכרונית) מתבצעת, וכשהיא מסתיימת היא יוצרת משימה (closure) שמתווספת לתור המשימות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:9:1",
+     "type": "prose",
+     "en": "When the event loop determines that the callback is ready to be called, the runtime environment invokes the task with the appropriate arguments.  The signature of the callback is determined by the asynchronous function: in the example above, the callback for the `readFile` procedure is a function with 2 parameters `(err, data)` which represent either an error object or the data that was read from the file.  These arguments are passed to the callback when the event is signaled.\n\n",
+     "hash": "fd5ec645fa4c515f",
+     "he": "כאשר לולאת האירועים קובעת שה-callback מוכן להיקרא, סביבת זמן הריצה מפעילה את המשימה עם הארגומנטים המתאימים. החתימה של ה-callback נקבעת על ידי הפונקציה האסינכרונית: בדוגמה שלמעלה, ה-callback של הפרוצדורה `readFile` הוא פונקציה עם 2 פרמטרים `(err, data)` שמייצגים או אובייקט שגיאה או את הנתונים שנקראו מהקובץ. הארגומנטים האלה מועברים ל-callback כשהאירוע מסומן."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:9:2",
+     "type": "prose",
+     "en": "The callback is a closure which is created in the context of the asynchronous function.  Hence, according to the operational semantics of the language, we know it has access to the environment in which it was created (not to the environment which is current when the closure is invoked).  See for example how the environment of the callback is used:\n\n\n",
+     "hash": "673abcfabdabe49b",
+     "he": "ה-callback הוא closure שנוצר בהקשר של הפונקציה האסינכרונית. לפיכך, לפי הסמנטיקה התפעולית של השפה, אנחנו יודעים שיש לו גישה לסביבה שבה הוא נוצר (ולא לסביבה שהיא הנוכחית כאשר ה-closure מופעל). ראו לדוגמה איך נעשה שימוש בסביבה של ה-callback:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:9:3",
+     "type": "code",
+     "en": "```typescript\nconst readJSONTime = (filename, callback) => {\n  let invoked = new Date();  // Timestamp when the read is invoked.\n  fs.readFile(filename, 'utf8', (err, res) => {\n    if (err) \n      callback(err, undefined);\n    else {\n      // This accesses a variable from the closure env.\n      console.log(\"Invoked at: \", invoked);\n      console.log(\"Callback at: \", new Date());\n      callback(undefined, JSON.parse(res));    \n    }\n  });\n}\n\nreadJSONTime('test.async', (err, res) => console.log(res));\n-->\n    undefined\n\n    Invoked at:  2017-06-08T12:55:42.764Z\n    Callback at:  2017-06-08T12:55:42.765Z\n    { id: 1, test: 'async' }\n```    \n\n",
+     "hash": "b16ddc9c4c0295d8",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה שמוכיחה שה-closure עובד גם אסינכרונית** — וזו נקודה מושגית חשובה. המשתנה `invoked` מוגדר ב-`readJSONTime` **לפני** הקריאה ל-`fs.readFile`, וה-callback ניגש אליו מאוחר יותר, כשהוא מופעל מלולאת האירועים. ההערה בקוד מציינת זאת במפורש: `This accesses a variable from the closure env`. **למה זה עובד?** בדיוק לפי מודל הסביבות מ-2.7: ה-closure שומר מצביע לסביבה שבה הוא **נוצר**, ולא לסביבה שקיימת בזמן ההפעלה. מחסנית הקריאות של `readJSONTime` כבר התרוקנה מזמן, אבל הסביבה שרדה — כי ה-closure מחזיק בה. **זו בדיוק ההבחנה שהפסקה שאחרי הקוד עושה**: הסביבה זמינה, אבל **הקשר הבקרה** (מחסנית הקריאות) שונה לגמרי. שימו לב לפרש הזמנים בפלט: `Invoked at: …42.764Z` ו-`Callback at: …42.765Z` — מילישנייה אחת בלבד, כי הקובץ קטן ומצוי במטמון; בקריאה איטית ההפרש היה נראה בבירור. **טעות נפוצה**: לחשוב שמשתנים מקומיים \"נעלמים\" כשהפונקציה חוזרת. הם נעלמים מהמחסנית, אבל לא מהסביבה שה-closure מחזיק."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:9:4",
+     "type": "prose",
+     "en": "Even if the **environment** is available, the callback is evaluated in a different **control context** - that is, in a different call stack.\n\n",
+     "hash": "b869e6299cb3fc74",
+     "he": "גם אם ה**סביבה** זמינה, ה-callback מוערך ב**הקשר בקרה** שונה — כלומר, במחסנית קריאות שונה."
+    }
+   ],
+   "headingHe": "‏Callbacks ומחסנית הקריאות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:10",
+   "depth": 2,
+   "headingEn": "Composing Asynchronous Functions",
+   "raw": "## Composing Asynchronous Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:10:0",
+     "type": "prose",
+     "en": "Composing synchronous functions is easy: given a function `f(x:Tx):Tf` and a function `g(y:Ty):Tx` - we can compose the calls by simply passing the return value of `g` as a parameter to `f`: `f(g(y))`.  As long as the types are compatible, this composition works (the return type of g must be the parameter type of f).\n\n",
+     "hash": "96b4ea7336604da4",
+     "he": "הרכבה של פונקציות סינכרוניות היא קלה: בהינתן פונקציה `f(x:Tx):Tf` ופונקציה `g(y:Ty):Tx` — אנחנו יכולים להרכיב את הקריאות פשוט על ידי העברת הערך המוחזר של `g` כפרמטר ל-`f`: `f(g(y))`. כל עוד הטיפוסים תואמים, ההרכבה הזו עובדת (טיפוס ההחזרה של g חייב להיות טיפוס הפרמטר של f)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:10:1",
+     "type": "prose",
+     "en": "Composing asynchronous functions is more challenging: we must write a specific callback each time we compose two functions:\n\n",
+     "hash": "d4b588b39d580c2b",
+     "he": "הרכבה של פונקציות אסינכרוניות מאתגרת יותר: עלינו לכתוב callback ספציפי בכל פעם שאנחנו מרכיבים שתי פונקציות:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:10:2",
+     "type": "prose",
+     "en": "`g(y, (gRes) => f(gRes, callback))`\n\n",
+     "hash": "80961bf4dad8fd4d",
+     "he": "`g(y, (gRes) => f(gRes, callback))`"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:10:3",
+     "type": "prose",
+     "en": "If we want to compose three functions - the callbacks must be nested accordingly - instead of `f(g(h(x)))` we must write:\n\n",
+     "hash": "b9b036b46ff836e6",
+     "he": "אם נרצה להרכיב שלוש פונקציות — ה-callbacks חייבים להיות מקוננים בהתאם. במקום `f(g(h(x)))` עלינו לכתוב:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:10:4",
+     "type": "code",
+     "en": "```typescript\nh(x, (hRes) => {\n    g(hRes, (gRes) => {\n        f(gRes, callback);\n    })\n});\n```\n\n",
+     "hash": "723c1f168d7b412b",
+     "lang": "typescript",
+     "noteHe": "**\"גיהינום ה-callbacks\" (callback hell) בצורתו הטהורה** — וכדאי להשוות אותו לצורה הסינכרונית `f(g(h(x)))` שהוא מחליף. שימו לב לשני היפוכים לעומת הגרסה הסינכרונית: (1) **סדר הכתיבה מתהפך** — ב-`f(g(h(x)))` הפונקציה שרצה ראשונה (`h`) נכתבת פנימה ביותר, וכאן היא נכתבת **חיצונית** ביותר; (2) **הקינון גדל לרוחב** — כל הרכבה נוספת מוסיפה רמת הזחה, וקוד עם חמש קריאות אסינכרוניות בשרשרת הופך לבלתי קריא. שימו לב שה-`callback` הסופי מועבר פנימה עד לקריאה האחרונה — הוא \"ההמשך\" של כל השרשרת. **הבחנה שכדאי לעשות עכשיו כדי להבין את המשך הפרק**: זו בדיוק אותה תבנית שראינו ב-ps3 בפונקציה `exp$` עם הפרמטר `delayed` — כלומר **CPS**. הקוד הזה הוא CPS שנכתב ביד, וזו הסיבה שהפרק יעבור מיד ל-CPS כנושא בפני עצמו. **הבעיה שנשארת פתוחה כאן**: אין בקוד הזה שום טיפול בשגיאות; מה קורה אם `h` נכשלת? הסעיף על טיפול בשגיאות בהמשך יראה עד כמה זה מחמיר את המצב."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:10:5",
+     "type": "prose",
+     "en": "Note how the order of the occurrences has changed: we read the program in the order in which the functions are invoked (first invoked h, then invoke g, then invoke f).\n\n",
+     "hash": "716dbc85b6b06697",
+     "he": "שימו לב איך סדר ההופעות השתנה: אנחנו קוראים את התוכנית בסדר שבו הפונקציות מופעלות (קודם מופעלת h, אחר כך מופעלת g, אחר כך מופעלת f)."
+    }
+   ],
+   "headingHe": "הרכבה של פונקציות אסינכרוניות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:11",
+   "depth": 2,
+   "headingEn": "The Type of Asynchronous Functions",
+   "raw": "## The Type of Asynchronous Functions\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:11:0",
+     "type": "prose",
+     "en": "When we think of composing synchronous functions, we check their type - that is, we verify that the type returned by g matches the type expected by f in order to enable the composition f(g(x)).\n\n",
+     "hash": "a2994678d34aaed9",
+     "he": "כשאנחנו חושבים על הרכבת פונקציות סינכרוניות, אנחנו בודקים את הטיפוס שלהן — כלומר, מוודאים שהטיפוס שמוחזר על ידי g מתאים לטיפוס שמצופה על ידי f, כדי לאפשר את ההרכבה f(g(x))."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:11:1",
+     "type": "prose",
+     "en": "Asynchronous functions do not return any value - that is, they are of return type `void`.  \nInstead, they post a future task which will receive a parameter of a certain type in the future.\n\n",
+     "hash": "19c601882acb41ba",
+     "he": "פונקציות אסינכרוניות אינן מחזירות שום ערך — כלומר, טיפוס ההחזרה שלהן הוא `void`.\nבמקום זאת, הן שולחות משימה עתידית שתקבל בעתיד פרמטר מטיפוס מסוים."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:11:2",
+     "type": "prose",
+     "en": "That is, if a synchronous function has type `f(x: Tx): Tf` - the corresponding asynchronous function will have type \n`asyncF(x: Tx, callback: (Tf -> Tc)): void`.\n\n",
+     "hash": "31f8f5eedd5fd9ef",
+     "he": "כלומר, אם לפונקציה סינכרונית יש טיפוס `f(x: Tx): Tf` — לפונקציה האסינכרונית המתאימה יהיה טיפוס\n`asyncF(x: Tx, callback: (Tf -> Tc)): void`."
+    }
+   ],
+   "headingHe": "הטיפוס של פונקציות אסינכרוניות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:12",
+   "depth": 2,
+   "headingEn": "Error Handling with Asynchronous Procedures (Success / Fail callbacks)",
+   "raw": "## Error Handling with Asynchronous Procedures (Success / Fail callbacks)\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:12:0",
+     "type": "prose",
+     "en": "In many cases, asynchronous functions can fail - this is the case for most I/O calls (file system, networking calls) which are most likely to be used in an asynchronous manner.\n\n",
+     "hash": "4c39ffa81f987530",
+     "he": "במקרים רבים, פונקציות אסינכרוניות יכולות להיכשל — זה המצב עבור רוב קריאות הקלט/פלט (מערכת קבצים, קריאות רשת), שהן אלה שסביר במיוחד שייעשה בהן שימוש באופן אסינכרוני."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:1",
+     "type": "prose",
+     "en": "To process the case of errors - the callback passed to the async function must be prepared to deal with either a success outcome, or with an error outcome.  Conceptually - this means the async function has 2 callbacks: one to process success, one to process failure.\n\n",
+     "hash": "f806555d443b7dd1",
+     "he": "כדי לעבד את מקרה השגיאות — ה-callback שמועבר לפונקציה האסינכרונית חייב להיות מוכן לטפל או בתוצאה של הצלחה, או בתוצאה של שגיאה. מבחינה מושגית, זה אומר שלפונקציה האסינכרונית יש 2 callbacks: אחד לעיבוד הצלחה, ואחד לעיבוד כישלון."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:2",
+     "type": "prose",
+     "en": "In the examples we reviewed above, we worked with a callback that has two parameters - one for error and one for the returned data in case of success.  When composing asynchronous functions with two parameters of this type, we introduce systematic complexity - because there is no way to \"stop early\" the chain of calls when an error is detected - as we would do by throwing an exception in a synchronous case.  We must handle the error case at all steps of the chain of calls.\n\n",
+     "hash": "13f521b3d4020a73",
+     "he": "בדוגמאות שסקרנו למעלה, עבדנו עם callback שיש לו שני פרמטרים — אחד לשגיאה ואחד לנתונים המוחזרים במקרה של הצלחה. כשמרכיבים פונקציות אסינכרוניות עם שני פרמטרים מהסוג הזה, אנחנו מכניסים סיבוכיות שיטתית — מכיוון שאין דרך \"לעצור מוקדם\" את שרשרת הקריאות כשמזוהה שגיאה, כפי שהיינו עושים על ידי זריקת חריגה במקרה סינכרוני. עלינו לטפל במקרה השגיאה בכל שלבי שרשרת הקריאות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:3",
+     "type": "prose",
+     "en": "For example, assuming the function f, g and h can return an error or a success, the composition of `f(g(h(x)))` requires the following structure:\n\n",
+     "hash": "548ce287fd7e4f38",
+     "he": "לדוגמה, בהנחה שהפונקציות f, g ו-h יכולות להחזיר שגיאה או הצלחה, ההרכבה של `f(g(h(x)))` מחייבת את המבנה הבא:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:4",
+     "type": "code",
+     "en": "```typescript\nh(x, (hErr, hRes) => {\n    if (hErr) {\n      failCallback(hErr);\n    } else {\n      g(hRes, (gErr, gRes) => {\n        if (gErr) {\n          failCallback(gErr);\n        } else {\n          f(gRes, callback);\n        }\n      })\n    }\n});\n```\n\n",
+     "hash": "649fdf3ef01aead8",
+     "lang": "typescript",
+     "noteHe": "אותה הרכבה של שלוש פונקציות, **עם טיפול בשגיאות** — והשוו אותה לגרסה בסעיף הקודם כדי לראות עד כמה היא התנפחה. כל רמת קינון קיבלה `if (err) … else …`, כלומר **הכפלנו את מספר השורות** ובנוסף הוספנו רמת הזחה לכל שלב. **הנקודה המרכזית שכדאי להבין**: בקוד סינכרוני היינו כותבים `try { f(g(h(x))) } catch(e) {…}` — **בלוק אחד** שתופס שגיאה מכל שלב בשרשרת, כי `throw` מגלגל את המחסנית עד ה-`catch` הקרוב. כאן אין מחסנית לגלגל: ה-callbacks מופעלים כל אחד בהקשר בקרה נפרד, ולכן `throw` בתוך אחד מהם **לא ייתפס** על ידי שום `catch` בקוד שקרא לו. וזו הסיבה שצריך `if (err)` בכל שלב בנפרד. שימו לב לחזרתיות: `failCallback(hErr)` ו-`failCallback(gErr)` הן אותה שורה בשני מקומות — שכפול קוד שגדל לינארית עם אורך השרשרת. **וזו בדיוק ההנעה ל-Promises** בסעיף הבא: הם מחזירים את היכולת לתפוס את כל השגיאות בשרשרת בנקודה **אחת**, עם `.catch()`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:5",
+     "type": "prose",
+     "en": "The following issues make the usage of asynchronous functions difficult for the programmer:\n",
+     "hash": "d352e82c223660cd",
+     "he": "הסוגיות הבאות מקשות על השימוש בפונקציות אסינכרוניות עבור המתכנת:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:12:6",
+     "type": "list",
+     "en": "* all calls must deal with error cases \n* sequence of calls or composed calls must be translated into nested callbacks\n* the types of the functions are obscure\n\n\n",
+     "hash": "282b80b88bd76a8d",
+     "he": "* כל הקריאות חייבות לטפל במקרי שגיאה\n* רצף של קריאות או קריאות מורכבות חייבות להיות מתורגמות ל-callbacks מקוננים\n* הטיפוסים של הפונקציות מעורפלים"
+    }
+   ],
+   "headingHe": "טיפול בשגיאות בפרוצדורות אסינכרוניות (callbacks של הצלחה / כישלון)"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:13",
+   "depth": 2,
+   "headingEn": "Using Promises to Simplify Asynchronous Composition",
+   "raw": "## Using Promises to Simplify Asynchronous Composition\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:13:0",
+     "type": "prose",
+     "en": "Promises are a general programming pattern designed to simplify asynchronous composition, in particular error handling.\n\n",
+     "hash": "1c22593192a4b167",
+     "he": "הבטחות (Promises) הן תבנית תכנות כללית שנועדה לפשט הרכבה אסינכרונית, ובמיוחד טיפול בשגיאות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:1",
+     "type": "prose",
+     "en": "A promise represents the result of an asynchronous operation - it is an object which serves as the proxy for a delayed computation which can be in different states:\n\n",
+     "hash": "bca5f38557e19558",
+     "he": "הבטחה מייצגת את התוצאה של פעולה אסינכרונית — היא אובייקט שמשמש כמתווך (proxy) לחישוב מושהה שיכול להיות במצבים שונים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:2",
+     "type": "list",
+     "en": "* **pending** - The initial state of a promise - before the computation has completed\n* **fulfilled** - The state of a promise representing a successful operation.\n* **rejected** - The state of a promise representing a failed operation.\n\n",
+     "hash": "2947f4af5ced2267",
+     "he": "* **pending** (ממתינה) — המצב ההתחלתי של הבטחה, לפני שהחישוב הושלם\n* **fulfilled** (מקוימת) — המצב של הבטחה שמייצגת פעולה שהצליחה.\n* **rejected** (נדחתה) — המצב של הבטחה שמייצגת פעולה שנכשלה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:3",
+     "type": "prose",
+     "en": "Once a promise is fulfilled or rejected, it becomes immutable (i.e. it can never change again).\n\n",
+     "hash": "1d13aa010f4a2d87",
+     "he": "ברגע שהבטחה מקוימת או נדחית, היא הופכת לבלתי-ניתנת-לשינוי (immutable) — כלומר, היא לעולם לא תוכל להשתנות שוב."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:4",
+     "type": "prose",
+     "en": "Promises allow the client (the programmer) to associate handlers with an asynchronous action's eventual success value or failure reason. This lets asynchronous methods return values like synchronous methods: instead of immediately returning the final value, the asynchronous method returns a promise to supply the value at some point in the future.\n\n",
+     "hash": "a55b64451895a71c",
+     "he": "הבטחות מאפשרות ללקוח (למתכנת) לשייך מטפלים (handlers) לערך ההצלחה או לסיבת הכישלון העתידיים של פעולה אסינכרונית. זה מאפשר למתודות אסינכרוניות להחזיר ערכים כמו מתודות סינכרוניות: במקום להחזיר מיד את הערך הסופי, המתודה האסינכרונית מחזירה הבטחה לספק את הערך בנקודה כלשהי בעתיד."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:5",
+     "type": "prose",
+     "en": "Clients of a promise register with the promise by submitting the callbacks they want the promise to execute.\nSince we want to simplify error handling, the client of a promise can register one callback for success completion (fulfillment) and one for error handling (rejection handler).\n\n",
+     "hash": "ed20ea940315f62d",
+     "he": "לקוחות של הבטחה נרשמים אליה על ידי הגשת ה-callbacks שהם רוצים שההבטחה תבצע.\nמכיוון שאנחנו רוצים לפשט את הטיפול בשגיאות, הלקוח של הבטחה יכול לרשום callback אחד להשלמה מוצלחת (fulfillment) ואחד לטיפול בשגיאות (rejection handler)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:6",
+     "type": "prose",
+     "en": "The registration is performed using two methods of the Promise interface:\n",
+     "hash": "afdc0366f682f935",
+     "he": "הרישום מתבצע באמצעות שתי מתודות של הממשק Promise:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:7",
+     "type": "list",
+     "en": "* Promise.then(successHandler)\n* Promise.catch(rejectionHandler)\n\n",
+     "hash": "9abccd4ebaeb7cb5",
+     "he": "* Promise.then(successHandler)\n* Promise.catch(rejectionHandler)"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:8",
+     "type": "prose",
+     "en": "The handlers are functions which are submitted to be executed in the future, when the promise is resolved (either fulfilled or rejected).  \n\n",
+     "hash": "c35734cd54bae631",
+     "he": "המטפלים הם פונקציות שמוגשות לביצוע בעתיד, כאשר ההבטחה נפתרת (resolved) — בין אם היא מקוימת ובין אם היא נדחית."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:9",
+     "type": "prose",
+     "en": "At this point, our understanding of a promise is that it is an object with the following state:\n",
+     "hash": "b9cf8b3f14072c26",
+     "he": "בנקודה הזו, ההבנה שלנו לגבי הבטחה היא שהיא אובייקט עם המצב הבא:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:10",
+     "type": "list",
+     "en": "* task: the asynchronous task to be computed\n* value: the result of the task when it is resolved\n* state: state of the promise (pending, fulfilled or rejected)\n* handlers: the handlers for success and failure\n\n",
+     "hash": "c7fb834b8337da2a",
+     "he": "* task: המשימה האסינכרונית שיש לחשב\n* value: התוצאה של המשימה כשהיא נפתרת\n* state: המצב של ההבטחה (pending, fulfilled או rejected)\n* handlers: המטפלים להצלחה ולכישלון"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:11",
+     "type": "prose",
+     "en": "The key events in the lifecycle of a promise correspond to state transitions:\n",
+     "hash": "f04655adc34f4529",
+     "he": "האירועים המרכזיים במחזור החיים של הבטחה מתאימים למעברי מצב:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:13:12",
+     "type": "list",
+     "en": "* created in state Pending\n* pending to fulfilled: triggered when the async computation completes (usually by the event loop); triggers the success handlers.\n* pending to rejected: triggered when the async computation ends in error; triggers the failure handlers.\n* attach handlers: if the state is pending, just add the handlers to the internal state of the promise, else immediately invoke the new handler with the stored value of the promise.\n\n\n",
+     "hash": "ea327d9bac1fc6f1",
+     "he": "* נוצרת במצב Pending\n* מ-pending ל-fulfilled: מופעל כשהחישוב האסינכרוני מושלם (בדרך כלל על ידי לולאת האירועים); מפעיל את המטפלים להצלחה.\n* מ-pending ל-rejected: מופעל כשהחישוב האסינכרוני מסתיים בשגיאה; מפעיל את המטפלים לכישלון.\n* צירוף מטפלים: אם המצב הוא pending, פשוט מוסיפים את המטפלים למצב הפנימי של ההבטחה; אחרת מפעילים מיד את המטפל החדש עם הערך המאוחסן של ההבטחה."
+    }
+   ],
+   "headingHe": "שימוש בהבטחות (Promises) לפישוט הרכבה אסינכרונית"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:14",
+   "depth": 3,
+   "headingEn": "Making a Promise",
+   "raw": "### Making a Promise\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:14:0",
+     "type": "prose",
+     "en": "To construct a promise from an asynchronous function with a callback, we use the Promise constructor and abstract the callbacks for success and failure:\n\n\n",
+     "hash": "d2499a3ae05ce7d2",
+     "he": "כדי לבנות הבטחה מפונקציה אסינכרונית עם callback, אנחנו משתמשים בבנאי Promise ומפשיטים את ה-callbacks להצלחה ולכישלון:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:14:1",
+     "type": "code",
+     "en": "```typescript\nconst readFilePromise = (filename: string): Promise<string> => {\n  return new Promise<string>( (resolve, reject) => {\n    fs.readFile(filename, (err, res) => {\n      if (err) \n        reject(err);\n      else\n        resolve(res.toString('utf8'));\n    })\n  })\n}\n```\n\n\n",
+     "hash": "68e66fc50eb854ee",
+     "lang": "typescript",
+     "noteHe": "**\"עיטוף בהבטחה\" (promisification)** — התבנית להמרת פונקציה אסינכרונית קיימת ל-Promise, וכדאי להכיר אותה. הבנאי `new Promise<string>(...)` מקבל פונקציה אחת עם **שני פרמטרים**: `resolve` ו-`reject`. בתוכה קוראים ל-`fs.readFile` המקורית כמו קודם, ואז מתרגמים: אם יש שגיאה → `reject(err)`, אחרת → `resolve(res.toString('utf8'))`. **הנקודה המושגית**: `resolve` ו-`reject` הם **שני ה-callbacks** שהפסקה שמעל מדברת עליהם, אלא שכאן אנחנו לא מקבלים אותם מהקורא — הבנאי מספק אותם, וההבטחה עצמה תדאג להעביר את הערך למי שנרשם ב-`.then()` או `.catch()`. **מה השתנה בטיפוס**: הפונקציה `readFilePromise` **מחזירה** משהו (`Promise<string>`), בעוד ש-`fs.readFile` החזירה `void`. זו החזרה לסגנון של ערכים מוחזרים, וזה מה שיאפשר את השרשור בהמשך. שימו לב שהמוסכמה `(err, res)` נשארת בפנים — היא לא נעלמת, אלא **נעטפת פעם אחת** ולא חוזרת בכל שימוש. שימו לב ל-`res.toString('utf8')`: כאן `readFile` נקראת **בלי** פרמטר הקידוד, ולכן היא מחזירה buffer שצריך להמיר במפורש."
+    }
+   ],
+   "headingHe": "יצירת הבטחה"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:15",
+   "depth": 3,
+   "headingEn": "The Type of a Promise",
+   "raw": "### The Type of a Promise\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:15:0",
+     "type": "prose",
+     "en": "A promise is a container for a value which may become available in the future.  A function such as `readFilePromise` above returns a promise - in contrast to the original `readFile` asynchronous function which had a `void` return type.\n\n",
+     "hash": "0d8f2c9bda60f047",
+     "he": "הבטחה היא מכולה (container) לערך שעשוי להיות זמין בעתיד. פונקציה כמו `readFilePromise` שלמעלה מחזירה הבטחה — בניגוד לפונקציה האסינכרונית המקורית `readFile`, שטיפוס ההחזרה שלה היה `void`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:15:1",
+     "type": "prose",
+     "en": "This ends up simplifying the type and making it more similar to the familiar synchronous version:\n\n",
+     "hash": "e2e31a4b84f15153",
+     "he": "זה מפשט בסופו של דבר את הטיפוס והופך אותו לדומה יותר לגרסה הסינכרונית המוכרת:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:15:2",
+     "type": "code",
+     "en": "```typescript\nreadFileSync(filename: string): string;\n\nreadFile(filename: string, callback: (err, data:string) -> T): void;\n\nreadFilePromise(filename: string) -> Promise<string>\n```\n\n",
+     "hash": "f2317baefdb07af0",
+     "lang": "typescript",
+     "noteHe": "**שלוש החתימות זו מול זו — התמצית של כל הסעיף, ושווה לשנן אותה.** (1) הסינכרונית: `filename → string`, פשוטה וקריאה, אבל חוסמת. (2) גרסת ה-callback: הערך המוחזר הוא `void`, והתוצאה \"נעלמת\" לתוך פרמטר שני שהוא פונקציה — **הטיפוס אינו אומר לנו כלום** על מה שהפונקציה מחשבת. (3) גרסת ה-Promise: `filename → Promise<string>` — הטיפוס חזר להיות **אינפורמטיבי**, וההשוואה לגרסה הסינכרונית מיידית: `string` הפך ל-`Promise<string>`. **הרעיון הכללי שכדאי לקחת מכאן**: `Promise<T>` הוא \"‏`T` שיהיה זמין בעתיד\". זה בדיוק אותו סוג של עטיפת טיפוס שראינו ב-`Result<T>` (\"‏`T` או שגיאה\") וב-`Optional<T>` (\"‏`T` או כלום\") — והפסקה בהמשך הסעיף אכן מקשרת אליהם במפורש. שימו לב לחוסר עקביות בכתיב במקור: השורה הראשונה מסתיימת בנקודה-פסיק והשלישית לא, והחצים מתחלפים בין `:` ל-`->` בין השורות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:15:3",
+     "type": "prose",
+     "en": "TypeScript supports generic Promise types to document this type of return value.\n\n",
+     "hash": "467ccc4cb02a2d0a",
+     "he": "‏TypeScript תומכת בטיפוסי Promise גנריים כדי לתעד את סוג הערך המוחזר הזה."
+    }
+   ],
+   "headingHe": "הטיפוס של הבטחה"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:16",
+   "depth": 3,
+   "headingEn": "Using a Promise",
+   "raw": "### Using a Promise\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:16:0",
+     "type": "prose",
+     "en": "We use the Promisified-version of the asynchronous function according to the Promise client pattern: \n",
+     "hash": "c9d1101873d6bb11",
+     "he": "אנחנו משתמשים בגרסה המעוטפת-בהבטחה של הפונקציה האסינכרונית לפי תבנית הלקוח של הבטחה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:16:1",
+     "type": "list",
+     "en": "* We decouple the creation of the promise from its consumption.\n* We separate success and error handling in two separate concerns.\n\n",
+     "hash": "0802602840172cbc",
+     "he": "* אנחנו מפרידים בין יצירת ההבטחה לבין הצריכה שלה.\n* אנחנו מפרידים בין טיפול בהצלחה לבין טיפול בשגיאה לשני עניינים נפרדים."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:16:2",
+     "type": "prose",
+     "en": "To this end, we use the 2 methods of the `Promise` object: `then(successHandler)` and `catch(errorHandler)`:\n\n\n",
+     "hash": "96da3a77f6ee1a0c",
+     "he": "לשם כך, אנחנו משתמשים ב-2 המתודות של האובייקט `Promise`: `then(successHandler)` ו-`catch(errorHandler)`:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:16:3",
+     "type": "code",
+     "en": "```typescript\nconst testContent = readFilePromise('test.async');\ntestContent\n    .then((content: string) => console.log(\"Content: \", JSON.parse(content)))\n    .catch((err) => console.error(err));\n-->\n\n    Promise { <pending> }\n    Content:  { id: 1, test: 'async' }\n```    \n\n",
+     "hash": "8e0e309c5fe426a1",
+     "lang": "typescript",
+     "noteHe": "שימוש בהבטחה בפועל. שימו לב לפרדה שהפסקה שמעל הבטיחה: השורה הראשונה **יוצרת** את ההבטחה ושומרת אותה במשתנה, והשורות הבאות **צורכות** אותה. שימו לב לשרשור: `.then(...)` ואחריו `.catch(...)` בשתי שורות נפרדות — קוראים את זה כ\"כשתצליח, עשה כך; אם תיכשל, עשה כך\". **הפרט המלמד בפלט**: השורה הראשונה שמודפסת היא `Promise { <pending> }` — זו התוצאה של הערכת `testContent` ב-REPL **מיד** אחרי היצירה, כלומר בזמן שהקריאה מהקובץ עוד לא הסתיימה. רק אחר כך מודפס `Content: {...}`. זו הדגמה מוחשית לכך שההבטחה היא **אובייקט שקיים כאן ועכשיו** אבל הערך שבתוכו עוד לא הגיע — בדיוק כמו קבלה שמבטיחה סחורה עתידית. **טעות נפוצה**: לנסות לגשת לערך של ההבטחה ישירות (למשל `testContent.value`) במקום דרך `.then()`. שימו לב שהמטפל מקבל את התוכן כמחרוזת ומפעיל עליו `JSON.parse` — כלומר העיבוד שהיה בגרסה הסינכרונית פשוט עבר לתוך ה-`then`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:16:4",
+     "type": "prose",
+     "en": "The style that the `then` and `catch` methods implement is special: they return a value of the same type as the object on which they are invoked, so that they can be chained.  This style is called the [fluent interface pattern](https://en.wikipedia.org/wiki/Fluent_interface).\n\n",
+     "hash": "ed02c913455d5cfc",
+     "he": "הסגנון שהמתודות `then` ו-`catch` מממשות הוא מיוחד: הן מחזירות ערך מאותו טיפוס כמו האובייקט שעליו הן מופעלות, כך שאפשר לשרשר אותן. הסגנון הזה נקרא [תבנית הממשק השוטף](https://en.wikipedia.org/wiki/Fluent_interface) (fluent interface pattern)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:16:5",
+     "type": "prose",
+     "en": "Observe how the use of Promises is similar to the known type patterns we exploited when implementing interpreters and the type inference system in Chapters 2 and 3: `Result` and `bind`, `Maybe` and `either`.\n\n",
+     "hash": "73a1b5a56a48aa50",
+     "he": "שימו לב איך השימוש בהבטחות דומה לתבניות הטיפוסים המוכרות שניצלנו בעת מימוש המפרשים ומערכת הסקת הטיפוסים בפרקים 2 ו-3: `Result` ו-`bind`, ‏`Maybe` ו-`either`."
+    }
+   ],
+   "headingHe": "שימוש בהבטחה"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:17",
+   "depth": 2,
+   "headingEn": "Chaining Promises",
+   "raw": "## Chaining Promises\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:17:0",
+     "type": "prose",
+     "en": "Using promises, we can achieve 3 main benefits over the structure that callbacks only would require:\n",
+     "hash": "111f854580263dcf",
+     "he": "בעזרת הבטחות, אנחנו יכולים להשיג 3 יתרונות עיקריים על המבנה שהיה נדרש עם callbacks בלבד:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:1",
+     "type": "list",
+     "en": "* The type of functions returning Promises is more informative and similar to the simple types of synchronous versions\n* We can chain sequences of asynchronous calls in a chain of `.then()` calls.\n* We can aggregate error handling in a single handler for a chain of calls, in a way similar to exception handling.\n\n",
+     "hash": "3612900041d7c5a7",
+     "he": "* הטיפוס של פונקציות שמחזירות הבטחות אינפורמטיבי יותר ודומה לטיפוסים הפשוטים של הגרסאות הסינכרוניות\n* אנחנו יכולים לשרשר רצפים של קריאות אסינכרוניות בשרשרת של קריאות `.then()`.\n* אנחנו יכולים לרכז את הטיפול בשגיאות במטפל אחד עבור שרשרת שלמה של קריאות, באופן דומה לטיפול בחריגות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:2",
+     "type": "prose",
+     "en": "The following example illustrates these 3 benefits:\n",
+     "hash": "e74b174f1de2337e",
+     "he": "הדוגמה הבאה ממחישה את 3 היתרונות האלה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:3",
+     "type": "list",
+     "en": "* We want to read a file containing a JSON value\n* Update the content of the JSON\n* Write back the updated value of the JSON to the file\n\n",
+     "hash": "8bbf32f1579b5642",
+     "he": "* אנחנו רוצים לקרוא קובץ שמכיל ערך JSON\n* לעדכן את התוכן של ה-JSON\n* לכתוב בחזרה לקובץ את הערך המעודכן של ה-JSON"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:4",
+     "type": "prose",
+     "en": "This requires a chain of asynchronous calls (reading the file and writing it).\n\n",
+     "hash": "83f838134aa5fd41",
+     "he": "זה מחייב שרשרת של קריאות אסינכרוניות (קריאת הקובץ וכתיבתו)."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:5",
+     "type": "prose",
+     "en": "Note that the error handler needs to be specified only once for the two operations \n\n\n",
+     "hash": "2dd00a7f40a931ed",
+     "he": "שימו לב שהמטפל בשגיאות צריך להיות מצוין פעם אחת בלבד עבור שתי הפעולות"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:17:6",
+     "type": "code",
+     "en": "```typescript\nimport * as fs from 'fs';\n\nconst readFilePromise = (filename: string): Promise<string> => {\n  return new Promise<string>( (resolve, reject) => {\n    fs.readFile(filename, (err, res) => {\n      if (err)\n        reject(err);\n      else\n        resolve(res.toString('utf8'));\n    })\n  })\n}\n\nconst writeFilePromise = (filename: string, content: string): Promise<void> => {\n  return new Promise( (resolve, reject) => {\n    fs.writeFile(filename, content, (err) => {\n      if (err)\n        reject(err);\n      else\n        resolve();\n    })\n  })\n}\n\n// Chain the calls together\nconst readUpdateWrite = (filename: string): Promise<void> => {\n    return readFilePromise(filename)\n            .then((content) => {\n                let j = JSON.parse(content);\n                j.lastModified = new Date();\n                return writeFilePromise(filename, JSON.stringify(j));\n            })\n            .catch((err) => console.error(err));\n}\n\nwriteFilePromise('test.async', JSON.stringify({a: 1}))\n    .then(() => console.log(\"File is created\"))\n    .then(() => readFilePromise('test.async'))\n    .then((content) => console.log(JSON.parse(content)))\n    .then(() => readUpdateWrite('test.async'))\n    .then(() => console.log('File is updated'))\n    .then(() => readFilePromise('test.async'))\n    .then((content) => console.log(JSON.parse(content)));\n-->\n    File is created\n    { a: 1 }\n    File is updated\n    { a: 1, lastModified: '2018-05-27T14:43:57.435Z' }\n```    \n\n",
+     "hash": "bc23846a51ec558b",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה המסכמת של סעיף ההבטחות** — ארוכה, אבל שווה לעבור עליה בשלושה חלקים. **(1) שני העיטופים**: `readFilePromise` ו-`writeFilePromise`, שתיהן באותה תבנית מהסעיף הקודם. שימו לב ש-`writeFilePromise` מחזירה `Promise<void>` וקוראת ל-`resolve()` **בלי ארגומנט** — כי אין ערך להחזיר, רק סימן שהפעולה הסתיימה. **(2) `readUpdateWrite`** — הלב של הדוגמה: קוראים את הקובץ, ובתוך ה-`then` מנתחים אותו תחבירית, מוסיפים שדה `lastModified`, ו**מחזירים הבטחה חדשה** (`writeFilePromise`). **זו הנקודה הקריטית שכדאי לשנן**: כשמטפל `then` מחזיר הבטחה, השרשרת **ממתינה לה** לפני שהיא ממשיכה — וזה מה שמאפשר לשרשר פעולות אסינכרוניות בזו אחר זו במקום לקנן אותן. אם היינו שוכחים את ה-`return`, הכתיבה הייתה מתרחשת \"במקביל\" והשרשרת לא הייתה ממתינה — **טעות נפוצה מאוד**. שימו לב ל-`.catch` **אחד** בסוף שמכסה גם את הקריאה וגם את הכתיבה, בדיוק כמו `try/catch` יחיד; השוו לגרסת ה-callbacks בסעיף 12 שדרשה `if (err)` בכל שלב. **(3) השרשרת הארוכה בסוף** — שבעה `.then` רצופים שמדגימים תסריט שלם: יוצרים קובץ, קוראים ומדפיסים, מעדכנים, קוראים ומדפיסים שוב. עקבו אחרי הפלט וראו שהסדר **בדיוק** כסדר השרשרת — כלומר החזרנו לעצמנו את היכולת לקרוא קוד אסינכרוני מלמעלה למטה. שימו לב לשני סוגי `then` בשרשרת: אלה שמקבלים פרמטר (`(content) => …`) ואלה שאינם (`() => …`), לפי מה שההבטחה הקודמת החזירה."
+    }
+   ],
+   "headingHe": "שרשור הבטחות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:18",
+   "depth": 2,
+   "headingEn": "Promises Summary",
+   "raw": "## Promises Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:18:0",
+     "type": "prose",
+     "en": "Promises simplify the usage of asynchronous functions on three aspects:\n",
+     "hash": "11e95804652f296d",
+     "he": "הבטחות מפשטות את השימוש בפונקציות אסינכרוניות בשלושה היבטים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:18:1",
+     "type": "list",
+     "en": "* Types of functions that return promises are clearer: for a synchronous function`f(x:T1):T2` the corresponding Promise version will have type `fp(x:T1):Promise<T2>`.  \nThis is in contrast with a callback-based version which would have type `fc(x:T1, (err:Error, res:T2)->T3): void`.\n* Composition is simplified by chaining `.then(handler)`.  \n* Error handling can be specified in a single place, as errors are cascaded through promises in a chain.\n\n\n",
+     "hash": "b257d02d71805bcb",
+     "he": "* הטיפוסים של פונקציות שמחזירות הבטחות ברורים יותר: עבור פונקציה סינכרונית `f(x:T1):T2`, לגרסת ה-Promise המתאימה יהיה הטיפוס `fp(x:T1):Promise<T2>`.\nזאת בניגוד לגרסה מבוססת-callback, שהטיפוס שלה היה `fc(x:T1, (err:Error, res:T2)->T3): void`.\n* ההרכבה מפושטת על ידי שרשור `.then(handler)`.\n* הטיפול בשגיאות יכול להיות מצוין במקום אחד, מכיוון ששגיאות מתגלגלות דרך ההבטחות בשרשרת."
+    }
+   ],
+   "headingHe": "סיכום הבטחות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:19",
+   "depth": 2,
+   "headingEn": "From Promises to Async / Await",
+   "raw": "## From Promises to Async / Await \n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:19:0",
+     "type": "prose",
+     "en": "Promises improve significantly over callback-based asynchronous functions, but still cannot be used as simply as synchronous functions within simple control flow operations (sequence, conditionals, composition).  Instead, we still need to pass the promise to a function using the `.then(function)` mechanism.\n\n",
+     "hash": "6b2a668160bd2d85",
+     "he": "הבטחות משפרות באופן משמעותי על פונקציות אסינכרוניות מבוססות-callback, אבל עדיין אי אפשר להשתמש בהן בפשטות כמו בפונקציות סינכרוניות בתוך פעולות זרימת בקרה פשוטות (רצף, תנאים, הרכבה). במקום זאת, אנחנו עדיין צריכים להעביר את ההבטחה לפונקציה באמצעות מנגנון `.then(function)`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:1",
+     "type": "prose",
+     "en": "Promises are made even easier to use through the mechanism of `async` and `await` syntactic sugar which was introduced in standard JavaScript around 2017.  These two new syntactic keywords introduce syntactic variants of the pattern which consists of building a promise and then chaining code into the `then` and `catch` methods of the promise.  So that for example:\n\n",
+     "hash": "a7eeee6d44417f3d",
+     "he": "השימוש בהבטחות נעשה קל אף יותר באמצעות מנגנון הסוכר התחבירי `async` ו-`await`, שהוצג ב-JavaScript התקנית סביב 2017. שתי מילות המפתח התחביריות החדשות האלה מציגות וריאנטים תחביריים של התבנית שמורכבת מבניית הבטחה ואחר כך שרשור קוד לתוך המתודות `then` ו-`catch` של ההבטחה. כך שלדוגמה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:2",
+     "type": "code",
+     "en": "```typescript\n// Chain the calls together\nconst readUpdateWrite = (filename: string): Promise<void> => {\n    return readFilePromise(filename)\n            .then((content) => {\n                let j = JSON.parse(content);\n                j.lastModified = new Date();\n                return writeFilePromise(filename, JSON.stringify(j));\n            })\n            .catch((err) => console.error(err));\n}\n```\n\n",
+     "hash": "b7da5984d9e8cbaf",
+     "lang": "typescript",
+     "noteHe": "אותה `readUpdateWrite` מהדוגמה הקודמת, מובאת שוב כדי להעמיד אותה מול גרסת ה-`async/await` בבלוק הבא. **קראו את שני הבלוקים זה מול זה** — זו ההשוואה החשובה בסעיף. שימו לב לשלושת המאפיינים של הסגנון הזה שעומדים להיעלם: `.then(...)` עם פונקציית חץ, ה-`return` של ההבטחה מתוך המטפל, ו-`.catch(...)` בסוף."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:3",
+     "type": "prose",
+     "en": "is equivalent to the following syntactic variant:\n\n",
+     "hash": "1aa51e87a4683eec",
+     "he": "שקול לווריאנט התחבירי הבא:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:4",
+     "type": "code",
+     "en": "```typescript\n// The async/await version\nconst readUpdateWrite_async = async (filename: string): Promise<void> => {\n    try {\n        const content = await readFilePromise(filename);\n        let j = JSON.parse(content);\n        j.lastModified = new Date();\n        return writeFilePromise(filename, JSON.stringify(j));\n    }\n    catch (err) {\n        return console.error(err);\n    }\n}\n```\n\n",
+     "hash": "74c10e12ec74ebc0",
+     "lang": "typescript",
+     "noteHe": "**אותה פונקציה בדיוק, בסגנון `async/await` — וזו התמורה של כל הפרק**. השוו שורה מול שורה לבלוק הקודם: `.then((content) => {…})` הפך ל-`const content = await readFilePromise(filename);`, ו-`.catch((err) => …)` הפך ל-`catch (err) {…}` רגיל. **שני הכללים שכדאי לשנן**: (1) `await` \"מחכה\" להבטחה ומחזיר את **הערך שבתוכה**, כך שאפשר לכתוב השמה רגילה; (2) `await` מותר **רק בתוך** פונקציה שסומנה `async` — וזו הסיבה שהמילה `async` מופיעה לפני רשימת הפרמטרים. שימו לב שטיפוס ההחזרה נשאר `Promise<void>` גם כאן: פונקציה `async` **תמיד** מחזירה הבטחה, גם אם הגוף שלה נראה סינכרוני לגמרי. **הנקודה המושגית החשובה**: זהו **סוכר תחבירי** בלבד — אין כאן מנגנון חדש, ומתחת למכסה המנוע זה בדיוק אותן הבטחות עם `then`/`catch`. הרווח הוא שהחזרנו לעצמנו את **זרימת הבקרה הרגילה**: השמות, `try/catch`, ואפילו לולאות ותנאים עובדים כמצופה. **טעות נפוצה**: לשכוח `await` ואז לעבוד עם אובייקט ההבטחה במקום עם הערך — `JSON.parse` על הבטחה ייכשל בצורה מבלבלת. **הערה על סגנון**: הקוד כאן משתמש ב-`return writeFilePromise(...)` בלי `await` — תקין, כי פונקציית `async` \"משטחת\" הבטחה שמוחזרת ממנה; אבל `return await …` היה קריא יותר ועקבי יותר עם השורה שמעליו."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:5",
+     "type": "prose",
+     "en": "The [specification for async and await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) explains how async and await\nare *syntactic abstraction* around Promises. \n\n",
+     "hash": "a08246829e4775c1",
+     "he": "[המפרט של async ו-await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) מסביר איך async ו-await\nהם *הפשטה תחבירית* סביב הבטחות."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:6",
+     "type": "prose",
+     "en": "Key points about using `async` and `await`:\n",
+     "hash": "e334a3a17b9f18c6",
+     "he": "נקודות מרכזיות לגבי השימוש ב-`async` וב-`await`:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:7",
+     "type": "list",
+     "en": "* Async functions always return a Promise value.  For example:\n\n",
+     "hash": "ad789cba52835080",
+     "he": "* פונקציות async מחזירות תמיד ערך Promise. לדוגמה:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:8",
+     "type": "code",
+     "en": "```typescript\ntype Resolver<T,R> = (value: T) => R;\n\n// wait ms milliseconds\nconst wait = (ms: number) : Promise<string> => \n    new Promise((r : Resolver<string, void>) => setTimeout(r, ms));\n\nconst hello = async () : Promise<string> => {\n    await wait(500);\n    return 'world';\n}\n\nconst world = async () : Promise<void> => \n    console.log(await hello());\n\nworld();\n``` \n",
+     "hash": "5f608f45ff8394f4",
+     "lang": "typescript",
+     "noteHe": "דוגמה קטנה שמדגימה שרשור של שתי פונקציות `async`. **`wait(ms)`** היא תבנית שכדאי להכיר: היא עוטפת `setTimeout` בהבטחה, וכך יוצרת \"השהיה שאפשר לחכות לה\" — שימו לב ש-`setTimeout(r, ms)` מעביר את פונקציית ה-`resolve` **עצמה** כ-callback, כך שכשהטיימר פורע ההבטחה נפתרת. **`hello`** מחכה 500 מילישניות ואז מחזירה `'world'` — שימו לב שהיא מחזירה **מחרוזת** אבל הטיפוס המוצהר הוא `Promise<string>`, וזה תקין בדיוק בגלל הכלל שפונקציית `async` עוטפת אוטומטית את הערך המוחזר בהבטחה. **`world`** קוראת ל-`hello` עם `await` בתוך `console.log`. הפלט יהיה `world` אחרי חצי שנייה. **הנקודה של הדוגמה**, כפי שהפסקה שמעל אומרת: `async` **תמיד** מחזירה הבטחה, ולכן כל קורא חייב או `await` או `.then()`. שימו לב שהקריאה `world()` בשורה האחרונה **אינה** מחכה לכלום — היא מפעילה את השרשרת ומיד חוזרת; אילו היינו צריכים לדעת מתי הכול נגמר, היינו צריכים `await world()`. שימו לב ל-`Resolver<T,R>` שמוגדר בשורה הראשונה — הוא רק כינוי טיפוס שנועד לתעד את החתימה של `resolve`, ואינו חלק מהמנגנון."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:9",
+     "type": "prose",
+     "en": "An async function may not contain any await, it still returns a Promise:\n\n",
+     "hash": "cf16a4360cecaf64",
+     "he": "פונקציית async יכולה לא להכיל שום await, והיא עדיין מחזירה Promise:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:10",
+     "type": "code",
+     "en": "```typescript\nasync function f() {\n    return 1;\n}\n```\n\n",
+     "hash": "7fc125c50c0454c7",
+     "lang": "typescript",
+     "noteHe": "שלוש שורות שממחישות את הכלל בצורתו הטהורה. הפונקציה מחזירה `1` — מספר, לא הבטחה — ואין בה `await` בכלל. ובכל זאת, **מכיוון שהיא מסומנת `async`**, מה שהקורא יקבל הוא `Promise` שמתקיימת עם הערך `1`. כלומר `f()` **אינו** `1` אלא הבטחה, ולקבל את `1` דורש `await f()` או `f().then(x => …)`. **טעות נפוצה שכדאי לזכור**: לסמן פונקציה `async` \"ליתר ביטחון\" ואז להתפלא שהערך המוחזר אינו מה שנכתב ב-`return`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:11",
+     "type": "prose",
+     "en": "returns a Promise which fulfills to 1.\n\n",
+     "hash": "08bff5310c3bf136",
+     "he": "מחזירה Promise שמתקיימת ל-1."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:12",
+     "type": "list",
+     "en": "* Await can only be used within the body of an async function.\n* Await is followed by a call that produces a Promise (usually an async function)\n* Await can throw an exception (corresponding to the fact that the promise that is awaited is rejected) - it should therefore be wrapped in try/catch construct.\n* `const x = await <something producing a promise>; <continuation>;` is equivalent to: `<something producing a promise>.then((x) => <continuation>);`\n\n",
+     "hash": "9a7399715542ce8f",
+     "he": "* ב-Await אפשר להשתמש רק בתוך הגוף של פונקציית async.\n* אחרי Await באה קריאה שמייצרת Promise (בדרך כלל פונקציית async)\n* ‏Await יכול לזרוק חריגה (מה שמתאים לעובדה שההבטחה שממתינים לה נדחתה) — ולכן יש לעטוף אותו במבנה try/catch.\n* `const x = await <משהו שמייצר הבטחה>; <המשך>;` שקול ל: `<משהו שמייצר הבטחה>.then((x) => <המשך>);`"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:13",
+     "type": "prose",
+     "en": "The following example is from [https://developers.google.com/web/fundamentals/primers/async-functions](https://developers.google.com/web/fundamentals/primers/async-functions):\n",
+     "hash": "7dfaa9269203dcc5",
+     "he": "הדוגמה הבאה היא מ-[https://developers.google.com/web/fundamentals/primers/async-functions](https://developers.google.com/web/fundamentals/primers/async-functions):"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:14",
+     "type": "code",
+     "en": "```typescript\nfunction logFetch(url) {\n  return fetch(url)\n    .then(response => response.text())\n    .then(text => {\n      console.log(text);\n    }).catch(err => {\n      console.error('fetch failed', err);\n    });\n}\n```\n\n",
+     "hash": "3c63cb5bf275ee5b",
+     "lang": "typescript",
+     "noteHe": "דוגמה מעשית נוספת, הפעם עם `fetch` — ה-API הסטנדרטי לבקשות HTTP בדפדפן. **שימו לב לשרשרת בת שני `then`**: הראשון ממיר את התגובה לטקסט (`response.text()` — שהיא **עצמה** אסינכרונית ומחזירה הבטחה), והשני מדפיס. וזו נקודה מלמדת: `fetch` דורשת **שתי** פעולות אסינכרוניות עוקבות כדי לקבל את גוף התגובה, ולכן היא דוגמה טבעית לשרשור. שימו לב שוב לתבנית מהסעיף הקודם — המטפל הראשון **מחזיר** הבטחה, ולכן השרשרת ממתינה לה. ה-`.catch` בסוף תופס כשל בשני השלבים גם יחד. השוו לגרסת ה-`async/await` בבלוק הבא."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:15",
+     "type": "prose",
+     "en": "is equivalent to:\n\n",
+     "hash": "93a2e127e45f94e9",
+     "he": "שקול ל:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:19:16",
+     "type": "code",
+     "en": "```typescript\nasync function logFetch(url) {\n  try {\n    const response = await fetch(url);\n    console.log(await response.text());\n  }\n  catch (err) {\n    console.log('fetch failed', err);\n  }\n}\n```\n\n\n\n",
+     "hash": "78f66aa90ba5c6ad",
+     "lang": "typescript",
+     "noteHe": "אותה `logFetch` ב-`async/await` — שבע שורות במקום תשע, ו**קריאה כמו קוד סינכרוני רגיל**. שימו לב לשני ה-`await`: אחד ל-`fetch(url)` ואחד ל-`response.text()`, כלומר שתי הפעולות האסינכרוניות שהיו שני `then` הפכו לשתי שורות רגילות. שימו לב במיוחד ל-`console.log(await response.text())` — `await` בתוך ארגומנט של קריאה, מה שמדגים שהוא **ביטוי** ולא פקודה, ולכן אפשר לשלב אותו בכל מקום שבו מותר ביטוי. ה-`try/catch` הרגיל מחליף את `.catch`. **הנקודה שכדאי לקחת מכל סעיף 19**: שלושת הסגנונות — callbacks, הבטחות, ו-`async/await` — הם **אותו מנגנון** בשלוש רמות של סוכר תחבירי, ואפשר לתרגם ביניהם מכנית. זו בדיוק שאלת מבחן טיפוסית: \"המירו את הקוד הזה מ-callbacks להבטחות\" או \"ל-async/await\". **שימו לב לאי-דיוק במקור**: בגרסת ההבטחות מודפסת השגיאה עם `console.error`, וכאן עם `console.log` — הבדל קטן שסותר את הטענה שהשתיים \"שקולות\"."
+    }
+   ],
+   "headingHe": "מהבטחות ל-Async / Await"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:20",
+   "depth": 2,
+   "headingEn": "Generators and Co-routines",
+   "raw": "## Generators and Co-routines\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:20:0",
+     "type": "prose",
+     "en": "Javascript (and other programming languages, including Python and Scheme) offer a mechanism called \n[generators](https://en.wikipedia.org/wiki/Generator_(computer_programming))\n(see [MDN generator documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*))\nwhich can be combined with promises to provide excellent support for asynchronous programming.\n\n",
+     "hash": "6a1db43142019401",
+     "he": "‏Javascript (ושפות תכנות אחרות, כולל Python ו-Scheme) מציעות מנגנון שנקרא\n[גנרטורים](https://en.wikipedia.org/wiki/Generator_(computer_programming))\n(ראו [תיעוד הגנרטורים ב-MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*))\nשאפשר לשלב עם הבטחות כדי לספק תמיכה מעולה בתכנות אסינכרוני."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:1",
+     "type": "prose",
+     "en": "**Generators** are functions which can be exited and later re-entered. Their context (variable bindings and current control locations) are saved across re-entries.  A generator is created with the keyword `function*`.\n\n",
+     "hash": "732386d6e57b98d4",
+     "he": "**גנרטורים** הם פונקציות שאפשר לצאת מהן ולהיכנס אליהן מחדש מאוחר יותר. ההקשר שלהן (קשירות משתנים ומקומות הבקרה הנוכחיים) נשמר בין הכניסות מחדש. גנרטור נוצר עם מילת המפתח `function*`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:2",
+     "type": "prose",
+     "en": "Calling a generator function does not execute its body immediately; an **iterator** object for the function is returned instead.\nAn iterator is a map with two fields: `{value: x, done: boolean}` and that has a `next()` method:\n\n",
+     "hash": "4a3b35e3040fa382",
+     "he": "קריאה לפונקציית גנרטור אינה מבצעת את הגוף שלה מיד; במקום זאת מוחזר אובייקט **איטרטור** (iterator) עבור הפונקציה.\nאיטרטור הוא מפה עם שני שדות: `{value: x, done: boolean}` ושיש לה מתודה `next()`:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:3",
+     "type": "code",
+     "en": "```typescript\ninterface IteratorResult {\n    value: any;\n    done: boolean;\n}\ninterface Iterator {\n    next(): IteratorResult;\n}\n```\n\n",
+     "hash": "93c620794ec4fa5d",
+     "lang": "typescript",
+     "noteHe": "שני הממשקים שמגדירים איטרטור, ושווה לשים לב כמה הם מינימליים. `IteratorResult` הוא מה שכל קריאה מחזירה: `value` (הערך שנמסר) ו-`done` (האם נגמר). `Iterator` הוא כל דבר שיש לו מתודה `next()` שמחזירה `IteratorResult`. **זה הכול** — הפרוטוקול כולו הוא מתודה אחת. **הנקודה שכדאי להבין**: הגנרטור אינו מחזיר את הערכים; הוא מחזיר **אובייקט שיודע לתת אותם אחד-אחד לפי דרישה**. זו הערכה **עצלה** (lazy), וזה בדיוק הרעיון שראינו בהקשר של רשימות עצלות. שימו לב שהטיפוס של `value` הוא `any` — הממשק הזה מקדים את הגרסאות הגנריות (`Iterator<T>`), וב-TypeScript מודרנית היה נכתב עם פרמטר טיפוס."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:4",
+     "type": "prose",
+     "en": "When the iterator's `next()` method is called, the generator function's body is executed until the first `yield()` expression, which specifies the value to be returned from the iterator. The `next()` method returns an object with a value property containing the yielded value and a done property which indicates whether the generator has yielded its last value as a boolean. Calling the `next()` method with an argument will resume the generator function execution, replacing the yield statement where execution was paused with the argument from `next()`. \n\n",
+     "hash": "4b2298ce781e46f7",
+     "he": "כאשר המתודה `next()` של האיטרטור נקראת, הגוף של פונקציית הגנרטור מתבצע עד לביטוי ה-`yield()` הראשון, שמציין את הערך שיוחזר מהאיטרטור. המתודה `next()` מחזירה אובייקט עם מאפיין value שמכיל את הערך שנמסר (yielded), ומאפיין done שמציין כבוליאני אם הגנרטור מסר את הערך האחרון שלו. קריאה למתודה `next()` עם ארגומנט תמשיך את ביצוע פונקציית הגנרטור, כשהיא מחליפה את פקודת ה-yield שבה הביצוע הושהה בארגומנט מ-`next()`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:5",
+     "type": "prose",
+     "en": "A `return` statement in a generator, when executed, will make the generator `done`. If a value is returned from the body of generator, it will be passed back as the value to the next `next()` call. \nA generator which has returned will not yield any more values. (That is, `return x` is like `yield(x)` plus the side effect that the generator is now done.)\n\n",
+     "hash": "4cf8f969fd96246d",
+     "he": "פקודת `return` בגנרטור, כשהיא מתבצעת, תגרום לגנרטור להיות `done`. אם ערך מוחזר מגוף הגנרטור, הוא יועבר בחזרה כערך לקריאת ה-`next()` הבאה.\nגנרטור שהחזיר לא ימסור עוד ערכים. (כלומר, `return x` הוא כמו `yield(x)` בתוספת תופעת הלוואי שהגנרטור סיים כעת.)"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:6",
+     "type": "prose",
+     "en": "Let us examine a few examples of using generators:\n\n",
+     "hash": "f537cee302e33137",
+     "he": "בואו נבחן כמה דוגמאות לשימוש בגנרטורים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:7",
+     "type": "code",
+     "en": "```typescript\nfunction* idMaker() {\n  let index = 0;\n  while (index < 3)\n    yield(index++);\n}\n\nconst gen = idMaker();\n\nconsole.log(gen.next().value); // 0\nconsole.log(gen.next().value); // 1\nconsole.log(gen.next().value); // 2\nconsole.log(gen.next().value); // undefined \n0\n1\n2\nundefined\n```\n\n",
+     "hash": "07c5486f0e7d454e",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה הראשונה לגנרטור, וכדאי לעקוב אחריה בקפידה.** `idMaker` מסומנת `function*` (שימו לב לכוכבית — זו כל ההצהרה שהופכת אותה לגנרטור), ובגוף שלה לולאת `while` עם `yield(index++)`. **מה שקורה בפועל**: הקריאה `idMaker()` **אינה מריצה כלום** — היא מחזירה איטרטור. רק הקריאה הראשונה ל-`gen.next()` מריצה את הגוף, ו-`yield` **עוצר את הביצוע באמצע הלולאה** ומחזיר `0`. הקריאה השנייה **ממשיכה מאותה נקודה בדיוק** — עם `index` ששווה כבר 1 — ומחזירה `1`. וכן הלאה. **זו הנקודה המושגית שהופכת גנרטורים למיוחדים**: הפונקציה \"חיה\" בין הקריאות. המשתנה `index` אינו מאותחל מחדש, כי הפונקציה מעולם לא הסתיימה — היא רק **מושהית**. השוו לפונקציה רגילה, שכל קריאה שלה מתחילה מאפס. **הקריאה הרביעית** מחזירה `undefined`, כי הלולאה הסתיימה (`index` הגיע ל-3) והגנרטור סיים. **הקישור לפרק**: זו זרימת בקרה **לא-מקומית** — יציאה מפונקציה וחזרה אליה — כלומר בדיוק מה שהסעיף הראשון של הדף מנה. שימו לב שהגנרטור שומר את מקום הבקרה שלו, ולא רק את הסביבה, וזה מה שמבדיל אותו מ-closure רגיל."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:8",
+     "type": "prose",
+     "en": "The client of the generator can pass a parameter back to the generator by passing it through the `next(val)` call.  \nThis value is retrieved on the generator side as the returned value of the `yield()` call.\n\n",
+     "hash": "eb913b9bbaaa598d",
+     "he": "הלקוח של הגנרטור יכול להעביר פרמטר בחזרה לגנרטור על ידי העברתו דרך הקריאה `next(val)`.\nהערך הזה נשלף בצד הגנרטור כערך המוחזר של הקריאה `yield()`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:9",
+     "type": "code",
+     "en": "```typescript\nfunction* demo() {\n  const res = yield(10);\n  assert(res === 32);\n  return 42;\n}\n\nconst d = demo();\nd.next();\n--> { value: 10, done: false }\n\nd.next(32)\n--> { value: 42, done: true }\n\nd.next();\n--> { value: undefined, done: true }\n```\n\n",
+     "hash": "8122e2993c047e55",
+     "lang": "typescript",
+     "noteHe": "**התקשורת הדו-כיוונית** — התכונה שהופכת גנרטור לקו-רוטינה, וזו הדוגמה החשובה ביותר בסעיף. שימו לב לשורה `const res = yield(10);`: ל-`yield` יש כאן **ערך מוחזר**, וזה נראה מוזר בהתחלה. עקבו: (1) `d.next()` מריצה עד ה-`yield`, שמוציא `10` לצד הלקוח — הפלט `{value: 10, done: false}`; הגנרטור **מושהה בדיוק על שורת ההשמה**, לפני ש-`res` קיבל ערך. (2) `d.next(32)` ממשיכה, וה-`32` שהועבר הופך ל**ערך של ביטוי ה-`yield`** — כלומר `res` מקבל 32, ה-`assert` עובר, והגנרטור מגיע ל-`return 42`; הפלט `{value: 42, done: true}`. (3) `d.next()` נוספת מחזירה `{value: undefined, done: true}` — הגנרטור סיים ואין עוד מה למסור. **הנקודה שכדאי לשנן**: `yield` הוא גם יציאה **וגם** כניסה — הוא מוציא ערך ומקבל ערך. זו תקשורת סימטרית בין שתי \"רוטינות\" שמחליפות שליטה ביניהן, ומכאן השם **קו-רוטינה**. **וזו בדיוק המנגנון שמאחורי `async/await`**: `await` הוא `yield` שמוסר הבטחה, ומקבל בחזרה את הערך שההבטחה נפתרה אליו. שימו לב שהערך שמועבר ב-`next()` הראשון **נזרק** — אין `yield` שממתין לו — וזו טעות נפוצה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:10",
+     "type": "prose",
+     "en": "The **`function*`** special form is used to construct a generator.  Within the body of a generator, the `yield` special form can be used.  \n\n",
+     "hash": "5f220963438ee76b",
+     "he": "הצורה המיוחדת **`function*`** משמשת לבניית גנרטור. בתוך הגוף של גנרטור, אפשר להשתמש בצורה המיוחדת `yield`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:11",
+     "type": "prose",
+     "en": "Generators are most often consumed inside loops - and as their names indicate they *generate* a sequence of values in a **lazy manner**: instead of eagerly constructing a list of values, the generator knows how to generate the values only when asked to.\n\n",
+     "hash": "34c6650f455d2314",
+     "he": "גנרטורים נצרכים לרוב בתוך לולאות — וכפי ששמם מרמז, הם *מייצרים* סדרה של ערכים באופן **עצל**: במקום לבנות באופן להוט (eager) רשימה של ערכים, הגנרטור יודע לייצר את הערכים רק כשמבקשים ממנו."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:12",
+     "type": "prose",
+     "en": "The `for` loop of JavaScript is a syntax which is adapted to consume any object which implements the iterator protocol, and hence works well with generators:\n\n\n",
+     "hash": "b8dfafaa089ad177",
+     "he": "לולאת ה-`for` של JavaScript היא תחביר שמותאם לצרוך כל אובייקט שמממש את פרוטוקול האיטרטור, ולכן עובד היטב עם גנרטורים:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:13",
+     "type": "code",
+     "en": "```typescript\nfunction* foo() {\n    yield 1;\n    yield 2;\n    yield 3;\n    yield 4;\n    yield 5;\n    return 6;\n}\n\nfor ( let v of foo() ) {\n    console.log(v);\n}\n```\n\n\n",
+     "hash": "3129260c0516cd6d",
+     "lang": "typescript",
+     "noteHe": "גנרטור עם חמישה `yield` מפורשים, שנצרך בלולאת `for…of`. **שימו לב לגוטצ'ה החשובה כאן**: הפלט יהיה `1 2 3 4 5` — **בלי ה-6**. הסיבה: `return 6` אכן מחזיר את הערך, אבל הוא מגיע יחד עם `done: true`, ו-`for…of` **מתעלם מהערך שמגיע עם `done`**. כלומר ערך שמוחזר ב-`return` מגנרטור אינו נצרך על ידי הלולאה, בשונה מערכים שנמסרים ב-`yield`. **טעות נפוצה מאוד**, ושאלת מבחן טובה. שימו לב שכאן `yield` נכתב בלי סוגריים (`yield 1`) ובדוגמאות קודמות איתם (`yield(index++)`) — שתי הצורות תקינות, `yield` הוא אופרטור ולא פונקציה. שימו לב גם לנוחות: `for (let v of foo())` — אין צורך לקרוא ל-`next()` ידנית ואין צורך לבדוק את `done`; הלולאה עושה זאת בעצמה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:14",
+     "type": "prose",
+     "en": "Generators can be used to generate computed sequences - which can even be infinite, since they are only generated when requested:\n\n\n",
+     "hash": "2fed946b39e0938c",
+     "he": "אפשר להשתמש בגנרטורים כדי לייצר סדרות מחושבות — שיכולות אפילו להיות אינסופיות, מכיוון שהן נוצרות רק כשמבקשים אותן:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:15",
+     "type": "code",
+     "en": "```typescript\nfunction* range(start, end) {\n    for (let n=start; n < end; n++) {\n        yield n;\n    }\n}\n\nfor (n of range(1,5)) \n    console.log(n);\n```\n\n",
+     "hash": "1a2ede495db9a590",
+     "lang": "typescript",
+     "noteHe": "‏`range` — המקבילה של `range` מ-Python, בשש שורות. הלולאה הפנימית רצה מ-`start` עד `end` ומוסרת כל מספר. הפלט: `1 2 3 4` (לא כולל 5, כי התנאי הוא `n < end`). **הנקודה**: הגנרטור אינו בונה מערך של ארבעה מספרים — הוא מייצר אותם אחד-אחד לפי דרישה, וזה מה שיאפשר בדוגמה הבאה גנרטור **אינסופי**. שימו לב לשגיאה קטנה בקוד: השורה `for (n of range(1,5))` משתמשת ב-`n` **בלי הצהרה** (`let`/`const`) — במצב לא-קפדני זה יוצר משתנה גלובלי, ובמצב `strict` זו שגיאה; בכל שאר הדוגמאות בדף כתוב `let n`."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:16",
+     "type": "prose",
+     "en": "A generator can produce a potentially infinite stream of data.\nSuch a generator is useful in case the consumer of the stream can limit the number of items to actually extract.\n\n",
+     "hash": "0162df73abc523fe",
+     "he": "גנרטור יכול לייצר זרם נתונים שהוא פוטנציאלית אינסופי.\nגנרטור כזה שימושי במקרה שצורך הזרם יכול להגביל את מספר האיברים שיישלפו בפועל."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:17",
+     "type": "prose",
+     "en": "The following example demonstrates an infinite generator and a higher order function called `take` which takes as input a number and a generator - and returns a new generator which generates less than `n` items from the generator:\n\n\n",
+     "hash": "b7ce109ed1ad695e",
+     "he": "הדוגמה הבאה מדגימה גנרטור אינסופי ופונקציה מסדר גבוה שנקראת `take`, שמקבלת כקלט מספר וגנרטור — ומחזירה גנרטור חדש שמייצר פחות מ-`n` איברים מהגנרטור:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:18",
+     "type": "code",
+     "en": "```typescript\n// An infinite generator\nfunction* naturalNumbers() {\n    for (let n=0;; n++) {\n        yield n;\n    }\n}\n\nfunction* take(n, generator) {\n    for (let x of generator) {\n        if (n <= 0) return;\n        n--;\n        yield x;\n    }\n}\n\nfor (let n of take(3, naturalNumbers())) {\n    console.log(n);\n}\n```\n",
+     "hash": "61f1c5dfc66b3edd",
+     "lang": "typescript",
+     "noteHe": "**הדוגמה שמראה למה גנרטורים באמת שווים** — גנרטור **אינסופי** ופונקציה שקוטמת אותו. `naturalNumbers` היא לולאה שלעולם אינה נעצרת: שימו לב ל-`for (let n=0;; n++)` — התנאי **ריק**, כלומר `true` תמיד. אילו זו הייתה פונקציה רגילה שבונה מערך, היא הייתה תולשת את הזיכרון; כגנרטור היא בטוחה לחלוטין, כי היא מייצרת ערך **רק כשמבקשים**. `take(n, generator)` היא גנרטור **שצורך גנרטור אחר**: היא עוברת עליו ב-`for…of`, מוסרת כל איבר, ומפסיקה ב-`return` כשהמונה נגמר. **הנקודה הקריטית**: כש-`take` מבצעת `return`, לולאת ה-`for…of` שבתוכה **מפסיקה לבקש** מ-`naturalNumbers`, וזו נשארת מושהית לנצח — לא נוצרה אף פעם רשימה אינסופית. הפלט: `0 1 2`. **כדאי לשנן**: זהו בדיוק הרעיון של רשימות עצלות (lazy lists) שראינו ב-Scheme, ואותה תבנית של \"מפיק ומצרך\" שנחזור אליה ב-4.3. **טעות נפוצה בהבנה**: לחשוב ש-`naturalNumbers()` \"רצה ברקע\" — היא אינה רצה בכלל; היא מתקדמת בדיוק צעד אחד בכל בקשה."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:19",
+     "type": "prose",
+     "en": "Generators are an efficient mechanism to combine iterations without copying lists of data at each stage.\n\n",
+     "hash": "62b92fbcecea0a11",
+     "he": "גנרטורים הם מנגנון יעיל לשילוב איטרציות בלי להעתיק רשימות של נתונים בכל שלב."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:20",
+     "type": "prose",
+     "en": "Consider the following examples:\n\n",
+     "hash": "3c9cb188fe5f83ec",
+     "he": "התבוננו בדוגמאות הבאות:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:21",
+     "type": "code",
+     "en": "```typescript\n// A map operator adapted to generators\nfunction* mapGen(generator, mapFunc) {\n    for (let x of generator) {\n        yield mapFunc(x);\n    }\n}\n\n// Can be combined with infinite generators\nfor (let n of take(4, mapGen(naturalNumbers(), x => x * x))) {\n    console.log(n);\n}\n// 0, 1, 4, 9\n```\n",
+     "hash": "db1585aa25bcc3ec",
+     "lang": "typescript",
+     "noteHe": "‏`mapGen` — הגרסה של `map` לגנרטורים, וכדאי לשים לב כמה היא פשוטה: עוברים על הגנרטור הנכנס, ומוסרים את `mapFunc(x)` במקום את `x`. חמש שורות. **מה שמעניין הוא השורה השנייה**: `take(4, mapGen(naturalNumbers(), x => x * x))` — שרשור של שלושה גנרטורים, שהאחד צורך את השני. הפלט `0, 1, 4, 9` הוא ריבועי ארבעת המספרים הראשונים. **הנקודה שהפסקה שמעל מדגישה**: `map` רגיל על מערך היה **בונה מערך חדש** של כל האיברים; כאן לא נוצר שום מערך ביניים, ובנוסף — אפשר להפעיל את זה על גנרטור **אינסופי**, מה שעם `map` רגיל היה בלתי אפשרי. **השוו למה שלמדנו ב-1.x על `map`**: אותה פונקציה מושגית, שני מודלי חישוב — להוט מול עצל."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:22",
+     "type": "code",
+     "en": "```typescript\n// A filter operator adapted to generators\nfunction* filterGen(generator, filterFunc) {\n    for (let x of generator) {\n        if (filterFunc(x)) {\n            yield x;\n        }\n    }\n}\n\nfor (let n of take(4, filterGen(naturalNumbers(), x => (x % 2) === 0))) {\n    console.log(n);\n}\n// 0, 2, 4, 6\n```\n\n",
+     "hash": "793604a3bd54b5fd",
+     "lang": "typescript",
+     "noteHe": "‏`filterGen` — אותו דבר עבור `filter`: עוברים על הגנרטור, ומוסרים את `x` **רק אם** הפרדיקט מתקיים. שימו לב שכאשר הפרדיקט נכשל, פשוט לא מוסרים כלום וממשיכים ללולאה הבאה — כלומר האיבר \"נדלג\" בשקט. הפלט `0, 2, 4, 6` הוא ארבעת המספרים הזוגיים הראשונים. **שימו לב לפרט חשוב שקל לפספס**: `take(4, …)` מבקש ארבעה איברים **מהפלט של הסינון**, ולכן `naturalNumbers` נאלץ לייצר שבעה מספרים (0 עד 6) כדי שארבעה זוגיים יעברו. כלומר הגנרטור הפנימי רץ יותר צעדים מהחיצוני — וזה בדיוק ההתנהגות הנכונה. **תרגיל שכדאי לעשות**: מה יקרה אם הפרדיקט לעולם אינו מתקיים, למשל `x => x > 1000000`, ונבקש `take(1, …)`? התשובה: הגנרטור ירוץ מיליון צעדים ואז יחזיר — בטוח, אבל איטי; ואם הפרדיקט אינו מתקיים **אף פעם**, נקבל לולאה אינסופית."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:23",
+     "type": "prose",
+     "en": "Such operators can be combined together - with the advantage that the data is not copied between each stage.  Instead, each time an element of the combination is requested, the chain of functions is evaluated:\n\n\n",
+     "hash": "9131a28a75b43121",
+     "he": "אפשר לשלב אופרטורים כאלה יחד — עם היתרון שהנתונים אינם מועתקים בין כל שלב. במקום זאת, בכל פעם שמתבקש איבר של השילוב, שרשרת הפונקציות מוערכת:"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:24",
+     "type": "code",
+     "en": "```typescript\nconst evenSquares = filterGen(mapGen(naturalNumbers(), x=> x*x), x=> (x % 2) === 0);\n\nfor (let n of take(4, evenSquares))\n    console.log(n);\n// 0, 4, 16, 36\n\nconst evenSquaresVerbose = filterGen(mapGen(naturalNumbers(), x=> { \n        console.log(\"square \", x, \"->\", x*x);\n        return x*x;\n    }), \n    x => {\n        console.log(\"filter \", x, \"->\", (x % 2) === 0);\n        return (x % 2) === 0;\n    });\n\nfor (let n of take(4, evenSquaresVerbose)) \n    console.log(\"EvenSquaresVerbose: \", n);\n```\n\n",
+     "hash": "b551d39780e3a4f8",
+     "lang": "typescript",
+     "noteHe": "שרשור של שלושה גנרטורים: ריבועים, סינון זוגיים, וקטימה לארבעה. `evenSquares` נותן `0, 4, 16, 36` — הריבועים הזוגיים. **הגרסה השנייה, `evenSquaresVerbose`, היא אותו דבר בדיוק אבל עם `console.log` בתוך שתי הפונקציות**, וכל מטרתה להראות את **סדר** הביצוע. שימו לב שהיא ארוכה יותר רק בגלל ההדפסות — הלוגיקה זהה. **מה שכדאי לצפות לו בפלט** (בבלוק הבא): לא \"כל הריבועים ואז כל הסינונים\", אלא ריבוע-סינון, ריבוע-סינון, איבר-איבר. זו ההוכחה לכך שהשרשור עצל ולא בונה שלבי ביניים."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:25",
+     "type": "prose",
+     "en": "The order in which the functions are executed is item by item: map-square / filter-even / take\n\n",
+     "hash": "bf89f739037f0204",
+     "he": "הסדר שבו הפונקציות מתבצעות הוא איבר-איבר: map-square / filter-even / take"
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:26",
+     "type": "code",
+     "en": "```typescript\nsquare  0 -> 0\nfilter  0 -> true\nEvenSquaresVerbose:  0\nsquare  1 -> 1\nfilter  1 -> false\nsquare  2 -> 4\nfilter  4 -> true\nEvenSquaresVerbose:  4\nsquare  3 -> 9\nfilter  9 -> false\nsquare  4 -> 16\nfilter  16 -> true\nEvenSquaresVerbose:  16\nsquare  5 -> 25\nfilter  25 -> false\nsquare  6 -> 36\nfilter  36 -> true\nEvenSquaresVerbose:  36\nsquare  7 -> 49\nfilter  49 -> false\nsquare  8 -> 64\nfilter  64 -> true\n```\n\n",
+     "hash": "2893d693d64a11a1",
+     "lang": "typescript",
+     "noteHe": "**הפלט שמוכיח את העצלות — הבלוק החשוב ביותר בסעיף, שווה לעבור עליו שורה-שורה.** עקבו אחרי התבנית: `square 0` → `filter 0 → true` → `EvenSquaresVerbose: 0`. כלומר איבר **אחד** עבר את כל שלושת השלבים לפני שהאיבר הבא התחיל. אחר כך `square 1` → `filter 1 → false` — ו**אין** פלט של `EvenSquaresVerbose`, כי האיבר נפל בסינון; ומיד `square 2`. **השוו למה שהיה קורה עם `map` ו-`filter` רגילים**, כפי שהפסקה שאחרי הבלוק אומרת: קודם כל הריבועים על כל המערך, ואז כל הסינונים על מערך התוצאה — כלומר כל שורות ה-`square` היו מודפסות לפני כל שורות ה-`filter`. **הפרט המלמד ביותר בפלט**: הוא ממשיך אחרי `EvenSquaresVerbose: 36` עם `square 7`, `filter 49`, `square 8`, `filter 64` — כלומר הגנרטור ייצר **שני איברים נוספים** אחרי שכבר נמסרו ארבעה. הסיבה: `take` יודע שהמונה נגמר רק כשהוא מקבל את האיבר החמישי ומגלה ש-`n <= 0`, ולכן הוא \"מבקש יותר מדי\" איבר אחד. כלומר המימוש הזה של `take` **אינו עצל לחלוטין** — הוא מבצע עבודה מיותרת בקצה. **זו נקודה מצוינת לשאלת מבחן**: אילו `take` היה בודק את המונה **לפני** שהוא מבקש את האיבר הבא, הבזבוז הזה היה נמנע."
+    },
+    {
+     "id": "cm/4.1AsyncProgramming:20:27",
+     "type": "prose",
+     "en": "In contrast, the traditional `map` and `filter` functions allocate a list (an array) to store the intermediary results.\nThe functions are evaluated on all the array at once - square on all the items of the input array first, then even on all the items of the output array.\n\n",
+     "hash": "88148a3e1a4b03cf",
+     "he": "בניגוד לזה, הפונקציות המסורתיות `map` ו-`filter` מקצות רשימה (מערך) כדי לאחסן את תוצאות הביניים.\nהפונקציות מוערכות על כל המערך בבת אחת — קודם square על כל האיברים של מערך הקלט, ואחר כך even על כל האיברים של מערך הפלט."
+    }
+   ],
+   "headingHe": "גנרטורים וקו-רוטינות"
+  },
+  {
+   "id": "cm/4.1AsyncProgramming:21",
+   "depth": 1,
+   "headingEn": "Summary",
+   "raw": "# Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.1AsyncProgramming:21:0",
+     "type": "list",
+     "en": "* When evaluating an expression, two contexts are necessary to determine how to resolve variables (the *environment* context we have already analyzed) and the *control context* which determines to which further computation the value of the expression is to be passed.\n* The control context is usually represented as a control stack when we use traditional control structures - sequence, conditional and function calls.\n\n* Non traditional control structures such as asynchronous functions and generators manipulate the control context in different manners than a control stack.\n* Asynchronous functions perform a first computation, which creates a task, which is then passed to a framework such as the Node event loop.  The framework posts the task on a queue and executes it according to the rules of the function.\nThe tasks are computed in the future, in the same environment as the original asynchronous function, but in a different control context.\n* Generators are functions which implement the iterator protocol (value, done, next) and can be paused (with the `yield` special form) and resumed (with the next() method).  When a generator is paused, it remembers its control context, which is re-activated when the generator is resumed.\n\n* Asynchronous introduce 3 problems for the programmer using them:\n    * obscured types;\n    * cannot be used in simple control structures (conditionals, sequences, loops, composed function calls); \n    * require systematic error handling after all calls.\n* Promises are a pattern which improves on these issues.\n\n* Generators can be used to model streams of computed data, including infinite streams.\n* Higher-order generators define generators on the basis of simpler generators - for example, take, mapGen, filterGen.\n\n",
+     "hash": "e222b3e594331df7",
+     "he": "* בעת הערכת ביטוי, שני הקשרים נחוצים כדי לקבוע איך לפתור משתנים (הקשר ה*סביבה* שכבר ניתחנו) וה*הקשר הבקרה* (control context) שקובע לאיזה חישוב נוסף יועבר הערך של הביטוי.\n* הקשר הבקרה מיוצג בדרך כלל כמחסנית בקרה כאשר אנחנו משתמשים במבני בקרה מסורתיים — רצף, תנאי וקריאות לפונקציות.\n\n* מבני בקרה לא-מסורתיים כמו פונקציות אסינכרוניות וגנרטורים מתפעלים את הקשר הבקרה בדרכים שונות ממחסנית בקרה.\n* פונקציות אסינכרוניות מבצעות חישוב ראשון, שיוצר משימה, שמועברת אחר כך למסגרת (framework) כמו לולאת האירועים של Node. המסגרת מפרסמת את המשימה בתור ומבצעת אותה לפי הכללים של הפונקציה.\nהמשימות מחושבות בעתיד, באותה סביבה של הפונקציה האסינכרונית המקורית, אבל בהקשר בקרה שונה.\n* גנרטורים הם פונקציות שמממשות את פרוטוקול האיטרטור (value, done, next) ושאפשר להשהות (עם הצורה המיוחדת `yield`) ולהמשיך (עם המתודה next()). כאשר גנרטור מושהה, הוא זוכר את הקשר הבקרה שלו, שמופעל מחדש כשהגנרטור ממשיך.\n\n* אסינכרוניות מכניסה 3 בעיות למתכנת שמשתמש בה:\n    * טיפוסים מעורפלים;\n    * אי אפשר להשתמש בהן במבני בקרה פשוטים (תנאים, רצפים, לולאות, קריאות מורכבות לפונקציות);\n    * דורשות טיפול שיטתי בשגיאות אחרי כל הקריאות.\n* הבטחות הן תבנית שמשפרת את הסוגיות האלה.\n\n* אפשר להשתמש בגנרטורים כדי למדל זרמים של נתונים מחושבים, כולל זרמים אינסופיים.\n* גנרטורים מסדר גבוה מגדירים גנרטורים על בסיס גנרטורים פשוטים יותר — לדוגמה, take, mapGen, filterGen."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "code-reading",
+   "questionHe": "מה יודפס, ובאיזה סדר?\n```typescript\nconsole.log(\"A\");\nsetTimeout(() => console.log(\"B\"), 0);\nPromise.resolve().then(() => console.log(\"C\"));\nconsole.log(\"D\");\n```",
+   "answerHe": "‏**A, D, C, B**",
+   "explanationHe": "**הסבר בשלושה שלבים.**\n\n**1. הקוד הסינכרוני רץ עד הסוף קודם.** ‏`console.log(\"A\")` ו-`console.log(\"D\")` מתבצעים מיד, בסדר שבו הם כתובים. שתי השורות שביניהם רק **רושמות** משימות ואינן מבצעות דבר. לכן `A` ואז `D`.\n\n**2. אחרי שהקוד הסינכרוני נגמר ומחסנית הקריאות התרוקנה**, לולאת האירועים פונה לתורים. וכאן הנקודה העדינה: **יש שני תורים**, לא אחד.\n- תור ה-**microtasks** — שם נמצאים המטפלים של הבטחות (`.then`).\n- תור ה-**macrotasks** — שם נמצאים `setTimeout`, אירועי קלט/פלט וכדומה.\n\n**3. תור ה-microtasks מקבל עדיפות** ומתרוקן במלואו לפני שנשלפת משימה אחת מתור ה-macrotasks. לכן `C` (מההבטחה) מודפס לפני `B` (מה-`setTimeout`) — **למרות ש-`setTimeout` נרשם קודם ועם השהיה 0**.\n\n**הטעות הנפוצה** היא לענות `A, D, B, C` — כלומר להניח תור אחד שפועל לפי סדר הרישום. `setTimeout(…, 0)` **אינו** \"הרץ מיד\" ואינו אפילו \"הרץ ראשון בין הממתינים\".\n\n**הנקודות שחייבות להופיע בתשובה**: (1) הקוד הסינכרוני קודם לכל; (2) `setTimeout` ו-`.then` רק רושמים משימות; (3) ההבחנה בין שני התורים ועדיפות ה-microtasks; (4) שההשהיה `0` אינה משנה את המסקנה."
+  },
+  {
+   "id": "ex2",
+   "type": "open",
+   "questionHe": "מדוע `try/catch` רגיל **אינו** תופס שגיאה שנזרקת בתוך callback אסינכרוני? הדגימו, והסבירו איך הבטחות פותרות זאת.",
+   "answerHe": "**הקוד שאינו עובד:**\n```typescript\ntry {\n  fs.readFile('missing.txt', (err, data) => {\n    if (err) throw err;   // לא ייתפס!\n    console.log(data);\n  });\n}\ncatch (e) {\n  console.error(\"caught:\", e);   // לעולם לא ירוץ\n}\n```\n\n**מדוע.** ‏`try/catch` הוא מנגנון שפועל על **מחסנית הקריאות**: `throw` מגלגל את המחסנית כלפי מעלה עד שהוא מוצא `catch`. אבל ה-callback **אינו מופעל במחסנית הזו**. מה שקורה בפועל:\n1. ‏`fs.readFile` נקראת, רושמת את ה-callback, ו**חוזרת מיד**.\n2. בלוק ה-`try` מסתיים בהצלחה — לא נזרקה בו שום שגיאה.\n3. מחסנית הקריאות מתרוקנת, וה-`try/catch` כבר אינו קיים.\n4. מאוחר יותר, לולאת האירועים שולפת את ה-callback ומריצה אותו על מחסנית **חדשה וריקה**. ה-`throw` שלו אינו מוצא שום `catch` ומגיע לראש המחסנית — כלומר שגיאה לא-מטופלת שמפילה את התהליך.\n\nזו בדיוק ההבחנה מהסעיף \"Callbacks ומחסנית הקריאות\": ה-callback שומר את ה**סביבה** שבה נוצר, אבל **לא** את הקשר הבקרה. `try/catch` הוא חלק מהקשר הבקרה.\n\n**איך הבטחות פותרות זאת.** ההבטחה **תופסת** את הכישלון בעצמה והופכת אותו לשינוי מצב (`rejected`) — כלומר לנתון ולא לזרימת בקרה. הכישלון מתגלגל אז לאורך השרשרת עד ה-`.catch()` הראשון:\n```typescript\nreadFilePromise('missing.txt')\n  .then(data => console.log(data))\n  .catch(e => console.error(\"caught:\", e));   // כן ירוץ\n```\n**וב-`async/await` חוזרים אפילו ל-`try/catch` המקורי** — כי `await` על הבטחה שנדחתה **זורק** את השגיאה, והפעם בתוך אותו הקשר בקרה:\n```typescript\ntry { const data = await readFilePromise('missing.txt'); }\ncatch (e) { console.error(\"caught:\", e); }\n```\n\n**הסיכום המושגי**: הבטחות מחזירות את הטיפול בשגיאות מעולם זרימת הבקרה לעולם הנתונים, ו-`async/await` נותן לנו את התחביר של הראשון עם הסמנטיקה של השני.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) דוגמת קוד שמדגימה את הכשל; (2) ההסבר שה-`try` מסתיים **לפני** שה-callback רץ, ולכן אין מה לתפוס; (3) הקישור לכך ש-callback משמר סביבה אך לא הקשר בקרה — וש-`try/catch` שייך להקשר הבקרה; (4) ההסבר שהבטחה הופכת כישלון לשינוי מצב (`rejected`) שמתגלגל לאורך השרשרת; (5) שב-`async/await` `try/catch` שוב עובד, כי `await` זורק בתוך אותו הקשר. בונוס: לציין שהשגיאה הלא-מטופלת מפילה את תהליך Node."
+  },
+  {
+   "id": "ex3",
+   "type": "mcq",
+   "questionHe": "מה מבדיל גנרטור מ-closure רגיל?",
+   "options": [
+    "גנרטור שומר את הסביבה שלו בין קריאות, ו-closure לא",
+    "גנרטור שומר גם את **מקום הבקרה** שלו ולא רק את הסביבה, ולכן הוא ממשיך מאמצע הגוף",
+    "גנרטור רץ בתהליכון נפרד, ולכן הוא אינו חוסם",
+    "גנרטור יכול לקבל ארגומנטים, ו-closure לא"
+   ],
+   "correct": 1,
+   "explanationHe": "**התשובה הנכונה: גנרטור שומר גם את מקום הבקרה.** כששוקלים `yield`, הגנרטור מושהה **בנקודה מסוימת בתוך הגוף**, וקריאת `next()` הבאה ממשיכה מאותה נקודה בדיוק — כולל באמצע לולאה. זו זרימת בקרה לא-מקומית, וזה מה שאין ל-closure.\n\nלמה השאר שגויים:\n- 'closure אינו שומר סביבה' — **שגוי, וזו הטעות המרכזית שהשאלה בודקת**: closure כן שומר את הסביבה שבה נוצר, בדיוק לפי מודל הסביבות מ-2.7. שניהם שומרים סביבה; ההבדל הוא במקום הבקרה.\n- 'תהליכון נפרד' — שגוי לגמרי. גנרטור רץ באותו תהליכון, ולמעשה **אינו רץ בכלל** בין הקריאות: הוא מתקדם צעד אחד בכל `next()` ואז נעצר.\n- 'ארגומנטים' — שגוי; שניהם מקבלים ארגומנטים.\n\n**ההשלכה החשובה**: מכיוון שגנרטור שומר את מקום הבקרה, `yield` יכול לשמש גם כנקודת **קליטה** — הערך שמועבר ל-`next(v)` הופך לערך של ביטוי ה-`yield`. זו התקשורת הדו-כיוונית שהופכת גנרטור לקו-רוטינה, ובדיוק המנגנון שעליו בנוי `await`."
+  },
+  {
+   "id": "ex4",
+   "type": "code-reading",
+   "questionHe": "מה יודפס?\n```typescript\nfunction* foo() {\n    yield 1;\n    yield 2;\n    return 3;\n}\n\nfor (let v of foo()) {\n    console.log(v);\n}\n```",
+   "answerHe": "יודפס **`1`** ואחר כך **`2`**. הערך **`3` לא יודפס**.",
+   "explanationHe": "**זו גוטצ'ה קלאסית, וכדאי להבין אותה לעומק.** לולאת `for…of` קוראת ל-`next()` שוב ושוב, וצורכת את `value` **רק כאשר `done` הוא `false`**. עקבו אחרי שלוש הקריאות:\n1. `next()` → `{value: 1, done: false}` → הלולאה מדפיסה `1`.\n2. `next()` → `{value: 2, done: false}` → הלולאה מדפיסה `2`.\n3. `next()` → `{value: 3, done: true}` → הלולאה רואה `done: true`, **מפסיקה, ומתעלמת מ-`value`**.\n\n**הכלל שכדאי לשנן**: ערך שמוחזר ב-`return` מגנרטור אינו נצרך על ידי `for…of`. אם רוצים לראות אותו, צריך לקרוא ל-`next()` ידנית ולבדוק את התוצאה:\n```typescript\nconst g = foo();\ng.next();            // {value: 1, done: false}\ng.next();            // {value: 2, done: false}\ng.next().value;      // 3  ← כאן כן מקבלים אותו\n```\n\n**האינטואיציה**: `yield x` אומר \"הנה עוד איבר בסדרה\", ואילו `return x` אומר \"הסדרה נגמרה, ואגב הערך הסופי הוא x\". ‏`for…of` מעוניין בסדרה בלבד.\n\n**נקודות שחייבות להופיע**: (1) הפלט `1, 2`; (2) ההסבר דרך `done: true` שמלווה את הערך המוחזר; (3) הכלל הכללי על `return` מול `yield` בגנרטור. בונוס: להראות איך כן לגשת לערך ה-`return`."
+  },
+  {
+   "id": "ex5",
+   "type": "open",
+   "questionHe": "הסבירו מדוע `take(4, filterGen(naturalNumbers(), x => x % 2 === 0))` מסתיים בזמן סופי, אף ש-`naturalNumbers()` הוא גנרטור **אינסופי**. איזו עבודה מיותרת המימוש של `take` בדף עושה בכל זאת?",
+   "answerHe": "**למה זה מסתיים.** גנרטור אינסופי אינו \"רץ\" — הוא **מתקדם צעד אחד בכל בקשה**. `naturalNumbers()` לעולם אינו בונה רשימה של כל המספרים; הוא מייצר מספר, נעצר על ה-`yield`, וממתין. לכן מספר הצעדים שיתבצעו נקבע כולו על ידי הצורך: `take` מבקש בדיוק כמה שהוא צריך, ואז מבצע `return` — ומאותו רגע איש אינו מבקש עוד, והגנרטור נשאר מושהה לנצח. **המפתח הוא היפוך השליטה**: הצורך קובע את הקצב, לא המפיק.\n\nבמקרה הזה `take` צריך ארבעה זוגיים, ולכן `filterGen` נדרש לבקש מ-`naturalNumbers` את `0..6` — שבעה מספרים כדי שארבעה יעברו. שימו לב שהגנרטור הפנימי מתקדם יותר צעדים מהחיצוני, וזה נורמלי.\n\n**העבודה המיותרת.** המימוש בדף הוא:\n```typescript\nfunction* take(n, generator) {\n    for (let x of generator) {\n        if (n <= 0) return;\n        n--;\n        yield x;\n    }\n}\n```\nהבדיקה `if (n <= 0)` מתבצעת **אחרי** ש-`for…of` כבר שלף את האיבר הבא. כלומר אחרי שנמסרו `n` איברים, `take` מבקש איבר **נוסף אחד** רק כדי לגלות שהמונה נגמר ולזרוק אותו. זה נראה בפלט המפורט בדף: אחרי `EvenSquaresVerbose: 36` מופיעים עוד `square 7`, `filter 49`, `square 8`, `filter 64` — כלומר **שני** מספרים נוספים נוצרו לשווא (כי נדרשו שניים כדי למצוא עוד זוגי אחד).\n\n**התיקון** הוא להעביר את הבדיקה לפני הבקשה, למשל:\n```typescript\nfunction* take(n, generator) {\n    if (n <= 0) return;\n    for (let x of generator) {\n        yield x;\n        if (--n <= 0) return;\n    }\n}\n```\nכאן ה-`return` מתרחש מיד אחרי מסירת האיבר ה-`n`, בלי לבקש עוד.\n\n**מתי זה משנה בפועל**: כשהאיברים יקרים לחישוב, או כשלייצור איבר יש תופעת לוואי (קריאה לרשת, כתיבה ללוג). בדוגמה של ריבועים זה זניח, בקריאת API זה באג.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ההסבר שגנרטור אינסופי מתקדם רק לפי דרישה ולכן אינו מסוכן; (2) הזיהוי שהצורך קובע את מספר הצעדים — היפוך שליטה; (3) החשבון שנדרשו שבעה מספרים כדי לקבל ארבעה זוגיים; (4) זיהוי העבודה המיותרת: הבדיקה `if (n <= 0)` באה אחרי השליפה, ולכן מתבקש איבר אחד עודף — עם ההפניה לשורות `square 7`/`square 8` בפלט של הדף; (5) תיקון שמעביר את הבדיקה לפני הבקשה. בונוס: הסבר מתי הבזבוז משמעותי (תופעות לוואי, חישוב יקר)."
+  },
+  {
+   "id": "ex6",
+   "type": "open",
+   "questionHe": "המירו את הקוד הבא משרשור הבטחות ל-`async/await`, ואז הסבירו מה **לא** השתנה מתחת למכסה המנוע.\n```typescript\nconst process = (url) =>\n    fetch(url)\n        .then(r => r.json())\n        .then(data => save(data))\n        .then(() => console.log(\"done\"))\n        .catch(e => console.error(e));\n```",
+   "answerHe": "**הגרסה ב-`async/await`:**\n```typescript\nconst process = async (url) => {\n    try {\n        const r = await fetch(url);\n        const data = await r.json();\n        await save(data);\n        console.log(\"done\");\n    }\n    catch (e) {\n        console.error(e);\n    }\n};\n```\n\n**התרגום, שורה מול שורה:**\n- כל `.then(x => …)` הופך ל-`const x = await …;` ואחריו הגוף.\n- ה-`.catch(e => …)` הופך ל-`catch (e) { … }` יחיד שעוטף את הכול.\n- הוספנו `async` לפני רשימת הפרמטרים — **חובה**, אחרת `await` אינו חוקי.\n\n**מה לא השתנה:**\n1. **הפונקציה עדיין מחזירה הבטחה.** `process(url)` אינו `undefined` אלא `Promise<void>`; כל פונקציית `async` עוטפת אוטומטית את ערך ההחזרה. הקורא עדיין חייב `await` או `.then()`.\n2. **המנגנון זהה לחלוטין.** `async/await` הוא **סוכר תחבירי** — אין כאן מנגנון חדש. תחת המכסה זה נשאר בדיוק אותן הבטחות עם `then`/`catch`; המהדר (או מנוע ה-JS) מתרגם את זה בחזרה.\n3. **הקוד עדיין אינו חוסם.** ‏`await` **אינו** ממתין בלולאה עמוסה — הוא מוותר על השליטה, ולולאת האירועים ממשיכה לטפל במשימות אחרות עד שההבטחה נפתרת. זו טעות הבנה נפוצה: `await` נראה סינכרוני אבל מתנהג אסינכרוני.\n4. **סדר הביצוע זהה.** שלוש הפעולות עדיין מתבצעות בזו אחר זו, כל אחת ממתינה לקודמת.\n\n**מה כן השתנה — וזה כל הרווח:** החזרנו לעצמנו את זרימת הבקרה הרגילה של השפה. עכשיו אפשר לשלב תנאים, לולאות, ומשתנים מקומיים שנראים בכל הגוף (שימו לב ש-`r` ו-`data` שני משתנים רגילים בתחום אחד — בגרסת ההבטחות כל אחד היה תקוע בתוך ה-`then` שלו, וכדי להשתמש בשניהם יחד היה צריך קינון).\n\n**הקישור העמוק לפרק**: `await` הוא בעצם `yield` שמוסר הבטחה — כלומר `async/await` נבנה על אותו מנגנון קו-רוטינות שראינו בגנרטורים.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) תרגום נכון עם `async`, שלושה `await`, ו-`try/catch` יחיד; (2) שהפונקציה עדיין מחזירה `Promise`; (3) שזהו סוכר תחבירי בלבד ותחתיו אותן הבטחות; (4) ש-`await` אינו חוסם — הוא מוותר על השליטה ללולאת האירועים; (5) הרווח האמיתי: זרימת בקרה רגילה ומשתנים בתחום אחד, במקום קינון. בונוס: הקישור בין `await` ל-`yield` ולקו-רוטינות."
+  },
+  {
+   "id": "ex7",
+   "type": "mcq",
+   "questionHe": "בשרשרת הבטחות, מה קורה אם מטפל `.then()` **מחזיר הבטחה** במקום ערך רגיל?",
+   "options": [
+    "השרשרת ממשיכה מיד, וההבטחה המוחזרת מתבצעת במקביל בלי שממתינים לה",
+    "השרשרת **ממתינה** להבטחה המוחזרת, וה-`then` הבא מקבל את הערך שהיא נפתרה אליו",
+    "זו שגיאת טיפוסים — `then` חייב להחזיר ערך שאינו הבטחה",
+    "ה-`then` הבא מקבל את אובייקט ההבטחה עצמו, וצריך לקרוא לו `.then()` בעצמו"
+   ],
+   "correct": 1,
+   "explanationHe": "**התשובה הנכונה: השרשרת ממתינה, וה-`then` הבא מקבל את הערך הפתור.** התכונה הזו נקראת **השטחה** (flattening) והיא מה שהופך שרשור הבטחות לשימושי: `Promise<Promise<T>>` אינו נוצר — הוא מתקפל אוטומטית ל-`Promise<T>`.\n\nזו בדיוק התבנית ב-`readUpdateWrite` מהדף:\n```typescript\nreadFilePromise(filename)\n  .then((content) => {\n      …\n      return writeFilePromise(filename, …);   // מחזיר הבטחה\n  })\n```\nהכתיבה מסתיימת לפני שהשרשרת ממשיכה, בדיוק כפי שנדרש.\n\nלמה השאר שגויים:\n- 'מתבצעת במקביל בלי להמתין' — **זו בדיוק מה שקורה אם שוכחים את ה-`return`**, וזו טעות נפוצה מאוד: ההבטחה נוצרת, השרשרת ממשיכה בלעדיה, והפעולות מתרחשות בסדר לא צפוי.\n- 'שגיאת טיפוסים' — שגוי; זו התנהגות מוגדרת ומרכזית בתקן.\n- 'מקבל את אובייקט ההבטחה' — שגוי, וזה מה שהיה קורה בעולם בלי השטחה; אז שרשור היה מייצר קינון הולך וגדל של הבטחות בתוך הבטחות.\n\n**הקישור ל-`async/await`**: אותה השטחה היא הסיבה שאפשר לכתוב `return writeFilePromise(...)` בתוך פונקציית `async` בלי `await` והתוצאה נכונה."
+  }
+ ]
+}

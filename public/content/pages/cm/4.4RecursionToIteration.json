@@ -1,0 +1,659 @@
+{
+ "id": "cm/4.4RecursionToIteration",
+ "kind": "lecture",
+ "sourcePath": "class_material/4.4RecursionToIteration.md",
+ "titleEn": "From Recursion to Iteration through CPS",
+ "titleHe": "מרקורסיה לאיטרציה דרך CPS",
+ "translated": true,
+ "sections": [
+  {
+   "id": "cm/4.4RecursionToIteration:0",
+   "depth": 1,
+   "headingEn": "From Recursion to Iteration through CPS",
+   "raw": "# From Recursion to Iteration through CPS\n",
+   "blocks": [],
+   "headingHe": "מרקורסיה לאיטרציה דרך CPS"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:1",
+   "depth": 2,
+   "headingEn": "PPL 2023",
+   "raw": "## PPL 2023\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:1:0",
+     "type": "prose",
+     "en": "We observed in [4.2](4.2CPS.html) that with our $$L5$$ interpreter because it is executed in a JavaScript interpreter which does NOT implement \nTail Call Optimization, we run out of stack space even when we execute a tail-recursive function in $$L5$$.\n\n",
+     "hash": "8c50eeaff3e26e36",
+     "he": "ראינו ב-[4.2](4.2CPS.html) שבמפרש ה-$$L5$$ שלנו, מכיוון שהוא מורץ במפרש JavaScript שאינו מממש\nאופטימיזציית קריאת זנב (Tail Call Optimization), נגמר לנו מקום המחסנית גם כשאנחנו מריצים פונקציה רקורסיבית-זנב ב-$$L5$$."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:1:1",
+     "type": "prose",
+     "en": "In this section, we introduce a general method which models recursion explicitly - so that we can properly implement tail-recursion as iteration **even** when our meta-language does not support tail call optimization.  In other words, our implementer *explains* how to turn tail recursion into iteration.\n\n",
+     "hash": "a7ad9f031b7ff926",
+     "he": "בסעיף הזה נציג שיטה כללית שממדלת רקורסיה באופן מפורש — כך שנוכל לממש כראוי רקורסיית זנב כאיטרציה **גם** כאשר שפת-המטא שלנו אינה תומכת באופטימיזציית קריאת זנב. במילים אחרות, המממש שלנו *מסביר* איך להפוך רקורסיית זנב לאיטרציה."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:1:2",
+     "type": "prose",
+     "en": "We first illustrate the general approach on a concrete example (a simple tail recursive function written in TypeScript, which we turn into an equivalent iterative program in JavaScript through gradual semantic transformations).  \nWe then implement the same method on the $$L5$$ interpreter and obtain an iterative version of the interpreter.  We finally demonstrate that when we\nexecute the iterative interpreter on a tail-recursive $$L5$$ program, this yields an iterative execution process which does not consume control memory.  \nThe end-result is an interpreter which executes tail-recursive programs as iteration even though the meta-language does **not** implement tail recursion optimization.\n\n\n",
+     "hash": "ecf547d7968c7c29",
+     "he": "תחילה נמחיש את הגישה הכללית על דוגמה קונקרטית (פונקציה רקורסיבית-זנב פשוטה שכתובה ב-TypeScript, שאותה נהפוך לתוכנית איטרטיבית שקולה ב-JavaScript באמצעות טרנספורמציות סמנטיות הדרגתיות).\nלאחר מכן נממש את אותה שיטה על מפרש ה-$$L5$$ ונקבל גרסה איטרטיבית של המפרש. לבסוף נדגים שכאשר אנחנו\nמריצים את המפרש האיטרטיבי על תוכנית $$L5$$ רקורסיבית-זנב, מתקבל תהליך ביצוע איטרטיבי שאינו צורך זיכרון בקרה.\nהתוצאה הסופית היא מפרש שמבצע תוכניות רקורסיביות-זנב כאיטרציה, למרות ששפת-המטא **אינה** מממשת אופטימיזציית רקורסיית זנב."
+    }
+   ],
+   "headingHe": "‏PPL 2023"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:2",
+   "depth": 2,
+   "headingEn": "From Recursion to Tail Recursion using the CPS Transformation",
+   "raw": "## From Recursion to Tail Recursion using the CPS Transformation\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:2:0",
+     "type": "prose",
+     "en": "Consider the following recursive function in TypeScript:\n\n\n",
+     "hash": "9caffc33f4cb4bc8",
+     "he": "נתבונן בפונקציה הרקורסיבית הבאה ב-TypeScript:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:1",
+     "type": "code",
+     "en": "```typescript\n// ============================================================\n// regular recursive function: sum all numbers from 0 to n.\nexport const sum = (n: number): number =>\n    (n === 0) ? 0 :\n    n + sum(n - 1);\n```\n\n",
+     "hash": "925b6de39a5385c5",
+     "lang": "typescript",
+     "noteHe": "נקודת המוצא של כל הפרק: סכום המספרים מ-0 עד ‏`n`, בכתיב הרקורסיבי ה\"טבעי\". שימו לב ל-`n + sum(n - 1)` — החיבור ממתין לתוצאת הקריאה, ולכן הקריאה **אינה** בעמדת זנב וזהו תהליך רקורסיבי שצורך מחסנית. זו אותה תבנית בדיוק של ‏`fact` מ-4.2, רק עם ‏`+` במקום ‏`*`. הפונקציה הזו תלווה אותנו לאורך כל הדף דרך ארבע טרנספורמציות, וכדאי לעקוב אחריה שלב-שלב."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:2",
+     "type": "prose",
+     "en": "This function is recursive (because the recursive call does not appear in tail position).\nWe know that if we execute it on a large value for n, it will create a stack overflow error.\n\n",
+     "hash": "3f1a2b4050c88f29",
+     "he": "הפונקציה הזו רקורסיבית (מכיוון שהקריאה הרקורסיבית אינה מופיעה בעמדת זנב).\nאנחנו יודעים שאם נריץ אותה על ערך גדול של n, היא תיצור שגיאת גלישת מחסנית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:3",
+     "type": "prose",
+     "en": "We could instead rewrite this function as a tail recursive function:\n\n",
+     "hash": "ae420f4279c53f1f",
+     "he": "במקום זאת יכולנו לכתוב מחדש את הפונקציה כפונקציה רקורסיבית-זנב:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:4",
+     "type": "code",
+     "en": "```typescript\nexport const sumIter = (n: number, acc: number): number =>\n    (n === 0) ? acc :\n    sumIter(n - 1, n + acc);\n```\n\n",
+     "hash": "c6cd80c63826ca49",
+     "lang": "typescript",
+     "noteHe": "הגרסה עם צובר, בדיוק כמו ‏`fact-iter` מ-4.2: ‏`acc` אוסף את הסכום, והקריאה הרקורסיבית היא הביטוי כולו — כלומר קריאת זנב. **אבל שימו לב לנקודה שהדף יחזור אליה בהמשך**: זה לא מה ש-CPS מייצר. כדי לכתוב את ‏`sumIter` היה צריך *לחשוב* — להמציא צובר ולהפוך את כיוון הסכימה. טרנספורמציית CPS, לעומת זאת, היא מכנית לחלוטין ואינה מחייבת שום תובנה על האלגוריתם. זו ההבחנה שהפסקאות הבאות מדגישות."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:5",
+     "type": "prose",
+     "en": "This version is tail-recursive.  On an interpreter that would perform Tail Call Optimization (TCO), this function would be executed in an iterative manner.  But JavaScript does **not** perform TCO, and therefore, this function will also cause a \nstack overflow when it is executed on a large value of n.\n\n",
+     "hash": "dd8392a19042c66a",
+     "he": "הגרסה הזו היא רקורסיבית-זנב. במפרש שהיה מבצע אופטימיזציית קריאת זנב (TCO), הפונקציה הזו הייתה מתבצעת באופן איטרטיבי. אבל JavaScript **אינה** מבצעת TCO, ולכן הפונקציה הזו תגרום גם היא לגלישת\nמחסנית כשהיא מורצת על ערך גדול של n."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:6",
+     "type": "prose",
+     "en": "We could of course write the same function directly in an iterative manner:\n\n",
+     "hash": "5c04b509870dd387",
+     "he": "כמובן שיכולנו לכתוב את אותה פונקציה ישירות באופן איטרטיבי:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:7",
+     "type": "code",
+     "en": "```typescript\nexport const sumLoop = (n: number): number => {\n    let sum = 0;\n    for (let i = 0; i <= n; i++)\n        sum = sum + i;\n    return sum;\n}\n```\n\n",
+     "hash": "1a2b2db1b49f2a12",
+     "lang": "typescript",
+     "noteHe": "הגרסה האימפרטיבית: לולאת ‏`for` עם משתנה מקומי בר-שינוי. היא באמת רצה בזיכרון קבוע — אין כאן שום קריאה רקורסיבית ולכן אין מסגרות מחסנית. **וזה בדיוק היעד**: אנחנו רוצים להגיע לצורה כזו, אבל **באופן שיטתי ואוטומטי** מתוך הקוד הרקורסיבי, ולא על ידי כתיבה מחדש ביד. שימו לב שהמשתנה המקומי נקרא ‏`sum` — אותו שם כמו הפונקציה מלמעלה — הצללה (shadowing) מבלבלת שהיה עדיף להימנע ממנה. שימו לב גם שהלולאה רצה עד ‏`i <= n` כולל, כפי שנדרש."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:8",
+     "type": "prose",
+     "en": "What we want to obtain instead is a systematic transformation process which will turn any recursive function into a semantically equivalent function which can be executed iteratively -- that is, without consuming control memory.\nWe demonstrate this transformation as a series of smaller transformations - starting with the CPS transformation, which\nis the key semantic transformation involved in this overall compilation of the recursive program into an equivalent iterative\nprogram.\n\n",
+     "hash": "9be8dfb5d94257d0",
+     "he": "מה שאנחנו רוצים להשיג במקום זאת הוא תהליך טרנספורמציה שיטתי שיהפוך כל פונקציה רקורסיבית לפונקציה שקולה סמנטית שניתן לבצע באופן איטרטיבי — כלומר, בלי לצרוך זיכרון בקרה.\nאנחנו מדגימים את הטרנספורמציה הזו כסדרה של טרנספורמציות קטנות יותר — החל בטרנספורמציית ה-CPS, שהיא\nהטרנספורמציה הסמנטית המרכזית המעורבת בקומפילציה הכוללת הזו של התוכנית הרקורסיבית לתוכנית איטרטיבית\nשקולה."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:9",
+     "type": "prose",
+     "en": "Note that when we perform the CPS transformation, we do **not** transform `sum` into `sumIter`.  \n`sumIter` implements a different algorithm than `sum`.  This is the result of the CPS transformation applied\non the TypeScript code of `sum`:\n\n\n",
+     "hash": "ec162a94e255450f",
+     "he": "שימו לב שכשאנחנו מבצעים את טרנספורמציית ה-CPS, אנחנו **לא** הופכים את `sum` ל-`sumIter`.\n‏`sumIter` מממשת אלגוריתם שונה מ-`sum`. זו התוצאה של טרנספורמציית ה-CPS המופעלת\nעל קוד ה-TypeScript של `sum`:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:10",
+     "type": "code",
+     "en": "```typescript\n// ============================================================\n// CPS Procedural transformation of the recursive algorithm\ntype Cont = (x: number) => number;\n\nexport const sumCPS = (n: number, cont: Cont): number =>\n    (n === 0) ? cont(0) :\n    sumCPS(n - 1, (sn1) => cont(n + sn1));\n\n// Driver function: same signature as the original function, passes a default cont.\nexport const sumCPS1 = (n: number): number =>\n    sumCPS(n, (x) => x);\n```\n\n",
+     "hash": "0f6157d59916a568",
+     "lang": "typescript",
+     "noteHe": "טרנספורמציית ה-CPS של ‏`sum`, בדיוק לפי הכללים מ-4.2: מקרה הבסיס מחזיר ‏`cont(0)` במקום ‏`0`, והחיבור ‏`n + …` נדחס להמשכית חדשה ‏`(sn1) => cont(n + sn1)`. הטיפוס ‏`Cont = (x: number) => number` נותן שם מפורש למושג. שימו לב לפונקציית ה\"נהג\" (driver) ‏`sumCPS1`: היא בעלת **אותה חתימה** כמו ‏`sum` המקורית, ומעבירה את הזהות כהמשכית התחלתית — כך שהקורא מבחוץ לא רואה שום שינוי בממשק. **וזו הנקודה החשובה**: בניגוד ל-`sumIter`, שדרשה להמציא אלגוריתם חדש, ‏`sumCPS` נגזרה **מכנית** מ-`sum` בלי שום מחשבה על משמעות החישוב — וזו בדיוק הסיבה שאפשר להחיל את השיטה על מפרש שלם בהמשך הדף."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:11",
+     "type": "prose",
+     "en": "The resulting program is tail recursive (which is always the case for a CPS program).  \nBut because JavaScript does not apply TCO, when we invoke this program, we still obtain a stack overflow:\n\n",
+     "hash": "e10e67c48ce2d76f",
+     "he": "התוכנית שהתקבלה היא רקורסיבית-זנב (וכך תמיד המצב בתוכנית CPS).\nאבל מכיוון ש-JavaScript אינה מיישמת TCO, כשאנחנו מפעילים את התוכנית הזו אנחנו עדיין מקבלים גלישת מחסנית:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:2:12",
+     "type": "code",
+     "en": "```typescript\nsumCPS1(10000)\n\n--> RangeError: Maximum call stack size exceeded\n```\n\n",
+     "hash": "cc6d685823fe8ae3",
+     "lang": "typescript",
+     "noteHe": "התוצאה המאכזבת שמניעה את שאר הדף: עשינו את הטרנספורמציה כמו שצריך, כל הקריאות בעמדת זנב — ועדיין המחסנית עולה על גדותיה. **כדאי לשנן את המסקנה**: ‏CPS לבדו **אינו מספיק**. הוא מבטיח שכל הקריאות תהיינה בעמדת זנב, אבל אם המימוש של שפת-המטא פותח מסגרת מחסנית לכל קריאה — וזה מה ש-JavaScript עושה — לא הרווחנו דבר בזיכרון. שני הסעיפים הבאים פותרים בדיוק את זה: תחילה מוציאים את ההמשכיות מלהיות פונקציות, ואז מוציאים את ההפעלה מלהיות קריאה."
+    }
+   ],
+   "headingHe": "מרקורסיה לרקורסיית זנב בעזרת טרנספורמציית CPS"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:3",
+   "depth": 2,
+   "headingEn": "From Procedural Continuations to Concrete Continuations",
+   "raw": "## From Procedural Continuations to Concrete Continuations\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:3:0",
+     "type": "prose",
+     "en": "The reason we still suffer from control memory consumption is that even for tail calls, the JavaScript interpreter internally allocates a stack frame.  That is, in the tail call:\n\n",
+     "hash": "3a50121739695045",
+     "he": "הסיבה שאנחנו עדיין סובלים מצריכת זיכרון בקרה היא שגם עבור קריאות זנב, המפרש של JavaScript מקצה פנימית מסגרת מחסנית. כלומר, בקריאת הזנב:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:1",
+     "type": "code",
+     "en": "```typescript\nsumCPS(5, cont) --> sumCPS(4, (sn1) => cont(5 + sn1))\n```\n\n",
+     "hash": "8900405c158d3421",
+     "lang": "typescript",
+     "noteHe": "צעד בודד מהריצה, שמראה איפה בדיוק הולך הזיכרון. ‏`sumCPS(5, cont)` מייצר ‏`sumCPS(4, (sn1) => cont(5 + sn1))` — כלומר **שתי** הקצאות: מסגרת מחסנית חדשה עבור הקריאה ל-`sumCPS`, וסגור חדש עבור ההמשכית. שימו לב שהסגור החדש \"זוכר\" בתוכו את ‏`5` ואת ‏`cont` הישנה, ולכן שרשרת ההמשכיות מתארכת בכל צעד. הסעיפים הבאים יטפלו בשתי ההקצאות בנפרד: תחילה בסגור, ואחר כך במסגרת."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:2",
+     "type": "prose",
+     "en": "we still allocate a call frame on the stack. \nIn fact, in JavaScript, we **always** allocate a call frame whenever we invoke a function - regardless of the position of the function application.  If we want to avoid allocating call stacks, we must avoid calling functions.  How can we achieve this for the cases of continuations?\n\n",
+     "hash": "588585f629e2dd02",
+     "he": "אנחנו עדיין מקצים מסגרת קריאה על המחסנית.\nלמעשה, ב-JavaScript אנחנו **תמיד** מקצים מסגרת קריאה בכל פעם שאנחנו מפעילים פונקציה — ללא קשר לעמדה של הפעלת הפונקציה. אם ברצוננו להימנע מהקצאת מחסניות קריאה, עלינו להימנע מקריאה לפונקציות. כיצד נוכל להשיג זאת עבור המקרים של המשכיות?"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:3",
+     "type": "prose",
+     "en": "We will achieve this objective in two steps:\n",
+     "hash": "984a47b44815f4d4",
+     "he": "נשיג את המטרה הזו בשני צעדים:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:4",
+     "type": "list",
+     "en": "* We will transform procedural continuations into concrete data structures which implement the same interface as continuations.\n* We will transform the invocation of continuations into an iterative process without parameter passing and without return address.\n\n",
+     "hash": "c0dc0d6bb6681c88",
+     "he": "* נהפוך המשכיות פרוצדורליות למבני נתונים קונקרטיים שמממשים את אותו ממשק כמו המשכיות.\n* נהפוך את ההפעלה של המשכיות לתהליך איטרטיבי בלי העברת פרמטרים ובלי כתובת חזרה."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:5",
+     "type": "prose",
+     "en": "Up to this point, we described continuations as closures which receive as parameter the result of the current function and pass this parameter to the continuation of the code.  These closures encapsulate any local variable that does not depend on the result.  When a procedure is transformed in CPS-form, the structure of the resulting function is:\n",
+     "hash": "b3e6b27b5ade7d47",
+     "he": "עד לנקודה הזו, תיארנו המשכיות כסגורים שמקבלים כפרמטר את התוצאה של הפונקציה הנוכחית ומעבירים את הפרמטר הזה להמשכית של הקוד. הסגורים האלה עוטפים כל משתנה מקומי שאינו תלוי בתוצאה. כאשר פרוצדורה עוברת המרה לצורת CPS, המבנה של הפונקציה שמתקבלת הוא:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:6",
+     "type": "list",
+     "en": "* A procedure which receives a single parameter\n* All computation which does not invoke a user-defined procedure (any sequence of primitive applications) is performed at the beginning of the computation.\n* The result of this computation is then passed to the continuation.\n\n",
+     "hash": "38778ae18dc8d772",
+     "he": "* פרוצדורה שמקבלת פרמטר יחיד\n* כל חישוב שאינו מפעיל פרוצדורה מוגדרת-משתמש (כל רצף של הפעלות פרימיטיביות) מתבצע בתחילת החישוב.\n* התוצאה של החישוב הזה מועברת אחר כך להמשכית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:7",
+     "type": "prose",
+     "en": "In this context, when we invoke a CPS function, we **construct** its continuation as the last parameter of the CPS function.\nThat is, each time we invoke a CPS function with a continuation, we construct a new continuation instance with the specific parameters this continuation receives.\n\n",
+     "hash": "0c1b0280875a9004",
+     "he": "בהקשר הזה, כשאנחנו מפעילים פונקציית CPS, אנחנו **בונים** את ההמשכית שלה כפרמטר האחרון של פונקציית ה-CPS.\nכלומר, בכל פעם שאנחנו מפעילים פונקציית CPS עם המשכית, אנחנו בונים מופע המשכית חדש עם הפרמטרים הספציפיים שההמשכית הזו מקבלת."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:8",
+     "type": "prose",
+     "en": "Within the body of the continuations, we invoke the continuation passed as a parameter with different parameters.\n\n",
+     "hash": "14264b0b0aeeb4f9",
+     "he": "בתוך גוף ההמשכיות, אנחנו מפעילים את ההמשכית שהועברה כפרמטר עם פרמטרים שונים."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:9",
+     "type": "prose",
+     "en": "We, accordingly, can distinguish two contexts in which continuations participate:\n",
+     "hash": "ba49f217fd6f7d37",
+     "he": "בהתאם לכך, אנחנו יכולים להבחין בשני הקשרים שבהם המשכיות משתתפות:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:10",
+     "type": "list",
+     "en": "* Places where a new continuation is constructed with its specific parameters\n* Places where a continuation is invoked\n\n",
+     "hash": "e1b651bcd727fca3",
+     "he": "* מקומות שבהם נבנית המשכית חדשה עם הפרמטרים הספציפיים שלה\n* מקומות שבהם המשכית מופעלת"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:11",
+     "type": "prose",
+     "en": "For example, in the sumCPS example:\n\n\n",
+     "hash": "55620d7f3297e96d",
+     "he": "לדוגמה, בדוגמת sumCPS:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:3:12",
+     "type": "code",
+     "en": "```typescript\ntype Cont = (x: number) => number;\n\nexport const sumCPS = (n: number, cont: Cont): number =>\n    (n === 0) ? cont(0) :                   // The cont parameter is invoked\n    sumCPS(n - 1, (sn1) => cont(n + sn1));  // A new continuation is constructed with n and cont in its memory\n                                            // In the body of this continuation, the cont continuation is invoked.\n                                            \n// Driver function: same signature as the original function, passes a default cont.\nexport const sumCPS1 = (n: number): number =>\n    sumCPS(n, (x) => x);  // The default identity continuation is constructed (it has no memory)\n```\n\n",
+     "hash": "83102117b239820c",
+     "lang": "typescript",
+     "noteHe": "אותו קוד ‏`sumCPS` מקודם, הפעם עם הערות שמסמנות את **שני התפקידים** של המשכית — וזו ההבחנה שכל הסעיף נשען עליה. בשורת מקרה הבסיס, ‏`cont(0)`, ההמשכית **מופעלת**. בשורה הרקורסיבית, ‏`(sn1) => cont(n + sn1)`, המשכית חדשה **נבנית**, והיא שומרת בזיכרון שלה את ‏`n` ואת ‏`cont` — ובתוך גופה, ההמשכית הישנה תופעל בבוא היום. וב-`sumCPS1` נבנית המשכית הזהות, שאין לה זיכרון כלל. **התובנה שמאפשרת את הצעד הבא**: אם כל מה שהמשכית עושה זה לזכור כמה ערכים ולהפעיל משהו בסוף, אז אין באמת צורך שהיא תהיה **פונקציה** — מספיק **רשומה** שמחזיקה את אותם ערכים, ופונקציה אחת שיודעת מה לעשות עם כל סוג רשומה. זה בדיוק מה שנעשה בסעיף הבא, והטכניקה נקראת **defunctionalization**."
+    }
+   ],
+   "headingHe": "מהמשכיות פרוצדורליות להמשכיות קונקרטיות"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:4",
+   "depth": 2,
+   "headingEn": "Concrete Continuations vs. Procedural Continuations",
+   "raw": "## Concrete Continuations vs. Procedural Continuations\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:4:0",
+     "type": "prose",
+     "en": "In the first step of the transformation from CPS to Iteration, we transform procedural continuations into concrete data structures.  This transformation is systematic:\n",
+     "hash": "cd5893cfe4adf0be",
+     "he": "בצעד הראשון של הטרנספורמציה מ-CPS לאיטרציה, אנחנו הופכים המשכיות פרוצדורליות למבני נתונים קונקרטיים. הטרנספורמציה הזו שיטתית:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:4:1",
+     "type": "list",
+     "en": "* We identify all the types of continuations which appear in the program.  In our trivial `sum` example, there are only two distinct continuation types, the one constructed inside `sumCPS` and the one constructed in the driver function `sumCPS1`.\n* We give them distinct names: in our case, `Cont1` and `IdCont`.\n* For each type of continuation, we identify which variables are closed in the corresponding closure: those are the variables which must be remembered in the activation frame of the corresponding closure.  In our case, for `Cont1` the variables captured in the closure are `cont` and `n`; for `IdCont`, no variables are captured.\n* We define a **disjoint type union system** to represent these continuations.  In our case, we define the interfaces `Cont1` and `IdCont` - each one with the captured variables as members of the interface, a discriminative tag for each interface, and a parent type union to represent all possible continuations in a polymorphic manner.\n* Finally, we define a polymorphic function `applyCont` which dispatches on the type of the cont and executes the body of the continuation according to its type when it is invoked.\n* In all places in the code where a continuation is constructed, we invoke the appropriate continuation constructor with the relevant parameters, and in the places where a continuation is invoked, we explicitly call `applyCont` on the concrete `cont` parameter.\n\n",
+     "hash": "a881194e81847376",
+     "he": "* אנחנו מזהים את כל סוגי ההמשכיות שמופיעים בתוכנית. בדוגמת ה-`sum` הטריוויאלית שלנו יש רק שני סוגי המשכיות נבדלים: זה שנבנה בתוך `sumCPS` וזה שנבנה בפונקציית הנהג `sumCPS1`.\n* אנחנו נותנים להם שמות נבדלים: במקרה שלנו, `Cont1` ו-`IdCont`.\n* עבור כל סוג של המשכית, אנחנו מזהים אילו משתנים נסגרים בסגור המתאים: אלה המשתנים שיש לזכור במסגרת ההפעלה של הסגור המתאים. במקרה שלנו, עבור `Cont1` המשתנים הנלכדים בסגור הם `cont` ו-`n`; עבור `IdCont`, אף משתנה אינו נלכד.\n* אנחנו מגדירים **מערכת איחוד טיפוסים זרים** (disjoint type union) לייצוג ההמשכיות האלה. במקרה שלנו, אנחנו מגדירים את הממשקים `Cont1` ו-`IdCont` — כל אחד עם המשתנים הנלכדים כאיברי הממשק, תג מבחין (discriminative tag) לכל ממשק, וטיפוס איחוד אב שמייצג את כל ההמשכיות האפשריות באופן פולימורפי.\n* לבסוף, אנחנו מגדירים פונקציה פולימורפית `applyCont` שמדספצ'ת לפי הטיפוס של ה-cont ומבצעת את גוף ההמשכית בהתאם לטיפוס שלה כשהיא מופעלת.\n* בכל המקומות בקוד שבהם נבנית המשכית, אנחנו מפעילים את בנאי ההמשכית המתאים עם הפרמטרים הרלוונטיים, ובמקומות שבהם המשכית מופעלת, אנחנו קוראים במפורש ל-`applyCont` על פרמטר ה-`cont` הקונקרטי."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:4:2",
+     "type": "prose",
+     "en": "With this transformation, we obtain the following code for the `sumCPS` example:\n\n",
+     "hash": "55ce3f40d4d05887",
+     "he": "בעזרת הטרנספורמציה הזו, אנחנו מקבלים את הקוד הבא עבור דוגמת ה-`sumCPS`:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:4:3",
+     "type": "code",
+     "en": "```typescript\n// =============================================================\n// CPS Concrete transformation of the CPS procedural implementation\n// Continuations are implemented as data structures instead of procedures.\n\ntype CCont = IdCont | Cont1;\n\nexport interface Cont1 {tag: \"Cont1\"; n: number; cont: CCont};\nexport const makeCont1 = (n: number, cont: CCont): Cont1 => ({tag: \"Cont1\", n: n, cont: cont});\nexport const isCont1 = (x: any): x is Cont1 => x.tag === \"Cont1\";\n\nexport interface IdCont {tag: \"IdCont\"};\nexport const makeIdCont = (): IdCont => ({tag: \"IdCont\"});\nexport const isIdCont = (x: any): x is IdCont => x.tag === \"IdCont\";\n\nexport const applyCont = (cont: CCont, val: number): number =>\n    isIdCont(cont) ? val :\n    isCont1(cont) ? applyCont(cont.cont, cont.n + val) :\n    -1;\n\nexport const sumCPSC = (n: number, cont: CCont): number =>\n    (n === 0) ? applyCont(cont, 0) :\n    sumCPSC(n - 1, makeCont1(n, cont));\n\nexport const sumCPS2 = (n: number): number =>\n    sumCPSC(n, makeIdCont());\n```\n\n",
+     "hash": "2ada1a4519658156",
+     "lang": "typescript",
+     "noteHe": "**זהו הצעד המרכזי של הדף — defunctionalization — וכדאי לשנן את המבנה שלו.** ההמשכיות כבר אינן פונקציות אלא **רשומות נתונים**. ‏`Cont1` היא ממשק עם שני שדות, ‏`n` ו-`cont`, שהם בדיוק המשתנים שהיו נלכדים בסגור; ‏`IdCont` היא ממשק ריק, כי לזהות אין מה לזכור. לכל אחת יש שלישייה מוכרת מפרק 1: בנאי (`makeCont1`), פרדיקט טיפוס (`isCont1`) ותג ‏`tag` שמאפשר את ההבחנה — זהו איחוד טיפוסים זרים (disjoint union), בדיוק כמו ה-AST מ-2.3. ‏`applyCont` היא הפונקציה שמחליפה את ה\"הפעלה\" של ההמשכית: היא בודקת את התג ומחליטה — עבור ‏`IdCont` מחזירה את הערך, ועבור ‏`Cont1` מחשבת ‏`cont.n + val` וממשיכה להמשכית הפנימית. שימו לב שגוף ההמשכית ‏`(sn1) => cont(n + sn1)` נדד לתוך ‏`applyCont`, בעוד שהערכים ‏`n` ו-`cont` נדדו לתוך הרשומה. **מה הרווחנו**: שרשרת ההמשכיות היא כעת מבנה נתונים גלוי שאפשר לבדוק, להדפיס ולשמור — למעשה **מחסנית מפורשת** שאנחנו מנהלים בעצמנו. שימו לב לענף ‏`-1` בסוף ‏`applyCont`: זו ברירת מחדל למקרה בלתי אפשרי, שנועדה לספק את בודק הטיפוסים; ערך שגיאה מספרי הוא בחירה מפוקפקת, וכדאי היה לזרוק שגיאה במקום."
+    }
+   ],
+   "headingHe": "המשכיות קונקרטיות מול המשכיות פרוצדורליות"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:5",
+   "depth": 2,
+   "headingEn": "Registerization of Concrete Continuations",
+   "raw": "## Registerization of Concrete Continuations\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:5:0",
+     "type": "prose",
+     "en": "This implementation of the CPS program with concrete continuations is still not iterative: we invoke JavaScript functions each time we construct a continuation and each time we invoke one.  These are places where we will still consume stack memory.\n\n",
+     "hash": "3c82de639d665f7c",
+     "he": "המימוש הזה של תוכנית ה-CPS עם המשכיות קונקרטיות עדיין אינו איטרטיבי: אנחנו מפעילים פונקציות JavaScript בכל פעם שאנחנו בונים המשכית ובכל פעם שאנחנו מפעילים אחת. אלה המקומות שבהם עדיין נצרוך זיכרון מחסנית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:1",
+     "type": "prose",
+     "en": "We use functions in the `sumCPS2` program for 3 reasons:\n",
+     "hash": "8267fa39d2f4ab3f",
+     "he": "אנחנו משתמשים בפונקציות בתוכנית `sumCPS2` משלוש סיבות:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:2",
+     "type": "list",
+     "en": "* To pass the appropriate parameters to the continuation constructors \n* To pass the appropriate parameters to the `applyCont` polymorphic method\n* To know where to return in the code execution once the procedures complete so that we can continue processing\n\n",
+     "hash": "50f7ab9114f491b4",
+     "he": "* כדי להעביר את הפרמטרים המתאימים לבנאי ההמשכיות\n* כדי להעביר את הפרמטרים המתאימים למתודה הפולימורפית `applyCont`\n* כדי לדעת לאן לחזור בביצוע הקוד ברגע שהפרוצדורות מסתיימות, כך שנוכל להמשיך בעיבוד"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:3",
+     "type": "prose",
+     "en": "Observe, however, that because we are operating on code in CPS form, the function calls are all in tail position.\nThis means that we do **not** need to remember where to return to, we can simply go to the next call and never return.\n\n",
+     "hash": "c5ee59fa7dda55b9",
+     "he": "שימו לב, עם זאת, שמכיוון שאנחנו פועלים על קוד בצורת CPS, כל הקריאות לפונקציות נמצאות בעמדת זנב.\nפירוש הדבר שאנחנו **לא** צריכים לזכור לאן לחזור, אנחנו יכולים פשוט לעבור לקריאה הבאה ולעולם לא לחזור."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:4",
+     "type": "prose",
+     "en": "We observe that the continuation constructors all have the same structure -- they simply initialize the fields of a record with the parameters.  Hence, we are ensured that invoking a continuation constructor will consume a single stack frame and will not chain to further function calls.\n\n",
+     "hash": "d88032ba4808c0c3",
+     "he": "אנחנו מבחינים שלבנאי ההמשכיות יש כולם את אותו מבנה — הם פשוט מאתחלים את השדות של רשומה עם הפרמטרים. לפיכך, מובטח לנו שהפעלת בנאי המשכית תצרוך מסגרת מחסנית אחת ולא תשתרשר לקריאות פונקציה נוספות."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:5",
+     "type": "prose",
+     "en": "In contrast, `applyCont` often yields recursive chains of function calls.\n\n",
+     "hash": "6885561a7ab9db49",
+     "he": "לעומת זאת, `applyCont` מייצרת לעיתים קרובות שרשראות רקורסיביות של קריאות לפונקציות."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:6",
+     "type": "prose",
+     "en": "In this step, we remove the need to use a stack frame to pass parameters to the functions involved in the CPS program.\nInstead, we define a finite set of **registers** - that is, a set of variables of the appropriate types which are defined over the scope of the whole program (all the functions involved in the CPS transformation).  There is one register for each parameter of all the continuation constructors and the `applyCont` function. \n\n",
+     "hash": "86fce85eb7bdd606",
+     "he": "בצעד הזה, אנחנו מסירים את הצורך להשתמש במסגרת מחסנית כדי להעביר פרמטרים לפונקציות המעורבות בתוכנית ה-CPS.\nבמקום זאת, אנחנו מגדירים קבוצה סופית של **רגיסטרים** — כלומר, קבוצה של משתנים מהטיפוסים המתאימים שמוגדרים על פני התחום של התוכנית כולה (כל הפונקציות המעורבות בטרנספורמציית ה-CPS). יש רגיסטר אחד לכל פרמטר של כל בנאי ההמשכיות ושל הפונקציה `applyCont`."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:7",
+     "type": "prose",
+     "en": "Instead of invoking a function by passing parameters - we initialize the corresponding registers and then call a function of zero parameters.  In our example, this transformation yields the following program:\n\n",
+     "hash": "6e8b0fe9b977f86a",
+     "he": "במקום להפעיל פונקציה על ידי העברת פרמטרים — אנחנו מאתחלים את הרגיסטרים המתאימים ואז קוראים לפונקציה חסרת פרמטרים. בדוגמה שלנו, הטרנספורמציה הזו מייצרת את התוכנית הבאה:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:8",
+     "type": "list",
+     "en": "* We define the registers `nREG` and `contREG` for the parameters of the `Cont1` constructor\n* We define the register `valREG` for the parameter to the `applyCont` function\n* We initialize the registers in the driver function `sumREG1`\n* We transform each function invocation with parameters into a sequence of assignments to the registers and then invocation of the function without parameters.\n\n\n",
+     "hash": "9a6870dbc12ca9c9",
+     "he": "* אנחנו מגדירים את הרגיסטרים `nREG` ו-`contREG` עבור הפרמטרים של בנאי ה-`Cont1`\n* אנחנו מגדירים את הרגיסטר `valREG` עבור הפרמטר של הפונקציה `applyCont`\n* אנחנו מאתחלים את הרגיסטרים בפונקציית הנהג `sumREG1`\n* אנחנו הופכים כל הפעלת פונקציה עם פרמטרים לרצף של השמות לרגיסטרים ואז הפעלה של הפונקציה בלי פרמטרים."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:5:9",
+     "type": "code",
+     "en": "```typescript\n// =============================================================\n// CPS Registerization transformation of the CPS concrete implementation\n\n// Define in the scope of the registers all the relevant functions:\n// - the computation functions in CPS form\n// - the invoke continuation dispatcher method\nconst sumREG1VM = (nREG: number, contREG: CCont, valREG: number): number => {\n    const sumCPSCReg = (): number => {\n        // console.log(`sumCPCReg n=${nREG} cont=${JSON.stringify(contREG)}`)\n        if (nREG === 0) {\n            valREG = 0;\n            return applyContReg();\n        } else {\n            contREG = makeCont1(nREG, contREG);\n            nREG = nREG - 1;\n            return sumCPSCReg();\n        }\n    }\n\n    const applyContReg = (): number => {\n        // console.log(`applyContReg val=${valREG} cont=${JSON.stringify(contREG)}`)\n        if (isIdCont(contREG)) {\n            return valREG;\n        } else if (isCont1(contREG)) {\n            valREG = contREG.n + valREG;\n            contREG = contREG.cont;\n            return applyContReg();\n        } else {\n            console.error(`Bad continuation ${contREG}`);\n            return -1;\n        }\n    }\n    // entry point\n    return sumCPSCReg();\n}\n\n// Bootstrap the virtual machine\nexport const sumREG1 = (n: number): number =>\n    sumREG1VM(n, makeIdCont(), undefined);\n\n```\n\n",
+     "hash": "ef0b665885fce84c",
+     "lang": "typescript",
+     "noteHe": "הצעד השני: **רגיסטריזציה**. שימו לב מה נעלם — לשתי הפונקציות הפנימיות ‏`sumCPSCReg` ו-`applyContReg` **אין פרמטרים כלל**. במקום להעביר ערכים, כותבים אותם לשלושת הרגיסטרים ‏`nREG`, ‏`contREG` ו-`valREG`, שמוגדרים בתחום החיצוני ולכן משותפים לשתיהן. עקבו אחרי הענף הרקורסיבי: ‏`contREG = makeCont1(nREG, contREG)` בונה המשכית חדשה מעל הקודמת, ‏`nREG = nREG - 1` מקדם את המונה, ואז קוראים ל-`sumCPSCReg()` בלי ארגומנטים. ‏`applyContReg` עושה את אותו הדבר בכיוון ההפוך: מצטברת ב-`valREG` ומקלפת שכבה מ-`contREG`. **הרעיון שכדאי לשנן**: זו בדיוק המרה של העברת פרמטרים לזיכרון גלובלי משותף — כמו במעבד אמיתי, שיש לו מספר קבוע של רגיסטרים ולא מסגרות מחסנית. שימו לב לשם ‏`sumREG1VM` — ה-VM מסמן שאנחנו בונים כאן מכונה וירטואלית. ‏`sumREG1` היא ה\"אתחול\" (bootstrap) שמאתחלת את הרגיסטרים ומפעילה. שימו לב שהיא מעבירה ‏`undefined` ל-`valREG` — זה עובד כי הערך ייכתב לפני שייקרא, אבל זו כתיבה שלא תעבור בהגדרות TypeScript קפדניות. הערה על המקור: שורות ה-`console.log` שבתוך שתי הפונקציות מכילות ‏`sumCPCReg` במקום ‏`sumCPSCReg`, וגם הסעיף הבא מתייחס ל-`sumCPSReg()` בעוד שהפונקציה נקראת ‏`sumCPSCReg`."
+    }
+   ],
+   "headingHe": "רגיסטריזציה של המשכיות קונקרטיות"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:6",
+   "depth": 3,
+   "headingEn": "Why Registers can be Safely Overridden",
+   "raw": "### Why Registers can be Safely Overridden\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:6:0",
+     "type": "prose",
+     "en": "The set of registers we defined replace activation frames in a stack.  Consider why in the current state of our transformation, it is safe to use a single flat set of registers instead of stacked activation frames.  \n\n",
+     "hash": "f910bb12dd778c3a",
+     "he": "קבוצת הרגיסטרים שהגדרנו מחליפה מסגרות הפעלה במחסנית. חשבו מדוע במצב הנוכחי של הטרנספורמציה שלנו, בטוח להשתמש בקבוצה שטוחה יחידה של רגיסטרים במקום במסגרות הפעלה מוערמות."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:1",
+     "type": "prose",
+     "en": "The reason is that in CPS form, when we enter a user-defined function, we read the parameters (in our case from the registers), execute a set of primitive computation steps, and then move on to the tail call.  In particular:\n",
+     "hash": "237ffa44c221a952",
+     "he": "הסיבה היא שבצורת CPS, כשאנחנו נכנסים לפונקציה מוגדרת-משתמש, אנחנו קוראים את הפרמטרים (במקרה שלנו מהרגיסטרים), מבצעים קבוצה של צעדי חישוב פרימיטיביים, ואז עוברים לקריאת הזנב. בפרט:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:2",
+     "type": "list",
+     "en": "* After a tail call, we do not return to the function from which we invoked the tail call.  This means that we do not need to read values from the activation frame anymore after the tail call is entered.\n* It is, therefore, safe to override the current register values with other values that will be consumed in the tail call.\n\n",
+     "hash": "ba18c230e1e8a55c",
+     "he": "* אחרי קריאת זנב, אנחנו לא חוזרים לפונקציה שממנה הפעלנו את קריאת הזנב. פירוש הדבר שאיננו צריכים לקרוא ערכים ממסגרת ההפעלה יותר, אחרי שנכנסנו לקריאת הזנב.\n* לכן, בטוח לדרוס את ערכי הרגיסטרים הנוכחיים בערכים אחרים שייצרכו בקריאת הזנב."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:3",
+     "type": "prose",
+     "en": "Realize that the registerization transformation is safe **only on code in CPS form**.\n\n",
+     "hash": "079a301ef03ba252",
+     "he": "שימו לב שטרנספורמציית הרגיסטריזציה בטוחה **רק על קוד בצורת CPS**."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:4",
+     "type": "prose",
+     "en": "Observe the code in the `sumREG1` program.  We still invoke unbounded functions (that is, functions which can invoke more user defined functions in an unbounded chain of calls):\n",
+     "hash": "7b87ecfd153d1af2",
+     "he": "התבוננו בקוד שבתוכנית `sumREG1`. אנחנו עדיין מפעילים פונקציות בלתי-חסומות (כלומר, פונקציות שיכולות להפעיל פונקציות מוגדרות-משתמש נוספות בשרשרת קריאות בלתי-חסומה):"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:5",
+     "type": "list",
+     "en": "* `applyContReg()`\n* `sumCPSReg()`\n\n",
+     "hash": "9aae89bc2c22bea4",
+     "he": "* `applyContReg()`\n* `sumCPSReg()`"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:6:6",
+     "type": "prose",
+     "en": "These functions have zero-argument by construction, but their invocation still consumes stack frames.\nIn the last step of the transformation, called **pipelining**, we now transform these calls into an explicit loop.\n\n",
+     "hash": "fcc268c479f11848",
+     "he": "לפונקציות האלה אין ארגומנטים מעצם הבנייה, אבל ההפעלה שלהן עדיין צורכת מסגרות מחסנית.\nבצעד האחרון של הטרנספורמציה, שנקרא **pipelining**, אנחנו הופכים כעת את הקריאות האלה ללולאה מפורשת."
+    }
+   ],
+   "headingHe": "מדוע ניתן לדרוס רגיסטרים בבטחה"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:7",
+   "depth": 2,
+   "headingEn": "From Registers to Iterative Execution",
+   "raw": "## From Registers to Iterative Execution\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:7:0",
+     "type": "prose",
+     "en": "In the register version of the program, we still invoke zero-parameter functions, all in tail positions.\nWe want to avoid calling functions altogether to avoid consuming activation frames on the stack.\n\n",
+     "hash": "c4678e78f38a2202",
+     "he": "בגרסת הרגיסטרים של התוכנית, אנחנו עדיין מפעילים פונקציות חסרות פרמטרים, כולן בעמדות זנב.\nאנחנו רוצים להימנע מקריאה לפונקציות לחלוטין, כדי להימנע מצריכת מסגרות הפעלה על המחסנית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:1",
+     "type": "prose",
+     "en": "The solution we introduce is to convert tail calls with no parameters into the equivalent of a \"computed GOTO\" instruction in a very simple \"abstract machine\".  An abstract machine has a set of pre-defined instructions and a set of registers.  \nIn our case, these instructions are the different types of continuations we can compute in the process of the function execution.  We add a single instruction to indicate that we have reached the end of the computation and that the Virtual Machine can shutdown and return the value of a specific register.\n\n",
+     "hash": "b8a032aa927de3ff",
+     "he": "הפתרון שאנחנו מציגים הוא להמיר קריאות זנב חסרות פרמטרים למקבילה של פקודת \"GOTO מחושב\" ב\"מכונה מופשטת\" פשוטה מאוד. למכונה מופשטת יש קבוצה של פקודות מוגדרות מראש וקבוצה של רגיסטרים.\nבמקרה שלנו, הפקודות האלה הן הסוגים השונים של המשכיות שאנחנו יכולים לחשב בתהליך ביצוע הפונקציה. אנחנו מוסיפים פקודה יחידה שמציינת שהגענו לסוף החישוב ושהמכונה הווירטואלית יכולה להיכבות ולהחזיר את הערך של רגיסטר מסוים."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:2",
+     "type": "prose",
+     "en": "To encode the name of the instruction of the next command to be executed, we introduce an additional register - traditionally called the **Program Counter** (or PC).  The type of this register is an enumeration of the possible continuation types.\nWe call this type the `InstructionSet` of the virtual machine.\n\n",
+     "hash": "73f1613e7499989d",
+     "he": "כדי לקודד את שם הפקודה של ההוראה הבאה שיש לבצע, אנחנו מציגים רגיסטר נוסף — שנקרא באופן מסורתי **מונה התוכנית** (Program Counter, או PC). הטיפוס של הרגיסטר הזה הוא מנייה של טיפוסי ההמשכיות האפשריים.\nאנחנו קוראים לטיפוס הזה `InstructionSet` של המכונה הווירטואלית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:3",
+     "type": "prose",
+     "en": "Finally, we define a VM() procedure which implements the logic of the virtual machine:\n",
+     "hash": "881836f0104ddedc",
+     "he": "לבסוף, אנחנו מגדירים פרוצדורת ()VM שמממשת את הלוגיקה של המכונה הווירטואלית:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:4",
+     "type": "list",
+     "en": "* Fetch: the instruction to be executed and the corresponding registers\n* Decode: dispatch the name of the instruction to the appropriate sequence of primitive calls\n* Execute: execute the sequence of primitive calls and update the registers to prepare for the next instruction\n\n\n",
+     "hash": "41c4638a1a9685b4",
+     "he": "* שליפה (Fetch): הפקודה שיש לבצע והרגיסטרים המתאימים\n* פענוח (Decode): ניתוב שם הפקודה לרצף המתאים של קריאות פרימיטיביות\n* ביצוע (Execute): ביצוע רצף הקריאות הפרימיטיביות ועדכון הרגיסטרים לקראת הפקודה הבאה"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:5",
+     "type": "prose",
+     "en": "All procedures in the implementation are defined in the scope of the registers.\nTo invoke a new procedure, we end each call by setting pcREG to the name of the procedure we want to execute next.\nSetting pcREG in tail position is equivalent to invoking a procedure in tail position.\n\n",
+     "hash": "0d0115082893b81a",
+     "he": "כל הפרוצדורות במימוש מוגדרות בתחום ההכרה של הרגיסטרים.\nכדי להפעיל פרוצדורה חדשה, אנחנו מסיימים כל קריאה בהשמה של שם הפרוצדורה שברצוננו לבצע הבאה ל-pcREG.\nהשמה ל-pcREG בעמדת זנב שקולה להפעלת פרוצדורה בעמדת זנב."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:6",
+     "type": "prose",
+     "en": "This transformation of calls of procedures in tail position to an explicit loop and dispatch over the PC register yields the following version of the program:\n\n",
+     "hash": "6a0d6dadcc2c3d37",
+     "he": "הטרנספורמציה הזו של קריאות לפרוצדורות בעמדת זנב ללולאה מפורשת ולניתוב לפי רגיסטר ה-PC מייצרת את הגרסה הבאה של התוכנית:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:7:7",
+     "type": "code",
+     "en": "```typescript\n// =============================================================\n// Iterative CPS transformation of the Registerized CPS version.\n\n// The set of instructions known by the \"Sum Virtual Machine\"\ntype InstructionSet = 'applyContReg2' | 'sumCPSCReg2' | 'halt';\n\n// Introduce the new register pcREG2 which encodes the name of the \"next instruction\" to be executed.\nconst sumREG2VM = (nREG2: number, contREG2: CCont, valREG2: number, pcREG2: InstructionSet): number => {\n    const sumCPSCReg2 = (): void => {\n        // console.log(`sumCPCReg n=${nREG2} cont=${JSON.stringify(contREG2)}`)\n        if (nREG2 === 0) {\n            valREG2 = 0;\n            pcREG2 = 'applyContReg2';\n        } else {\n            contREG2 = makeCont1(nREG2, contREG2);\n            nREG2 = nREG2 - 1;\n            pcREG2 = 'sumCPSCReg2';\n        }\n    }\n\n    const applyContReg2 = (): void => {\n        // console.log(`applyContReg val=${valREG2} cont=${JSON.stringify(contREG2)}`)\n        if (isIdCont(contREG2)) {\n            pcREG2 = 'halt';\n            // return valREG;\n        } else if (isCont1(contREG2)) {\n            valREG2 = contREG2.n + valREG2;\n            contREG2 = contREG2.cont;\n            pcREG2 = 'applyContReg2';\n        } else {\n            pcREG2 = 'halt';\n        }\n    }\n\n    const VM = (): void => {\n        // Explicitly iterate over each of the possible steps of the computation\n        // The next instruction to be executed is computed and stored in the pcREG2 register.\n        while (pcREG2 !== 'halt') {\n            if (pcREG2 === 'sumCPSCReg2') sumCPSCReg2();\n            else if (pcREG2 === 'applyContReg2') applyContReg2();\n            else {\n                console.error(`Bad instruction ${pcREG2}`);\n                pcREG2 = 'halt';\n            }\n        }\n    }\n\n    // entry point\n    VM();\n    return valREG2;\n}\n\nexport const sumREG2 = (n: number): number =>\n    sumREG2VM(n, makeIdCont(), undefined, 'sumCPSCReg2');\n```\n\n",
+     "hash": "5fdfe6e75aaa394a",
+     "lang": "typescript",
+     "noteHe": "**הצעד האחרון, והשיא של הפרק כולו.** שימו לב לשינוי המכריע: שתי הפונקציות מחזירות כעת ‏`void` ואינן קוראות זו לזו כלל. במקום ‏`return applyContReg()` כתוב ‏`pcREG2 = 'applyContReg2'` — כלומר במקום **לקרוא**, רק **רושמים לאן ללכת**. זה בדיוק ה\"GOTO מחושב\" שהפסקה שמעל תיארה. כל העבודה מתבצעת בלולאת ‏`while` יחידה בתוך ‏`VM`, שקוראת את ‏`pcREG2` ומנתבת לפונקציה המתאימה עד שמגיעים ל-`'halt'`. **וכאן נסגר המעגל**: שרשרת הקריאות הרקורסיבית הפכה ללולאה שטוחה, ומכיוון שכל הפעלה מסתיימת ומחזירה שליטה ללולאה, המחסנית לעולם אינה גדלה מעבר למסגרת אחת. ‏`sumREG2` מאתחלת את ארבעת הרגיסטרים ומפעילה. שימו לב שהתבנית ‏`while (pc !== 'halt') { … }` היא בדיוק המבנה של **מחזור fetch-decode-execute** במעבד אמיתי, וזו הסיבה שהקוד נקרא VM. שימו לב גם ש-`valREG2` מוחזר **אחרי** שהלולאה מסתיימת, ולא מתוך ‏`applyContReg2` — ולכן שורת ה-`return valREG` שם מסומנת כהערה. שאלת מבחן קלאסית: \"הסבירו מדוע הגרסה הזו רצה בזיכרון בקרה קבוע\"; התשובה היא שאין בה אף קריאה בעמדת זנב — אין בה קריאות בכלל, רק השמות ולולאה."
+    }
+   ],
+   "headingHe": "מרגיסטרים לביצוע איטרטיבי"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:8",
+   "depth": 2,
+   "headingEn": "The Registerized VM is Iterative",
+   "raw": "## The Registerized VM is Iterative\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:8:0",
+     "type": "prose",
+     "en": "The resulting program is an iterative implementation of the original program.\nBecause the original program was tail-recursive, the resulting program is also iterative.\n\n",
+     "hash": "6269d8b597cd6fe2",
+     "he": "התוכנית שהתקבלה היא מימוש איטרטיבי של התוכנית המקורית.\nמכיוון שהתוכנית המקורית הייתה רקורסיבית-זנב, גם התוכנית שהתקבלה היא איטרטיבית."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:8:1",
+     "type": "prose",
+     "en": "We confirm this through empirical tests:\n\n",
+     "hash": "4886bd6877a335e9",
+     "he": "אנחנו מאשרים זאת באמצעות בדיקות אמפיריות:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:8:2",
+     "type": "code",
+     "en": "```typescript\n// =============================================================\n// TESTS\nsum(10000);     // Stack overflow\nsumCPS1(10000); // Stack overflow\nsumCPS2(10000); // Stack overflow\nsumREG1(10000); // Stack overflow\nsumREG2(10000); // 100 010 000 / 2 = 50 005 000\n```\n\n\n",
+     "hash": "20cd0d88a0146749",
+     "lang": "typescript",
+     "noteHe": "**הטבלה שמסכמת את כל הדף — כדאי לשנן אותה.** ארבע הגרסאות הראשונות **כולן** גולשות על 10,000: המקורית, גרסת ה-CPS, גרסת ההמשכיות הקונקרטיות, וגרסת הרגיסטרים. רק החמישית, ‏`sumREG2` — זו עם ה-PC והלולאה — עוברת ומחזירה 50,005,000. **המסקנה**: כל אחד מהצעדים לבדו אינו מספיק; רק הצירוף המלא, שמסתיים בביטול הקריאות לטובת לולאה, מביא לביצוע איטרטיבי אמיתי. אימות מהיר של התוצאה לפי נוסחת הסכום: ‏10000·10001/2 = 50,005,000 ✓ (ההערה בקוד כותבת זאת כ-`100 010 000 / 2`). שימו לב שגם ‏`sumREG1`, למרות שכל הפרמטרים שלה עברו לרגיסטרים, עדיין גולשת — כי ‏`applyContReg` עדיין **קוראת לעצמה**. זו בדיוק הנקודה שהסעיף הקודם הצביע עליה."
+    }
+   ],
+   "headingHe": "המכונה הווירטואלית מבוססת-הרגיסטרים היא איטרטיבית"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:9",
+   "depth": 1,
+   "headingEn": "Transforming the $$L5$$ Interpreter into an Iterative Interpreter",
+   "raw": "# Transforming the $$L5$$ Interpreter into an Iterative Interpreter\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:9:0",
+     "type": "prose",
+     "en": "This was quite a lot of work to turn a single tail recursive procedure into an iterative program.\nThe benefit of this method is that, by relying on the properties of the CPS transformation, we can transform **any program** into a corresponding iterative program.\n\n",
+     "hash": "5e8c82ad5d4599c7",
+     "he": "זו הייתה עבודה לא מעטה כדי להפוך פרוצדורה רקורסיבית-זנב יחידה לתוכנית איטרטיבית.\nהיתרון של השיטה הזו הוא שבהסתמך על התכונות של טרנספורמציית ה-CPS, אנחנו יכולים להפוך **כל תוכנית** לתוכנית איטרטיבית מתאימה."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:1",
+     "type": "prose",
+     "en": "In particular, we can transform the code of the $$L5$$ interpreter into an iterative interpreter which does not consume JavaScript stack.  Naturally, this program will still consume \"some memory\" when it executes a recursive program.  But this memory will be managed explicitly, in the form of a concrete continuation data structure.  It will not rely implicitly on the stack of the metalanguage (JavaScript).\n\n",
+     "hash": "24f757e7bc81ae12",
+     "he": "בפרט, אנחנו יכולים להפוך את הקוד של מפרש ה-$$L5$$ למפרש איטרטיבי שאינו צורך מחסנית JavaScript. באופן טבעי, התוכנית הזו עדיין תצרוך \"קצת זיכרון\" כשהיא מבצעת תוכנית רקורסיבית. אבל הזיכרון הזה ינוהל במפורש, בצורה של מבנה נתונים קונקרטי של המשכית. הוא לא יסתמך באופן מובלע על המחסנית של שפת-המטא (JavaScript)."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:2",
+     "type": "prose",
+     "en": "As a consequence, if we execute an $$L5$$ tail-recursive program, this iterative interpreter will consume bounded control memory - as expected of a Scheme interpreter.\n\n",
+     "hash": "3cb4419758b3b2b7",
+     "he": "כתוצאה מכך, אם נריץ תוכנית $$L5$$ רקורסיבית-זנב, המפרש האיטרטיבי הזה יצרוך זיכרון בקרה חסום — כפי שמצופה ממפרש Scheme."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:3",
+     "type": "prose",
+     "en": "We illustrate this transformation in multiple steps:\n",
+     "hash": "a3983d560087e355",
+     "he": "אנחנו ממחישים את הטרנספורמציה הזו במספר צעדים:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:4",
+     "type": "list",
+     "en": "* $$L5$$ is the original recursive interpreter.  It is recursive because the various evaluation methods are by definition recursive over the inductive structure of the input AST.\n* [$$L6$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L6-eval.ts) is the CPS transformation of $$L5$$.  We simply apply the rules of the CPS transformation over the code of $$L5$$ in TypeScript.  In this CPS transformation, we only include procedures which can lead to unbounded execution.  Any user-defined procedure which has bounded execution is left unchanged (for example, `applyPrimitive` and all the procedures manipulating the AST are left unchanged)\n* [$$L7a$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7a-eval.ts) is the transformation of $$L6$$ with explicit continuation ADT but still using closures for the ADT implementation\n* [$$L7b$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7b-eval.ts) turns continuations into concrete data structures\n* [$$L7c$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7c-eval.ts) introduces the iterative version of the interpreter with registers and explicit dispatch according to pcREG.\n* [$$L7$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7-eval.ts) iterative version of the interpreter with registers and explicit dispatch according to pcREG.\n* [$$L7-tests$$](https://github.com/bguppl/interpreters/blob/master/test/cps/L7-tests.ts) covers the tests for the different versions of the interpreter.\n\n\n",
+     "hash": "71210dbd8a138d61",
+     "he": "* $$L5$$ הוא המפרש הרקורסיבי המקורי. הוא רקורסיבי מכיוון ששיטות ההערכה השונות הן מעצם הגדרתן רקורסיביות מעל המבנה האינדוקטיבי של ה-AST הנתון.\n* [$$L6$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L6-eval.ts) הוא טרנספורמציית ה-CPS של $$L5$$. אנחנו פשוט מחילים את כללי טרנספורמציית ה-CPS על הקוד של $$L5$$ ב-TypeScript. בטרנספורמציית ה-CPS הזו, אנחנו כוללים רק פרוצדורות שיכולות להוביל לביצוע בלתי-חסום. כל פרוצדורה מוגדרת-משתמש שהביצוע שלה חסום נשארת ללא שינוי (לדוגמה, `applyPrimitive` וכל הפרוצדורות שמטפלות ב-AST נשארות ללא שינוי)\n* [$$L7a$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7a-eval.ts) הוא הטרנספורמציה של $$L6$$ עם ADT מפורש של המשכיות, אך עדיין תוך שימוש בסגורים למימוש ה-ADT\n* [$$L7b$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7b-eval.ts) הופך המשכיות למבני נתונים קונקרטיים\n* [$$L7c$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7c-eval.ts) מציג את הגרסה האיטרטיבית של המפרש עם רגיסטרים וניתוב מפורש לפי pcREG.\n* [$$L7$$](https://github.com/bguppl/interpreters/blob/master/src/cps/L7-eval.ts) גרסה איטרטיבית של המפרש עם רגיסטרים וניתוב מפורש לפי pcREG.\n* [$$L7-tests$$](https://github.com/bguppl/interpreters/blob/master/test/cps/L7-tests.ts) מכסה את הבדיקות עבור הגרסאות השונות של המפרש."
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:5",
+     "type": "prose",
+     "en": "To validate the transformation, we confirm that the evaluation of the following $$L7$$ program completes without stack overflow:\n\n\n",
+     "hash": "3f51115b13a49966",
+     "he": "כדי לאמת את הטרנספורמציה, אנחנו מוודאים שההערכה של תוכנית ה-$$L7$$ הבאה מסתיימת בלי גלישת מחסנית:"
+    },
+    {
+     "id": "cm/4.4RecursionToIteration:9:6",
+     "type": "code",
+     "en": "```typescript\nassert.deepEqual(evalParse(`\n(L5 (define sumCPS\n      (lambda (n cont)\n        (if (= n 0)\n            (cont 0)\n            (sumCPS (- n 1) (lambda (sn1) (cont (+ n sn1)))))))\n    (sumCPS 10000 (lambda (x) x)))\n`), 50005000);\n```\n\n",
+     "hash": "f261762880a71435",
+     "lang": "typescript",
+     "noteHe": "המבחן האמיתי, וסגירת המעגל של הפרק כולו. השוו את הבלוק הזה לזה שראינו ב-4.2: שם הרצנו ‏`factIter 10000` במפרש ה-L5 וקיבלנו ‏`RangeError`; כאן מריצים ‏`sumCPS 10000` במפרש ה-**L7** וה-`assert` עובר. שימו לב שהתוכנית שמורצת היא בעצמה כתובה ב-CPS **בשפת המושא** — כלומר יש כאן שתי שכבות CPS: התוכנית שנכתבה כך על ידי המשתמש, והמפרש שהומר כך על ידינו. מה שמאפשר את התוצאה הוא רק השכבה השנייה. **וזו התשובה לשאלה שנפתחה בתחילת 4.2**: מפרש יכול לספק רקורסיית זנב איטרטיבית גם כששפת-המטא שלו אינה תומכת בכך — בתנאי שהוא מנהל את הקשר הבקרה בעצמו, במפורש, במקום להשאיל אותו. התוצאה 50,005,000 היא סכום 0 עד 10000."
+    }
+   ],
+   "headingHe": "הפיכת המפרש של $$L5$$ למפרש איטרטיבי"
+  },
+  {
+   "id": "cm/4.4RecursionToIteration:10",
+   "depth": 2,
+   "headingEn": "Summary",
+   "raw": "## Summary\n\n",
+   "blocks": [
+    {
+     "id": "cm/4.4RecursionToIteration:10:0",
+     "type": "list",
+     "en": "* We introduce a systematic transformation to turn recursive code into semantically equivalent iterative code with explicit stack management (encoded in the form of continuation parameters).\n* The transformation involves the following steps:\n  * Transformation to CPS\n  * Transformation of closure-based continuations to concrete data structures for continuations\n  * Registerization: transformation of all continuation-constructors and of callCont into zero-parameter procedures and passing the parameters through a flat set of registers.\n  * Explicit iteration: transform invocation of functions into setting a PC register with the name of the next instruction and an explicit loop dispatching to the appropriate zero-parameter function based on the value of the PC register.\n  \n* The transformation steps are safe because they rely on properties of CPS code: all calls to user-defined functions are in tail position\n* We first illustrate this transformation on a simple TypeScript function (sum).\n* We then demonstrate the same exact transformation applied to the code of the $$L5$$ interpreter.\n* The result is an iterative interpreter which explicitly manages control memory in the form of concrete continuation data structures.\n* In particular, this interpreter can execute tail recursive procedures in $$L5$$ in an iterative manner even though it is written in a meta-language which does not perform Tail Call Optimization (JavaScript).\n",
+     "hash": "8fb6cfd5de99ed0a",
+     "he": "* אנחנו מציגים טרנספורמציה שיטתית שהופכת קוד רקורסיבי לקוד איטרטיבי שקול סמנטית, עם ניהול מפורש של המחסנית (מקודד בצורה של פרמטרי המשכית).\n* הטרנספורמציה כוללת את הצעדים הבאים:\n  * טרנספורמציה ל-CPS\n  * טרנספורמציה של המשכיות מבוססות-סגורים למבני נתונים קונקרטיים עבור המשכיות\n  * רגיסטריזציה: טרנספורמציה של כל בנאי ההמשכיות ושל callCont לפרוצדורות חסרות פרמטרים, והעברת הפרמטרים דרך קבוצה שטוחה של רגיסטרים.\n  * איטרציה מפורשת: הפיכת הפעלת פונקציות להשמה של רגיסטר PC עם שם הפקודה הבאה, ולולאה מפורשת שמנתבת לפונקציה חסרת-הפרמטרים המתאימה על סמך הערך של רגיסטר ה-PC.\n  \n* צעדי הטרנספורמציה בטוחים מכיוון שהם מסתמכים על תכונות של קוד CPS: כל הקריאות לפונקציות מוגדרות-משתמש נמצאות בעמדת זנב\n* תחילה אנחנו ממחישים את הטרנספורמציה הזו על פונקציית TypeScript פשוטה (sum).\n* אחר כך אנחנו מדגימים את אותה טרנספורמציה בדיוק, מיושמת על הקוד של מפרש ה-$$L5$$.\n* התוצאה היא מפרש איטרטיבי שמנהל במפורש את זיכרון הבקרה בצורה של מבני נתונים קונקרטיים של המשכיות.\n* בפרט, המפרש הזה יכול לבצע פרוצדורות רקורסיביות-זנב ב-$$L5$$ באופן איטרטיבי, למרות שהוא כתוב בשפת-מטא שאינה מבצעת אופטימיזציית קריאת זנב (JavaScript)."
+    }
+   ],
+   "headingHe": "סיכום"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "ex1",
+   "type": "mcq",
+   "questionHe": "בבדיקות שבסוף הדף, ‏`sum`, ‏`sumCPS1`, ‏`sumCPS2` ו-`sumREG1` **כולן** גולשות על 10000, ורק `sumREG2` עוברת. מהו הצעד היחיד שבזכותו `sumREG2` שונה?",
+   "options": [
+    "ההמרה ל-CPS, שהפכה את כל הקריאות לעמדת זנב",
+    "העברת הפרמטרים לרגיסטרים גלובליים במקום למסגרות מחסנית",
+    "החלפת הקריאות לפונקציות בהשמה לרגיסטר PC ולולאת `while` יחידה",
+    "הפיכת ההמשכיות ממבני נתונים חזרה לפונקציות"
+   ],
+   "correct": 2,
+   "explanationHe": "‏**התשובה: ביטול הקריאות עצמן לטובת לולאה.**\n\nזו הפואנטה שכל הדף בנוי אליה. ב-JavaScript **כל** קריאה לפונקציה מקצה מסגרת מחסנית — גם בעמדת זנב, כי אין TCO. לכן כל עוד `applyContReg` קוראת לעצמה, לא משנה כמה יפה סידרנו את הפרמטרים, המחסנית תגדל.\n\n`sumREG2` היא הראשונה שבה **אין אף קריאה**: הפונקציות מחזירות `void` ורק כותבות `pcREG2 = '…'`, ולולאת ה-`while` היא זו שמפעילה את הפונקציה הבאה. כל הפעלה מסתיימת ומחזירה שליטה ללולאה, ולכן המחסנית לעולם אינה עמוקה מפריים אחד.\n\n**למה השאר שגויים**: (א) ו-(ב) הם צעדים **הכרחיים אך לא מספיקים** — `sumCPS1` ו-`sumREG1` מדגימות בדיוק את זה, שתיהן גולשות. ו-(ד) הוא הכיוון ההפוך מהטרנספורמציה: ההמשכיות הופכות מפונקציות למבני נתונים, לא להפך.\n\n**כדאי לשנן**: ‏CPS מבטיח עמדת זנב; רק הלולאה מבטיחה זיכרון קבוע."
+  },
+  {
+   "id": "ex2",
+   "type": "open",
+   "questionHe": "הסבירו מהי **defunctionalization** (הפיכת המשכיות פרוצדורליות להמשכיות קונקרטיות): מה בדיוק הופך למה, ומהו הכלל שקובע אילו שדות תקבל כל רשומת המשכית? הדגימו על `Cont1` מהדף.",
+   "answerHe": "**מה הופך למה.** כל *סוג* של המשכית בתוכנית — כלומר כל מקום בקוד שבו נכתב `(res) => …` — הופך ל**טיפוס רשומה** נפרד, ואת ההפעלה של ההמשכית מחליפה פונקציית `applyCont` יחידה שמנתבת לפי תג.\n\nכלומר במקום *פונקציה אחת פולימורפית שיודעת לעשות דבר אחד לכל מופע*, מקבלים *נתון + פונקציה מרכזית שיודעת מה לעשות עם כל סוג נתון*.\n\n**הכלל לשדות**: הרשומה מקבלת שדה עבור **כל משתנה שהיה נלכד בסגור** — כלומר כל משתנה חופשי בגוף ה-lambda שאינו הפרמטר שלה.\n\n**הדגמה על `Cont1`.** ההמשכית המקורית היא\n```typescript\n(sn1) => cont(n + sn1)\n```\nהמשתנים החופשיים בגופה הם `n` ו-`cont` (‏`sn1` הוא הפרמטר, ולכן אינו נשמר). ומכאן:\n```typescript\nexport interface Cont1 {tag: \"Cont1\"; n: number; cont: CCont};\n```\nבדיוק שני שדות. ו-`IdCont` היא `(x) => x` — אין בה אף משתנה חופשי, ולכן הממשק שלה ריק.\n\nגוף ה-lambda נודד ל-`applyCont`:\n```typescript\nisCont1(cont) ? applyCont(cont.cont, cont.n + val) : …\n```\n\n**מה מרוויחים.** ההמשכית הופכת מקופסה שחורה לנתון שאפשר לבדוק, להדפיס, לשמור ולעבור עליו — למעשה **מחסנית מפורשת** שאנחנו מנהלים. וזה תנאי מקדים לשני הצעדים הבאים: אי אפשר להעביר פונקציה לרגיסטר ולנתב אליה לפי שם, אבל רשומה עם תג — אפשר.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) שכל *סוג* המשכית הופך לטיפוס רשומה עם תג מבחין, ושכל ההפעלות מתרכזות ב-`applyCont` אחת; (2) **הכלל**: השדות הם בדיוק המשתנים החופשיים שנלכדו בסגור, ולא הפרמטר; (3) הדגמה מספרית על `Cont1` (‏`n` ו-`cont`) ועל `IdCont` (ריק); (4) שגוף ה-lambda עובר ל-`applyCont`.\n\n**בונוס**: לציין שזהו איחוד טיפוסים זרים (disjoint union) עם בנאי, פרדיקט ותג — בדיוק המבנה של ה-AST מ-2.3 — ושהתוצאה היא מחסנית מפורשת על הערמה.\n\n**טעות נפוצה**: לכלול את פרמטר ההמשכית (`sn1`) בין שדות הרשומה. הוא לא נשמר — הוא מגיע כארגומנט `val` ל-`applyCont` בזמן ההפעלה."
+  },
+  {
+   "id": "ex3",
+   "type": "code-reading",
+   "questionHe": "עקבו אחרי `sumREG2(3)`. מהו הערך של `contREG2` ברגע שבו `nREG2` מגיע ל-0, ומה סדר החישובים ב-`applyContReg2` לאחר מכן?",
+   "answerHe": "**שלב הבנייה** — `sumCPSCReg2` רצה שלוש פעמים ומעמיסה שכבה בכל צעד:\n\n| צעד | `nREG2` | `contREG2` |\n|---|---|---|\n| התחלה | 3 | `IdCont` |\n| אחרי 1 | 2 | `Cont1(3, IdCont)` |\n| אחרי 2 | 1 | `Cont1(2, Cont1(3, IdCont))` |\n| אחרי 3 | 0 | `Cont1(1, Cont1(2, Cont1(3, IdCont)))` |\n\nכלומר ברגע ש-`nREG2 === 0`, הרגיסטר מחזיק **שרשרת בעומק 3**, עם `n=1` בחוץ ו-`n=3` בפנים. אז מושם `valREG2 = 0` ו-`pcREG2 = 'applyContReg2'`.\n\n**שלב הפריקה** — `applyContReg2` מקלפת שכבה בכל סיבוב של הלולאה:\n\n| סיבוב | פעולה | `valREG2` | `contREG2` |\n|---|---|---|---|\n| 1 | `1 + 0` | 1 | `Cont1(2, Cont1(3, IdCont))` |\n| 2 | `2 + 1` | 3 | `Cont1(3, IdCont)` |\n| 3 | `3 + 3` | 6 | `IdCont` |\n| 4 | `halt` | 6 | — |\n\nהתוצאה: **6** = 1+2+3 ✓\n\n**שימו לב לסדר**: החיבור מתבצע 1, אחר כך 2, אחר כך 3 — כלומר **בסדר הפוך** לסדר שבו השכבות נבנו. השרשרת מתנהגת בדיוק כמו מחסנית: last-in, first-out.",
+   "explanationHe": "‏**מה שנבדק**: היכולת לראות ששרשרת ההמשכיות **היא** המחסנית, רק גלויה. בנייה מבפנים החוצה, פריקה מבחוץ פנימה.\n\n**הנקודה שמסכמת את הדף**: הזיכרון לא נחסך — עומק השרשרת הוא `n`, בדיוק כמו עומק המחסנית ב-`sum` המקורית. מה שהשתנה הוא **מי מנהל אותו**: הערמה תחת שליטתנו במקום מחסנית הקריאות של JavaScript. ולכן `sumREG2` לא נופלת ב-`RangeError` — למנוע ה-JS יש מסגרת אחת בלבד לאורך כל הריצה.\n\n**טעות נפוצה**: לחשוב ש-`Cont1(3, …)` הוא החיצוני. הוא הראשון שנבנה ולכן **הפנימי** ביותר, והוא זה שיחושב אחרון."
+  },
+  {
+   "id": "ex4",
+   "type": "mcq",
+   "questionHe": "מדוע בטוח להשתמש בקבוצה **שטוחה** של רגיסטרים גלובליים (`nREG`, `contREG`, `valREG`) במקום במסגרות הפעלה מוערמות — ולדרוס אותם בכל צעד?",
+   "options": [
+    "כי הרגיסטרים הם מטיפוסים פרימיטיביים בלבד",
+    "כי בקוד CPS כל הקריאות בעמדת זנב, ולכן אף פעם לא חוזרים לפונקציה הקוראת ואין למי להזדקק לערכים הישנים",
+    "כי ה-VM שומר עותק של הרגיסטרים לפני כל השמה",
+    "כי JavaScript מבצעת garbage collection על ערכים שאינם בשימוש"
+   ],
+   "correct": 1,
+   "explanationHe": "‏**התשובה: כי אין חזרה.**\n\nמסגרת הפעלה קיימת כדי לשמר ערכים **עד שהקריאה תחזור**. בקוד CPS אין חזרה: כל קריאה היא בעמדת זנב, ואחרי שעברנו לקריאה הבאה, הפונקציה שממנה יצאנו לא תרוץ שוב ולא תזדקק לשום ערך. לכן דריסת הרגיסטר בטוחה לחלוטין.\n\n**וזו בדיוק הסיבה** שהדף מדגיש: *\"טרנספורמציית הרגיסטריזציה בטוחה **רק** על קוד בצורת CPS\"*. על קוד רגיל היא הייתה הורסת ערכים שעדיין נחוצים אחרי החזרה.\n\n**שימו לב מה כן נשמר**: הערכים שצריכים לשרוד לא יושבים ברגיסטרים אלא **בתוך שרשרת ההמשכיות** ב-`contREG` — למשל ה-`n` של כל שכבה. זו חלוקת העבודה: הרגיסטרים הם ה\"עכשיו\", ההמשכית היא ה\"אחר כך\".\n\n**למה השאר שגויים**: `contREG` מחזיק מבנה נתונים מקונן, לא פרימיטיב (א'). אין שום שמירת עותקים — זו בדיוק הנקודה, אחרת היינו חוזרים למחסנית (ג'). ו-GC נוגע לשחרור זיכרון, לא לשאלה אם ערך עדיין נחוץ לוגית (ד')."
+  },
+  {
+   "id": "ex5",
+   "type": "open",
+   "questionHe": "הדף מדגיש ש-`sumIter` (הגרסה עם הצובר) **אינה** התוצאה של טרנספורמציית CPS על `sum`. הסבירו את ההבדל, ומדוע ההבחנה הזו חשובה לפרויקט של הפיכת המפרש לאיטרטיבי.",
+   "answerHe": "**ההבדל.** `sumIter` היא אלגוריתם **אחר**:\n```typescript\nsumIter = (n, acc) => (n === 0) ? acc : sumIter(n - 1, n + acc);\n```\nכדי לכתוב אותה צריך *תובנה* — להבין שחיבור הוא אסוציאטיבי וקומוטטיבי, להמציא צובר, ולהפוך את כיוון הסכימה (‏`sum` מחברת מ-1 כלפי מעלה בדרך החוצה; `sumIter` מ-`n` כלפי מטה בדרך פנימה).\n\n`sumCPS`, לעומת זאת, מבצעת את **אותו** חישוב בדיוק באותו סדר בדיוק:\n```typescript\nsumCPS = (n, cont) => (n === 0) ? cont(0) : sumCPS(n - 1, (sn1) => cont(n + sn1));\n```\nהיא נגזרת **מכנית** מ-`sum` לפי כללי 4.2, בלי להבין דבר על משמעות החישוב. החיבורים עדיין ממתינים — הם פשוט ממתינים בהמשכית במקום על המחסנית.\n\n**למה ההבחנה קריטית לפרויקט.** אילו הדרך היחידה להגיע לאיטרטיביות הייתה \"להמציא צובר\", לא היה אפשר לעשות זאת למפרש: אין \"צובר\" טבעי עבור `L5applicativeEval`, והמצאת אחד הייתה דורשת להבין את הסמנטיקה של כל סוג ביטוי מחדש. \n\nהערך של CPS הוא בדיוק שהוא **אלגוריתמי וניתן להחלה בעיוורון** — ולכן אפשר להריץ אותו על אלפי שורות של קוד מפרש, ואחריו את שלושת הצעדים הנוספים, ולקבל את `L7`. תמורת האוטומטיות משלמים בזיכרון: `sumIter` רצה בזיכרון קבוע, ואילו `sumCPS` בונה שרשרת בעומק `n`.\n\n**בקצרה**: `sumIter` = חכם וידני ולא ניתן להכללה; `sumCPS` = מכני וניתן להכללה, ולכן זה מה שמשמש כאן.",
+   "explanationHe": "תשובה מלאה חייבת לכלול: (1) ש-`sumIter` מממשת אלגוריתם אחר עם צובר וכיוון סכימה הפוך, בעוד ש-`sumCPS` משמרת את החישוב המקורי; (2) שההמרה ל-CPS **מכנית** ואינה דורשת הבנה של האלגוריתם, בעוד שהמצאת צובר דורשת תובנה; (3) ההשלכה — רק שיטה מכנית ניתנת להחלה על קוד המפרש כולו; (4) המחיר: `sumIter` בזיכרון קבוע מול שרשרת בעומק `n` ב-`sumCPS`.\n\n**בונוס**: לציין שלא לכל פונקציה קיימת בכלל גרסת-צובר טבעית (למשל רקורסיית עץ), בעוד שטרנספורמציית CPS מוגדרת תמיד."
+  },
+  {
+   "id": "ex6",
+   "type": "code-reading",
+   "questionHe": "בגרסת ה-VM, `applyContReg2` מסתיימת ב-`pcREG2 = 'halt'` כשההמשכית היא `IdCont`, והשורה `return valREG2` מופיעה שם כהערה בלבד. היכן הערך **באמת** מוחזר, ומדוע אי אפשר להחזיר אותו מתוך `applyContReg2`?",
+   "answerHe": "**הערך מוחזר מ-`sumREG2VM`**, בשורה שאחרי הלולאה:\n```typescript\nVM();\nreturn valREG2;\n```\n\n**מדוע אי אפשר אחרת.** ל-`applyContReg2` יש טיפוס החזרה `void` — היא אינה מחזירה דבר לאף אחד. היא נקראת מתוך לולאת ה-`while` שבתוך `VM`, ולכן `return` שלה היה חוזר ללולאה בלבד, לא לקורא החיצוני.\n\nוזה לא פגם אלא **בדיוק העניין**: ברגע שהחלפנו קריאות בהשמה ל-PC, אין יותר שרשרת חזרות שדרכה ערך יכול לטפס החוצה. במקום זה, התקשורת עוברת דרך הרגיסטרים המשותפים: `applyContReg2` כותבת את התוצאה ל-`valREG2`, מסמנת `'halt'`, הלולאה מסתיימת, ו-`sumREG2VM` קוראת את הרגיסטר.\n\n**הניסוח שכדאי לשנן**: במכונה הווירטואלית אין \"ערך מוחזר\" — יש **מצב**. הפקודות משנות רגיסטרים, ו-`'halt'` היא רק הסימן שהמצב הסופי מוכן לקריאה. זו בדיוק ההתנהגות של מעבד אמיתי, שבו תוצאת חישוב יושבת ברגיסטר ולא \"מוחזרת\".",
+   "explanationHe": "‏**מה שנבדק**: ההבנה שהמעבר ל-VM החליף העברת ערכים בניהול מצב.\n\nנקודות שחייבות להופיע: (1) הערך מוחזר מ-`sumREG2VM` אחרי `VM()`; (2) `applyContReg2` היא `void` ונקראת מתוך הלולאה, ולכן `return` שלה לא יגיע לקורא; (3) התקשורת עוברת דרך `valREG2`, ו-`'halt'` הוא סימן סיום ולא ערך.\n\n**קישור**: זו הסיבה שהשורה `// return valREG;` הושארה בקוד כהערה — היא שריד מגרסת `sumREG1`, שבה הפונקציות עדיין החזירו ערכים. השוואת שתי הגרסאות זו לצד זו היא הדרך הטובה ביותר לראות מה בדיוק השתנה בצעד האחרון."
+  }
+ ]
+}
